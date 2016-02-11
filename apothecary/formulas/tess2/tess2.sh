@@ -323,8 +323,23 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
-		echoWarning "TODO: android build"
-		
+	    ABI=armeabi-v7a
+	    source ../../android_configure.sh $ABI
+	    premake4 gmake
+	    cd Build
+	    make config=release tess2 
+	    cd ..
+	    mkdir -p build/android/$ABI
+	    mv Build/libtess2.a build/android/$ABI
+	    
+	    ABI=x86
+	    source ../../android_configure.sh $ABI
+	    premake4 gmake
+	    cd Build
+	    make config=release tess2
+	    cd ..
+	    mkdir -p build/android/$ABI 
+	    mv Build/libtess2.a build/android/$ABI
 	elif [ "$TYPE" == "emscripten" ] ; then
     	cp -v $FORMULA_DIR/CMakeLists.txt .
     	mkdir -p build
@@ -380,6 +395,11 @@ function copy() {
 
 	elif [ "$TYPE" == "linux32" ]; then
 		cp -v Build/libtess2.a $1/lib/$TYPE/libtess2.a
+	elif [ "$TYPE" == "android" ]; then
+	    mkdir -p $1/lib/$TYPE/armv7
+	    mkdir -p $1/lib/$TYPE/x86
+		cp -v build/$TYPE/armeabi-v7a/libtess2.a $1/lib/$TYPE/armv7/libtess2.a
+		cp -v build/$TYPE/x86/libtess2.a $1/lib/$TYPE/x86/libtess2.a
 		
 	else
 		cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a

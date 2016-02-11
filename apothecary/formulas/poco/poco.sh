@@ -50,7 +50,7 @@ function prepare() {
 		git reset --hard $SHA
 	fi
 	
-	if [ "$TYPE" != "msys2" ] && [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ]; then
+	if [ "$TYPE" != "msys2" ] && [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
 		# manually prepare dependencies
 		apothecaryDependencies download
 		apothecaryDependencies prepare
@@ -528,9 +528,19 @@ PING_LOOP_PID=$!
 
 		export PATH=$OLD_PATH
 
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
 		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
 		./configure $BUILD_OPTS
+		make -j${PARALLEL_MAKE}
+		# delete debug builds
+		rm -f lib/Linux/$(uname -m)/*d.a
+    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+        export CROSS_COMPILE=$TOOLCHAIN_ROOT/arm-bcm2708/arm-bcm2708-linux-gnueabi/bin/arm-bcm2708-linux-gnueabi-
+		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
+		./configure $BUILD_OPTS \
+		    --include-path="$RPI_ROOT/usr/include $RPI_ROOT/opt/vc/include $RPI_ROOT/opt/vc/include/IL $RPI_ROOT/opt/vc/include/interface/vcos/pthreads $RPI_ROOT/opt/vc/include/interface/vmcs_host/linux $RPI_ROOT/opt/vc/lib $RPI_ROOT/usr/include/c++/4.9 $RPI_ROOT/usr/include/arm-linux-gnueabihf" \
+		    --library-path="$RPI_ROOT/usr/lib $RPI_ROOT/usr/lib/arm-linux-gnueabihf" \
+		    --cflags="--sysroot=$RPI_ROOT -march=armv6 -mfpu=vfp -mfloat-abi=hard -fPIC -ftree-vectorize -Wno-psabi -pipe -DSTANDALONE -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -DTARGET_POSIX -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM" 
 		make -j${PARALLEL_MAKE}
 		# delete debug builds
 		rm -f lib/Linux/$(uname -m)/*d.a

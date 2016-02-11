@@ -335,7 +335,6 @@ function installAndroidToolchain() {
 	fi
 
 	if [ ! -d "$BUILD_DIR/Toolchains/Android/arm" ]; then
-	    echo "preparing toolchain arm"
 		./make-standalone-toolchain.sh \
 			--ndk-dir=$ANDROID_NDK_ROOT \
 			--platform=$ANDROID_PLATFORM \
@@ -483,7 +482,8 @@ function doCommand() {
 		if [ "$1" == "core" ] ; then
 			local formula
 			for formula in $( ls -1 $REL_FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
-				doCommand $shouldSource $cmd "${formula%.*}" # remove extension
+			    ./apothecary -t $TYPE update "${formula%.*}" # remove extension
+				#doCommand $shouldSource $cmd "${formula%.*}" # remove extension
 			done
 
 		# process all addons in the addons dir
@@ -1032,7 +1032,6 @@ BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
 # set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
-    ls ${APOTHECARY_DIR}
 	if [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
 		source ${APOTHECARY_DIR}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
