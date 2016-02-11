@@ -1,9 +1,27 @@
 set -ev
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
+
 APOTHECARY_PATH=$(dirname "$0")/../../apothecary
 cd $APOTHECARY_PATH
-./apothecary -tandroid update core
+
+# trap any script errors and exit
+trap "trapError" ERR
+
+trapError() {
+	echo
+	echoError " ^ Received error ^"
+	cat $APOTHECARY_PATH/formula.log
+	exit 1
+}
+
+#./apothecary -tandroid update core
+
+for formula in $( ls -1 formulas | grep -v _depends) ; do
+    formula_name="${formula%.*}"
+    echo Compiling $formula_name
+    ./apothecary -tandroid update $formula_name > formula.log 2>&1 
+done
 cd ..
 TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_android.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)

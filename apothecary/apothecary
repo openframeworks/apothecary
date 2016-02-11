@@ -482,8 +482,7 @@ function doCommand() {
 		if [ "$1" == "core" ] ; then
 			local formula
 			for formula in $( ls -1 $REL_FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
-			    ./apothecary -t $TYPE update "${formula%.*}" # remove extension
-				#doCommand $shouldSource $cmd "${formula%.*}" # remove extension
+				doCommand $shouldSource $cmd "${formula%.*}" # remove extension
 			done
 
 		# process all addons in the addons dir
