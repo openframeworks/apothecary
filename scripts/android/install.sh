@@ -13,15 +13,10 @@ else
     echo "Downloading NDK"
     # curl -Lk http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin -o ndk.bin
     # get slimmed and recompressed NDK from our server instead
-    curl -Lk http://ci.openframeworks.cc/${NDK_DIR} -o ndk.bin
-    chmod a+x ndk.bin
-    # "Normal" way:
-    # ./ndk.bin -y | grep -v Extracting
-    # extract with 7zip, -mmt=1 makes it use only 1 thread to reduce memory consumption:
-    # 7z x -mmt=1 ndk.bin $(sed 's/^/ -xr!/g' $ROOT/scripts/ci/android/NDK_excludes.txt) | grep -v -e "Extracting" -e "Skipping"
+    curl -LO http://ci.openframeworks.cc/${NDK_DIR}.tar.bz2
     # extract customized NDK:
-    tar -xjf ndk.bin
-    rm ndk.bin
+    tar -xjf ${NDK_DIR}.tar.bz2
+    rm ${NDK_DIR}.tar.bz2
 fi
 NDK_ROOT=$(echo ${PWD} | sed "s/\//\\\\\//g")
 echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $ROOT/paths.default.make
