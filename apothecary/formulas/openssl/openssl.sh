@@ -645,7 +645,6 @@ PING_LOOP_PID=$!
 		unset TOOLCHAIN DEVELOPER
 
 	elif [ "$TYPE" == "android" ]; then
-		source $LIBS_DIR/openFrameworksCompiled/project/android/paths.make
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 		export _ANDROID_NDK_ROOT=$NDK_ROOT
 		export FIPS_SIG=
