@@ -313,7 +313,8 @@ function installAndroidToolchain() {
 	local WD=$(pwd)
 
 	if [ ! -d $ANDROID_NDK_ROOT/build/tools ]; then
-		echoError "ANDROID_NDK_ROOT not defined, please configure ../../libs/openFrameworksCompiled/project/android/paths.make"
+		echoError "ANDROID_NDK_ROOT not defined, please configure paths.make in this folder or ../projects/android/paths.make"
+		exit 1
 	fi
 
 
@@ -1030,15 +1031,18 @@ BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
 # set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
-	if [[ -e ${LIBS_DIR}/openFrameworksCompiled/project/android/paths.make ]] ; then
-		source $LIBS_DIR/openFrameworksCompiled/project/android/paths.make
+	if [[ -e paths.make ]] ; then
+		source paths.make
+		ANDROID_NDK_ROOT=${NDK_ROOT}
+		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
+	elif [[ -e ${LIBS_DIR}/projects/android/paths.make ]] ; then
+		source $LIBS_DIR/projects/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"
-		echoError "libs/openFrameworksCompiled/project/android/paths.make ..."
-		echoError "See the following for info:"
-		echoError "libs/openFrameworksCompiled/project/android/paths.make.default"
+		echoError "paths.make in apothecary folder or"
+		echoError "projects/android/paths.make in OF folder"
 		exit 1
 	fi
 fi

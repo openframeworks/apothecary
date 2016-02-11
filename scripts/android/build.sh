@@ -1,3 +1,6 @@
+set -ev
+# capture failing exits in commands obscured behind a pipe
+set -o pipefail
 APOTHECARY_PATH=$(dirname "$0")/../../apothecary
 cd $APOTHECARY_PATH
 ./apothecary -tandroid update core
