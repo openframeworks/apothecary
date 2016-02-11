@@ -3,7 +3,7 @@ NDK_DIR=android-ndk-r10e
 set -ev
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
-APOTHECARY_DIR=${TRAVIS_BUILD_DIR:-"$( cd "$(dirname "$0")/../../apothecary" ; pwd -P )"}
+APOTHECARY_DIR=${TRAVIS_BUILD_DIR}/apothecary
 cd ~
 # check if cached directory exists
 if [ "$(ls -A ${NDK_DIR})" ]; then
