@@ -106,8 +106,9 @@ BUILDROOT_SUBDIR=_buildroot
 # paths relative to this script
 REL_FORMULAS_DIR=formulas
 REL_BUILD_DIR=build
+REL_OF_ROOT=../../
 REL_LIBS_DIR=../
-REL_ADDONS_DIR=../../addons
+REL_ADDONS_DIR=$REL_OF_ROOT/addons
 CHECKOUT=YES
 
 # ansi console escape codes
@@ -1036,8 +1037,8 @@ if [[ "$TYPE" == "android" ]] ; then
 		source ${APOTHECARY_DIR}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [[ -e ${LIBS_DIR}/projects/android/paths.make ]] ; then
-		source $LIBS_DIR/projects/android/paths.make
+	elif [[ -e ${REL_OF_ROOT}/projects/android/paths.make ]] ; then
+		source $REL_OF_ROOT/projects/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
 	else
