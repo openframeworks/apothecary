@@ -30,6 +30,10 @@ matrix:
     - os: linux
       sudo: false
       env: TARGET="android"
+      addons:
+        apt:
+          packages:
+          - xutils-dev
       cache:
         directories:
         - ~/android-ndk-r10e
