@@ -10,7 +10,7 @@ trap "trapError" ERR
 
 trapError() {
 	echo
-	echoError " ^ Received error ^"
+	echo " ^ Received error ^"
 	cat $APOTHECARY_PATH/formula.log
 	exit 1
 }
