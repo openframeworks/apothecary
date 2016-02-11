@@ -1,3 +1,9 @@
-*.DS_STORE
-*libs
-scripts/apothecary/build
+/*
+!.gitignore
+!.travis.yml
+!README.md
+!/apothecary
+!/scripts
+!/apothecary/**/*
+!/scripts/**/*
+/apothecary/build
