@@ -280,13 +280,13 @@ EOF
 	    
 	    ABI=armeabi-v7a
 	    source ../../android_configure.sh $ABI
-	    sed "s/%{NDK_ROOT}/${NDK_ROOT}/" $FORMULA_DIR/project-config-android_arm.jam > project-config.jam
+	    sed "s/\%\{NDK_ROOT\}/${NDK_ROOT}/" $FORMULA_DIR/project-config-android_arm.jam > project-config.jam
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_arm link=static stage
 		mv stage stage_arm
 		
 	    ABI=x86
 	    source ../../android_configure.sh $ABI
-	    sed "s/%{NDK_ROOT}/${NDK_ROOT}/" $FORMULA_DIR/project-config-android_x86.jam > project-config.jam
+	    sed "s/\%\{NDK_ROOT\}/${NDK_ROOT}/" $FORMULA_DIR/project-config-android_x86.jam > project-config.jam
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_x86 link=static stage
 		mv stage stage_x86
 	fi
