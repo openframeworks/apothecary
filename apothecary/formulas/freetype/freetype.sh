@@ -412,6 +412,8 @@ function copy() {
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
 		echoWarning "TODO: copy msys2 lib"
 	elif [ "$TYPE" == "android" ] ; then
+	    mkdir -p $1/lib/$TYPE/armeabi-v7a
+	    mkdir -p $1/lib/$TYPE/x86
 		cp -v build/$TYPE/armeabi-v7a/lib/libfreetype.a $1/lib/$TYPE/armeabi-v7a/libfreetype.a
 		cp -v build/$TYPE/x86/lib/libfreetype.a $1/lib/$TYPE/x86/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
