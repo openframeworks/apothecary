@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "linux" "linux64" "vs" "msys2" "ios" "android" )
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv7l" "vs" "msys2" )
 
 # define the version
 VER=3.0.4
