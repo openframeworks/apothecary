@@ -335,7 +335,7 @@ function installAndroidToolchain() {
 	fi
 
 	if [ ! -d "$BUILD_DIR/Toolchains/Android/arm" ]; then
-		./make-standalone-toolchain.sh \
+		echo ./make-standalone-toolchain.sh \
 			--ndk-dir=$ANDROID_NDK_ROOT \
 			--platform=$ANDROID_PLATFORM \
 			--install-dir=$BUILD_DIR/Toolchains/Android/arm \
