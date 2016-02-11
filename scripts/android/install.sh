@@ -19,4 +19,4 @@ else
     rm ${NDK_DIR}.tar.bz2
 fi
 NDK_ROOT=$(echo ${PWD} | sed "s/\//\\\\\//g")
-echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $APOTHECARY_DIR/paths.default.make
+echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $APOTHECARY_DIR/paths.make
