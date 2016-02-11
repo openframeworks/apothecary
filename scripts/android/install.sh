@@ -3,7 +3,7 @@ NDK_DIR=android-ndk-r10e
 set -ev
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
-ROOT=${TRAVIS_BUILD_DIR:-"$( cd "$(dirname "$0")/../.." ; pwd -P )"}
+APOTHECARY_DIR=${TRAVIS_BUILD_DIR:-"$( cd "$(dirname "$0")/../../apothecary" ; pwd -P )"}
 cd ~
 # check if cached directory exists
 if [ "$(ls -A ${NDK_DIR})" ]; then
@@ -19,4 +19,4 @@ else
     rm ${NDK_DIR}.tar.bz2
 fi
 NDK_ROOT=$(echo ${PWD} | sed "s/\//\\\\\//g")
-echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $ROOT/paths.default.make
+echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $APOTHECARY_DIR/paths.default.make
