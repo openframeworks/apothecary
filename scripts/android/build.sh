@@ -11,7 +11,7 @@ trap "trapError" ERR
 trapError() {
 	echo
 	echo " ^ Received error ^"
-	cat $APOTHECARY_PATH/formula.log
+	cat formula.log
 	exit 1
 }
 
@@ -20,11 +20,11 @@ trapError() {
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
-    ./apothecary -tandroid update $formula_name > $APOTHECARY_PATH/formula.log 2>&1 
+    ./apothecary -tandroid update $formula_name > formula.log 2>&1 
     echo $formula_name Done
 done
 echo Compressing libraries
-cd $APOTHECARY_PATH/..
+cd ..
 TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_android.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 echo Unencrypting key
