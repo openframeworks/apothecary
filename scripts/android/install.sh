@@ -18,7 +18,7 @@ else
     tar -xjf ${NDK_DIR}.tar.bz2
     rm ${NDK_DIR}.tar.bz2
 fi
-NDK_ROOT=$(echo ${PWD} | sed "s/\//\\\\\//g")
+NDK_ROOT=$(echo ${PWD})
 echo "APOTHECARY DIR set to $APOTHECARY_DIR"
 echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $APOTHECARY_DIR/paths.make
 cat $APOTHECARY_DIR/paths.make
