@@ -22,7 +22,7 @@ matrix:
           - libxcursor-dev
           - libxi-dev
     - os: linux
-      sudo: false
+      sudo: required
       env: TARGET="android" OPT="armv7"
       addons:
         apt:
@@ -33,7 +33,7 @@ matrix:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/armv7
     - os: linux
-      sudo: false
+      sudo: required
       env: TARGET="android" OPT="x86"
       addons:
         apt:
