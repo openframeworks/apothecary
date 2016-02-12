@@ -5,28 +5,22 @@ matrix:
   include:
 # fully specify builds, include can't dynamically expand matrix entries
 # relative order of sudo and env is important so that addons: is recognized
-#    - os: linux
-#      dist: trusty
-#      sudo: required
-#      env: TARGET="linux"
-#      addons:
-#        apt:
-#          sources:
-#          - ubuntu-toolchain-r-test
-#          packages:
-#          - gcc-4.9
-#          - g++-4.9
-#          - libxrandr-dev
-#          - libxinerama-dev
-#          - libx11-dev
-#          - libxcursor-dev
-#          - libxi-dev
-#    - os: osx
-#      compiler: clang
-#      env: TARGET="osx"
-#    - os: osx
-#      compiler: clang
-#      env: TARGET="ios"
+    - os: linux
+      dist: trusty
+      sudo: required
+      env: TARGET="linux"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-4.9
+          - g++-4.9
+          - libxrandr-dev
+          - libxinerama-dev
+          - libx11-dev
+          - libxcursor-dev
+          - libxi-dev
     - os: linux
       sudo: false
       env: TARGET="android" OPT="armv7"
@@ -44,6 +38,12 @@ matrix:
         apt:
           packages:
           - xutils-dev
+#    - os: osx
+#      compiler: clang
+#      env: TARGET="osx"
+#    - os: osx
+#      compiler: clang
+#      env: TARGET="ios"
       cache:
         directories:
         - ~/android-ndk-r10e
@@ -54,6 +54,6 @@ install:
         scripts/$TARGET/install.sh;
       fi
 script:
-    - scripts/$TARGET/build.sh $OPT
+    - scripts/build.sh $OPT
 git:
     depth: 10
