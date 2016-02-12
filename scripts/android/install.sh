@@ -11,12 +11,9 @@ if [ "$(ls -A ${NDK_DIR})" ]; then
     ls -A ${NDK_DIR}
 else
     echo "Downloading NDK"
-    # curl -Lk http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin -o ndk.bin
-    # get slimmed and recompressed NDK from our server instead
-    curl -LO http://ci.openframeworks.cc/${NDK_DIR}.tar.bz2
-    # extract customized NDK:
-    tar -xjf ${NDK_DIR}.tar.bz2
-    rm ${NDK_DIR}.tar.bz2
+    curl -Lk http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin -o ndk.bin
+    chmod u+x ndk.bin
+    ./ndk.bin
 fi
 NDK_ROOT=$(echo ${PWD})
 echo "APOTHECARY DIR set to $APOTHECARY_DIR"
