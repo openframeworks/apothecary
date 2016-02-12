@@ -31,9 +31,9 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
     if [ "$OPT" != "" ]; then
-        ./apothecary -$TARGET -a$OPT update $formula_name #> formula.log 2>&1 &
+        ./apothecary -t$TARGET -a$OPT update $formula_name #> formula.log 2>&1 &
     else
-        ./apothecary -$TARGET update $formula_name #> formula.log 2>&1 &
+        ./apothecary -t$TARGET update $formula_name #> formula.log 2>&1 &
     fi
     #apothecaryPID=$!
     #echoDots $apothecaryPID
