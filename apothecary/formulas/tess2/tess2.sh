@@ -339,18 +339,12 @@ function build() {
     	cd build
     	emcmake cmake .. -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
     	emmake make -j${PARALLEL_MAKE}
-	elif [ "$TYPE" == "linux64" ]; then
+	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ]; then
 	    mkdir -p Build
 	    cd Build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
-	    make config=release64 tess2
-	elif [ "$TYPE" == "linux" ]; then
-	    mkdir -p Build
-	    cd Build
-	    cp -v $FORMULA_DIR/Makefile .
-	    cp -v $FORMULA_DIR/tess2.make .
-	    make config=release32 tess2
+	    make config=release tess2
 	elif [ "$TYPE" == "linuxarmv6l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             export PREFIX=arm-linux-gnueabihf
