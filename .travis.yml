@@ -31,6 +31,7 @@ matrix:
       cache:
         directories:
         - ~/android-ndk-r10e
+        - apothecary/build/Toolchains/armv7
     - os: linux
       sudo: false
       env: TARGET="android" OPT="x86"
@@ -38,15 +39,16 @@ matrix:
         apt:
           packages:
           - xutils-dev
+      cache:
+        directories:
+        - ~/android-ndk-r10e
+        - apothecary/build/Toolchains/x86
 #    - os: osx
 #      compiler: clang
 #      env: TARGET="osx"
 #    - os: osx
 #      compiler: clang
 #      env: TARGET="ios"
-      cache:
-        directories:
-        - ~/android-ndk-r10e
   exclude:
     - compiler: gcc
 install:
