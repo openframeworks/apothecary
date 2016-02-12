@@ -21,7 +21,10 @@ echoDots(){
         for i in $(seq 1 10); do 
             echo -ne .
             sleep 2
-            if [ ! -d /proc/$1 ]; then return; fi
+            if [ ! -d /proc/$1 ]; then 
+                printf "\r"
+                return; 
+            fi
         done
         printf "\r                    "
         printf "\r"
