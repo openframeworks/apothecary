@@ -2,7 +2,7 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ROOT=$(dirname "$0"; pwd -P)/..
+ROOT=$(cd $(dirname "$0") pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 cd $APOTHECARY_PATH
 
