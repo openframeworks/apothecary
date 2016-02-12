@@ -2,7 +2,8 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-APOTHECARY_PATH=$(dirname "$0")/../apothecary
+ROOT=$(dirname "$0")/..
+APOTHECARY_PATH=$ROOT/apothecary
 cd $APOTHECARY_PATH
 
 # trap any script errors and exit
@@ -30,15 +31,15 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
     if [ "$OPT" != "" ]; then
-        ./apothecary -$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
+        ./apothecary -$TARGET -a$OPT update $formula_name #> formula.log 2>&1 &
     else
-        ./apothecary -$TARGET update $formula_name > formula.log 2>&1 &
+        ./apothecary -$TARGET update $formula_name #> formula.log 2>&1 &
     fi
-    apothecaryPID=$!
-    echoDots $apothecaryPID
+    #apothecaryPID=$!
+    #echoDots $apothecaryPID
 done
 echo Compressing libraries
-cd ..
+cd $ROOT
 TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 echo Unencrypting key
