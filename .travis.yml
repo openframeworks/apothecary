@@ -22,6 +22,7 @@ matrix:
           - libxcursor-dev
           - libxi-dev
     - os: linux
+      dist: trusty
       sudo: required
       env: TARGET="android" OPT="armv7"
       addons:
@@ -33,6 +34,7 @@ matrix:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/armv7
     - os: linux
+      dist: trusty
       sudo: required
       env: TARGET="android" OPT="x86"
       addons:
@@ -46,7 +48,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/rpi_toolchain"
+      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
     - os: osx
       compiler: clang
       env: TARGET="osx"
