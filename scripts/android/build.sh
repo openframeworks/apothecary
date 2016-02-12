@@ -15,29 +15,31 @@ trapError() {
 	exit 1
 }
 
-#./apothecary -tandroid update core
-
 echoDots(){
     while [ -d /proc/$1 ]; do
         for i in $(seq 1 10); do 
             echo -ne .
             sleep 2
         done
-        echo \r"                    "
-        echo \r
+        printf "\r                    "
+        printf "\r"
     done
 }
 
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
-    ./apothecary -tandroid -a$1 update $formula_name > formula.log 2>&1 &
+    if [ "$OPT" != "" ]; then
+        ./apothecary -$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
+    else
+        ./apothecary -$TARGET update $formula_name > formula.log 2>&1 &
+    fi
     apothecaryPID=$!
     echoDots $apothecaryPID
 done
 echo Compressing libraries
 cd ..
-TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_android.tar.bz2
+TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 echo Unencrypting key
 openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
