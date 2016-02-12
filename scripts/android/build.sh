@@ -23,8 +23,8 @@ echoDots(){
             echo -ne .
             sleep 2
         done
-        echo "\r                    "
-        echo "\r"
+        echo \r"                    "
+        echo \r
     done
 }
 
