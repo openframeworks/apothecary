@@ -8,7 +8,7 @@
 # into the openFrameworks library directory.
 
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "" )
 
 # define the version
 VER=44459
