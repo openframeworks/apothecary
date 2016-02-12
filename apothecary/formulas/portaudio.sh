@@ -6,7 +6,7 @@
 #
 # build not currently needed on any platform
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "" )
 
 # define the version
 VER=stable_v19_20110326

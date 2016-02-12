@@ -16,15 +16,33 @@ trapError() {
 	exit 1
 }
 
+isRunning(){
+    if [ “$(uname)” == “Darwin” ]; then
+        number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
+
+        if [ $number -gt 0 ]; then
+            return 0;
+        else
+            return 1;
+        fi
+    elif [ “$(uname)” == “Linux” ]; then
+	if [ -d /proc/$1 ]; then
+	    return 0
+        else
+            return 1
+        fi
+    fi
+}
+
 echoDots(){
-    while [ -d /proc/$1 ]; do
+    while isRunning $1; do
         for i in $(seq 1 10); do 
             echo -ne .
-            sleep 2
-            if [ ! -d /proc/$1 ]; then 
+            if ! isRunning $1; then 
                 printf "\r"
                 return; 
             fi
+            sleep 2
         done
         printf "\r                    "
         printf "\r"
@@ -41,6 +59,7 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     fi
     apothecaryPID=$!
     echoDots $apothecaryPID
+    wait $apothecaryPID
 done
 echo Compressing libraries
 cd $ROOT
