@@ -9,7 +9,7 @@
 # on ios, use some build scripts adapted from the Assimp project
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" )
+FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" "linuxarmv6l" )
 
 # define the version
 VER=1.1
@@ -344,6 +344,19 @@ function build() {
 	    premake4 gmake
 	    cd Build
 	    make config=release32 tess2
+	elif [ "$TYPE" == "linuxarmv6l" ]; then
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            export PREFIX=arm-linux-gnueabihf
+            export SYSROOT=$BUILD_DIR/../../scripts/linuxarm/raspbian
+            export TOOLCHAIN_ROOT=$BUILD_DIR/../../scripts/linuxarm/rpi_toolchain
+            source ../../linuxarmv6_configure.sh
+        fi
+	    premake4 gmake
+	    cd Build
+	    make config=release tess2
+	    cd ..
+	    mkdir -p build/$TYPE
+	    mv Build/libtess2.a build/$TYPE
 	else
 		mkdir -p build/$TYPE
 		cd build/$TYPE

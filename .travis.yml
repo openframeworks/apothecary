@@ -43,6 +43,10 @@ matrix:
         directories:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/x86
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/rpi_toolchain"
 #    - os: osx
 #      compiler: clang
 #      env: TARGET="osx"
@@ -52,7 +56,7 @@ matrix:
   exclude:
     - compiler: gcc
 install:
-    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "osx" ]; then
+    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "osx" ]; then
         scripts/$TARGET/install.sh;
       fi
 script:

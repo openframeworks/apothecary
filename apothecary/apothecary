@@ -1053,6 +1053,26 @@ if [[ "$TYPE" == "android" ]] ; then
 	fi
 fi
 
+CROSSCOMPILING=0
+if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+    if [ "$(uname -m)" != "armv6" -a "$(uname -m)" != "armv7" ]; then
+        CROSSCOMPILING=1
+        if [ -z $TOOLCHAIN_PREFIX ]; then
+            export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+        fi
+        if [ -z $SYSROOT ]; then
+            echoError Trying to cross compile but SYSROOT environment variable is not set
+            echoError Should be set to root of target OS image
+            exit 1
+        fi
+        if [ -z $TOOLCHAIN_ROOT ]; then
+            echoWarning Trying to cross compile but TOOLCHAIN_ROOT not set
+            echoWarning Trying to continue in case PATH is set to correct toolchain
+            echoWarning If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain
+        fi
+    fi
+fi
+
 # handle commands
 echoVerbose "Running: $A_CMD $*"
 case "$A_CMD" in

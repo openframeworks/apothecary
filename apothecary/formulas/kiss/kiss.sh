@@ -30,6 +30,12 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+    if [ $CROSSCOMPILING -eq 1 ]; then
+        export PREFIX=arm-linux-gnueabihf
+        export SYSROOT=$BUILD_DIR/../../scripts/linuxarm/raspbian
+        export TOOLCHAIN_ROOT=$BUILD_DIR/../../scripts/linuxarm/rpi_toolchain
+        source ../../linuxarmv6_configure.sh
+    fi
     make  -j${PARALLEL_MAKE} TARGET_DIR=$TYPE
 }
 
