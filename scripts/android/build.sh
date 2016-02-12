@@ -1,4 +1,4 @@
-set -ev
+set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
@@ -23,8 +23,8 @@ echoDots(){
             echo -ne .
             sleep 2
         done
-        echo \\r"                    "
-        echo \\r
+        echo "\r                    "
+        echo "\r"
     done
 }
 
