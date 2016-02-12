@@ -21,6 +21,7 @@ echoDots(){
         for i in $(seq 1 10); do 
             echo -ne .
             sleep 2
+            if [ ! -d /proc/$1 ]; then return; fi
         done
         printf "\r                    "
         printf "\r"
@@ -31,12 +32,12 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
     if [ "$OPT" != "" ]; then
-        ./apothecary -t$TARGET -a$OPT update $formula_name #> formula.log 2>&1 &
+        ./apothecary -t$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
     else
-        ./apothecary -t$TARGET update $formula_name #> formula.log 2>&1 &
+        ./apothecary -t$TARGET update $formula_name > formula.log 2>&1 &
     fi
-    #apothecaryPID=$!
-    #echoDots $apothecaryPID
+    apothecaryPID=$!
+    echoDots $apothecaryPID
 done
 echo Compressing libraries
 cd $ROOT
