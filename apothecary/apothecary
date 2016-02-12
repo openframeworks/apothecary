@@ -334,27 +334,28 @@ function installAndroidToolchain() {
 	    exit 1
 	fi
 
-	if [ ! -d "$BUILD_DIR/Toolchains/Android/arm" ]; then
-		./make-standalone-toolchain.sh \
-			--ndk-dir=$ANDROID_NDK_ROOT \
-			--platform=$ANDROID_PLATFORM \
-			--install-dir=$BUILD_DIR/Toolchains/Android/arm \
-			--arch=arm \
-			--system=${ANDROID_HOST} \
-			--toolchain=arm-linux-androideabi-clang3.6 \
-			--stl=libc++
-	fi
-
-
-	if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
-		./make-standalone-toolchain.sh \
-			--ndk-dir=$ANDROID_NDK_ROOT \
-			--platform=$ANDROID_PLATFORM \
-			--install-dir=$BUILD_DIR/Toolchains/Android/x86 \
-			--arch=x86  \
-			--system=${ANDROID_HOST} \
-			--toolchain=x86-clang3.6 \
-			--stl=libc++
+    if [ "$ARCH" == "armv7" ]; then
+	    if [ ! -d "$BUILD_DIR/Toolchains/Android/arm" ]; then
+		    ./make-standalone-toolchain.sh \
+			    --ndk-dir=$ANDROID_NDK_ROOT \
+			    --platform=$ANDROID_PLATFORM \
+			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+			    --arch=arm \
+			    --system=${ANDROID_HOST} \
+			    --toolchain=arm-linux-androideabi-clang3.6 \
+			    --stl=libc++
+	    fi
+	elif [ "$ARCH" == "x86" ]; then
+	    if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
+		    ./make-standalone-toolchain.sh \
+			    --ndk-dir=$ANDROID_NDK_ROOT \
+			    --platform=$ANDROID_PLATFORM \
+			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+			    --arch=x86  \
+			    --system=${ANDROID_HOST} \
+			    --toolchain=x86-clang3.6 \
+			    --stl=libc++
+	    fi
 	fi
 
 	cd $WD
@@ -991,7 +992,7 @@ fi
 echoVerbose "Build type: $TYPE"
 
 # check if we have a valid arch
-if [ $ARCH != 32 -a $ARCH != 64 ] ; then
+if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 ] ; then
 	echoError " Invalid architecture: $ARCH"
 	exit 1
 fi
@@ -1044,6 +1045,11 @@ if [[ "$TYPE" == "android" ]] ; then
 		echoError "paths.make in apothecary folder or"
 		echoError "projects/android/paths.make in OF folder"
 		exit 1
+	fi
+	if [ "$ARCH" == "armv7" ]; then
+	    ABI=armeabi-v7a
+	elif [ "$ARCH" == "x86" ]; then
+	    ABI=x86
 	fi
 fi
 

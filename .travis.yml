@@ -29,21 +29,24 @@ matrix:
 #      env: TARGET="ios"
     - os: linux
       sudo: false
-      env: TARGET="android"
+      env: TARGET="android" OPT="armv7"
       addons:
         apt:
           packages:
           - xutils-dev
-          - coreutils
       cache:
         directories:
         - ~/android-ndk-r10e
-#    - os: linux
-#      sudo: false
-#      env: TARGET="android" OPT="x86"
-#      cache:
-#        directories:
-#        - ~/android-ndk-r10e
+    - os: linux
+      sudo: false
+      env: TARGET="android" OPT="x86"
+      addons:
+        apt:
+          packages:
+          - xutils-dev
+      cache:
+        directories:
+        - ~/android-ndk-r10e
   exclude:
     - compiler: gcc
 install:

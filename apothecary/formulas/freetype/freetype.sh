@@ -334,29 +334,18 @@ function build() {
  
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
 
-	elif [ "$TYPE" == "android" ] ; then		
-		# armv7
-		ABI=armeabi-v7a
-		local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
-		source ../../android_configure.sh $ABI
-
-		./configure --prefix=$BUILD_TO_DIR --host armv7a-linux-android --with-harfbuzz=no --enable-static=yes --enable-shared=no 
-		make clean 
-		make -j${PARALLEL_MAKE}
-		make install
-		
-		# x86
-		ABI=x86
-		local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
-		source ../../android_configure.sh $ABI
-
-		./configure --prefix=$BUILD_TO_DIR --host x86-linux-android --with-harfbuzz=no --enable-static=yes --enable-shared=no 
-		make clean 
-		make -j${PARALLEL_MAKE}
-		make install
-
-		echo "-----------"
-		echo "$BUILD_DIR"
+	elif [ "$TYPE" == "android" ] ; then	
+	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
+	    source ../../android_configure.sh $ABI
+	    if [ "$ARCH" == "armv7" ]; then
+            HOST=armv7a-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            HOST=x86-linux-android
+        fi
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no 
+	    make clean 
+	    make -j${PARALLEL_MAKE}
+	    make install
 	elif [ "$TYPE" == "emscripten" ]; then
 	    if [ "$EMSCRIPTEN" == "" ]; then
 	        echo "error emscripten is not installed or environment not set"
@@ -412,10 +401,9 @@ function copy() {
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
 		echoWarning "TODO: copy msys2 lib"
 	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/armeabi-v7a
-	    mkdir -p $1/lib/$TYPE/x86
-		cp -v build/$TYPE/armeabi-v7a/lib/libfreetype.a $1/lib/$TYPE/armeabi-v7a/libfreetype.a
-		cp -v build/$TYPE/x86/lib/libfreetype.a $1/lib/$TYPE/x86/libfreetype.a
+	    rm -rf $1/lib/$TYPE/$ABI
+        mkdir -p $1/lib/$TYPE/$ABI
+	    cp -v build/$TYPE/$ABI/lib/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 		cp -v build/$TYPE/lib/libfreetype.bc $1/lib/$TYPE/libfreetype.bc
 	fi

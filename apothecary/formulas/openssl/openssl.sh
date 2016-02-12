@@ -656,15 +656,18 @@ PING_LOOP_PID=$!
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
-		#perl -pi -e 's/export CROSS_COMPILE="arm-linux-androideabi-"/#export CROSS_COMPILE="arm-linux-androideabi-"/g' Setenv-android.sh
-		#perl -pi -e 's/echo "CROSS_COMPILE: \$CROSS_COMPILE"/#echo "CROSS_COMPILE: $CROSS_COMPILE"/g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
 		
         # armv7
-        echoInfo "Compiling armv7"
-        export _ANDROID_EABI=arm-linux-androideabi-4.9
-		export _ANDROID_ARCH=arch-arm
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/armeabi-v7a
+        if [ "$ARCH" == "armv7" ]; then
+            export _ANDROID_EABI=arm-linux-androideabi-4.9
+		    export _ANDROID_ARCH=arch-arm
+		elif [ "$ARCH" == "x86" ]; then
+            export _ANDROID_EABI=x86-4.9
+		    export _ANDROID_ARCH=arch-x86
+		fi
+		
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
         ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
@@ -673,21 +676,6 @@ PING_LOOP_PID=$!
         make build_libs 
         mkdir -p $BUILD_TO_DIR/lib
 		cp libssl.a $BUILD_TO_DIR/lib/
-        cp libcrypto.a $BUILD_TO_DIR/lib/
-        
-        # x86
-        echoInfo "Compiling x86"
-        export _ANDROID_EABI=x86-4.9
-		export _ANDROID_ARCH=arch-x86
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
-        mkdir -p $BUILD_TO_DIR
-        source Setenv-android.sh
-        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-        make clean
-        make depend 
-        make build_libs 
-        mkdir -p $BUILD_TO_DIR/lib
-        cp libssl.a $BUILD_TO_DIR/lib/
         cp libcrypto.a $BUILD_TO_DIR/lib/
 
 	else 
@@ -759,13 +747,11 @@ function copy() {
 	# 	cp -v lib/MinGW/i686/*.a $1/lib/$TYPE
 	
 	elif [ "$TYPE" == "android" ] ; then
-	    if [ -d $1/lib/$TYPE/ ]; then
-	        rm -r $1/lib/$TYPE/
+	    if [ -d $1/lib/$TYPE/$ABI ]; then
+	        rm -r $1/lib/$TYPE/$ABI
 	    fi
-	    mkdir -p $1/lib/$TYPE/armeabi-v7a
-		cp -rv build/android/armeabi-v7a/lib/*.a $1/lib/$TYPE/armeabi-v7a/
-	    mkdir -p $1/lib/$TYPE/x86
-		cp -rv build/android/x86/lib/*.a $1/lib/$TYPE/x86/
+	    mkdir -p $1/lib/$TYPE/$ABI
+		cp -rv build/android/$ABI/lib/*.a $1/lib/$TYPE/$ABI/
 	    mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
 	# 	mkdir -p $1/lib/$TYPE/armeabi-v7a

@@ -17,11 +17,23 @@ trapError() {
 
 #./apothecary -tandroid update core
 
+echoDots(){
+    while [ -d /proc/$1 ]; do
+        for i in $(seq 1 10); do 
+            echo -ne .
+            sleep 2
+        done
+        echo \\r"                    "
+        echo \\r
+    done
+}
+
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
-    ./apothecary -tandroid update $formula_name > formula.log 2>&1 
-    echo $formula_name Done
+    ./apothecary -tandroid -a$1 update $formula_name > formula.log 2>&1 &
+    apothecaryPID=$!
+    echoDots $apothecaryPID
 done
 echo Compressing libraries
 cd ..

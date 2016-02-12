@@ -124,7 +124,6 @@ function prepare() {
 			patch -p0 -u < $FORMULA_DIR/android.patch
 		fi
 		cp $FORMULA_DIR/Android build/config/Android
-
 	fi
 
 }
@@ -492,7 +491,7 @@ PING_LOOP_PID=$!
 
 		local OLD_PATH=$PATH
 
-		export PATH=$BUILD_DIR/Toolchains/Android/arm/bin:$OLD_PATH
+		export PATH=$BUILD_DIR/Toolchains/Android/$ARCH/bin:$OLD_PATH
 
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
@@ -507,24 +506,12 @@ PING_LOOP_PID=$!
         export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
-					--library-path=$OPENSSL_LIBS/armeabi-v7a \
+					--library-path=$OPENSSL_LIBS/$ABI \
 					--config=Android
-        make clean ANDROID_ABI=armeabi-v7a
-		make -j${PARALLEL_MAKE} ANDROID_ABI=armeabi-v7a
-		
-        export CXX=clang++
-        export PATH=$BUILD_DIR/Toolchains/Android/x86/bin:$OLD_PATH
-		./configure $BUILD_OPTS \
-					--include-path=$OPENSSL_INCLUDE \
-					--library-path=$OPENSSL_LIBS/x86 \
-					--config=Android
-        make clean ANDROID_ABI=x86
-		make -j${PARALLEL_MAKE} ANDROID_ABI=x86
+        make clean ANDROID_ABI=$ABI
+		make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
 
-		echo `pwd`
-
-		rm -f lib/Android/armeabi-v7a/*d.a
-		rm -f lib/Android/x86/*d.a
+		rm -f lib/Android/$ABI/*d.a
 
 		export PATH=$OLD_PATH
 
@@ -601,11 +588,9 @@ function copy() {
 		mkdir -p $1/lib/$TYPE
 		cp -v lib/Linux/armv7l/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "android" ] ; then
-		mkdir -p $1/lib/$TYPE/armeabi-v7a
-		cp -v lib/Android/armeabi-v7a/*.a $1/lib/$TYPE/armeabi-v7a
-
-		mkdir -p $1/lib/$TYPE/x86
-		cp -v lib/Android/x86/*.a $1/lib/$TYPE/x86
+		rm -rf $1/lib/$TYPE/$ABI
+		mkdir -p $1/lib/$TYPE/$ABI
+		cp -v lib/Android/$ABI/*.a $1/lib/$TYPE/$ABI
 	else
 		echoWarning "TODO: copy $TYPE lib"
 	fi
