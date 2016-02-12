@@ -6,8 +6,7 @@ matrix:
 # fully specify builds, include can't dynamically expand matrix entries
 # relative order of sudo and env is important so that addons: is recognized
     - os: linux
-      dist: trusty
-      sudo: required
+      sudo: false
       env: TARGET="linux"
       addons:
         apt:
@@ -22,8 +21,7 @@ matrix:
           - libxcursor-dev
           - libxi-dev
     - os: linux
-      dist: trusty
-      sudo: required
+      sudo: false
       env: TARGET="android" OPT="armv7"
       addons:
         apt:
@@ -34,8 +32,7 @@ matrix:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/armv7
     - os: linux
-      dist: trusty
-      sudo: required
+      sudo: false
       env: TARGET="android" OPT="x86"
       addons:
         apt:

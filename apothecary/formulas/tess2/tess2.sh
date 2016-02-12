@@ -50,11 +50,11 @@ function prepare() {
 function build() {
 	
 	cd ../tess2_patched
-	# use CMake for the build using CMakeLists.txt from HomeBrew since the original source doesn't have one
-	# see : https://github.com/mxcl/homebrew/pull/19634/files
-	cp -v $FORMULA_DIR/CMakeLists.txt .
 	
 	if [ "$TYPE" == "osx" ] ; then
+	    # use CMake for the build using CMakeLists.txt from HomeBrew since the original source doesn't have one
+	    # see : https://github.com/mxcl/homebrew/pull/19634/files
+	    cp -v $FORMULA_DIR/CMakeLists.txt .
 
 		OSX_ARCHS="i386 x86_64" 
 
@@ -109,6 +109,7 @@ function build() {
 			 > "${LOG}" 2>&1
 
 	elif [ "$TYPE" == "vs" ] ; then
+	    cp -v $FORMULA_DIR/CMakeLists.txt .
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
@@ -123,7 +124,7 @@ function build() {
 		
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-	
+	    cp -v $FORMULA_DIR/CMakeLists.txt .
 		local IOS_ARCHS
         if [ "${TYPE}" == "tvos" ]; then 
             IOS_ARCHS="x86_64 arm64"
@@ -323,9 +324,11 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
-	    source ../../android_configure.sh $ABI
-	    premake4 gmake
+	    mkdir -p Build
 	    cd Build
+	    cp -v $FORMULA_DIR/Makefile .
+	    cp -v $FORMULA_DIR/tess2.make .
+	    source ../../android_configure.sh $ABI
 	    make config=release tess2 
 	    cd ..
 	    mkdir -p build/android/$ABI
@@ -337,12 +340,16 @@ function build() {
     	emcmake cmake .. -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
     	emmake make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "linux64" ]; then
-	    premake4 gmake
+	    mkdir -p Build
 	    cd Build
+	    cp -v $FORMULA_DIR/Makefile .
+	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release64 tess2
 	elif [ "$TYPE" == "linux" ]; then
-	    premake4 gmake
+	    mkdir -p Build
 	    cd Build
+	    cp -v $FORMULA_DIR/Makefile .
+	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release32 tess2
 	elif [ "$TYPE" == "linuxarmv6l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
@@ -351,8 +358,10 @@ function build() {
             export TOOLCHAIN_ROOT=$BUILD_DIR/../../scripts/linuxarm/rpi_toolchain
             source ../../linuxarmv6_configure.sh
         fi
-	    premake4 gmake
+	    mkdir -p Build
 	    cd Build
+	    cp -v $FORMULA_DIR/Makefile .
+	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
 	    cd ..
 	    mkdir -p build/$TYPE

@@ -5,8 +5,6 @@ set -ev
 set -o pipefail
 APOTHECARY_DIR=${TRAVIS_BUILD_DIR}/apothecary
 cd ~
-sudo apt-get update
-sudo apt-get install -y premake4
 # check if cached directory exists
 if [ "$(ls -A ${NDK_DIR})" ]; then
     echo "Using cached NDK"
