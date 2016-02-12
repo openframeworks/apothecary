@@ -13,7 +13,7 @@ else
     echo "Downloading NDK"
     curl -Lk http://dl.google.com/android/ndk/android-ndk-r10e-linux-x86_64.bin -o ndk.bin
     chmod u+x ndk.bin
-    ./ndk.bin
+    ./ndk.bin > /dev/null 2>&1 
 fi
 NDK_ROOT=$(echo ${PWD})
 echo "APOTHECARY DIR set to $APOTHECARY_DIR"
