@@ -324,11 +324,11 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
+	    source ../../android_configure.sh $ABI
 	    mkdir -p Build
 	    cd Build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
-	    source ../../android_configure.sh $ABI
 	    make config=release tess2 
 	    cd ..
 	    mkdir -p build/android/$ABI

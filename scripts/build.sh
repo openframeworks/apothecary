@@ -49,13 +49,21 @@ echoDots(){
     done
 }
 
+if [ "$TARGET" == "osx" ] || [ "$TARGET" == "ios" ]; then
+    PARALLEL=4
+elif [ "$TARGET" == "android" ]; then
+    PARALLEL=2
+else
+    PARALLEL=1
+fi
+
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
     if [ "$OPT" != "" ]; then
-        ./apothecary -t$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
+        ./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
     else
-        ./apothecary -t$TARGET update $formula_name > formula.log 2>&1 &
+        ./apothecary -j$PARALLEL -t$TARGET update $formula_name > formula.log 2>&1 &
     fi
     apothecaryPID=$!
     echoDots $apothecaryPID
