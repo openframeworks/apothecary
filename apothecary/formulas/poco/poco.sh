@@ -144,11 +144,8 @@ function build() {
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}
-
-		cd lib/Darwin
-
-		# delete debug builds
-		rm -f x86_64/*d.a
+		make install
+		rm -f install/$TYPE/lib/*d.a
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			cmd //c buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests
