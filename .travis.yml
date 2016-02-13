@@ -46,7 +46,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/linuxarmv6/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
     - os: osx
       compiler: clang
       env: TARGET="osx"
