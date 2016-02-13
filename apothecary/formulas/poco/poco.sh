@@ -133,95 +133,21 @@ function build() {
     local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
 	if [ "$TYPE" == "osx" ] ; then
 		CURRENTPATH=`pwd`
-		mkdir -p "$CURRENTPATH/build/$TYPE/LOG"
-		LOG="$CURRENTPATH/build/$TYPE/poco-configure-i386-${VER}.log"
-		set +e
-
 		echo "--------------------"
 		echo "Making Poco-${VER}"
 		echo "--------------------"
-		echo "Configuring for i386 libc++ ..."
+		echo "Configuring for universal i386 and x86_64 libc++ ..."
 
 		# 32 bit
 		# For OS 10.9+ we must explicitly set libstdc++ for the 32-bit OSX build.
-		./configure $BUILD_OPTS --config=Darwin32-clang-libc++ > "${LOG}" 2>&1
-		if [ $? != 0 ];
-		then
-			tail -n 100 "${LOG}"
-	    	echo "Problem while configuring - Please check ${LOG}"
-	    	exit 1
-	    else
-	    	tail -n 100 "${LOG}"
-	    	echo "Configure Successful"
-	    fi
-	    echo "--------------------"
-		echo "Running make"
-		LOG="$CURRENTPATH/build/$TYPE/poco-make-i386-${VER}.log"
-		export BUILD_OUTPUT=$LOG
-	    export PING_SLEEP=30s
-	    export PING_LOOP_PID
-	    trap 'error_handler' ERR
-	    bash -c "while true; do echo \$(date) - Building Poco ...; sleep $PING_SLEEP; done" &
-PING_LOOP_PID=$!
-		make -j${PARALLEL_MAKE} >> "${BUILD_OUTPUT}" 2>&1
-		dump_output
-		kill $PING_LOOP_PID
-		trap - ERR
-		if [ $? != 0 ];
-		then
-			tail -n 100 "${LOG}"
-	    	echo "Problem while make - Please check ${LOG}"
-	    	exit 1
-	    else
-	    	tail -n 100 "${LOG}"
-	    	echo "Make Successful"
-	    fi
-
-		# 64 bit
-		export POCO_ENABLE_CPP11=1
-		LOG="$CURRENTPATH/build/$TYPE/poco-configure-x86_64-${VER}.log"
-		./configure $BUILD_OPTS --config=Darwin64-clang-libc++  > "${LOG}" 2>&1
-		if [ $? != 0 ];
-		then
-			tail -n 100 "${LOG}"
-	    	echo "Problem while configuring - Please check ${LOG}"
-	    	exit 1
-	    else
-	    	tail -n 100 "${LOG}"
-	    	echo "Configure Successful"
-	    fi
-	    echo "--------------------"
-		echo "Running make"
-		LOG="$CURRENTPATH/build/$TYPE/poco-make-x86_64-${VER}.log"
-		export BUILD_OUTPUT=$LOG
-	    export PING_SLEEP=30s
-	    export PING_LOOP_PID
-	    trap 'error_handler' ERR
-	    bash -c "while true; do echo \$(date) - Building Poco ...; sleep $PING_SLEEP; done" &
-PING_LOOP_PID=$!
-
-		make -j${PARALLEL_MAKE} >> "${BUILD_OUTPUT}" 2>&1
-		dump_output
-		kill $PING_LOOP_PID
-		trap - ERR
-
-		unset POCO_ENABLE_CPP11
+		export ARCHFLAGS=-arch i386 -arch x86_64
+		./configure $BUILD_OPTS --config=Darwin-clang-libc++
+		make -j${PARALLEL_MAKE}
 
 		cd lib/Darwin
 
 		# delete debug builds
-		rm -f i386/*d.a
 		rm -f x86_64/*d.a
-
-		# link into universal lib, strip "lib" from filename
-		local lib
-		for lib in $( ls -1 i386) ; do
-			local renamedLib=$(echo $lib | sed 's|lib||')
-			if [ ! -e $renamedLib ] ; then
-				lipo -c i386/$lib x86_64/$lib -o $renamedLib
-			fi
-		done
-
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			cmd //c buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests
