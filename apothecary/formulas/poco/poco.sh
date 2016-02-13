@@ -524,7 +524,7 @@ PING_LOOP_PID=$!
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../linuxarmv6_configure.sh
-            export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$PREFIX-
+            export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
             export LIBRARY_PATH="$RPI_ROOT/usr/lib $RPI_ROOT/usr/lib/arm-linux-gnueabihf"
         fi
 		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"

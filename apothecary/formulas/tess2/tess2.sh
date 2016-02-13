@@ -399,7 +399,7 @@ function copy() {
 	elif [ "$TYPE" == "linux64" ]; then
 		cp -v Build/libtess2.a $1/lib/$TYPE/libtess2.a
 
-	elif [ "$TYPE" == "linux32" ]; then
+	elif [ "$TYPE" == "linux" ]; then
 		cp -v Build/libtess2.a $1/lib/$TYPE/libtess2.a
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
