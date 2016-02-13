@@ -130,10 +130,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
+    local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
 	if [ "$TYPE" == "osx" ] ; then
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
-
 		CURRENTPATH=`pwd`
 		mkdir -p "$CURRENTPATH/build/$TYPE/LOG"
 		LOG="$CURRENTPATH/build/$TYPE/poco-configure-i386-${VER}.log"
@@ -234,7 +232,6 @@ PING_LOOP_PID=$!
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 	    cp $FORMULA_DIR/MinGWConfig64 build/config/MinGW
-		local BUILD_OPTS="--no-tests --no-samples --static  --no-sharedlibs --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
 
 		./configure $BUILD_OPTS \
 					--config=MinGW
@@ -300,7 +297,7 @@ PING_LOOP_PID=$!
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
 
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
+		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
 
 		STATICOPT_CC=-fPIC
 		STATICOPT_CXX=-fPIC
@@ -487,8 +484,6 @@ PING_LOOP_PID=$!
 		echo "Completed."
 
 	elif [ "$TYPE" == "android" ] ; then
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
-
 		local OLD_PATH=$PATH
 
 		export PATH=$BUILD_DIR/Toolchains/Android/$ARCH/bin:$OLD_PATH
@@ -497,11 +492,8 @@ PING_LOOP_PID=$!
 
 		# get the absolute path to the included openssl libs
 		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
-
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
 
         export CXX=clang++
 		./configure $BUILD_OPTS \
@@ -516,7 +508,6 @@ PING_LOOP_PID=$!
 		export PATH=$OLD_PATH
 
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
 		./configure $BUILD_OPTS
 		make -j${PARALLEL_MAKE}
 		# delete debug builds
@@ -527,7 +518,6 @@ PING_LOOP_PID=$!
             export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
             export LIBRARY_PATH="$SYSROOT/usr/lib $SYSROOT/usr/lib/arm-linux-gnueabihf"
         fi
-		local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data/MySQL,Data/ODBC,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen"
 		./configure $BUILD_OPTS \
 		    --library-path="$LIBRARY_PATH" \
 		    --cflags="$CFLAGS" \
