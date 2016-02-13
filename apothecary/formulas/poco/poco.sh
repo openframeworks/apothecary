@@ -140,7 +140,7 @@ function build() {
 
 		# 32 bit
 		# For OS 10.9+ we must explicitly set libstdc++ for the 32-bit OSX build.
-		export ARCHFLAGS=-arch i386 -arch x86_64
+		export ARCHFLAGS="-arch i386 -arch x86_64"
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++
 		make -j${PARALLEL_MAKE}
 
