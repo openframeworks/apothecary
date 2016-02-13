@@ -347,9 +347,6 @@ function build() {
 	    make config=release tess2
 	elif [ "$TYPE" == "linuxarmv6l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
-            export PREFIX=arm-linux-gnueabihf
-            export SYSROOT=$BUILD_DIR/../../scripts/linuxarm/raspbian
-            export TOOLCHAIN_ROOT=$BUILD_DIR/../../scripts/linuxarm/rpi_toolchain
             source ../../linuxarmv6_configure.sh
         fi
 	    mkdir -p Build
