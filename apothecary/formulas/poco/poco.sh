@@ -140,7 +140,7 @@ function build() {
 
 		# 32 bit
 		# For OS 10.9+ we must explicitly set libstdc++ for the 32-bit OSX build.
-		export ARCHFLAGS=-arch i386 -arch x86_64
+		export ARCHFLAGS="-arch i386 -arch x86_64"
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}
@@ -477,14 +477,16 @@ function copy() {
 	cp -Rv Zip/include/Poco/Zip $1/include/Poco
 
     rm -rf $1/lib/$TYPE
-    mkdir -p $1/lib/$TYPE
     
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
-		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
+		mkdir -p $1/lib/$TYPE
+		cp -v lib/Darwin/*.a $1/lib/$TYPE
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -v lib/$TYPE/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "vs" ] ; then
+		mkdir -p $1/lib/$TYPE
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v lib/*.lib $1/lib/$TYPE/Win32
@@ -494,15 +496,20 @@ function copy() {
 		fi
 		
 	elif [ "$TYPE" == "msys2" ] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
 		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "linux" ] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -v lib/Linux/$(uname -m)/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "linux64" ] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -v lib/Linux/x86_64/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "linuxarmv6l" ] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "linuxarmv7l" ] ; then
+		mkdir -p $1/lib/$TYPE
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "android" ] ; then
 		rm -rf $1/lib/$TYPE/$ABI
