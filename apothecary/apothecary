@@ -954,7 +954,7 @@ function  error_handler() {
     if [ $# -gt 2 ]; then
         LASTERR="$2"          # error code
     else
-        LASTERR=""
+        LASTERR="1"
     fi
     echo "ERROR in ${JOB} : line ${LASTLINE} with exit code ${LASTERR}"
 
