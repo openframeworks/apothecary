@@ -64,7 +64,7 @@ fi
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
-    if [ "$OPT" != "" ]; then
+    if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         ./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
     else
         ./apothecary -j$PARALLEL -t$TARGET update $formula_name > formula.log 2>&1 &
