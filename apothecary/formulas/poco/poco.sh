@@ -124,6 +124,8 @@ function prepare() {
 			patch -p0 -u < $FORMULA_DIR/android.patch
 		fi
 		cp $FORMULA_DIR/Android build/config/Android
+	elif [ "$TYPE" == "android" ] ; then
+		cp $FORMULA_DIR/Linux build/config/Linux
 	fi
 
 }
