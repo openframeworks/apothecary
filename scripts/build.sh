@@ -57,8 +57,12 @@ else
     PARALLEL=1
 fi
 
-if [ $TARGET == "linux" ]; then
+if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
+    if [ "$OPT" == "gcc5" ]; then
+        CC="gcc-5" 
+        CXX="g++-5"
+    fi
 fi
 
 for formula in $( ls -1 formulas | grep -v _depends) ; do

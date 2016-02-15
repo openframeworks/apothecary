@@ -20,7 +20,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linux" OPT="gcc5" CC="gcc-5" CXX="g++-5"
+      env: TARGET="linux" OPT="gcc5"
       addons:
         apt:
           sources:
