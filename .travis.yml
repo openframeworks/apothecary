@@ -28,6 +28,7 @@ matrix:
           packages:
           - gcc-5
           - g++-5
+          - libstdc++-5-dev
           - libxrandr-dev
           - libxinerama-dev
           - libx11-dev
