@@ -49,7 +49,7 @@ echoDots(){
     done
 }
 
-if [ "$TARGET" == "osx" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ];; then
+if [ "$TARGET" == "osx" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     PARALLEL=4
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
