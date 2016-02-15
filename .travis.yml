@@ -22,6 +22,22 @@ matrix:
           - libxcursor-dev
           - libxi-dev
     - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linux" OPT="gcc5"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-5
+          - g++-5
+          - libxrandr-dev
+          - libxinerama-dev
+          - libx11-dev
+          - libxcursor-dev
+          - libxi-dev
+    - os: linux
       sudo: false
       env: TARGET="android" OPT="armv7"
       addons:
