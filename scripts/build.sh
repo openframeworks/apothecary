@@ -57,6 +57,10 @@ else
     PARALLEL=1
 fi
 
+if [ $TARGET == "linux" ]; then
+    TARGET="linux64"
+fi
+
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     echo Compiling $formula_name
