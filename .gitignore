@@ -7,3 +7,4 @@
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build
+.DS_Store
