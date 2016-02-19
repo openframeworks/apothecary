@@ -86,7 +86,7 @@ cd $ROOT
 TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 
-if [ $TRAVIS_BRANCH != "master" ]; then
+if [ "$TRAVIS_BRANCH" != "master" ]; then
     exit 0
 fi
 
