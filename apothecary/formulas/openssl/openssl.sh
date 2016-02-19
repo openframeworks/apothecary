@@ -476,13 +476,6 @@ export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
 export BUILD_TOOLS="${DEVELOPER}"
 
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-# min iOS version for arm64 is iOS 7
-
-if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-elif [ "${IOS_ARCH}" == "i386" ]; then
-MIN_IOS_VERSION=5.1 # 6.0 to prevent start linking errors
-fi
 
 BITCODE=""
 if [[ "$TYPE" == "tvos" ]]; then
@@ -698,7 +691,13 @@ function copy() {
 
 # # headers
 if [ -d $1/include/ ]; then
-rm -r $1/include/
+# keep a copy of the platform specific headers
+find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
+# remove old headers
+rm -r $1/include/ 
+# restore platform specific headers
+find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
+
 fi
 
 mkdir -pv $1/include/openssl/
@@ -708,50 +707,25 @@ mkdir -pv $1/include/openssl/
 # opensslconf.h that detects the platform and includes the
 # correct one. Then every platform checkouts the rest of the config
 # files that were deleted here
-if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 if [ -f lib/include/openssl/opensslconf.h ]; then
-mv lib/include/openssl/opensslconf.h lib/include/openssl/opensslconf_${TYPE}.h
+    mv lib/include/openssl/opensslconf.h lib/include/openssl/opensslconf_${TYPE}.h
 fi
+
 cp -RHv lib/include/openssl/* $1/include/openssl/
 cp -v $FORMULA_DIR/opensslconf.h lib/include/openssl/opensslconf.h
 
 # We also copy this file so that POCO and others can access it.
 cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-
-elif [ -f include/openssl/opensslconf.h ]; then
-mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
 cp -RHv include/openssl/* $1/include/openssl/
 cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-fi
-# suppress file not found errors
-#same here doesn't seem to be a solid reason to delete the files
-#rm -rf $1/lib/$TYPE/* 2> /dev/null
 
 # libs
 if [ "$TYPE" == "osx" ] ; then
 mkdir -p $1/lib/$TYPE
 cp -v lib/$TYPE/*.a $1/lib/$TYPE
-if [[ "$CHECKOUT" == "NO" ]]; then
-echo "no git checkout"
-else
-git checkout $1/include/openssl/opensslconf_osx.h
-git checkout $1/include/openssl/opensslconf_ios.h
-git checkout $1/include/openssl/opensslconf_android.h
-git checkout $1/include/openssl/opensslconf_vs.h
-git checkout $1/include/openssl/opensslconf_win32.h
-fi
 elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 mkdir -p $1/lib/$TYPE
 cp -v lib/$TYPE/*.a $1/lib/$TYPE
-if [[ "$CHECKOUT" == "NO" ]]; then
-echo "no git checkout"
-else
-git checkout $1/include/openssl/opensslconf_osx.h
-git checkout $1/include/openssl/opensslconf_ios.h
-git checkout $1/include/openssl/opensslconf_android.h
-git checkout $1/include/openssl/opensslconf_vs.h
-git checkout $1/include/openssl/opensslconf_win32.h
-fi
 elif [ "$TYPE" == "vs" ] ; then
 if [ $ARCH == 32 ] ; then
 rm -rf $1/lib/$TYPE/Win32
@@ -770,11 +744,6 @@ base=`basename $f .lib`
 mv -v $f $1/lib/$TYPE/x64/${base}md.lib
 done
 fi
-
-git checkout $1/include/openssl/opensslconf_ios.h
-git checkout $1/include/openssl/opensslconf_osx.h
-git checkout $1/include/openssl/opensslconf_android.h
-git checkout $1/include/openssl/opensslconf_win32.h
 # elif [ "$TYPE" == "msys2" ] ; then
 # 	mkdir -p $1/lib/$TYPE
 # 	cp -v lib/MinGW/i686/*.a $1/lib/$TYPE
@@ -789,12 +758,6 @@ mkdir -p $1/lib/$TYPE/x86
 cp -rv build/android/x86/lib/*.a $1/lib/$TYPE/x86/
 mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
-git checkout $1/include/openssl/comp.h
-git checkout $1/include/openssl/engine.h
-git checkout $1/include/openssl/opensslconf_osx.h
-git checkout $1/include/openssl/opensslconf_ios.h
-git checkout $1/include/openssl/opensslconf_vs.h
-git checkout $1/include/openssl/opensslconf_win32.h
 
 # 	mkdir -p $1/lib/$TYPE/armeabi-v7a
 # 	cp -v lib/Android/armeabi-v7a/*.a $1/lib/$TYPE/armeabi-v7a
