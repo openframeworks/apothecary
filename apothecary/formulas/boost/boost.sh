@@ -16,12 +16,12 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=http://sourceforge.net/projects/boost/files/boost/${VERSION}/${TARBALL}/download
+URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSION_UNDERSCORES.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -Lk ${URL} > ${TARBALL}
-	tar -xf ${TARBALL}
+	wget ${URL}
+	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
 	rm ${TARBALL}
 
