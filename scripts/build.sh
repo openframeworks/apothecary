@@ -88,10 +88,14 @@ tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 
 if [[ $TRAVIS_PULL_REQUEST == "true" ]]; then
     # exit here on PR's 
+    echo "This is a PR exiting build";
     exit 0
+else 
+    echo "On Master Branch and not a PR";
 fi
 
 if [ "$TRAVIS_BRANCH" == "master" ]; then
+    echo "On Master Branch";
     # only on master
     echo Unencrypting key
     openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
