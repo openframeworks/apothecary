@@ -17,7 +17,7 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://downloads.sourceforge.net/project/kissfft/kissfft/v$VER_UNDERSCORE/kiss_fft$VER.tar.gz
+	wget http://downloads.sourceforge.net/project/kissfft/kissfft/v$VER_UNDERSCORE/kiss_fft$VER.tar.gz
 	tar -xf kiss_fft$VER.tar.gz
 	mv kiss_fft$VER kiss
 	rm kiss_fft$VER.tar.gz
