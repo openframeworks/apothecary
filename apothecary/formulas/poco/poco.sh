@@ -27,7 +27,7 @@ FORMULA_DEPENDS_MANUAL=1
 # 3rd Party libraries.  See https://github.com/pocoproject/poco/blob/develop/README
 # for more information.
 
-SHA=f8dee428ab61499753e9b2f81f8a5b9ea1dc74e4
+SHA=7a8e0d12d518f08446a8382899c3bdba3aebbe6d
 
 # download the source code and unpack it into LIB_NAME
 function download() {
