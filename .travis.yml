@@ -67,6 +67,10 @@ matrix:
       osx_image: xcode7.1
       compiler: clang
       env: TARGET="ios"
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="tvos"
   exclude:
     - compiler: gcc
 install:
