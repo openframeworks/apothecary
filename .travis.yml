@@ -74,7 +74,7 @@ matrix:
   exclude:
     - compiler: gcc
 install:
-    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ]; then
+    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvOS" ] || [ "$TARGET" == "linuxarmv6l" ]; then
         scripts/$TARGET/install.sh;
       fi
 script:
