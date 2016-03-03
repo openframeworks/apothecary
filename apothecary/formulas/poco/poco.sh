@@ -334,7 +334,7 @@ PING_LOOP_PID=$!
 		    	echo "Problem while make - Please check ${LOG}"
 		    	exit 1
 		    else
-		    	tail -n 10 "${LOG}"
+		    	#tail -n 10 "${LOG}"
 		    	echo "Make Successful for ${IOS_ARCH}"
 		    fi
 			unset POCO_TARGET_OSARCH IPHONE_SDK_VERSION_MIN OSFLAGS
