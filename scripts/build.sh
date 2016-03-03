@@ -111,7 +111,7 @@ fi
 
 echo Compressing libraries
 cd $ROOT
-TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT.tar.bz2
+TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
 tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 
 if [[ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]]; then
