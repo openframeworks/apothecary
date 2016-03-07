@@ -68,16 +68,16 @@ fi
 
 # Extract everything
 echo "Uncompressing toolchain source"
-#for f in *.tar*; do tar xf $f; done
+for f in *.tar*; do tar xf $f; done
 
 # Make symbolic links
-#cd $GCC_VERSION
-#ln -sf `ls -1d ../mpfr-*/` mpfr
-#ln -sf `ls -1d ../gmp-*/` gmp
-#ln -sf `ls -1d ../mpc-*/` mpc
-#ln -sf `ls -1d ../isl-*/` isl
-#ln -sf `ls -1d ../cloog-*/` cloog
-#cd ..
+cd $GCC_VERSION
+ln -sf `ls -1d ../mpfr-*/` mpfr
+ln -sf `ls -1d ../gmp-*/` gmp
+ln -sf `ls -1d ../mpc-*/` mpc
+ln -sf `ls -1d ../isl-*/` isl
+ln -sf `ls -1d ../cloog-*/` cloog
+cd ..
 
 
 # Step 1. Binutils
