@@ -8,11 +8,11 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.6.0-release
+VER=1.6.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.6.0-release
+GIT_TAG=poco-1.6.1-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l")
 
@@ -27,7 +27,7 @@ FORMULA_DEPENDS_MANUAL=1
 # 3rd Party libraries.  See https://github.com/pocoproject/poco/blob/develop/README
 # for more information.
 
-SHA=
+SHA=7a8e0d12d518f08446a8382899c3bdba3aebbe6d
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -334,7 +334,7 @@ PING_LOOP_PID=$!
 		    	echo "Problem while make - Please check ${LOG}"
 		    	exit 1
 		    else
-		    	tail -n 10 "${LOG}"
+		    	#tail -n 10 "${LOG}"
 		    	echo "Make Successful for ${IOS_ARCH}"
 		    fi
 			unset POCO_TARGET_OSARCH IPHONE_SDK_VERSION_MIN OSFLAGS

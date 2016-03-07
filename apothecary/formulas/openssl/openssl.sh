@@ -5,7 +5,7 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "msys2" "ios" "tvos" "android" )
 
-VER=1.0.2f
+VER=1.0.2g
 VERDIR=1.0.2
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 COMPILER_TYPE=clang # clang, gcc
@@ -476,13 +476,6 @@ PING_LOOP_PID=$!
 			export BUILD_TOOLS="${DEVELOPER}"
 
             MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-            # min iOS version for arm64 is iOS 7
-        
-            if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-                MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-            elif [ "${IOS_ARCH}" == "i386" ]; then
-                MIN_IOS_VERSION=5.1 # 6.0 to prevent start linking errors
-            fi
 
             BITCODE=""
             if [[ "$TYPE" == "tvos" ]]; then
@@ -690,9 +683,14 @@ function copy() {
 	#echoWarning "TODO: copy $TYPE lib"
 
 	# # headers
-	if [ -d $1/include/ ]; then
-	    rm -r $1/include/
-	fi
+    if [ -d $1/include/ ]; then
+        # keep a copy of the platform specific headers
+        find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
+        # remove old headers
+        rm -r $1/include/ 
+        # restore platform specific headers
+        find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
+    fi
 	
 	mkdir -pv $1/include/openssl/
 	
