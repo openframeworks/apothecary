@@ -61,12 +61,9 @@ matrix:
       dist: trusty
       env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
     - os: linux
-      sudo: false
+      sudo: required
       dist: trusty
       env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-      cache:
-        directories:
-        - ~/rpi2_toolchain
     - os: osx
       compiler: clang
       env: TARGET="osx"
