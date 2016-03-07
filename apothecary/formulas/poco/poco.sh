@@ -440,9 +440,9 @@ PING_LOOP_PID=$!
 		rm -f lib/Linux/$(uname -m)/*d.a
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../linuxarmv6_configure.sh
+            source ../../${TYPE}_configure.sh
             export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
-            export LIBRARY_PATH="$SYSROOT/usr/lib $SYSROOT/usr/lib/arm-linux-gnueabihf"
+            export LIBRARY_PATH="$SYSROOT/usr/lib $SYSROOT/usr/lib/$TOOLCHAIN_PREFIX"
         fi
 		./configure $BUILD_OPTS \
 		    --library-path="$LIBRARY_PATH" \
