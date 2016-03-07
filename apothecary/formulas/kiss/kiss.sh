@@ -5,7 +5,7 @@
 # http://sourceforge.net/projects/kissfft/
 #
 # has a Makefile
-FORMULA_TYPES=( "linux" "linux64" "linuxarmv6" "linuxarmv7" )
+FORMULA_TYPES=( "linux" "linux64" "linuxarmv6l" "linuxarmv7l" )
 
 # define the version
 VER=130
@@ -31,10 +31,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     if [ $CROSSCOMPILING -eq 1 ]; then
-        export PREFIX=arm-linux-gnueabihf
-        export SYSROOT=$BUILD_DIR/../../scripts/linuxarm/raspbian
-        export TOOLCHAIN_ROOT=$BUILD_DIR/../../scripts/linuxarm/rpi_toolchain
-        source ../../linuxarmv6_configure.sh
+        source ../../${TYPE}_configure.sh
     fi
     make  -j${PARALLEL_MAKE} TARGET_DIR=$TYPE
 }
