@@ -96,7 +96,7 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     wait $apothecaryPID
 done
 
-if [[ $TRAVIS_BRANCH == "master" -a $TRAVIS_PULL_REQUEST == "false" ]]; then
+if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
     # exit here on PR's 
     echo "On Master Branch and not a PR";
 else 
