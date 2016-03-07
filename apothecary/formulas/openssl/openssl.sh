@@ -16,11 +16,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		curl -O https://www.openssl.org/source/$FILENAME.tar.gz
+		wget https://www.openssl.org/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		curl -O https://www.openssl.org/source/$FILENAME.tar.gz.sha1
+		wget https://www.openssl.org/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
