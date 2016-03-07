@@ -9,7 +9,7 @@
 # on ios, use some build scripts adapted from the Assimp project
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" "linuxarmv6l" )
+FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" )
 
 # define the version
 VER=1.1
@@ -345,9 +345,9 @@ function build() {
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
-	elif [ "$TYPE" == "linuxarmv6l" ]; then
+	elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../linuxarmv6_configure.sh
+            source ../../${TYPE}_configure.sh
         fi
 	    mkdir -p Build
 	    cd Build
