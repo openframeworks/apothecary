@@ -12,22 +12,22 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 # See: http://preshing.com/20141119/how-to-build-a-gcc-cross-compiler
 #-------------------------------------------------------------------------------------------
 
-export SYSROOT=$(cd $(dirname $0)/../raspbian; pwd -P)
+export SYSROOT=$(cd $(dirname $0)/../archlinux; pwd -P)
 
 
-INSTALL_PATH=$(cd $(dirname $0)/..; pwd -P)/rpi_toolchain
+INSTALL_PATH=$(cd $(dirname $0)/..; pwd -P)/rpi2_toolchain
 TARGET=arm-linux-gnueabihf
 LINUX_ARCH=arm
-CONFIGURATION_OPTIONS="--disable-werror"
+CONFIGURATION_OPTIONS="--disable-werror --with-arch=armv7-a --with-float=hard --with-fpu=vfpv3-d16"
 SYSROOT_OPTIONS="--with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT"
 
 PARALLEL_MAKE=-j4
-BINUTILS_VERSION=binutils-2.25.1
-GCC_VERSION=gcc-4.9.2
-LINUX_KERNEL_VERSION=linux-4.1.7
-GLIBC_VERSION=glibc-2.20
-MPFR_VERSION=mpfr-3.1.2
-GMP_VERSION=gmp-6.0.0a
+BINUTILS_VERSION=binutils-2.26
+GCC_VERSION=gcc-5.3.0
+LINUX_KERNEL_VERSION=linux-4.1.18
+GLIBC_VERSION=glibc-2.23
+MPFR_VERSION=mpfr-3.1.3
+GMP_VERSION=gmp-6.1.0
 MPC_VERSION=mpc-1.0.2
 ISL_VERSION=isl-0.12.2
 CLOOG_VERSION=cloog-0.18.1
@@ -144,6 +144,9 @@ cd build-gcc
 make $PARALLEL_MAKE all
 make install
 cd ..
+
+sed -i "s|${INSTALL_PATH}/arm-linux-gnueabihf/lib/||g" ${INSTALL_PATH}/arm-linux-gnueabihf/lib/libpthread.so
+sed -i "s|${INSTALL_PATH}/arm-linux-gnueabihf/lib/||g" ${INSTALL_PATH}/arm-linux-gnueabihf/lib/libc.so
 
 trap - EXIT
 echo 'Success!'

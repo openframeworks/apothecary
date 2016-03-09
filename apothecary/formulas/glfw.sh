@@ -63,18 +63,26 @@ function build() {
  		make -j${PARALLEL_MAKE}
  		make install
 	else
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source ../../${TYPE}_configure.sh
+            EXTRA_CONFIG="-DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2 -DCMAKE_LIBRARY_PATH=$SYSROOT/usr/lib -DCMAKE_INCLUDE_PATH=$SYSROOT/usr/include"
+        else
+            EXTRA_CONFIG=" "
+        fi
 		# *nix build system
 
 		# NOTE: DGLFW_BUILD_UNIVERSAL will be ignored on non OSX systems.
 		# Rather than creating a seperate if/then branch, we just let cmake
 		# ignore the warning on non OSX platforms.
-		cmake . -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT_DIR \
+		mkdir -p build 
+		cd build
+		cmake .. -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT_DIR \
 				-DGLFW_BUILD_DOCS=OFF \
 				-DGLFW_BUILD_TESTS=OFF \
 				-DGLFW_BUILD_EXAMPLES=OFF \
 				-DBUILD_SHARED_LIBS=OFF \
 				-DCMAKE_BUILD_TYPE=Release \
-				-DGLFW_BUILD_UNIVERSAL=ON 
+				$EXTRA_CONFIG
 
  		make clean
  		make -j${PARALLEL_MAKE}
@@ -115,7 +123,7 @@ function copy() {
 		# copy headers
 		cp -Rv include/GLFW/* $1/include/GLFW/
 		# copy lib
-		cp -Rv src/libglfw3.a $1/lib/$TYPE/libglfw3.a
+		cp -Rv build/src/libglfw3.a $1/lib/$TYPE/libglfw3.a
 	fi
 
 	# copy license file

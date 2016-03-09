@@ -20,7 +20,7 @@ URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSI
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget ${URL}
+	wget -nv ${URL}
 	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
 	rm ${TARBALL}
@@ -39,16 +39,18 @@ function download() {
 function prepare() {
 	if [ "$VERSION" == "1.58.0" ]; then 
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/operations.cpp.patch_1.58 2>/dev/null ; then
-               	    patch -p0 -u < $FORMULA_DIR/operations.cpp.patch_1.58
-                fi
+            patch -p0 -u < $FORMULA_DIR/operations.cpp.patch_1.58
+        fi
                 
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/visualc.hpp.patch_1.58 2>/dev/null ; then
-                    patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch_1.58
-                fi
+            patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch_1.58
+        fi
 	fi
 
-	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "emscripten" ]; then
+	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "android" ]; then
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
+    elif [ "$TYPE" == "emscripten" ]; then
+		./bootstrap.sh --with-libraries=filesystem
 	elif [[ "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
 		mkdir -p lib/
 		mkdir -p build/
@@ -61,8 +63,6 @@ function prepare() {
 		BOOST_LIBS_COMMA=$(echo $BOOST_LIBS | sed -e "s/ /,/g")
 	    echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
-	elif [ "$TYPE" == "android" ]; then
-		./bootstrap.sh --with-toolset=clang --with-libraries=filesystemel
 	elif [ "$TYPE" == "vs" ]; then
 		cmd.exe /c "bootstrap"
 	else

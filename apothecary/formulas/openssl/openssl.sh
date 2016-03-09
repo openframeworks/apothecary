@@ -9,18 +9,19 @@ VER=1.0.2g
 VERDIR=1.0.2
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 COMPILER_TYPE=clang # clang, gcc
-
+SITE=https://www.openssl.org
+MIRROR=http://mirrors.ibiblio.org/openssl
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		curl -O https://www.openssl.org/source/$FILENAME.tar.gz
+		wget ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		curl -O https://www.openssl.org/source/$FILENAME.tar.gz.sha1
+		wget ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')

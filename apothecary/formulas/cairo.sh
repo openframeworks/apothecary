@@ -12,7 +12,7 @@
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "osx" "vs" )
 
 FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 

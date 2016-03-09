@@ -17,6 +17,8 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
+          
+          
     - os: linux
       sudo: required
       dist: trusty
@@ -34,6 +36,8 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
+          
+          
     - os: linux
       sudo: false
       env: TARGET="android" OPT="armv7"
@@ -45,6 +49,8 @@ matrix:
         directories:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/armv7
+            
+            
     - os: linux
       sudo: false
       env: TARGET="android" OPT="x86"
@@ -56,32 +62,64 @@ matrix:
         directories:
         - ~/android-ndk-r10e
         - apothecary/build/Toolchains/x86
+        
+        
+    - os: linux
+      sudo: false
+      env: TARGET="emscripten"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libstdc++6
+            - gcc-4.9
+        
+        
     - os: linux
       sudo: required
       dist: trusty
       env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      
+      
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      
+      
     - os: osx
       compiler: clang
       env: TARGET="osx"
+      
+      
     - os: osx
       osx_image: xcode7.1
       compiler: clang
       env: TARGET="ios" OPT2="1"
+      
+      
     - os: osx
       compiler: clang
       env: TARGET="ios" OPT2="2"
+      
+      
     - os: osx
       osx_image: xcode7.1
       compiler: clang
       env: TARGET="tvos" OPT2="1"
+
+
     - os: osx
       osx_image: xcode7.1
       compiler: clang
       env: TARGET="tvos" OPT2="2"
+
+
   exclude:
     - compiler: gcc
 install:
-    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvOS" ] || [ "$TARGET" == "linuxarmv6l" ]; then
+    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "linuxarmv7l" ] || [ "$TARGET" == "emscripten" ]; then
         scripts/$TARGET/install.sh;
       fi
 script:
