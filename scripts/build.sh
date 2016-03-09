@@ -67,6 +67,10 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
+if [ "$TARGET" == "emscripten" ]; then
+    source ~/emscripten-sdk/emsdk_env.sh
+fi
+
 for formula in $( ls -1 formulas | grep -v _depends) ; do
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
