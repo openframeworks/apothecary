@@ -65,7 +65,8 @@ matrix:
 #        
         
     - os: linux
-      sudo: false
+      sudo: required
+      dist: trusty
       env: TARGET="emscripten"
       addons:
         apt:
