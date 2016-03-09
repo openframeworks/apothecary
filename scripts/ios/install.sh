@@ -1,4 +1,4 @@
-brew install cmake
+brew install cmake 2>/dev/null
 
 set -e
 # capture failing exits in commands obscured behind a pipe
