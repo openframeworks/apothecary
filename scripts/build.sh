@@ -13,6 +13,9 @@ trapError() {
 	echo
 	echo " ^ Received error ^"
 	cat formula.log
+	if [ "$formula_name" == "boost" ]; then
+	    cat $APOTHECARY_PATH/boost/bootstrap.log
+	fi
 	exit 1
 }
 
