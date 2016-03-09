@@ -65,8 +65,7 @@ matrix:
 #        
         
     - os: linux
-      sudo: required
-      dist: trusty
+      sudo: false
       env: TARGET="emscripten"
       addons:
         apt:
@@ -74,6 +73,7 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - libstdc++6
+            - clang
         
         
 #    - os: linux
