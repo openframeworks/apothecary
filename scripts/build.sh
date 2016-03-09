@@ -79,7 +79,7 @@ for formula in $( ls -1 formulas | grep -v _depends) ; do
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
         ./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name > formula.log 2>&1 &
-    elif [ "$TARGET" == "ios" ]; then
+    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
         if [ "$OPT2" == "1" ]; then
             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ]; then
                 echo Pass 1 - Compiling $formula_name
