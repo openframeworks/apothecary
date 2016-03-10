@@ -104,11 +104,23 @@ matrix:
       env: TARGET="ios" OPT2="2"
       
       
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="tvos" OPT2="1"
+
+
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="tvos" OPT2="2"
+
+
   exclude:
     - compiler: gcc
 install:
-    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvOS" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "linuxarmv7l" ] || [ "$TARGET" == "emscripten" ]; then
-        scripts/$TARGET/install.sh;
+    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "linuxarmv7l" ] || [ "$TARGET" == "emscripten" ]; then
+        scripts/$TARGET/install.sh $OPT $OPT2;
       fi
 script:
     - scripts/build.sh $OPT $OPT2
