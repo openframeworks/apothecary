@@ -12,7 +12,7 @@ VER=1.6.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.6.1-release
+GIT_TAG=poco-1.7.2-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l")
 
@@ -27,18 +27,18 @@ FORMULA_DEPENDS_MANUAL=1
 # 3rd Party libraries.  See https://github.com/pocoproject/poco/blob/develop/README
 # for more information.
 
-SHA=7a8e0d12d518f08446a8382899c3bdba3aebbe6d
+SHA=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	if [ "$SHA" == "" ] ; then
-		echo "SHA=="" $GIT_URL"
+		echo "SHA=="" Using $GIT_URL with GIT_TAG=$GIT_TAG"
 		curl -Lk $GIT_URL/archive/$GIT_TAG.tar.gz -o poco-$GIT_TAG.tar.gz
 		tar -xf poco-$GIT_TAG.tar.gz
 		mv poco-$GIT_TAG poco
 		rm poco*.tar.gz
 	else
-		echo $GIT_URL
+		echo "$GIT_URL - Using SHA=$SHA"
 		git clone $GIT_URL -b poco-$VER
 	fi
 }
@@ -47,6 +47,7 @@ function download() {
 function prepare() {
 
 	if [ "$SHA" != "" ] ; then
+		echo "Setting git repo to SHA=$SHA"
 		git reset --hard $SHA
 	fi
 	
