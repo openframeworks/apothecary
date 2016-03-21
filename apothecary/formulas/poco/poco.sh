@@ -12,7 +12,7 @@ VER=1.6.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.7.1-release
+GIT_TAG=poco-1.7.2-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l")
 
