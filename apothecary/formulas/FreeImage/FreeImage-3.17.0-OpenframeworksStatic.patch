@@ -1,0 +1,83 @@
+diff C3 FreeImage/Source/LibJXR/image/sys/strcodec.c FreeImage/Source/LibJXR/image/sys/strcodec.c
+*** FreeImage/Source/LibJXR/image/sys/strcodec.c	Mon Mar 02 02:07:10 2015
+--- FreeImage/Source/LibJXR/image/sys/strcodec.c	Sun Feb 07 02:20:19 2016
+***************
+*** 664,670 ****
+  //================================================================
+  // Memory access functions
+  //================================================================
+! #if (defined(WIN32) && !defined(UNDER_CE) && (!defined(__MINGW32__) || defined(__MINGW64_TOOLCHAIN__))) || (defined(UNDER_CE) && defined(_ARM_))
+  // WinCE ARM and Desktop x86
+  #else
+  // other platform
+--- 664,670 ----
+  //================================================================
+  // Memory access functions
+  //================================================================
+! #if (defined(WIN32) && !defined(UNDER_CE) && (defined(__MINGW32__) || defined(__MINGW64_TOOLCHAIN__))) || (defined(UNDER_CE) && defined(_ARM_))
+  // WinCE ARM and Desktop x86
+  #else
+  // other platform
+diff C3 FreeImage/Source/LibWebP/src/dsp/dsp.upsampling_mips_dsp_r2.c FreeImage/Source/LibWebP/src/dsp/dsp.upsampling_mips_dsp_r2.c
+*** FreeImage/Source/LibWebP/src/dsp/dsp.upsampling_mips_dsp_r2.c	Fri Feb 20 03:34:36 2015
+--- FreeImage/Source/LibWebP/src/dsp/dsp.upsampling_mips_dsp_r2.c	Sun Feb 07 01:17:05 2016
+***************
+*** 34,48 ****
+      G = G - t2 + kGCst;                                                        \
+      B = B + kBCst;                                                             \
+      __asm__ volatile (                                                         \
+!       "shll_s.w         %["#R"],      %["#R"],        9              \n\t"     \
+!       "shll_s.w         %["#G"],      %["#G"],        9              \n\t"     \
+!       "shll_s.w         %["#B"],      %["#B"],        9              \n\t"     \
+!       "precrqu_s.qb.ph  %["#R"],      %["#R"],        $zero          \n\t"     \
+!       "precrqu_s.qb.ph  %["#G"],      %["#G"],        $zero          \n\t"     \
+!       "precrqu_s.qb.ph  %["#B"],      %["#B"],        $zero          \n\t"     \
+!       "srl              %["#R"],      %["#R"],        24             \n\t"     \
+!       "srl              %["#G"],      %["#G"],        24             \n\t"     \
+!       "srl              %["#B"],      %["#B"],        24             \n\t"     \
+        : [R]"+r"(R), [G]"+r"(G), [B]"+r"(B)                                     \
+        :                                                                        \
+      );                                                                         \
+--- 34,48 ----
+      G = G - t2 + kGCst;                                                        \
+      B = B + kBCst;                                                             \
+      __asm__ volatile (                                                         \
+!       "shll_s.w         %[" #R "],      %[" #R "],        9              \n\t"     \
+!       "shll_s.w         %[" #G "],      %[" #G "],        9              \n\t"     \
+!       "shll_s.w         %[" #B "],      %[" #B "],        9              \n\t"     \
+!       "precrqu_s.qb.ph  %[" #R "],      %[" #R "],        $zero          \n\t"     \
+!       "precrqu_s.qb.ph  %[" #G "],      %[" #G "],        $zero          \n\t"     \
+!       "precrqu_s.qb.ph  %[" #B "],      %[" #B "],        $zero          \n\t"     \
+!       "srl              %[" #R "],      %[" #R "],        24             \n\t"     \
+!       "srl              %[" #G "],      %[" #G "],        24             \n\t"     \
+!       "srl              %[" #B "],      %[" #B "],        24             \n\t"     \
+        : [R]"+r"(R), [G]"+r"(G), [B]"+r"(B)                                     \
+        :                                                                        \
+      );                                                                         \
+diff C3 FreeImage/Source/LibWebP/src/dsp/dsp.yuv_mips_dsp_r2.c FreeImage/Source/LibWebP/src/dsp/dsp.yuv_mips_dsp_r2.c
+*** FreeImage/Source/LibWebP/src/dsp/dsp.yuv_mips_dsp_r2.c	Fri Feb 20 03:34:38 2015
+--- FreeImage/Source/LibWebP/src/dsp/dsp.yuv_mips_dsp_r2.c	Sun Feb 07 01:17:57 2016
+***************
+*** 54,62 ****
+    "srl              %[temp5],   %[temp5],       24              \n\t"          \
+    "srl              %[temp6],   %[temp6],       24              \n\t"          \
+    "srl              %[temp7],   %[temp7],       24              \n\t"          \
+!   "sb               %[temp5],   "#R"(%[dst])                    \n\t"          \
+!   "sb               %[temp6],   "#G"(%[dst])                    \n\t"          \
+!   "sb               %[temp7],   "#B"(%[dst])                    \n\t"          \
+  
+  #define ASM_CLOBBER_LIST()                                                     \
+    : [temp0]"=&r"(temp0), [temp1]"=&r"(temp1), [temp2]"=&r"(temp2),             \
+--- 54,62 ----
+    "srl              %[temp5],   %[temp5],       24              \n\t"          \
+    "srl              %[temp6],   %[temp6],       24              \n\t"          \
+    "srl              %[temp7],   %[temp7],       24              \n\t"          \
+!   "sb               %[temp5],   " #R "(%[dst])                    \n\t"          \
+!   "sb               %[temp6],   " #G "(%[dst])                    \n\t"          \
+!   "sb               %[temp7],   " #B "(%[dst])                    \n\t"          \
+  
+  #define ASM_CLOBBER_LIST()                                                     \
+    : [temp0]"=&r"(temp0), [temp1]"=&r"(temp1), [temp2]"=&r"(temp2),             \
+diff C3 FreeImage/Makefile.gnu FreeImage/Makefile.gnu
+*** FreeImage/Makefile.gnu	Sun Mar 08 18:04:00 2015
+--- FreeImage/Makefile.gnu	Sun Mar 08 18:04:00 2015
