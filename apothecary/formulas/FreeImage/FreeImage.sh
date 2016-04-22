@@ -19,7 +19,7 @@ GIT_TAG=3.17.0-header-changes
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+	if [ "$TYPE" == "vs" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
 		curl -LO http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
@@ -90,6 +90,17 @@ ENDDELIM
         #rm Source/LibWebP/src/dsp/dec_neon.c
         
         sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
+		
+	elif [ "$TYPE" == "msys2" ]; then
+		patch -p1 -i $FORMULA_DIR/FreeImage-3.17.0_CVE-2015-0852.patch
+		patch -p1 -i $FORMULA_DIR/FreeImage-3.17.0-OpenframeworksStatic.patch
+
+		# Delete guiddef file, it already comes with mingw
+		rm Source/LibJXR/common/include/guiddef.h
+
+		# Generate source list
+		sh ./gensrclist.sh
+		sh ./genfipsrclist.sh
 	fi
 }
 
@@ -335,6 +346,7 @@ function build() {
         make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
+		
     elif [ "$TYPE" == "emscripten" ]; then
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
         rm -rf $BUILD_DIR/FreeImagePatched
@@ -358,6 +370,13 @@ function build() {
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/
         cd $BUILD_DIR/FreeImage
         #rm -rf $BUILD_DIR/FreeImagePatched
+	
+	elif [ "$TYPE" == "msys2" ]; then
+		echo "Completed Build for $TYPE"
+		export FREEIMAGE_LIBRARY_TYPE=STATIC
+		make -j${PARALLEL_MAKE} -f Makefile.mingw libFreeImage.a
+		# do we need the plus file? 
+		# make -f Makefile.fip libfreeimageplus.a 
 	fi
 }
 
@@ -375,7 +394,7 @@ function copy() {
 	    cp -v Dist/*.h $1/include
 		mkdir -p $1/lib/$TYPE
 		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
-	elif [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include #/Win32
 		#mkdir -p $1/include/x64
 	    cp -v Dist/x32/*.h $1/include #/Win32/
@@ -408,6 +427,11 @@ function copy() {
         fi
         mkdir -p $1/lib/$TYPE
         cp -rv Dist/libfreeimage.a $1/lib/$TYPE/
+		
+	elif [ "$TYPE" == "msys2" ] ; then
+		cp -v Source/FreeImage.h $1/include
+		mkdir -p $1/lib/$TYPE/$ARCH
+		cp -v libfreeimage.a $1/lib/$TYPE/$ARCH/
 	fi	
 
     # copy license files
@@ -446,6 +470,6 @@ function clean() {
 	else
 		make clean
 		# run dedicated clean script
-		clean.sh
+		./clean.sh
 	fi
 }
