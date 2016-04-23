@@ -1,0 +1,41 @@
+--- FreeImage/Source/OpenEXR/IlmImf/ImfSystemSpecific.h.orig	2015-03-02 01:50:58.000000000 +0100
++++ FreeImage/Source/OpenEXR/IlmImf/ImfSystemSpecific.h	2016-04-23 14:53:35.650728500 +0200
+@@ -54,7 +54,22 @@
+ 
+ #ifdef IMF_HAVE_SSE2
+ 
+-#ifdef __GNUC__
++#ifdef __MINGW32__
++#define EXR_FORCEINLINE inline
++#define EXR_RESTRICT __restrict
++
++static void* EXRAllocAligned(size_t size, size_t alignment)
++{
++    __mingw_aligned_malloc(alignment, size);
++}
++
++
++static void EXRFreeAligned(void* ptr)
++{
++    __mingw_aligned_free(ptr);
++}
++
++#elif __GNUC__
+ // Causes issues on certain gcc versions
+ //#define EXR_FORCEINLINE inline __attribute__((always_inline))
+ #define EXR_FORCEINLINE inline
+--- FreeImage/Source/OpenEXR/IlmImf/ImfSimd.h.orig	2015-03-02 01:50:58.000000000 +0100
++++ FreeImage/Source/OpenEXR/IlmImf/ImfSimd.h	2016-04-23 15:33:22.566536200 +0200
+@@ -44,8 +44,10 @@
+ 
+ 
+ // GCC and Visual Studio SSE2 compiler flags
+-#if defined __SSE2__ || (_MSC_VER >= 1300 && !_M_CEE_PURE)
+-    #define IMF_HAVE_SSE2 1
++#ifndef __MINGW64__
++	#if defined __SSE2__ || (_MSC_VER >= 1300 && !_M_CEE_PURE)
++		#define IMF_HAVE_SSE2 1
++	#endif
+ #endif
+ 
+ extern "C"

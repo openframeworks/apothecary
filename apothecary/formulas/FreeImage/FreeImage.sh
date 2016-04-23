@@ -372,7 +372,6 @@ function build() {
         #rm -rf $BUILD_DIR/FreeImagePatched
 	
 	elif [ "$TYPE" == "msys2" ]; then
-		echo "Completed Build for $TYPE"
 		export FREEIMAGE_LIBRARY_TYPE=STATIC
 		make -j${PARALLEL_MAKE} -f Makefile.mingw libFreeImage.a
 		# do we need the plus file? 
