@@ -94,6 +94,7 @@ ENDDELIM
 	elif [ "$TYPE" == "msys2" ]; then
 		patch -p1 -i $FORMULA_DIR/FreeImage-3.17.0_CVE-2015-0852.patch
 		patch -p1 -i $FORMULA_DIR/FreeImage-3.17.0-OpenframeworksStatic.patch
+		patch -p1 -i $FORMULA_DIR/FreeImage-3.17.0_OpenExr.patch
 
 		# Delete guiddef file, it already comes with mingw
 		rm Source/LibJXR/common/include/guiddef.h
