@@ -12,6 +12,12 @@ GIT_TAG=pixman-$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	# Skip dowload() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		mkdir pixman #apothecary will complain about failed download if it doesn't find this directory
+		return
+	fi
+	
 	curl -LO http://cairographics.org/releases/pixman-$VER.tar.gz
 	tar -xf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
@@ -20,6 +26,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+	# Skip prepare() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		return
+	fi
+	
 	if [ "$TYPE" == "vs" ] ; then
 		echo "handled in the cairo script"
 	# generate the configure script if it's not there
@@ -32,6 +43,10 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+	if [ "$TYPE" == "msys2" ] ; then
+		install-pkg pixman
+		return
+	fi
 
 	if [ "$TYPE" == "osx" ] ; then
 
@@ -78,6 +93,11 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
+	# Skip copy() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		return
+	fi
+	
 	if [ "$TYPE" == "vs" ] ; then
 		echo "copy vs"
 	else
@@ -93,6 +113,10 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
+	# Skip clean() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		return
+	fi
 	make uninstall
 	make clean
 }
