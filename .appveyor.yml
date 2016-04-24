@@ -16,4 +16,13 @@ install:
   - .\scripts\msys2\install.bat
 build_script:
   - set CHERE_INVOKING=1
-  - '%MSYS2_PATH%\usr\bin\bash -lc "cd apothecary && ./apothecary update freeimage"'
+  - '%MSYS2_PATH%\usr\bin\bash -lc "mkdir ci"'
+  - '%MSYS2_PATH%\usr\bin\bash -lc "cd apothecary && ./apothecary -d ../ci update freeimage zlib pkg-config pixman kiss"'
+  
+artifacts:
+  - path: openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip
+    name: of_msys2_%MSYS2_BITS%
+  
+after_build:
+  - 7z a -r openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip ci\*
+  - appveyor PushArtifact openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip
