@@ -93,8 +93,31 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	# Skip copy() for "msys2"
+	# Copy package manager installed files
 	if [ "$TYPE" == "msys2" ] ; then
+		local PREFIX_DIR=/mingw32
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			PREFIX_DIR=/mingw64
+			LIB_DIR=$TYPE/x64
+		fi
+		
+		#Copy headers
+		mkdir -p $1/include
+		cp -rv ${PREFIX_DIR}/include/pixman-1/* $1/include/
+		
+		#copy libs
+		mkdir -p $1/$LIB_DIR
+		cp -rv ${PREFIX_DIR}/lib/*.a $1/$LIB_DIR/
+		
+		#copys dlls
+		mkdir -p $1/../export/$LIB_DIR
+		cp -rv ${PREFIX_DIR}/bin/*.dll $1/../export/$LIB_DIR/
+		
+		#copy licence
+		rm -rf $1/license
+		mkdir -p $1/license
+		cp -rv ${PREFIX_DIR}/share/licenses/pixman/* $1/license/
 		return
 	fi
 	

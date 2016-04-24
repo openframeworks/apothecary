@@ -66,7 +66,37 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	if [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
+	# Copy package manager installed files
+	if [ "$TYPE" == "msys2" ] ; then
+		local PREFIX_DIR=/mingw32
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			PREFIX_DIR=/mingw64
+			LIB_DIR=$TYPE/x64
+		fi
+		
+		#Copy headers
+		mkdir -p $1/include
+		cp -v ${PREFIX_DIR}/include/zconf.h $1/include/
+		cp -v ${PREFIX_DIR}/include/zlib.h $1/include/
+		
+		#copy libs
+		mkdir -p $1/$LIB_DIR
+		cp -v ${PREFIX_DIR}/lib/libz.a $1/$LIB_DIR/
+		cp -v ${PREFIX_DIR}/lib/libz.dll.a $1/$LIB_DIR/
+		
+		#copys dlls
+		mkdir -p $1/../export/$LIB_DIR
+		cp -v ${PREFIX_DIR}/bin/zlib1.dll $1/../export/$LIB_DIR/
+		
+		#copy licence
+		rm -rf $1/license
+		mkdir -p $1/license
+		ls -al ${PREFIX_DIR}/share/licenses/
+		cp -v ${PREFIX_DIR}/share/licenses/zlib/* $1/license/
+		return
+	fi
+	if [ "$TYPE" == "osx" ] ; then
 		return
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
