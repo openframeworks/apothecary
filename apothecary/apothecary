@@ -849,6 +849,26 @@ function vs-clean() {
 	fi
 }
 
+#install a package using platform package manager
+function install-pkg() {
+	if [ "$TYPE" == "msys2" ] ; then
+		#Install pkg_config with pacman if not present
+		local MSYS2_ARCH=i686
+		if [ $ARCH == 64 ] ; then 
+			MSYS2_ARCH=x86_64
+		fi
+		pkg_name=mingw-w64-${MSYS2_ARCH}-$1
+		installed_pkg=`pacman -Q $pkg_name 2>/dev/null`
+		if [ -n "$installed_pkg" ] ; then
+			echoVerbose "package already installed : $installed_pkg"
+		else
+			echoVerbose "installing package : $pkg_name"
+			pacman --noconfirm -Sy $pkg_name
+		fi
+		return
+	fi
+}
+
 ################################################################################
 ### FORMULA SCRIPT FUNCTIONS
 
