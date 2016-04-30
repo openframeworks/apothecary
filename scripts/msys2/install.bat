@@ -8,8 +8,8 @@ mkdir %MSYS2_PATH%
 7z x %APPVEYOR_BUILD_FOLDER%\%MSYS2_BASE% -o%MSYS2_PATH% -so | 7z x -aoa -si -ttar> nul
 ECHO.Updating MSYS2...
 (
-	echo.pacman --noconfirm -Sy pacman
-	echo.pacman --noconfirm -Syuu
+	echo./usr/bin/pacman --noconfirm -Sy pacman
+	echo./usr/bin/pacman --noconfirm -Syuu
 )>script.sh
 SET CHERE_INVOKING=1
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
