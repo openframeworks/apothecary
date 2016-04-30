@@ -14,7 +14,8 @@ ECHO.Updating MSYS2...
 SET CHERE_INVOKING=1
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
 (
-	echo.pacman --noconfirm --needed -Sy make unzip git
+	echo.pacman --noconfirm --needed -Sy make unzip git mingw-w64-%MSYS2_ARCH%-cmake
+
 	echo.exit
 )>script.sh
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
