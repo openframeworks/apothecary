@@ -11,16 +11,19 @@ rem mkdir %MSYS2_PATH%
 move msys64 %MSYS2_PATH%
 %MSYS2_PATH%\autorebase.bat > nul
 
+echo %PATH%
 ECHO.Updating MSYS2...
 (
+	echo "PATH is $PATH"
 	echo./usr/bin/pacman --noconfirm -Sy pacman
 	echo./usr/bin/pacman --noconfirm -Syuu
 )>script.sh
+SET PATH=%MSYS2_PATH%;%PATH;
 SET CHERE_INVOKING=1
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
 (
+	echo "PATH is $PATH"
 	echo./usr/bin/pacman --noconfirm --needed -Sy make unzip git mingw-w64-%MSYS2_ARCH%-cmake
-
 	echo.exit
 )>script.sh
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
