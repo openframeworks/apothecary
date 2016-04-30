@@ -63,10 +63,13 @@ function copy() {
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Release/videoInput.lib $1/lib/$TYPE/x64/videoInput.lib
 		fi
 		
-
-	else
-		mkdir -p $1/lib/$TYPE
-		cp -v compiledLib/msys2/libvideoinput.a $1/lib/$TYPE/
+	elif [ "$TYPE" == "msys2" ] ; then
+		local LIB_DIR=lib/$TYPE/Win32
+		if [ $ARCH == 64 ] ; then
+			LIB_DIR=lib/$TYPE/x64
+		fi
+		mkdir -p $1/$LIB_DIR
+		cp -v compiledLib/msys2/libvideoinput.a $1/$LIB_DIR
 	fi
 
 	echoWarning "TODO: License Copy"
