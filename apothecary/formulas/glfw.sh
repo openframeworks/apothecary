@@ -53,12 +53,15 @@ function build() {
 	elif [ "$TYPE" == "msys2" ]; then
 	
 		# *nix build system
-		cmake . -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT_DIR \
+		local INSTALL_DIR=msys2/Win32
+		if [ $ARCH == 64 ] ; then
+			INSTALL_DIR=msys2/x64
+		fi
+		cmake . -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
 				-DGLFW_BUILD_DOCS=OFF \
 				-DGLFW_BUILD_TESTS=OFF \
 				-DGLFW_BUILD_EXAMPLES=OFF \
 				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe
 
  		make -j${PARALLEL_MAKE}
  		make install
@@ -116,6 +119,24 @@ function copy() {
 		# copy lib
 		if [ -d lib/ ] ; then
 			cp -Rv lib/libglfw3.a $1/lib/$TYPE/glfw3.a
+		fi
+		
+	elif [ "$TYPE" == "msys2" ]; then
+		# Standard *nix style copy.
+		# copy headers
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			LIB_DIR=$TYPE/x64
+		fi
+		
+		if [ -d $LIB_DIR/include/GLFW/ ] ; then
+			cp -Rv $LIB_DIR/include/GLFW/* $1/include/GLFW/
+		fi
+		
+		# copy lib
+		if [ -d $LIB_DIR/lib/ ] ; then
+			mkdir -p $1/lib/$LIB_DIR
+			cp -Rv $LIB_DIR/lib/libglfw3.a $1/lib/$LIB_DIR/glfw3.a
 		fi
 		
 	else
