@@ -6,6 +6,7 @@ SET MSYS2_PATH=c:\msys2
 ECHO.Installing MSYS2...
 mkdir %MSYS2_PATH%
 7z x %APPVEYOR_BUILD_FOLDER%\%MSYS2_BASE% -o%MSYS2_PATH% -so | 7z x -aoa -si -ttar> nul
+dir %MSYS2_PATH%
 ECHO.Updating MSYS2...
 (
 	echo./usr/bin/pacman --noconfirm -Sy pacman
