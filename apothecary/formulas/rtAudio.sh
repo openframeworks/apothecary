@@ -96,7 +96,7 @@ function build() {
 		local API="--with-wasapi --with-ds" # asio as well?
 		mkdir -p build
 		cd build
-		cmake .. -G "Unix Makefiles"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON -DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe -DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe -DBUILD_TESTING=OFF
+		cmake .. -G "Unix Makefiles"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON -DBUILD_TESTING=OFF
 		make
 	fi
 
@@ -127,7 +127,12 @@ function copy() {
 		
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			LIB_DIR=$TYPE/x64
+		fi
+		mkdir -p $1/lib/$LIB_DIR
+		cp -v build/librtaudio_static.a $1/lib/$LIB_DIR/librtaudio.a
 	
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a

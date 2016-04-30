@@ -11,6 +11,8 @@ if [ "$OS" == "darwin" ]; then
 	OS="osx"
 elif [ "$OS" == "windowsnt" ] ; then
 	OS="vs"
+elif [ "${OS:0:7}" == "mingw64" -o "${OS:0:7}" == "mingw32" ]; then
+	OS="${OS:0:7}"
 elif [ "${OS:0:5}" == "mingw" -o "$OS" == "msys_nt-6.3" ]; then
 	OS="msys2"
 elif [ "$OS" == "linux" ]; then

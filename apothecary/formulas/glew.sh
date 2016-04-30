@@ -72,23 +72,32 @@ function copy() {
 	mkdir -p $1/include
 	cp -Rv include/* $1/include
 
-	rm -rf $1/lib/$TYPE/*
+	
 	
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
+		rm -rf $1/lib/$TYPE/*
 		mkdir -p $1/lib/$TYPE
 		cp -v libGLEW.a $1/lib/$TYPE/glew.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+		rm -rf $1/lib/$TYPE/*
 		mkdir -p $1/lib/$TYPE/Win32
 		mkdir -p $1/lib/$TYPE/x64
 		cp -v lib/Release/x64/glew32s.lib $1/lib/$TYPE/x64
 		cp -v lib/Release/Win32/glew32s.lib $1/lib/$TYPE/Win32
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		# TODO: add cb formula
-		mkdir -p $1/lib/$TYPE
-		cp -v lib/libglew32.a $1/lib/$TYPE
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			LIB_DIR=$TYPE/x64
+		fi
+		
+		
+		# copy lib
+		rm -rf $1/lib/$LIB_DIR
+		mkdir -p $1/lib/$LIB_DIR
+		cp -v lib/libglew32.a $1/lib/$LIB_DIR
 	fi
 
 	# copy license files

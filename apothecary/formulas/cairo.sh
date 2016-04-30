@@ -12,7 +12,7 @@
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
-FORMULA_TYPES=( "osx" "vs" )
+FORMULA_TYPES=( "osx" "vs" "msys2")
 
 FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 
@@ -29,6 +29,12 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	# Skip dowload() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		mkdir cairo #apothecary will complain about failed download if it doesn't find this directory
+		return
+	fi
+	
 	if [ "$TYPE" == "vs" ] ; then
 		# Download the xz extractor.
 		curl -LO http://tukaani.org/xz/xz-5.2.1-windows.zip
@@ -56,6 +62,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+	# Skip prepare() for "msys2"
+	if [ "$TYPE" == "msys2" ] ; then
+		return
+	fi
+	
 	if [ "$TYPE" == "vs" ] ; then
 	
 		apothecaryDependencies prepare
@@ -99,6 +110,10 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+	if [ "$TYPE" == "msys2" ] ; then
+		install-pkg cairo
+		return
+	fi
 
 	if [ "$TYPE" == "vs" ] ; then
 		cd ../Cairo-VS/projects
@@ -143,6 +158,39 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
+	# Copy package manager installed files
+	if [ "$TYPE" == "msys2" ] ; then
+		apothecaryDepend copy pkg-config
+		apothecaryDepend copy libpng
+		apothecaryDepend copy pixman
+		apothecaryDepend copy freetype
+	
+		local PREFIX_DIR=/mingw32
+		local LIB_DIR=$TYPE/Win32
+		if [ $ARCH == 64 ] ; then 
+			PREFIX_DIR=/mingw64
+			LIB_DIR=$TYPE/x64
+		fi
+		
+		#Copy headers
+		mkdir -p $1/include
+		cp -rv ${PREFIX_DIR}/include/pixman-1/* $1/include/
+		
+		#copy libs
+		mkdir -p $1/$LIB_DIR
+		cp -rv ${PREFIX_DIR}/lib/*.a $1/$LIB_DIR/
+		
+		#copys dlls
+		mkdir -p $1/../export/$LIB_DIR
+		cp -rv ${PREFIX_DIR}/bin/*.dll $1/../export/$LIB_DIR/
+		
+		#copy licence
+		rm -rf $1/license
+		mkdir -p $1/license
+		cp -rv ${PREFIX_DIR}/share/licenses/pixman/* $1/license/
+		return
+	fi
+	
 	if [ "$TYPE" == "vs" ] ; then
 		cd ..
 		#this copies all header files but we dont need all of them it seems
@@ -168,7 +216,7 @@ function copy() {
 		fi
 		cd cairo
 
-	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
+	elif [ "$TYPE" == "osx" ] ; then
 		# make the path in the libs dir
 		mkdir -p $1/include/cairo
 

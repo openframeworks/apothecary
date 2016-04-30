@@ -1,0 +1,29 @@
+platform:
+  - x64
+environment:
+  global:
+    APPVEYOR_OS_NAME: windows
+    MSYS2_BASEVER: 20160205
+  matrix:
+    - MSYS2_ARCH: i686
+      MSYS2_BITS: 32
+      MSYSTEM: MINGW32
+    - MSYS2_ARCH: x86_64
+      MSYS2_BITS: 64
+      MSYSTEM: MINGW64
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))      
+install:
+  - .\scripts\msys2\install.bat
+build_script:
+  - set CHERE_INVOKING=1
+  - '%MSYS2_PATH%\usr\bin\bash -lc "mkdir ci"'
+  - '%MSYS2_PATH%\usr\bin\bash -lc "cd apothecary && ./apothecary -d ../ci update freeimage zlib pkg-config pixman kiss videoInput utf8 rtAudio portAudio json glfw glew"'
+  
+artifacts:
+  - path: openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip
+    name: of_msys2_%MSYS2_BITS%
+  
+after_build:
+  - 7z a -r openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip ci\*
+  - appveyor PushArtifact openFrameworksLibs_%APPVEYOR_REPO_BRANCH%_msys2_%MSYS2_BITS%.zip
