@@ -9,7 +9,7 @@ rem mkdir %MSYS2_PATH%
 7z x %APPVEYOR_BUILD_FOLDER%\%MSYS2_BASE% -so | 7z x -aoa -si -ttar > nul
 
 move msys64 %MSYS2_PATH%
-%MSYS2_PATH%\autorebase.bat > nul
+rem %MSYS2_PATH%\autorebase.bat > nul
 
 echo %PATH%
 ECHO.Updating MSYS2...
@@ -28,4 +28,4 @@ SET CHERE_INVOKING=1
 )>script.sh
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
 
-rem %MSYS2_PATH%\autorebase.bat > nul
+%MSYS2_PATH%\autorebase.bat > nul
