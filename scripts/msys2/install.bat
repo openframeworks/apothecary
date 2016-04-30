@@ -1,14 +1,15 @@
 SET MSYS2_BASE=msys2-base-x86_64-%MSYS2_BASEVER%.tar.xz
-ECHO.Downloading %MSYS2_BASE%...
-appveyor DownloadFile http://kent.dl.sourceforge.net/project/msys2/Base/x86_64/%MSYS2_BASE%
-
+IF "%APPVEYOR%"=="True" (
+  ECHO.Downloading %MSYS2_BASE%...
+  appveyor DownloadFile http://kent.dl.sourceforge.net/project/msys2/Base/x86_64/%MSYS2_BASE%
+)
 SET MSYS2_PATH=c:\msys2
 ECHO.Installing MSYS2...
-mkdir %MSYS2_PATH%
+rem mkdir %MSYS2_PATH%
 7z x %APPVEYOR_BUILD_FOLDER%\%MSYS2_BASE% -so | 7z x -aoa -si -ttar > nul
 dir
 
-move msys64\ %MSYS2_PATH%
+move msys64 %MSYS2_PATH%
 dir %MSYS2_PATH%
 %MSYS2_PATH%\autorebase.bat > nul
 
