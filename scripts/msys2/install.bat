@@ -7,10 +7,8 @@ SET MSYS2_PATH=c:\msys2
 ECHO.Installing MSYS2...
 rem mkdir %MSYS2_PATH%
 7z x %APPVEYOR_BUILD_FOLDER%\%MSYS2_BASE% -so | 7z x -aoa -si -ttar > nul
-dir
 
 move msys64 %MSYS2_PATH%
-dir %MSYS2_PATH%
 %MSYS2_PATH%\autorebase.bat > nul
 
 ECHO.Updating MSYS2...
@@ -21,10 +19,10 @@ ECHO.Updating MSYS2...
 SET CHERE_INVOKING=1
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
 (
-	echo.pacman --noconfirm --needed -Sy make unzip git mingw-w64-%MSYS2_ARCH%-cmake
+	echo./usr/bin/pacman --noconfirm --needed -Sy make unzip git mingw-w64-%MSYS2_ARCH%-cmake
 
 	echo.exit
 )>script.sh
 %MSYS2_PATH%\usr\bin\bash -lc "./script.sh"
 
-%MSYS2_PATH%\autorebase.bat > nul
+rem %MSYS2_PATH%\autorebase.bat > nul
