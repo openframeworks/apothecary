@@ -1,5 +1,6 @@
 #!/bin/bash
-NDK_DIR=android-ndk-r12b
+NDK_VER=r12b
+NDK_DIR="android-ndk-$NDK_VER"
 set -ev
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
@@ -11,10 +12,9 @@ if [ "$(ls -A ${NDK_DIR})" ]; then
     ls -A ${NDK_DIR}
 else
     echo "Downloading NDK"
-    curl -Lk http://dl.google.com/android/ndk/android-ndk-r12b-linux-x86_64.bin -o ndk.bin
-    chmod u+x ndk.bin
+    curl -Lk "http://dl.google.com/android/repository/android-ndk-$NDK_VER-linux-x86_64.zip" -o ndk.zip
     echo "Uncompressing NDK"
-    ./ndk.bin > /dev/null 2>&1 
+    unzip ndk.zip
 fi
 NDK_ROOT=$(echo ${PWD})
 echo "APOTHECARY DIR set to $APOTHECARY_DIR"
