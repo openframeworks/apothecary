@@ -44,18 +44,6 @@ function build() {
 			cmake .. -G "Visual Studio $VS_VER Win64"
 			vs-build "GLFW.sln" Build "Release|x64"
 		fi
-	elif [ "$TYPE" == "msys2" ]; then
-	
-		# *nix build system
-		cmake . -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT_DIR \
-				-DGLFW_BUILD_DOCS=OFF \
-				-DGLFW_BUILD_TESTS=OFF \
-				-DGLFW_BUILD_EXAMPLES=OFF \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe
-
- 		make -j${PARALLEL_MAKE}
- 		make install
 	else
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
@@ -80,6 +68,7 @@ function build() {
 
  		make clean
  		make -j${PARALLEL_MAKE}
+ 		make install
 	fi
 }
 
