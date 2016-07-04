@@ -58,8 +58,7 @@ function build() {
 		# ignore the warning on non OSX platforms.
 		mkdir -p build 
 		cd build
-		cmake .. -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT_DIR \
-				-DGLFW_BUILD_DOCS=OFF \
+		cmake .. -DGLFW_BUILD_DOCS=OFF \
 				-DGLFW_BUILD_TESTS=OFF \
 				-DGLFW_BUILD_EXAMPLES=OFF \
 				-DBUILD_SHARED_LIBS=OFF \
@@ -68,7 +67,6 @@ function build() {
 
  		make clean
  		make -j${PARALLEL_MAKE}
- 		make install
 	fi
 }
 
@@ -88,19 +86,7 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
-		fi
-	    
-	elif [ "$TYPE" == "osx" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		if [ -d include/GLFW/ ] ; then
-			cp -Rv include/GLFW/* $1/include/GLFW/
-		fi
-		# copy lib
-		if [ -d lib/ ] ; then
-			cp -Rv lib/libglfw3.a $1/lib/$TYPE/glfw3.a
-		fi
-		
+		fi		
 	else
 		# Standard *nix style copy.
 		# copy headers
