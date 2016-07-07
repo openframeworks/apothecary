@@ -53,17 +53,27 @@ function build() {
         fi
 		# *nix build system
 
-		# NOTE: DGLFW_BUILD_UNIVERSAL will be ignored on non OSX systems.
-		# Rather than creating a seperate if/then branch, we just let cmake
-		# ignore the warning on non OSX platforms.
 		mkdir -p build 
 		cd build
-		cmake .. -DGLFW_BUILD_DOCS=OFF \
-				-DGLFW_BUILD_TESTS=OFF \
-				-DGLFW_BUILD_EXAMPLES=OFF \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_BUILD_TYPE=Release \
-				$EXTRA_CONFIG
+
+		# OS X needs both arches specified to be universal 
+		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call 
+		if [ "$TYPE" == "osx" ] ; then
+			cmake .. -DGLFW_BUILD_DOCS=OFF \
+					-DGLFW_BUILD_TESTS=OFF \
+					-DGLFW_BUILD_EXAMPLES=OFF \
+					-DBUILD_SHARED_LIBS=OFF \
+					-DCMAKE_BUILD_TYPE=Release \
+					-DCMAKE_C_FLAGS='-arch i386 -arch x86_64' \
+					$EXTRA_CONFIG 
+		else
+			cmake .. -DGLFW_BUILD_DOCS=OFF \
+					-DGLFW_BUILD_TESTS=OFF \
+					-DGLFW_BUILD_EXAMPLES=OFF \
+					-DBUILD_SHARED_LIBS=OFF \
+					-DCMAKE_BUILD_TYPE=Release
+					$EXTRA_CONFIG 
+		fi
 
  		make clean
  		make -j${PARALLEL_MAKE}
