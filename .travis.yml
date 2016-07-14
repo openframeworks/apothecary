@@ -47,7 +47,7 @@ matrix:
           - xutils-dev
       cache:
         directories:
-        - ~/android-ndk-r10e
+        - ~/android-ndk-r12b
         - apothecary/build/Toolchains/armv7
             
             
@@ -60,7 +60,7 @@ matrix:
           - xutils-dev
       cache:
         directories:
-        - ~/android-ndk-r10e
+        - ~/android-ndk-r12b
         - apothecary/build/Toolchains/x86
         
         

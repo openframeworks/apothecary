@@ -17,11 +17,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget ${MIRROR}/source/$FILENAME.tar.gz
+		wget ${SITE}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		wget ${SITE}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
@@ -666,8 +666,8 @@ PING_LOOP_PID=$!
         source Setenv-android.sh
         ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
         make clean
-        make depend 
-        make build_libs 
+        make depend -j${PARALLEL_MAKE}
+        make build_libs -j${PARALLEL_MAKE}
         mkdir -p $BUILD_TO_DIR/lib
 		cp libssl.a $BUILD_TO_DIR/lib/
         cp libcrypto.a $BUILD_TO_DIR/lib/
@@ -803,4 +803,3 @@ function clean() {
 	 	make clean
 	fi
 }
-

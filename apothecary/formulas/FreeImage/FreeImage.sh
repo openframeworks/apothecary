@@ -61,7 +61,7 @@ function prepare() {
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
 	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
 	    cd $BUILD_DIR/FreeImage_patched
-	    sed -i "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+	    sed -i '' "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
 	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
 	    #include <stdint.h>
         #include <asm/byteorder.h>
@@ -75,13 +75,13 @@ function prepare() {
         }
 ENDDELIM
         
-        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
+        sed -i '' "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
         echo "#include \"swab.h\"" > Source/LibRawLite/internal/dcraw_common_patched.cpp;
         cat Source/LibRawLite/internal/dcraw_common.cpp >> Source/LibRawLite/internal/dcraw_common_patched.cpp
         cat Source/LibRawLite/internal/dcraw_common_patched.cpp > Source/LibRawLite/internal/dcraw_common.cpp
         rm Source/LibRawLite/internal/dcraw_common_patched.cpp
         
-        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
+        sed -i '' "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
         echo "#include \"swab.h\"" > Source/LibRawLite/src/libraw_cxx_patched.cpp
         cat Source/LibRawLite/src/libraw_cxx.cpp >> Source/LibRawLite/src/libraw_cxx_patched.cpp
         cat Source/LibRawLite/src/libraw_cxx_patched.cpp > Source/LibRawLite/src/libraw_cxx.cpp
@@ -89,7 +89,7 @@ ENDDELIM
         
         #rm Source/LibWebP/src/dsp/dec_neon.c
         
-        sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
+        sed -i '' "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 	fi
 }
 
