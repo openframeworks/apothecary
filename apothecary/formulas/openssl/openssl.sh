@@ -650,6 +650,7 @@ PING_LOOP_PID=$!
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
+		perl -pi -e 's/\r//g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
 		
         # armv7
