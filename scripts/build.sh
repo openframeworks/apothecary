@@ -74,7 +74,7 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
-for formula in $( ls -1 formulas | grep -v _depends) ; do
+for formula in "openssl $( ls -1 formulas | grep -v _depends | grep -v openssl )" ; do
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
