@@ -90,7 +90,7 @@ function build() {
 	
 	if [ "$TYPE" == "osx" ] ; then	
 
-        export CFLAGS=-arch i386 -arch x86_64
+        export CFLAGS="-arch i386 -arch x86_64"
 	    ./Configure $CONFIG_TARGET $BUILD_OPTS --openssldir="$CURRENTPATH/build/$TYPE/" --prefix="$CURRENTPATH/build/$TYPE/"
         make -j 1
 		make -j 1 install
