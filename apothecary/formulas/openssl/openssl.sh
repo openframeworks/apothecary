@@ -88,204 +88,12 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	
-	if [ "$TYPE" == "osx" ] ; then
+	if [ "$TYPE" == "osx" ] ; then	
 
-        set -e
-        CURRENTPATH=`pwd`
-
-        DEVELOPER=$XCODE_DEV_ROOT
-        TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-        SDKVERSION=""
-        SDKVERSION=`xcrun -sdk macosx --show-sdk-version`
-
-        if [ "${COMPILER_TYPE}" == "clang" ]; then
-                export THECOMPILER=clang
-            else
-                export THECOMPILER=gcc
-            fi
-
-        # Validate environment
-        case $XCODE_DEV_ROOT in  
-             *\ * )
-                   echo "Your Xcode path contains whitespaces, which is not supported."
-                   exit 1
-                  ;;
-        esac
-        case $CURRENTPATH in  
-             *\ * )
-                   echo "Your path contains whitespaces, which is not supported by 'make install'."
-                   exit 1
-                  ;;
-        esac 
-        local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain 
-        
-        export OSX_CC=$TOOLCHAIN/usr/bin/$THECOMPILER
-        export OSX_CXX=$TOOLCHAIN/usr/bin/$THECOMPILER++
-        export LD=$TOOLCHAIN/usr/bin/ld
-        export AR=$TOOLCHAIN/usr/bin/ar
-        export AS=$TOOLCHAIN/usr/bin/as
-        export NM=$TOOLCHAIN/usr/bin/nm
-        export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-		
-		local BUILD_OPTS="-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic"
-		local OSX_ARCHS="i386 x86_64"
-		
-		VERSION=$VER
-		CURRENTPATH=`pwd`
-		
-		# create build directories 
-
-		for OSX_ARCH in ${OSX_ARCHS}
-			do
-			
-            make -j 1 clean 
-            rm -rf build/$TYPE/OSX_ARCH
-            rm -rf *.a # remove temp lib from main directory
-			# Back up configure & makefile
-
-			cp "Configure" "Configure.orig" 
-			cp "Makefile" "Makefile.orig"
-
-			# create build directory for current arch
-			mkdir -p "$CURRENTPATH/build/$TYPE/$OSX_ARCH"
-
-			#create logfile
-			LOG="$CURRENTPATH/build/$TYPE/$OSX_ARCH/build-openssl-${VER}.log"
-			echo "Using Compiler: $THECOMPILER for $OSX_ARCH"
-
-            # patch the Configure file to make sure the correct compiler is invoked.
-			export LC_CTYPE=C
-            export LANG=C
-            sed -ie "s!\"darwin-i386-cc\",\"cc:-arch i386 -O3!\"darwin-i386-cc\",\"cc:-arch i386 -O3!" Configure
-            
-            export LC_CTYPE=C
-            export LANG=C
-            sed -ie "s!\"darwin64-x86_64-cc\",\"cc:-arch x86_64 -O3!\"darwin64-x86_64-cc\",\"cc:-arch x86_64 -O3!" Configure
-
-   			OSX_C_FLAGS="" 		# Flags for stdlib, std and arch
-   			CONFIG_TARGET=""	# Which one of the target presets to use
-
-			if [[ "${OSX_ARCH}" == "i386" ]]; then
-		    	# 386 -> libstdc++
-		    	OSX_C_FLAGS="-arch ${OSX_ARCH} -std=${CSTANDARD} -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		    	CONFIG_TARGET=darwin-i386-cc
-		    	export CC="${OSX_CC} ${OSX_C_FLAGS}"
-		    elif [ "${OSX_ARCH}" == "x86_64" ]; then
-		    	# 86_64 -> libc++
-		    	OSX_C_FLAGS="-arch ${OSX_ARCH} -std=${CSTANDARD} -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-				CONFIG_TARGET=darwin64-x86_64-cc
-		    	export CC="${OSX_CC} ${OSX_C_FLAGS}"
-		    fi
-
-	    	echo "Configure for target: $CONFIG_TARGET"
-
-		    ./Configure $CONFIG_TARGET $BUILD_OPTS --openssldir="$CURRENTPATH/build/$TYPE/$OSX_ARCH" > "${LOG}" 2>&1
-
-			if [ $? != 0 ]; then 
-                tail -n 100 "${LOG}"
-		    	echo "Problem during configure - Please check ${LOG}"
-		    	exit 1
-		    fi
-
-            # we need to unset LANG otherwise sed will get upsed.
-   			# unset LANG if defined
-			if test ${LANG+defined};
-			then
-                OLD_LANG=$LANG
-				unset LANG
-			fi
-
-            # unset LC_CTYPE if defined
-            if test ${LC_CTYPE+defined};
-            then
-                OLD_LC_CTYPE=$LC_CTYPE
-                LC_CTYPE=C
-            fi
-
-            # patching Makefile to use the correct c flags.
-			sed -ie "s!^CFLAG=!CFLAG=$OSX_C_FLAGS !" Makefile
-
-            # reset LANG if it was defined
-			if test ${OLD_LANG+defined};
-			then
-				export LANG=$OLD_LANG
-            fi
-
-            # reset LC_CTYPE if it was defined
-            if test ${OLD_LC_CTYPE+defined};
-            then
-                export LC_CTYPE=$OLD_LC_CTYPE
-            fi
-            set -o pipefail  # trace ERR through pipes
-            set -o errtrace  # trace ERR through 'time command' and other functions
-
-            export BUILD_OUTPUT=$LOG
-            export PING_SLEEP=30s
-            export PING_LOOP_PID
-            trap 'error_handler ${LINENO} ${?}' ERR
-            bash -c "while true; do echo \$(date) - Building OpenSSL ...; sleep $PING_SLEEP; done" &
-PING_LOOP_PID=$!
-            echo "Running make for ${OSX_ARCH}"
-            echo "Please stand by..."
-            # Must run at -j 1 (single thread only else will fail)
-            # this is super annoying, but true for OS X, as well as iOS.
-            make -j 1 >> "${BUILD_OUTPUT}" 2>&1
-            dump_output
-            kill $PING_LOOP_PID
-			trap - ERR
-            
-			if [ $? != 0 ];
-		    then 
-                tail -n 100 "${LOG}"
-		    	echo "Problem while make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Make Successful for ${OSX_ARCH}"
-		    fi
-
-			set -e
-			make -j 1 install >> "${LOG}" 2>&1
-			make -j 1 clean 
-
-			# restore configure & makefile
-
-			cp "Configure.orig" "Configure" 
-			cp "Makefile.orig" "Makefile"
-
-            rm -rf *.a # remove temp lib from main directory
-			unset CC CFLAG CFLAGS EXTRAFLAGS
-		done
-        unset THECOMPILER
-		# Stage includes
-		echo "Staging includes"
-
-		cp -R "build/$TYPE/x86_64/include/" "lib/include/"
-
-		# Stage fat libs - this is where we omit the lib-prefix
-		echo "Building & staging fat libs"
-		lipo -c "build/$TYPE/i386/lib/libcrypto.a" "build/$TYPE/x86_64/lib/libcrypto.a" -o "lib/$TYPE/crypto.a"
-		lipo -c "build/$TYPE/i386/lib/libssl.a" "build/$TYPE/x86_64/lib/libssl.a" -o "lib/$TYPE/ssl.a"
-
-        cd lib/$TYPE
-        SLOG="$CURRENTPATH/lib/$TYPE-stripping.log"
-        local TOBESTRIPPED
-        for TOBESTRIPPED in $( ls *.a) ; do
-            strip -x $TOBESTRIPPED >> "${SLOG}" 2>&1
-            if [ $? != 0 ];
-            then
-                tail -n 100 "${SLOG}"
-                echo "Problem while stripping lib - Please check ${SLOG}"
-                exit 1
-            else
-                echo "Strip Successful for ${SLOG}"
-            fi
-        done
-
-        cd ../../
-
-        echo "Build Finished!"
-		
-		# ------------ END OS X Recipe.
+        export CFLAGS=-arch i386 -arch x86_64
+	    ./Configure $CONFIG_TARGET $BUILD_OPTS --openssldir="$CURRENTPATH/build/$TYPE/" --prefix="$CURRENTPATH/build/$TYPE/"
+        make -j 1
+		make -j 1 install
 
 	 elif [ "$TYPE" == "vs" ] ; then
 		CURRENTPATH=`pwd`
@@ -665,7 +473,7 @@ PING_LOOP_PID=$!
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
-        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+        ./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
         make clean
         make depend 
         make build_libs 
@@ -720,7 +528,7 @@ function copy() {
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE
-		cp -v lib/$TYPE/*.a $1/lib/$TYPE
+		cp -v build/$TYPE/lib/libopenssl.a $1/lib/$TYPE/openssl.a
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 	 	mkdir -p $1/lib/$TYPE
 	 	cp -v lib/$TYPE/*.a $1/lib/$TYPE

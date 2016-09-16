@@ -8,33 +8,30 @@
 
 FORMULA_TYPES=( "osx" "vs" "ios" "android" )
 
-#dependencies
-FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_50_2
+VER=0.8.4
 
 # tools for git use
-GIT_URL=https://github.com/curl/curl.git
+GIT_URL=git://git.code.sf.net/p/uriparser/git
 GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -Lk https://github.com/curl/curl/archive/curl-$VER.tar.gz -o curl-$VER.tar.gz
-	tar -xf curl-$VER.tar.gz
-	mv curl-curl-$VER curl
-	rm curl*.tar.gz
+	wget https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
+	tar -xjf uriparser-$VER.tar.bz2
+	mv uriparser-$VER uriparser
+	rm uriparser*.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    : #noop
+	: # noop
 }
 
 # executed inside the lib src dir
 function build() {
 	rm -f CMakeCache.txt
-	local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
 	if [ "$TYPE" == "vs" ] ; then
 		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
@@ -54,43 +51,36 @@ function build() {
 			#vs-build "curl.sln" Build "Release|x64"
             cmake --build . --config "Release|Win64"--clean-first
 		fi
+
 	elif [ "$TYPE" == "android" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
+	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$ABI
 	    source ../../android_configure.sh $ABI
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
         fi
-        ./buildconf
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no 
-        sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --disable-test --disable-doc --enable-static=yes --enable-shared=no 
         make clean
 	    make -j${PARALLEL_MAKE}
 	    make install
-    else
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib 
-            export CFLAGS=-I$SYSROOT/usr/include
-        fi
-        if [ "$TYPE" == "osx" ]; then
-            export CFLAGS=-arch i386 -arch x86_64
-        fi
+	else
+		if [ $CROSSCOMPILING -eq 1 ]; then
+			source ../../${TYPE}_configure.sh
+			export LDFLAGS=-L$SYSROOT/usr/lib CFLAGS=-I$SYSROOT/usr/include
+		fi
 
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
-        ./buildconf
-		./configure --with-ssl=$OPENSSL_DIR
+	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
+		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc
         make clean
-	    make -j${PARALLEL_MAKE}
+		make -j${PARALLEL_MAKE}
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	# prepare headers directory if needed
-	mkdir -p $1/include/curl
+	mkdir -p $1/include/uriparser
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
@@ -99,30 +89,23 @@ function copy() {
 		cp -Rv include/* $1/include
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs_32/src/Release/curl.lib $1/lib/$TYPE/Win32/curl.lib
+			cp -v build_vs_32/src/Release/uriparser.lib $1/lib/$TYPE/Win32/uriparser.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs_64/src/Release/curl.lib $1/lib/$TYPE/x64/curl.lib
-		fi		
+			cp -v build_vs_64/src/Release/uriparser.lib $1/lib/$TYPE/x64/uriparser.lib
+		fi
 	elif [ "$TYPE" == "osx" ] ; then
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
+		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv lib/.libs/libcurl.a $1/lib/$TYPE/curl.a
-	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/$ABI
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
-		# copy lib
-		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
+		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
     else
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
+		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv lib/.libs/libcurl.a $1/lib/$TYPE/libcurl.a
+		cp -Rv build/$TYPE/$ABI/lib/*.a $1/lib/$TYPE/$ABI
 	fi
 
 	# copy license file
