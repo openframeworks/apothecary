@@ -530,7 +530,8 @@ function copy() {
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE
-		cp -v build/$TYPE/lib/libopenssl.a $1/lib/$TYPE/openssl.a
+		cp -v build/$TYPE/lib/libcrypto.a $1/lib/$TYPE/crypto.a
+		cp -v build/$TYPE/lib/libssl.a $1/lib/$TYPE/ssl.a
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 	 	mkdir -p $1/lib/$TYPE
 	 	cp -v lib/$TYPE/*.a $1/lib/$TYPE
