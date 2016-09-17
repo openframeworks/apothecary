@@ -46,7 +46,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apr-get install -y xutils-dev
+        - sudo apt-get install -y xutils-dev
       cache:
         directories:
         - ~/android-ndk-r12b
