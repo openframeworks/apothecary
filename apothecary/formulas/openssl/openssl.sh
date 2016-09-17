@@ -513,7 +513,7 @@ function copy() {
 	# files that were deleted here
      if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-            mv build/$TYPE/include/openssl/opensslconf.h lib/include/openssl/opensslconf_${TYPE}.h
+            mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
         fi
         cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
         cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
