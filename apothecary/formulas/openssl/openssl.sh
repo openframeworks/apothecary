@@ -90,13 +90,31 @@ function build() {
 	
 	if [ "$TYPE" == "osx" ] ; then	
 
-        #export CFLAGS="-arch i386 -arch x86_64 -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        local BUILD_OPTS="-arch i386 -arch x86_64 -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE
-	    ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
+
+        make clean && make dclean
+	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
+
+
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+        make clean && make dclean
+	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        make -j1 depend 
+        make -j${PARALLEL_MAKE} 
+		make -j 1 install
+
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+        mkdir -p $BUILD_TO_DIR/lib/
+        cp -r $BUILD_TO_DIR/x64/include $BUILD_TO_DIR/
+        lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+                     $BUILD_TO_DIR/x64/lib/libcrypto.a \
+                     $BUILD_TO_DIR/x86/lib/libssl.a \
+                     $BUILD_TO_DIR/x64/lib/libssl.a \
+                     -output $BUILD_TO_DIR/lib/libopenssl.a
 
 	 elif [ "$TYPE" == "vs" ] ; then
 		CURRENTPATH=`pwd`
@@ -530,8 +548,7 @@ function copy() {
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE
-		cp -v build/$TYPE/lib/libcrypto.a $1/lib/$TYPE/crypto.a
-		cp -v build/$TYPE/lib/libssl.a $1/lib/$TYPE/ssl.a
+		cp -v build/$TYPE/lib/libopenssl.a $1/lib/$TYPE/openssl.a
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 	 	mkdir -p $1/lib/$TYPE
 	 	cp -v lib/$TYPE/*.a $1/lib/$TYPE
