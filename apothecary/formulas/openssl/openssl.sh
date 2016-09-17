@@ -91,6 +91,7 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then	
 
         export CFLAGS="-arch i386 -arch x86_64"
+        local BUILD_OPTS=-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}
 	    ./Configure $BUILD_OPTS --openssldir="$CURRENTPATH/build/$TYPE/" --prefix="$CURRENTPATH/build/$TYPE/"
         make -j 1
 		make -j 1 install
