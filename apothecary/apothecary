@@ -1057,6 +1057,7 @@ if [[ "$TYPE" == "android" ]] ; then
 		exit 1
 	fi
 	if [ "$ARCH" == "armv7" ]; then
+        echo setting arch to armv7
 	    ABI=armeabi-v7a
 	elif [ "$ARCH" == "x86" ]; then
 	    ABI=x86

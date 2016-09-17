@@ -47,7 +47,10 @@ function prepare() {
         fi
 	fi
 
-	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "android" ]; then
+	if [ "$TYPE" == "osx" ]; then
+		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
+    elif [ "$TYPE" == "android" ]; then
+        source ../../android_configure.sh $ABI
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "emscripten" ]; then
 		./bootstrap.sh --with-libraries=filesystem

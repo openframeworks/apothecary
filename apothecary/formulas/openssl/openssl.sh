@@ -91,9 +91,10 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then	
 
         export CFLAGS="-arch i386 -arch x86_64"
-        local BUILD_OPTS=-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}
+        local BUILD_OPTS="-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 	    ./Configure $BUILD_OPTS --openssldir="$CURRENTPATH/build/$TYPE/" --prefix="$CURRENTPATH/build/$TYPE/"
-        make -j 1
+        make -j1 depend 
+        make -j${PARALLEL_MAKE} 
 		make -j 1 install
 
 	 elif [ "$TYPE" == "vs" ] ; then
@@ -476,11 +477,10 @@ PING_LOOP_PID=$!
         source Setenv-android.sh
         ./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
         make clean
-        make depend 
-        make build_libs 
-        mkdir -p $BUILD_TO_DIR/lib
-		cp libssl.a $BUILD_TO_DIR/lib/
-        cp libcrypto.a $BUILD_TO_DIR/lib/
+        make -j1 depend 
+        make -j${PARALLEL_MAKE} 
+        make install
+        make install
 
 	else 
 

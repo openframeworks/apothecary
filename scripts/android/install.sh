@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 NDK_DIR=android-ndk-r12b
 set -ev
 # capture failing exits in commands obscured behind a pipe
