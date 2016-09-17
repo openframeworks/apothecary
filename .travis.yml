@@ -39,12 +39,14 @@ matrix:
           
           
     - os: linux
-      sudo: false
+      sudo: required
+      dist: trusty
       env: TARGET="android" OPT="armv7"
-      addons:
-        apt:
-          packages:
-          - xutils-dev
+      before_script:
+        - sudo add-apt-repository ppa:dns/gnu -y
+        - sudo apt-get update -q
+        - sudo apt-get install -y --only-upgrade autoconf
+        - sudo apr-get install -y xutils-dev
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -56,8 +58,11 @@ matrix:
       env: TARGET="android" OPT="x86"
       addons:
         apt:
+          sources:
+          - dns/gnu
           packages:
           - xutils-dev
+          - autoconf
       cache:
         directories:
         - ~/android-ndk-r12b
