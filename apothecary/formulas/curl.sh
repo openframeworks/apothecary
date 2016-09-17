@@ -76,7 +76,7 @@ function build() {
             export CFLAGS=-I$SYSROOT/usr/include
         fi
         if [ "$TYPE" == "osx" ]; then
-            export CFLAGS=-arch i386 -arch x86_64
+            export CFLAGS="-arch i386 -arch x86_64"
         fi
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
