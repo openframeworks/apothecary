@@ -108,12 +108,18 @@ function build() {
 		make -j 1 install
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-        mkdir -p $BUILD_TO_DIR/lib/
-        cp -r $BUILD_TO_DIR/x64/include $BUILD_TO_DIR/
+        cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+
         lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
                      $BUILD_TO_DIR/x64/lib/libcrypto.a \
-                     $BUILD_TO_DIR/x86/lib/libssl.a \
+                     -output $BUILD_TO_DIR/lib/libcrypto.a
+
+        lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
                      $BUILD_TO_DIR/x64/lib/libssl.a \
+                     -output $BUILD_TO_DIR/lib/libssl.a
+
+        lipo -create $BUILD_TO_DIR/lib/libssl.a
+                     $BUILD_TO_DIR/lib/libcrypto.a
                      -output $BUILD_TO_DIR/lib/libopenssl.a
 
 	 elif [ "$TYPE" == "vs" ] ; then
