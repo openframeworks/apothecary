@@ -81,6 +81,8 @@ function build() {
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 		./configure --with-ssl=$OPENSSL_DIR
         make clean
 	    make -j${PARALLEL_MAKE}
