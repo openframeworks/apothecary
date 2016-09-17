@@ -90,10 +90,10 @@ function build() {
 	
 	if [ "$TYPE" == "osx" ] ; then	
 
-        export CFLAGS="-arch i386 -arch x86_64"
-        local BUILD_OPTS="-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="-arch i386 -arch x86_64 -fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        #local BUILD_OPTS="-no-shared -no-asm -no-ec_nistp_64_gcc_128 -no-gmp -no-jpake -no-krb5 -no-md2 -no-rc5 -no-rfc3779 -no-sctp -no-shared -no-store -no-unit-test -no-zlib -no-zlib-dynamic "
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE
-	    ./Configure $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+	    ./config --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
