@@ -112,7 +112,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
     wait $apothecaryPID
 done
 
-if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     # exit here on PR's 
     echo "On Master Branch and not a PR";
 else 

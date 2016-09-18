@@ -44,6 +44,8 @@ function build() {
 	# https://www.music.mcgill.ca/~gary/rtaudio/compiling.html
 
 	if [ "$TYPE" == "osx" ] ; then
+        rm -f librtaudio.a
+        rm -f librtaudio-x86_64
 
 		# Compile the program
 		/usr/bin/g++ -O2 \

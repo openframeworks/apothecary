@@ -18,7 +18,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
+	wget --no-check-certificate https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
 	tar -xjf uriparser-$VER.tar.bz2
 	mv uriparser-$VER uriparser
 	rm uriparser*.tar.bz2
@@ -70,10 +70,13 @@ function build() {
 			export LDFLAGS=-L$SYSROOT/usr/lib CFLAGS=-I$SYSROOT/usr/include
 		fi
 
+        export CFLAGS="-arch i386 -arch x86_64"
+        export LDFLAGS="-arch i386 -arch x86_64"
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
 		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc
         make clean
 		make -j${PARALLEL_MAKE}
+	    make install
 	fi
 }
 
@@ -99,7 +102,7 @@ function copy() {
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
+		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
     else
 		# Standard *nix style copy.
 		# copy headers

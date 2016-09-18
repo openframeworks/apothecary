@@ -90,6 +90,10 @@ function build() {
 	
 	if [ "$TYPE" == "osx" ] ; then	
 
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+        rm -rf $BUILD_TO_DIR
+        rm -f libcrypto.a libssl.a
+
         local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
