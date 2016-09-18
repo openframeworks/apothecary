@@ -69,21 +69,43 @@ function build() {
         make clean
 	    make -j${PARALLEL_MAKE}
 	    make install
+	elif [ "$TYPE" == "osx" ]; then
+        echo "building osx for $TYPE"
+        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        ./buildconf
+
+        export CFLAGS="-arch i386"
+        export LDFLAGS="-arch i386"
+		./configure --with-ssl=$OPENSSL_DIR --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
+        make clean
+	    make -j${PARALLEL_MAKE}
+        make install
+
+        export CFLAGS="-arch x86_64"
+        export LDFLAGS="-arch x86_64"
+		./configure --with-ssl=$OPENSSL_DIR --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
+        make clean
+	    make -j${PARALLEL_MAKE}
+        make install
+
+        cp -r build/osx/x64/* build/osx/
+
+        lipo -create build/osx/x86/lib/libcurl.a \
+                     build/osx/x64/lib/libcurl.a \
+                    -output build/osx/lib/libcurl.a
     else
+        echo "building other for $TYPE"
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib 
             export CFLAGS=-I$SYSROOT/usr/include
-        fi
-        if [ "$TYPE" == "osx" ]; then
-            export CFLAGS="-arch i386 -arch x86_64"
         fi
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-		./configure --with-ssl=$OPENSSL_DIR
+		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
         make clean
 	    make -j${PARALLEL_MAKE}
 	fi
@@ -111,7 +133,7 @@ function copy() {
 		# copy headers
 		cp -Rv include/curl/* $1/include/curl/
 		# copy lib
-		cp -Rv lib/.libs/libcurl.a $1/lib/$TYPE/curl.a
+		cp -Rv build/osx/lib/libcurl.a $1/lib/$TYPE/curl.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# Standard *nix style copy.
