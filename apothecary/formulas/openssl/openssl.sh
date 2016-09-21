@@ -107,7 +107,7 @@ function build() {
         make clean && make dclean
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
         make -j1 depend 
-        make -j${PARALLEL_MAKE} 
+        make -j1 #${PARALLEL_MAKE} 
 		make -j 1 install
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
@@ -222,7 +222,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 
 			make depend
-			make -j ${PARALLEL_MAKE}
+			make -j 1 #${PARALLEL_MAKE}
 
 			make install
 
