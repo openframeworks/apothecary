@@ -53,9 +53,10 @@ fi
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-
+BITCODE=""
 if [[ "$TYPE" == "tvos" ]]; then
     MIN_IOS_VERSION=9.0
+    BITCODE=-fembed-bitcode
 fi
 
 #export CC="$(xcrun -find -sdk ${SDK} clang)"
@@ -63,7 +64,7 @@ fi
 #export CPP="$(xcrun -find -sdk ${SDK} clang++)"
 #export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -std=gnu11 -stdlib=libc++ -pipe -Os -gdwarf-2 -fembed-bitcode -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -std=gnu11 -stdlib=libc++ -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"

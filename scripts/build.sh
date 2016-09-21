@@ -58,6 +58,7 @@ echoDots(){
 
 if [ "$TARGET" == "osx" ]; then
     PARALLEL=4
+    brew reinstall libtool
 elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     PARALLEL=2
 elif [ "$TARGET" == "android" ]; then

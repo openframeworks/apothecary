@@ -33,7 +33,6 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	rm -f CMakeCache.txt
 	local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
 	if [ "$TYPE" == "vs" ] ; then
@@ -196,7 +195,7 @@ function copy() {
     #else\
     #define CURL_SIZEOF_CURL_OFF_T 4\
     #endif/' < "$1/include/curl/curlbuild.h.temp" > "$1/include/curl/curlbuild.h"
-    rm curlbuild.h.temp
+    rm $1/include/curl/curlbuild.h.temp
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
