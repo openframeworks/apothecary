@@ -137,6 +137,9 @@ VS_BUILD_TOOL=devenv
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
 
+# If formula already exists force download
+FORCE_DOWNLOAD=0
+
 about:
  this is the OpenFrameworks library apothecary
   it mixes formulas and potions to build and 
@@ -172,6 +175,8 @@ options:
   -s	specify the git-tag to select another version of the library
 	note: availible only with git option
 	
+  -f    force download even if build folder already exists
+
   -x    use visual studio express tools
 
   -h	print this usage guide
@@ -286,6 +291,8 @@ while getopts t:a:b:d:s:j:hgvx opt ; do
 		   A_VERBOSE=1 ;;
 		x) # use visual express tools
 		   VS_BUILD_TOOL=WDExpress ;;
+        f) # force download
+           FORCE_DOWNLOAD=1
 		[?]) # print help and exit 
 			 echo "$HELP" ; exit 0 ;;
 	esac
@@ -612,19 +619,26 @@ function downloadFormula(){
 	cd $BUILD_DIR
 
 	if [ -e $1 ] ; then
-		echo "... skipping, src dir already exists"
-	else
-		if [ ! -z "$USE_GIT" ] && [[ "${GIT_URL:+x}" ]] ; then
-			gitclone $1 $GIT_URL ${GIT_TAG:-master}
-		else
-			download $1
-		fi
-		
-		if [ ! -d $BUILD_DIR/$1 ] ; then
-			echoError " It looks like downloading failed for \"$1\""
-			exit 1
-		fi
-	fi
+        if [ $FORCE_DOWNLOAD -eq 1 ]; then
+            rm -rf ${PWD}/${1}
+        else
+            echo "... skipping, $1 src dir already exists in ${PWD}/${1}"
+        fi
+    fi
+
+	if [ ! -e $1 ] ; then
+	    if [ ! -z "$USE_GIT" ] && [[ "${GIT_URL:+x}" ]] ; then
+		    gitclone $1 $GIT_URL ${GIT_TAG:-master}
+	    else
+		    download $1
+	    fi
+	
+	    if [ ! -d $BUILD_DIR/$1 ] ; then
+		    echoError " It looks like downloading failed for \"$1\""
+		    exit 1
+	    fi
+    fi
+
 
 	# dependencies
 	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
