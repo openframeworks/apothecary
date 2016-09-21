@@ -64,14 +64,15 @@ function build() {
             HOST=x86-linux-android
         fi
         ./buildconf
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no 
         sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make clean
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-        echo "building osx for $TYPE"
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
 
         export CFLAGS="-arch i386"
@@ -83,7 +84,7 @@ function build() {
 
         export CFLAGS="-arch x86_64"
         export LDFLAGS="-arch x86_64"
-		./configure --with-ssl=$OPENSSL_DIR --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
+		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
@@ -93,6 +94,35 @@ function build() {
         lipo -create build/osx/x86/lib/libcurl.a \
                      build/osx/x64/lib/libcurl.a \
                     -output build/osx/lib/libcurl.a
+	    make install
+	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        ./buildconf
+        if [ "${TYPE}" == "tvos" ]; then 
+            IOS_ARCHS=(x86_64 arm64)
+        elif [ "$TYPE" == "ios" ]; then
+            IOS_ARCHS=(i386 x86_64 armv7 arm64) #armv7s
+        fi
+		for IOS_ARCH in ${IOS_ARCHS}; do
+    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
+            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6 CC=$CC CXX=$CXX 
+            make -j${PARALLEL_MAKE}
+            make install
+            make clean
+        done
+
+        cp -r build/$TYPE/arm64/* build/$TYPE/
+
+        if [ "${TYPE}" == "tvos" ]; then 
+            lipo -create build/$TYPE/i386/lib/libcurl.a \
+                         build/$TYPE/x86_64/lib/libcurl.a \
+                         build/$TYPE/armv7/lib/libcurl.a \
+                         build/$TYPE/arm64/lib/libcurl.a \
+                        -output build/$TYPE/lib/libcurl.a
+        elif [ "$TYPE" == "ios" ]; then
+            lipo -create build/$TYPE/x86_64/lib/libcurl.a \
+                         build/$TYPE/arm64/lib/libcurl.a \
+                        -output build/$TYPE/lib/libcurl.a
+        fi
     else
         echo "building other for $TYPE"
         if [ $CROSSCOMPILING -eq 1 ]; then

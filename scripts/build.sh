@@ -59,7 +59,7 @@ echoDots(){
 if [ "$TARGET" == "osx" ]; then
     PARALLEL=4
 elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-    PARALLEL=2
+    PARALLEL=6
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
 else
@@ -86,13 +86,13 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         ./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
         if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ]; then
+            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "curl" ] && [ "$formula_name" != "uriparser" ]; then
                 echo Pass 1 - Compiling $formula_name
                 echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         elif [ "$OPT2" == "2" ]; then
-            if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ]; then
+            if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ] || [ "$formula_name" == "uriparser" ]; then
                 echo Pass 2 - Compiling $formula_name
                 echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &

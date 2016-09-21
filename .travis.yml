@@ -6,38 +6,38 @@ matrix:
 # fully specify builds, include can't dynamically expand matrix entries
 # relative order of sudo and env is important so that addons: is recognized
 
-#    - os: linux
-#      sudo: required
-#      dist: trusty
-#      env: TARGET="linux"
-#      addons:
-#        apt:
-#          packages:
-#          - libxrandr-dev
-#          - libxinerama-dev
-#          - libx11-dev
-#          - libxcursor-dev
-#          - libxi-dev
-#          
-#          
-#    - os: linux
-#      sudo: required
-#      dist: trusty
-#      env: TARGET="linux" OPT="gcc5"
-#      addons:
-#        apt:
-#          sources:
-#          - ubuntu-toolchain-r-test
-#          packages:
-#          - gcc-5
-#          - g++-5
-#          - libstdc++-5-dev
-#          - libxrandr-dev
-#          - libxinerama-dev
-#          - libx11-dev
-#          - libxcursor-dev
-#          - libxi-dev
-#          
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linux"
+      addons:
+        apt:
+          packages:
+          - libxrandr-dev
+          - libxinerama-dev
+          - libx11-dev
+          - libxcursor-dev
+          - libxi-dev
+          
+          
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linux" OPT="gcc5"
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-5
+          - g++-5
+          - libstdc++-5-dev
+          - libxrandr-dev
+          - libxinerama-dev
+          - libx11-dev
+          - libxcursor-dev
+          - libxi-dev
+          
 #          
 #    - os: linux
 #      sudo: required
@@ -52,46 +52,54 @@ matrix:
 #        directories:
 #        - ~/android-ndk-r12b
 #        - apothecary/build/Toolchains/armv7
-#            
-#            
-#    - os: linux
-#      sudo: false
-#      env: TARGET="android" OPT="x86"
-#      addons:
-#        apt:
-#          sources:
-#          - dns/gnu
-#          packages:
-#          - xutils-dev
-#          - autoconf
-#      cache:
-#        directories:
-#        - ~/android-ndk-r12b
-#        - apothecary/build/Toolchains/x86
-#        
-#        
-#    - os: linux
-#      sudo: false
-#      env: TARGET="emscripten"
-#      addons:
-#        apt:
-#          sources:
-#            - ubuntu-toolchain-r-test
-#          packages:
-#            - libstdc++6
-#            - gcc-4.9
-#        
-#        
-#    - os: linux
-#      sudo: required
-#      dist: trusty
-#      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-#      
-#      
-#    - os: linux
-#      sudo: required
-#      dist: trusty
-#      env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+            
+    - os: linux
+      sudo: false
+      env: TARGET="android" OPT="armv7"
+      addons:
+        apt:
+          packages:
+          - xutils-dev
+      cache:
+        directories:
+        - ~/android-ndk-r12b
+        - apothecary/build/Toolchains/x86
+            
+    - os: linux
+      sudo: false
+      env: TARGET="android" OPT="x86"
+      addons:
+        apt:
+          packages:
+          - xutils-dev
+      cache:
+        directories:
+        - ~/android-ndk-r12b
+        - apothecary/build/Toolchains/x86
+        
+        
+    - os: linux
+      sudo: false
+      env: TARGET="emscripten"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libstdc++6
+            - gcc-4.9
+        
+        
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      
+      
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
       
       
     - os: osx
@@ -99,27 +107,27 @@ matrix:
       env: TARGET="osx"
       
       
-#    - os: osx
-#      osx_image: xcode7.1
-#      compiler: clang
-#      env: TARGET="ios" OPT2="1"
-#      
-#      
-#    - os: osx
-#      compiler: clang
-#      env: TARGET="ios" OPT2="2"
-#      
-#      
-#    - os: osx
-#      osx_image: xcode7.1
-#      compiler: clang
-#      env: TARGET="tvos" OPT2="1"
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="ios" OPT2="1"
+      
+      
+    - os: osx
+      compiler: clang
+      env: TARGET="ios" OPT2="2"
+      
+      
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="tvos" OPT2="1"
 
 
-#    - os: osx
-#      osx_image: xcode7.1
-#      compiler: clang
-#      env: TARGET="tvos" OPT2="2"
+    - os: osx
+      osx_image: xcode7.1
+      compiler: clang
+      env: TARGET="tvos" OPT2="2"
 
 
   exclude:
