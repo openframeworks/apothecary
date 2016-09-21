@@ -125,6 +125,9 @@ VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "vs" "msys2" "
 # verbose mode bool
 A_VERBOSE=0
 
+# If formula already exists force download
+FORCE_DOWNLOAD=0
+
 # prefer git instead of download tarballs
 # This remains _UNSET_ if git is not in use.
 # To use, set USE_GIT=1
@@ -136,9 +139,6 @@ VS_BUILD_TOOL=devenv
 
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
-
-# If formula already exists force download
-FORCE_DOWNLOAD=0
 
 about:
  this is the OpenFrameworks library apothecary
@@ -269,7 +269,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:hgvx opt ; do
+while getopts t:a:b:d:s:j:hgvxf opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   TYPE="$OPTARG" ;;
