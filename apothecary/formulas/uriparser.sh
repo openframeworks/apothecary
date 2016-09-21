@@ -64,19 +64,46 @@ function build() {
         make clean
 	    make -j${PARALLEL_MAKE}
 	    make install
-	else
-		if [ $CROSSCOMPILING -eq 1 ]; then
-			source ../../${TYPE}_configure.sh
-			export LDFLAGS=-L$SYSROOT/usr/lib CFLAGS=-I$SYSROOT/usr/include
-		fi
-
+	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64"
         export LDFLAGS="-arch i386 -arch x86_64"
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
-		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc
+		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         make clean
 		make -j${PARALLEL_MAKE}
 	    make install
+	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        if [ "${TYPE}" == "tvos" ]; then 
+            IOS_ARCHS="x86_64 arm64"
+        elif [ "$TYPE" == "ios" ]; then
+            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+        fi
+
+		for IOS_ARCH in ${IOS_ARCHS}; do
+            echo
+            echo
+            echo "Compiling for $IOS_ARCH"
+    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
+            local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$IOS_ARCH
+            ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared --host=$HOST --target=$HOST
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+        done
+
+        cp -r build/$TYPE/arm64/* build/$TYPE/
+
+        if [ "${TYPE}" == "ios" ]; then 
+            lipo -create build/$TYPE/i386/lib/liburiparser.a \
+                         build/$TYPE/x86_64/lib/liburiparser.a \
+                         build/$TYPE/armv7/lib/liburiparser.a \
+                         build/$TYPE/arm64/lib/liburiparser.a \
+                        -output build/$TYPE/lib/liburiparser.a
+        elif [ "$TYPE" == "tvos" ]; then
+            lipo -create build/$TYPE/x86_64/lib/liburiparser.a \
+                         build/$TYPE/arm64/lib/liburiparser.a \
+                        -output build/$TYPE/lib/liburiparser.a
+        fi
 	fi
 }
 
@@ -97,13 +124,13 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/uriparser.lib $1/lib/$TYPE/x64/uriparser.lib
 		fi
-	elif [ "$TYPE" == "osx" ] ; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
-    else
+    elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/

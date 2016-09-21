@@ -114,13 +114,13 @@ function build() {
 
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "ios" ]; then 
             lipo -create build/$TYPE/i386/lib/libcurl.a \
                          build/$TYPE/x86_64/lib/libcurl.a \
                          build/$TYPE/armv7/lib/libcurl.a \
                          build/$TYPE/arm64/lib/libcurl.a \
                         -output build/$TYPE/lib/libcurl.a
-        elif [ "$TYPE" == "ios" ]; then
+        elif [ "$TYPE" == "tvos" ]; then
             lipo -create build/$TYPE/x86_64/lib/libcurl.a \
                          build/$TYPE/arm64/lib/libcurl.a \
                         -output build/$TYPE/lib/libcurl.a
