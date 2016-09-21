@@ -59,7 +59,7 @@ echoDots(){
 if [ "$TARGET" == "osx" ]; then
     PARALLEL=4
 elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-    PARALLEL=6
+    PARALLEL=2
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
 else

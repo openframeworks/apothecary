@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 #if [ "${TYPE}" == "tvos" ]; then 
-#    IOS_ARCHS=(x86_64 arm64)
+#    IOS_ARCHS="x86_64 arm64"
 #elif [ "$TYPE" == "ios" ]; then
-#    IOS_ARCHS=(i386 x86_64 armv7 arm64) #armv7s
+#    IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
 #fi
 TYPE=$1
 IOS_ARCH=$2
@@ -58,14 +58,13 @@ if [[ "$TYPE" == "tvos" ]]; then
     MIN_IOS_VERSION=9.0
 fi
 
-export CC="$(xcrun -find -sdk ${SDK} clang)"
-export CXX="$(xcrun -find -sdk ${SDK} clang++)"
-export CPP="$(xcrun -find -sdk ${SDK} clang++)"
-export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
+#export CC="$(xcrun -find -sdk ${SDK} clang)"
+#export CXX="$(xcrun -find -sdk ${SDK} clang++)"
+#export CPP="$(xcrun -find -sdk ${SDK} clang++)"
+#export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export ARCHFLAGS="-arch=${IOS_ARCH}  -isysroot ${SYSROOT}"
-export CFLAGS="-pipe -Os -gdwarf-2 -fembed-bitcode -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-export LDFLAGS="${ARCHFLAGS}"
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -std=gnu11 -stdlib=libc++ -pipe -Os -gdwarf-2 -fembed-bitcode -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi

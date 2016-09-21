@@ -98,16 +98,19 @@ function build() {
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         ./buildconf
         if [ "${TYPE}" == "tvos" ]; then 
-            IOS_ARCHS=(x86_64 arm64)
+            IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS=(i386 x86_64 armv7 arm64) #armv7s
+            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
         fi
 		for IOS_ARCH in ${IOS_ARCHS}; do
+            echo
+            echo
+            echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6 CC=$CC CXX=$CXX 
+            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
+            #make clean
             make -j${PARALLEL_MAKE}
             make install
-            make clean
         done
 
         cp -r build/$TYPE/arm64/* build/$TYPE/
@@ -178,6 +181,22 @@ function copy() {
 		# copy lib
 		cp -Rv lib/.libs/libcurl.a $1/lib/$TYPE/libcurl.a
 	fi
+
+    #Patch headers for 64-bit archs
+    sed 's/#define CURL_SIZEOF_LONG 8/\
+    #ifdef __LP64__\
+    #define CURL_SIZEOF_LONG 8\
+    #else\
+    #define CURL_SIZEOF_LONG 4\
+    #endif/'< "$1/include/curl/curlbuild.h" > "$1/include/curl/curlbuild.h.temp"
+
+    sed 's/#define CURL_SIZEOF_CURL_OFF_T 8/\
+    #ifdef __LP64__\
+    #define CURL_SIZEOF_CURL_OFF_T 8\
+    #else\
+    #define CURL_SIZEOF_CURL_OFF_T 4\
+    #endif/' < "$1/include/curl/curlbuild.h.temp" > "$1/include/curl/curlbuild.h"
+    rm curlbuild.h.temp
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists

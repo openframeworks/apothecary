@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "msys2" "ios" "tvos" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 VER=1.0.2h
 VERDIR=1.0.2
@@ -166,10 +166,6 @@ function build() {
 		# Refer to the other script if anything drastic changes for future versions
 		
 		CURRENTPATH=`pwd`
-		
-		DEVELOPER=$XCODE_DEV_ROOT
-		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-		VERSION=$VER
 
         local IOS_ARCHS
         if [ "${TYPE}" == "tvos" ]; then 
@@ -177,32 +173,13 @@ function build() {
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
         fi
-		local STDLIB="libc++"
-
-        SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then 
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [ "$TYPE" == "ios" ]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-
-		# Validate environment
-		case $XCODE_DEV_ROOT in  
-		     *\ * )
-		           echo "Your Xcode path contains whitespaces, which is not supported."
-		           exit 1
-		          ;;
-		esac
-		case $CURRENTPATH in  
-		     *\ * )
-		           echo "Your path contains whitespaces, which is not supported by 'make install'."
-		           exit 1
-		          ;;
-		esac 
 			
         unset LANG
         local LC_CTYPE=C
         local LC_ALL=C
+
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+        rm -rf $BUILD_TO_DIR
 
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
@@ -212,13 +189,9 @@ function build() {
             cp "apps/speed.c" "apps/speed.c.orig" 
 			cp "Makefile" "Makefile.orig"
 
-			export THECOMPILER=$TOOLCHAIN/usr/bin/clang
-			echo "The compiler: $THECOMPILER"
-
             ## Fix for tvOS fork undef 9.0
             if [ "${TYPE}" == "tvos" ]; then
-
-            # Patch apps/speed.c to not use fork() since it's not available on tvOS
+                # Patch apps/speed.c to not use fork() since it's not available on tvOS
                 sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
                 # Patch Configure to build for tvOS, not iOS
                 sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
@@ -226,72 +199,25 @@ function build() {
             else
                 sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
             fi
-
-			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-			then
-				if [ "${TYPE}" == "tvos" ]; then 
-                    PLATFORM="AppleTVSimulator"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneSimulator"
-                fi
-			else
+			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
+            if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
 				cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
 				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
-				if [ "${TYPE}" == "tvos" ]; then 
-                    PLATFORM="AppleTVOS"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneOS"
-                fi
 			fi
 
-			export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-			export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-			export BUILD_TOOLS="${DEVELOPER}"
-
-            MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-
-            BITCODE=""
-            if [[ "$TYPE" == "tvos" ]]; then
-                BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=9.0
-            fi
-
-
-		    if [ "${TYPE}" == "tvos" ]; then 
-                MIN_TYPE=-mtvos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mtvos-simulator-version-min=
-                fi
-            elif [ "$TYPE" == "ios" ]; then
-                MIN_TYPE=-miphoneos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mios-simulator-version-min=
-                fi
-            fi
-
-			export CC="${THECOMPILER}"
-            export CFLAGS="-std=${CSTANDARD} $BITCODE -fPIC -stdlib=libc++ $MIN_TYPE$MIN_IOS_VERSION"
-			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-			LOG="$CURRENTPATH/build/$TYPE/$IOS_ARCH/build-openssl-${VER}.log"
-			
-			
-			echo "Compiler: $CC"
-			echo "Building openssl-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
-
-			set +e
+            make clean && make dclean
+            rm -f libcrypto.a libssl.a
+	    	echo "Configuring ${IOS_ARCH}"
 			if [ "${IOS_ARCH}" == "i386" ]; then
-				echo "Configuring i386"
-			    ./Configure darwin-i386-cc $CFLAGS no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			    ./Configure darwin-i386-cc no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 		    elif [ "${IOS_ARCH}" == "x86_64" ]; then
-		    	echo "Configuring x86_64"
-			    ./Configure darwin64-x86_64-cc $CFLAGS no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			    ./Configure darwin64-x86_64-cc no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 		    else
-		    	# armv7, armv7s, arm64
-		    	echo "Configuring arm"
-			    ./Configure iphoneos-cross $CFLAGS no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			    ./Configure iphoneos-cross no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 		    fi
 
-            sed -ie "s!^CFLAG=!CFLAG=-arch ${IOS_ARCH} -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} !" "Makefile"
+            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" "Makefile"
 
 			echo "Running make for ${IOS_ARCH}"
 
@@ -299,7 +225,6 @@ function build() {
 			make -j ${PARALLEL_MAKE}
 
 			make install
-			make clean && make dclean
 
 
 			# reset source file back.
@@ -340,8 +265,6 @@ function build() {
         fi
 
 		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-
-		unset TOOLCHAIN DEVELOPER
 
 	elif [ "$TYPE" == "android" ]; then
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
