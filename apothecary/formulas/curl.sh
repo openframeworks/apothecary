@@ -76,7 +76,7 @@ function build() {
 
         export CFLAGS="-arch i386"
         export LDFLAGS="-arch i386"
-		./configure --with-ssl=$OPENSSL_DIR --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
+		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
