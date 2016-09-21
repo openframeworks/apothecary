@@ -83,30 +83,30 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
-        ./apothecary -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
         if [ "$OPT2" == "1" ]; then
             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "curl" ] && [ "$formula_name" != "uriparser" ]; then
                 echo Pass 1 - Compiling $formula_name
-                echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         elif [ "$OPT2" == "2" ]; then
             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ] || [ "$formula_name" == "uriparser" ]; then
                 echo Pass 2 - Compiling $formula_name
-                echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         else
             echo Compiling $formula_name
-            echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-            ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
         fi
     else
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
     echoDots $apothecaryPID
