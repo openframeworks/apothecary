@@ -38,7 +38,7 @@ elif [ "$TYPE" == "ios" ]; then
         export SDK=$SIM
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "armv7" ]; then
-        export HOST=arm-apple-darwin15
+        export HOST=arm-apple-darwin
         export SDK=$OS
         export MIN_TYPE=-miphoneos-version-min=
     elif [ "${IOS_ARCH}" == "arm64" ]; then
@@ -63,8 +63,9 @@ export CXX="$(xcrun -find -sdk ${SDK} clang++)"
 export CPP="$(xcrun -find -sdk ${SDK} clang++)"
 export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export CFLAGS="-arch=${IOS_ARCH} -pipe -Os -gdwarf-2 -fembed-bitcode -fPIC $MIN_TYPE$MIN_IOS_VERSION -isysroot ${SYSROOT}"
-export LDFLAGS="-arch=${IOS_ARCH} -isysroot ${SYSROOT}"
+export ARCHFLAGS="-arch=${IOS_ARCH}  -isysroot ${SYSROOT}"
+export CFLAGS="-pipe -Os -gdwarf-2 -fembed-bitcode -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export LDFLAGS="${ARCHFLAGS}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi
