@@ -292,7 +292,7 @@ while getopts t:a:b:d:s:j:hgvx opt ; do
 		x) # use visual express tools
 		   VS_BUILD_TOOL=WDExpress ;;
         f) # force download
-           FORCE_DOWNLOAD=1
+           FORCE_DOWNLOAD=1 ;;
 		[?]) # print help and exit 
 			 echo "$HELP" ; exit 0 ;;
 	esac
