@@ -61,6 +61,7 @@ if [ "$TARGET" == "osx" ]; then
     brew reinstall libtool
 elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     PARALLEL=2
+    brew reinstall libtool
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
 else
