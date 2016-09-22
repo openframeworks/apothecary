@@ -88,7 +88,6 @@ function prepare() {
 function build() {
 	
 	if [ "$TYPE" == "osx" ] ; then	
-
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
         rm -rf $BUILD_TO_DIR
         rm -f libcrypto.a libssl.a
@@ -98,6 +97,9 @@ function build() {
 
         make clean && make dclean
 	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+	    sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
+	    sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+	    sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
@@ -106,8 +108,11 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
         make clean && make dclean
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+	    sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
+	    sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+	    sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
         make -j1 depend 
-        make -j1 #${PARALLEL_MAKE} 
+        make -j${PARALLEL_MAKE} 
 		make -j 1 install
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
@@ -217,12 +222,15 @@ function build() {
 			    ./Configure iphoneos-cross no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 		    fi
 
-            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" "Makefile"
+            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
+            sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
+            sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+            sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
 			echo "Running make for ${IOS_ARCH}"
 
 			make depend
-			make -j 1 #${PARALLEL_MAKE}
+			make -j${PARALLEL_MAKE}
 
 			make install
 
@@ -230,7 +238,6 @@ function build() {
 			# reset source file back.
 			cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
             cp "apps/speed.c.orig" "apps/speed.c"
-            cp "Makefile.orig" "Makefile"
 
 		done
 
