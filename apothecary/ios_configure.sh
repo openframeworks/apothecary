@@ -14,13 +14,17 @@ declare -a MIN_TYPES
 if [ "${TYPE}" == "tvos" ]; then 
     SIM=appletvsimulator
     OS=appletvos
+    COS=AppleTvOS
+    CSIM=AppleTvSimulator
     if [ "${IOS_ARCH}" == "x86_64" ]; then
         export HOST=x86_64-apple-darwin 
         export SDK=$SIM
+        export CSDK=$CSIM
         export MIN_TYPE=-mtvos-simulator-version-min=
     elif [ "${IOS_ARCH}" == "arm64" ]; then
         export HOST=aarch64-apple-darwin
         export SDK=$OS
+        export CSDK=$COS
         export MIN_TYPE=-mtvos-version-min=
     else
         echo tvos arch $IOS_ARCH not supported by ios_configure.sh
@@ -29,27 +33,36 @@ if [ "${TYPE}" == "tvos" ]; then
 elif [ "$TYPE" == "ios" ]; then
     SIM=iphonesimulator
     OS=iphoneos
+    COS=iPhoneOS
+    CSIM=iPhoneSimulator
     if [ "${IOS_ARCH}" == "i386" ]; then
         export HOST=i386-apple-darwin
         export SDK=$SIM
+        export CSDK=$CSIM
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "x86_64" ]; then
         export HOST=x86_64-apple-darwin 
         export SDK=$SIM
+        export CSDK=$CSIM
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "armv7" ]; then
         export HOST=arm-apple-darwin
         export SDK=$OS
+        export CSDK=$COS
         export MIN_TYPE=-miphoneos-version-min=
     elif [ "${IOS_ARCH}" == "arm64" ]; then
         export HOST=aarch64-apple-darwin
         export SDK=$OS
+        export CSDK=$COS
         export MIN_TYPE=-miphoneos-version-min=
     else
         echo ios arch $IOS_ARCH not supported by ios_configure.sh
         exit
     fi
 fi
+export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
+export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER

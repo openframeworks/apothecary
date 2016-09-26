@@ -5,22 +5,22 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.0.2h
-VERDIR=1.0.2
+VER=1.1.0b
+VERDIR=1.1.0
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
-MIRROR=http://mirrors.ibiblio.org/openssl
+MIRROR=https://www.openssl.org
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget ${MIRROR}/source/$FILENAME.tar.gz
+		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
@@ -44,44 +44,11 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 
-	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-		# create output directories
-		mkdir -p "src"
-		mkdir -p "bin"
-		mkdir -p "lib"
-
-		mkdir -p lib/$TYPE
-		mkdir -p lib/include
-
-		mkdir -p build/$TYPE/i386
-		mkdir -p build/$TYPE/x86_64
-		mkdir -p build/$TYPE/armv7
-        #mkdir -p build/$TYPE/armv7s
-		mkdir -p build/$TYPE/arm64
-
-		mkdir -p lib/$TYPE/i386
-		mkdir -p lib/$TYPE/x86_64
-		mkdir -p lib/$TYPE/armv7
-        #mkdir -p lib/$TYPE/armv7s
-		mkdir -p lib/$TYPE/arm64
-
-		# make copies of the source files before modifying
-		cp Makefile Makefile.orig
-		cp Configure Configure.orig
-		cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
- 	elif  [ "$TYPE" == "osx" ] ; then
-		mkdir -p lib/$TYPE
-		mkdir -p lib/include
-
-        cp Makefile Makefile.orig
-        cp Configure Configure1.orig
-
-        #cp $FORMULA_DIR/Configure Configure
- 	elif  [ "$TYPE" == "vs" ] ; then
+	if  [ "$TYPE" == "vs" ] ; then
 		if patch -p1 -u -N --dry-run --silent < $FORMULA_DIR/winOpenSSL.patch 2>/dev/null ; then
 			patch -p1 -u < $FORMULA_DIR/winOpenSSL.patch
 		fi
-	fi
+    fi
 }
 
 # executed inside the lib src dir
@@ -95,22 +62,16 @@ function build() {
         local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
-        make clean && make dclean
 	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-	    sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
-	    sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-	    sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+        make clean
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
 
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
-        make clean && make dclean
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-	    sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
-	    sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-	    sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+        make clean
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
@@ -176,7 +137,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then 
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="armv7 i386 x86_64 arm64" #armv7s
         fi
 			
         unset LANG
@@ -192,7 +153,6 @@ function build() {
 			# make sure backed up
 			cp "Configure" "Configure.orig" 
             cp "apps/speed.c" "apps/speed.c.orig" 
-			cp "Makefile" "Makefile.orig"
 
             ## Fix for tvOS fork undef 9.0
             if [ "${TYPE}" == "tvos" ]; then
@@ -211,21 +171,30 @@ function build() {
 				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
 			fi
 
-            make clean && make dclean
-            rm -f libcrypto.a libssl.a
 	    	echo "Configuring ${IOS_ARCH}"
-			if [ "${IOS_ARCH}" == "i386" ]; then
-			    ./Configure darwin-i386-cc no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-		    elif [ "${IOS_ARCH}" == "x86_64" ]; then
-			    ./Configure darwin64-x86_64-cc no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-		    else
-			    ./Configure iphoneos-cross no-asm --openssldir="$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-		    fi
+            FLAGS="no-asm no-shared --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+            if [ "$TYPE" == "tvos" ]; then
+                FLAGS="$FLAGS no-async"
+            fi
 
-            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
-            sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
-            sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-            sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			if [ "${IOS_ARCH}" == "i386" ]; then
+			    ./Configure darwin-i386-cc $FLAGS
+		    elif [ "${IOS_ARCH}" == "x86_64" ]; then
+			    ./Configure darwin64-x86_64-cc $FLAGS
+		    else
+			    ./Configure iphoneos-cross $FLAGS
+		    fi
+            make clean
+
+            if [ "$TYPE" == "ios" ]; then
+                CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+            fi
+
+            sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
+            #sed -ie "s!^CFLAGS=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
+            #sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
+            #sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+            #sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
 			echo "Running make for ${IOS_ARCH}"
 
@@ -236,7 +205,9 @@ function build() {
 
 
 			# reset source file back.
-			cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
+            if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
+			    cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
+            fi
             cp "apps/speed.c.orig" "apps/speed.c"
 
 		done
