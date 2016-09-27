@@ -5,8 +5,8 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.1.0b
-VERDIR=1.1.0
+VER=1.0.2j
+VERDIR=1.0.2j
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
@@ -71,7 +71,7 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        make clean
+        make clean && make dclean
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
@@ -184,13 +184,13 @@ function build() {
 		    else
 			    ./Configure iphoneos-cross $FLAGS
 		    fi
-            make clean
+            make clean && make dclean
 
             if [ "$TYPE" == "ios" ]; then
                 CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
             fi
 
-            sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
+            sed -ie "s!^CFLAG=\(.*\)!CFLAG=$CFLAGS \1!" Makefile
             #sed -ie "s!^CFLAGS=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
             #sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
             #sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
