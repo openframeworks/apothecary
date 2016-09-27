@@ -43,7 +43,6 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-
 	if  [ "$TYPE" == "vs" ] ; then
 		if patch -p1 -u -N --dry-run --silent < $FORMULA_DIR/winOpenSSL.patch 2>/dev/null ; then
 			patch -p1 -u < $FORMULA_DIR/winOpenSSL.patch
@@ -63,7 +62,7 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
 	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        make clean
+        make clean 
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
@@ -71,7 +70,7 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        make clean && make dclean
+        make clean 
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
 		make -j 1 install
@@ -184,14 +183,14 @@ function build() {
 		    else
 			    ./Configure iphoneos-cross $FLAGS
 		    fi
-            make clean && make dclean
+            make clean
 
-            if [ "$TYPE" == "ios" ]; then
-                CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-            fi
+            #if [ "$TYPE" == "ios" ]; then
+            #    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+            #fi
 
-            sed -ie "s!^CFLAG=\(.*\)!CFLAG=$CFLAGS \1!" Makefile
-            #sed -ie "s!^CFLAGS=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
+            #sed -ie "s!^CFLAG=\(.*\)!CFLAG=$CFLAGS \1!" Makefile
+            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
             #sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
             #sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
             #sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile

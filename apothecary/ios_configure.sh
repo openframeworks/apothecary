@@ -60,9 +60,9 @@ elif [ "$TYPE" == "ios" ]; then
         exit
     fi
 fi
-export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
-export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
-export CROSS_SDK=${CSDK}.sdk
+#export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+#export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
+#export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
