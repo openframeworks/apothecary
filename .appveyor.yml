@@ -1,0 +1,37 @@
+version: 1.0.{build}
+os: Visual Studio 2015 RC
+
+environment:
+  global:
+    APPVEYOR_OS_NAME: windows
+  matrix:
+  #MSYS2 Building
+    - platform: x86
+      TARGET: msys2
+
+  #VisualStudio Building
+    - platform: x86 
+      TARGET: vs
+    - platform: x64
+      TARGET: vs 
+    
+configuration: Debug
+shallow_clone: true
+clone_depth: 10  
+
+#init:
+#- set MSYS2_PATH=c:\msys64
+#- set CHERE_INVOKING=1
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Sy pacman"'
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syuu"'
+#- if "%BUILDER%_%PLATFORM%"=="MSYS2_x86" set MSYSTEM=MINGW32
+#- if "%BUILDER%_%PLATFORM%"=="MSYS2_x64" set MSYSTEM=MINGW64
+
+
+#- IF "BUILDER"=="VS" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  
+#install:
+#- if "%BUILDER%"=="MSYS2" (%MSYS2_PATH%\usr\bin\bash -lc "scripts/msys2/install_dependencies.sh --noconfirm")
+
+build_script:
+- (%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh")
