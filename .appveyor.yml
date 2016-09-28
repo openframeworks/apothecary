@@ -9,12 +9,15 @@ environment:
   #MSYS2 Building
     - platform: x86
       TARGET: msys2
+      ARCH: 32
 
   #VisualStudio Building
     - platform: x86 
       TARGET: vs
+      ARCH: 32
     - platform: x64
-      TARGET: vs 
+      TARGET: vs
+      ARCH: 64 
     
 configuration: Debug
 shallow_clone: true

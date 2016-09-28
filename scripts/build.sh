@@ -108,11 +108,6 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        if [ "$PLATFORM" == "x64" ]; then
-            ARCH=64
-        elif [ "$PLATFORM" == "x86" ]; then
-            ARCH=32
-        fi
         echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
         ./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
     else
