@@ -24,7 +24,7 @@ GIT_TAG=master
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	curl -Lk $GIT_URL/archive/master.tar.gz -o  rtaudio-$GIT_TAG.tar.gz
+	wget $GIT_URL/archive/master.tar.gz -O rtaudio-$GIT_TAG.tar.gz
 	tar -xf rtaudio-$GIT_TAG.tar.gz
 	mv rtaudio-$GIT_TAG rtAudio
 	rm rtaudio-$GIT_TAG.tar.gz
@@ -98,7 +98,13 @@ function build() {
 		local API="--with-wasapi --with-ds" # asio as well?
 		mkdir -p build
 		cd build
-		cmake .. -G "Unix Makefiles"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON -DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe -DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe -DBUILD_TESTING=OFF
+		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/mingw32/bin/make \
+			-DAUDIO_WINDOWS_WASAPI=ON \
+			-DAUDIO_WINDOWS_DS=ON \
+			-DAUDIO_WINDOWS_ASIO=ON \
+			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
+			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
+			-DBUILD_TESTING=OFF
 		make
 	fi
 

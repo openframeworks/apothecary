@@ -7,7 +7,7 @@
 # Makefile build system, 
 # some Makefiles are out of date so patching/modification may be required
 
-FORMULA_TYPES=( "osx" "vs" "msys2" "ios" "tvos" "android" "emscripten")
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
 VER=3170 # 3.16.0

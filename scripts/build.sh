@@ -3,8 +3,6 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-echo "build.sh begin"
-
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 cd $APOTHECARY_PATH
@@ -110,18 +108,22 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        ./apothecary -j$PARALLEL -t$TARGET -a$PLATFORM update $formula_name > formula.log 2>&1 &
+        if [ "$PLATFORM" == "x64" ]; then
+            ARCH=64
+        elif [ "$PLATFORM" == "x86" ]; then
+            ARCH=32
+        fi
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
+        ./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
     else
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name #>> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-    echoDots $apothecaryPID
+    #echoDots $apothecaryPID
     wait $apothecaryPID
 done
-
-echo "build.sh after formulas"
 
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     # exit here on PR's 

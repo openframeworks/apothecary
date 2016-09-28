@@ -6,7 +6,7 @@
 #
 # an autotools project
 
-FORMULA_TYPES=( "osx" "vs" "msys2" "ios" "tvos" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
 VER=2.5.5

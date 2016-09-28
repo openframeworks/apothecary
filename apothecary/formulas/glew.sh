@@ -8,7 +8,7 @@
 # use "make glew.lib" to build only the lib without demos/tests
 # the OPT flag is used for CFLAGS (& LDFLAGS I think?)
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "osx" "vs" )
 
 # define the version
 VER=1.11.0

@@ -1,11 +1,11 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # Boost
 # Filesystem and system modules only until they are part of c++ std
 # 
 # uses a own build system
 
-FORMULA_TYPES=( "osx" "msys2" "ios" "tvos" "android" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
 VERSION=1.58.0
@@ -20,7 +20,7 @@ URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSI
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv ${URL}
+	wget ${URL}
 	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
 	rm ${TARBALL}
