@@ -24,7 +24,7 @@ GIT_TAG=master
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	curl -Lk $GIT_URL/archive/master.tar.gz -o  rtAudio-$GIT_TAG.tar.gz
+	curl -Lk $GIT_URL/archive/master.tar.gz -o  rtaudio-$GIT_TAG.tar.gz
 	tar -xf rtaudio-$GIT_TAG.tar.gz
 	mv rtaudio-$GIT_TAG rtAudio
 	rm rtaudio-$GIT_TAG.tar.gz
