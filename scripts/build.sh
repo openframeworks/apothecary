@@ -3,6 +3,8 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+echo "build.sh begin"
+
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 cd $APOTHECARY_PATH
@@ -118,6 +120,8 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
     echoDots $apothecaryPID
     wait $apothecaryPID
 done
+
+echo "build.sh after formulas"
 
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     # exit here on PR's 
