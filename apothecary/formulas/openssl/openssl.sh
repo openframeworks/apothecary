@@ -61,6 +61,8 @@ function build() {
         local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
+        rm -f libcrypto.a
+        rm -f libssl.a
 	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
         sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
         sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
@@ -70,6 +72,8 @@ function build() {
 		make -j 1 install
 
 
+        rm -f libcrypto.a
+        rm -f libssl.a
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
         sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
@@ -180,6 +184,8 @@ function build() {
                 FLAGS="$FLAGS no-async"
             fi
 
+            rm -f libcrypto.a
+            rm -f libssl.a
 			if [ "${IOS_ARCH}" == "i386" ]; then
 			    ./Configure darwin-i386-cc $FLAGS
 		    elif [ "${IOS_ARCH}" == "x86_64" ]; then
