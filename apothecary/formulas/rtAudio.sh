@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # RtAudio
 # RealTime Audio input/output across Linux, Macintosh OS-X and Windows

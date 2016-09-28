@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # GLEW
 # OpenGL Extensions Wrangler

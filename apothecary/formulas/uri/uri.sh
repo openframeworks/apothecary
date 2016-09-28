@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # cpp-uri
 # Uri parsing library that will become part of c++ std

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # GLFW
 # creating windows with OpenGL contexts and managing input and events

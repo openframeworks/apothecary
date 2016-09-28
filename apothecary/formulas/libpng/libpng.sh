@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # the official PNG reference library
 # http://libpng.org/pub/png/libpng.html

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # Cairo
 # 2D graphics library with support for multiple output devices
