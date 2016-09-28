@@ -40,9 +40,6 @@ function download() {
 	if [ "$TYPE" == "vs" ] ; then
 		# Get the custom cairo visual studio solution.
 		git clone https://github.com/DomAmato/Cairo-VS
-
-		# Remove the xz extractor.
-		rm xz.exe
 	fi
 }
 
