@@ -8,3 +8,5 @@
 !/scripts/**/*
 /apothecary/build
 .DS_Store
+!.travis.yml
+!.appveyor.yml

@@ -104,6 +104,9 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
             echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
             ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
         fi
+    elif [ "$TARGET" == "vs" ]; then
+        echo Compiling $formula_name
+        ./apothecary -j$PARALLEL -t$TARGET -a$PLATFORM update $formula_name > formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
