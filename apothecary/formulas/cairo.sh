@@ -29,14 +29,6 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	if [ "$TYPE" == "vs" ] ; then
-		# Download the xz extractor.
-		wget http://tukaani.org/xz/xz-5.2.1-windows.zip
-
-		# Unzip xz and save it to the local directory.
-		unzip -jqo xz-5.2.1-windows.zip bin_x86-64/xz.exe -d .
-	fi
-
 	wget http://cairographics.org/releases/cairo-$VER.tar.xz
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo

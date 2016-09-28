@@ -26,8 +26,9 @@ clone_depth: 10
 init:
 - set MSYS2_PATH=c:\msys64
 #- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Sy pacman"'
-#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syuu"'
-#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S perl"'
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syu"'
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Su"'
+- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S xz"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
 
