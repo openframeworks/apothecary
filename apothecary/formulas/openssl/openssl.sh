@@ -62,6 +62,8 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
 	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
         make clean 
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
@@ -70,6 +72,8 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
         make clean 
         make -j1 depend 
         make -j${PARALLEL_MAKE} 
@@ -184,16 +188,19 @@ function build() {
 			    ./Configure iphoneos-cross $FLAGS
 		    fi
             make clean
-
+            
+            # For openssl 1.1.0
             #if [ "$TYPE" == "ios" ]; then
             #    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
             #fi
 
-            #sed -ie "s!^CFLAG=\(.*\)!CFLAG=$CFLAGS \1!" Makefile
+            #sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
+
+
             sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
             #sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
-            #sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-            #sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+            sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+            sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
 			echo "Running make for ${IOS_ARCH}"
 
