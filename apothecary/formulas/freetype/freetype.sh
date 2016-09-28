@@ -9,24 +9,23 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.5.5
-FVER=255
+VER=2.7
+FVER=27
 
 # tools for git use
 GIT_URL=http://git.savannah.gnu.org/r/freetype/freetype2.git
-GIT_TAG=VER-2-5-5
+GIT_TAG=VER-2-7
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz
-	tar -xf freetype-$VER.tar.gz
+	wget http://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz
+	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
 	rm freetype*.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
 	mkdir -p lib/$TYPE
 }
 
@@ -85,11 +84,17 @@ function build() {
 		echo "$BUILD_DIR"
 	
 	elif [ "$TYPE" == "vs" ] ; then
-		
+		unset TMP
+		unset tmp
+		unset TEMP
+		unset temp
 		cd builds/windows/vc2010 #this upgrades without issue to vs2015
 		vs-upgrade "freetype.sln"
-		vs-build "freetype.vcxproj" Build "Release|Win32"
-		vs-build "freetype.vcxproj" Build "Release|x64"
+		if [ $ARCH ==  32 ] ; then
+			vs-build "freetype.sln" Build "Release|Win32"
+		elif [ $ARCH == 64 ] ; then
+			vs-build "freetype.sln" Build "Release|x64"
+		fi
 		cd ../../../
 	
 	elif [ "$TYPE" == "msys2" ] ; then
@@ -393,10 +398,13 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
 	elif [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/lib/$TYPE/Win32
-		mkdir -p $1/lib/$TYPE/x64		
-		cp -v objs/vc2010/Win32/freetype$FVER.lib $1/lib/$TYPE/Win32/libfreetype.lib
-		cp -v objs/vc2010/x64/freetype$FVER.lib $1/lib/$TYPE/x64/libfreetype.lib
+		if [ $ARCH ==  32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32
+			cp -v objs/vc2010/Win32/freetype$FVER.lib $1/lib/$TYPE/Win32/libfreetype.lib
+		else
+			mkdir -p $1/lib/$TYPE/x64		
+			cp -v objs/vc2010/x64/freetype$FVER.lib $1/lib/$TYPE/x64/libfreetype.lib
+		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
 		echoWarning "TODO: copy msys2 lib"
