@@ -4,8 +4,8 @@
 # http://libpng.org/pub/png/libpng.html
 
 # define the version
-MAJOR_VER=16/older-releases
-VER=1.6.2
+MAJOR_VER=16
+VER=1.6.25
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO https://downloads.sourceforge.net/project/libpng/libpng$MAJOR_VER/$VER/libpng-$VER.tar.gz
+	wget http://prdownloads.sourceforge.net/libpng/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
 	tar -xf libpng-$VER.tar.gz
 	mv libpng-$VER libpng
 	rm libpng-$VER.tar.gz
@@ -53,6 +53,8 @@ function build() {
 		make clean
 		make
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		if [ $ARCH == 32 ] ; then
 			cd projects/visualc71
 			cmd //c buildwin.cmd Win32
@@ -61,14 +63,6 @@ function build() {
 			cd projects/visualc71
 			cmd //c buildwin.cmd x64
 		fi
-		
-	else
-	./configure LDFLAGS="-arch i386 -arch x86_64" \
-				CFLAGS="-Os -arch i386 -arch x86_64" \
-				--prefix=$BUILD_ROOT_DIR \
-				--disable-dependency-tracking
-		make clean
-		make
 	fi
 
 
