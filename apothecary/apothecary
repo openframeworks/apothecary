@@ -620,6 +620,7 @@ function downloadFormula(){
 
 	if [ -e $1 ] ; then
         if [ $FORCE_DOWNLOAD -eq 1 ]; then
+			echo "removing already existing $1" 
             rm -rf ${PWD}/${1}
         else
             echo "... skipping, $1 src dir already exists in ${PWD}/${1}"

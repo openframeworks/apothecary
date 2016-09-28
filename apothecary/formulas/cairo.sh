@@ -31,13 +31,13 @@ GIT_TAG=$VER
 function download() {
 	if [ "$TYPE" == "vs" ] ; then
 		# Download the xz extractor.
-		curl -LO http://tukaani.org/xz/xz-5.2.1-windows.zip
+		wget http://tukaani.org/xz/xz-5.2.1-windows.zip
 
 		# Unzip xz and save it to the local directory.
-		unzip -j xz-5.2.1-windows.zip bin_x86-64/xz.exe -d .
+		unzip -jqo xz-5.2.1-windows.zip bin_x86-64/xz.exe -d .
 	fi
 
-	curl -LO http://cairographics.org/releases/cairo-$VER.tar.xz
+	wget http://cairographics.org/releases/cairo-$VER.tar.xz
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz

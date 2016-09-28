@@ -109,7 +109,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
         echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
-        ./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
