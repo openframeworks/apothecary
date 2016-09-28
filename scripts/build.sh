@@ -64,6 +64,8 @@ elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     brew reinstall libtool
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
+elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
+    PARALLEL=4
 else
     PARALLEL=1
 fi

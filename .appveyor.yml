@@ -24,8 +24,8 @@ init:
 - set MSYS2_PATH=c:\msys64
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Sy pacman"'
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syuu"'
-- if "%BUILDER%_%PLATFORM%"=="MSYS2_x86" set MSYSTEM=MINGW32
-- if "%BUILDER%_%PLATFORM%"=="MSYS2_x64" set MSYSTEM=MINGW64
+- if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
+- if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
 
 
 - IF "BUILDER"=="VS" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
@@ -34,4 +34,4 @@ init:
 #- if "%BUILDER%"=="MSYS2" (%MSYS2_PATH%\usr\bin\bash -lc "scripts/msys2/install_dependencies.sh --noconfirm")
 
 build_script:
-- (%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh")
+- %MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"
