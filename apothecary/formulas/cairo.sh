@@ -50,6 +50,8 @@ function prepare() {
 		apothecaryDepend copy pixman
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
+		apothecaryDepend build zlib
+		apothecaryDepend copy zlib
 
 		echo "copying from $PWD"
 		cp build/libpng/projects/visualc71/Win32_LIB_Release/libpng.lib build/libpng/libpng.lib
