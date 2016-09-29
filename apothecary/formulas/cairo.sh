@@ -42,23 +42,25 @@ function download() {
 function prepare() {
 	if [ "$TYPE" == "vs" ] ; then
 
-		apothecaryDependencies prepare
 
-		apothecaryDepend build libpng
-		apothecaryDepend copy libpng
-		apothecaryDepend build pixman
-		apothecaryDepend copy pixman
-		apothecaryDepend build freetype
-		apothecaryDepend copy freetype
+		apothecaryDepend prepare zlib
 		apothecaryDepend build zlib
 		apothecaryDepend copy zlib
+		apothecaryDepend prepare libpng
+		apothecaryDepend build libpng
+		apothecaryDepend copy libpng
+		apothecaryDepend prepare pixman
+		apothecaryDepend build pixman
+		apothecaryDepend copy pixman
+		apothecaryDepend prepare freetype
+		apothecaryDepend build freetype
+		apothecaryDepend copy freetype
 
 		echo "copying from $PWD"
-		cp build/libpng/projects/visualc71/Win32_LIB_Release/libpng.lib build/libpng/libpng.lib
-		ls build/zlib
-		ls build/zlib/Release
-		cp build/zlib/Release/zlib.lib build/zlib/zlib.lib
-
+		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
+		ls ../zlib
+		ls ../zlib/Release
+		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	else
 		# generate the configure script if it's not there
 		if [ ! -f configure ] ; then
@@ -85,7 +87,6 @@ function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		ROOT=${PWD}/..
-		export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
 		export INCLUDE="$INCLUDE;$ROOT/zlib"
 		export INCLUDE="$INCLUDE;$ROOT/libpng"
 		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"

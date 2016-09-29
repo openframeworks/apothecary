@@ -44,9 +44,9 @@ function copy() {
 		return
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			cp -v Release/zlib.dll $1/../../export/$TYPE/Win32/Zlib.dll
+			cp -v Release/zlib.dll $OF_ROOT/export/$TYPE/Win32/Zlib.dll
 		elif [ $ARCH == 64 ] ; then
-			cp -v Release/zlib.dll $1/../../export/$TYPE/x64/Zlib.dll
+			cp -v Release/zlib.dll $OF_ROOT/export/$TYPE/x64/Zlib.dll
 		fi
 
 	else

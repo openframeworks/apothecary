@@ -47,7 +47,7 @@ TYPE= # library build type ("osx", "ios", "vs", etc)
 ARCH=32 # library build arch, 32 or 64 bit (not used for some build types)
 
 # full path to this script's dir
-APOTHECARY_DIR=$(pwd)
+APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # full path to the dir of the current formula
 FORMULA_DIR=
@@ -107,10 +107,14 @@ BUILDROOT_SUBDIR=_buildroot
 # paths relative to this script
 REL_FORMULAS_DIR=formulas
 REL_BUILD_DIR=build
-REL_OF_ROOT=../../
-REL_LIBS_DIR=../
+REL_OF_ROOT=${APOTHECARY_DIR}/../../../
+REL_LIBS_DIR=${APOTHECARY_DIR}/../
 REL_ADDONS_DIR=$REL_OF_ROOT/addons
+OF_ROOT=$(realpath $REL_OF_ROOT)
+LIBS_DIR=$(realpath $REL_LIBS_DIR)
+ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
 CHECKOUT=YES
+
 
 # ansi console escape codes
 CON_DEFAULT="\033[0m"
@@ -312,6 +316,14 @@ shift 1
 if [ $# -lt 1 ] ; then
 	echoWarning " Missing lib build target (maybe you wanted \"core\"). See help: 'apothecary -h'."
 	exit 1
+fi
+
+if [ "$TYPE" == "vs" ]; then
+    if [ "$ARCH" == "64" ]; then
+        export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
+    else
+        export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
+    fi
 fi
 
 ################################################################################
@@ -521,7 +533,7 @@ function doCommand() {
 
 					# set libs dest dir to addon/libs if it hasn't been manually set
 					if [ $IS_CUSTOM_LIBS_DIR == 0 ] ; then
-						LIBS_DIR=$APOTHECARY_DIR/$REL_ADDONS_DIR/$1/libs
+						LIBS_DIR=$(realpath $APOTHECARY_DIR/$REL_ADDONS_DIR/$1/libs)
 					fi
 
 					# process all formulas in scripts/formulas
@@ -888,6 +900,7 @@ function clean() {
 # $1 = command
 # $2 = dependency name
 function apothecaryDepend() {
+    local ROOT=$PWD
 	local depend="${2%.*}" # removes extension
 
 	# detect if dependency is a main OF lib
@@ -909,7 +922,12 @@ function apothecaryDepend() {
 	fi
 
 	# Uses git IF the USE_GIT variable is set
-	$APOTHECARY_SCRIPT -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
+    if [ $FORCE_DOWNLOAD -eq 1 ]; then
+	    $APOTHECARY_SCRIPT -f -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
+    else
+        $APOTHECARY_SCRIPT -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
+    fi
+    cd $ROOT
 }
 
 # do a command on all formula dependencies in separate apothecary runs
