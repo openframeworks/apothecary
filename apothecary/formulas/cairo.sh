@@ -52,8 +52,8 @@ function prepare() {
 		apothecaryDepend copy freetype
 
 		echo "copying from $PWD"
-		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
-		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+		cp build/libpng/projects/visualc71/Win32_LIB_Release/libpng.lib build/libpng/libpng.lib
+		cp build/zlib/Release/zlib.lib build/zlib/zlib.lib
 
 	else
 		# generate the configure script if it's not there
