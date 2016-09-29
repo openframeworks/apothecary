@@ -51,7 +51,7 @@ function prepare() {
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
 
-		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib cp ../libpng/libpng.lib
+		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
 		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 
 	else
