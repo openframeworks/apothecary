@@ -53,6 +53,8 @@ function prepare() {
 
 		echo "copying from $PWD"
 		cp build/libpng/projects/visualc71/Win32_LIB_Release/libpng.lib build/libpng/libpng.lib
+		ls build/zlib
+		ls build/zlib/Release
 		cp build/zlib/Release/zlib.lib build/zlib/zlib.lib
 
 	else
