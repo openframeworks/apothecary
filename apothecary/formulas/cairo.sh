@@ -73,6 +73,7 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		ROOT=${PWD}/..
 		export INCLUDE="$INCLUDE;$ROOT/zlib"
+		export INCLUDE="$INCLUDE;$ROOT/libpng"
 		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"
 		export INCLUDE="$INCLUDE;$ROOT/cairo/boilerplate"
 		export INCLUDE="$INCLUDE;$ROOT/cairo/src"

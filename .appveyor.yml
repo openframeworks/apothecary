@@ -32,7 +32,7 @@ init:
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
 - if "%TARGET%"=="vs" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
-- call "%VS140COMNTOOLS%/vsvars32.bat"
+- call "%VS140COMNTOOLS%/vsvars32.bat" %PLATFORM%
 
 #install:
 #- if "%BUILDER%"=="MSYS2" (%MSYS2_PATH%\usr\bin\bash -lc "scripts/msys2/install_dependencies.sh --noconfirm")
