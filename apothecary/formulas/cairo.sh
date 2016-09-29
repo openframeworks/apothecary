@@ -51,6 +51,9 @@ function prepare() {
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
 
+		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib cp ../libpng/libpng.lib
+		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+
 	else
 		# generate the configure script if it's not there
 		if [ ! -f configure ] ; then
@@ -87,8 +90,6 @@ function build() {
 		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
 		sed -i "s/-MD/-MT/" build/Makefile.win32.common
 		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
-		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
-		sed -i "s!/libpng.lib!/projects/visualc71/Win32_LIB_Release/libpng.lib!" build/Makefile.win32.common
 		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
