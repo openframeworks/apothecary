@@ -77,6 +77,7 @@ function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		ROOT=${PWD}/..
+		export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
 		export INCLUDE="$INCLUDE;$ROOT/zlib"
 		export INCLUDE="$INCLUDE;$ROOT/libpng"
 		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"
