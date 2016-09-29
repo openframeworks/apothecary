@@ -87,7 +87,8 @@ function build() {
 		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
 		sed -i "s/-MD/-MT/" build/Makefile.win32.common
 		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
-		sed -i "s/-nologo//g" build/Makefile.win32.common
+		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
+		sed -i "s!/libpng.lib!/projects/visualc71/Win32_LIB_Release/libpng.lib!" build/Makefile.win32.common
 		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
