@@ -44,8 +44,10 @@ function copy() {
 		return
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32/
 			cp -v Release/zlib.dll $1/lib/$TYPE/Win32/Zlib.dll
 		elif [ $ARCH == 64 ] ; then
+			mkdir -p $1/lib/$TYPE/x64/
 			cp -v Release/zlib.dll $1/lib/$TYPE/x64/Zlib.dll
 		fi
 
