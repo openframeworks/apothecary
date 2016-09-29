@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env /bash
 #
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
@@ -48,7 +48,7 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			cp -v Release/zlib.dll $1/../../export/$TYPE/x64/Zlib.dll
 		fi
-		
+
 	else
 		make install
 	fi

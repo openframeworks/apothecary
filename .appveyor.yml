@@ -12,16 +12,16 @@ environment:
       ARCH: 32
 
   #VisualStudio Building
-    - platform: x86 
+    - platform: x86
       TARGET: vs
       ARCH: 32
     - platform: x64
       TARGET: vs
-      ARCH: 64 
-    
+      ARCH: 64
+
 configuration: Debug
 shallow_clone: true
-clone_depth: 10  
+clone_depth: 10
 
 init:
 - set MSYS2_PATH=c:\msys64
@@ -31,10 +31,9 @@ init:
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S xz"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
+- if "%TARGET%"=="vs" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
+- call "%VS140COMNTOOLS%/vsvars32.bat"
 
-
-- if "%TARGET%"=="vs" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
-  
 #install:
 #- if "%BUILDER%"=="MSYS2" (%MSYS2_PATH%\usr\bin\bash -lc "scripts/msys2/install_dependencies.sh --noconfirm")
 

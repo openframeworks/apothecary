@@ -8,7 +8,7 @@
 # see docs/formula_template.sh for a bare formula script
 #
 # Core OF lib formulas are located in the formulas dir and addon formulas should
-# be in addons/ofxMyAddon/scripts/formulas 
+# be in addons/ofxMyAddon/scripts/formulas
 #
 # 2014 OpenFrameworks team
 # 2013 Dan Wilcox <danomatika@gmail.com>,
@@ -142,7 +142,7 @@ HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
 
 about:
  this is the OpenFrameworks library apothecary
-  it mixes formulas and potions to build and 
+  it mixes formulas and potions to build and
   update OF C/C++ lib dependencies
 
 commands:
@@ -155,7 +155,7 @@ commands:
   remove	remove the library from the build cache
   remove-lib	remove the library from the libs dir
   remove-all	remove the library from the build cache and libs dir
-  
+
 options:
   -t	specify libary type when building, detects type from OS by default
 	valid types: osx, linux, linux64, linuxarmv6l, linuxarmv7l, vs, msys2, ios, tvos, android
@@ -174,7 +174,7 @@ options:
 
   -s	specify the git-tag to select another version of the library
 	note: availible only with git option
-	
+
   -f    force download even if build folder already exists
 
   -x    use visual studio express tools
@@ -187,7 +187,7 @@ examples:
 
   # update only glew
   apothecary update glew
- 
+
   # remove all downloaded core lib src dirs from the build cache
   apothecary remove core
 
@@ -197,7 +197,7 @@ examples:
   # remove glew from the build cache and libs dir
   apothecary remove-all glew
 
-  # update freetype for ios 
+  # update freetype for ios
   apothecary -t ios freetype
 
   # update assimp for 64bit OSX (maybe in the future ...)
@@ -207,7 +207,7 @@ examples:
   apothecary update ofxAssimpModelLoader
 
   # update a formula script manually and set build and lib dest dirs
-  apothecary -b ../build -d ../libs path/to/formula.sh 
+  apothecary -b ../build -d ../libs path/to/formula.sh
 
   # clean freetype via git and switch version to VER-2-5-0
   apothecary -g -s VER-2-5-0 clean freetype
@@ -293,7 +293,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		   VS_BUILD_TOOL=WDExpress ;;
         f) # force download
            FORCE_DOWNLOAD=1 ;;
-		[?]) # print help and exit 
+		[?]) # print help and exit
 			 echo "$HELP" ; exit 0 ;;
 	esac
 done
@@ -328,9 +328,9 @@ function installAndroidToolchain() {
 
 
 	cd $ANDROID_NDK_ROOT/build/tools
-	
+
 	local HOST=$(${BUILD_DIR}/../ostype.sh)
-	
+
 	if [ "${HOST}" == "linux" ]; then
 	    ANDROID_HOST="linux-x86"
 	elif [ "${HOST}" == "linux64" ]; then
@@ -379,7 +379,7 @@ function isValidType() {
 }
 
 # check if a given string matches anything in FORMULA_TYPES,
-# bool result is set to second argument 
+# bool result is set to second argument
 function isFormulaType() {
 	local i
 	for i in "${FORMULA_TYPES[@]}" ; do
@@ -404,29 +404,29 @@ function checkFormula() {
 
 	# is given formula an existing script?
 	if [ -e $1 -a "${1##*.}" == "sh" ] ; then
-		local path=$1	
+		local path=$1
 		case $1 in
 			/*) : ;; # absolute path
 			 *) path=$WD/$1 ;; # relative path
 		esac
 		script=$(basename $path)
 		parentDir=$(dirname $path)
-	
+
 	# existing formula dir with script?
 	elif [ -e $1 -a -d $1 -a -e $1/$1.sh ] ; then
-		local path=$1/$1.sh	
+		local path=$1/$1.sh
 		case $1 in
 			/*) : ;; # absolute path
 			 *) path=$WD/$1/$1.sh ;; # relative path
 		esac
 		script=$(basename $path)
 		parentDir=$(dirname $path)
-			
+
 	# is the given formula name a script in the formulas dir?
 	elif [ -e $REL_FORMULAS_DIR/$1.sh ] ; then
 		script=$1.sh
-		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR 
-	
+		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR
+
 	# is the given formula name a dir in the formulas dir?
 	elif [ -e $REL_FORMULAS_DIR/$1 -a -d $REL_FORMULAS_DIR/$1 ] ; then
 		script=$1.sh
@@ -434,17 +434,17 @@ function checkFormula() {
 
 	# is the given formula name a script in the depends formulas dir?
 	elif [ -e $REL_FORMULAS_DIR/$DEPENDS_SUBDIR/$1.sh ] ; then
-		
+
 		echoVerbose " Detected dependency: \"$1\""
 
 		script=$1.sh
 		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR
 
-		eval $5=1 
+		eval $5=1
 
 	# is the given formula name an addon in the addons dir?
-	elif [ -e $REL_ADDONS_DIR/$1 ] ; then 
-		
+	elif [ -e $REL_ADDONS_DIR/$1 ] ; then
+
 		echoVerbose " Detected addon: \"$1\""
 
 		# are there formulas in the addon formulas dir?
@@ -517,7 +517,7 @@ function doCommand() {
 				local tmpLibsDir=$LIBS_DIR
 
 				# are there formulas in the addon formulas dir?
-				if [ "$FORMULA_DIR" != "" ] ; then					
+				if [ "$FORMULA_DIR" != "" ] ; then
 
 					# set libs dest dir to addon/libs if it hasn't been manually set
 					if [ $IS_CUSTOM_LIBS_DIR == 0 ] ; then
@@ -530,17 +530,17 @@ function doCommand() {
 						# is the file in the directory a valid formula extension
 						if [ -e $FORMULA_DIR -a "${addonFormula##*.}" == "sh" ] ; then
 							doCommand $shouldSource $cmd $FORMULA_DIR/$addonFormula
-						else 
+						else
 							echoVerbose "Unknown formula extension '$addonFormula' with extension: ${addonFormula##*.}"
 						fi
 					done
-					
+
 					# back to default
 					if [ $IS_CUSTOM_LIBS_DIR == 0 ] ; then
 						LIBS_DIR=$tmpLibsDir
 					fi
 				else
-					echoInfo " Skipping addon \"$1\": no formulas found"					
+					echoInfo " Skipping addon \"$1\": no formulas found"
 				fi
 
 			else # OF lib or dependency formula
@@ -602,14 +602,14 @@ function updateFormula() {
 
 # download a given library into the build cache, arg is library name
 function downloadFormula(){
-	
+
 	echo
 	echoInfo " Downloading \"$1\""
 	echoVerbose " Formula dir: $FORMULA_DIR"
 	echoVerbose " Formula build types: ${FORMULA_TYPES[*]}"
 	echoVerbose " Build dir: $BUILD_DIR"
 	echoVerbose " Depends formula dir: $DEPENDS_FORMULA_DIR"
-	if [ ${#FORMULA_DEPENDS[@]} -gt 0 ] ; then 
+	if [ ${#FORMULA_DEPENDS[@]} -gt 0 ] ; then
 		echoVerbose " Dependencies: ${FORMULA_DEPENDS[*]}"
 	fi
 	echo
@@ -620,8 +620,8 @@ function downloadFormula(){
 
 	if [ -e $1 ] ; then
         if [ $FORCE_DOWNLOAD -eq 1 ]; then
-			echo "removing already existing $1" 
-            rm -rf ${PWD}/${1}
+			echo "removing already existing $1"
+            rm -rf ${PWD}/${1}*
         else
             echo "... skipping, $1 src dir already exists in ${PWD}/${1}"
         fi
@@ -633,7 +633,7 @@ function downloadFormula(){
 	    else
 		    download $1
 	    fi
-	
+
 	    if [ ! -d $BUILD_DIR/$1 ] ; then
 		    echoError " It looks like downloading failed for \"$1\""
 		    exit 1
@@ -665,14 +665,14 @@ function prepareFormula() {
 	fi
 
 	cd $BUILD_DIR/$1
-	
+
 	# dependencies
 	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies prepare $1
 	fi
-	
+
 	prepare $1
-	
+
 	cd $APOTHECARY_DIR
 }
 
@@ -727,7 +727,7 @@ function copyFormula() {
 
 # clean a given library, arg is library name
 function cleanFormula() {
-	
+
 	# run build command in src dir
 	echo
 	echoInfo " Cleaning \"$1\""
@@ -755,7 +755,7 @@ function cleanFormula() {
             }
 		fi
 	else
-		
+
 		# dependencies
 		if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
 			apothecaryDependencies clean
@@ -882,7 +882,7 @@ function copy() {
 }
 function clean() {
 	echoWarning " Clean function not implemented"
-} 
+}
 
 # do a command on a given dependency in a separate apothecary run
 # $1 = command
@@ -898,7 +898,7 @@ function apothecaryDepend() {
 			echoVerbose " ... skipping main lib dependency $depend"
 			return
 		fi
-	
+
 	# a dependency
 	elif [ -f $DEPENDS_FORMULA_DIR/$depend.sh -o -d $DEPENDS_FORMULA_DIR/$depend ] ; then
 		: # noop
@@ -909,7 +909,7 @@ function apothecaryDepend() {
 	fi
 
 	# Uses git IF the USE_GIT variable is set
-	$APOTHECARY_SCRIPT -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend 
+	$APOTHECARY_SCRIPT -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
 }
 
 # do a command on all formula dependencies in separate apothecary runs
@@ -937,9 +937,9 @@ function apothecaryDependencies() {
 function  dump_output() {
 	if [ -z "$BUILD_OUTPUT" ]; then
 		echo "BUILD_OUTPUT not set."
-	else 
+	else
 		echo Tailing the last 500 lines of output:
-		tail -500 "$BUILD_OUTPUT"  
+		tail -500 "$BUILD_OUTPUT"
 	fi
 }
 function  error_handler() {
@@ -948,7 +948,7 @@ function  error_handler() {
 	# nicely terminate the ping output loop
 	if [ -z "$PING_LOOP_PID" ]; then
 		echo "Loop PID not set."
-	else 
+	else
 		kill $PING_LOOP_PID || true
 	fi
 
@@ -1022,7 +1022,7 @@ echoVerbose "Architecture: $ARCH"
 # use default build dir?
 if [ "$BUILD_DIR" == "" ] ; then
 	BUILD_DIR=$APOTHECARY_DIR/$REL_BUILD_DIR
-	
+
 else # manually set
 	case $BUILD_DIR in
 		/*) : ;; # absolute path
@@ -1107,7 +1107,7 @@ case "$A_CMD" in
 
 	prepare)
 		doCommand 1 prepareFormula $@ ;;
-	
+
 	build)
 		doCommand 1 buildFormula $@ ;;
 

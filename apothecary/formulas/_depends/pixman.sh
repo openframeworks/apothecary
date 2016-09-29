@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env /bash
 #
 # a low-level software library for pixel manipulation
 # http://pixman.org/
@@ -23,7 +23,7 @@ function prepare() {
 	if [ "$TYPE" == "vs" ] ; then
 		echo "handled in the cairo script"
 	# generate the configure script if it's not there
-	else 
+	else
 		if [ ! -f configure ] ; then
 			./autogen.sh
 		fi
@@ -53,11 +53,11 @@ function build() {
 		echo "build is handled in the cairo script"
 #		sed s/-MD/-MT/ Makefile.win32 > Makefile.fixed
 #		mv Makefile.fixed Makefile.win32
-		
+
 #		CURRENTPATH=`pwd`
 #		WINPATH=$(echo "$CURRENTPATH" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
 #		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && nmake -f Makefile.win32 "CFG=release"'
-		
+
 		#cmd.exe /c 'nmake -f Makefile.win32 "CFG=release"'
 	else
 	./configure LDFLAGS="-arch i386 -arch x86_64" \
@@ -72,8 +72,8 @@ function build() {
 		make
 	fi
 
-	
-	
+
+
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
@@ -84,7 +84,7 @@ function copy() {
 		# lib
 		cd pixman
 		make install
-		
+
 		# pkg-config info
 		cd ../
 		make install-pkgconfigDATA
