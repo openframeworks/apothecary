@@ -12,7 +12,7 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://zlib.net/zlib-$VER.tar.gz
+	wget https://github.com/madler/zlib/archive/v$VER.tar.gz
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
 	rm zlib-$VER.tar.gz
