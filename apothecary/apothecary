@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 #
 # this is the OpenFrameworks library apothecary,
 # it mixes formulas and potions to build and update the C/C++ lib dependencies
