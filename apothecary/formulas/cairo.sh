@@ -44,7 +44,12 @@ function prepare() {
 
 		apothecaryDependencies prepare
 
+		apothecaryDepend build libpng
+		apothecaryDepend copy libpng
+		apothecaryDepend build pixman
+		apothecaryDepend copy pixman
 		apothecaryDepend build freetype
+		apothecaryDepend copy freetype
 
 	else
 		# generate the configure script if it's not there
