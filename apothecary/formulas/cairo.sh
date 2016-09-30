@@ -137,14 +137,13 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		cd ..
 		#this copies all header files but we dont need all of them it seems
 		#maybe alter the VS-Cairo build to separate necessary headers
 		# make the path in the libs dir
 		mkdir -p $1/include/cairo
 
 		# copy the cairo headers
-		cp -Rv cairo/src/*.h $1/include/cairo
+		cp -Rv src/*.h $1/include/cairo
 
 		if [ $ARCH == 32 ] ; then
 			# make the libs path
@@ -153,6 +152,7 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
+			echo $PWD
 			cp -v src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
 		fi
 		cd cairo
