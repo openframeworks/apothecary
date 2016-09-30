@@ -38,7 +38,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	# The ./configure / MAKEFILE sequence is broken for OSX, making it 
+	# The ./configure / MAKEFILE sequence is broken for OSX, making it
 	# impossible to create universal libs in one pass.  As a result, we compile
 	# the project manually according to the author's page:
 	# https://www.music.mcgill.ca/~gary/rtaudio/compiling.html
@@ -79,6 +79,8 @@ function build() {
 		lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		local API="--with-wasapi --with-ds" # asio as well?
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
@@ -132,11 +134,11 @@ function copy() {
 			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
 			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib
 		fi
-		
+
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
-	
+
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a
 	fi
@@ -149,7 +151,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-	
+
 	if [ "$TYPE" == "vs" ] ; then
 		vs-clean "rtaudio_static.vcxproj"
 	else

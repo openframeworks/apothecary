@@ -33,6 +33,8 @@ function build() {
 	rm -f CMakeCache.txt
 
 	if [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
@@ -53,11 +55,11 @@ function build() {
         fi
 		# *nix build system
 
-		mkdir -p build 
+		mkdir -p build
 		cd build
 
-		# OS X needs both arches specified to be universal 
-		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call 
+		# OS X needs both arches specified to be universal
+		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call
 		if [ "$TYPE" == "osx" ] ; then
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
 					-DGLFW_BUILD_TESTS=OFF \
@@ -65,14 +67,14 @@ function build() {
 					-DBUILD_SHARED_LIBS=OFF \
 					-DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_C_FLAGS='-arch i386 -arch x86_64' \
-					$EXTRA_CONFIG 
+					$EXTRA_CONFIG
 		else
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
 					-DGLFW_BUILD_TESTS=OFF \
 					-DGLFW_BUILD_EXAMPLES=OFF \
 					-DBUILD_SHARED_LIBS=OFF \
 					-DCMAKE_BUILD_TYPE=Release
-					$EXTRA_CONFIG 
+					$EXTRA_CONFIG
 		fi
 
  		make clean
@@ -96,7 +98,7 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
-		fi		
+		fi
 	else
 		# Standard *nix style copy.
 		# copy headers

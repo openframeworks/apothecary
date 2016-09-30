@@ -51,6 +51,8 @@ function build() {
 		lipo -c libGLEW-i386.a libGLEW-x86_64.a -o libGLEW.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		cd build/vc12 #this upgrades without issue to vs2015
 		#vs-clean "glew.sln"
 		vs-upgrade "glew.sln"
@@ -73,7 +75,7 @@ function copy() {
 	cp -Rv include/* $1/include
 
 	rm -rf $1/lib/$TYPE/*
-	
+
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE

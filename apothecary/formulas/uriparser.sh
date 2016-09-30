@@ -34,6 +34,8 @@ function build() {
 	rm -f CMakeCache.txt
 
 	if [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
@@ -60,7 +62,7 @@ function build() {
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
         fi
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --disable-test --disable-doc --enable-static=yes --enable-shared=no 
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --disable-test --disable-doc --enable-static=yes --enable-shared=no
         make clean
 	    make -j${PARALLEL_MAKE}
 	    make install
@@ -73,7 +75,7 @@ function build() {
 		make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -93,7 +95,7 @@ function build() {
 
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
-        if [ "${TYPE}" == "ios" ]; then 
+        if [ "${TYPE}" == "ios" ]; then
             lipo -create build/$TYPE/i386/lib/liburiparser.a \
                          build/$TYPE/x86_64/lib/liburiparser.a \
                          build/$TYPE/armv7/lib/liburiparser.a \
