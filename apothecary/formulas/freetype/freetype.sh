@@ -91,9 +91,9 @@ function build() {
 		cd builds/windows/vc2010 #this upgrades without issue to vs2015
 		vs-upgrade "freetype.sln"
 		if [ "$ARCH" ==  "32" ] ; then
-			vs-build "freetype.sln" Build "Release|Win32"
+			vs-build freetype.sln Build "Release|Win32"
 		elif [ "$ARCH" == "64" ] ; then
-			vs-build "freetype.sln" Build "Release|x64"
+			vs-build freetype.sln Build "Release|x64"
 		fi
 		cd ../../../
 

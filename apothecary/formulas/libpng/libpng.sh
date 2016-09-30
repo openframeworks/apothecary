@@ -56,7 +56,7 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-			cd projects/vs2015
+		cd projects/vs2015
 		if [ $ARCH == 32 ] ; then
 			#cmd //c buildwin.cmd Win32
 			vs-build libpng.sln Build "LIB Release|x86"

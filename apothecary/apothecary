@@ -856,7 +856,7 @@ function vs-upgrade() {
 	if [ $ARCH == 32 ] ; then
 		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Upgrade"
 	elif [ $ARCH == 64 ] ; then
-		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\..\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Upgrade"
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Upgrade"
 	fi
 }
 
