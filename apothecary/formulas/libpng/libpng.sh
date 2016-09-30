@@ -32,20 +32,21 @@ function prepare() {
 		if [ ! -e ../zlib ] ; then
 			echoError "libpng needs zlib, please update that formula first"
 		fi
-		CURRENTPATH=`pwd`
-		cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH/projects/visualc71
+		#CURRENTPATH=`pwd`
+		cp -vr $FORMULA_DIR/vs2015 projects/
+		cp -v $FORMULA_DIR/buildwin.cmd projects/vs2015
 	fi
 }
 
 # executed inside the lib src dir
 function build() {
-	
+
 	if [ "$TYPE" == "osx" ] ; then
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		local FAT_LDFLAGS="-arch i386 -arch x86_64 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
-	
+
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
@@ -56,17 +57,23 @@ function build() {
 		unset TMP
 		unset TEMP
 		if [ $ARCH == 32 ] ; then
-			cd projects/visualc71
+			cd projects/vs2015
 			cmd //c buildwin.cmd Win32
-			#cd ../..
 		elif [ $ARCH == 64 ] ; then
-			cd projects/visualc71
+			cd projects/vs2015
 			cmd //c buildwin.cmd x64
 		fi
+
+		#cd projects/vs2015 #this upgrades without issue to vs2015
+		#if [ "$ARCH" ==  "32" ] ; then
+		#	vs-build "libpng.sln" Build "LIB Release|x86"
+		#elif [ "$ARCH" == "64" ] ; then
+		#	vs-build "libpng.sln" Build "LIB Release|x64"
+		#fi
 	fi
 
 
-	
+
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root

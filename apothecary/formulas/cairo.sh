@@ -57,7 +57,11 @@ function prepare() {
 		apothecaryDepend copy freetype
 
 		echo "copying from $PWD"
-		cp ../libpng/projects/visualc71/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
+		if [ "$ARCH" == 32 ]; then
+			cp ../libpng/projects/vs2015/x86/LIB\ Release/libpng.lib ../libpng/libpng.lib
+		else
+			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib ../libpng/libpng.lib
+		fi
 		ls ../zlib
 		ls ../zlib/Release
 		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
@@ -145,15 +149,11 @@ function copy() {
 		if [ $ARCH == 32 ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v Cairo-VS/projects/Release/cairo.lib $1/lib/$TYPE/Win32/cairo-static.lib
-			cp -v Cairo-VS/projects/Release/pixman.lib $1/lib/$TYPE/Win32/pixman-1.lib
-			cp -v Cairo-VS/libs/libpng.lib $1/lib/$TYPE/Win32
+			cp -v build/cairo/src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
 		elif [ $ARCH == 64 ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v Cairo-VS/projects/x64/Release/cairo.lib $1/lib/$TYPE/x64/cairo-static.lib
-			cp -v Cairo-VS/projects/x64/Release/pixman.lib $1/lib/$TYPE/x64/pixman-1.lib
-			cp -v Cairo-VS/libs/libpng.lib $1/lib/$TYPE/x64
+			cp -v build/cairo/src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
 		fi
 		cd cairo
 
