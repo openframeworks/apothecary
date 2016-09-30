@@ -42,7 +42,7 @@ FORMULA_DEPENDS_MANUAL=0
 ### READ ONLY please!
 
 # build settings
-OS= # compile os ("osx", "windows", "linux")
+HOST_OS= # compile os ("osx", "windows", "linux")
 TYPE= # library build type ("osx", "ios", "vs", etc)
 ARCH=32 # library build arch, 32 or 64 bit (not used for some build types)
 
@@ -83,7 +83,7 @@ fi
 
 # used when building for vs
 VS_VER=14
-VS_64_BIT_ENV='VC\bin\x86_amd64\vcvarsx86_amd64.bat'
+VS_64_BIT_ENV='VC\vcvarsall'
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
@@ -844,10 +844,9 @@ function gitclone() {
 # http://msdn.microsoft.com/library/vstudio/b20w810z.aspx
 function vs-build() {
 	if [ $ARCH == 32 ] ; then
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && '$VS_BUILD_TOOL' '$1' /'${2:-Build}' "'${3:-Release}'"'
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
 	elif [ $ARCH == 64 ] ; then
-        echo 'call "%VS'${VS_VER}'0COMNTOOLS%..\..\'${VS_64_BIT_ENV}'" && '$VS_BUILD_TOOL' '$1' /'${2:-Build}' "'${3:-Release}'"'
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%..\..\'${VS_64_BIT_ENV}'" && '$VS_BUILD_TOOL' '$1' /'${2:-Build}' "'${3:-Release}'"'
+        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
 	fi
 }
 
@@ -855,9 +854,9 @@ function vs-build() {
 # http://msdn.microsoft.com/en-us/library/vstudio/w15a82ay(v=vs.110).aspx
 function vs-upgrade() {
 	if [ $ARCH == 32 ] ; then
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && '$VS_BUILD_TOOL' '$1' /Upgrade'
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Upgrade"
 	elif [ $ARCH == 64 ] ; then
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%..\..\'${VS_64_BIT_ENV}'" && '$VS_BUILD_TOOL' '$1' /Upgrade'
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\..\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Upgrade"
 	fi
 }
 
@@ -865,11 +864,11 @@ function vs-upgrade() {
 # http://msdn.microsoft.com/en-us/library/vstudio/w15a82ay(v=vs.110).aspx
 function vs-clean() {
 	if [ $ARCH == 32 ] ; then
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && '$VS_BUILD_TOOL' '$1' /Clean Release'
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && '$VS_BUILD_TOOL' '$1' /Clean Debug'
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Release"
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Debug"
 	elif [ $ARCH == 64 ] ; then
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%..\..\'${VS_64_BIT_ENV}'" && '$VS_BUILD_TOOL' '$1' /Clean Release'
-		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%..\..\'${VS_64_BIT_ENV}'" && '$VS_BUILD_TOOL' '$1' /Clean Debug'
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Release"
+		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Debug"
 	fi
 }
 
@@ -1003,20 +1002,20 @@ APOTHECARY_DIR=$(pwd)
 APOTHECARY_SCRIPT=$APOTHECARY_DIR/apothecary
 
 # set OS & build types
-OS=`./ostype.sh`
+HOST_OS=`./ostype.sh`
 if [ "$TYPE" == "" ] ; then
-	case "$OS" in
+	case "$HOST_OS" in
 		windows)
 			TYPE="vs" ;;
 		*)
-			TYPE=$OS ;;
+			TYPE=$HOST_OS ;;
 	esac
 fi
 FORMULA_TYPES=("${VALID_TYPES[@]}") # copy array
 echoVerbose "Valid build types: ${VALID_TYPES[*]}"
 
 # set xcode dev root on osx
-if [ "$OS" == "osx" ] ; then
+if [ "$HOST_OS" == "osx" ] ; then
 	XCODE_DEV_ROOT=$($XS) # Sets to path from Xcode Path
 	OSX_SDK_VER=$($OSX_LATEST_SDK) # sets to latest OSX SDK
 	IOS_SDK_VER=$($IOS_LATEST_SDK) # sets to latest iOS SDK
