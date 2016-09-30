@@ -149,11 +149,11 @@ function copy() {
 		if [ $ARCH == 32 ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build/cairo/src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
+			cp -v src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
 		elif [ $ARCH == 64 ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v build/cairo/src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
+			cp -v src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
 		fi
 		cd cairo
 
