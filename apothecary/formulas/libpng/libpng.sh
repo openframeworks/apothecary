@@ -59,11 +59,11 @@ function build() {
 		if [ $ARCH == 32 ] ; then
 			cd projects/vs2015
 			#cmd //c buildwin.cmd Win32
-			build-vs libpng.sln Build Win32
+			vs-build libpng.sln Build Win32
 		elif [ $ARCH == 64 ] ; then
 			cd projects/vs2015
 			#cmd //c buildwin.cmd x64
-			build-vs libpng.sln Build x64
+			vs-build libpng.sln Build x64
 		fi
 
 		#cd projects/vs2015 #this upgrades without issue to vs2015
