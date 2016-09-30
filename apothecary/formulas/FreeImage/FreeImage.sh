@@ -385,7 +385,7 @@ function copy() {
 		cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
 		cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage32.dll
 		cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-		cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/$TYPE/FreeImage64.dll
+		cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage64.dll
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v Dist/*.h $1/include
         if [ -d $1/lib/$TYPE/ ]; then
