@@ -5,6 +5,7 @@ environment:
   global:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
+    PATH: %MSYS2_PATH%\usr\bin;%PATH%
   matrix:
   #MSYS2 Building
     - platform: x86
