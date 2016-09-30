@@ -155,7 +155,6 @@ function copy() {
 			echo $PWD
 			cp -v src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
 		fi
-		cd cairo
 
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
 		# make the path in the libs dir
