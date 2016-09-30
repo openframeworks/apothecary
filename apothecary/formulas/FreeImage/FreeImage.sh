@@ -22,11 +22,7 @@ function download() {
 	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
 		curl -LO http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
-		if [ ! -z  ${MSYS2_PATH+x} ]; then
-			${MSYS2_PATH}/usr/bin/unzip -qo FreeImage"$VER"Win32Win64.zip
-		else
-			unzip -qo FreeImage"$VER"Win32Win64.zip
-		fi
+		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
 	elif [[ "${TYPE}" == "osx" || "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
