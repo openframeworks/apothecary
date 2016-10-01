@@ -106,16 +106,19 @@ function prepare() {
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
 		# get the absolute path to the included openssl libs
-		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
+		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $OF_LIBS_OPENSSL; pwd)
 
 		# convert the absolute path from unix to windows
-		local OPENSSL_DIR=$(echo $OF_LIBS_OPENSSL_ABS_PATH | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')
+		#local OPENSSL_DIR=$(echo $OF_LIBS_OPENSSL_ABS_PATH | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')
 
 		# escape windows slashes and a few common escape sequences before passing to sed
-		local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
+		#local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
+		export OPENSSL_DIR="$(cygpath -w $OF_LIBS_OPENSSL_ABS_PATH)"
+		export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
+		echo $OPENSSL_DIR
 
 		# replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
-		sed -i.tmp "s|C:\\\OpenSSL|$OPENSSL_DIR|g" buildwin.cmd
+		sed -i.tmp "s|C:\\\OpenSSL|$ESCAPED_OPENSSL_DIR|g" buildwin.cmd
 
 		# replace OPENSSL_LIB=%OPENSSL_DIR%\lib;%OPENSSL_DIR%\lib\VC with OPENSSL_LIB=%OPENSSL_DIR%\lib\vs
 		sed -i.tmp "s|%OPENSSL_DIR%\\\lib;.*|%OPENSSL_DIR%\\\lib\\\vs|g" buildwin.cmd
