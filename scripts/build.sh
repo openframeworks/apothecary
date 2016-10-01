@@ -43,11 +43,11 @@ isRunning(){
 
 echoDots(){
     while isRunning $1; do
-        for i in $(seq 1 10); do 
+        for i in $(seq 1 10); do
             echo -ne .
-            if ! isRunning $1; then 
+            if ! isRunning $1; then
                 printf "\r"
-                return; 
+                return;
             fi
             sleep 2
         done
@@ -73,7 +73,7 @@ fi
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
-        export CC="gcc-5" 
+        export CC="gcc-5"
         export CXX="g++-5"
     fi
 fi
@@ -113,22 +113,24 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name #>> formula.log 2>&1 &
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-    #echoDots $apothecaryPID
-    wait $apothecaryPID
+	if [ "$TARGET" != "vs" ]; then
+    	echoDots $apothecaryPID
+    	wait $apothecaryPID
+	fi
 done
 
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    # exit here on PR's 
+    # exit here on PR's
     echo "On Master Branch and not a PR";
-else 
+else
     echo "This is a PR or not master branch, exiting build before compressing";
     exit 0
 fi
 
-if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then 
+if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     echo "No secure vars set so exiting before compressing";
     exit 0
 fi
@@ -146,5 +148,3 @@ echo Uploading libraries
 scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
 ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
 rm scripts/id_rsa
-
-
