@@ -41,7 +41,7 @@ function prepare() {
 	# check if the patch was applied, if not then patch
 	patch -p1 -u -N  < $FORMULA_DIR/tess2.patch
 	# copy in build script and CMake toolchains adapted from Assimp
-	if [ "$OS" == "osx" ] ; then
+	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p build
 	fi
 }
