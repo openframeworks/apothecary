@@ -58,7 +58,7 @@ function prepare() {
 
 		echo "copying from $PWD"
 		if [ "$ARCH" == 32 ]; then
-			cp ../libpng/projects/vs2015/x86/LIB\ Release/libpng.lib ../libpng/libpng.lib
+			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
 		else
 			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib ../libpng/libpng.lib
 		fi
