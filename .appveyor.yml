@@ -7,9 +7,9 @@ environment:
     CHERE_INVOKING: 1
   matrix:
   #MSYS2 Building
-    - platform: x86
-      TARGET: msys2
-      ARCH: 32
+    #- platform: x86
+    #  TARGET: msys2
+    #  ARCH: 32
 
   #VisualStudio Building
     - platform: x86
