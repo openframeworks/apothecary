@@ -948,7 +948,7 @@ function apothecaryDependencies() {
 		done
 
         #also have to cd back to the APOTHECARY_DIR for the next commands to work
-        cd $APOTHECARY_DIR
+        #cd $APOTHECARY_DIR
 	fi
 }
 

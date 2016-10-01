@@ -33,15 +33,14 @@ function download() {
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz
-
-	# manually download dependencies
-	apothecaryDependencies download
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+	# manually download dependencies
+	apothecaryDependencies download
+	
 	if [ "$TYPE" == "vs" ] ; then
-
 
 		apothecaryDepend prepare zlib
 		apothecaryDepend build zlib

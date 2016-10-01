@@ -46,8 +46,8 @@ function build() {
 		make clean
 		make
 	elif [ "$TYPE" == "vs" ] ; then
+		sed -i s/-MD/-MT/ Makefile.win32.common
 		cd pixman
-		sed -i s/-MD/-MT/ Makefile.win32
 		make -f Makefile.win32 CFG=release MMX=off
 		#CURRENTPATH=`pwd`
 		#WINPATH=$(echo "$CURRENTPATH" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
