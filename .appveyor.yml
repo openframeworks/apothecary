@@ -43,3 +43,16 @@ build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
 
 test: off
+
+artifacts:
+    - path: 'openFrameworks*.zip'
+
+deploy:
+    provider: FTP
+    protocol: sftp
+    host: ci.openframeworks.cc
+    username: tests
+    password:
+        secure: ALHv+04sZ49FZ4OCj6tTSg==
+    folder: libs
+    artifact: /openFrameworks.zip

@@ -122,7 +122,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
 	fi
 done
 
-if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ -z ${APPVEYOR+x} ]; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else
@@ -137,14 +137,19 @@ fi
 
 echo Compressing libraries
 cd $ROOT
-TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
-tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 
-echo Unencrypting key
-openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
-cp scripts/ssh_config ~/.ssh/config
-chmod 600 scripts/id_rsa
-echo Uploading libraries
-scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-rm scripts/id_rsa
+if [ -z ${APPVEYOR+x} ]; then
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_$TARGET_$ARCH.zip
+	7z a $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+else
+	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
+	tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+	echo Unencrypting key
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
+	cp scripts/ssh_config ~/.ssh/config
+	chmod 600 scripts/id_rsa
+	echo Uploading libraries
+	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm scripts/id_rsa
+fi
