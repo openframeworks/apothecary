@@ -139,7 +139,7 @@ echo Compressing libraries
 cd $ROOT
 
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_$TARGET_$ARCH.zip
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
 	7z a $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
