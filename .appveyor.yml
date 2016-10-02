@@ -55,4 +55,3 @@ deploy:
     password:
         secure: ALHv+04sZ49FZ4OCj6tTSg==
     folder: libs
-    artifact: /openFrameworksLibs*.zip
