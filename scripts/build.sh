@@ -122,7 +122,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
 	fi
 done
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ -z ${APPVEYOR+x} ]; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else
@@ -138,7 +138,7 @@ fi
 echo Compressing libraries
 cd $ROOT
 
-if [ -z ${APPVEYOR+x} ]; then
+if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_$TARGET_$ARCH.zip
 	7z a $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 else
