@@ -44,13 +44,12 @@ function copy() {
 		return
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32/
-			cp -v Release/zlib.dll $1/lib/$TYPE/Win32/Zlib.dll
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64/
-			cp -v Release/zlib.dll $1/lib/$TYPE/x64/Zlib.dll
+			PLATFORM="Win32"
+		else
+			PLATFORM="x64"
 		fi
-
+		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
+		cp -v Release/zlibstatic.lib $1/../cairo/lib/$TYPE/$PLATFORM/zlib.lib
 	else
 		make install
 	fi

@@ -69,7 +69,13 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		echo "copy vs"
+		if [ $ARCH == 32 ] ; then
+			PLATFORM="Win32"
+		else
+			PLATFORM="x64"
+		fi
+		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
+		cp -v pixman/release/pixman-1.lib $1/../cairo/lib/$TYPE/$PLATFORM/
 	else
 		# lib
 		cd pixman

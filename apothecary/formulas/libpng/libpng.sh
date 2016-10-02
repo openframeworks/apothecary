@@ -70,7 +70,13 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-	    : noop
+		if [ $ARCH == 32 ] ; then
+			PLATFORM="Win32"
+		else
+			PLATFORM="x64"
+		fi
+		mkdir -p $1/../cairo/lib/vs/$PLATFORM/
+	    cp projects/vs2015/Win32_LIB_Release/libpng.lib $1/../cairo/lib/vs/$PLATFORM/
 	else
 		make install
 	fi
