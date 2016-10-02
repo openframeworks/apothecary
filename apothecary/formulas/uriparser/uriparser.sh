@@ -40,7 +40,7 @@ function build() {
 		unset TEMP
 		cd win32/vs2015
 		if [ $ARCH == 32 ] ; then
-			vs-build uriparser.sln Build "Release|x86"
+			vs-build uriparser.sln Build "Release|Win32"
 		elif [ $ARCH == 64 ] ; then
 			vs-build uriparser.sln Build "Release|x64"
 		fi
