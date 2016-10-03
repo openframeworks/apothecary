@@ -110,9 +110,15 @@ REL_BUILD_DIR=build
 REL_OF_ROOT=${APOTHECARY_DIR}/../../../
 REL_LIBS_DIR=${APOTHECARY_DIR}/../
 REL_ADDONS_DIR=$REL_OF_ROOT/addons
-OF_ROOT=$(realpath $REL_OF_ROOT)
-LIBS_DIR=$(realpath $REL_LIBS_DIR)
-ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
+if [ "$TYPE" == "osx" ]; then
+    OF_ROOT=[[ $REL_OF_ROOT = /* ]] && echo "$REL_OF_ROOT" || echo "$PWD/${REL_OF_ROOT#./}"
+    LIBS_DIR=[[ $REL_LIBS_DIR = /* ]] && echo "$REL_LIBS_DIR" || echo "$PWD/${REL_LIBS_DIR#./}"
+    ADDONS_DIR=[[ $REL_ADDONS_DIR = /* ]] && echo "$REL_ADDONS_DIR" || echo "$PWD/${REL_ADDONS_DIR#./}"
+else
+    OF_ROOT=$(realpath $REL_OF_ROOT)
+    LIBS_DIR=$(realpath $REL_LIBS_DIR)
+    ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
+fi
 CHECKOUT=YES
 
 
@@ -533,7 +539,7 @@ function doCommand() {
 
 					# set libs dest dir to addon/libs if it hasn't been manually set
 					if [ $IS_CUSTOM_LIBS_DIR == 0 ] ; then
-						LIBS_DIR=$(realpath $APOTHECARY_DIR/$REL_ADDONS_DIR/$1/libs)
+						LIBS_DIR=$ADDONS_DIR/$1/libs
 					fi
 
 					# process all formulas in scripts/formulas
