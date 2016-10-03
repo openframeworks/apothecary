@@ -80,6 +80,10 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
+REL_OF_ROOT=${APOTHECARY_DIR}/../../../
+REL_LIBS_DIR=${APOTHECARY_DIR}/../
+REL_ADDONS_DIR=$REL_OF_ROOT/addons
+APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "OF: $(realpath $REL_OF_ROOT)"
 echo "LIBS: $(realpath $REL_LIBS_DIR)"
 echo "ADDONS: $(realpath $REL_ADDONS_DIR)"

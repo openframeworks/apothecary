@@ -105,17 +105,14 @@ DEPENDS_SUBDIR=_depends
 BUILDROOT_SUBDIR=_buildroot
 
 # paths relative to this script
-REL_FORMULAS_DIR=formulas
-REL_BUILD_DIR=build
-REL_OF_ROOT=${APOTHECARY_DIR}/../../../
-REL_LIBS_DIR=${APOTHECARY_DIR}/../
-REL_ADDONS_DIR=$REL_OF_ROOT/addons
-OF_ROOT=$(realpath $REL_OF_ROOT)
-LIBS_DIR=$(realpath $REL_LIBS_DIR)
-ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
+FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
+BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
+OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../../)
+LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
+ADDONS_DIR=$(realpath $OF_ROOT/addons)
 echo "OF: $OF_ROOT"
 echo "LIBS: $LIBS_DIR"
-echo "ADDONS: $ADDONS_DIR
+echo "ADDONS: $ADDONS_DIR"
 
 CHECKOUT=YES
 
@@ -284,7 +281,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		a) # set the architecture
 		   ARCH=$OPTARG ;;
 		b) # set the build dir
-		   BUILD_DIR="$OPTARG" ;;
+		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
 		   LIBS_DIR="$OPTARG" ;;
 		s) # set the git tag to switch version
@@ -439,22 +436,22 @@ function checkFormula() {
 		parentDir=$(dirname $path)
 
 	# is the given formula name a script in the formulas dir?
-	elif [ -e $REL_FORMULAS_DIR/$1.sh ] ; then
+	elif [ -e $FORMULAS_DIR/$1.sh ] ; then
 		script=$1.sh
-		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR
+		parentDir=$FORMULAS_DIR
 
 	# is the given formula name a dir in the formulas dir?
-	elif [ -e $REL_FORMULAS_DIR/$1 -a -d $REL_FORMULAS_DIR/$1 ] ; then
+	elif [ -e $FORMULAS_DIR/$1 -a -d $FORMULAS_DIR/$1 ] ; then
 		script=$1.sh
-		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR/$1
+		parentDir=$FORMULAS_DIR/$1
 
 	# is the given formula name a script in the depends formulas dir?
-	elif [ -e $REL_FORMULAS_DIR/$DEPENDS_SUBDIR/$1.sh ] ; then
+	elif [ -e $FORMULAS_DIR/$DEPENDS_SUBDIR/$1.sh ] ; then
 
 		echoVerbose " Detected dependency: \"$1\""
 
 		script=$1.sh
-		parentDir=$APOTHECARY_DIR/$REL_FORMULAS_DIR
+		parentDir=$FORMULAS_DIR
 
 		eval $5=1
 
@@ -501,7 +498,7 @@ function doCommand() {
 		# process all formulas in formulas dir, ignore depends subdir
 		if [ "$1" == "core" ] ; then
 			local formula
-			for formula in $( ls -1 $REL_FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
+			for formula in $( ls -1 $FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
 				doCommand $shouldSource $cmd "${formula%.*}" # remove extension
 			done
 
@@ -517,7 +514,7 @@ function doCommand() {
 		# process all formulas in the dependencies dir
 		elif [ "$1" == "depends" ] ; then
 			local depend
-			for depends in $( ls -1 $REL_FORMULAS_DIR/$DEPENDS_SUBDIR) ; do
+			for depends in $( ls -1 $FORMULAS_DIR/$DEPENDS_SUBDIR) ; do
 				doCommand $shouldSource $cmd "${depend%.*}" # remove extension
 			done
 
@@ -908,7 +905,7 @@ function apothecaryDepend() {
 	local depend="${2%.*}" # removes extension
 
 	# detect if dependency is a main OF lib
-	if [ -f $APOTHECARY_DIR/$REL_FORMULAS_DIR/$depend.sh -o -d $APOTHECARY_DIR/$REL_FORMULAS_DIR/$depend ] ; then
+	if [ -f $FORMULAS_DIR/$depend.sh -o -d $FORMULAS_DIR/$depend ] ; then
 
 		# don't remove main OF libs if they are dependencies
 		if [ "$1" == "remove" -o "$1" == "remove-lib" -o "$1" == "remove-all" ] ; then
@@ -1041,16 +1038,6 @@ if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 ] ; then
 fi
 echoVerbose "Architecture: $ARCH"
 
-# use default build dir?
-if [ "$BUILD_DIR" == "" ] ; then
-	BUILD_DIR=$APOTHECARY_DIR/$REL_BUILD_DIR
-
-else # manually set
-	case $BUILD_DIR in
-		/*) : ;; # absolute path
-	 	*) BUILD_DIR=$WD/$BUILD_DIR ;; # relative path
-	esac
-fi
 echoVerbose "Build dir: $BUILD_DIR"
 
 # use default libs dir?
@@ -1070,7 +1057,7 @@ if [ ! -e $LIBS_DIR ] ; then
 fi
 
 # dependency & build root dirs
-DEPENDS_FORMULA_DIR=$APOTHECARY_DIR/$REL_FORMULAS_DIR/$DEPENDS_SUBDIR
+DEPENDS_FORMULA_DIR=$FORMULAS_DIR/$DEPENDS_SUBDIR
 BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
 # set for android sdk info
