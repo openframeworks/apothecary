@@ -80,9 +80,9 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
-OF_ROOT=[[ $REL_OF_ROOT = /* ]] && echo "$REL_OF_ROOT" || echo "$PWD/${REL_OF_ROOT#./}"
-LIBS_DIR=[[ $REL_LIBS_DIR = /* ]] && echo "$REL_LIBS_DIR" || echo "$PWD/${REL_LIBS_DIR#./}"
-ADDONS_DIR=[[ $REL_ADDONS_DIR = /* ]] && echo "$REL_ADDONS_DIR" || echo "$PWD/${REL_ADDONS_DIR#./}"
+echo "OF: $(realpath $REL_OF_ROOT)"
+echo "LIBS: $(realpath $REL_LIBS_DIR)"
+echo "ADDONS: $(realpath $REL_ADDONS_DIR)"
 
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) ; do
     formula_name="${formula%.*}"
