@@ -12,8 +12,9 @@ trapError() {
 }
 
 installPackages(){
-    sudo apt-get -y update
-    sudo apt-get -y install multistrap unzip realpath
+    sudo add-apt-repository ppa:dns/gnu -y
+    sudo apt-get update -q
+    sudo apt-get -y install multistrap unzip coreutils realpath
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
     sudo sed -i s/\$forceyes//g /usr/sbin/multistrap
 }

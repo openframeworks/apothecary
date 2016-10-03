@@ -19,7 +19,9 @@ createArchImg(){
     #sudo apt-get -f -y --force-yes dist-upgrade
     #sudo apt-get install -y libgssapi-krb5-2 libkrb5-3 libidn11
     #sudo ./arch-bootstrap.sh archlinux
-    sudo apt-get -y install realpath
+    sudo add-apt-repository ppa:dns/gnu -y
+    sudo apt-get update -q
+    sudo apt-get install -y coreutils realpath
     
     ./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 }

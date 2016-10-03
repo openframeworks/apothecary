@@ -18,7 +18,10 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
-          - realpath
+      before_script:
+        - sudo add-apt-repository ppa:dns/gnu -y
+        - sudo apt-get update -q
+        - sudo apt-get install -y coreutils realpath
           
           
     - os: linux
@@ -38,7 +41,10 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
-          - realpath
+      before_script:
+        - sudo add-apt-repository ppa:dns/gnu -y
+        - sudo apt-get update -q
+        - sudo apt-get install -y coreutils realpath
           
     - os: linux
       sudo: required
@@ -48,7 +54,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev realpath
+        - sudo apt-get install -y xutils-dev coreutils realpath
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -110,6 +116,7 @@ matrix:
             - libstdc++6
             - gcc-4.9
             - realpath
+            - coreutils
         
         
     - os: linux
