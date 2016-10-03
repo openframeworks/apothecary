@@ -138,6 +138,8 @@ fi
 echo Compressing libraries
 cd $ROOT
 LIBS=$(ls  | grep -v apothecary | grep -v scripts)
+echo "Compressing from $PWD $LIBS"
+echo "ls $(ls)"
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
