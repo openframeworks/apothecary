@@ -111,6 +111,9 @@ OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../../)
 LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
 ADDONS_DIR=$(realpath $OF_ROOT/addons)
 echo "OF: $OF_ROOT"
+echo "APOTHECARY: $APOTHECARY_DIR"
+echo "FORMULAS: $FORMULAS_DIR"
+echo "BUILD: $BUILD_DIR"
 echo "LIBS: $LIBS_DIR"
 echo "ADDONS: $ADDONS_DIR"
 

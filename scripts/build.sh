@@ -80,6 +80,7 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
+echo "Running apothecary from $PWD"
 
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) ; do
     formula_name="${formula%.*}"
