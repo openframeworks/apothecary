@@ -82,6 +82,19 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
+if [ "$TYPE" == "osx" ]; then
+    OF_ROOT=[[ $REL_OF_ROOT = /* ]] && echo "$REL_OF_ROOT" || echo "$PWD/${REL_OF_ROOT#./}"
+    LIBS_DIR=[[ $REL_LIBS_DIR = /* ]] && echo "$REL_LIBS_DIR" || echo "$PWD/${REL_LIBS_DIR#./}"
+    ADDONS_DIR=[[ $REL_ADDONS_DIR = /* ]] && echo "$REL_ADDONS_DIR" || echo "$PWD/${REL_ADDONS_DIR#./}"
+else
+    OF_ROOT=$(realpath $REL_OF_ROOT)
+    LIBS_DIR=$(realpath $REL_LIBS_DIR)
+    ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
+fi
+echo "OF: $OF_ROOT"
+echo "LIBS: $LIBS_DIR"
+echo "ADDONS: $ADDONS_DIR"
+
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) ; do
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
