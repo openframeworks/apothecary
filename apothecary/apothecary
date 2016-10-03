@@ -119,6 +119,10 @@ else
     LIBS_DIR=$(realpath $REL_LIBS_DIR)
     ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
 fi
+echo "OF: $OF_ROOT"
+echo "LIBS: $LIBS_DIR"
+echo "ADDONS: $ADDONS_DIR"
+
 CHECKOUT=YES
 
 

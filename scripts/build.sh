@@ -137,13 +137,14 @@ fi
 
 echo Compressing libraries
 cd $ROOT
+LIBS=$(ls  | grep -v apothecary | grep -v scripts)
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
-	7z a $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
-	tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+	tar cjf $TARBALL $LIBS
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
 	cp scripts/ssh_config ~/.ssh/config
