@@ -110,18 +110,12 @@ REL_BUILD_DIR=build
 REL_OF_ROOT=${APOTHECARY_DIR}/../../../
 REL_LIBS_DIR=${APOTHECARY_DIR}/../
 REL_ADDONS_DIR=$REL_OF_ROOT/addons
-if [ "$TYPE" == "osx" ]; then
-    OF_ROOT=[[ $REL_OF_ROOT = /* ]] && echo "$REL_OF_ROOT" || echo "$PWD/${REL_OF_ROOT#./}"
-    LIBS_DIR=[[ $REL_LIBS_DIR = /* ]] && echo "$REL_LIBS_DIR" || echo "$PWD/${REL_LIBS_DIR#./}"
-    ADDONS_DIR=[[ $REL_ADDONS_DIR = /* ]] && echo "$REL_ADDONS_DIR" || echo "$PWD/${REL_ADDONS_DIR#./}"
-else
-    OF_ROOT=$(realpath $REL_OF_ROOT)
-    LIBS_DIR=$(realpath $REL_LIBS_DIR)
-    ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
-fi
+OF_ROOT=$(realpath $REL_OF_ROOT)
+LIBS_DIR=$(realpath $REL_LIBS_DIR)
+ADDONS_DIR=$(realpath $REL_ADDONS_DIR)
 echo "OF: $OF_ROOT"
 echo "LIBS: $LIBS_DIR"
-echo "ADDONS: $ADDONS_DIR"
+echo "ADDONS: $ADDONS_DIR
 
 CHECKOUT=YES
 

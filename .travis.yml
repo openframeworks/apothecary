@@ -18,6 +18,7 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
+          - coreutils
           
           
     - os: linux
@@ -37,6 +38,7 @@ matrix:
           - libx11-dev
           - libxcursor-dev
           - libxi-dev
+          - coreutils
           
     - os: linux
       sudo: required
@@ -46,7 +48,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev
+        - sudo apt-get install -y xutils-dev coreutils
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -60,7 +62,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev
+        - sudo apt-get install -y xutils-dev coreutils
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -107,6 +109,7 @@ matrix:
           packages:
             - libstdc++6
             - gcc-4.9
+            - coreutils
         
         
     - os: linux
@@ -153,7 +156,7 @@ matrix:
   exclude:
     - compiler: gcc
 install:
-    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "linuxarmv7l" ] || [ "$TARGET" == "emscripten" ]; then
+    - if [ "$TARGET" == "android" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "linux" ] || [ "$TARGET" == "linuxarmv6l" ] || [ "$TARGET" == "linuxarmv7l" ] || [ "$TARGET" == "emscripten" ]  || [ "$TARGET" == "osx" ]; then
         scripts/$TARGET/install.sh $OPT $OPT2;
       fi
 script:
