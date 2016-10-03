@@ -1,13 +1,13 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # Free Image
 # cross platform image io
 # http://freeimage.sourceforge.net
 #
-# Makefile build system, 
+# Makefile build system,
 # some Makefiles are out of date so patching/modification may be required
 
-FORMULA_TYPES=( "osx" "vs" "msys2" "ios" "tvos" "android" "emscripten")
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
 VER=3170 # 3.16.0
@@ -21,27 +21,23 @@ function download() {
 
 	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
-		curl -LO http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
+		wget http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	elif [[ "${TYPE}" == "osx" || "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
+	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL for OSX/iOS"
 		echo $GIT_URL
-		curl -Lk $GIT_URL/archive/$GIT_TAG.tar.gz -o FreeImage-$GIT_TAG.tar.gz
-		tar -xf FreeImage-$GIT_TAG.tar.gz
+		wget $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		tar -xzf FreeImage-$GIT_TAG.tar.gz
 		mv FreeImage-$GIT_TAG FreeImage
 		rm FreeImage-$GIT_TAG.tar.gz
-	else
-		curl -LO http://downloads.sourceforge.net/freeimage/FreeImage"$VER".zip
-		unzip -qo FreeImage"$VER".zip
-		rm FreeImage"$VER".zip
 	fi
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	
+
 	if [ "$TYPE" == "osx" ] ; then
 
 		cp -rf $FORMULA_DIR/Makefile.osx Makefile.osx
@@ -74,28 +70,28 @@ function prepare() {
                 *((uint16_t*)to+i) = __arch__swab16(*((uint16_t*)from+i));
         }
 ENDDELIM
-        
+
         sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
         echo "#include \"swab.h\"" > Source/LibRawLite/internal/dcraw_common_patched.cpp;
         cat Source/LibRawLite/internal/dcraw_common.cpp >> Source/LibRawLite/internal/dcraw_common_patched.cpp
         cat Source/LibRawLite/internal/dcraw_common_patched.cpp > Source/LibRawLite/internal/dcraw_common.cpp
         rm Source/LibRawLite/internal/dcraw_common_patched.cpp
-        
+
         sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
         echo "#include \"swab.h\"" > Source/LibRawLite/src/libraw_cxx_patched.cpp
         cat Source/LibRawLite/src/libraw_cxx.cpp >> Source/LibRawLite/src/libraw_cxx_patched.cpp
         cat Source/LibRawLite/src/libraw_cxx_patched.cpp > Source/LibRawLite/src/libraw_cxx.cpp
         rm Source/LibRawLite/src/libraw_cxx_patched.cpp
-        
+
         #rm Source/LibWebP/src/dsp/dec_neon.c
-        
+
         sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 	fi
 }
 
 # executed inside the lib src dir
 function build() {
-	
+
 	if [ "$TYPE" == "osx" ] ; then
 		make -j${PARALLEL_MAKE} -f Makefile.osx
 
@@ -103,13 +99,13 @@ function build() {
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
-		# Notes: 
+		# Notes:
         # --- for 3.1+ Must use "-DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT" to compile LibJXR
 		export TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
 		export TARGET_IOS
-        
+
         local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -119,13 +115,13 @@ function build() {
         local CURRENTPATH=`pwd`
 
         SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
         elif [ "$TYPE" == "ios" ]; then
             SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
         fi
 
-			
+
         DEVELOPER=$XCODE_DEV_ROOT
 		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
 		VERSION=$VER
@@ -151,22 +147,22 @@ function build() {
         do
 
         	unset ARCH IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL 
+            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
             unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
 
             export ARCH=$IOS_ARCH
-            
+
             local EXTRA_PLATFORM_CFLAGS=""
 			export EXTRA_PLATFORM_LDFLAGS=""
 			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
 			then
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneSimulator"
                 fi
 			else
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneOS"
@@ -179,14 +175,14 @@ function build() {
 
 			MIN_IOS_VERSION=$IOS_MIN_SDK_VER
 		    # min iOS version for arm64 is iOS 7
-		
+
 		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
 		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
 		    elif [ "${IOS_ARCH}" == "i386" ]; then
 		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
 		    fi
 
-            if [ "${TYPE}" == "tvos" ]; then 
+            if [ "${TYPE}" == "tvos" ]; then
     		    MIN_TYPE=-mtvos-version-min=
     		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
     		    	MIN_TYPE=-mtvos-simulator-version-min=
@@ -203,7 +199,7 @@ function build() {
                 BITCODE=-fembed-bitcode;
                 MIN_IOS_VERSION=9.0
             fi
-            
+
 			export TARGET_NAME="$CURRENTPATH/libfreeimage-$IOS_ARCH.a"
 			export HEADER="Source/FreeImage.h"
 
@@ -211,7 +207,7 @@ function build() {
 			export CPP=$TOOLCHAIN/usr/bin/clang++
 			export CXX=$TOOLCHAIN/usr/bin/clang++
 			export CXXCPP=$TOOLCHAIN/usr/bin/clang++
-	
+
 			export LD=$TOOLCHAIN/usr/bin/ld
 			export AR=$TOOLCHAIN/usr/bin/ar
 			export AS=$TOOLCHAIN/usr/bin/as
@@ -243,14 +239,14 @@ function build() {
 			# run makefile
 			make -j${PARALLEL_MAKE} -f Makefile.ios >> "${LOG}" 2>&1
 			if [ $? != 0 ];
-		    then 
+		    then
                 tail -n 100 "${LOG}"
 		    	echo "Problem while make - Please check ${LOG}"
 		    	exit 1
 		    else
 		    	echo "Make Successful for ${IOS_ARCH}"
 		    fi
-		    
+
      		echo "Completed Build for $IOS_ARCH of FreeImage"
 
      		mv -v libfreeimage-$IOS_ARCH.a Dist/$TYPE/libfreeimage-$IOS_ARCH.a
@@ -258,7 +254,7 @@ function build() {
      		cp Source/FreeImage.h Dist
 
             unset ARCH IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL 
+            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
             unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
 
 		done
@@ -275,7 +271,7 @@ function build() {
 		# link into universal lib
 		echo "Running lipo to create fat lib"
 		echo "Please stand by..."
-        if [[ "${TYPE}" == "tvos" ]] ; then 
+        if [[ "${TYPE}" == "tvos" ]] ; then
             lipo -create libfreeimage-arm64.a \
                     libfreeimage-x86_64.a \
                     -output freeimage.a >> "${LOG}" 2>&1
@@ -289,7 +285,7 @@ function build() {
         fi
 
 		if [ $? != 0 ];
-		then 
+		then
             tail -n 100 "${LOG}"
 		    echo "Problem while creating fat lib with lipo - Please check ${LOG}"
 		    exit 1
@@ -306,7 +302,7 @@ function build() {
     		# validate all stripped debug:
     		strip -x freeimage.a  >> "${LOG}" 2>&1
     		if [ $? != 0 ];
-    		then 
+    		then
                 tail -n 10 "${LOG}"
     		    echo "Problem while stripping lib - Please check ${LOG}"
     		    exit 1
@@ -326,7 +322,7 @@ function build() {
 	elif [ "$TYPE" == "android" ] ; then
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
         cd $BUILD_DIR/FreeImage_patched
-        
+
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
         export CC="$CC $CFLAGS $LDFLAGS"
@@ -363,7 +359,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	
+
 	# headers
 	if [ -d $1/include ]; then
 	    rm -rf $1/include
@@ -380,12 +376,15 @@ function copy() {
 		#mkdir -p $1/include/x64
 	    cp -v Dist/x32/*.h $1/include #/Win32/
 		#cp -v Dist/x64/*.h $1/include/x64/
-		mkdir -p $1/lib/$TYPE/Win32
-		mkdir -p $1/lib/$TYPE/x64
-		cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
-		cp -v Dist/x32/FreeImage.dll $1/../../export/$TYPE/FreeImage32.dll
-		cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-		cp -v Dist/x64/FreeImage.dll $1/../../export/$TYPE/FreeImage64.dll
+		if [ $ARCH == 32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32
+			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
+			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage32.dll
+		else
+			mkdir -p $1/lib/$TYPE/x64
+			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
+			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage64.dll
+		fi
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v Dist/*.h $1/include
         if [ -d $1/lib/$TYPE/ ]; then
@@ -408,7 +407,7 @@ function copy() {
         fi
         mkdir -p $1/lib/$TYPE
         cp -rv Dist/libfreeimage.a $1/lib/$TYPE/
-	fi	
+	fi
 
     # copy license files
     rm -rf $1/license # remove any older files if exists
@@ -420,21 +419,21 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-	
+
 	if [ "$TYPE" == "android" ] ; then
-		make clean 
+		make clean
 		rm -rf Dist
 		rm -f *.a
 		rm -f builddir/$TYPE
 		rm -f builddir
-		rm -f lib		
+		rm -f lib
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    make clean
 	    rm -rf Dist
 		rm -f *.a
 		rm -f builddir/$TYPE
 		rm -f builddir
-		rm -f lib		
+		rm -f lib
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		# clean up compiled libraries
 		make clean
@@ -442,7 +441,7 @@ function clean() {
 		rm -f *.a *.lib
 		rm -f builddir/$TYPE
 		rm -f builddir
-		rm -f lib		
+		rm -f lib
 	else
 		make clean
 		# run dedicated clean script

@@ -43,11 +43,11 @@ isRunning(){
 
 echoDots(){
     while isRunning $1; do
-        for i in $(seq 1 10); do 
+        for i in $(seq 1 10); do
             echo -ne .
-            if ! isRunning $1; then 
+            if ! isRunning $1; then
                 printf "\r"
-                return; 
+                return;
             fi
             sleep 2
         done
@@ -64,6 +64,8 @@ elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     brew reinstall libtool
 elif [ "$TARGET" == "android" ]; then
     PARALLEL=2
+elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
+    PARALLEL=4
 else
     PARALLEL=1
 fi
@@ -71,7 +73,7 @@ fi
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
-        export CC="gcc-5" 
+        export CC="gcc-5"
         export CXX="g++-5"
     fi
 fi
@@ -104,41 +106,50 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
             echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
             ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
         fi
+    elif [ "$TARGET" == "vs" ]; then
+        echo Compiling $formula_name
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
     else
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-    echoDots $apothecaryPID
-    wait $apothecaryPID
+	if [ "$TARGET" != "vs" ]; then
+    	echoDots $apothecaryPID
+    	wait $apothecaryPID
+	fi
 done
 
-if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    # exit here on PR's 
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
+    # exit here on PR's
     echo "On Master Branch and not a PR";
-else 
+else
     echo "This is a PR or not master branch, exiting build before compressing";
     exit 0
 fi
 
-if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then 
+if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     echo "No secure vars set so exiting before compressing";
     exit 0
 fi
 
 echo Compressing libraries
 cd $ROOT
-TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
-tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
 
-echo Unencrypting key
-openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
-cp scripts/ssh_config ~/.ssh/config
-chmod 600 scripts/id_rsa
-echo Uploading libraries
-scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-rm scripts/id_rsa
-
-
+if [ ! -z ${APPVEYOR+x} ]; then
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
+	7z a $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+else
+	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
+	tar cjf $TARBALL $(ls  | grep -v apothecary | grep -v scripts)
+	echo Unencrypting key
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
+	cp scripts/ssh_config ~/.ssh/config
+	chmod 600 scripts/id_rsa
+	echo Uploading libraries
+	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm scripts/id_rsa
+fi

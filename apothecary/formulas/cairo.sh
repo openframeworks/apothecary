@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # Cairo
 # 2D graphics library with support for multiple output devices
@@ -8,7 +8,7 @@
 # dependencies have their own formulas in cairo/depends
 #
 # following http://www.cairographics.org/end_to_end_build_for_mac_os_x,
-# we build and install dependencies into a subfolder of cairo by setting the 
+# we build and install dependencies into a subfolder of cairo by setting the
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
@@ -21,7 +21,7 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.12.14
+VER=1.14.6
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
@@ -29,53 +29,41 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	if [ "$TYPE" == "vs" ] ; then
-		# Download the xz extractor.
-		curl -LO http://tukaani.org/xz/xz-5.2.1-windows.zip
-
-		# Unzip xz and save it to the local directory.
-		unzip -j xz-5.2.1-windows.zip bin_x86-64/xz.exe -d .
-	fi
-
-	curl -LO http://cairographics.org/releases/cairo-$VER.tar.xz
+	wget http://cairographics.org/releases/cairo-$VER.tar.xz
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz
-
-	# manually download dependencies
-	apothecaryDependencies download
-
-	if [ "$TYPE" == "vs" ] ; then
-		# Get the custom cairo visual studio solution.
-		git clone https://github.com/DomAmato/Cairo-VS
-
-		# Remove the xz extractor.
-		rm xz.exe
-	fi
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "vs" ] ; then
+	# manually download dependencies
+	apothecaryDependencies download
 	
-		apothecaryDependencies prepare
-		
+	if [ "$TYPE" == "vs" ] ; then
+
+		apothecaryDepend prepare zlib
+		apothecaryDepend build zlib
+		apothecaryDepend copy zlib
+		apothecaryDepend prepare libpng
+		apothecaryDepend build libpng
+		apothecaryDepend copy libpng
+		apothecaryDepend prepare pixman
+		apothecaryDepend build pixman
+		apothecaryDepend copy pixman
+		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
-		
-		cd ../Cairo-VS
-		
-		cp -Rv ../cairo/* cairo
-		cp -Rv ../freetype/* freetype
-		cp -Rv ../libpng/* libpng
-		cp -Rv ../pixman/* pixman
-		cp -Rv ../zlib/* zlib
-		
-		if [ $ARCH == 32 ] ; then
-			cp -v ../freetype/objs/vc2010/Win32/*.lib libs/freetype.lib
-		elif [ $ARCH == 64 ] ; then
-			cp -v ../freetype/objs/vc2010/x64/*.lib libs/freetype.lib
+		apothecaryDepend copy freetype
+
+		echo "copying from $PWD"
+		if [ "$ARCH" == 32 ]; then
+			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
+		else
+			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib ../libpng/libpng.lib
 		fi
-		
+		ls ../zlib
+		ls ../zlib/Release
+		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	else
 		# generate the configure script if it's not there
 		if [ ! -f configure ] ; then
@@ -101,13 +89,17 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		cd ../Cairo-VS/projects
-		if [ $ARCH == 32 ] ; then
-			vs-build "cairo.sln"
-		elif [ $ARCH == 64 ] ; then
-			vs-build "cairo.sln" Build "Release|x64"
-		fi
-		 
+		ROOT=${PWD}/..
+		export INCLUDE="$INCLUDE;$ROOT/zlib"
+		export INCLUDE="$INCLUDE;$ROOT/libpng"
+		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"
+		export INCLUDE="$INCLUDE;$ROOT/cairo/boilerplate"
+		export INCLUDE="$INCLUDE;$ROOT/cairo/src"
+		export LIB="$LIB;$ROOT/zlib/Release/"
+		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
+		sed -i "s/-MD/-MT/" build/Makefile.win32.common
+		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
+		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
@@ -120,10 +112,10 @@ function build() {
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
-					--disable-qt 
-		make -j${PARALLEL_MAKE} 
+					--disable-qt
+		make -j${PARALLEL_MAKE}
 		make install
-	else 
+	else
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
 					LDFLAGS="-arch i386 -arch x86_64" \
@@ -135,8 +127,8 @@ function build() {
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
-					--disable-qt 
-		make -j${PARALLEL_MAKE} 
+					--disable-qt
+		make -j${PARALLEL_MAKE}
 		make install
 	fi
 }
@@ -144,29 +136,24 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		cd ..
 		#this copies all header files but we dont need all of them it seems
 		#maybe alter the VS-Cairo build to separate necessary headers
 		# make the path in the libs dir
 		mkdir -p $1/include/cairo
 
 		# copy the cairo headers
-		cp -Rv cairo/src/*.h $1/include/cairo		
-		
+		cp -Rv src/*.h $1/include/cairo
+
 		if [ $ARCH == 32 ] ; then
-			# make the libs path 
+			# make the libs path
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v Cairo-VS/projects/Release/cairo.lib $1/lib/$TYPE/Win32/cairo-static.lib
-			cp -v Cairo-VS/projects/Release/pixman.lib $1/lib/$TYPE/Win32/pixman-1.lib
-			cp -v Cairo-VS/libs/libpng.lib $1/lib/$TYPE/Win32
+			cp -v src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
 		elif [ $ARCH == 64 ] ; then
-			# make the libs path 
+			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v Cairo-VS/projects/x64/Release/cairo.lib $1/lib/$TYPE/x64/cairo-static.lib
-			cp -v Cairo-VS/projects/x64/Release/pixman.lib $1/lib/$TYPE/x64/pixman-1.lib
-			cp -v Cairo-VS/libs/libpng.lib $1/lib/$TYPE/x64
+			echo $PWD
+			cp -v src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
 		fi
-		cd cairo
 
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
 		# make the path in the libs dir
@@ -175,9 +162,9 @@ function copy() {
 		# copy the cairo headers
 		cp -Rv $BUILD_ROOT_DIR/include/cairo/* $1/include/cairo
 
-		# make the libs path 
+		# make the libs path
 		mkdir -p $1/lib/$TYPE
-	
+
 		if [ "$TYPE" == "osx" ] ; then
 			cp -v $BUILD_ROOT_DIR/lib/libcairo-script-interpreter.a $1/lib/$TYPE/cairo-script-interpreter.a
 		fi
@@ -196,7 +183,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-	
+
 	# manually clean dependencies
 	apothecaryDependencies clean
 

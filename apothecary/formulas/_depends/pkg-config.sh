@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env /bash
 #
 # a helper tool used when compiling applications and libraries
 # http://www.freedesktop.org/wiki/Software/pkg-config/
@@ -30,7 +30,7 @@ function prepare() {
 function build() {
 
 	# setting empty flags so it ignores an existing pkg-config install
-	# PKG-CONFIG does not need the typical architecture flags because 
+	# PKG-CONFIG does not need the typical architecture flags because
 	# it is a tool and does not contribute static lib objects to the core
     ./configure --prefix=$BUILD_ROOT_DIR --with-internal-glib GLIB_CFLAGS="" GLIB_LIBS=""
 
@@ -40,7 +40,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 
-	# rm link if it exists as this can cause the install to fail 
+	# rm link if it exists as this can cause the install to fail
 	if [ -f $BUILD_ROOT_DIR/bin/*-pkg-config ] ; then
 		rm $BUILD_ROOT_DIR/bin/*-pkg-config
 	fi

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # videoInput
 # A video capture library for windows
@@ -31,6 +31,8 @@ function build() {
 	cd videoInputSrcAndDemos
 
 	if [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		cd VS-videoInputcompileAsLib
 		if [ $ARCH == 32 ] ; then
 			vs-build "videoInput.sln"
@@ -41,7 +43,7 @@ function build() {
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd msys2
-		make 
+		make
 	fi
 }
 
@@ -62,7 +64,7 @@ function copy() {
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Debug/videoInputD.lib $1/lib/$TYPE/x64/videoInputD.lib
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Release/videoInput.lib $1/lib/$TYPE/x64/videoInput.lib
 		fi
-		
+
 
 	else
 		mkdir -p $1/lib/$TYPE
@@ -74,7 +76,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-	
+
 	if [ "$TYPE" == "vs" ] ; then
 		cd videoInputSrcAndDemos/VS-videoInputcompileAsLib
 		vs-clean "videoInput.sln"

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # RtAudio
 # RealTime Audio input/output across Linux, Macintosh OS-X and Windows
@@ -24,7 +24,7 @@ GIT_TAG=master
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	curl -Lk $GIT_URL/archive/master.tar.gz -o  rtaudio-$GIT_TAG.tar.gz
+	wget $GIT_URL/archive/master.tar.gz -O rtaudio-$GIT_TAG.tar.gz
 	tar -xf rtaudio-$GIT_TAG.tar.gz
 	mv rtaudio-$GIT_TAG rtAudio
 	rm rtaudio-$GIT_TAG.tar.gz
@@ -38,7 +38,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	# The ./configure / MAKEFILE sequence is broken for OSX, making it 
+	# The ./configure / MAKEFILE sequence is broken for OSX, making it
 	# impossible to create universal libs in one pass.  As a result, we compile
 	# the project manually according to the author's page:
 	# https://www.music.mcgill.ca/~gary/rtaudio/compiling.html
@@ -79,6 +79,8 @@ function build() {
 		lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		local API="--with-wasapi --with-ds" # asio as well?
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
@@ -98,7 +100,13 @@ function build() {
 		local API="--with-wasapi --with-ds" # asio as well?
 		mkdir -p build
 		cd build
-		cmake .. -G "Unix Makefiles"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON -DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe -DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe -DBUILD_TESTING=OFF
+		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/mingw32/bin/make \
+			-DAUDIO_WINDOWS_WASAPI=ON \
+			-DAUDIO_WINDOWS_DS=ON \
+			-DAUDIO_WINDOWS_ASIO=ON \
+			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
+			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
+			-DBUILD_TESTING=OFF
 		make
 	fi
 
@@ -126,11 +134,11 @@ function copy() {
 			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
 			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib
 		fi
-		
+
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
-	
+
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a
 	fi
@@ -143,7 +151,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-	
+
 	if [ "$TYPE" == "vs" ] ; then
 		vs-clean "rtaudio_static.vcxproj"
 	else

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # tess2
 # Game and tools oriented refactored version of GLU tesselator
@@ -41,22 +41,22 @@ function prepare() {
 	# check if the patch was applied, if not then patch
 	patch -p1 -u -N  < $FORMULA_DIR/tess2.patch
 	# copy in build script and CMake toolchains adapted from Assimp
-	if [ "$OS" == "osx" ] ; then
+	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p build
 	fi
 }
 
 # executed inside the lib src dir
 function build() {
-	
+
 	cd ../tess2_patched
-	
+
 	if [ "$TYPE" == "osx" ] ; then
 	    # use CMake for the build using CMakeLists.txt from HomeBrew since the original source doesn't have one
 	    # see : https://github.com/mxcl/homebrew/pull/19634/files
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
 
-		OSX_ARCHS="i386 x86_64" 
+		OSX_ARCHS="i386 x86_64"
 
 		for OSX_ARCH in ${OSX_ARCHS}
 		do
@@ -66,8 +66,8 @@ function build() {
 			set +e
 
 			STD_LIB_FLAGS="-stdlib=libc++"
-		
-			
+
+
 			OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
 
 			export CFLAGS="-arch $OSX_ARCH $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -109,6 +109,8 @@ function build() {
 			 > "${LOG}" 2>&1
 
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
@@ -121,40 +123,40 @@ function build() {
 			cmake .. -G "Visual Studio $VS_VER Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 			vs-build "tess2.sln" Build "Release|x64"
 		fi
-		
+
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
 		local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
         fi
 
-		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`	
+		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
 		set -e
 		CURRENTPATH=`pwd`
-		
+
 		DEVELOPER=$XCODE_DEV_ROOT
 		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
 
 		mkdir -p "builddir/$TYPE"
-	
+
 		# Validate environment
-		case $XCODE_DEV_ROOT in  
+		case $XCODE_DEV_ROOT in
 		     *\ * )
 		           echo "Your Xcode path contains whitespaces, which is not supported."
 		           exit 1
 		          ;;
 		esac
-		case $CURRENTPATH in  
+		case $CURRENTPATH in
 		     *\ * )
 		           echo "Your path contains whitespaces, which is not supported by 'make install'."
 		           exit 1
 		          ;;
-		esac 
-		
+		esac
+
 		export CC=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
 		export CPP=$TOOLCHAIN/usr/bin/$COMPILER_CPPTYPE
 		export CXX=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
@@ -167,15 +169,15 @@ function build() {
 		export RANLIB=$TOOLCHAIN/usr/bin/ranlib
 
 		SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
         elif [ "$TYPE" == "ios" ]; then
             SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
         fi
-	
+
 		EXTRA_LINK_FLAGS="-stdlib=libc++ -Os -fPIC"
 		EXTRA_FLAGS="$EXTRA_LINK_FLAGS -fvisibility-inlines-hidden"
-		
+
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
@@ -186,13 +188,13 @@ function build() {
 
 			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
 			then
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneSimulator"
                 fi
 			else
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneOS"
@@ -207,10 +209,10 @@ function build() {
 		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
 		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
 		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=7.0 
+		    	MIN_IOS_VERSION=7.0
 		    fi
 
-            if [ "${TYPE}" == "tvos" ]; then 
+            if [ "${TYPE}" == "tvos" ]; then
     		    MIN_TYPE=-mtvos-version-min=
     		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
     		    	MIN_TYPE=-mtvos-simulator-version-min=
@@ -229,8 +231,8 @@ function build() {
             fi
 
 
-			export CFLAGS="-arch $IOS_ARCH $BITCODE -DNDEBUG -pipe -no-cpp-precomp -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $MIN_TYPE$MIN_IOS_VERSION -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/" 
-	
+			export CFLAGS="-arch $IOS_ARCH $BITCODE -DNDEBUG -pipe -no-cpp-precomp -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $MIN_TYPE$MIN_IOS_VERSION -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
+
 			export CPPFLAGS=$CFLAGS
 			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS "
 			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++11 -stdlib=libc++"
@@ -245,12 +247,12 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-			cmake -G 'Unix Makefiles' 
+			cmake -G 'Unix Makefiles'
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 
 			if [ $? != 0 ];
-		    then 
+		    then
 		    	tail -n 100 "${LOG}"
 		    	echo "Problem while make - Please check ${LOG}"
 		    	exit 1
@@ -290,7 +292,7 @@ function build() {
 		fi
 
 		if [ $? != 0 ];
-		then 
+		then
 			tail -n 10 "${LOG}"
 		    echo "Problem while creating fat lib with lipo - Please check ${LOG}"
 		    exit 1
@@ -309,7 +311,7 @@ function build() {
 
 			strip -x lib/$TYPE/libtess2.a >> "${SLOG}" 2>&1
 			if [ $? != 0 ];
-			then 
+			then
 				tail -n 100 "${SLOG}"
 			    echo "Problem while stripping lib - Please check ${SLOG}"
 			    exit 1
@@ -329,7 +331,7 @@ function build() {
 	    cd Build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
-	    make config=release tess2 
+	    make config=release tess2
 	    cd ..
 	    mkdir -p build/android/$ABI
 	    mv Build/libtess2.a build/android/$ABI
@@ -367,7 +369,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	
+
 	cd ../tess2_patched
 	# headers
 	rm -rf $1/include
@@ -376,7 +378,7 @@ function copy() {
 
 	# lib
 	mkdir -p $1/lib/$TYPE
-	if [ "$TYPE" == "vs" ] ; then 
+	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_32/Release/tess2.lib $1/lib/$TYPE/Win32/tess2.lib
@@ -384,7 +386,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/Release/tess2.lib $1/lib/$TYPE/x64/tess2.lib
 		fi
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then 
+	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		cp -v lib/$TYPE/libtess2.a $1/lib/$TYPE/tess2.a
 
 	elif [ "$TYPE" == "osx" ]; then
@@ -417,7 +419,7 @@ function clean() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f CMakeCache.txt *.lib
-	
+
 	elif [ "$TYPE" == "android" ] ; then
 		echoWarning "TODO: clean android"
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then

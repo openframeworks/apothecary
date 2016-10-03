@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # Poco
 # C++ with Batteries Included
@@ -50,7 +50,7 @@ function prepare() {
 		echo "Setting git repo to SHA=$SHA"
 		git reset --hard $SHA
 	fi
-	
+
 	if [ "$TYPE" != "msys2" ] && [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
 		# manually prepare dependencies
 		apothecaryDependencies download
@@ -67,7 +67,7 @@ function prepare() {
 
 		cd build/config
 
-		if [[ "$TYPE" == "tvos" ]]; then 
+		if [[ "$TYPE" == "tvos" ]]; then
 			cp $FORMULA_DIR/AppleTV AppleTV
 			cp $FORMULA_DIR/AppleTVSimulator AppleTVSimulator
 		fi
@@ -95,8 +95,8 @@ function prepare() {
 		rm buildwin.cmd
 		CURRENTPATH=`pwd`
 		cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
-		
-		
+
+
 		# Patch the components to exclude those that we aren't using.
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/components.patch 2>/dev/null ; then
 			patch -p0 -u < $FORMULA_DIR/components.patch
@@ -106,16 +106,19 @@ function prepare() {
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
 		# get the absolute path to the included openssl libs
-		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
+		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $OF_LIBS_OPENSSL; pwd)
 
 		# convert the absolute path from unix to windows
-		local OPENSSL_DIR=$(echo $OF_LIBS_OPENSSL_ABS_PATH | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')
+		#local OPENSSL_DIR=$(echo $OF_LIBS_OPENSSL_ABS_PATH | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')
 
 		# escape windows slashes and a few common escape sequences before passing to sed
-		local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
+		#local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
+		export OPENSSL_DIR="$(cygpath -w $OF_LIBS_OPENSSL_ABS_PATH)"
+		export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
+		echo $OPENSSL_DIR
 
 		# replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
-		sed -i.tmp "s|C:\\\OpenSSL|$OPENSSL_DIR|g" buildwin.cmd
+		sed -i.tmp "s|C:\\\OpenSSL|$ESCAPED_OPENSSL_DIR|g" buildwin.cmd
 
 		# replace OPENSSL_LIB=%OPENSSL_DIR%\lib;%OPENSSL_DIR%\lib\VC with OPENSSL_LIB=%OPENSSL_DIR%\lib\vs
 		sed -i.tmp "s|%OPENSSL_DIR%\\\lib;.*|%OPENSSL_DIR%\\\lib\\\vs|g" buildwin.cmd
@@ -150,12 +153,14 @@ function build() {
 		make install
 		rm -f install/$TYPE/lib/*d.a
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		if [ $ARCH == 32 ] ; then
-			cmd //c buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests
-			cmd //c buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
 		elif [ $ARCH == 64 ] ; then
-			cmd //c buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests
-			cmd //c buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 	    cp $FORMULA_DIR/MinGWConfig64 build/config/MinGW
@@ -172,7 +177,7 @@ function build() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		set -e
 		SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
         elif [ "$TYPE" == "ios" ]; then
             SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -184,7 +189,7 @@ function build() {
 		VERSION=$VER
 
 		local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -234,7 +239,7 @@ function build() {
 		do
 			MIN_IOS_VERSION=$IOS_MIN_SDK_VER
 		    # min iOS version for arm64 is iOS 7
-		
+
 		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
 		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
 		    elif [ "${IOS_ARCH}" == "i386" ]; then
@@ -248,7 +253,7 @@ function build() {
 
 			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
 			then
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
                     BUILD_POCO_CONFIG="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
@@ -256,7 +261,7 @@ function build() {
                     BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_SIMULATOR
                 fi
 			else
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
                     BUILD_POCO_CONFIG="AppleTV"
                 elif [ "$TYPE" == "ios" ]; then
@@ -265,7 +270,7 @@ function build() {
                 fi
 			fi
 
-			if [ "${TYPE}" == "tvos" ]; then 
+			if [ "${TYPE}" == "tvos" ]; then
     		    MIN_TYPE=-mtvos-version-min=
     		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
     		    	MIN_TYPE=-mtvos-simulator-version-min=
@@ -328,7 +333,7 @@ PING_LOOP_PID=$!
 			dump_output
 			kill $PING_LOOP_PID
 			trap - ERR
-			
+
 			if [ $? != 0 ];
 		    then
 		    	tail -n 100 "${LOG}"
@@ -372,7 +377,7 @@ PING_LOOP_PID=$!
 				fi
 			done
 		fi
-		
+
 
 		cd ../../
 
@@ -396,7 +401,7 @@ PING_LOOP_PID=$!
 			done
 			cd ../../
 		fi
-		
+
 
 		echo "--------------------"
 		echo "Reseting changed files back to originals"
@@ -478,7 +483,7 @@ function copy() {
 
     rm -rf $1/lib/$TYPE
     mkdir -p $1/lib/$TYPE
-    
+
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
@@ -492,7 +497,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v lib64/*.lib $1/lib/$TYPE/x64
 		fi
-		
+
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
 		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE

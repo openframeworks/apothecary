@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # PortAudio
 # Portable Cross-platform Audio I/O

@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # FmodEX 
 # http://www.portaudio.com/

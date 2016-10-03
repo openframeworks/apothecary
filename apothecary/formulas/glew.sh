@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # GLEW
 # OpenGL Extensions Wrangler
@@ -8,7 +8,7 @@
 # use "make glew.lib" to build only the lib without demos/tests
 # the OPT flag is used for CFLAGS (& LDFLAGS I think?)
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "osx" "vs" )
 
 # define the version
 VER=1.11.0
@@ -51,12 +51,16 @@ function build() {
 		lipo -c libGLEW-i386.a libGLEW-x86_64.a -o libGLEW.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		cd build/vc12 #this upgrades without issue to vs2015
 		#vs-clean "glew.sln"
 		vs-upgrade "glew.sln"
-		vs-build "glew_static.vcxproj" Build "Release|Win32"
-		vs-build "glew_static.vcxproj" Build "Release|x64"
-		#mv lib/Release/x64/glew32s.lib glew64s.lib
+		if [ "$ARCH" == "32" ]; then
+			vs-build "glew_static.vcxproj" Build "Release|Win32"
+		else
+			vs-build "glew_static.vcxproj" Build "Release|x64"
+		fi
 		cd ../../
 	elif [ "$TYPE" == "msys2" ] ; then
 		make clean
@@ -73,18 +77,20 @@ function copy() {
 	cp -Rv include/* $1/include
 
 	rm -rf $1/lib/$TYPE/*
-	
+
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE
 		cp -v libGLEW.a $1/lib/$TYPE/glew.a
 
 	elif [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/lib/$TYPE/Win32
-		mkdir -p $1/lib/$TYPE/x64
-		cp -v lib/Release/x64/glew32s.lib $1/lib/$TYPE/x64
-		cp -v lib/Release/Win32/glew32s.lib $1/lib/$TYPE/Win32
-
+		if [ "$ARCH" == "32" ]; then
+			mkdir -p $1/lib/$TYPE/Win32
+			cp -v lib/Release/Win32/glew32s.lib $1/lib/$TYPE/Win32
+		else
+			mkdir -p $1/lib/$TYPE/x64
+			cp -v lib/Release/x64/glew32s.lib $1/lib/$TYPE/x64
+		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 		# TODO: add cb formula
 		mkdir -p $1/lib/$TYPE

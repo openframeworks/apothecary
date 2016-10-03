@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env /bash
 #
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
@@ -12,7 +12,7 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://zlib.net/zlib-$VER.tar.gz
+	wget https://github.com/madler/zlib/archive/v$VER.tar.gz -O zlib-$VER.tar.gz
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
 	rm zlib-$VER.tar.gz
@@ -25,9 +25,9 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	if [ "$TYPE" == "osx" ] ; then
-		echo "build not needed for $TYPE"
-	elif [ "$TYPE" == "vs" ] ; then
+	if [ "$TYPE" == "vs" ] ; then
+		unset TMP
+		unset TEMP
 		if [ $ARCH == 32 ] ; then
 			cmake -G "Visual Studio $VS_VER"
 			vs-build "zlib.sln"
@@ -35,11 +35,6 @@ function build() {
 			cmake -G "Visual Studio $VS_VER Win64"
 			vs-build "zlib.sln" Build "Release|x64"
 		fi
-	else
-		./configure --static \
-					--prefix=$BUILD_ROOT_DIR \
-		make clean; 
-		make
 	fi
 }
 
@@ -49,11 +44,12 @@ function copy() {
 		return
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			cp -v Release/zlib.dll $1/../../export/$TYPE/Win32/Zlib.dll
-		elif [ $ARCH == 64 ] ; then
-			cp -v Release/zlib.dll $1/../../export/$TYPE/x64/Zlib.dll
+			PLATFORM="Win32"
+		else
+			PLATFORM="x64"
 		fi
-		
+		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
+		cp -v Release/zlibstatic.lib $1/../cairo/lib/$TYPE/$PLATFORM/zlib.lib
 	else
 		make install
 	fi

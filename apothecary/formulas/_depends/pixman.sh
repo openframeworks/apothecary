@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env /bash
 #
 # a low-level software library for pixel manipulation
 # http://pixman.org/
@@ -12,18 +12,15 @@ GIT_TAG=pixman-$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://cairographics.org/releases/pixman-$VER.tar.gz
-	tar -xf pixman-$VER.tar.gz
+	wget http://cairographics.org/releases/pixman-$VER.tar.gz
+	tar -xzf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
 	rm pixman-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "vs" ] ; then
-		echo "handled in the cairo script"
-	# generate the configure script if it's not there
-	else 
+	if [ "$TYPE" != "vs" ] ; then
 		if [ ! -f configure ] ; then
 			./autogen.sh
 		fi
@@ -32,12 +29,11 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
 	if [ "$TYPE" == "osx" ] ; then
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch i386 -arch x86_64 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
+		local FAT_LDFLAGS="-arch i386 -arch x86_64"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
@@ -50,41 +46,41 @@ function build() {
 		make clean
 		make
 	elif [ "$TYPE" == "vs" ] ; then
-		echo "build is handled in the cairo script"
-#		sed s/-MD/-MT/ Makefile.win32 > Makefile.fixed
-#		mv Makefile.fixed Makefile.win32
-		
-#		CURRENTPATH=`pwd`
-#		WINPATH=$(echo "$CURRENTPATH" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
-#		cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && nmake -f Makefile.win32 "CFG=release"'
-		
-		#cmd.exe /c 'nmake -f Makefile.win32 "CFG=release"'
+		sed -i s/-MD/-MT/ Makefile.win32.common
+		cd pixman
+		make -f Makefile.win32 CFG=release MMX=off
+		#CURRENTPATH=`pwd`
+		#WINPATH=$(echo "$CURRENTPATH" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
+		#cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && nmake -f Makefile.win32 "CFG=release"'
 	else
-	./configure LDFLAGS="-arch i386 -arch x86_64" \
-				CFLAGS="-O3 -arch i386 -arch x86_64" \
-				--prefix=$BUILD_ROOT_DIR \
-				--disable-dependency-tracking \
-				--disable-gtk \
-				--disable-shared
+		./configure LDFLAGS="-arch i386 -arch x86_64" \
+					CFLAGS="-O3 -arch i386 -arch x86_64" \
+					--prefix=$BUILD_ROOT_DIR \
+					--disable-dependency-tracking \
+					--disable-gtk \
+					--disable-shared
 		# only build & install lib, ignore demos/tests
 		cd pixman
 		make clean
 		make
 	fi
-
-	
-	
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		echo "copy vs"
+		if [ $ARCH == 32 ] ; then
+			PLATFORM="Win32"
+		else
+			PLATFORM="x64"
+		fi
+		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
+		cp -v pixman/release/pixman-1.lib $1/../cairo/lib/$TYPE/$PLATFORM/
 	else
 		# lib
 		cd pixman
 		make install
-		
+
 		# pkg-config info
 		cd ../
 		make install-pkgconfigDATA

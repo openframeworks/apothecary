@@ -8,3 +8,4 @@
 !/scripts/**/*
 /apothecary/build
 .DS_Store
+!.*.yml

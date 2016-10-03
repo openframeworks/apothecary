@@ -1,0 +1,57 @@
+version: 1.0.{build}
+os: Visual Studio 2015 RC
+
+environment:
+  global:
+    APPVEYOR_OS_NAME: windows
+    CHERE_INVOKING: 1
+  matrix:
+  #MSYS2 Building
+    #- platform: x86
+    #  TARGET: msys2
+    #  ARCH: 32
+
+  #VisualStudio Building
+    - platform: x86
+      TARGET: vs
+      ARCH: 32
+    - platform: x64
+      TARGET: vs
+      ARCH: 64
+
+configuration: Debug
+shallow_clone: true
+clone_depth: 10
+
+init:
+- set MSYS2_PATH=c:\msys64
+- set PATH=%MSYS2_PATH%\usr\bin;%PATH%
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Sy pacman"'
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syu"'
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Su"'
+- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S xz unzip"'
+- if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
+- if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
+- if "%PLATFORM%"=="x86" call "%VS140COMNTOOLS%\vsvars32.bat"
+- if "%PLATFORM%"=="x64" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
+- if "%TARGET%"=="vs" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
+
+#install:
+#- if "%BUILDER%"=="MSYS2" (%MSYS2_PATH%\usr\bin\bash -lc "scripts/msys2/install_dependencies.sh --noconfirm")
+
+build_script:
+- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
+
+test: off
+
+artifacts:
+    - path: 'openFrameworks*.zip'
+
+deploy:
+    provider: FTP
+    protocol: sftp
+    host: ci.openframeworks.cc
+    username: tests
+    password:
+        secure: ALHv+04sZ49FZ4OCj6tTSg==
+    folder: libs

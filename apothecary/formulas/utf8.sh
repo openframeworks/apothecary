@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # utf8cpp
 # http://utfcpp.sourceforge.net/

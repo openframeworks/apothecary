@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # GLFW
 # creating windows with OpenGL contexts and managing input and events
@@ -28,7 +28,9 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    : #noop
+	if [ "$TYPE" == "vs" ] ; then
+		cp $FORMULA_DIR/build-openssl.bat projects/build-openssl.bat
+	fi
 }
 
 # executed inside the lib src dir
@@ -36,23 +38,19 @@ function build() {
 	local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
 	if [ "$TYPE" == "vs" ] ; then
-		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
-		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
-		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-        EXTRA_CONFIG="-DCMAKE_USE_OPENSSL=ON -DCURL_STATICLIB=ON -DBUILD_TESTING=OFF -DCMAKE_LIBRARY_PATH=$OPENSSL_LIBS -DCMAKE_INCLUDE_PATH=$OPENSSL_INCLUDE"
+		unset TMP
+		unset TEMP
+		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
+		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
+		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
+		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14"
+		cd projects/Windows/VC14/lib
 		if [ $ARCH == 32 ] ; then
-			mkdir -p build_vs_32
-			cd build_vs_32
-			cmake .. -G "Visual Studio $VS_VER" $EXTRA_CONFIG
-			#vs-build "curl.sln"
-            cmake --build . --config "Release|Win32" --clean-first
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p build_vs_64
-			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64" $EXTRA_CONFIG
-			#vs-build "curl.sln" Build "Release|x64"
-            cmake --build . --config "Release|Win64"--clean-first
+			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+		else
+			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
 		fi
+
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
@@ -65,7 +63,7 @@ function build() {
         ./buildconf
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no 
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no
         sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -96,7 +94,7 @@ function build() {
 	    make install
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         ./buildconf
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -114,7 +112,7 @@ function build() {
 
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
-        if [ "${TYPE}" == "ios" ]; then 
+        if [ "${TYPE}" == "ios" ]; then
             lipo -create build/$TYPE/i386/lib/libcurl.a \
                          build/$TYPE/x86_64/lib/libcurl.a \
                          build/$TYPE/armv7/lib/libcurl.a \
@@ -129,7 +127,7 @@ function build() {
         echo "building other for $TYPE"
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib 
+            export LDFLAGS=-L$SYSROOT/usr/lib
             export CFLAGS=-I$SYSROOT/usr/include
         fi
 
@@ -155,11 +153,11 @@ function copy() {
 		cp -Rv include/* $1/include
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs_32/src/Release/curl.lib $1/lib/$TYPE/Win32/curl.lib
+			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs_64/src/Release/curl.lib $1/lib/$TYPE/x64/curl.lib
-		fi		
+			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
+		fi
 	elif [ "$TYPE" == "osx" ] ; then
 		# Standard *nix style copy.
 		# copy headers
