@@ -12,7 +12,7 @@ GIT_TAG=pixman-$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://cairographics.org/releases/pixman-$VER.tar.gz
+	wget --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
 	rm pixman-$VER.tar.gz
@@ -40,7 +40,8 @@ function build() {
 				--prefix=$BUILD_ROOT_DIR \
 				--disable-dependency-tracking \
 				--disable-gtk \
-				--disable-shared
+				--disable-shared \
+                --disable-mmx
 		# only build & install lib, ignore demos/tests
 		cd pixman
 		make clean
