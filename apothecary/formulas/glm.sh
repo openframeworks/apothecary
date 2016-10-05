@@ -16,7 +16,6 @@ GIT_TAG=v$VER
 function download() {
 	wget https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     unzip glm-$VER.zip
-    mv glm-$VER glm
 }
 
 # prepare the build environment, executed inside the lib src dir
