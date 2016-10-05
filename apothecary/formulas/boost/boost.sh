@@ -317,17 +317,20 @@ function copy() {
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
         OUTPUT_DIR_SRC=`pwd`/lib/boost/include/boost
         #rsync -ar $OUTPUT_DIR_SRC/* $1/include/boost/
+		ls
 		rsync -ar install_dir/boost/* $1/include/boost/
         lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a
         lipo -info $OUTPUT_DIR_LIB/boost_system.a
         cp -v $OUTPUT_DIR_LIB/boost_filesystem.a $1/lib/$TYPE/
 		cp -v $OUTPUT_DIR_LIB/boost_system.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "emscripten" ]; then
+		ls
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
+		ls
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage_$ARCH/lib/*.a $1/lib/$TYPE/$ABI/
 	fi
