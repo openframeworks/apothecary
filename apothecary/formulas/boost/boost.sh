@@ -298,16 +298,16 @@ function copy() {
 		cp -r install_dir/boost/* $1/include/boost/
 		if [ "$ARCH" == "32" ]; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-1_58.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_system-vc140-mt-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/Win32/
 		elif [ "$ARCH" == "64" ]; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-1_58.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_system-vc140-mt-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-${VERSION_UNDERSCORES}.lib $1/lib/$TYPE/x64/
 		fi
 	elif [ "$TYPE" == "osx" ]; then
 		rsync -ar install_dir/boost/* $1/include/boost/
