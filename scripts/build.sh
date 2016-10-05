@@ -139,7 +139,7 @@ fi
 
 cd $ROOT
 echo "Compressing libraries from $PWD"
-
+LIBS=$(ls | grep -v .appveyor.yml | grep -v .travis.yml | grep -v .gitignore | grep -v apothecary | grep -v scripts)
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${ARCH}.zip
 	7z a $TARBALL $LIBS
