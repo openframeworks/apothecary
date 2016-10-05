@@ -294,6 +294,7 @@ function copy() {
 	mkdir -p install_dir
 
 	if [ "$TYPE" == "vs" ] ; then
+		ls
 		cp stage_$ARCH/include/boost/* $1/include/boost/
 		if [ "$ARCH" == "32" ]; then
 			mkdir -p $1/lib/$TYPE/Win32
