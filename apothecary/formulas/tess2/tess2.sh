@@ -313,6 +313,9 @@ function build() {
 	    cd build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
+		if [ "$TYPE" == "msys2" ]; then
+			export CC=gcc
+		fi
 	    make config=release tess2
 	elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
