@@ -311,13 +311,6 @@ function build() {
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p build
 	    cd build
-		echo "in $PWD"
-		echo Root
-		ls ..
-		echo Source
-		ls ../Source
-
-
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
