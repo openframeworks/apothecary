@@ -223,7 +223,7 @@ $(OBJDIR)/dict.o: ../Source/dict.c
 	@echo $(notdir $<)
 	@echo From $$PWD
 	ls $<
-    mkdir $(OBJDIR)
+	mkdir $(OBJDIR)
 	$(SILENT) $(CC) $(CFLAGS) -o "$@" -c "$<"
 $(OBJDIR)/priorityq.o: ../Source/priorityq.c
 	@echo $(notdir $<)
