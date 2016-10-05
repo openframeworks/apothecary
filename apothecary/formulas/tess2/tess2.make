@@ -221,10 +221,7 @@ endif
 
 $(OBJDIR)/dict.o: ../Source/dict.c
 	@echo $(notdir $<)
-	@echo From $$PWD
-	ls $<
-	mkdir $(OBJDIR)
-	$(SILENT) $(CC) $(CFLAGS) -o "$@" -c "$<"
+	$(CC) $(CFLAGS) -o "$@" -c "$<"
 $(OBJDIR)/priorityq.o: ../Source/priorityq.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(CFLAGS) -o "$@" -c "$<"
