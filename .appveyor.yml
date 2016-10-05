@@ -29,7 +29,7 @@ init:
 #- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Sy pacman"'
 #- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Syu"'
 #- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -Su"'
-- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S xz unzip mingw-w64-i686-gcc"'
+- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
 - if "%PLATFORM%"=="x86" call "%VS140COMNTOOLS%\vsvars32.bat"

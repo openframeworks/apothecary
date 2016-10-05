@@ -28,8 +28,8 @@ GIT_REV=24e4bdd4158909e9720422208ab0a0aca788e700
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl --insecure -L $GIT_URL/archive/$GIT_REV.tar.gz -o libtess2-$GIT_REV.tar.gz
-	tar -xf libtess2-$GIT_REV.tar.gz
+	wget $GIT_URL/archive/$GIT_REV.tar.gz
+	tar -xzf libtess2-$GIT_REV.tar.gz
 	mv libtess2-$GIT_REV tess2
 	rm libtess2*.tar.gz
 }
@@ -311,11 +311,11 @@ function build() {
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p build
 	    cd build
+		which cc
+		which gcc
+		
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
-		if [ "$TYPE" == "msys2" ]; then
-			export CC=gcc
-		fi
 	    make config=release tess2
 	elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
