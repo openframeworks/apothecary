@@ -110,13 +110,17 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         echo Compiling $formula_name
         echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
         ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
+    elif [ "$TARGET" == "msys2" ]; then
+        echo Compiling $formula_name
+        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name #> formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-	if [ "$TARGET" != "vs" ]; then
+	if [ "$TARGET" != "vs" ] && [ "$TARGET" != "msys2" ]; then
     	echoDots $apothecaryPID
     	wait $apothecaryPID
 	fi
@@ -142,7 +146,7 @@ echo "Compressing from $PWD $LIBS"
 echo "ls $(ls)"
 
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${ARCH}.zip
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
