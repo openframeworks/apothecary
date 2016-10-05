@@ -312,7 +312,10 @@ function build() {
 	    mkdir -p build
 	    cd build
 		echo "in $PWD"
-		ls
+		echo Root
+		ls ..
+		echo Source
+		ls ../Source
 
 
 	    cp -v $FORMULA_DIR/Makefile .

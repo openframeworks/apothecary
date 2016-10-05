@@ -27,11 +27,11 @@ ifeq ($(config),debug)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall
-  CXXFLAGS  += $(CFLAGS) 
-  LDFLAGS   += 
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  CXXFLAGS  += $(CFLAGS)
+  LDFLAGS   +=
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -49,11 +49,11 @@ ifeq ($(config),release)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall
-  CXXFLAGS  += $(CFLAGS) 
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -71,11 +71,11 @@ ifeq ($(config),debug64)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall -m64
-  CXXFLAGS  += $(CFLAGS) 
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -m64 -L/usr/lib64
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -93,11 +93,11 @@ ifeq ($(config),release64)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall -m64
-  CXXFLAGS  += $(CFLAGS) 
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s -m64 -L/usr/lib64
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -115,11 +115,11 @@ ifeq ($(config),debug32)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall -m32
-  CXXFLAGS  += $(CFLAGS) 
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -m32 -L/usr/lib32
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -137,11 +137,11 @@ ifeq ($(config),release32)
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
   CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall -m32
-  CXXFLAGS  += $(CFLAGS) 
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s -m32 -L/usr/lib32
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -221,6 +221,7 @@ endif
 
 $(OBJDIR)/dict.o: ../Source/dict.c
 	@echo $(notdir $<)
+    @echo From $$PWD
 	$(SILENT) $(CC) $(CFLAGS) -o "$@" -c "$<"
 $(OBJDIR)/priorityq.o: ../Source/priorityq.c
 	@echo $(notdir $<)
