@@ -28,7 +28,7 @@ GIT_REV=24e4bdd4158909e9720422208ab0a0aca788e700
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget $GIT_URL/archive/$GIT_REV.tar.gz
+	wget $GIT_URL/archive/$GIT_REV.tar.gz -O libtess2-$GIT_REV.tar.gz
 	tar -xzf libtess2-$GIT_REV.tar.gz
 	mv libtess2-$GIT_REV tess2
 	rm libtess2*.tar.gz
@@ -313,7 +313,7 @@ function build() {
 	    cd build
 		which cc
 		which gcc
-		
+
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
