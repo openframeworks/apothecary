@@ -292,12 +292,10 @@ function copy() {
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 	mkdir -p install_dir
+	dist/bin/bcp filesystem install_dir
 
 	if [ "$TYPE" == "vs" ] ; then
-		ls
-		ls stage_$ARCH
-		ls install_dir
-		cp stage_$ARCH/include/boost/* $1/include/boost/
+		cp -r install_dir/include/boost/* $1/include/boost/
 		if [ "$ARCH" == "32" ]; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
@@ -312,32 +310,23 @@ function copy() {
 			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-1_58.lib $1/lib/$TYPE/x64/
 		fi
 	elif [ "$TYPE" == "osx" ]; then
-		dist/bin/bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
 		cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
 	elif  [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
-        OUTPUT_DIR_SRC=`pwd`/lib/boost/include/boost
-        #rsync -ar $OUTPUT_DIR_SRC/* $1/include/boost/
-		ls
-		ls install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
         lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a
         lipo -info $OUTPUT_DIR_LIB/boost_system.a
         cp -v $OUTPUT_DIR_LIB/boost_filesystem.a $1/lib/$TYPE/
 		cp -v $OUTPUT_DIR_LIB/boost_system.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "emscripten" ]; then
-		ls
-		ls install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
+	rsync -ar install_dir/boost/* $1/include/boost/
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
-		ls
-		ls install_dir
-		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage_$ARCH/lib/*.a $1/lib/$TYPE/$ABI/
 	fi
 
