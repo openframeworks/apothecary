@@ -14,10 +14,11 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://downloads.sourceforge.net/project/utfcpp/utf8cpp_2x/Release%20${VER}/utf8_v${VER_}.zip
+	wget http://downloads.sourceforge.net/project/utfcpp/utf8cpp_2x/Release%20${VER}/utf8_v${VER_}.zip
 	mkdir utf8
 	cd utf8
 	unzip ../utf8_v${VER_}.zip
+    rm ../utf8_v${VER_}.zip
 }
 
 # prepare the build environment, executed inside the lib src dir
