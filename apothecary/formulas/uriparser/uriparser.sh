@@ -68,6 +68,7 @@ function build() {
 	elif [ "$TYPE" == "msys2" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
 		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
+		echo "int main(){return 0;}" > tool/uriparse.c
         make clean
 		make -j${PARALLEL_MAKE}
 	    make install
