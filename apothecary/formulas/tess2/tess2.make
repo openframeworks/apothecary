@@ -221,7 +221,7 @@ endif
 
 $(OBJDIR)/dict.o: ../Source/dict.c
 	@echo $(notdir $<)
-    @echo From $$PWD
+	@echo From $$PWD
 	$(SILENT) $(CC) $(CFLAGS) -o "$@" -c "$<"
 $(OBJDIR)/priorityq.o: ../Source/priorityq.c
 	@echo $(notdir $<)
