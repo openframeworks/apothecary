@@ -295,7 +295,7 @@ function copy() {
 	dist/bin/bcp filesystem install_dir
 
 	if [ "$TYPE" == "vs" ] ; then
-		cp -r install_dir/include/boost/* $1/include/boost/
+		cp -r install_dir/boost/* $1/include/boost/
 		if [ "$ARCH" == "32" ]; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
