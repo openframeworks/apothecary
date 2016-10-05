@@ -311,8 +311,9 @@ function build() {
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p build
 	    cd build
-		which cc
-		which gcc
+		echo "in $PWD"
+		ls
+
 
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
