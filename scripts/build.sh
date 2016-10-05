@@ -137,11 +137,8 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-echo Compressing libraries
 cd $ROOT
-LIBS=$(ls  | grep -v apothecary | grep -v scripts)
-echo "Compressing from $PWD $LIBS"
-echo "ls $(ls)"
+echo "Compressing libraries from $PWD"
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${ARCH}.zip

@@ -9,7 +9,7 @@
 # on ios, use some build scripts adapted from the Assimp project
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" )
+FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "tvos" "android" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2" )
 
 # define the version
 VER=1.1
@@ -56,57 +56,24 @@ function build() {
 	    # see : https://github.com/mxcl/homebrew/pull/19634/files
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
 
-		OSX_ARCHS="i386 x86_64"
+		unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
+		rm -f CMakeCache.txt
 
-		for OSX_ARCH in ${OSX_ARCHS}
-		do
+		STD_LIB_FLAGS="-stdlib=libc++"
+		OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
 
-			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
-			rm -f CMakeCache.txt
-			set +e
+		export CFLAGS="-arch i386 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		export CPPFLAGS=$CFLAGS
+		export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"
+		export LDFLAGS="$LINKFLAGS"
+		export CXXFLAGS=$CPPFLAGS
 
-			STD_LIB_FLAGS="-stdlib=libc++"
-
-
-			OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
-
-			export CFLAGS="-arch $OSX_ARCH $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-			export CPPFLAGS=$CFLAGS
-			export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"
-			export LDFLAGS="$LINKFLAGS"
-			export CXXFLAGS=$CPPFLAGS
-
-			LOG="build-tess2-${VER}-${OSX_ARCH}-cmake.log"
-
-			echo "Building library slice for ${OSX_ARCH}..."
-
-			cmake -G 'Unix Makefiles' \
- 				.
- 			make clean >> "${LOG}" 2>&1
-			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
-
-
-			# now we need to create a directory were we can keep our current build result.
-
-			mkdir -p $TYPE
-			mv libtess2.a $TYPE/libtess2-$OSX_ARCH.a
-
-		done
-
-		# combine into fat lib using lipo
-		echo "Running lipo to create fat lib"
-		echo "Please stand by..."
-
-		LIPO_SLICES=	#initialise empty
-
-		for OSX_ARCH in ${OSX_ARCHS}; do
-			LIPO_SLICES+="${TYPE}/libtess2-${OSX_ARCH}.a "
-		done
-
-		LOG="build-tess2-${VER}-lipo.log"
-		lipo -create $LIPO_SLICES \
-			 -output build/libtess2.a \
-			 > "${LOG}" 2>&1
+		mkdir -p build
+		cd build
+		cmake -G 'Unix Makefiles' \
+				..
+		make clean
+		make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
@@ -341,9 +308,9 @@ function build() {
     	cd build
     	emcmake cmake .. -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
     	emmake make -j${PARALLEL_MAKE}
-	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ]; then
-	    mkdir -p Build
-	    cd Build
+	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
+	    mkdir -p build
+	    cd build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
@@ -351,14 +318,14 @@ function build() {
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
         fi
-	    mkdir -p Build
-	    cd Build
+	    mkdir -p build
+	    cd build
 	    cp -v $FORMULA_DIR/Makefile .
 	    cp -v $FORMULA_DIR/tess2.make .
 	    make config=release tess2
 	    cd ..
 	    mkdir -p build/$TYPE
-	    mv Build/libtess2.a build/$TYPE
+	    mv build/libtess2.a build/$TYPE
 	else
 		mkdir -p build/$TYPE
 		cd build/$TYPE
@@ -395,11 +362,9 @@ function copy() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
 
-	elif [ "$TYPE" == "linux64" ]; then
-		cp -v Build/libtess2.a $1/lib/$TYPE/libtess2.a
+	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
+		cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
 
-	elif [ "$TYPE" == "linux" ]; then
-		cp -v Build/libtess2.a $1/lib/$TYPE/libtess2.a
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
