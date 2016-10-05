@@ -24,19 +24,19 @@ trapError() {
 }
 
 isRunning(){
-    if [ “$(uname)” == “Darwin” ]; then
+    if [ “$(uname)” == “Linux” ]; then
+		if [ -d /proc/$1 ]; then
+	    	return 0
+        else
+            return 1
+        fi
+    else
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
             return 0;
         else
             return 1;
-        fi
-    elif [ “$(uname)” == “Linux” ]; then
-	if [ -d /proc/$1 ]; then
-	    return 0
-        else
-            return 1
         fi
     fi
 }
@@ -108,22 +108,20 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "msys2" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name #> formula.log 2>&1 &
+        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-	if [ "$TARGET" != "vs" ] && [ "$TARGET" != "msys2" ]; then
-    	echoDots $apothecaryPID
-    	wait $apothecaryPID
-	fi
+	echoDots $apothecaryPID
+	wait $apothecaryPID
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
