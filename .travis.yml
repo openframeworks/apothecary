@@ -117,7 +117,7 @@ matrix:
             - gcc-4.9
             - realpath
             - coreutils
-            - libboost-tools-dev
+            - libboost-dev
 
 
     - os: linux
