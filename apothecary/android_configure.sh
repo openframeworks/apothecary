@@ -27,8 +27,8 @@ export AR=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ar
 export RANLIB=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ranlib
 export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums"
 export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libcxx/include -I${NDK_ROOT}/sources/android/cpufeatures  -gcc-toolchain ${GCC_TOOLCHAIN_PATH}"
-export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lc++ -lc++abi -lunwind -lgcc -lc -lm -ldl"
-export LIBS="-lz -llog -lc++ -lc++abi -lunwind -lgcc -lc -lm -ldl"
+export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
+export LIBS="-lz -llog  -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
 
