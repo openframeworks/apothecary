@@ -39,7 +39,7 @@ function download() {
 function prepare() {
 	# manually download dependencies
 	apothecaryDependencies download
-	
+
 	if [ "$TYPE" == "vs" ] ; then
 
 		apothecaryDepend prepare zlib
@@ -103,8 +103,8 @@ function build() {
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386 -stdlib=libstdc++ -arch x86_64 -Xarch_x86_64 -stdlib=libc++" \
-					CFLAGS="-Os -arch i386 -stdlib=libstdc++ -arch x86_64 -Xarch_x86_64 -stdlib=libc++" \
+					LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					CFLAGS="-Os -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \

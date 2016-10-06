@@ -144,9 +144,7 @@ function build() {
 		echo "--------------------"
 		echo "Configuring for universal i386 and x86_64 libc++ ..."
 
-		# 32 bit
-		# For OS 10.9+ we must explicitly set libstdc++ for the 32-bit OSX build.
-		export ARCHFLAGS="-arch i386 -arch x86_64"
+		export ARCHFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}
@@ -427,12 +425,12 @@ PING_LOOP_PID=$!
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-        export CXX=clang++
+    export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
 					--library-path=$OPENSSL_LIBS/$ABI \
 					--config=Android
-        make clean ANDROID_ABI=$ABI
+    make clean ANDROID_ABI=$ABI
 		make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
 
 		rm -f lib/Android/$ABI/*d.a
@@ -481,8 +479,8 @@ function copy() {
 	cp -Rv XML/include/Poco/* $1/include/Poco
 	cp -Rv Zip/include/Poco/Zip $1/include/Poco
 
-    rm -rf $1/lib/$TYPE
-    mkdir -p $1/lib/$TYPE
+  rm -rf $1/lib/$TYPE
+  mkdir -p $1/lib/$TYPE
 
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
@@ -521,8 +519,11 @@ function copy() {
 	fi
 
 	# copy license file
+	echo "remove license"
 	rm -rf $1/license # remove any older files if exists
+	echo "create license dir"
 	mkdir -p $1/license
+	echo "copy license"
 	cp -v LICENSE $1/license/
 }
 

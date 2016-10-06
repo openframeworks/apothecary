@@ -40,11 +40,11 @@ function build() {
 		# so we build them separately.
 
 		# 32 bit
-		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch i386 -stdlib=libc++"
+		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch i386  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		mv lib/libGLEW.a libGLEW-i386.a
 
 		# 64 bit
-		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch x86_64 -stdlib=libc++"
+		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch x86_64  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		mv lib/libGLEW.a libGLEW-x86_64.a
 
 		# link into fat universal lib

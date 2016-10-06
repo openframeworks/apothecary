@@ -329,11 +329,9 @@ function copy() {
 	#rm -rf $1/lib/$TYPE/* 2> /dev/null
 
 	# libs
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
 		cp -v build/$TYPE/lib/libcrypto.a $1/lib/$TYPE/crypto.a
 		cp -v build/$TYPE/lib/libssl.a $1/lib/$TYPE/ssl.a
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-		cp -v build/$TYPE/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "vs" ] ; then
 		rm -rf $1/lib/$TYPE/${PLATFORM}
 		mkdir -p $1/lib/$TYPE/${PLATFORM}
