@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-I.
+RANLIB ?= ranlib
 
 LIB=libkiss.a
 LIBDEST=./lib/$(TARGET_DIR)/
