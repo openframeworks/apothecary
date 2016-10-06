@@ -16,9 +16,8 @@ install: $(LIB)
 $(LIB): $(LIBOBJ)
 	@echo lib Makefile - archiving $(LIB)
 	@$(AR) r $(LIB) $(LIBOBJ)
+	@$(RANLIB) $(LIB)
 
 %.o: %.c
 	@echo lib Makefile - compiling $<
 	@$(CC) $(CFLAGS) -c $< -o $@
-
-
