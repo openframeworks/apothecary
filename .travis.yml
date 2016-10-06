@@ -22,8 +22,8 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
-          
-          
+
+
     - os: linux
       sudo: required
       dist: trusty
@@ -45,7 +45,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
-          
+
     - os: linux
       sudo: required
       dist: trusty
@@ -54,7 +54,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath
+        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -68,12 +68,12 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev realpath
+        - sudo apt-get install -y xutils-dev realpath libboost-tools-dev
       cache:
         directories:
         - ~/android-ndk-r12b
-        - apothecary/build/Toolchains/x86     
-    
+        - apothecary/build/Toolchains/x86
+
 #    - os: linux
 #      sudo: false
 #      env: TARGET="android" OPT="armv7"
@@ -88,7 +88,7 @@ matrix:
 #        directories:
 #        - ~/android-ndk-r12b
 #        - apothecary/build/Toolchains/armv7
-#            
+#
 #    - os: linux
 #      sudo: false
 #      env: TARGET="android" OPT="x86"
@@ -103,8 +103,8 @@ matrix:
 #        directories:
 #        - ~/android-ndk-r12b
 #        - apothecary/build/Toolchains/x86
-        
-        
+
+
     - os: linux
       sudo: false
       env: TARGET="emscripten"
@@ -117,38 +117,39 @@ matrix:
             - gcc-4.9
             - realpath
             - coreutils
-        
-        
+            - libboost-dev
+
+
     - os: linux
       sudo: required
       dist: trusty
       env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-      
-      
+
+
     - os: linux
       sudo: required
       dist: trusty
       env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-      
-      
+
+
     - os: osx
       osx_image: xcode7.1
       compiler: clang
       env: TARGET="osx"
-      
-      
+
+
     - os: osx
       osx_image: xcode8
       compiler: clang
       env: TARGET="ios" OPT2="1"
-      
-      
+
+
     - os: osx
       osx_image: xcode8
       compiler: clang
       env: TARGET="ios" OPT2="2"
-      
-      
+
+
     - os: osx
       osx_image: xcode8
       compiler: clang

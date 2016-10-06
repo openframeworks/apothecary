@@ -52,7 +52,7 @@ function build() {
 					 -Wall \
 					 -fPIC \
 					 -stdlib=libc++ \
-					 -arch i386 \
+					 -arch i386 -arch x86_64 \
 					 -Iinclude \
 					 -DHAVE_GETTIMEOFDAY \
 					 -D__MACOSX_CORE__ \
@@ -62,21 +62,21 @@ function build() {
 		/usr/bin/ar ruv librtaudio.a RtAudio.o
 		/usr/bin/ranlib librtaudio.a
 
-		/usr/bin/g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -stdlib=libc++ \
-					 -arch x86_64 \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__MACOSX_CORE__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
+		#/usr/bin/g++ -O2 \
+		#			 -Wall \
+		#			 -fPIC \
+		#			 -stdlib=libc++ \
+		#			 -arch x86_64 \
+		#			 -Iinclude \
+		#			 -DHAVE_GETTIMEOFDAY \
+		#			 -D__MACOSX_CORE__ \
+		#			 -c RtAudio.cpp \
+		#			 -o RtAudio.o
 
-		/usr/bin/ar ruv librtaudio-x86_64.a RtAudio.o
-		/usr/bin/ranlib librtaudio-x86_64.a
+		#/usr/bin/ar ruv librtaudio-x86_64.a RtAudio.o
+		#/usr/bin/ranlib librtaudio-x86_64.a
 
-		lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
+		#lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
 
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
@@ -97,17 +97,23 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		local API="--with-wasapi --with-ds" # asio as well?
-		mkdir -p build
-		cd build
-		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/mingw32/bin/make \
-			-DAUDIO_WINDOWS_WASAPI=ON \
-			-DAUDIO_WINDOWS_DS=ON \
-			-DAUDIO_WINDOWS_ASIO=ON \
-			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
-			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
-			-DBUILD_TESTING=OFF
-		make
+        rm -f librtaudio.a
+        rm -f librtaudio-x86_64
+
+		# Compile the program
+		g++ -O2 \
+					 -Wall \
+					 -fPIC \
+					 -Iinclude \
+					 -DHAVE_GETTIMEOFDAY \
+					 -D__WINDOWS_DS__ \
+					 -D__WINDOWS_ASIO__ \
+					 -D__WINDOWS_WASAPI__ \
+					 -c RtAudio.cpp \
+					 -o RtAudio.o
+
+		ar ruv librtaudio.a RtAudio.o
+		ranlib librtaudio.a
 	fi
 
 	# clean up env vars
@@ -137,7 +143,7 @@ function copy() {
 
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
+		cp -v librtaudio.a $1/lib/$TYPE/librtaudio.a
 
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a

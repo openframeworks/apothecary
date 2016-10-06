@@ -24,19 +24,19 @@ trapError() {
 }
 
 isRunning(){
-    if [ “$(uname)” == “Darwin” ]; then
+    if [ “$(uname)” == “Linux” ]; then
+		if [ -d /proc/$1 ]; then
+	    	return 0
+        else
+            return 1
+        fi
+    else
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
             return 0;
         else
             return 1;
-        fi
-    elif [ “$(uname)” == “Linux” ]; then
-	if [ -d /proc/$1 ]; then
-	    return 0
-        else
-            return 1
         fi
     fi
 }
@@ -108,18 +108,20 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name #> formula.log 2>&1 &
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
+    elif [ "$TARGET" == "msys2" ]; then
+        echo Compiling $formula_name
+        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     apothecaryPID=$!
-	if [ "$TARGET" != "vs" ]; then
-    	echoDots $apothecaryPID
-    	wait $apothecaryPID
-	fi
+	echoDots $apothecaryPID
+	wait $apothecaryPID
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
@@ -135,14 +137,11 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-echo Compressing libraries
 cd $ROOT
-LIBS=$(ls  | grep -v apothecary | grep -v scripts)
-echo "Compressing from $PWD $LIBS"
-echo "ls $(ls)"
-
+echo "Compressing libraries from $PWD"
+LIBS=$(ls | grep -v \.appveyor.yml | grep -v \.travis.yml | grep -v \.gitignore | grep -v apothecary | grep -v scripts)
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_vs${ARCH}.zip
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${ARCH}.zip
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2

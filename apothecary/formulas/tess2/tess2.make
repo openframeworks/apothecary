@@ -26,12 +26,12 @@ ifeq ($(config),debug)
   DEFINES   += -DDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall
-  CXXFLAGS  += $(CFLAGS) 
-  LDFLAGS   += 
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  CFLAGS    += $(CPPFLAGS) -g -Wall
+  CXXFLAGS  += $(CFLAGS)
+  LDFLAGS   +=
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -48,12 +48,12 @@ ifeq ($(config),release)
   DEFINES   += -DNDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall
-  CXXFLAGS  += $(CFLAGS) 
+  CFLAGS    += $(CPPFLAGS) -O2 -Wall
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -70,12 +70,12 @@ ifeq ($(config),debug64)
   DEFINES   += -DDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall -m64
-  CXXFLAGS  += $(CFLAGS) 
+  CFLAGS    += $(CPPFLAGS) -m64 -g -Wall -m64
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -m64 -L/usr/lib64
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -92,12 +92,12 @@ ifeq ($(config),release64)
   DEFINES   += -DNDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall -m64
-  CXXFLAGS  += $(CFLAGS) 
+  CFLAGS    += $(CPPFLAGS) -m64 -O2 -Wall -m64
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s -m64 -L/usr/lib64
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -114,12 +114,12 @@ ifeq ($(config),debug32)
   DEFINES   += -DDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -g -Wall -m32
-  CXXFLAGS  += $(CFLAGS) 
+  CFLAGS    += $(CPPFLAGS) -m32 -g -Wall -m32
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -m32 -L/usr/lib32
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -136,12 +136,12 @@ ifeq ($(config),release32)
   DEFINES   += -DNDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) $(ARCH) -O2 -Wall -m32
-  CXXFLAGS  += $(CFLAGS) 
+  CFLAGS    += $(CPPFLAGS) -m32 -O2 -Wall -m32
+  CXXFLAGS  += $(CFLAGS)
   LDFLAGS   += -s -m32 -L/usr/lib32
-  LIBS      += 
-  RESFLAGS  += $(DEFINES) $(INCLUDES) 
-  LDDEPS    += 
+  LIBS      +=
+  RESFLAGS  += $(DEFINES) $(INCLUDES)
+  LDDEPS    +=
   LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)
   define PREBUILDCMDS
   endef

@@ -2,15 +2,15 @@
 #
 # Boost
 # Filesystem and system modules only until they are part of c++ std
-# 
+#
 # uses a own build system
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
-VERSION=1.58.0
+VERSION=1.62.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
-TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz" 
+TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 
 BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
@@ -26,8 +26,8 @@ function download() {
 	rm ${TARBALL}
 
 	if [ "$VERSION" == "1.58.0" ]; then
-                cp -v boost/boost/config/compiler/visualc.hpp boost/boost/config/compiler/visualc.hpp.orig # back this up as we manually patch it
-                cp -v boost/libs/filesystem/src/operations.cpp boost/libs/filesystem/src/operations.cpp.orig # back this up as we manually patch it
+        cp -v boost/boost/config/compiler/visualc.hpp boost/boost/config/compiler/visualc.hpp.orig # back this up as we manually patch it
+        cp -v boost/libs/filesystem/src/operations.cpp boost/libs/filesystem/src/operations.cpp.orig # back this up as we manually patch it
 	fi
 
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
@@ -37,11 +37,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$VERSION" == "1.58.0" ]; then 
+	if [ "$VERSION" == "1.58.0" ]; then
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/operations.cpp.patch_1.58 2>/dev/null ; then
             patch -p0 -u < $FORMULA_DIR/operations.cpp.patch_1.58
         fi
-                
+
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/visualc.hpp.patch_1.58 2>/dev/null ; then
             patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch_1.58
         fi
@@ -58,9 +58,9 @@ function prepare() {
 		mkdir -p lib/
 		mkdir -p build/
 		SDKVERSION=""
-        
+
         SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
- 
+
 		cp -v tools/build/example/user-config.jam.orig tools/build/example/user-config.jam
 		cp $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator${SDKVERSION}.sdk/usr/include/{crt_externs,bzlib}.h .
 		BOOST_LIBS_COMMA=$(echo $BOOST_LIBS | sed -e "s/ /,/g")
@@ -68,41 +68,36 @@ function prepare() {
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
 	elif [ "$TYPE" == "vs" ]; then
 		cmd.exe /c "bootstrap"
-	else
-		./bootstrap.bat
 	fi
 }
 
 # executed inside the lib src dir
 function build() {
-	if [ "$TYPE" == "wincb" ] ; then
-		: #noop by now
-		
-	elif [ "$TYPE" == "vs" ]; then
+	if [ "$TYPE" == "vs" ]; then
 		./b2 -j${PARALLEL_MAKE} threading=multi variant=release --build-dir=build --with-filesystem link=static address-model=$ARCH stage
 		./b2 -j${PARALLEL_MAKE} threading=multi variant=debug --build-dir=build --with-filesystem link=static address-model=$ARCH stage
 		mv stage stage_$ARCH
-		
-		cd tools/bcp  
+
+		cd tools/bcp
 		../../b2
-		
-		
+
+
 	elif [ "$TYPE" == "osx" ]; then
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
-		cd tools/bcp  
+		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
 		# set some initial variables
 
 		local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
         fi
 
 		SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
             SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
         elif [ "$TYPE" == "ios" ]; then
             SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -141,7 +136,7 @@ function build() {
         BOOST_SRC=$CURRENTPATH
         BITCODE=""
         MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-        if [ "${TYPE}" == "tvos" ]; then 
+        if [ "${TYPE}" == "tvos" ]; then
 			local CROSS_TOP_IOS="${DEVELOPER}/Platforms/AppleTVOS.platform/Developer"
 			local CROSS_SDK_IOS="AppleTVOS${SDKVERSION}.sdk"
 			local CROSS_TOP_SIM="${DEVELOPER}/Platforms/AppleTVSimulator.platform/Developer"
@@ -270,7 +265,7 @@ EOF
 	    echo "------------------"
 	    echo "Copying Includes to Final Dir $OUTPUT_DIR_SRC"
 	    set +e
-	    cp -r $PREFIXDIR/include/boost/*  $OUTPUT_DIR_SRC/ 
+	    cp -r $PREFIXDIR/include/boost/*  $OUTPUT_DIR_SRC/
 	    echo "------------------"
 	    # clean up the build area as it is quite large.
 	    rm -rf build/lib iphone-build iphonesim-build
@@ -292,27 +287,23 @@ EOF
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	# prepare headers directory if needed
-	mkdir -p $1/include
+	mkdir -p $1/include/boost
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 	mkdir -p install_dir
-	
-	if [ "$TYPE" == "wincb" ] ; then
-		: #noop by now
-	elif [ "$TYPE" == "vs" ] ; then
+
+	if [ "$TYPE" == "vs" ] ; then
+		dist/bin/bcp filesystem install_dir
+		cp -r install_dir/boost/* $1/include/boost/
 		if [ "$ARCH" == "32" ]; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-1_58.lib $1/lib/$TYPE/Win32/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-1_58.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_filesystem*.lib $1/lib/$TYPE/Win32/
+			cp stage_$ARCH/lib/libboost_system*.lib $1/lib/$TYPE/Win32/
 		elif [ "$ARCH" == "64" ]; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_filesystem-vc140-mt-gd-1_58.lib $1/lib/$TYPE/x64/
-			cp stage_$ARCH/lib/libboost_system-vc140-mt-gd-1_58.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_filesystem*.lib $1/lib/$TYPE/x64/
+			cp stage_$ARCH/lib/libboost_system*.lib $1/lib/$TYPE/x64/
 		fi
 	elif [ "$TYPE" == "osx" ]; then
 		dist/bin/bcp filesystem install_dir
@@ -320,16 +311,20 @@ function copy() {
 		cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
 		cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
 	elif  [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
+		bcp filesystem install_dir
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
-        OUTPUT_DIR_SRC=`pwd`/lib/boost/include/boost
-        #rsync -ar $OUTPUT_DIR_SRC/* $1/include/boost/
-        lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a 
+		rsync -ar install_dir/boost/* $1/include/boost/
+        lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a
         lipo -info $OUTPUT_DIR_LIB/boost_system.a
         cp -v $OUTPUT_DIR_LIB/boost_filesystem.a $1/lib/$TYPE/
 		cp -v $OUTPUT_DIR_LIB/boost_system.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "emscripten" ]; then
+		bcp filesystem install_dir
+		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
+		bcp filesystem install_dir
+		rsync -ar install_dir/boost/* $1/include/boost/
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
 		cp stage_$ARCH/lib/*.a $1/lib/$TYPE/$ABI/

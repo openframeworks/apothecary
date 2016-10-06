@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "android" "msys2" )
 
 
 # define the version by sha
@@ -65,6 +65,13 @@ function build() {
         make clean
 		make -j${PARALLEL_MAKE}
 	    make install
+	elif [ "$TYPE" == "msys2" ]; then
+	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
+		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
+		echo "int main(){return 0;}" > tool/uriparse.c
+        make clean
+		make -j${PARALLEL_MAKE}
+	    make install
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -117,12 +124,18 @@ function copy() {
 		cp -Rv include/* $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM
 		cp -v win32/uriparser.lib $1/lib/$TYPE/$PLATFORM/uriparser.lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
+	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "msys2" ]; then
+		# Standard *nix style copy.
+		# copy headers
+		cp -Rv include/uriparser/* $1/include/uriparser/
+		# copy lib
+		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers

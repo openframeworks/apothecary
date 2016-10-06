@@ -1,6 +1,7 @@
 brew install cmake
 brew install coreutils
 brew reinstall libtool
+brew install boost-bcp
 
 set -e
 # capture failing exits in commands obscured behind a pipe
