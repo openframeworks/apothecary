@@ -1,4 +1,4 @@
-CC=gcc
+CC ?= gcc
 CFLAGS=-I.
 RANLIB ?= ranlib
 
