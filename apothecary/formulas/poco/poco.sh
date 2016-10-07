@@ -90,6 +90,11 @@ function prepare() {
 		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" compile
 		cd ../../
 
+	elif [ "$TYPE" == "osx" ]; then
+		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
+		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
+		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
+
 	elif [ "$TYPE" == "vs" ] ; then
 		#change the build win cmd file for vs2015 compatibility
 		rm buildwin.cmd
@@ -144,6 +149,14 @@ function build() {
 		echo "--------------------"
 		echo "Configuring for universal i386 and x86_64 libc++ ..."
 
+		# Locate the path of the openssl libs distributed with openFrameworks.
+		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
+		local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
+
+		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
+		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
+
+		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
 		export ARCHFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
@@ -485,7 +498,7 @@ function copy() {
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		for lib in install/$TYPE/lib/*.a; do
-			dstlib=$(basename $lib | sed s/lib\(.*\)/\1)
+			dstlib=$(basename $lib | sed s/lib\(.*\)/\1/)
 			cp -v $lib $1/lib/$TYPE/$dstlib
 		done
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then

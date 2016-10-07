@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#if [ "${TYPE}" == "tvos" ]; then 
+#if [ "${TYPE}" == "tvos" ]; then
 #    IOS_ARCHS="x86_64 arm64"
 #elif [ "$TYPE" == "ios" ]; then
 #    IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -11,13 +11,13 @@ declare -a HOSTS
 declare -a SDKS
 declare -a MIN_TYPES
 
-if [ "${TYPE}" == "tvos" ]; then 
+if [ "${TYPE}" == "tvos" ]; then
     SIM=appletvsimulator
     OS=appletvos
     COS=AppleTvOS
     CSIM=AppleTvSimulator
     if [ "${IOS_ARCH}" == "x86_64" ]; then
-        export HOST=x86_64-apple-darwin 
+        export HOST=x86_64-apple-darwin
         export SDK=$SIM
         export CSDK=$CSIM
         export MIN_TYPE=-mtvos-simulator-version-min=
@@ -41,7 +41,7 @@ elif [ "$TYPE" == "ios" ]; then
         export CSDK=$CSIM
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "x86_64" ]; then
-        export HOST=x86_64-apple-darwin 
+        export HOST=x86_64-apple-darwin
         export SDK=$SIM
         export CSDK=$CSIM
         export MIN_TYPE=-mios-simulator-version-min=
@@ -77,9 +77,8 @@ fi
 #export CPP="$(xcrun -find -sdk ${SDK} clang++)"
 #export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -std=gnu11 -stdlib=libc++ -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi
-
