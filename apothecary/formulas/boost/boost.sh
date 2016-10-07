@@ -275,10 +275,9 @@ EOF
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
-        ABI=armeabi-v7a
-        source ../../android_configure.sh $ABI
-        ESCAPED_NDK_ROOT=$(echo ${NDK_ROOT} | sed s/\\//\\\\\\//g)
-        sed "s/\%{NDK_ROOT}/${ESCAPED_NDK_ROOT}/" $FORMULA_DIR/project-config-android_$ARCH.jam > project-config.jam
+      source ../../android_configure.sh $ABI
+      ESCAPED_NDK_ROOT=$(echo ${NDK_ROOT} | sed s/\\//\\\\\\//g)
+      sed "s/\%{NDK_ROOT}/${ESCAPED_NDK_ROOT}/" $FORMULA_DIR/project-config-android_$ARCH.jam > project-config.jam
 	    ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
 	    mv stage stage_$ARCH
 	fi
