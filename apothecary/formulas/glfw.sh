@@ -99,12 +99,12 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
 		fi
-	else
+	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/GLFW/* $1/include/GLFW/
 		# copy lib
-		cp -Rv build/src/libglfw3.a $1/lib/$TYPE/libglfw3.a
+		cp -Rv build/src/libglfw3.a $1/lib/$TYPE/glfw3.a
 	fi
 
 	# copy license file

@@ -498,7 +498,7 @@ function copy() {
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
 		for lib in install/$TYPE/lib/*.a; do
-			dstlib=$(basename $lib | sed s/lib\(.*\)/\1/)
+			dstlib=$(basename $lib | sed "s/lib\(.*\)/\1/")
 			cp -v $lib $1/lib/$TYPE/$dstlib
 		done
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
