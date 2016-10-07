@@ -47,54 +47,54 @@ function prepare() {
 		if patch -p1 -u -N --dry-run --silent < $FORMULA_DIR/winOpenSSL.patch 2>/dev/null ; then
 			patch -p1 -u < $FORMULA_DIR/winOpenSSL.patch
 		fi
-    fi
+	fi
 }
 
 # executed inside the lib src dir
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-        rm -rf $BUILD_TO_DIR
-        rm -f libcrypto.a libssl.a
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		rm -rf $BUILD_TO_DIR
+		rm -f libcrypto.a libssl.a
 
-        local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
+		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
-        rm -f libcrypto.a
-        rm -f libssl.a
-	    KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-        make clean
-        make -j1 depend
-        make -j${PARALLEL_MAKE}
+		rm -f libcrypto.a
+		rm -f libssl.a
+		KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+		make clean
+		make -j1 depend
+		make -j${PARALLEL_MAKE}
 		make -j 1 install
 
 
-        rm -f libcrypto.a
-        rm -f libssl.a
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
-	    KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-        make clean
-        make -j1 depend
-        make -j${PARALLEL_MAKE}
+		rm -f libcrypto.a
+		rm -f libssl.a
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+		make clean
+		make -j1 depend
+		make -j${PARALLEL_MAKE}
 		make -j 1 install
 
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-        cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-        lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
-                     $BUILD_TO_DIR/x64/lib/libcrypto.a \
-                     -output $BUILD_TO_DIR/lib/libcrypto.a
+		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+		$BUILD_TO_DIR/x64/lib/libcrypto.a \
+		-output $BUILD_TO_DIR/lib/libcrypto.a
 
-        lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
-                     $BUILD_TO_DIR/x64/lib/libssl.a \
-                     -output $BUILD_TO_DIR/lib/libssl.a
+		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
+		$BUILD_TO_DIR/x64/lib/libssl.a \
+		-output $BUILD_TO_DIR/lib/libssl.a
 
-	 elif [ "$TYPE" == "vs" ] ; then
+	elif [ "$TYPE" == "vs" ] ; then
 		PREFIX=`pwd`/build/
 		cp -v $FORMULA_DIR/buildwin.cmd ./
 		WINPREFIX=$(echo "$PREFIX" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
@@ -119,73 +119,73 @@ function build() {
 
 		CURRENTPATH=`pwd`
 
-        local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="armv7 i386 x86_64 arm64" #armv7s
-        fi
+		local IOS_ARCHS
+		if [ "${TYPE}" == "tvos" ]; then
+			IOS_ARCHS="x86_64 arm64"
+		elif [ "$TYPE" == "ios" ]; then
+			IOS_ARCHS="armv7 i386 x86_64 arm64" #armv7s
+		fi
 
-        unset LANG
-        local LC_CTYPE=C
-        local LC_ALL=C
+		unset LANG
+		local LC_CTYPE=C
+		local LC_ALL=C
 
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-        rm -rf $BUILD_TO_DIR
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		rm -rf $BUILD_TO_DIR
 
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
 			# make sure backed up
 			cp "Configure" "Configure.orig"
-            cp "apps/speed.c" "apps/speed.c.orig"
+			cp "apps/speed.c" "apps/speed.c.orig"
 
-            ## Fix for tvOS fork undef 9.0
-            if [ "${TYPE}" == "tvos" ]; then
-                # Patch apps/speed.c to not use fork() since it's not available on tvOS
-                sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-                # Patch Configure to build for tvOS, not iOS
-                sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
-                chmod u+x ./Configure
-            else
-                sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
-            fi
+			## Fix for tvOS fork undef 9.0
+			if [ "${TYPE}" == "tvos" ]; then
+				# Patch apps/speed.c to not use fork() since it's not available on tvOS
+				sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
+				# Patch Configure to build for tvOS, not iOS
+				sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
+				chmod u+x ./Configure
+			else
+				sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
+			fi
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
+			source ../../ios_configure.sh $TYPE $IOS_ARCH
+			if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
 				cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
 				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
 			fi
 
-	    	echo "Configuring ${IOS_ARCH}"
-            FLAGS="no-asm no-shared --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-            if [ "$TYPE" == "tvos" ]; then
-                FLAGS="$FLAGS no-async"
-            fi
+			echo "Configuring ${IOS_ARCH}"
+			FLAGS="no-asm no-shared --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			if [ "$TYPE" == "tvos" ]; then
+				FLAGS="$FLAGS no-async"
+			fi
 
-            rm -f libcrypto.a
-            rm -f libssl.a
+			rm -f libcrypto.a
+			rm -f libssl.a
 			if [ "${IOS_ARCH}" == "i386" ]; then
-			    ./Configure darwin-i386-cc $FLAGS
-		    elif [ "${IOS_ARCH}" == "x86_64" ]; then
-			    ./Configure darwin64-x86_64-cc $FLAGS
-		    else
-			    ./Configure iphoneos-cross $FLAGS
-		    fi
-            make clean
+				./Configure darwin-i386-cc $FLAGS
+			elif [ "${IOS_ARCH}" == "x86_64" ]; then
+				./Configure darwin64-x86_64-cc $FLAGS
+			else
+				./Configure iphoneos-cross $FLAGS
+			fi
+			make clean
 
-            # For openssl 1.1.0
-            #if [ "$TYPE" == "ios" ]; then
-            #    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-            #fi
+			# For openssl 1.1.0
+			#if [ "$TYPE" == "ios" ]; then
+			#    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			#fi
 
-            #sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
+			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
 
 
-            sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
-            #sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
-            sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-            sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
+			#sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
+			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
 			echo "Running make for ${IOS_ARCH}"
 
@@ -196,10 +196,10 @@ function build() {
 
 
 			# reset source file back.
-            if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
-			    cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-            fi
-            cp "apps/speed.c.orig" "apps/speed.c"
+			if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
+				cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
+			fi
+			cp "apps/speed.c.orig" "apps/speed.c"
 
 		done
 
@@ -208,30 +208,30 @@ function build() {
 		unset IOS_DEVROOT IOS_SDKROOT
 
 
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-        cp -r $BUILD_TO_DIR/x86_64/* $BUILD_TO_DIR/
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		cp -r $BUILD_TO_DIR/x86_64/* $BUILD_TO_DIR/
 
-        if [ "${TYPE}" == "tvos" ]; then
-            lipo -create $BUILD_TO_DIR/arm64/lib/libcrypto.a \
-                         $BUILD_TO_DIR/x86_64/lib/libcrypto.a \
-                         -output $BUILD_TO_DIR/lib/libcrypto.a
+		if [ "${TYPE}" == "tvos" ]; then
+			lipo -create $BUILD_TO_DIR/arm64/lib/libcrypto.a \
+			$BUILD_TO_DIR/x86_64/lib/libcrypto.a \
+			-output $BUILD_TO_DIR/lib/libcrypto.a
 
-            lipo -create $BUILD_TO_DIR/arm64/lib/libssl.a \
-                         $BUILD_TO_DIR/x86_64/lib/libssl.a \
-                         -output $BUILD_TO_DIR/lib/libssl.a
-        elif [ "$TYPE" == "ios" ]; then
-            lipo -create $BUILD_TO_DIR/armv7/lib/libcrypto.a \
-                         $BUILD_TO_DIR/arm64/lib/libcrypto.a \
-                         $BUILD_TO_DIR/i386/lib/libcrypto.a \
-                         $BUILD_TO_DIR/x86_64/lib/libcrypto.a \
-                         -output $BUILD_TO_DIR/lib/libcrypto.a
+			lipo -create $BUILD_TO_DIR/arm64/lib/libssl.a \
+			$BUILD_TO_DIR/x86_64/lib/libssl.a \
+			-output $BUILD_TO_DIR/lib/libssl.a
+		elif [ "$TYPE" == "ios" ]; then
+			lipo -create $BUILD_TO_DIR/armv7/lib/libcrypto.a \
+			$BUILD_TO_DIR/arm64/lib/libcrypto.a \
+			$BUILD_TO_DIR/i386/lib/libcrypto.a \
+			$BUILD_TO_DIR/x86_64/lib/libcrypto.a \
+			-output $BUILD_TO_DIR/lib/libcrypto.a
 
-            lipo -create $BUILD_TO_DIR/armv7/lib/libssl.a \
-                         $BUILD_TO_DIR/arm64/lib/libssl.a \
-                         $BUILD_TO_DIR/i386/lib/libssl.a \
-                         $BUILD_TO_DIR/x86_64/lib/libssl.a \
-                         -output $BUILD_TO_DIR/lib/libssl.a
-        fi
+			lipo -create $BUILD_TO_DIR/armv7/lib/libssl.a \
+			$BUILD_TO_DIR/arm64/lib/libssl.a \
+			$BUILD_TO_DIR/i386/lib/libssl.a \
+			$BUILD_TO_DIR/x86_64/lib/libssl.a \
+			-output $BUILD_TO_DIR/lib/libssl.a
+		fi
 
 		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
@@ -250,24 +250,24 @@ function build() {
 		perl -pi -e 's/\r//g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
 
-        # armv7
-        if [ "$ARCH" == "armv7" ]; then
-            export _ANDROID_EABI=arm-linux-androideabi-4.9
-		    export _ANDROID_ARCH=arch-arm
+		# armv7
+		if [ "$ARCH" == "armv7" ]; then
+			export _ANDROID_EABI=arm-linux-androideabi-4.9
+			export _ANDROID_ARCH=arch-arm
 		elif [ "$ARCH" == "x86" ]; then
-            export _ANDROID_EABI=x86-4.9
-		    export _ANDROID_ARCH=arch-x86
+			export _ANDROID_EABI=x86-4.9
+			export _ANDROID_ARCH=arch-x86
 		fi
 
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-        mkdir -p $BUILD_TO_DIR
-        source Setenv-android.sh
-        ./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-        make clean
-        make -j1 depend
-        make -j${PARALLEL_MAKE}
-        make install
-        make install
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
+		mkdir -p $BUILD_TO_DIR
+		source Setenv-android.sh
+		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+		make clean
+		make -j1 depend
+		make -j${PARALLEL_MAKE}
+		make install
+		make install
 
 	else
 
@@ -281,17 +281,17 @@ function copy() {
 	#echoWarning "TODO: copy $TYPE lib"
 
 	# # headers
-    if [ -d $1/include/ ]; then
-        # keep a copy of the platform specific headers
-        find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
-        # remove old headers
-        rm -r $1/include/
-        # restore platform specific headers
-        find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
-    fi
+	if [ -d $1/include/ ]; then
+		# keep a copy of the platform specific headers
+		find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
+		# remove old headers
+		rm -r $1/include/
+		# restore platform specific headers
+		find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
+	fi
 
 	mkdir -pv $1/include/openssl/
- 	mkdir -p $1/lib/$TYPE
+	mkdir -p $1/lib/$TYPE
 
 	if [ "$TYPE" == "vs" ]; then
 		PREFIX=`pwd`/build/
@@ -307,23 +307,23 @@ function copy() {
 	# opensslconf.h that detects the platform and includes the
 	# correct one. Then every platform checkouts the rest of the config
 	# files that were deleted here
-     if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-            mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-        fi
-        cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-        cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+		if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
+			mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
+		fi
+		cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
 
-    elif [ "$TYPE" == "vs" ]; then
-        mv ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf.h ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf_${TYPE}.h
-        cp -RHv ${PREFIX}/ms/${PLATFORM}/include/openssl/* $1/include/openssl/
-        cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	elif [ "$TYPE" == "vs" ]; then
+		mv ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf.h ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf_${TYPE}.h
+		cp -RHv ${PREFIX}/ms/${PLATFORM}/include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
 
 	elif [ -f include/openssl/opensslconf.h ]; then
-        mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
-        cp -RHv include/openssl/* $1/include/openssl/
-        cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-    fi
+		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
+		cp -RHv include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	fi
 	# suppress file not found errors
 	#same here doesn't seem to be a solid reason to delete the files
 	#rm -rf $1/lib/$TYPE/* 2> /dev/null
@@ -341,26 +341,26 @@ function copy() {
 			mv -v $f $1/lib/$TYPE/${PLATFORM}/${base}md.lib
 		done
 	elif [ "$TYPE" == "android" ] ; then
-	    if [ -d $1/lib/$TYPE/$ABI ]; then
-	        rm -r $1/lib/$TYPE/$ABI
-	    fi
-	    mkdir -p $1/lib/$TYPE/$ABI
+		if [ -d $1/lib/$TYPE/$ABI ]; then
+			rm -r $1/lib/$TYPE/$ABI
+		fi
+		mkdir -p $1/lib/$TYPE/$ABI
 		cp -rv build/android/$ABI/lib/*.a $1/lib/$TYPE/$ABI/
-	    mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
+		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
-	# 	mkdir -p $1/lib/$TYPE/armeabi-v7a
-	# 	cp -v lib/Android/armeabi-v7a/*.a $1/lib/$TYPE/armeabi-v7a
+		# 	mkdir -p $1/lib/$TYPE/armeabi-v7a
+		# 	cp -v lib/Android/armeabi-v7a/*.a $1/lib/$TYPE/armeabi-v7a
 
-	# 	mkdir -p $1/lib/$TYPE/x86
-	# 	cp -v lib/Android/x86/*.a $1/lib/$TYPE/x86
+		# 	mkdir -p $1/lib/$TYPE/x86
+		# 	cp -v lib/Android/x86/*.a $1/lib/$TYPE/x86
 	else
-	 	echoWarning "TODO: copy $TYPE lib"
+		echoWarning "TODO: copy $TYPE lib"
 	fi
 
-    # copy license file
-    rm -rf $1/license # remove any older files if exists
-    mkdir -p $1/license
-    cp -v LICENSE $1/license/
+	# copy license file
+	rm -rf $1/license # remove any older files if exists
+	mkdir -p $1/license
+	cp -v LICENSE $1/license/
 
 
 }
@@ -379,22 +379,22 @@ function clean() {
 		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 		cp "Makefile.orig" "Makefile"
 		cp "Configure.orig" "Configure"
-	# if [ "$TYPE" == "vs" ] ; then
-	# 	cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
-	# elif [ "$TYPE" == "android" ] ; then
-	# 	export PATH=$PATH:$ANDROID_TOOLCHAIN_ANDROIDEABI/bin:$ANDROID_TOOLCHAIN_X86/bin
-	# 	make clean ANDROID_ABI=armeabi
-	# 	make clean ANDROID_ABI=armeabi-v7a
-	# 	make clean ANDROID_ABI=x86
-	# 	unset PATH
-    elif [[ "$TYPE" == "osx" ]] ; then
-        make clean
-        # clean up old build folder
-        rm -rf /build
-        # clean up compiled libraries
-        rm -rf /lib
-        rm -rf *.a
+		# if [ "$TYPE" == "vs" ] ; then
+		# 	cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
+		# elif [ "$TYPE" == "android" ] ; then
+		# 	export PATH=$PATH:$ANDROID_TOOLCHAIN_ANDROIDEABI/bin:$ANDROID_TOOLCHAIN_X86/bin
+		# 	make clean ANDROID_ABI=armeabi
+		# 	make clean ANDROID_ABI=armeabi-v7a
+		# 	make clean ANDROID_ABI=x86
+		# 	unset PATH
+	elif [[ "$TYPE" == "osx" ]] ; then
+		make clean
+		# clean up old build folder
+		rm -rf /build
+		# clean up compiled libraries
+		rm -rf /lib
+		rm -rf *.a
 	else
-	 	make clean
+		make clean
 	fi
 }
