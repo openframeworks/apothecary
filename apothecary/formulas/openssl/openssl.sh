@@ -123,7 +123,7 @@ function build() {
 		if [ "${TYPE}" == "tvos" ]; then
 			IOS_ARCHS="x86_64 arm64"
 		elif [ "$TYPE" == "ios" ]; then
-			IOS_ARCHS="armv7 i386 x86_64 arm64" #armv7s
+			IOS_ARCHS="i386 x86_64 arm64 armv7" #armv7s
 		fi
 
 		unset LANG
@@ -181,8 +181,7 @@ function build() {
 
 			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
 
-
-			sed -ie "s!^CFLAG=\(.*\) -isysroot [^ ]* \(.*\)!CFLAG=$CFLAGS \1 \2!" Makefile
+			sed -ie "s!^CFLAG=\(.*\)!CFLAG=\1 $CFLAGS !" Makefile
 			#sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
 			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
