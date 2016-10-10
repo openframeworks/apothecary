@@ -82,10 +82,6 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
-if [ "$TARGET" == "linux64" ]; then
-	./apothecary -f -j$PARALLEL -t$TARGET update poco
-fi
-
 echo "Running apothecary from $PWD"
 
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) ; do
