@@ -1,5 +1,5 @@
 sudo add-apt-repository -y -s ppa:dns/gnu
-sudo add-apt-repository -y -s ppa:ubuntu-toolchain-r-test
+sudo add-apt-repository -y -s ppa:ubuntu-toolchain-r/test
 sudo apt-get update -q
 
 g++ -v
