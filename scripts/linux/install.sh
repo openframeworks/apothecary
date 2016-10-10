@@ -1,11 +1,6 @@
-
 sudo add-apt-repository -y -s ppa:dns/gnu
 sudo add-apt-repository -y -s ppa:ubuntu-toolchain-r-test
 sudo apt-get update -q
-sudo apt-get install -y coreutils realpath gcc-4.9 g++-4.9 libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
-sudo apt-get remove -y --purge g++-4.8
-sudo apt-get autoremove
-sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100
 
 g++ -v
 
@@ -22,6 +17,7 @@ cd src && ./contrib/download_prerequisites
 -v --with-pkgversion='Ubuntu 5.4.1-2ubuntu1~14.04' --with-bugurl=file:///usr/share/doc/gcc-5/README.Bugs --enable-languages=c,c++ --prefix=/usr --program-suffix=-5 --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --disable-browser-plugin --enable-java-awt=gtk --enable-gtk-cairo -with-arch-directory=amd64 --enable-multiarch --disable-werror --disable-multilib --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
 make -j 4 && make install
 
+sudo apt-get install -y coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
 sudo apt-get remove -y --purge g++-4.8
 sudo apt-get autoremove
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
