@@ -54,8 +54,8 @@ matrix:
         - sudo apt-get install -y coreutils realpath
         - sudo apt-get remove -y --purge g++-4.8
         - sudo apt-get autoremove
-        - ls /usr/bin/g*
-        #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
+        - g++ -v
 
     - os: linux
       sudo: required
