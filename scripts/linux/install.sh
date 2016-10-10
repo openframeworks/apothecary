@@ -1,8 +1,8 @@
 sudo apt-get -y update
 sudo apt-get build-dep -y gcc-5
 apt-get source -y gcc-5
-#dpkg-source -x gcc-5_5.4.1-2ubuntu1~14.04.dsc
-dpkg-source -x gcc-5_5.4.1-2ubuntu1~16.04.dsc
+dpkg-source -x gcc-5_5.4.1-2ubuntu1~14.04.dsc
+#dpkg-source -x gcc-5_5.4.1-2ubuntu1~16.04.dsc
 cd gcc-5-5.4.1
 tar -xf gcc-*.tar.xz
 mv gcc-5.4.0 src
