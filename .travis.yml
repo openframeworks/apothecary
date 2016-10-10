@@ -8,7 +8,10 @@ matrix:
 #    - os: linux
 #      sudo: required
 #      dist: trusty
-#      env: TARGET="linux"
+#      env: 
+#       - TARGET="linux"
+#       - CC=gcc
+#       - CXX=g++ -std=c++11
 #      addons:
 #        apt:
 #          packages:
@@ -29,9 +32,8 @@ matrix:
       env: 
         - TARGET="linux" 
         - OPT="gcc5"
-        - COMPILER=g++-5
-        - CC=gcc=5
-        - CXX=g++-5
+        - CC=gcc-5
+        - CXX=g++-5 -std=c++11
       addons:
         apt:
           sources:
@@ -50,7 +52,7 @@ matrix:
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
         - ls /usr/bin/g*
-        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5.4 20
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20
 
 #    - os: linux
 #      sudo: required
