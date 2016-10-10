@@ -32,26 +32,12 @@ matrix:
       env: 
         - TARGET="linux" 
         - OPT="gcc5"
-        - CC=gcc-6
-        - CXX=g++-6 -std=c++11
-        - COMPILER=g++6
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          packages:
-          - gcc-4.9
-          - g++-4.9
-          #- libstdc++-5-dev
-          - libxrandr-dev
-          - libxinerama-dev
-          - libx11-dev
-          - libxcursor-dev
-          - libxi-dev
       before_script:
         - sudo add-apt-repository ppa:dns/gnu -ys
+        - sudo add-apt-repository ppa:ubuntu-toolchain-r-test -ys
+
         - sudo apt-get update -q
-        - sudo apt-get install -y coreutils realpath
+        - sudo apt-get install -y coreutils realpath gcc-4.9 g++-4.9 libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
         - sudo apt-get remove -y --purge g++-4.8
         - sudo apt-get autoremove
         - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100

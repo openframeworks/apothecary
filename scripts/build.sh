@@ -71,10 +71,11 @@ fi
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
-        export CC="gcc-6"
-        export CXX="g++-6 -std=c++11"
+        export CC="gcc-5"
+        export CXX="g++-5"
+        export COMPILER="g++5"
     else
-        export CXX="g++ -std=c++11"
+        export CXX="g++"
     fi
 fi
 
