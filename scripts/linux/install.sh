@@ -1,4 +1,15 @@
-sudo apt-get -y update
+
+sudo add-apt-repository -y -s ppa:dns/gnu
+sudo add-apt-repository -y -s ppa:ubuntu-toolchain-r-test
+sudo apt-get update -q
+sudo apt-get install -y coreutils realpath gcc-4.9 g++-4.9 libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+sudo apt-get remove -y --purge g++-4.8
+sudo apt-get autoremove
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 100
+
+g++ -v
+
+
 sudo apt-get build-dep -y gcc-5
 apt-get source -y gcc-5
 dpkg-source -x gcc-5_5.4.1-2ubuntu1~14.04.dsc
@@ -15,3 +26,4 @@ sudo apt-get remove -y --purge g++-4.8
 sudo apt-get autoremove
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
+g++ -v
