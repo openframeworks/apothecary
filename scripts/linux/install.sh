@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 sed -e 
 
 # trap any script errors and exit
