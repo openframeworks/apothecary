@@ -116,14 +116,20 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         echo Compiling $formula_name
         echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+    elif [ "$TARGET" == "linux64" ] && [ "$formula_name" == "poco" ]; then
+        echo Compiling $formula_name
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     else
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
-    apothecaryPID=$!
-	echoDots $apothecaryPID
-	wait $apothecaryPID
+    if [ "$TARGET" != "linux64" ] || [ "$formula_name" != "poco" ]; then
+        apothecaryPID=$!
+    	echoDots $apothecaryPID
+	    wait $apothecaryPID
+    fi
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
