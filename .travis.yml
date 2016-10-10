@@ -52,7 +52,7 @@ matrix:
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
         - ls /usr/bin/g*
-        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 20
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
 
 #    - os: linux
 #      sudo: required
