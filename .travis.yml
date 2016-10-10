@@ -1,5 +1,4 @@
 language: c++
-compiler: gcc
 sudo: false
 matrix:
   include:
@@ -9,6 +8,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
+      compiler: gcc
       env: TARGET="linux"
       addons:
         apt:
@@ -27,15 +27,16 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
+      compiler: gcc-5
       env: TARGET="linux" OPT="gcc5"
       addons:
         apt:
-          sources:
-          - ubuntu-toolchain-r-test
+          #sources:
+          #- ubuntu-toolchain-r-test
           packages:
-          - gcc-5
-          - g++-5
-          - libstdc++-5-dev
+          #- gcc-5
+          #- g++-5
+          #- libstdc++-5-dev
           - libxrandr-dev
           - libxinerama-dev
           - libx11-dev
@@ -45,6 +46,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
+        #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5.4 90
 
     - os: linux
       sudo: required
