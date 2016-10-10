@@ -32,17 +32,17 @@ matrix:
       env: 
         - TARGET="linux" 
         - OPT="gcc5"
-        - CC=gcc-5
-        - CXX=g++-5 -std=c++11
-        - COMPILER=g++5
+        - CC=gcc-6
+        - CXX=g++-6 -std=c++11
+        - COMPILER=g++6
       addons:
         apt:
           sources:
           - ubuntu-toolchain-r-test
           packages:
-          - gcc-5
-          - g++-5
-          - libstdc++-5-dev
+          - gcc-6
+          - g++-6
+          #- libstdc++-5-dev
           - libxrandr-dev
           - libxinerama-dev
           - libx11-dev
