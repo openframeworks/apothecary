@@ -73,6 +73,8 @@ if [ "$TARGET" == "linux" ]; then
     if [ "$OPT" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"
+    else
+        export CXX="g++ -std=c++11"
     fi
 fi
 
