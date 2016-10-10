@@ -34,6 +34,7 @@ matrix:
         - OPT="gcc5"
         - CC=gcc-5
         - CXX=g++-5 -std=c++11
+        - COMPILER=g++5
       addons:
         apt:
           sources:
@@ -51,9 +52,10 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
-        - sudo apt-get remove -y libstdc++-4-dev libstdc++-6-dev
+        - sudo apt-get remove -y --purge g++-4.8
+        - sudo apt-get autoremove
         - ls /usr/bin/g*
-        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+        #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
 
     - os: linux
       sudo: required
