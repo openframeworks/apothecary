@@ -26,7 +26,12 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linux" OPT="gcc5"
+      env: 
+        - TARGET="linux" 
+        - OPT="gcc5"
+        - COMPILER=g++-5
+        - CC=gcc=5
+        - CXX=g++-5
       addons:
         apt:
           sources:
@@ -44,6 +49,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y coreutils realpath
+        - ls /usr/bin/g*
         - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5.4 20
 
 #    - os: linux

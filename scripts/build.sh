@@ -70,10 +70,6 @@ fi
 
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
-    if [ "$OPT" == "gcc5" ]; then
-        export CC="gcc-5"
-        export CXX="g++-5"
-    fi
 fi
 
 if [ "$TARGET" == "emscripten" ]; then
