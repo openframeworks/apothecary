@@ -75,6 +75,21 @@ apothecaryPID=$!
 echoDots $apothecaryPID
 wait $apothecaryPID
 ls *.deb
+cd ..
+ls *.deb
+
+cd ..
+openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in id_rsa.enc -out id_rsa -d
+cp ssh_config ~/.ssh/config
+chmod 600 id_rsa
+echo Uploading libraries
+if [ -e scripts/linux/*.deb ]; then
+    scp -i id_rsa scripts/linux/*.deb tests@ci.openframeworks.cc:libs
+fi
+
+if [ -e scripts/linux/gcc-5-5.4.1/*.deb ]; then
+    scp -i id_rsa scripts/linux/gcc-5-5.4.1/*.deb tests@ci.openframeworks.cc:libs
+fi
 
 sudo apt-get install -y coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
 sudo apt-get remove -y --purge g++-4.8
