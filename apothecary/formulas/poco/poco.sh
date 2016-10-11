@@ -452,6 +452,7 @@ PING_LOOP_PID=$!
 
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
 		./configure $BUILD_OPTS
+        $CXX -v
 		make -j${PARALLEL_MAKE}
 		# delete debug builds
 		rm -f lib/Linux/$(uname -m)/*d.a
