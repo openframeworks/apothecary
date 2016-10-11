@@ -25,15 +25,21 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
  
 # download the source code and unpack it into LIB_NAME
 function download() {
-  curl -Lk https://github.com/Itseez/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
-  tar -xf opencv-$VER.tar.gz
-  mv opencv-$VER $1
-  rm opencv*.tar.gz
+    if [ "$TYPE" != "android" ]; then
+        wget https://github.com/Itseez/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
+        tar -xf opencv-$VER.tar.gz
+        mv opencv-$VER $1
+        rm opencv*.tar.gz
+    else
+        wget http://sourceforge.net/projects/opencvlibrary/files/opencv-android/3.1.0/OpenCV-3.1.0-android-sdk.zip/download -O OpenCV-3.1.0-android-sdk.zip
+        unzip -qo OpenCV-3.1.0-android-sdk.zip
+        mv OpenCV-android-sdk $1
+    fi
 }
  
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-  : # noop
+    : #noop
 }
 
 # executed inside the lib src dir
@@ -488,100 +494,7 @@ function build() {
 
     cd ../../
 
-  # end if iOS
-  
-  elif [ "$TYPE" == "android" ]; then
-    export ANDROID_NDK=${ANDROID_NDK_ROOT}
-    cd platforms
-    cp ${FORMULA_DIR}/android.toolchain.cmake android/
-    
-    rm -rf build_android_arm
-    rm -rf build_android_x86
-    
-    scripts/cmake_android_arm.sh \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
-      -DHAVE_opencv_androidcamera=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_TESTS=OFF \
-      -DANDROID_STL=c++_static \
-      -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-clang3.6 \
-      -DANDROID_NATIVE_API_LEVEL=android-19 \
-      -DBUILD_PERF_TESTS=OFF
-    cd build_android_arm
-    make -j${PARALLEL_MAKE}
-    cd ..
-    
-    scripts/cmake_android_x86.sh \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
-      -DHAVE_opencv_androidcamera=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_TESTS=OFF \
-      -DANDROID_STL=c++_static \
-      -DANDROID_TOOLCHAIN_NAME=x86-clang3.6 \
-      -DANDROID_NATIVE_API_LEVEL=android-19 \
-      -DBUILD_PERF_TESTS=OFF
-    cd build_android_x86
-    make -j${PARALLEL_MAKE}
-    cd ..
-    
+  # end if iOS    
   elif [ "$TYPE" == "emscripten" ]; then
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -691,16 +604,17 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     cp -v lib/$TYPE/*.a $1/lib/$TYPE
   elif [ "$TYPE" == "android" ]; then
-    cp -r include/opencv $1/include/
-    cp -r include/opencv2 $1/include/
+    mkdir -p $1/lib/$TYPE
+    cp -r sdk/native/jni/include/opencv $1/include/
+    cp -r sdk/native/jni/include/opencv2 $1/include/
     
-    rm -f platforms/build_android_arm/lib/armeabi-v7a/*pch_dephelp.a
-    rm -f platforms/build_android_arm/lib/armeabi-v7a/*.so
-    cp -r platforms/build_android_arm/lib/armeabi-v7a $1/lib/$TYPE/
-    
-    rm -f platforms/build_android_x86/lib/x86/*pch_dephelp.a
-    rm -f platforms/build_android_x86/lib/x86/*.so
-    cp -r platforms/build_android_x86/lib/x86 $1/lib/$TYPE/
+    if [ "$TYPE" == "android" ]; then
+        if [ "$ARCH" == "armv7" ]; then
+            cp sdk/native/libs/armeabi-v7a/*.a $1/lib/$TYPE
+        else            
+            cp sdk/native/libs/armeabi-v7a/*.a $1/lib/$TYPE
+        fi
+    fi
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r include/opencv $1/include/
     cp -r include/opencv2 $1/include/
