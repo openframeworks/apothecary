@@ -127,7 +127,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
     
-    if [ "$TARGET" != "linux64" ] || [ "$formula_name" != "poco"]; then
+    if [ "$TARGET" != "linux64" ] || [ "$formula_name" != "poco" ]; then
         apothecaryPID=$!
 	    echoDots $apothecaryPID
 	    wait $apothecaryPID
