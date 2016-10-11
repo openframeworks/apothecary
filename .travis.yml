@@ -64,7 +64,8 @@ matrix:
             - gcc-4.9
             - realpath
             - coreutils
-            - libboost-dev
+            - libboost-tools-dev
+            #- libboost-dev
 
 
     # linux arm6
