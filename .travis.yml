@@ -11,7 +11,7 @@ matrix:
       env: 
        - TARGET="linux"
        - CC=gcc
-       - CXX=g++ -std=c++11
+       - CXX=g++
       addons:
         apt:
           packages:
