@@ -91,7 +91,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
         if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ]; then
+            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ]; then
                 echo Pass 1 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
@@ -99,6 +99,12 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         elif [ "$OPT2" == "2" ]; then
             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ]; then
                 echo Pass 2 - Compiling $formula_name
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            fi
+        elif [ "$OPT3" == "3" ]; then
+            if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ]; then
+                echo Pass 3 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
