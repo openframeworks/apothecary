@@ -369,8 +369,8 @@ function copy() {
 
 	# headers
 	mkdir -p $1/include
-    rm -r $1/include/assimp || true
-    rm -r $1/include/* || true
+    rm -rf $1/include/assimp
+    rm -rf $1/include/*
 	cp -Rv include/* $1/include
 
 	# libs
@@ -379,11 +379,11 @@ function copy() {
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_32/code/Release/assimp.lib $1/lib/$TYPE/Win32/assimp.lib
-			cp -v build_vs_32/code/Release/assimp.dll ../../../../export/vs/Win32/assimp.dll
+			cp -v build_vs_32/code/Release/assimp.dll $1/lib/$TYPE/Win32/assimp.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/code/Release/assimp.lib $1/lib/$TYPE/x64/assimp.lib
-			cp -v build_vs_64/code/Release/assimp.dll ../../../../export/vs/x64/assimp.dll
+			cp -v build_vs_64/code/Release/assimp.dll $1/lib/$TYPE/x64/assimp.dll
 		fi
 	elif [ "$TYPE" == "osx" ] ; then
 		cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
