@@ -295,6 +295,8 @@ function build() {
 
 	elif [ "$TYPE" == "vs" ] ; then
 		
+		unset TMP
+		unset TEMP
 		#architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
 		echo "building $TYPE | $ARCH | $VS_VER"
 		echo "--------------------"
