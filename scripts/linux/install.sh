@@ -51,7 +51,7 @@ wget http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
 tar xjf gcc5debs.tar.bz2
 sudo gdebi -n cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
 sudo gdebi -n libasan2_5.4.1-2ubuntu1~14.04_amd64.deb
-sudo gdebi -n gcc-5_5.4.1-2ubuntu1~14.04_amd64
+sudo gdebi -n gcc-5_5.4.1-2ubuntu1~14.04_amd64.deb
 sudo gdebi -n gcc-5-base_5.4.1-2ubuntu1~14.04_amd64.deb
 sudo gdebi -n g++-5_5.4.1-2ubuntu1~14.04_amd64.deb
 
