@@ -117,7 +117,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         echo Compiling $formula_name
         echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-    elif [ "$TARGET" == "linux64" ] && [ "$formula_name" == "poco"]; then
+    elif [ "$TARGET" == "linux64" ] && [ "$formula_name" == "poco" ]; then
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
