@@ -102,7 +102,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
-        elif [ "$OPT3" == "3" ]; then
+        elif [ "$OPT2" == "3" ]; then
             if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ]; then
                 echo Pass 3 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
