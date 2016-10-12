@@ -459,6 +459,7 @@ function copy() {
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
     cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/ $1/lib/$TYPE/
   fi
 
   # copy license file
