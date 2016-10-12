@@ -47,11 +47,11 @@ function build() {
   rm -f CMakeCache.txt
  
   LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
+  mkdir -p $LIB_FOLDER
 
   if [ "$TYPE" == "osx" ] ; then
     LOG="$LIB_FOLDER/opencv2-${VER}.log"
     echo "Logging to $LOG"
-    mkdir -p $LIB_FOLDER
     cd build
     rm -f CMakeCache.txt
     echo "Log:" >> "${LOG}" 2>&1
@@ -616,12 +616,8 @@ function copy() {
         fi
     fi
   elif [ "$TYPE" == "emscripten" ]; then
-    cp -r include/opencv $1/include/
-    cp -r include/opencv2 $1/include/
-    
-    rm -f build_emscripten/lib/*pch_dephelp.a
-    rm -f build_emscripten/lib/*.so
-    cp -r build_emscripten/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/include/* $1/include/
+    cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
