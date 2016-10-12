@@ -349,11 +349,24 @@ function build() {
       -DBUILD_FAT_JAVA_LIB=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
+      -DBUILD_CUDA_STUBS=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
+      -DBUILD_opencv_apps=OFF \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_imgcodecs=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DENABLE_SSE=OFF \
+      -DENABLE_SSE2=OFF \
+      -DENABLE_SSE3=OFF \
+      -DENABLE_SSE41=OFF \
+      -DENABLE_SSE42=OFF \
+      -DENABLE_SSSE3=OFF \
+      -DENABLE_AVX=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
       -DWITH_1394=OFF \
@@ -364,13 +377,28 @@ function build() {
       -DWITH_GIGEAPI=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_CUFFT=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
       -DWITH_JASPER=OFF \
       -DWITH_IMAGEIO=OFF \
       -DWITH_IPP=OFF \
+      -DWITH_IPP_A=OFF \
+      -DWITH_TBB=OFF \
       -DWITH_OPENNI=OFF \
       -DWITH_QT=OFF \
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
+      -DWITH_LIBV4L=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_OPENCLCLAMDBLAS=OFF \
+      -DWITH_OPENCLCLAMDFFT=OFF \
+      -DWITH_OPENCL_SVM=OFF \
+      -DWITH_WEBP=OFF \
+      -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
@@ -459,7 +487,7 @@ function copy() {
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
     cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/ $1/lib/$TYPE/
+    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
