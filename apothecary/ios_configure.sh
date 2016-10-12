@@ -20,11 +20,13 @@ if [ "${TYPE}" == "tvos" ]; then
         export HOST=x86_64-apple-darwin
         export SDK=$SIM
         export CSDK=$CSIM
+        export ISSIM=TRUE
         export MIN_TYPE=-mtvos-simulator-version-min=
     elif [ "${IOS_ARCH}" == "arm64" ]; then
         export HOST=aarch64-apple-darwin
         export SDK=$OS
         export CSDK=$COS
+        export ISSIM=FALSE
         export MIN_TYPE=-mtvos-version-min=
     else
         echo tvos arch $IOS_ARCH not supported by ios_configure.sh
@@ -39,30 +41,35 @@ elif [ "$TYPE" == "ios" ]; then
         export HOST=i386-apple-darwin
         export SDK=$SIM
         export CSDK=$CSIM
+        export ISSIM=TRUE
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "x86_64" ]; then
         export HOST=x86_64-apple-darwin
         export SDK=$SIM
         export CSDK=$CSIM
+        export ISSIM=TRUE
         export MIN_TYPE=-mios-simulator-version-min=
     elif [ "${IOS_ARCH}" == "armv7" ]; then
         export HOST=arm-apple-darwin
         export SDK=$OS
         export CSDK=$COS
+        export ISSIM=FALSE
         export MIN_TYPE=-miphoneos-version-min=
     elif [ "${IOS_ARCH}" == "arm64" ]; then
         export HOST=aarch64-apple-darwin
         export SDK=$OS
         export CSDK=$COS
+        export ISSIM=FALSE
         export MIN_TYPE=-miphoneos-version-min=
     else
         echo ios arch $IOS_ARCH not supported by ios_configure.sh
         exit
     fi
 fi
-#export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
-#export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
-#export CROSS_SDK=${CSDK}.sdk
+export PLATFORM=$CSDK
+export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
+export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
@@ -72,10 +79,10 @@ if [[ "$TYPE" == "tvos" ]]; then
     BITCODE=-fembed-bitcode
 fi
 
-#export CC="$(xcrun -find -sdk ${SDK} clang)"
-#export CXX="$(xcrun -find -sdk ${SDK} clang++)"
-#export CPP="$(xcrun -find -sdk ${SDK} clang++)"
-#export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
+export CC="$(xcrun -find -sdk ${SDK} clang)"
+export CXX="$(xcrun -find -sdk ${SDK} clang++)"
+export CPP="$(xcrun -find -sdk ${SDK} clang++)"
+export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
 export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
