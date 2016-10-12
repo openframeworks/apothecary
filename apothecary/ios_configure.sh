@@ -81,7 +81,7 @@ fi
 
 export CC="$(xcrun -find -sdk ${SDK} clang)"
 export CXX="$(xcrun -find -sdk ${SDK} clang++)"
-export CPP="$(xcrun -find -sdk ${SDK} clang++)"
+#export CPP="$(xcrun -find -sdk ${SDK} clang)"
 export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
 export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
