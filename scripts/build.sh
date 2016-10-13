@@ -83,7 +83,7 @@ fi
 
 echo "Running apothecary from $PWD"
 
-for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) ; do
+for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 | grep -v uri) ; do
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
@@ -91,7 +91,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
         ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
         if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ]; then
+            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
                 echo Pass 1 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
@@ -103,7 +103,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl ) 
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         elif [ "$OPT2" == "3" ]; then
-            if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ]; then
+            if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
                 echo Pass 3 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
