@@ -72,15 +72,15 @@ function build() {
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
 
-        export CFLAGS="-arch i386"
-        export LDFLAGS="-arch i386"
+        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
 
-        export CFLAGS="-arch x86_64"
-        export LDFLAGS="-arch x86_64"
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
