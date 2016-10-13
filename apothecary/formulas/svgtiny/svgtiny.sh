@@ -47,6 +47,7 @@ function prepare() {
     if git apply $FORMULA_DIR/libparseutils.patch  --check; then
         git apply $FORMULA_DIR/libparseutils.patch  
     fi
+    cd ..
 
 
     if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] ; then   
@@ -54,11 +55,12 @@ function prepare() {
         apothecaryDepend prepare libxml2
         apothecaryDepend build libxml2
         apothecaryDepend copy libxml2
-    fi
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ]; then
+
         cp $FORMULA_DIR/expat.h src/
         cp $FORMULA_DIR/expat_external.h src/
     fi
+
+    gperf src/colors.gperf > src/svg_colors.c
 }
 
 # executed inside the lib src dir
@@ -177,6 +179,13 @@ function copy() {
 		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] ; then
+	    mkdir -p $1/lib/$TYPE
+		# Standard *nix style copy.
+		# copy headers
+		cp -Rv include/* $1/include/
+		# copy lib
+		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
 	fi
 
 
