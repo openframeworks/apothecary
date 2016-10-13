@@ -1,82 +1,36 @@
 #!/usr/bin/env bash
 #
-# svgtiny
-# Libsvgtiny is an implementation of SVG Tiny, written in C
-# http://www.netsurf-browser.org/projects/libsvgtiny/
+# libxml2
+# XML parser
+# http://xmlsoft.org/index.html
 #
-# uses a makeifle build system
+# uses an automake build system
 
-FORMULA_TYPES=( "linux64" "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-#dependencies
-FORMULA_DEPENDS=( "libxml2" )
 
 # define the version by sha
-VER=0.1.4
+VER=2.9.4
 
-# tools for git use
-GIT_URL=git://git.netsurf-browser.org/libsvgtiny.git
-GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	git clone git://git.netsurf-browser.org/libsvgtiny.git
-    mv libsvgtiny svgtiny
-    cd svgtiny
-    git checkout release/$VER
-
-    git clone git://git.netsurf-browser.org/libdom.git
-    cd libdom 
-    git checkout release/0.3.0
-    cd ..
-
-    git clone git://git.netsurf-browser.org/libparserutils.git  
-    cd libparserutils
-    git checkout release/0.2.3
-    cd ..
-
-    git clone git://git.netsurf-browser.org/libwapcaplet.git
-    cd libwapcaplet
-    git checkout release/0.3.0
-    cd ..        
+    wget ftp://xmlsoft.org/libxml2/libxml2-${VER}.tar.gz
+    tar xzf libxml2-${VER}.tar.gz
+    mv libxml2-${VER} libxml2
+    rm libxml2-${VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    cd libparserutils
-    if git apply $FORMULA_DIR/libparseutils.patch  --check; then
-        git apply $FORMULA_DIR/libparseutils.patch  
-    fi
-
-
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] ; then   
-        apothecaryDepend download libxml2
-        apothecaryDepend prepare libxml2
-        apothecaryDepend build libxml2
-        apothecaryDepend copy libxml2
-    fi
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ]; then
-        cp $FORMULA_DIR/expat.h src/
-        cp $FORMULA_DIR/expat_external.h src/
+    if [ "$TYPE" == "android" ]; then
+        cp $FORMULA_DIR/glob.h .
     fi
 }
 
 # executed inside the lib src dir
 function build() {
-    cp $FORMULA_DIR/Makefile .
-    cp -rf libdom/bindings libdom/include/dom/
-    
-    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] ; then      
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib
-            export CFLAGS=-I$SYSROOT/usr/include
-        else
-            export CFLAGS="$(pkg-config libxml-2.0 --cflags)"  
-        fi
-        make clean
-	    make -j${PARALLEL_MAKE}
-	elif [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
 		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
@@ -92,7 +46,14 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
-        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+	    if [ "$ARCH" == "armv7" ]; then
+            HOST=armv7a-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            HOST=x86-linux-android
+        fi
+        ./configure --host=$HOST --without-lzma --without-zlib --disable-tests --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "osx" ]; then
@@ -152,7 +113,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	# prepare headers directory if needed
-	mkdir -p $1/include/curl
+	mkdir -p $1/include/libxml
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
@@ -176,16 +137,15 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/* $1/include/
+		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
-		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
+		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
 	fi
-
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	cp -v COPYING $1/license/
+	cp -v Copyright $1/license/
 }
 
 # executed inside the lib src dir

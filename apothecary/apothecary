@@ -115,7 +115,7 @@ echo "OF: $OF_ROOT"
 echo "APOTHECARY: $APOTHECARY_DIR"
 echo "FORMULAS: $FORMULAS_DIR"
 echo "BUILD: $BUILD_DIR"
-echo "LIBS: $LIBS_DIR"
+echo "LIBS_DIR: $LIBS_DIR"
 echo "ADDONS: $ADDONS_DIR"
 
 CHECKOUT=YES
@@ -928,9 +928,9 @@ function apothecaryDepend() {
 
 	# Uses git IF the USE_GIT variable is set
     if [ $FORCE_DOWNLOAD -eq 1 ]; then
-	    $APOTHECARY_SCRIPT -f -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
+	    $APOTHECARY_SCRIPT -f -t $TYPE -a $ARCH -j$PARALLEL_MAKE ${USE_GIT:+-g} $1 $depend
     else
-        $APOTHECARY_SCRIPT -t $TYPE -a $ARCH ${USE_GIT:+-g} $1 $depend
+        $APOTHECARY_SCRIPT -t $TYPE -a $ARCH -j$PARALLEL_MAKE ${USE_GIT:+-g} $1 $depend
     fi
     cd $ROOT
 }
