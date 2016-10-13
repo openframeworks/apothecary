@@ -61,7 +61,7 @@ if [ ! -z ${OPT+x} ]; then
     sudo gdebi -n g++-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
     rm *.deb
 
-    sudo apt-get install -y coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get remove -y --purge g++-4.8
     sudo apt-get autoremove
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
@@ -70,5 +70,5 @@ if [ ! -z ${OPT+x} ]; then
 else
     sudo add-apt-repository -y ppa:dns/gnu
     sudo apt-get update -q
-    sudo apt-get install -y coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
 fi

@@ -29,7 +29,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev
+        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -43,7 +43,7 @@ matrix:
         - sudo add-apt-repository ppa:dns/gnu -y
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev realpath libboost-tools-dev
+        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
       cache:
         directories:
         - ~/android-ndk-r12b
@@ -65,6 +65,7 @@ matrix:
             - realpath
             - coreutils
             - libboost-tools-dev
+            - gperf
             #- libboost-dev
 
 

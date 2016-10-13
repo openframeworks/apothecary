@@ -21,7 +21,7 @@ createArchImg(){
     #sudo ./arch-bootstrap.sh archlinux
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
-    sudo apt-get install -y coreutils realpath
+    sudo apt-get install -y coreutils realpath gperf
     
     ./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 }
