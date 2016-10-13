@@ -104,7 +104,7 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
+            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --disable-ntlm-wb --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
             #make clean
             make -j${PARALLEL_MAKE}
             make install
@@ -173,21 +173,32 @@ function copy() {
 		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
 
-    #Patch headers for 64-bit archs
-    sed 's/#define CURL_SIZEOF_LONG 8/\
-    #ifdef __LP64__\
-    #define CURL_SIZEOF_LONG 8\
-    #else\
-    #define CURL_SIZEOF_LONG 4\
-    #endif/'< "$1/include/curl/curlbuild.h" > "$1/include/curl/curlbuild.h.temp"
+    if [ "$TYPE" == "osx" ]; then
+        cp build/$TYPE/x86/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+        cp build/$TYPE/x64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    elif [ "$TYPE" == "ios" ]; then
+        cp build/$TYPE/i386/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+        cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    elif [ "$TYPE" == "tvos" ]; then
+        cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    elif [ "$TYPE" == "vs" ]; then
+		if [ $ARCH == 32 ] ; then
+            cp include/curl/curlbuild.h $1/include/curbuild32.h
+        else
+            cp include/curl/curlbuild.h $1/include/curbuild64.h
+        fi
+    elif [ "$TYPE" == "android" ]; then
+		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    fi
 
-    sed 's/#define CURL_SIZEOF_CURL_OFF_T 8/\
-    #ifdef __LP64__\
-    #define CURL_SIZEOF_CURL_OFF_T 8\
-    #else\
-    #define CURL_SIZEOF_CURL_OFF_T 4\
-    #endif/' < "$1/include/curl/curlbuild.h.temp" > "$1/include/curl/curlbuild.h"
-    rm $1/include/curl/curlbuild.h.temp
+cat > $1/include/curl/curlbuild.h << EOF
+/* The size of long, as computed by sizeof. */
+#ifdef __LP64__
+#include "curl/curlbuild64.h"
+#else
+#include "curl/curlbuild32.h"
+#endif
+EOF
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
