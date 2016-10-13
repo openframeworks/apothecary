@@ -158,7 +158,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
 		fi
-	elif [ "$TYPE" == "osx" ] ; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] ; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/curl/* $1/include/curl/

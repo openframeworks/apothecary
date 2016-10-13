@@ -124,7 +124,7 @@ function copy() {
 		cp -Rv include/* $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM
 		cp -v win32/uriparser.lib $1/lib/$TYPE/$PLATFORM/uriparser.lib
-	elif [ "$TYPE" == "osx" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
