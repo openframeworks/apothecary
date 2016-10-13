@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )
@@ -112,7 +112,7 @@ function build() {
 
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
-        if [ "${TYPE}" == "ios" ]; then
+        if [ "$TYPE" == "ios" ]; then
             lipo -create build/$TYPE/i386/lib/libcurl.a \
                          build/$TYPE/x86_64/lib/libcurl.a \
                          build/$TYPE/armv7/lib/libcurl.a \
@@ -158,12 +158,12 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
 		fi
-	elif [ "$TYPE" == "osx" ] ; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/curl/* $1/include/curl/
 		# copy lib
-		cp -Rv build/osx/lib/libcurl.a $1/lib/$TYPE/curl.a
+		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# Standard *nix style copy.
@@ -171,12 +171,6 @@ function copy() {
 		cp -Rv include/curl/* $1/include/curl/
 		# copy lib
 		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
-    else
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
-		# copy lib
-		cp -Rv lib/.libs/libcurl.a $1/lib/$TYPE/libcurl.a
 	fi
 
     #Patch headers for 64-bit archs
