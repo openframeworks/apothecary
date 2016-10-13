@@ -19,13 +19,13 @@ COMPONENT_TYPE ?= lib-static
 TESTRUNNER = test/runtest.sh $(BUILDDIR) $(EXEEXT)
 
 # Toolchain flags
-WARNFLAGS := -Wall -W -Wundef -Wpointer-arith -Wcast-align \
+WARNFLAGS := -Wall -W -Wundef -Wpointer-arith \
 	-Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes \
 	-Wmissing-declarations -Wnested-externs
 # BeOS/Haiku/AmigaOS standard library headers create warnings
 ifneq ($(BUILD),i586-pc-haiku)
   ifneq ($(findstring amigaos,$(BUILD)),amigaos)
-    WARNFLAGS := $(WARNFLAGS) -Werror
+    WARNFLAGS := $(WARNFLAGS)
   endif
 endif
 

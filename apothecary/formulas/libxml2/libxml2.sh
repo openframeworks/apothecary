@@ -53,16 +53,17 @@ function build() {
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
         fi
-        ./configure --host=$HOST --without-lzma --without-zlib --disable-tests --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        ./configure --host=$HOST --without-lzma --without-zlib --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        ./buildconf
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
@@ -73,8 +74,9 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --disable-ntlm-wb --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
-            #make clean
+            local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
+            ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+            make clean
             make -j${PARALLEL_MAKE}
             make install
         done
@@ -82,15 +84,15 @@ function build() {
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
         if [ "$TYPE" == "ios" ]; then
-            lipo -create build/$TYPE/i386/lib/libcurl.a \
-                         build/$TYPE/x86_64/lib/libcurl.a \
-                         build/$TYPE/armv7/lib/libcurl.a \
-                         build/$TYPE/arm64/lib/libcurl.a \
-                        -output build/$TYPE/lib/libcurl.a
+            lipo -create build/$TYPE/i386/lib/libxml2.a \
+                         build/$TYPE/x86_64/lib/libxml2.a \
+                         build/$TYPE/armv7/lib/libxml2.a \
+                         build/$TYPE/arm64/lib/libxml2.a \
+                        -output build/$TYPE/lib/libxml2.a
         elif [ "$TYPE" == "tvos" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libcurl.a \
-                         build/$TYPE/arm64/lib/libcurl.a \
-                        -output build/$TYPE/lib/libcurl.a
+            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
+                         build/$TYPE/arm64/lib/libxml2.a \
+                        -output build/$TYPE/lib/libxml2.a
         fi
     else
         echo "building other for $TYPE"
@@ -130,9 +132,9 @@ function copy() {
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
+		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
-		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
+		cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# Standard *nix style copy.

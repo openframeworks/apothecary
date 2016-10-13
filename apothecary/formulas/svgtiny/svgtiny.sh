@@ -98,10 +98,10 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        ./buildconf
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
@@ -112,24 +112,22 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --disable-ntlm-wb --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
-            #make clean
-            make -j${PARALLEL_MAKE}
-            make install
+            export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
+            make clean
+	        make -j${PARALLEL_MAKE}
+            mv libsvgtiny.a libsvgtiny_$IOS_ARCH.a
         done
 
-        cp -r build/$TYPE/arm64/* build/$TYPE/
-
         if [ "$TYPE" == "ios" ]; then
-            lipo -create build/$TYPE/i386/lib/libcurl.a \
-                         build/$TYPE/x86_64/lib/libcurl.a \
-                         build/$TYPE/armv7/lib/libcurl.a \
-                         build/$TYPE/arm64/lib/libcurl.a \
-                        -output build/$TYPE/lib/libcurl.a
+            lipo -create libsvgtiny_i386.a \
+                         libsvgtiny_x86_64.a \
+                         libsvgtiny_armv7.a \
+                         libsvgtiny_arm64.a \
+                        -output libsvgtiny.a
         elif [ "$TYPE" == "tvos" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libcurl.a \
-                         build/$TYPE/arm64/lib/libcurl.a \
-                        -output build/$TYPE/lib/libcurl.a
+            lipo -create libsvgtiny_x86_64.a \
+                         libsvgtiny_arm64.a \
+                        -output libsvgtiny.a
         fi
     else
         echo "building other for $TYPE"
@@ -152,7 +150,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	# prepare headers directory if needed
-	mkdir -p $1/include/curl
+	mkdir -p $1/include
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
@@ -169,9 +167,9 @@ function copy() {
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
+		cp -Rv include/* $1/include/
 		# copy lib
-		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
+		cp -Rv libsvgtiny.a $1/lib/$TYPE/svgtiny.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# Standard *nix style copy.
