@@ -26,6 +26,11 @@ function prepare() {
     if [ "$TYPE" == "android" ]; then
         cp $FORMULA_DIR/glob.h .
     fi
+
+    if [ "$TYPE" == "vs" ]; then
+        cp $FORMULA_DIR/vs2015/*.h include/libxml/
+        cp -r $FORMULA_DIR/vs2015/* win32/VC10/
+    fi
 }
 
 # executed inside the lib src dir
@@ -33,15 +38,11 @@ function build() {
     if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
-		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
-		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14"
-		cd projects/Windows/VC14/lib
+		cd win32/VC10
 		if [ $ARCH == 32 ] ; then
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+			vs-build libxml2.vcxproj Build "Release|Win32"
 		else
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+			vs-build libcurl.vcxproj Build "Release|x64"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
@@ -59,7 +60,7 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        
+
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -74,7 +75,7 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        
+
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -135,34 +136,25 @@ function copy() {
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
+    cp -Rv include/libxml/* $1/include/libxml/
 
 	if [ "$TYPE" == "vs" ] ; then
-		cp -Rv include/* $1/include
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+			cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/Win32/
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
+			cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/x64/
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/libxml2.a
 	fi

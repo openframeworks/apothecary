@@ -75,9 +75,8 @@ function build() {
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib
             export CFLAGS=-I$SYSROOT/usr/include
-        else
-            export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         fi
+        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         make clean
 	    make -j${PARALLEL_MAKE}
 
