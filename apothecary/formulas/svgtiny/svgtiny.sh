@@ -51,10 +51,10 @@ function prepare() {
 
 
     if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] ; then   
-#        apothecaryDepend download libxml2
-#        apothecaryDepend prepare libxml2
-#        apothecaryDepend build libxml2
-#        apothecaryDepend copy libxml2
+        apothecaryDepend download libxml2
+        apothecaryDepend prepare libxml2
+        apothecaryDepend build libxml2
+        apothecaryDepend copy libxml2
 
         cp $FORMULA_DIR/expat.h src/
         cp $FORMULA_DIR/expat_external.h src/
