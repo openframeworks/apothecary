@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "linux64" "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "linux64" "linuxarmv6" "linuxarmv7" "osx" "vs" "ios" "tvos" "android" )
 
 #dependencies
 FORMULA_DEPENDS=( "libxml2" )
