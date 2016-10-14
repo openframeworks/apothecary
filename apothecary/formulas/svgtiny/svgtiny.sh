@@ -53,7 +53,7 @@ function prepare() {
     cd ..
 
 
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] && [ "$TYPE" != "msys2" ] ; then
+    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6l" ] && [ "$TYPE" != "linuxarmv7l" ] && [ "$TYPE" != "msys2" ] ; then
         apothecaryDepend download libxml2
         apothecaryDepend prepare libxml2
         apothecaryDepend build libxml2
@@ -70,7 +70,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ] ; then
+    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ] ; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib
