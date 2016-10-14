@@ -83,7 +83,7 @@ fi
 
 echo "Running apothecary from $PWD"
 
-for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 | grep -v uri) ; do
+for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
