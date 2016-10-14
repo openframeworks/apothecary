@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "linux64" "linuxarmv6" "linuxarmv7" "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "linux64" "linuxarmv6" "linuxarmv7" "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 #dependencies
 FORMULA_DEPENDS=( "libxml2" )
@@ -51,23 +51,22 @@ function prepare() {
 
 
     if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] ; then   
-        apothecaryDepend download libxml2
-        apothecaryDepend prepare libxml2
-        apothecaryDepend build libxml2
-        apothecaryDepend copy libxml2
+#        apothecaryDepend download libxml2
+#        apothecaryDepend prepare libxml2
+#        apothecaryDepend build libxml2
+#        apothecaryDepend copy libxml2
 
         cp $FORMULA_DIR/expat.h src/
         cp $FORMULA_DIR/expat_external.h src/
     fi
 
     gperf src/colors.gperf > src/svg_colors.c
+    cp $FORMULA_DIR/Makefile .
+    cp -rf libdom/bindings libdom/include/dom/
 }
 
 # executed inside the lib src dir
-function build() {
-    cp $FORMULA_DIR/Makefile .
-    cp -rf libdom/bindings libdom/include/dom/
-    
+function build() {    
     if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] ; then      
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
@@ -78,6 +77,7 @@ function build() {
         fi
         make clean
 	    make -j${PARALLEL_MAKE}
+
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
@@ -97,12 +97,14 @@ function build() {
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
+
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
+
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -131,21 +133,12 @@ function build() {
                          libsvgtiny_arm64.a \
                         -output libsvgtiny.a
         fi
-    else
-        echo "building other for $TYPE"
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib
-            export CFLAGS=-I$SYSROOT/usr/include
-        fi
 
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
-        ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
-        make clean
-	    make -j${PARALLEL_MAKE}
+
+	elif [ "$TYPE" == "emscripten" ]; then
+        emmake make clean
+	    emmake make -j${PARALLEL_MAKE} CUSTOM_CFLAGS="-I$LIBS_DIR/libxml2/include"
+
 	fi
 }
 
@@ -179,7 +172,7 @@ function copy() {
 		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] ; then
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "emscripten" ]; then
 	    mkdir -p $1/lib/$TYPE
 		# Standard *nix style copy.
 		# copy headers

@@ -29,10 +29,10 @@ ifneq ($(BUILD),i586-pc-haiku)
   endif
 endif
 
-CFLAGS := $(CFLAGS) -D_BSD_SOURCE -D_DEFAULT_SOURCE -DWITHOUT_ICONV_FILTER \
+CFLAGS := $(CFLAGS) $(CUSTOM_CFLAGS) -D_BSD_SOURCE -D_DEFAULT_SOURCE -DWITHOUT_ICONV_FILTER \
 	-fPIC \
 	-I$(CURDIR)/include/ -I$(CURDIR)/src \
-	$(WARNFLAGS) $(CFLAGS)
+	$(WARNFLAGS)
 ifneq ($(GCCVER),2)
   CFLAGS := $(CFLAGS) -std=c99
 else
@@ -64,7 +64,7 @@ OBJS := $(patsubst %.c,%.o,$(SRC))
 all: libsvgtiny.a
 
 libsvgtiny.a: $(OBJS)
-	$(AR) -cr "$@" $(OBJS)
+	$(AR) ruv "$@" $(OBJS)
 
 %.o: %.c
 	$(CC) -c $< -o $@ -O2 $(CFLAGS)

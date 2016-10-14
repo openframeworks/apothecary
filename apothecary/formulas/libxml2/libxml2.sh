@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 
 # define the version by sha
@@ -63,6 +63,22 @@ function build() {
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
+
+
+	elif [ "$TYPE" == "emscripten" ]; then
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        emconfigure ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        make clean
+	    make -j${PARALLEL_MAKE}
+	elif [ "$TYPE" == "osx" ]; then
+        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        make clean
+	    make -j${PARALLEL_MAKE}
+
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -142,6 +158,13 @@ function copy() {
 		cp -Rv include/libxml/* $1/include/libxml/
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+	elif [ "$TYPE" == "emscripten" ] ; then
+	    mkdir -p $1/lib/$TYPE
+		# Standard *nix style copy.
+		# copy headers
+		cp -Rv include/libxml/* $1/include/libxml/
+		# copy lib
+		cp -Rv .libs/libxml2.a $1/lib/$TYPE/libxml2.a
 	fi
 
 	# copy license file
