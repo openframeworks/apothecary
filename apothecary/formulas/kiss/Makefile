@@ -12,7 +12,7 @@ LIBOBJ=$(LIBSRC:.c=.o)
 install: $(LIB)
 	@echo lib Makefile - installing $(LIB)
 	@mkdir -p $(LIBDEST)
-	@install -m 444 $(LIB) $(LIBDEST)
+	@install -m 644 $(LIB) $(LIBDEST)
 
 $(LIB): $(LIBOBJ)
 	@echo lib Makefile - archiving $(LIB)
