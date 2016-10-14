@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "osx" "vs" "ios" "tvos" "android" "emscripten" )
+FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "osx" "vs" "ios" "tvos" "android" "emscripten" "msys2" )
 
 #dependencies
 FORMULA_DEPENDS=( "libxml2" )
@@ -26,11 +26,11 @@ function download() {
     git checkout release/$VER
 
     git clone git://git.netsurf-browser.org/libdom.git
-    cd libdom 
+    cd libdom
     git checkout release/0.3.0
     cd ..
 
-    git clone git://git.netsurf-browser.org/libparserutils.git  
+    git clone git://git.netsurf-browser.org/libparserutils.git
     cd libparserutils
     git checkout release/0.2.3
     cd ..
@@ -38,19 +38,22 @@ function download() {
     git clone git://git.netsurf-browser.org/libwapcaplet.git
     cd libwapcaplet
     git checkout release/0.3.0
-    cd ..        
+    cd ..
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     cd libparserutils
+	if [ "$TYPE" == "msys2" ]; then
+		dos2unix $FORMULA_DIR/libparseutils.patch
+	fi
     if git apply $FORMULA_DIR/libparseutils.patch  --check; then
-        git apply $FORMULA_DIR/libparseutils.patch  
+        git apply $FORMULA_DIR/libparseutils.patch
     fi
     cd ..
 
 
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] ; then   
+    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6" ] && [ "$TYPE" != "linuxarmv7" ] && [ "$TYPE" != "msys2" ] ; then
         apothecaryDepend download libxml2
         apothecaryDepend prepare libxml2
         apothecaryDepend build libxml2
@@ -66,14 +69,14 @@ function prepare() {
 }
 
 # executed inside the lib src dir
-function build() {    
-    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] ; then      
+function build() {
+    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ] ; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib
             export CFLAGS=-I$SYSROOT/usr/include
         else
-            export CFLAGS="$(pkg-config libxml-2.0 --cflags)"  
+            export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         fi
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -172,9 +175,8 @@ function copy() {
 		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "emscripten" ]; then
-	    mkdir -p $1/lib/$TYPE
-		# Standard *nix style copy.
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ]; then
+	    # Standard *nix style copy.
 		# copy headers
 		cp -Rv include/* $1/include/
 		# copy lib
