@@ -31,14 +31,14 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     if [ "$TYPE" == "emscripten" ]; then
-        rm -f libpugixml.a
+        rm -f libpugixml.bc
 
 		# Compile the program
 		emcc -O2 \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o src/pugixml.bc
+			 -o libpugixml.bc
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
