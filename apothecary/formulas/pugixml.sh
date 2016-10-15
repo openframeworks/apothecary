@@ -51,7 +51,7 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
 		# Compile the program
-		$CXX -O2 \
+		$CXX -O2  $CFLAGS \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
@@ -59,7 +59,7 @@ function build() {
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		clang++ -O2 \
+		clang++ -O2  $CFLAGS \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
