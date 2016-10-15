@@ -160,7 +160,7 @@ function copy() {
 			cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
+			cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
