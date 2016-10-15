@@ -60,11 +60,11 @@ function prepare() {
         apothecaryDepend copy libxml2
     fi
 
-	if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "msys2" ] ; then
-		#TODO: This should work as a dependency in linux arm
-		cp $FORMULA_DIR/expat.h src/
-		cp $FORMULA_DIR/expat_external.h src/
-	fi
+	#if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "msys2" ] ; then
+	#	#TODO: This should work as a dependency in linux arm
+	#	cp $FORMULA_DIR/expat.h src/
+	#	cp $FORMULA_DIR/expat_external.h src/
+	#fi
 
 	if [ "$TYPE" == "vs" ]; then
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
@@ -84,7 +84,7 @@ function build() {
             export LDFLAGS=-L$SYSROOT/usr/lib
             export CFLAGS=-I$SYSROOT/usr/include
         fi
-        export CFLAGS="$(pkg-config libxml-2.0 expat --cflags)"
+        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         make clean
 	    make -j${PARALLEL_MAKE}
 

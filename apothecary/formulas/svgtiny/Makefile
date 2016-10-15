@@ -55,7 +55,7 @@ INSTALL_ITEMS := $(INSTALL_ITEMS) /$(LIBDIR):$(OUTPUT)
 
 SRC := $(wildcard src/*.c)
 SRC += $(wildcard libdom/src/*/*.c)
-SRC += $(wildcard libdom/bindings/xml/*.c)
+SRC += libdom/bindings/xml/libxml_xmlparser.c
 SRC += $(wildcard libwapcaplet/src/*.c)
 SRC += $(wildcard libparserutils/src/*.c)
 SRC += $(wildcard libparserutils/src/*/*.c)

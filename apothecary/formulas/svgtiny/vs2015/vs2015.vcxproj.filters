@@ -327,6 +327,9 @@
     <ClCompile Include="..\libwapcaplet\src\libwapcaplet.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\libdom\bindings\xml\libxml_xmlparser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\svgtiny_internal.h">

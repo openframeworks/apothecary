@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\libdom\bindings\xml\libxml_xmlparser.c" />
     <ClCompile Include="..\libdom\src\core\attr.c" />
     <ClCompile Include="..\libdom\src\core\cdatasection.c" />
     <ClCompile Include="..\libdom\src\core\characterdata.c" />
