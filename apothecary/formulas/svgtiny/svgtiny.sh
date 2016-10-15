@@ -58,10 +58,13 @@ function prepare() {
         apothecaryDepend prepare libxml2
         apothecaryDepend build libxml2
         apothecaryDepend copy libxml2
-
-        cp $FORMULA_DIR/expat.h src/
-        cp $FORMULA_DIR/expat_external.h src/
     fi
+
+	if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "msys2" ] ; then
+		#TODO: This should work as a dependency in linux arm
+		cp $FORMULA_DIR/expat.h src/
+		cp $FORMULA_DIR/expat_external.h src/
+	fi
 
 	if [ "$TYPE" == "vs" ]; then
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
