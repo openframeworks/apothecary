@@ -17,7 +17,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz 
+	wget http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
     tar xzf pugixml-$VER.tar.gz
     mv pugixml-$VER pugixml
     rm pugixml-$VER.tar.gz
@@ -44,7 +44,7 @@ function build() {
 		unset TEMP
 		cd scripts
 		if [ $ARCH == 32 ] ; then
-			vs-build pugixml_vs2015.vcxproj Build "Release|Win32"
+			vs-build pugixml_vs2015.vcxproj Build "Release|x86"
 		else
 			vs-build pugixml_vs2015.vcxproj Build "Release|x64"
 		fi
@@ -108,33 +108,27 @@ function copy() {
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
+	# Standard *nix style copy.
+	# copy headers
+	cp -Rv src/*.hpp $1/include/
+
 	if [ "$TYPE" == "vs" ] ; then
-		cp -Rv src/*.hpp $1/include/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+			cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
+			cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv src/*.hpp $1/include/
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv src/*.hpp $1/include/
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv src/*.hpp $1/include/
 		# copy lib
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
 	fi
