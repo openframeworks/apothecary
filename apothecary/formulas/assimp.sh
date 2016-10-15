@@ -33,7 +33,7 @@ function download() {
     elif [ "$TYPE" == "vs" ] ; then
 		#ADDED EXCEPTION, FIX DOESN'T WORK IN VS
     	echo "VS"
-	else 
+	else
 		echo "$TYPE"
 
     	sed -i -e 's/SET ( ASSIMP_BUILD_STATIC_LIB OFF/SET ( ASSIMP_BUILD_STATIC_LIB ON/g' assimp/CMakeLists.txt
@@ -66,9 +66,9 @@ function build() {
 
         export TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
 		export TARGET_IOS
-        
+
         local IOS_ARCHS
-        if [[ "${TYPE}" == "tvos" ]]; then 
+        if [[ "${TYPE}" == "tvos" ]]; then
             IOS_ARCHS="x86_64 arm64"
         elif [[ "$TYPE" == "ios" ]]; then
             IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -80,7 +80,7 @@ function build() {
         echo $CURRENTPATH
 
 		SDKVERSION=""
-        if [[ "${TYPE}" == "tvos" ]]; then 
+        if [[ "${TYPE}" == "tvos" ]]; then
             SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
         elif [[ "$TYPE" == "ios" ]]; then
             SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -114,15 +114,15 @@ function build() {
         for IOS_ARCH in ${IOS_ARCHS}
         do
         	unset IOS_DEVROOT IOS_SDKROOT
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL 
+            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
             unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS
-            unset CROSS_TOP CROSS_SDK BUILD_TOOLS PLATFORM 
+            unset CROSS_TOP CROSS_SDK BUILD_TOOLS PLATFORM
 
             export CC=$TOOLCHAIN/usr/bin/clang
 			export CPP=$TOOLCHAIN/usr/bin/clang++
 			export CXX=$TOOLCHAIN/usr/bin/clang++
 			export CXXCPP=$TOOLCHAIN/usr/bin/clang++
-	
+
 			export LD=$TOOLCHAIN/usr/bin/ld
 			export AR=$TOOLCHAIN/usr/bin/ar
 			export AS=$TOOLCHAIN/usr/bin/as
@@ -134,13 +134,13 @@ function build() {
 
 			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
             then
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneSimulator"
                 fi
             else
-                if [ "${TYPE}" == "tvos" ]; then 
+                if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneOS"
@@ -151,17 +151,17 @@ function build() {
 			export CROSS_SDK="${PLATFORM}.sdk"
 			export BUILD_TOOLS="${DEVELOPER}"
 
-           
+
             MIN_IOS_VERSION=$IOS_MIN_SDK_VER
             # min iOS version for arm64 is iOS 7
-        
+
             if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
                 MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
             elif [ "${IOS_ARCH}" == "i386" ]; then
                 MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
             fi
             MIN_TYPE=-miphoneos-version-min=
-            if [ "${TYPE}" == "tvos" ]; then 
+            if [ "${TYPE}" == "tvos" ]; then
                 MIN_TYPE=-mtvos-version-min=
                 if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
                     MIN_TYPE=-mtvos-simulator-version-min=
@@ -188,7 +188,7 @@ function build() {
 			EXTRA_FLAGS="$EXTRA_LINK_FLAGS -pipe -no-cpp-precomp -funroll-loops $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
 
 			unset CFLAGS LDFLAGS CPPFLAGS CXXFLAGS DEVROOT SDKROOT
-          
+
             export LDFLAGS="$EXTRA_LINK_FLAGS $EXTRA_PLATFORM_LDFLAGS -std=c++11"
             export DEVROOT="$CROSS_TOP"
             export SDKROOT="$CROSS_SDK"
@@ -226,28 +226,28 @@ function build() {
 		echo "Running lipo to create fat lib"
         echo "Please stand by..."
 
-        SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version` 
+        SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
         DEVELOPER=$XCODE_DEV_ROOT
         TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
 
-        if [[ "${TYPE}" == "tvos" ]] ; then 
+        if [[ "${TYPE}" == "tvos" ]] ; then
              $TOOLCHAIN/usr/bin/lipo -create libassimp-arm64.a \
                         libassimp-x86_64.a \
-                        -output "../../lib/$TYPE/assimp.a" 
+                        -output "../../lib/$TYPE/assimp.a"
          elif [[ "$TYPE" == "ios" ]]; then
         #           libassimp-armv7s.a \
             $TOOLCHAIN/usr/bin/lipo -create libassimp-armv7.a \
                         libassimp-arm64.a \
                         libassimp-i386.a \
                         libassimp-x86_64.a \
-                        -output "../../lib/$TYPE/assimp.a" 
+                        -output "../../lib/$TYPE/assimp.a"
         fi
 
         cd ../../
 
 
         if [ $? != 0 ];
-        then 
+        then
             echo "Problem while creating fat lib with lipo"
             exit 1
         else
@@ -290,11 +290,11 @@ function build() {
 		local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
 
 		# 32 bit
-		cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops" -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops" .
+		cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
 		make assimp -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "vs" ] ; then
-		
+
 		unset TMP
 		unset TEMP
 		#architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
@@ -306,16 +306,16 @@ function build() {
 		if [ $ARCH == 32 ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
-			cmake .. -G "$generatorName" $buildOpts  
+			cmake .. -G "$generatorName" $buildOpts
 			vs-build "Assimp.sln" build "Release|Win32"
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
 			generatorName+=' Win64'
-			cmake .. -G "$generatorName" $buildOpts  
+			cmake .. -G "$generatorName" $buildOpts
 			vs-build "Assimp.sln" build "Release|x64"
 		fi
-		cd ..		
+		cd ..
 		#cleanup to not fail if the other platform is called
 		rm -f CMakeCache.txt
 		echo "--------------------"
@@ -326,11 +326,11 @@ function build() {
 		echoWarning "TODO: msys2 build"
 
 	elif [ "$TYPE" == "android" ] ; then
-        
+
 		# warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
 		# these may need to be updated for a new release
 		local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
-		
+
 
 		# arm
         ABI=armeabi-v7a
@@ -340,7 +340,7 @@ function build() {
 		cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
 		make assimp -j${PARALLEL_MAKE}
 		cd ..
-		
+
 
 		# x86
         ABI=x86
@@ -352,7 +352,7 @@ function build() {
 		cd ..
 
 	elif [ "$TYPE" == "emscripten" ] ; then
-        
+
 		# warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
 		# these may need to be updated for a new release
 		local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"

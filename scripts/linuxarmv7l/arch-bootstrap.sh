@@ -32,12 +32,12 @@ DEFAULT_REPO_URL="http://mirrors.kernel.org/archlinux"
 DEFAULT_ARM_REPO_URL="http://mirror.archlinuxarm.org"
 
 PACMAN_PACKAGES_ARM=(
-acl archlinux-keyring attr bzip2 curl expat glibc gpgme libarchive  libassuan libgpg-error libssh2 lzo openssl pacman pacman-mirrorlist xz zlib linux-raspberrypi linux-raspberrypi-headers libutil-linux linux-api-headers linux-firmware krb5 e2fsprogs keyutils libidn gcc-libs coreutils bash grep gawk file tar systemd sed gcc glibc coreutils systemd  make pkg-config openal glew freeimage freetype2 libsndfile openssl mesa mesa-libgl fontconfig gstreamer gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-bad gst-libav assimp boost cairo pixman libpng harfbuzz graphite libdrm libx11 xproto kbproto libxcb libxau libxdmcp libxext xextproto libxdamage damageproto libxfixes fixesproto libxxf86vm xf86vidmodeproto libxrender renderproto alsa-lib flex libxrandr libxi libxcursor libxshmfence wayland opencv libxml2 pugixml
+acl archlinux-keyring attr bzip2 curl expat glibc gpgme libarchive  libassuan libgpg-error libssh2 lzo openssl pacman pacman-mirrorlist xz zlib linux-raspberrypi linux-raspberrypi-headers libutil-linux linux-api-headers linux-firmware krb5 e2fsprogs keyutils libidn gcc-libs coreutils bash grep gawk file tar systemd sed gcc glibc coreutils systemd  make pkg-config openal glew freeimage freetype2 libsndfile openssl mesa mesa-libgl fontconfig gstreamer gst-plugins-base gst-plugins-base-libs gst-plugins-good gst-plugins-bad gst-libav assimp boost cairo pixman libpng harfbuzz graphite libdrm libx11 xproto kbproto libxcb libxau libxdmcp libxext xextproto libxdamage damageproto libxfixes fixesproto libxxf86vm xf86vidmodeproto libxrender renderproto alsa-lib flex libxrandr libxi libxcursor libxshmfence wayland opencv libxml2 pugixml expat
 )
 BASIC_PACKAGE_ARMS=(${PACMAN_PACKAGES_ARM[*]} filesystem)
 
-stderr() { 
-  echo "$@" >&2 
+stderr() {
+  echo "$@" >&2
 }
 
 debug() {
@@ -54,14 +54,14 @@ fetch() {
 
 uncompress() {
   local FILEPATH=$1 DEST=$2
-  
+
   case "$FILEPATH" in
     *.gz) tar xzf "$FILEPATH" -C "$DEST";;
     *.xz) xz -dc "$FILEPATH" | tar x -C "$DEST";;
     *) debug "Error: unknown package format: $FILEPATH"
        return 1;;
   esac
-}  
+}
 
 ###
 get_default_repo() {
@@ -101,20 +101,20 @@ configure_pacman() {
 
 configure_minimal_system() {
   local DEST=$1
-  
+
   mkdir -p "$DEST/dev"
-  echo "root:x:0:0:root:/root:/bin/bash" > "$DEST/etc/passwd" 
+  echo "root:x:0:0:root:/root:/bin/bash" > "$DEST/etc/passwd"
   echo 'root:$1$GT9AUpJe$oXANVIjIzcnmOpY07iaGi/:14657::::::' > "$DEST/etc/shadow"
   touch "$DEST/etc/group"
   echo "bootstrap" > "$DEST/etc/hostname"
-  
+
   test -e "$DEST/etc/mtab" || echo "rootfs / rootfs rw 0 0" > "$DEST/etc/mtab"
   #test -e "$DEST/dev/null" || mknod "$DEST/dev/null" c 1 3
   #test -e "$DEST/dev/random" || mknod -m 0644 "$DEST/dev/random" c 1 8
   #test -e "$DEST/dev/urandom" || mknod -m 0644 "$DEST/dev/urandom" c 1 9
   mount -o bind /dev $DEST/dev
   mount -o bind /proc $DEST/proc
-  
+
   sed -i "s/^[[:space:]]*\(CheckSpace\)/# \1/" "$DEST/etc/pacman.conf"
   sed -i "s/^[[:space:]]*SigLevel[[:space:]]*=.*$/SigLevel = Never/" "$DEST/etc/pacman.conf"
 }
@@ -137,8 +137,8 @@ install_rpi_image(){
 }
 
 fetch_packages_list() {
-  local REPO=$1 
-  
+  local REPO=$1
+
   debug "fetch packages list: $REPO/"
   fetch "$REPO/" | extract_href | awk -F"/" '{print $NF}' | sort -rn ||
     { debug "Error: cannot fetch packages list: $REPO"; return 1; }
@@ -147,12 +147,12 @@ fetch_packages_list() {
 install_pacman_packages() {
   local BASIC_PACKAGES=$1 DEST=$2 LIST=$3 DOWNLOAD_DIR=$4
   debug "pacman package and dependencies: $BASIC_PACKAGES"
-  
+
   for PACKAGE in $BASIC_PACKAGES; do
     local FILE=$(echo "$LIST" | grep -m1 "^$PACKAGE-[[:digit:]].*\(\.gz\|\.xz\)$")
     test "$FILE" || { debug "Error: cannot find package: $PACKAGE"; return 1; }
     local FILEPATH="$DOWNLOAD_DIR/$FILE"
-    
+
     debug "download package: $REPO/$FILE"
     fetch -o "$FILEPATH" "$REPO/$FILE"
     debug "uncompress package: $FILEPATH"
@@ -194,7 +194,7 @@ main() {
   local REPO_URL=
   local USE_QEMU=
   local DOWNLOAD_DIR=
-  
+
   while getopts "qa:r:d:h" ARG; do
     case "$ARG" in
       a) ARCH=$OPTARG;;
@@ -206,10 +206,10 @@ main() {
   done
   shift $(($OPTIND-1))
   test $# -eq 1 || { show_usage; return 1; }
-  
+
   [[ -z "$ARCH" ]] && ARCH=$(uname -m)
   [[ -z "$REPO_URL" ]] &&REPO_URL=$(get_default_repo "$ARCH")
-  
+
   local DEST=$1
   local REPO=$(get_core_repo_url "$REPO_URL" "$ARCH")
   [[ -z "$DOWNLOAD_DIR" ]] && DOWNLOAD_DIR=$(mktemp -d)
@@ -218,7 +218,7 @@ main() {
   debug "destination directory: $DEST"
   debug "core repository: $REPO"
   debug "temporary directory: $DOWNLOAD_DIR"
-  
+
   # Fetch packages, install system and do a minimal configuration
   mkdir -p "$DEST"
   local LIST=$(fetch_packages_list $REPO)
@@ -230,7 +230,7 @@ main() {
   configure_pacman "$DEST" "$ARCH" # Pacman must be re-configured
   [[ "$DOWNLOAD_DIR" ]] && rm -rf "$DOWNLOAD_DIR"
   install_rpi_image
-  
+
   debug "done"
 }
 

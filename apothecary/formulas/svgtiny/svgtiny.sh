@@ -63,6 +63,11 @@ function prepare() {
         cp $FORMULA_DIR/expat_external.h src/
     fi
 
+	if [ "$TYPE" == "vs" ]; then
+		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
+		cp -r $FORMULA_DIR/vs2015 ./
+	fi
+
     gperf src/colors.gperf > src/svg_colors.c
     cp $FORMULA_DIR/Makefile .
     cp -rf libdom/bindings libdom/include/dom/
@@ -83,15 +88,11 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
-		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
-		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14"
-		cd projects/Windows/VC14/lib
+		cd vs2015
 		if [ $ARCH == 32 ] ; then
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+			vs-build svgtiny.sln Build "Release|x86"
 		else
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+			vs-build svgtiny.sln Build "Release|x64"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
@@ -151,33 +152,24 @@ function copy() {
 
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
+	cp -Rv include/* $1/include
 
 	if [ "$TYPE" == "vs" ] ; then
-		cp -Rv include/* $1/include
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+			cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/curl.lib
+			cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/svgtiny.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ]; then
-	    # Standard *nix style copy.
-		# copy headers
-		cp -Rv include/* $1/include/
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
 	fi

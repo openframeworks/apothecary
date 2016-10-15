@@ -65,6 +65,7 @@ all: libsvgtiny.a
 
 libsvgtiny.a: $(OBJS)
 	$(AR) ruv "$@" $(OBJS)
+	$(RANLIB) "$@"
 
 %.o: %.c
 	$(CC) -c $< -o $@ -O2 $(CFLAGS)
