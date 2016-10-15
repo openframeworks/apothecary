@@ -9,6 +9,7 @@ COMPONENT := svgtiny
 COMPONENT_VERSION := 0.1.4
 # Default to a static library
 COMPONENT_TYPE ?= lib-static
+RANLIB ?= ranlib
 
 # Setup the tooling
 #PREFIX ?= /opt/netsurf
