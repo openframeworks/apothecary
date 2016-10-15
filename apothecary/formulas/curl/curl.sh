@@ -149,8 +149,11 @@ function copy() {
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
+	# Standard *nix style copy.
+	# copy headers
+	cp -Rv include/curl/* $1/include/curl/
+
 	if [ "$TYPE" == "vs" ] ; then
-		cp -Rv include/* $1/include
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
@@ -159,16 +162,10 @@ function copy() {
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
 		# copy lib
 		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/curl/* $1/include/curl/
 		# copy lib
 		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
@@ -183,9 +180,9 @@ function copy() {
         cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
     elif [ "$TYPE" == "vs" ]; then
 		if [ $ARCH == 32 ] ; then
-            cp include/curl/curlbuild.h $1/include/curbuild32.h
+            cp include/curl/curlbuild.h $1/include/curl/curbuild32.h
         else
-            cp include/curl/curlbuild.h $1/include/curbuild64.h
+            cp include/curl/curlbuild.h $1/include/curl/curbuild64.h
         fi
     elif [ "$TYPE" == "android" ]; then
 		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
