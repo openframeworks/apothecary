@@ -180,9 +180,9 @@ function copy() {
         cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
     elif [ "$TYPE" == "vs" ]; then
 		if [ $ARCH == 32 ] ; then
-            cp include/curl/curlbuild.h $1/include/curl/curbuild32.h
+            cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
         else
-            cp include/curl/curlbuild.h $1/include/curl/curbuild64.h
+            cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h
         fi
     elif [ "$TYPE" == "android" ]; then
 		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
