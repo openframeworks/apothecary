@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" "msys2" )
 
 # define the version by sha
 VER=1.7
@@ -60,6 +60,14 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		clang++ -O2  $CFLAGS \
+			 -Wall \
+			 -Iinclude \
+			 -c src/pugixml.cpp \
+			 -o src/pugixml.o
+        ar ruv libpugixml.a src/pugixml.o
+        ranlib libpugixml.a
+	elif [ "$TYPE" == "msys2" ]; then
+		g++ -O2 \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
@@ -120,7 +128,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 		fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "msys2" ]; then
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
 	elif [ "$TYPE" == "android" ] ; then
