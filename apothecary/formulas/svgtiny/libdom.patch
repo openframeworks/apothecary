@@ -1,0 +1,80 @@
+diff --git a/bindings/xml/libxml_xmlparser.c b/bindings/xml/libxml_xmlparser.c
+index 02b8a34..ff28389 100644
+--- a/bindings/xml/libxml_xmlparser.c
++++ b/bindings/xml/libxml_xmlparser.c
+@@ -650,7 +650,7 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 			strlen((const char *) child->ns->prefix) : 0) +
+ 			(child->ns->prefix != NULL ? 1 : 0) /* ':' */ +
+ 			strlen((const char *) child->name);
+-		uint8_t qnamebuf[qnamelen + 1 /* '\0' */];
++		uint8_t * qnamebuf = (uint8_t *) malloc(qnamelen + 1 /* '\0' */);
+ 
+ 		/* Create namespace DOM string */
+ 		err = dom_string_create(
+@@ -680,7 +680,7 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 			dom_string_unref(namespace);
+ 			parser->msg(DOM_MSG_CRITICAL, parser->mctx,
+ 					"No memory for qname");
+-			return;
++			goto clean;
+ 		}
+ 
+ 		/* Create element node */
+@@ -692,12 +692,15 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 			parser->msg(DOM_MSG_CRITICAL, parser->mctx,
+ 					"Failed creating element '%s'",
+ 					qnamebuf);
+-			return;
++			goto clean;
+ 		}
+ 
+ 		/* No longer need namespace / qname */
+ 		dom_string_unref(namespace);
+ 		dom_string_unref(qname);
++
++		clean:
++			free(qnamebuf);
+ 	}
+ 
+ 	/* Add attributes to created element */
+@@ -742,7 +745,7 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 				strlen((const char *) a->ns->prefix) : 0) +
+ 				(a->ns->prefix != NULL ? 1 : 0) /* ':' */ +
+ 				strlen((const char *) a->name);
+-			uint8_t qnamebuf[qnamelen + 1 /* '\0' */];
++			uint8_t * qnamebuf = malloc(qnamelen + 1 /* '\0' */);
+ 
+ 			/* Create namespace DOM string */
+ 			err = dom_string_create(
+@@ -752,6 +755,7 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 			if (err != DOM_NO_ERR) {
+ 				parser->msg(DOM_MSG_CRITICAL, parser->mctx,
+ 						"No memory for namespace");
++				free(qnamebuf);
+ 				return;
+ 			}
+ 
+@@ -772,6 +776,7 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 				dom_string_unref(namespace);
+ 				parser->msg(DOM_MSG_CRITICAL, parser->mctx,
+ 						"No memory for qname");
++				free(qnamebuf);
+ 				return;
+ 			}
+ 
+@@ -784,12 +789,15 @@ void xml_parser_add_element_node(dom_xml_parser *parser,
+ 				parser->msg(DOM_MSG_CRITICAL, parser->mctx,
+ 						"Failed creating attribute \
+ 						'%s'", qnamebuf);
++				free(qnamebuf);
+ 				return;
+ 			}
+ 
+ 			/* No longer need namespace / qname */
+ 			dom_string_unref(namespace);
+ 			dom_string_unref(qname);
++
++			free(qnamebuf);
+ 		}
+ 
+ 		/* Clone subtree (attribute value) */

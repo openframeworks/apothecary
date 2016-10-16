@@ -43,14 +43,32 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    cd libparserutils
-	if [ "$TYPE" == "msys2" ]; then
+	if [ "$TYPE" == "msys2" ] || [ "$TYPE" == "vs" ]; then
 		dos2unix $FORMULA_DIR/libparseutils.patch
+		dos2unix $FORMULA_DIR/libdom.patch
 	fi
+
+	cd libparserutils
     if git apply $FORMULA_DIR/libparseutils.patch  --check; then
         git apply $FORMULA_DIR/libparseutils.patch
     fi
     cd ..
+
+	cd libdom
+    if git apply $FORMULA_DIR/libdom.patch  --check; then
+        git apply $FORMULA_DIR/libdom.patch
+    fi
+	cd ..
+
+	if [ "$TYPE" == "vs" ]; then
+		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
+		cp -r $FORMULA_DIR/vs2015 ./
+	else
+    	cp $FORMULA_DIR/Makefile .
+	fi
+
+    gperf src/colors.gperf > src/svg_colors.c
+    cp -rf libdom/bindings libdom/include/dom/
 
 
     if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6l" ] && [ "$TYPE" != "linuxarmv7l" ] && [ "$TYPE" != "msys2" ] ; then
@@ -59,21 +77,6 @@ function prepare() {
         apothecaryDepend build libxml2
         apothecaryDepend copy libxml2
     fi
-
-	#if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "msys2" ] ; then
-	#	#TODO: This should work as a dependency in linux arm
-	#	cp $FORMULA_DIR/expat.h src/
-	#	cp $FORMULA_DIR/expat_external.h src/
-	#fi
-
-	if [ "$TYPE" == "vs" ]; then
-		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
-		cp -r $FORMULA_DIR/vs2015 ./
-	fi
-
-    gperf src/colors.gperf > src/svg_colors.c
-    cp $FORMULA_DIR/Makefile .
-    cp -rf libdom/bindings libdom/include/dom/
 }
 
 # executed inside the lib src dir
