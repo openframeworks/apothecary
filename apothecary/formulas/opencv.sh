@@ -5,12 +5,12 @@
 # http://opencv.org
 #
 # uses a CMake build system
- 
+
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
- 
+
 # define the version
 VER=3.1.0
- 
+
 # tools for git use
 GIT_URL=https://github.com/Itseez/opencv.git
 GIT_TAG=$VER
@@ -22,7 +22,7 @@ local LIB_FOLDER64="$LIB_FOLDER-64"
 local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
 local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
- 
+
 # download the source code and unpack it into LIB_NAME
 function download() {
     if [ "$TYPE" != "android" ]; then
@@ -36,7 +36,7 @@ function download() {
         mv OpenCV-android-sdk $1
     fi
 }
- 
+
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     : #noop
@@ -45,7 +45,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
   rm -f CMakeCache.txt
- 
+
   LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
   mkdir -p $LIB_FOLDER
 
@@ -167,7 +167,7 @@ function build() {
 		-DBUILD_SHARED_LIBS=OFF \
 		-DWITH_PNG=OFF \
 		-DWITH_OPENCL=OFF \
-		-DWITH_PVAPI=OFF  | tee ${LOG} 
+		-DWITH_PVAPI=OFF  | tee ${LOG}
 		vs-build "OpenCV.sln"
 		vs-build "OpenCV.sln" Build "Debug"
 	elif [ $ARCH == 64 ] ; then
@@ -206,20 +206,20 @@ function build() {
 		-DBUILD_SHARED_LIBS=OFF \
 		-DWITH_PNG=OFF \
 		-DWITH_OPENCL=OFF \
-		-DWITH_PVAPI=OFF  | tee ${LOG} 
+		-DWITH_PVAPI=OFF  | tee ${LOG}
 		vs-build "OpenCV.sln" Build "Release|x64"
 		vs-build "OpenCV.sln" Build "Debug|x64"
 	fi
-    
+
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
-    if [[ "${TYPE}" == "tvos" ]]; then 
+    if [[ "${TYPE}" == "tvos" ]]; then
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
         IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
     fi
     CURRENTPATH=`pwd`
-     
+
       # loop through architectures! yay for loops!
     for IOS_ARCH in ${IOS_ARCHS}
     do
@@ -287,11 +287,11 @@ function build() {
 
         echo "--------------------"
         echo "Running make clean for ${IOS_ARCH}"
-        make clean 
+        make clean
 
         echo "--------------------"
         echo "Running make for ${IOS_ARCH}"
-        make -j${PARALLEL_MAKE} 
+        make -j${PARALLEL_MAKE}
 
         echo "--------------------"
         echo "Running make install for ${IOS_ARCH}"
@@ -312,11 +312,11 @@ function build() {
       local renamedLib=$(echo $lib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
         echo "renamed";
-        if [[ "${TYPE}" == "tvos" ]] ; then 
+        if [[ "${TYPE}" == "tvos" ]] ; then
           lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
           lipo -c armv7/lib/$lib arm64/lib/$lib i386/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
-        fi  
+        fi
       fi
     done
 
@@ -335,7 +335,7 @@ function build() {
 
     cd ../../
 
-  # end if iOS    
+  # end if iOS
   elif [ "$TYPE" == "emscripten" ]; then
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -405,7 +405,7 @@ function build() {
       -DBUILD_PERF_TESTS=OFF
     make -j${PARALLEL_MAKE}
     make install
-  fi 
+  fi
 
 }
 
@@ -424,13 +424,13 @@ function copy() {
     # copy headers
 
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
-    
+
     cp -R $LIB_FOLDER/include/ $1/include/
- 
+
     # copy lib
     cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
-	
-  elif [ "$TYPE" == "vs" ] ; then 
+
+  elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/Win32"
 		elif [ $ARCH == 64 ] ; then
@@ -444,9 +444,13 @@ function copy() {
       #copy the cv libs
       cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
       cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-      #copy the zlib 
+      #copy the zlib
       cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
       cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
+
+      cp -R include/opencv $1/include/
+      cp -R include/opencv2 $1/include/
+      cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
       #copy the ippicv includes and lib
       IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
@@ -476,11 +480,11 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     cp -r sdk/native/jni/include/opencv $1/include/
     cp -r sdk/native/jni/include/opencv2 $1/include/
-    
+
     if [ "$TYPE" == "android" ]; then
         if [ "$ARCH" == "armv7" ]; then
             cp sdk/native/libs/armeabi-v7a/*.a $1/lib/$TYPE
-        else            
+        else
             cp sdk/native/libs/armeabi-v7a/*.a $1/lib/$TYPE
         fi
     fi
@@ -496,7 +500,7 @@ function copy() {
   cp -v LICENSE $1/license/
 
 }
- 
+
 # executed inside the lib src dir
 function clean() {
   if [ "$TYPE" == "osx" ] ; then
