@@ -506,11 +506,17 @@ function copy() {
 		cp -v lib/$TYPE/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v lib/*.lib $1/lib/$TYPE/Win32
+			mkdir -p $1/lib/$TYPE/Win32/Debug
+			cp -v lib/*mdd.lib $1/lib/$TYPE/Win32/Debug/
+
+			mkdir -p $1/lib/$TYPE/Win32/Release
+			cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
 		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v lib64/*.lib $1/lib/$TYPE/x64
+			mkdir -p $1/lib/$TYPE/x64/Debug
+			cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
+
+			mkdir -p $1/lib/$TYPE/x64/Release
+			cp -v lib64/*md.lib $1/lib/$TYPE/x64/Release
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then
