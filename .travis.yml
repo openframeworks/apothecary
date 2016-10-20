@@ -19,6 +19,13 @@ matrix:
         - TARGET="linux" 
         - OPT="gcc5"
 
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: 
+        - TARGET="linux" 
+        - OPT="gcc6"
+
 
     # android
     - os: linux
