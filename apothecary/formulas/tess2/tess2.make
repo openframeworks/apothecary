@@ -26,7 +26,7 @@ ifeq ($(config),debug)
   DEFINES   += -DDEBUG
   INCLUDES  += -I../Include -I../Source
   CPPFLAGS  += -MMD -MP $(DEFINES) $(INCLUDES)
-  CFLAGS    += $(CPPFLAGS) -g -Wall
+  CFLAGS    += $(CPPFLAGS) -g -Wall -fPIC
   CXXFLAGS  += $(CFLAGS)
   LDFLAGS   +=
   LIBS      +=

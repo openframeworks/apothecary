@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS=-I.
+CFLAGS=-I. -fPIC
 RANLIB ?= ranlib
 
 LIB=libkiss.a
