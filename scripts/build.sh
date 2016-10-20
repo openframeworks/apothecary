@@ -75,9 +75,9 @@ if [ "$TARGET" == "linux" ]; then
         export CXX="g++-5 -std=c++11"
         export COMPILER="g++5 -std=c++11"
     elif [ "$OPT" == "gcc6" ]; then
-        export CC="gcc-6"
-        export CXX="g++-6 -std=c++11"
-        export COMPILER="g++6 -std=c++11"
+        export CC="gcc-6 -fPIE"
+        export CXX="g++-6 -std=c++11 -fPIE"
+        export COMPILER="g++6 -std=c++11 -fPIE"
     fi
 fi
 
