@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxarmv6" "linuxarmv7" "msys2" )
 
 
 # define the version by sha
@@ -70,8 +70,23 @@ function build() {
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
         emconfigure ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        emmake make clean
+	    emmake make -j${PARALLEL_MAKE}
+
+
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ]; then
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source ../../${TYPE}_configure.sh
+            export LDFLAGS=-L$SYSROOT/usr/lib
+            export CFLAGS=-I$SYSROOT/usr/include
+        fi
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
+
+
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -111,21 +126,6 @@ function build() {
                          build/$TYPE/arm64/lib/libxml2.a \
                         -output build/$TYPE/lib/libxml2.a
         fi
-    else
-        echo "building other for $TYPE"
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib
-            export CFLAGS=-I$SYSROOT/usr/include
-        fi
-
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
-        ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
-        make clean
-	    make -j${PARALLEL_MAKE}
 	fi
 }
 
@@ -153,7 +153,7 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-	elif [ "$TYPE" == "emscripten" ] ; then
+	elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p $1/lib/$TYPE
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/libxml2.a

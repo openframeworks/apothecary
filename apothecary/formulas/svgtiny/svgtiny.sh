@@ -70,13 +70,10 @@ function prepare() {
     gperf src/colors.gperf > src/svg_colors.c
     cp -rf libdom/bindings libdom/include/dom/
 
-
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "linux64" ] && [ "$TYPE" != "linuxarmv6l" ] && [ "$TYPE" != "linuxarmv7l" ] && [ "$TYPE" != "msys2" ] ; then
-        apothecaryDepend download libxml2
-        apothecaryDepend prepare libxml2
-        apothecaryDepend build libxml2
-        apothecaryDepend copy libxml2
-    fi
+    apothecaryDepend download libxml2
+    apothecaryDepend prepare libxml2
+    apothecaryDepend build libxml2
+    apothecaryDepend copy libxml2
 }
 
 # executed inside the lib src dir
