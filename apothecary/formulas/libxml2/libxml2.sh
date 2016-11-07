@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxarmv6" "linuxarmv7" "msys2" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2" )
 
 
 # define the version by sha
@@ -74,7 +74,7 @@ function build() {
 	    emmake make -j${PARALLEL_MAKE}
 
 
-    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ]; then
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib
@@ -153,7 +153,7 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-	elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6" ] || [ "$TYPE" == "linuxarmv7" ] || [ "$TYPE" == "msys2" ]; then
+	elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p $1/lib/$TYPE
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/libxml2.a
