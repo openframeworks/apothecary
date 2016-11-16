@@ -12,11 +12,20 @@ trapError() {
 }
 
 installPackages(){
-    sudo add-apt-repository ppa:dns/gnu -y
+    IS_UBUNTU=`uname -a | grep Ubuntu > /dev/null; echo $?`
+    UBUNTU_VERSION=`lsb_release -r | awk '{ print $2 }'`
+    if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION" == "14.04" ]; then
+        echo "installing ppa"
+        sudo add-apt-repository ppa:dns/gnu -y
+    else
+        echo "$UBUNTU_VERSION doesn\'t need ppa"
+    fi
     sudo apt-get update -q
     sudo apt-get -y install multistrap unzip coreutils realpath gperf
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
-    sudo sed -i s/\$forceyes//g /usr/sbin/multistrap
+    if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION"=="14.04" ]; then
+        sudo sed -i s/\$forceyes//g /usr/sbin/multistrap
+    fi
 }
 
 createRaspbianImg(){
@@ -68,3 +77,9 @@ relativeSoftLinks
 cd $ROOT/raspbian/usr/lib/arm-linux-gnueabihf
 relativeSoftLinks
 cd $ROOT/raspbian/usr/lib/gcc/arm-linux-gnueabihf/4.9
+
+cd $ROOT/rpi_toolchain/arm-linux-gnueabihf/lib
+#sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" libc.so
+for f in *.so; do 
+    sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" $f
+done
