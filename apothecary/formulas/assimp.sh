@@ -300,7 +300,7 @@ function build() {
 		#architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
 		echo "building $TYPE | $ARCH | $VS_VER"
 		echo "--------------------"
-		local buildOpts=" -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_BUILD_ASSIMP_TOOLS=0"
+		local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_BUILD_ASSIMP_TOOLS=0 -DASSIMP_BUILD_TESTS=0 -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
 		local generatorName="Visual Studio "
 		generatorName+=$VS_VER
 		if [ $ARCH == 32 ] ; then
@@ -378,12 +378,12 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs_32/code/Release/assimp.lib $1/lib/$TYPE/Win32/assimp.lib
-			#cp -v build_vs_32/code/Release/assimp.dll $1/lib/$TYPE/Win32/assimp.dll
+			cp -v build_vs_32/code/Release/assimp$ARCH.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
+			cp -v build_vs_32/code/Release/assimp$ARCH.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs_64/code/Release/assimp.lib $1/lib/$TYPE/x64/assimp.lib
-			#cp -v build_vs_64/code/Release/assimp.dll $1/lib/$TYPE/x64/assimp.dll
+			cp -v build_vs_64/code/Release/assimp$ARCH.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
+			cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
 		fi
 	elif [ "$TYPE" == "osx" ] ; then
 		cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
