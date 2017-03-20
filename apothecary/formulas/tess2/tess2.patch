@@ -13,7 +13,7 @@ index c27541e..eafb0aa 100755
  // See OpenGL Red Book for description of the winding rules
  // http://www.glprogramming.com/red/chapter11.html
  enum TessWindingRule
-@@ -115,7 +119,11 @@ enum TessElementType
+@@ -115,11 +119,15 @@
  };
  
  typedef float TESSreal;
@@ -26,6 +26,11 @@ index c27541e..eafb0aa 100755
  typedef struct TESStesselator TESStesselator;
  typedef struct TESSalloc TESSalloc;
  
+-#define TESS_UNDEF (~(TESSindex)0)
++#define TESS_UNDEF ((TESSindex)~0)
+
+ #define TESS_NOTUSED(v) do { (void)(1 ? (void)0 : ( (void)(v) ) ); } while(0)
+
 diff --git a/Source/tess.c b/Source/tess.c
 index 67c038f..93061bb 100755
 --- a/Source/tess.c
