@@ -48,9 +48,8 @@ matrix:
       env: TARGET="android" OPT="x86"
       before_script:
         - sudo add-apt-repository ppa:dns/gnu -y
-        - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
         - sudo apt-get update -q
-        - sudo apt-get install -y --only-upgrade autoconf cmake
+        - sudo apt-get install -y --only-upgrade autoconf
         - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
       cache:
         directories:
@@ -63,6 +62,10 @@ matrix:
       sudo: required
       dist: trusty
       env: TARGET="emscripten"
+      before_script:
+          - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+          - sudo apt-get update -q
+          - sudo apt-get install -y --only-upgrade cmake
       addons:
         apt:
           sources:
