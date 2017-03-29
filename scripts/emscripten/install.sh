@@ -13,7 +13,7 @@ trapError() {
 }
 
 cd ~/
-wget http://www.cmake.org/files/v3.4/cmake-3.7.2.tar.gz
+wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz
 tar -xvzf cmake-3.7.2.tar.gz
 cd cmake-3.7.2/
 ./configure
