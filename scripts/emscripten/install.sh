@@ -14,12 +14,12 @@ trapError() {
 
 cd ~/
 wget https://cmake.org/files/v3.7/cmake-3.7.2.tar.gz
-tar -xvzf cmake-3.7.2.tar.gz
+tar -xzf cmake-3.7.2.tar.gz
 cd cmake-3.7.2/
 ./configure
 make
 sudo make install
-update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
+sudo update-alternatives --install /usr/bin/cmake cmake /usr/local/bin/cmake 1 --force
 cmake --version
 
 cd $TRAVIS_BUILD_DIR
