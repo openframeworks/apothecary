@@ -12,7 +12,6 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxa
 # define the version by sha
 VER=2.9.4
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
     wget ftp://xmlsoft.org/libxml2/libxml2-${VER}.tar.gz
@@ -74,18 +73,28 @@ function build() {
 	    emmake make -j${PARALLEL_MAKE}
 
 
-    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source ../../${TYPE}_configure.sh
-            export LDFLAGS=-L$SYSROOT/usr/lib
-            export CFLAGS=-I$SYSROOT/usr/include
-        fi
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
 	    make -j${PARALLEL_MAKE}
-
+    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+        source ../../${TYPE}_configure.sh
+        export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
+        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c 
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
+        make clean
+        #echo "int main(){ return 0; }" > xmllint.c
+        #echo "int main(){ return 0; }" > xmlcatalog.c
+        #echo "int main(){ return 0; }" > testSchemas.c
+        #echo "int main(){ return 0; }" > testRelax.c
+        #echo "int main(){ return 0; }" > testSAX.c
+        #echo "int main(){ return 0; }" > testHTML.c
+        #echo "int main(){ return 0; }" > testXPath.c
+        #echo "int main(){ return 0; }" > testURI.c
+        #echo "int main(){ return 0; }" > testThreads.c
+        #echo "int main(){ return 0; }" > testC14N.c
+	    make -j${PARALLEL_MAKE}
+    
 
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
