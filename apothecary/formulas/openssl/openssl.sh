@@ -5,8 +5,8 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.0.2j
-VERDIR=1.0.2j
+VER=1.0.2k
+VERDIR=1.0.2k
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
