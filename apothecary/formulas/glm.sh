@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# json
-# JSON for Modern C++ http://nlohmann.github.io/json
-# https://github.com/nlohmann/json
+# glm
+# OpenGL Mathematics
+# https://github.com/g-truc/glm
 #
 
 # define the version
-VER=0.9.7.3
+VER=0.9.8.4
 
 # tools for git use
 GIT_URL=
