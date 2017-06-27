@@ -56,6 +56,9 @@ function build() {
 		unset TMP
 		unset TEMP
 		cd projects/vs2015
+
+		vs-upgrade libpng.sln
+
 		if [ $ARCH == 32 ] ; then
 			vs-build libpng.sln Build "LIB Release|x86"
 		elif [ $ARCH == 64 ] ; then
