@@ -82,7 +82,7 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
 fi
 
 # used when building for vs
-VS_VER=14
+VS_VER=15
 VS_64_BIT_ENV='VC\vcvarsall'
 
 # paths to android SDK, etc
