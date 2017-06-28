@@ -28,8 +28,8 @@ environment:
   #VisualStudio 2015 32 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x86
-      VS_VER: 14
       TARGET: vs
+      VS_VER: 14
       ARCH: 32
       VS_NAME: vs2015
   # #VisualStudio 2015 64 bit Building
