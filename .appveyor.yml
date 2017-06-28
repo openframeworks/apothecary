@@ -13,7 +13,7 @@ environment:
   #     ARCH: 64
   #VisualStudio 2017 32 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      platform: x64
+      platform: x86
       TARGET: vs
       VS_VER: 15
       ARCH: 32
