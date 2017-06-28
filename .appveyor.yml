@@ -12,22 +12,22 @@ environment:
       VS_VER: 15
       ARCH: 64
   #MSYS2 Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      TARGET: msys2
-      ARCH: 32
-  #VisualStudio 2015 32 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      VS_VER: 14
-      TARGET: vs
-      ARCH: 32
-  #VisualStudio 2015 64 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x64
-      VS_VER: 14
-      TARGET: vs
-      ARCH: 64
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #     platform: x86
+  #     TARGET: msys2
+  #     ARCH: 32
+  # #VisualStudio 2015 32 bit Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #     platform: x86
+  #     VS_VER: 14
+  #     TARGET: vs
+  #     ARCH: 32
+  # #VisualStudio 2015 64 bit Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #     platform: x64
+  #     VS_VER: 14
+  #     TARGET: vs
+  #     ARCH: 64
 
 
 configuration: Debug
