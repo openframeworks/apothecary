@@ -856,10 +856,10 @@ function vs-build() {
 		echo "-- Searching for vs-build"
 		# vswhere is a utility to find the most recent vs compiler toolchain. it is 
 		# assumed to be installed at a fixed location
-		VSWHERE_EXE=`cmd.exe /c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" `
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_INSTALL_PATH=`cmd.exe /c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_INSTALL_PATH=`cmd //c ${VSWHERE_EXE} -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs install path: ${VS_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
@@ -903,10 +903,10 @@ function vs-upgrade() {
 		echo "-- Searching for devenv"
 		# vswhere is a utility to find the most recent vs compiler toolchain. it is 
 		# assumed to be installed at a fixed location
-		VSWHERE_EXE=`cmd.exe /c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" `
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_IDE_INSTALL_PATH=`cmd.exe /c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_IDE_INSTALL_PATH=`cmd.exe //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs ide install path: ${VS_IDE_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		DEVENV_PATH="${VS_IDE_INSTALL_PATH}\Common7\IDE\devenv.exe"
