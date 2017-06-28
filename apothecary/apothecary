@@ -872,8 +872,8 @@ function vs-build() {
 		BUILD_PLATFORM="$( cut -d '|' -f 2- <<< "${3:-Default|x64}" )"
 		BUILD_PLATFORM=$BUILD_PLATFORM
 
-		echo "-- Build platform: $BUILD_CONFIGURATION"
-		echo "-- Build configuration: $BUILD_PLATFORM"
+		echo "-- Build platform: $BUILD_PLATFORM"
+		echo "-- Build configuration: $BUILD_CONFIGURATION"
 
 		BUILD_EXEC="\"${MSBUILD_PATH}\" \"$1\" /t:${2:-Build} /p:Platform=\"$BUILD_PLATFORM\" /p:Configuration=\"$BUILD_CONFIGURATION\""
 		echo "-- Build parameters: $BUILD_EXEC"
