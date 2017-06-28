@@ -896,10 +896,10 @@ function vs-build() {
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
-			cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
 		elif [ $ARCH == 64 ] ; then
 			echo "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
-	        cmd.exe //c /s "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+	        cmd.exe /c /s "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
 		fi
 	fi
 
