@@ -81,8 +81,13 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_MIN_SDK_VER=7.0
 fi
 
-# used when building for vs
-VS_VER=15
+# used when building for vs - set to 15 if not set explicitly
+if [ -z ${VS_VER+x} ] ; then 
+	echo "VS_VER was unset - set to 15"
+	VS_VER=15
+else 
+	echo "VS_VER is set to '$VS_VER'"
+fi
 VS_64_BIT_ENV='VC\vcvarsall'
 
 # paths to android SDK, etc
