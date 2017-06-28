@@ -122,6 +122,7 @@ if %VS_VERSION%==vs100 (set VCPROJ_EXT=vcxproj)
 if %VS_VERSION%==vs110 (set VCPROJ_EXT=vcxproj)
 if %VS_VERSION%==vs120 (set VCPROJ_EXT=vcxproj)
 if %VS_VERSION%==vs140 (set VCPROJ_EXT=vcxproj)
+if %VS_VERSION%==vs150 (set VCPROJ_EXT=vcxproj)
 
 if "%8"=="" goto use_devenv
 set BUILD_TOOL=%8
@@ -132,6 +133,8 @@ if "%VS_VERSION%"=="vs100" (set BUILD_TOOL=msbuild)
 if "%VS_VERSION%"=="vs110" (set BUILD_TOOL=msbuild)
 if "%VS_VERSION%"=="vs120" (set BUILD_TOOL=msbuild)
 if "%VS_VERSION%"=="vs140" (set BUILD_TOOL=msbuild)
+if "%VS_VERSION%"=="vs150" (set BUILD_TOOL=msbuild)
+
 :use_custom
 if not "%BUILD_TOOL%"=="msbuild" (set USEENV=/useenv)
 if "%BUILD_TOOL%"=="msbuild" (
@@ -147,6 +150,7 @@ if "%VS_VERSION%"=="vs100" (goto msbuildok)
 if "%VS_VERSION%"=="vs110" (goto msbuildok)
 if "%VS_VERSION%"=="vs120" (goto msbuildok)
 if "%VS_VERSION%"=="vs140" (goto msbuildok)
+if "%VS_VERSION%"=="vs150" (goto msbuildok)
 if "%BUILD_TOOL%"=="msbuild" (
   echo "Cannot use msbuild with Visual Studio 2008 or earlier."
   exit /b 2
@@ -191,6 +195,7 @@ set USEENV=
 if %VS_VERSION%==vs110 (set EXTRASW=/m /p:VisualStudioVersion=11.0)
 if %VS_VERSION%==vs120 (set EXTRASW=/m /p:VisualStudioVersion=12.0)
 if %VS_VERSION%==vs140 (set EXTRASW=/m /p:VisualStudioVersion=14.0)
+if %VS_VERSION%==vs150 (set EXTRASW=/m /p:VisualStudioVersion=15.0)
 )
 
 rem SAMPLES [samples|nosamples]
@@ -597,7 +602,7 @@ exit /b 1
 echo Usage:
 echo ------
 echo buildwin VS_VERSION [ACTION] [LINKMODE] [CONFIGURATION] [PLATFORM] [SAMPLES] [TESTS] [TOOL]
-echo VS_VERSION:    "90|100|110|120|140"
+echo VS_VERSION:    "90|100|110|120|140|150"
 echo ACTION:        "build|rebuild|clean|upgrade"
 echo LINKMODE:      "static_mt|static_md|shared|all"
 echo CONFIGURATION: "release|debug|both"
