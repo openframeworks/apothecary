@@ -864,12 +864,18 @@ function vs-build() {
 		# msbuild is the tool used to build visual studio solutions
 		MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
 		echo "-- Found MSBuild path: ${MSBUILD_PATH}"
-		
+
+		# define fallback build selection if vs-build was not called with enough parameters.
+		DEFAULT_BUILD="Release|x64"
+		if [ $ARCH == 32 ] ; then
+			DEFAULT_BUILD="Release|Win32"
+		fi
+
 		# Cut part before '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_CONFIGURATION
-		BUILD_CONFIGURATION="$( cut -d '|' -f 1 <<< "${3:-Default|x64}" )"
+		BUILD_CONFIGURATION="$( cut -d '|' -f 1 <<< "${3:-$DEFAULT_BUILD}" )"
 		BUILD_CONFIGURATION=$BUILD_CONFIGURATION
 		# Cut part after '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_PLATFORM
-		BUILD_PLATFORM="$( cut -d '|' -f 2- <<< "${3:-Default|x64}" )"
+		BUILD_PLATFORM="$( cut -d '|' -f 2- <<< "${3:-$DEFAULT_BUILD}" )"
 		BUILD_PLATFORM=$BUILD_PLATFORM
 
 		echo "-- Build platform: $BUILD_PLATFORM"
