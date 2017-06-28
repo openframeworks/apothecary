@@ -5,29 +5,35 @@ environment:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
-  #VisualStudio 2017 Building
+  # #VisualStudio 2017 64 bit Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  #     platform: x64
+  #     TARGET: vs
+  #     VS_VER: 15
+  #     ARCH: 64
+  #VisualStudio 2017 32 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x64
       TARGET: vs
       VS_VER: 15
+      ARCH: 32
+  # MSYS2 Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: msys2
+      ARCH: 32
+  #VisualStudio 2015 32 bit Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      VS_VER: 14
+      TARGET: vs
+      ARCH: 32
+  #VisualStudio 2015 64 bit Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      VS_VER: 14
+      TARGET: vs
       ARCH: 64
-  #MSYS2 Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x86
-  #     TARGET: msys2
-  #     ARCH: 32
-  # #VisualStudio 2015 32 bit Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x86
-  #     VS_VER: 14
-  #     TARGET: vs
-  #     ARCH: 32
-  # #VisualStudio 2015 64 bit Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x64
-  #     VS_VER: 14
-  #     TARGET: vs
-  #     ARCH: 64
 
 
 configuration: Debug
@@ -45,7 +51,7 @@ init:
 - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
 - if "%TARGET%_%VS_VER%"=="vs_14" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
 # visual studio 2017
-# - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+- if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - if "%TARGET%_%VS_VER%"=="vs_15" set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX64\x64;%PATH%
 
