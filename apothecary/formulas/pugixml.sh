@@ -44,8 +44,8 @@ function build() {
 		unset TEMP
 		cd scripts
 		if [ $ARCH == 32 ] ; then
-				vs-build pugixml_vs2015.vcxproj Build "Release|x86"
-				vs-build pugixml_vs2015.vcxproj Build "Debug|x86"
+				vs-build pugixml_vs2015.vcxproj Build "Release|Win32"
+				vs-build pugixml_vs2015.vcxproj Build "Debug|Win32"
 		else
 				vs-build pugixml_vs2015.vcxproj Build "Release|x64"
 				vs-build pugixml_vs2015.vcxproj Build "Debug|x64"
