@@ -57,8 +57,8 @@ function build() {
 					vs-build "pugixml_vs2015.vcxproj" build "Release"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug"
 			else
-					vs-build "pugixml_vs2015.vcxproj" build "Release"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug"
+					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
 			fi
 		fi
 
