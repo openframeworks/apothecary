@@ -43,13 +43,25 @@ function build() {
 		unset TMP
 		unset TEMP
 		cd scripts
-		if [ $ARCH == 32 ] ; then
-				vs-build pugixml_vs2015.vcxproj Build "Release|x86"
-				vs-build pugixml_vs2015.vcxproj Build "Debug|x86"
+
+		if [[ $VS_VER -gt 14 ]]; then
+			if [ $ARCH == 32 ] ; then
+					vs-build "pugixml_vs2015.vcxproj" build "Release|Win32"
+					vs-build "pugixml_vs2015.vcxproj" build "Debug|Win32"
+			else
+					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
+			fi
 		else
-				vs-build pugixml_vs2015.vcxproj Build "Release|x64"
-				vs-build pugixml_vs2015.vcxproj Build "Debug|x64"
+			if [ $ARCH == 32 ] ; then
+					vs-build "pugixml_vs2015.vcxproj" build "Release"
+					vs-build "pugixml_vs2015.vcxproj" build "Debug"
+			else
+					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
+			fi
 		fi
+
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
 		# Compile the program

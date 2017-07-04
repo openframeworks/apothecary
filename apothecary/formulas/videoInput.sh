@@ -35,8 +35,8 @@ function build() {
 		unset TEMP
 		cd VS-videoInputcompileAsLib
 		if [ $ARCH == 32 ] ; then
-			vs-build "videoInput.sln"
-			vs-build "videoInput.sln" Build "Debug"
+			vs-build "videoInput.sln" Build "Release|Win32"
+			vs-build "videoInput.sln" Build "Debug|Win32"
 		elif [ $ARCH == 64 ] ; then
 			vs-build "videoInput.sln" Build "Release|x64"
 			vs-build "videoInput.sln" Build "Debug|x64"

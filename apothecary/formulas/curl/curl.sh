@@ -45,11 +45,17 @@ function build() {
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14"
 		cd projects/Windows/VC14/lib
-		if [ $ARCH == 32 ] ; then
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-		else
-			PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
-		fi
+
+        # perform upgrade for vs2017, as project file will be for vs 2015
+        if [ $VS_VER -gt 14 ] ; then
+            vs-upgrade libcurl.sln
+        fi
+
+        if [ $ARCH == 32 ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+        else
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+        fi
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
