@@ -52,6 +52,7 @@ ALIASES["libltdl"]="libtool"
 ALIASES["libjpeg"]="libjpeg-turbo"
 ALIASES["libusbx"]="libusb"
 ALIASES["libgl"]="mesa"
+ALIASES["opengl-driver"]="mesa"
 
 stderr() {
   echo "$@" >&2
