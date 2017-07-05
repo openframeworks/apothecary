@@ -51,6 +51,7 @@ ALIASES["sh"]="bash"
 ALIASES["libltdl"]="libtool"
 ALIASES["libjpeg"]="libjpeg-turbo"
 ALIASES["libusbx"]="libusb"
+ALIASES["libgl"]="mesa"
 
 stderr() {
   echo "$@" >&2
@@ -151,7 +152,7 @@ parse_dependencies() {
                 echo "Adding aliased dependency $DEP to ${ALIASES[$DEP]}"
                 DEP=${ALIASES[$DEP]}
             fi
-            if echo $DEP | grep -qv lib[^.]*\.so && echo $DEP | grep -qv libgl; then
+            if echo $DEP | grep -qv lib[^.]*\.so && echo $DEP; then
                 DEPENDENCIES_PACKAGES["${DEP##*::}"]=1
             fi
         done
