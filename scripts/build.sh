@@ -18,7 +18,7 @@ trapError() {
 	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
 	fi
     if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
-        cat $APOTHECARY_PATH/build/$formula_name/config.log
+        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
     fi
 	exit 1
 }
@@ -130,7 +130,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
-    
+
     apothecaryPID=$!
     echoDots $apothecaryPID
     wait $apothecaryPID
