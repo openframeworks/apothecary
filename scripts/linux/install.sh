@@ -70,7 +70,7 @@ if [ ! -z ${OPT+x} ]; then
         g++ -v
     else
         sudo add-apt-repository -y ppa:dns/gnu
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        #sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         # sudo apt-get update -q
         # sudo apt-get install gdebi
         # wget http://ci.openframeworks.cc/gcc5/gcc6debs.tar.bz2
@@ -88,7 +88,7 @@ if [ ! -z ${OPT+x} ]; then
         # rm *.deb
 		echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
 		sudo apt-get update -q
-		sudo apt-get install -y gcc-6 g++-6
+		sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
 
         sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
         sudo apt-get remove -y --purge g++-4.8
