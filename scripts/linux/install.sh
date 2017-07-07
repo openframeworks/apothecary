@@ -69,8 +69,8 @@ if [ ! -z ${OPT+x} ]; then
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
         g++ -v
     else
-        # sudo add-apt-repository -y ppa:dns/gnu
-        # sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo add-apt-repository -y ppa:dns/gnu
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         # sudo apt-get update -q
         # sudo apt-get install gdebi
         # wget http://ci.openframeworks.cc/gcc5/gcc6debs.tar.bz2
