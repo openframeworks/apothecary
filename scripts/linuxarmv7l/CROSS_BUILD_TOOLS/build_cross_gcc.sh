@@ -12,7 +12,18 @@ trap 'echo FAILED COMMAND: $previous_command' EXIT
 # See: http://preshing.com/20141119/how-to-build-a-gcc-cross-compiler
 #-------------------------------------------------------------------------------------------
 
+export BUILDROOT=$(cd $(dirname $0); pwd -P)
+export SYSROOT=$(dirname $0)/../archlinux
+
+if [ ! -d $SYSROOT ]; then
+	wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+	mkdir $SYSROOT
+	tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C $SYSROOT 2> /dev/null
+	rm ArchLinuxARM-rpi-2-latest.tar.gz
+fi
+
 export SYSROOT=$(cd $(dirname $0)/../archlinux; pwd -P)
+mkdir -p $BUILDROOT/logs
 
 
 INSTALL_PATH=$(cd $(dirname $0)/..; pwd -P)/rpi2_toolchain
@@ -21,19 +32,20 @@ LINUX_ARCH=arm
 CONFIGURATION_OPTIONS="--disable-werror --with-arch=armv7-a --with-float=hard --with-fpu=vfpv3-d16"
 SYSROOT_OPTIONS="--with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT"
 
-PARALLEL_MAKE=-j4
-BINUTILS_VERSION=binutils-2.26
-GCC_VERSION=gcc-5.3.0
-LINUX_KERNEL_VERSION=linux-4.1.18
-GLIBC_VERSION=glibc-2.23
-MPFR_VERSION=mpfr-3.1.3
-GMP_VERSION=gmp-6.1.0
-MPC_VERSION=mpc-1.0.2
+PARALLEL_MAKE=-j8
+BINUTILS_VERSION=binutils-2.28
+GCC_VERSION=gcc-6.4.0
+LINUX_KERNEL_VERSION=linux-4.9.35
+GLIBC_VERSION=glibc-2.25
+MPFR_VERSION=mpfr-3.1.5
+GMP_VERSION=gmp-6.1.2
+MPC_VERSION=mpc-1.0.3
 ISL_VERSION=isl-0.12.2
 CLOOG_VERSION=cloog-0.18.1
 USE_NEWLIB=0
 export PATH=$INSTALL_PATH/bin:$PATH
 
+cd $(dirname $0)
 
 # Download packages
 export http_proxy=$HTTP_PROXY https_proxy=$HTTP_PROXY ftp_proxy=$HTTP_PROXY
@@ -83,66 +95,74 @@ cd ..
 # Step 1. Binutils
 mkdir -p build-binutils
 cd build-binutils
-../$BINUTILS_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS  
-make $PARALLEL_MAKE
-make install
+echo Compiling binutils
+../$BINUTILS_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS &> $BUILDROOT/logs/binutils.log
+make $PARALLEL_MAKE &> $BUILDROOT/logs/binutils.log
+make install &> $BUILDROOT/logs/binutils.log
 cd ..
 
 # Step 2. Linux Kernel Headers
 if [ $USE_NEWLIB -eq 0 ]; then
     cd $LINUX_KERNEL_VERSION
-    make ARCH=$LINUX_ARCH INSTALL_HDR_PATH=$INSTALL_PATH/$TARGET headers_install
+	echo Compiling headers_install
+    make ARCH=$LINUX_ARCH INSTALL_HDR_PATH=$INSTALL_PATH/$TARGET headers_install &> $BUILDROOT/logs/headers_install.log
     cd ..
 fi
 
 # Step 3. C/C++ Compilers
 mkdir -p build-gcc
 cd build-gcc
+echo Compiling gcc
 if [ $USE_NEWLIB -ne 0 ]; then
     NEWLIB_OPTION=--with-newlib
 fi
-../$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET --enable-languages=c,c++ --with-float=hard  --enable-multiarch --target=arm-linux-gnueabihf $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS  
-make $PARALLEL_MAKE all-gcc
-make install-gcc
+../$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET --enable-languages=c,c++ --with-float=hard  --enable-multiarch --target=arm-linux-gnueabihf $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS &> $SYSROOT/logs/gcc.log
+make $PARALLEL_MAKE all-gcc &> $BUILDROOT/logs/gcc.log
+make install-gcc &> $BUILDROOT/logs/gcc.log
 cd ..
 
 if [ $USE_NEWLIB -ne 0 ]; then
     # Steps 4-6: Newlib
     mkdir -p build-newlib
     cd build-newlib
-    ../newlib-master/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS
-    make $PARALLEL_MAKE
-    make install
+	echo Compiling newlib
+    ../newlib-master/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS &> $BUILDROOT/logs/newlib.log
+    make $PARALLEL_MAKE &> $BUILDROOT/logs/newlib.log
+    make install &> $BUILDROOT/logs/newlib.log
     cd ..
 else
     # Step 4. Standard C Library Headers and Startup Files
     mkdir -p build-glibc
     cd build-glibc
-    ../$GLIBC_VERSION/configure --prefix=$INSTALL_PATH/$TARGET --build=$MACHTYPE --host=$TARGET --target=$TARGET --with-headers=$INSTALL_PATH/$TARGET/include $CONFIGURATION_OPTIONS libc_cv_forced_unwind=yes
-    make install-bootstrap-headers=yes install-headers
-    make $PARALLEL_MAKE csu/subdir_lib
-    install csu/crt1.o csu/crti.o csu/crtn.o $INSTALL_PATH/$TARGET/lib
-    $TARGET-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $INSTALL_PATH/$TARGET/lib/libc.so
+	echo Compiling glibc
+    ../$GLIBC_VERSION/configure --prefix=$INSTALL_PATH/$TARGET --build=$MACHTYPE --host=$TARGET --target=$TARGET --with-headers=$INSTALL_PATH/$TARGET/include $CONFIGURATION_OPTIONS libc_cv_forced_unwind=yes &> $BUILDROOT/logs/glibc.log
+    make install-bootstrap-headers=yes install-headers &> $BUILDROOT/logs/glibc.log
+    make $PARALLEL_MAKE csu/subdir_lib &> $BUILDROOT/logs/glibc.log
+    install csu/crt1.o csu/crti.o csu/crtn.o $INSTALL_PATH/$TARGET/lib &> $BUILDROOT/logs/glibc.log
+    $TARGET-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o $INSTALL_PATH/$TARGET/lib/libc.so &> $BUILDROOT/logs/glibc.log
     touch $INSTALL_PATH/$TARGET/include/gnu/stubs.h
     cd ..
 
     # Step 5. Compiler Support Library
     cd build-gcc
-    make $PARALLEL_MAKE all-target-libgcc
-    make install-target-libgcc
+	echo compiling Compiler Support Library
+    make $PARALLEL_MAKE all-target-libgcc &> $BUILDROOT/logs/gcclib.log
+    make install-target-libgcc &> $BUILDROOT/logs/gcclib.log
     cd ..
 
     # Step 6. Standard C Library & the rest of Glibc
     cd build-glibc
-    make $PARALLEL_MAKE
-    make install
+	echo comiling rest of glibc
+    make $PARALLEL_MAKE &> $BUILDROOT/logs/glibc.log
+    make install &> $BUILDROOT/logs/glibc.log
     cd ..
 fi
 
 # Step 7. Standard C++ Library & the rest of GCC
 cd build-gcc
-make $PARALLEL_MAKE all
-make install
+echo compiling rest of gcc
+make $PARALLEL_MAKE all &> $BUILDROOT/logs/gcc.log
+make install &> $BUILDROOT/logs/gcc.log
 cd ..
 
 sed -i "s|${INSTALL_PATH}/arm-linux-gnueabihf/lib/||g" ${INSTALL_PATH}/arm-linux-gnueabihf/lib/libpthread.so
@@ -150,4 +170,3 @@ sed -i "s|${INSTALL_PATH}/arm-linux-gnueabihf/lib/||g" ${INSTALL_PATH}/arm-linux
 
 trap - EXIT
 echo 'Success!'
-

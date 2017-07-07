@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e 
+set -e
 
 # trap any script errors and exit
 trap "trapError" ERR
@@ -76,9 +76,9 @@ if [ ! -z ${OPT+x} ]; then
         wget http://ci.openframeworks.cc/gcc5/gcc6debs.tar.bz2
         tar xjf gcc6debs.tar.bz2
         rm gcc6debs.tar.bz2
+        sudo gdebi -n gcc-6-base_6.2.0-3ubuntu11~14.04_amd64.deb
         sudo gdebi -n cpp-6_6.2.0-3ubuntu11~14.04_amd64.deb
         sudo gdebi -n g++-6_6.2.0-3ubuntu11~14.04_amd64.deb
-        sudo gdebi -n gcc-6-base_6.2.0-3ubuntu11~14.04_amd64.deb
         sudo gdebi -n libstdc++-6-pic_6.2.0-3ubuntu11~14.04_amd64.deb
         sudo gdebi -n libstdc++-6-dev_6.2.0-3ubuntu11~14.04_amd64.deb
         sudo gdebi -n gcc-6_6.2.0-3ubuntu11~14.04_amd64.deb

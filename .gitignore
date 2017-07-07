@@ -9,3 +9,6 @@
 /apothecary/build
 .DS_Store
 !.*.yml
+scripts/linuxarmv7l/archlinux
+scripts/linuxarmv7l/CROSS_BUILD_TOOLS/*
+!scripts/linuxarmv7l/CROSS_BUILD_TOOLS/build_cross_gcc.sh
