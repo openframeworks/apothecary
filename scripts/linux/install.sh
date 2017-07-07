@@ -86,7 +86,7 @@ if [ ! -z ${OPT+x} ]; then
         # sudo gdebi -n gcc-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
         # sudo gdebi -n g++-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
         # rm *.deb
-		sudo echo deb http://ci.openframeworks.cc/gcc_repo trusty main > /etc/apt/sources.list.d/of_gcc_repo.list
+		echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
 		sudo apt-get update -q
 		sudo apt-get install -y gcc-6 g++-6
 
