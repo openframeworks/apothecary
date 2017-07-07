@@ -29,7 +29,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     # PATHC should be fixed when moving to 3.0.0
-    sed -i "s/return \*lhs\.m_value.array < \*rhs\.m_value.array/return (*lhs.m_value.array) < *rhs.m_value.array/g" json.hpp
+    sed -i -e "s/return \*lhs\.m_value.array < \*rhs\.m_value.array/return (*lhs.m_value.array) < *rhs.m_value.array/g" json.hpp
     #nothing to do, header only lib
 }
 
