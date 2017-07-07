@@ -6,7 +6,7 @@
 #
 
 # define the version
-VER=1.1.0
+VER=2.1.1
 
 # tools for git use
 GIT_URL=
@@ -28,7 +28,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    echo
+    # PATHC should be fixed when moving to 3.0.0
+    sed -i "s/return \*lhs\.m_value.array < \*rhs\.m_value.array/return (*lhs.m_value.array) < *rhs.m_value.array/g" json.hpp
     #nothing to do, header only lib
 }
 
