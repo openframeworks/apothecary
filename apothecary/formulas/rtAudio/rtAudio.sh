@@ -97,23 +97,20 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then
-        rm -f librtaudio.a
-        rm -f librtaudio-x86_64
-
 		# Compile the program
-		g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__WINDOWS_DS__ \
-					 -D__WINDOWS_ASIO__ \
-					 -D__WINDOWS_WASAPI__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
-
-		ar ruv librtaudio.a RtAudio.o
-		ranlib librtaudio.a
+		local API="--with-wasapi --with-ds" # asio as well?
+		cp -v $FORMULA_DIR/CMakeLists.txt .
+		mkdir -p build
+		cd build
+		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/usr/bin/make \
+			-DAUDIO_WINDOWS_WASAPI=ON \
+			-DAUDIO_WINDOWS_DS=ON \
+			-DAUDIO_WINDOWS_ASIO=ON \
+			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
+			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
+			-DCMAKE_CXX_FLAGS=-std=c++11 \
+			-DBUILD_TESTING=OFF
+		make 
 	fi
 
 	# clean up env vars
@@ -143,7 +140,7 @@ function copy() {
 
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		cp -v librtaudio.a $1/lib/$TYPE/librtaudio.a
+		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
 
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a
