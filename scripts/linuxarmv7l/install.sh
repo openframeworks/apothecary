@@ -23,7 +23,17 @@ createArchImg(){
     sudo apt-get update -q
     sudo apt-get install -y coreutils realpath gperf
 
-    ./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
+    #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
+	junest << EOF
+		cd ~
+		wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+		mkdir archlinux
+		tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C archlinux/ 2> /dev/null
+		sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g archlinux/etc/pacman.conf
+		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -Syu
+		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
+		touch ~/archlinux/timestamp
+EOF
 }
 
 downloadToolchain(){
@@ -68,11 +78,19 @@ relativeSoftLinks(){
     done
 }
 
-
+installJunest(){
+	git clone git://github.com/fsquillace/junest ~/.local/share/junest
+	export PATH=~/.local/share/junest/bin:$PATH
+	junest -u << EOF
+		pacman -Syy --noconfirm
+		pacman -S --noconfirm git flex grep gcc pkg-config make wget
+EOF
+}
 
 ROOT=$( cd "$(dirname "$0")" ; pwd -P )
 echo $ROOT
 cd $ROOT
+installJunest
 createArchImg
 downloadToolchain
 downloadFirmware
