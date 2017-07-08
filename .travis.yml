@@ -87,7 +87,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linuxarmv7l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      env: TARGET="linuxarmv7l" SYSROOT="$HOME/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
 
     # osx

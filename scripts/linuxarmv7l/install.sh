@@ -25,14 +25,14 @@ createArchImg(){
 
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 	echo > $ROOT/install_image.sh << EOF
-		cd $ROOT
+		cd $HOME
 		wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 		mkdir archlinux
 		tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C archlinux/ 2> /dev/null
-		sed -i s_/etc/pacman_$ROOT/archlinux/etc/pacman_g archlinux/etc/pacman.conf
+		sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g archlinux/etc/pacman.conf
 		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -Syu
 		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
-		touch $ROOT/archlinux/timestamp
+		touch $HOME/archlinux/timestamp
 EOF
 	chmod 755 $ROOT/install_image.sh
 	junest -u $ROOT/install_image.sh
@@ -97,7 +97,7 @@ createArchImg
 downloadToolchain
 downloadFirmware
 
-cd $ROOT/archlinux/usr/lib
+cd $HOME/archlinux/usr/lib
 relativeSoftLinks "../.." "..\/.."
 #cd $ROOT/archlinux/usr/lib/arm-unknown-linux-gnueabihf
 #relativeSoftLinks  "../../.." "..\/..\/.."
