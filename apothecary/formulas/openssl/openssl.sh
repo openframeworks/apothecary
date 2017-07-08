@@ -5,8 +5,8 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.0.2j
-VERDIR=1.0.2j
+VER=1.0.2k
+VERDIR=1.0.2k
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
@@ -80,8 +80,8 @@ function build() {
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
 		make -j1 depend
-		make -j${PARALLEL_MAKE}
-		make -j 1 install
+		make -j1
+		make -j1 install
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
@@ -189,8 +189,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 
 			make depend
-			make -j${PARALLEL_MAKE}
-
+			make -j1
 			make install
 
 

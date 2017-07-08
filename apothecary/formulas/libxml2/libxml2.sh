@@ -38,6 +38,9 @@ function build() {
 		unset TMP
 		unset TEMP
 		cd win32/VC10
+
+        vs-upgrade libxml2.vcxproj
+
 		if [ $ARCH == 32 ] ; then
 			vs-build libxml2.vcxproj Build "Release|Win32"
 		else

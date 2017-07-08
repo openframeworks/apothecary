@@ -18,7 +18,7 @@ trapError() {
 	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
 	fi
     if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
-        cat $APOTHECARY_PATH/build/$formula_name/config.log
+        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
     fi
 	exit 1
 }
@@ -130,7 +130,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
-    
+
     apothecaryPID=$!
     echoDots $apothecaryPID
     wait $apothecaryPID
@@ -153,7 +153,7 @@ cd $ROOT
 echo "Compressing libraries from $PWD"
 LIBS=$(ls | grep -v \.appveyor.yml | grep -v \.travis.yml | grep -v \.gitignore | grep -v apothecary | grep -v scripts)
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${ARCH}.zip
+	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}.zip
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2

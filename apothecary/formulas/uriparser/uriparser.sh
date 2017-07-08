@@ -39,6 +39,11 @@ function build() {
 		unset TMP
 		unset TEMP
 		cd win32/vs2015
+
+		if [[ $VS_VER -gt 14 ]]; then
+			vs-upgrade uriparser.sln
+		fi
+
 		if [ $ARCH == 32 ] ; then
 			vs-build uriparser.sln Build "Release|Win32"
 		elif [ $ARCH == 64 ] ; then

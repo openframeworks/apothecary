@@ -168,8 +168,8 @@ function build() {
 		-DWITH_PNG=OFF \
 		-DWITH_OPENCL=OFF \
 		-DWITH_PVAPI=OFF  | tee ${LOG}
-		vs-build "OpenCV.sln"
-		vs-build "OpenCV.sln" Build "Debug"
+		vs-build "OpenCV.sln" Build "Release|Win32"
+		vs-build "OpenCV.sln" Build "Debug|Win32"
 	elif [ $ARCH == 64 ] ; then
 		mkdir -p build_vs_64
 		cd build_vs_64
