@@ -24,7 +24,7 @@ createArchImg(){
     sudo apt-get install -y coreutils realpath gperf
 
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
-	echo > $ROOT/install_image.sh << EOF
+	cat > $ROOT/install_image.sh << EOF
 		cd $HOME
 		wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 		mkdir archlinux
