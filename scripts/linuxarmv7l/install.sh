@@ -24,16 +24,18 @@ createArchImg(){
     sudo apt-get install -y coreutils realpath gperf
 
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
-	junest << EOF
-		cd ~
+	echo > install_image.sh << EOF
+		cd $HOME
 		wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 		mkdir archlinux
 		tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C archlinux/ 2> /dev/null
 		sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g archlinux/etc/pacman.conf
 		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -Syu
 		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
-		touch ~/archlinux/timestamp
+		touch $HOME/archlinux/timestamp
 EOF
+	chmod 755 install_image.sh
+	junest -u install_image.sh
 }
 
 downloadToolchain(){
