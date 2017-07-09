@@ -105,7 +105,7 @@ function build() {
 		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/usr/bin/make \
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
-			-DAUDIO_WINDOWS_ASIO=ON \
+			-DAUDIO_WINDOWS_ASIO=OFF \
 			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
 			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
 			-DCMAKE_CXX_FLAGS=-std=c++11 \
