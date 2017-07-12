@@ -68,7 +68,7 @@ function build() {
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
 		make -j1 depend
-		make -j${PARALLEL_MAKE}
+		make -j1
 		make -j 1 install
 
 
