@@ -102,13 +102,10 @@ function build() {
 		cp -v $FORMULA_DIR/CMakeLists.txt .
 		mkdir -p build
 		cd build
-		cmake .. -G "Unix Makefiles"  -DCMAKE_MAKE_PROGRAM=/usr/bin/make \
+		cmake .. -G "Unix Makefiles" \
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
-			-DAUDIO_WINDOWS_ASIO=OFF \
-			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
-			-DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
-			-DCMAKE_CXX_FLAGS=-std=c++11 \
+			-DAUDIO_WINDOWS_ASIO=ON \
 			-DBUILD_TESTING=OFF
 		make 
 	fi
