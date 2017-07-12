@@ -25,7 +25,7 @@ if (HAVE_GETTIMEOFDAY)
 endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 set(rtaudio_SOURCES RtAudio.cpp)
@@ -87,7 +87,6 @@ if (UNIX)
 endif (UNIX)
 
 if (WIN32)
-	add_definitions(-DWIN32)
     if (NOT AUDIO_WINDOWS_DS AND NOT AUDIO_WINDOWS_ASIO AND NOT AUDIO_WINDOWS_WASAPI)
         set(AUDIO_WINDOWS_WASAPI ON)
     endif()
@@ -106,6 +105,7 @@ if (WIN32)
         list(APPEND LINKLIBS uuid ksuser)
     endif (AUDIO_WINDOWS_WASAPI)
     if (AUDIO_WINDOWS_ASIO)
+		add_definitions(-DWIN32)
         list(APPEND rtaudio_SOURCES
             include/asio.cpp
             include/asiodrivers.cpp
