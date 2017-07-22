@@ -6,17 +6,22 @@
 FORMULA_TYPES=( "vs" "osx" )
 
 # define the version
+# for vs latest release is good
 VER=v1.0.21
+GIT_URL_VS=https://github.com/libusb/libusb
+GIT_TAG_VS=$VER
 
-# tools for git use
-GIT_URL=https://github.com/libusb/libusb
-GIT_TAG=$VER
+# for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
+GIT_URL_OSX=https://github.com/ofTheo/libusb
+GIT_BRANCH_OSX=osx-kinect
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	git clone ${GIT_URL}
-	
+
 	if [ "$TYPE" == "vs" ] ; then
+        echo "Running: git clone --branch ${GIT_TAG_VS} ${GIT_URL_VS}"
+        git clone --branch ${GIT_TAG_VS} ${GIT_URL_VS}
+
 		cd libusb
 		git fetch https://github.com/cuisinart/libusb/ 
 		git cherry-pick b680238def7b61a9a2b7e6dd4539ca0e631ce068
@@ -26,6 +31,13 @@ function download() {
 		#git fetch jblake
 		#git cherry-pick c5b0af4 1c74211
 	fi
+
+	if [ "$TYPE" == "osx" ] ; then
+        echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL_OSX}"
+    	git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL_OSX}
+	fi
+
+
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -48,6 +60,12 @@ function build() {
 		fi		
 
 	fi
+
+    if [ "$TYPE" == "osx" ] ; then
+        cd Xcode
+    	xcodebuild -configuration Release -target libusb -project libusb.xcodeproj/
+	fi
+
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
@@ -68,6 +86,11 @@ function copy() {
 		
 	fi
 
+    if [ "$TYPE" == "osx" ] ; then
+        mkdir -p $1/lib/$TYPE
+        cp -v Xcode/build/Release/libusb-1.0.0.a $1/lib/$TYPE/usb-1.0.0.lib
+	fi
+
 	echoWarning "TODO: License Copy"
 }
 
@@ -77,5 +100,10 @@ function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		cd msvc
 		MSBuild.exe libusb_2015.sln //t:Clean
+	fi
+
+    if [ "$TYPE" == "osx" ] ; then
+        cd Xcode
+    	xcodebuild -configuration Release -target libusb -project libusb.xcodeproj/ clean
 	fi
 }
