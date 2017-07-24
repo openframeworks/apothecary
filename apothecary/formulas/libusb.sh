@@ -39,10 +39,9 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 	
 		cd msvc
-		SET Platform=
 	
 		if [ $ARCH == 32 ] ; then
-			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x86
+			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
 		elif [ $ARCH == 64 ] ; then
 			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
 		fi		
