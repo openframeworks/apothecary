@@ -5,38 +5,25 @@
 
 FORMULA_TYPES=( "vs" "osx" )
 
-# define the version
-# for vs latest release is good
-VER=v1.0.21
-GIT_URL_VS=https://github.com/libusb/libusb
-GIT_TAG_VS=$VER
-
 # for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
-GIT_URL_OSX=https://github.com/ofTheo/libusb
+#for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers 
+
+GIT_URL=https://github.com/ofTheo/libusb
+GIT_BRANCH_VS=windows-patched
 GIT_BRANCH_OSX=osx-kinect
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 
 	if [ "$TYPE" == "vs" ] ; then
-        echo "Running: git clone --branch ${GIT_TAG_VS} ${GIT_URL_VS}"
-        git clone --branch ${GIT_TAG_VS} ${GIT_URL_VS}
-
-		cd libusb
-		git fetch https://github.com/cuisinart/libusb/ 
-		git cherry-pick b680238def7b61a9a2b7e6dd4539ca0e631ce068
-
-		#this doesn't work - the above should be the same 
-		#git remote add jblake https://github.com/JoshBlake/libusbx.git
-		#git fetch jblake
-		#git cherry-pick c5b0af4 1c74211
+        echo "Running: git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}"
+        git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
 	fi
 
 	if [ "$TYPE" == "osx" ] ; then
-        echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL_OSX}"
-    	git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL_OSX}
+        echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}"
+        git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}
 	fi
-
 
 }
 
@@ -63,7 +50,7 @@ function build() {
 
     if [ "$TYPE" == "osx" ] ; then
         cd Xcode
-    	xcodebuild -configuration Release -target libusb -project libusb.xcodeproj/
+        xcodebuild -configuration Release -target libusb -project libusb.xcodeproj/
 	fi
 
 }
