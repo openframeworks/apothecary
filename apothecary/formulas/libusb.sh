@@ -50,7 +50,7 @@ function build() {
 
     if [ "$TYPE" == "osx" ] ; then
         cd Xcode
-        xcodebuild -configuration Release -target libusb -project libusb.xcodeproj/
+        xcodebuild ARCHS="i386 x86_64" ONLY_ACTIVE_ARCH=NO -configuration Release -target libusb -project libusb.xcodeproj/
 	fi
 
 }
