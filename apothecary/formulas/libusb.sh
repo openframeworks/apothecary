@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# libusb for ofxKinect needed for 
+# libusb for ofxKinect needed for
 # Visual Studio and OS X
 
 FORMULA_TYPES=( "vs" "osx" )
 
 # for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
-#for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers 
+#for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers
 
 GIT_URL=https://github.com/ofTheo/libusb
 GIT_BRANCH_VS=windows-patched
@@ -37,14 +37,14 @@ function build() {
 
 
 	if [ "$TYPE" == "vs" ] ; then
-	
+
 		cd msvc
-	
+
 		if [ $ARCH == 32 ] ; then
 			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
 		elif [ $ARCH == 64 ] ; then
 			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
-		fi		
+		fi
 
 	fi
 
@@ -70,12 +70,12 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v x64/Release/lib/libusb-1.0.lib $1/lib/$TYPE/x64/libusb-1.0.lib
 		fi
-		
+
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v Xcode/build/Release/libusb-1.0.0.a $1/lib/$TYPE/usb-1.0.0.lib
+        cp -v Xcode/build/Release/libusb-1.0.0.a $1/lib/$TYPE/usb-1.0.0.a
 	fi
 
 	echoWarning "TODO: License Copy"
