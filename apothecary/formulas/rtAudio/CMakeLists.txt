@@ -92,6 +92,7 @@ if (WIN32)
     endif()
 
     include_directories(include)
+    add_definitions(-DWIN32)
     list(APPEND LINKLIBS winmm ole32)
 
     if (AUDIO_WINDOWS_DS)
@@ -105,7 +106,6 @@ if (WIN32)
         list(APPEND LINKLIBS uuid ksuser)
     endif (AUDIO_WINDOWS_WASAPI)
     if (AUDIO_WINDOWS_ASIO)
-		add_definitions(-DWIN32)
         list(APPEND rtaudio_SOURCES
             include/asio.cpp
             include/asiodrivers.cpp
