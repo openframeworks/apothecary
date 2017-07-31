@@ -32,7 +32,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+	if [ "$TYPE" == "msys2" ] ; then
+		# patch to be able to compile without ASIO
+		patch -p1 -u -N  < $FORMULA_DIR/rtAudio.patch
+		cp -v $FORMULA_DIR/CMakeLists.txt .
+	fi
 }
 
 # executed inside the lib src dir
@@ -98,8 +102,7 @@ function build() {
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# Compile the program
-		local API="--with-wasapi --with-ds" # asio as well?
-		cp -v $FORMULA_DIR/CMakeLists.txt .
+		local API="--with-wasapi --with-ds " # asio as well?
 		mkdir -p build
 		cd build
 		cmake .. -G "Unix Makefiles" \
