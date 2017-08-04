@@ -1,0 +1,11 @@
+diff -ur rtAudio/RtAudio.cpp rtAudio.new/RtAudio.cpp
+--- rtAudio/RtAudio.cpp	2017-06-09 21:45:59.000000000 +0200
++++ rtAudio.new/RtAudio.cpp	2017-07-31 22:52:11.958827800 +0200
+@@ -3679,6 +3679,7 @@
+ #ifndef INITGUID
+   #define INITGUID
+ #endif
++#include <math.h>
+ #include <audioclient.h>
+ #include <avrt.h>
+ #include <mmdeviceapi.h>

@@ -32,7 +32,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+	if [ "$TYPE" == "msys2" ] ; then
+		# patch to be able to compile without ASIO
+		patch -p1 -u -N  < $FORMULA_DIR/rtAudio.patch
+		cp -v $FORMULA_DIR/CMakeLists.txt .
+	fi
 }
 
 # executed inside the lib src dir
@@ -97,23 +101,16 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then
-        rm -f librtaudio.a
-        rm -f librtaudio-x86_64
-
 		# Compile the program
-		g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__WINDOWS_DS__ \
-					 -D__WINDOWS_ASIO__ \
-					 -D__WINDOWS_WASAPI__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
-
-		ar ruv librtaudio.a RtAudio.o
-		ranlib librtaudio.a
+		local API="--with-wasapi --with-ds " # asio as well?
+		mkdir -p build
+		cd build
+		cmake .. -G "Unix Makefiles" \
+			-DAUDIO_WINDOWS_WASAPI=ON \
+			-DAUDIO_WINDOWS_DS=ON \
+			-DAUDIO_WINDOWS_ASIO=ON \
+			-DBUILD_TESTING=OFF
+		make 
 	fi
 
 	# clean up env vars
@@ -143,7 +140,7 @@ function copy() {
 
 
 	elif [ "$TYPE" == "msys2" ] ; then
-		cp -v librtaudio.a $1/lib/$TYPE/librtaudio.a
+		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
 
 	else
 		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a
