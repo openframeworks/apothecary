@@ -26,12 +26,11 @@ export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ar
 export RANLIB=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ranlib
 export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums"
-export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libcxx/include -I${NDK_ROOT}/sources/android/cpufeatures  -gcc-toolchain ${GCC_TOOLCHAIN_PATH}"
+export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures  -gcc-toolchain ${GCC_TOOLCHAIN_PATH}"
 export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -llog  -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
-
 if [ $ABI = armeabi-v7a ]; then
     export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
     export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -Wl,--fix-cortex-a8 -Wl,--no-undefined"

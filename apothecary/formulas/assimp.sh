@@ -331,22 +331,11 @@ function build() {
 		# these may need to be updated for a new release
 		local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
 
+		source ../../android_configure.sh $ABI
 
-		# arm
-        ABI=armeabi-v7a
-        source ../../android_configure.sh $ABI
-		mkdir -p build_arm
-		cd build_arm
-		cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
-		make assimp -j${PARALLEL_MAKE}
-		cd ..
+		mkdir -p build
+		cd build
 
-
-		# x86
-        ABI=x86
-        source ../../android_configure.sh $ABI
-		mkdir -p build_x86
-		cd build_x86
 		cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
 		make assimp -j${PARALLEL_MAKE}
 		cd ..
@@ -372,7 +361,6 @@ function copy() {
     rm -rf $1/include/assimp
     rm -rf $1/include/*
 	cp -Rv include/* $1/include
-
 	# libs
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
@@ -390,10 +378,8 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		cp -Rv lib/$TYPE/assimp.a $1/lib/$TYPE/assimp.a
 	elif [ "$TYPE" == "android" ]; then
-    	mkdir -p $1/lib/$TYPE/armeabi-v7a/
-    	mkdir -p $1/lib/$TYPE/x86/
-		cp -Rv build_arm/code/libassimp.a $1/lib/$TYPE/armeabi-v7a/libassimp.a
-		cp -Rv build_x86/code/libassimp.a $1/lib/$TYPE/x86/libassimp.a
+		mkdir -p $1/lib/$TYPE/$ABI/
+		cp -Rv build/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a 
 	elif [ "$TYPE" == "emscripten" ]; then
     	cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
 	fi
@@ -415,7 +401,7 @@ function clean() {
 		fi
 		rm -f CMakeCache.txt
 		echo "Assimp VS | $TYPE | $ARCH cleaned"
-
+	
 	elif [ "$TYPE" == "android" ] ; then
 		echoWarning "TODO: clean android"
 
