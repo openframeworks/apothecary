@@ -24,7 +24,8 @@ function download() {
 		wget http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	else
+	
+	else 
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL for OSX/iOS"
 		echo $GIT_URL
@@ -61,13 +62,14 @@ function prepare() {
 	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
 	    #include <stdint.h>
         #include <asm/byteorder.h>
-        inline void swab(const void *from, void*to, ssize_t n)
+		#define __swap(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+        inline void swab(const void *from, void*to, size_t n)
         {
-            ssize_t i;
+            size_t i;
             if (n < 0)
                 return;
             for (i = 0; i < (n/2)*2; i += 2)
-                *((uint16_t*)to+i) = __arch__swab16(*((uint16_t*)from+i));
+                *((uint16_t*)to+i) = __swap(*((uint16_t*)from+i));
         }
 ENDDELIM
 
