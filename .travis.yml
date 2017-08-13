@@ -39,7 +39,7 @@ matrix:
         - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
       cache:
         directories:
-        - ~/android-ndk-r12b
+        - ~/android-ndk-r15c
         - apothecary/build/Toolchains/armv7
 
     - os: linux
@@ -53,7 +53,7 @@ matrix:
         - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
       cache:
         directories:
-        - ~/android-ndk-r12b
+        - ~/android-ndk-r15c
         - apothecary/build/Toolchains/x86
 
 
