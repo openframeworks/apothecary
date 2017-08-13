@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2" )
 
 
 # define the version by sha
@@ -22,6 +22,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+    if [ "$TYPE" == "android" ]; then
+        cp $FORMULA_DIR/glob.h .        
+    fi
+
     if [ "$TYPE" == "vs" ]; then
         cp $FORMULA_DIR/vs2015/*.h include/libxml/
         cp -r $FORMULA_DIR/vs2015/* win32/VC10/
@@ -42,7 +46,19 @@ function build() {
 		else
 			vs-build libxml2.vcxproj Build "Release|x64"
 		fi
+    elif [ "$TYPE" == "android" ]; then
+        source ../../android_configure.sh $ABI
 
+        # wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        # wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+	    if [ "$ARCH" == "armv7" ]; then
+            HOST=armv7a-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            HOST=x86-linux-android
+        fi
+        ./configure --host=$HOST --without-lzma --without-zlib --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        make clean
+	    make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
