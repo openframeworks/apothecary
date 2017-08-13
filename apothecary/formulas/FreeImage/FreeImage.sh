@@ -62,14 +62,14 @@ function prepare() {
 	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
 	    #include <stdint.h>
         #include <asm/byteorder.h>
-		#define __swap(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
         inline void swab(const void *from, void*to, size_t n)
         {
             size_t i;
             if (n < 0)
                 return;
             for (i = 0; i < (n/2)*2; i += 2)
-                *((uint16_t*)to+i) = __swap(*((uint16_t*)from+i));
+                *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
         }
 ENDDELIM
 
