@@ -6,25 +6,25 @@ matrix:
 # relative order of sudo and env is important so that addons: is recognized
 
     # linux 64
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #    - TARGET="linux"
+    - os: linux
+      sudo: required
+      dist: trusty
+      env:
+       - TARGET="linux"
 
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="linux"
-    #     - OPT="gcc5"
+    - os: linux
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="linux"
+        - OPT="gcc5"
 
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="linux"
-    #     - OPT="gcc6"
+    - os: linux
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="linux"
+        - OPT="gcc6"
 
 
     # android
@@ -57,88 +57,88 @@ matrix:
         - apothecary/build/Toolchains/x86
 
 
-    # # emscripten
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env: TARGET="emscripten"
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - libstdc++6
-    #         - gcc-4.9
-    #         - realpath
-    #         - coreutils
-    #         - libboost-tools-dev
-    #         - gperf
-    #         #- libboost-dev
+    # emscripten
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="emscripten"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libstdc++6
+            - gcc-4.9
+            - realpath
+            - coreutils
+            - libboost-tools-dev
+            - gperf
+            #- libboost-dev
 
 
-    # # linux arm6
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+    # linux arm6
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
 
-    # # linux arm7
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env: TARGET="linuxarmv7l" SYSROOT="$HOME/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+    # linux arm7
+    - os: linux
+      sudo: required
+      dist: trusty
+      env: TARGET="linuxarmv7l" SYSROOT="$HOME/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
 
-    # # osx
-    # - os: osx
-    #   osx_image: xcode7.3.1
-    #   compiler: clang
-    #   env: TARGET="osx" OPT2="1"
+    # osx
+    - os: osx
+      osx_image: xcode7.3.1
+      compiler: clang
+      env: TARGET="osx" OPT2="1"
 
-    # - os: osx
-    #   osx_image: xcode7.3.1
-    #   compiler: clang
-    #   env: TARGET="osx" OPT2="2"
+    - os: osx
+      osx_image: xcode7.3.1
+      compiler: clang
+      env: TARGET="osx" OPT2="2"
 
-    # - os: osx
-    #   osx_image: xcode7.3.1
-    #   compiler: clang
-    #   env: TARGET="osx" OPT2="3"
-
-
-    # # ios
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="ios" OPT2="1"
-
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="ios" OPT2="2"
-
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="ios" OPT2="3"
+    - os: osx
+      osx_image: xcode7.3.1
+      compiler: clang
+      env: TARGET="osx" OPT2="3"
 
 
-    # # tvos
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="tvos" OPT2="1"
+    # ios
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="ios" OPT2="1"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="tvos" OPT2="2"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="ios" OPT2="2"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env: TARGET="tvos" OPT2="3"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="ios" OPT2="3"
+
+
+    # tvos
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="tvos" OPT2="1"
+
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="tvos" OPT2="2"
+
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: TARGET="tvos" OPT2="3"
 
 
   exclude:
