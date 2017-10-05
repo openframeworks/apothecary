@@ -4,6 +4,7 @@
 !README.md
 !/apothecary
 !/scripts
+!/docker
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build
