@@ -65,20 +65,14 @@ LIBS_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
-function getrealpath() { if command -v realpath 2>/dev/null; then
-  echo realpath $1;
-else
-	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-fi;
+function getrealpath() {
+    if command -v realpath 2>/dev/null; then
+        echo realpath $1;
+    else
+        [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+    fi;
  }
 
-realpath() {
-[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-
-### Xcode/ios specific settings
-
-function realpath() { if command -v realpath 2>/dev/null; then realpath $1; else [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"; fi; }
 
 # xcode Developer root
 if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
@@ -120,10 +114,10 @@ BUILDROOT_SUBDIR=_buildroot
 
 # paths relative to this script
 mkdir -p ${APOTHECARY_DIR}/build
-FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
-BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
-OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
-LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
+FORMULAS_DIR=$(getrealpath ${APOTHECARY_DIR}/formulas)
+BUILD_DIR=$(getrealpath ${APOTHECARY_DIR}/build)
+OF_ROOT=$(getrealpath ${APOTHECARY_DIR}/../../../)
+LIBS_DIR=$(getrealpath ${APOTHECARY_DIR}/../)
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
 echo "OF: $OF_ROOT/"
@@ -303,7 +297,7 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 		a) # set the architecture
 		   ARCH=$OPTARG ;;
 		b) # set the build dir
-		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
+		   BUILD_DIR="$(getrealpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
 		   LIBS_DIR="$OPTARG"; IS_CUSTOM_LIBS_DIR=1 ;;
 		s) # set the git tag to switch version
