@@ -415,6 +415,8 @@ function isFormulaType() {
 	eval $2=0
 }
 
+function downloader() { if command -v curl 2>/dev/null; then curl -LO --retry 20 -O --progress $1 $2 $3; else downloader $1 $2 $3; fi; }
+
 # checks if a given formula string is a forumla script or exists in the formulas dir,
 # exits with error on failure, sets formula script and parent dir on success
 #

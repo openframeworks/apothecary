@@ -24,7 +24,7 @@ function download() {
 	else
 		PKG=fmodex_${TYPE}.tar.bz2
 	fi
-	wget http://ci.openframeworks.cc/libs/fmodex/$PKG
+	downloader http://ci.openframeworks.cc/libs/fmodex/$PKG
 	tar xjf $PKG
 }
 

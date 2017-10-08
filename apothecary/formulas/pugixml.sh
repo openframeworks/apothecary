@@ -17,7 +17,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
+	downloader http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
     tar xzf pugixml-$VER.tar.gz
     mv pugixml-$VER pugixml
     rm pugixml-$VER.tar.gz

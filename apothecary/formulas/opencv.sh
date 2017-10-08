@@ -26,12 +26,12 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 # download the source code and unpack it into LIB_NAME
 function download() {
     if [ "$TYPE" != "android" ]; then
-        wget https://github.com/Itseez/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
+        downloader https://github.com/Itseez/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
         tar -xf opencv-$VER.tar.gz
         mv opencv-$VER $1
         rm opencv*.tar.gz
     else
-        wget http://sourceforge.net/projects/opencvlibrary/files/opencv-android/3.1.0/OpenCV-3.1.0-android-sdk.zip/download -O OpenCV-3.1.0-android-sdk.zip
+        downloader http://sourceforge.net/projects/opencvlibrary/files/opencv-android/3.1.0/OpenCV-3.1.0-android-sdk.zip/download -O OpenCV-3.1.0-android-sdk.zip
         unzip -qo OpenCV-3.1.0-android-sdk.zip
         mv OpenCV-android-sdk $1
     fi

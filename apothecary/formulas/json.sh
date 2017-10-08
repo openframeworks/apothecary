@@ -16,8 +16,8 @@ GIT_TAG=v$VER
 function download() {
     mkdir json
     cd json
-	wget https://github.com/nlohmann/json/releases/download/v$VER/json.hpp
-	wget https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT
+	downloader https://github.com/nlohmann/json/releases/download/v$VER/json.hpp
+	downloader https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT
 }
 
 # prepare the build environment, executed inside the lib src dir

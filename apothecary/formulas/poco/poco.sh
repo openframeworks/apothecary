@@ -33,7 +33,7 @@ SHA=
 function download() {
 	if [ "$SHA" == "" ] ; then
 		echo "SHA=="" Using $GIT_URL with GIT_TAG=$GIT_TAG"
-		curl -Lk $GIT_URL/archive/$GIT_TAG.tar.gz -o poco-$GIT_TAG.tar.gz
+		downloader $GIT_URL/archive/$GIT_TAG.tar.gz -o poco-$GIT_TAG.tar.gz
 		tar -xf poco-$GIT_TAG.tar.gz
 		mv poco-$GIT_TAG poco
 		rm poco*.tar.gz

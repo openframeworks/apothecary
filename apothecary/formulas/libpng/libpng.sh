@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://prdownloads.sourceforge.net/libpng/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
+	downloader http://prdownloads.sourceforge.net/libpng/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
 	tar -xf libpng-$VER.tar.gz
 	mv libpng-$VER libpng
 	rm libpng-$VER.tar.gz

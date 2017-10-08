@@ -20,7 +20,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 function download() {
 
 	# stable release from source forge
-	curl -LO "https://github.com/assimp/assimp/archive/v$VER.zip"
+	downloader "https://github.com/assimp/assimp/archive/v$VER.zip"
 	unzip -oq "v$VER.zip"
 	mv "assimp-$VER" assimp
 	rm "v$VER.zip"

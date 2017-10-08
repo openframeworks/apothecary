@@ -17,7 +17,7 @@ GIT_TAG=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -O http://www.portaudio.com/archives/pa_$VER.tgz
+	downloader http://www.portaudio.com/archives/pa_$VER.tgz
 	tar -xf pa_$VER.tgz
 	rm pa_$VER.tgz
 }

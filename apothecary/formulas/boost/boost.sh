@@ -20,7 +20,7 @@ URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSI
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget ${URL}
+	downloader ${URL}
 	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
 	rm ${TARBALL}

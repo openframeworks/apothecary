@@ -12,7 +12,7 @@ GIT_TAG=pixman-$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
+	downloader --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
 	rm pixman-$VER.tar.gz

@@ -18,7 +18,7 @@ GIT_TAG=VER-2-7
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget https://sourceforge.net/projects/freetype/files/freetype2/$VER/freetype-$VER.tar.gz/download -O freetype-$VER.tar.gz
+	downloader https://sourceforge.net/projects/freetype/files/freetype2/$VER/freetype-$VER.tar.gz/download -O freetype-$VER.tar.gz
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
 	rm freetype*.tar.gz

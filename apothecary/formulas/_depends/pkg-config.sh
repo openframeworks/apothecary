@@ -12,7 +12,7 @@ GIT_TAG=pkg-config-$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO http://pkgconfig.freedesktop.org/releases/pkg-config-$VER.tar.gz
+	downloader http://pkgconfig.freedesktop.org/releases/pkg-config-$VER.tar.gz
 	tar -xf pkg-config-$VER.tar.gz
 	mv pkg-config-$VER pkg-config
 	rm pkg-config-$VER.tar.gz
