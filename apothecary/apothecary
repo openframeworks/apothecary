@@ -78,6 +78,8 @@ realpath() {
 
 ### Xcode/ios specific settings
 
+function realpath() { if command -v realpath 2>/dev/null; then realpath $1; else [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"; fi; }
+
 # xcode Developer root
 if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     XS="xcode-select -print-path" # stupid hack to keep my syntax highlighting from breaking :P
