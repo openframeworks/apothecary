@@ -9,10 +9,10 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
  
 # define the version
-VER=3.1.0
+VER=3.3.0
  
 # tools for git use
-GIT_URL=https://github.com/Itseez/opencv.git
+GIT_URL=https://github.com/opencv/opencv.git
 GIT_TAG=$VER
 
 # these paths don't really matter - they are set correctly further down
@@ -25,7 +25,7 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
  
 # download the source code and unpack it into LIB_NAME
 function download() {
-  curl -Lk https://github.com/Itseez/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
+  curl -Lk https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
   tar -xf opencv-$VER.tar.gz
   mv opencv-$VER $1
   rm opencv*.tar.gz
@@ -119,91 +119,91 @@ function build() {
     unset TEMP
 
     rm -f CMakeCache.txt
-	#LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
-	mkdir -p $LIB_FOLDER
+  #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
+  mkdir -p $LIB_FOLDER
     LOG="$LIB_FOLDER/opencv2-${VER}.log"
     echo "Logging to $LOG"
     echo "Log:" >> "${LOG}" 2>&1
     set +e
-	if [ $ARCH == 32 ] ; then
-		mkdir -p build_vs_32
-		cd build_vs_32
-		cmake .. -G "Visual Studio $VS_VER"\
-		-DBUILD_PNG=OFF \
-		-DWITH_OPENCLAMDBLAS=OFF \
-		-DBUILD_TESTS=OFF \
-		-DWITH_CUDA=OFF \
-		-DWITH_FFMPEG=OFF \
-		-DWITH_WIN32UI=OFF \
-		-DBUILD_PACKAGE=OFF \
-		-DWITH_JASPER=OFF \
-		-DWITH_OPENEXR=OFF \
-		-DWITH_GIGEAPI=OFF \
-		-DWITH_JPEG=OFF \
-		-DBUILD_WITH_DEBUG_INFO=OFF \
-		-DWITH_CUFFT=OFF \
-		-DBUILD_TIFF=OFF \
-		-DBUILD_JPEG=OFF \
-		-DWITH_OPENCLAMDFFT=OFF \
-		-DBUILD_WITH_STATIC_CRT=OFF \
-		-DBUILD_opencv_java=OFF \
-		-DBUILD_opencv_python=OFF \
-		-DBUILD_opencv_apps=OFF \
-		-DBUILD_PERF_TESTS=OFF \
-		-DBUILD_JASPER=OFF \
-		-DBUILD_DOCS=OFF \
-		-DWITH_TIFF=OFF \
-		-DWITH_1394=OFF \
-		-DWITH_EIGEN=OFF \
-		-DBUILD_OPENEXR=OFF \
-		-DWITH_DSHOW=OFF \
-		-DWITH_VFW=OFF \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DWITH_PNG=OFF \
-		-DWITH_OPENCL=OFF \
-		-DWITH_PVAPI=OFF  | tee ${LOG} 
-		vs-build "OpenCV.sln"
-		vs-build "OpenCV.sln" Build "Debug"
-	elif [ $ARCH == 64 ] ; then
-		mkdir -p build_vs_64
-		cd build_vs_64
-		cmake .. -G "Visual Studio $VS_VER Win64" \
-		-DBUILD_PNG=OFF \
-		-DWITH_OPENCLAMDBLAS=OFF \
-		-DBUILD_TESTS=OFF \
-		-DWITH_CUDA=OFF \
-		-DWITH_FFMPEG=OFF \
-		-DWITH_WIN32UI=OFF \
-		-DBUILD_PACKAGE=OFF \
-		-DWITH_JASPER=OFF \
-		-DWITH_OPENEXR=OFF \
-		-DWITH_GIGEAPI=OFF \
-		-DWITH_JPEG=OFF \
-		-DBUILD_WITH_DEBUG_INFO=OFF \
-		-DWITH_CUFFT=OFF \
-		-DBUILD_TIFF=OFF \
-		-DBUILD_JPEG=OFF \
-		-DWITH_OPENCLAMDFFT=OFF \
-		-DBUILD_WITH_STATIC_CRT=OFF \
-		-DBUILD_opencv_java=OFF \
-		-DBUILD_opencv_python=OFF \
-		-DBUILD_opencv_apps=OFF \
-		-DBUILD_PERF_TESTS=OFF \
-		-DBUILD_JASPER=OFF \
-		-DBUILD_DOCS=OFF \
-		-DWITH_TIFF=OFF \
-		-DWITH_1394=OFF \
-		-DWITH_EIGEN=OFF \
-		-DBUILD_OPENEXR=OFF \
-		-DWITH_DSHOW=OFF \
-		-DWITH_VFW=OFF \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DWITH_PNG=OFF \
-		-DWITH_OPENCL=OFF \
-		-DWITH_PVAPI=OFF  | tee ${LOG} 
-		vs-build "OpenCV.sln" Build "Release|x64"
-		vs-build "OpenCV.sln" Build "Debug|x64"
-	fi
+  if [ $ARCH == 32 ] ; then
+    mkdir -p build_vs_32
+    cd build_vs_32
+    cmake .. -G "Visual Studio $VS_VER"\
+    -DBUILD_PNG=OFF \
+    -DWITH_OPENCLAMDBLAS=OFF \
+    -DBUILD_TESTS=OFF \
+    -DWITH_CUDA=OFF \
+    -DWITH_FFMPEG=OFF \
+    -DWITH_WIN32UI=OFF \
+    -DBUILD_PACKAGE=OFF \
+    -DWITH_JASPER=OFF \
+    -DWITH_OPENEXR=OFF \
+    -DWITH_GIGEAPI=OFF \
+    -DWITH_JPEG=OFF \
+    -DBUILD_WITH_DEBUG_INFO=OFF \
+    -DWITH_CUFFT=OFF \
+    -DBUILD_TIFF=OFF \
+    -DBUILD_JPEG=OFF \
+    -DWITH_OPENCLAMDFFT=OFF \
+    -DBUILD_WITH_STATIC_CRT=OFF \
+    -DBUILD_opencv_java=OFF \
+    -DBUILD_opencv_python=OFF \
+    -DBUILD_opencv_apps=OFF \
+    -DBUILD_PERF_TESTS=OFF \
+    -DBUILD_JASPER=OFF \
+    -DBUILD_DOCS=OFF \
+    -DWITH_TIFF=OFF \
+    -DWITH_1394=OFF \
+    -DWITH_EIGEN=OFF \
+    -DBUILD_OPENEXR=OFF \
+    -DWITH_DSHOW=OFF \
+    -DWITH_VFW=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DWITH_PNG=OFF \
+    -DWITH_OPENCL=OFF \
+    -DWITH_PVAPI=OFF  | tee ${LOG} 
+    vs-build "OpenCV.sln"
+    vs-build "OpenCV.sln" Build "Debug"
+  elif [ $ARCH == 64 ] ; then
+    mkdir -p build_vs_64
+    cd build_vs_64
+    cmake .. -G "Visual Studio $VS_VER Win64" \
+    -DBUILD_PNG=OFF \
+    -DWITH_OPENCLAMDBLAS=OFF \
+    -DBUILD_TESTS=OFF \
+    -DWITH_CUDA=OFF \
+    -DWITH_FFMPEG=OFF \
+    -DWITH_WIN32UI=OFF \
+    -DBUILD_PACKAGE=OFF \
+    -DWITH_JASPER=OFF \
+    -DWITH_OPENEXR=OFF \
+    -DWITH_GIGEAPI=OFF \
+    -DWITH_JPEG=OFF \
+    -DBUILD_WITH_DEBUG_INFO=OFF \
+    -DWITH_CUFFT=OFF \
+    -DBUILD_TIFF=OFF \
+    -DBUILD_JPEG=OFF \
+    -DWITH_OPENCLAMDFFT=OFF \
+    -DBUILD_WITH_STATIC_CRT=OFF \
+    -DBUILD_opencv_java=OFF \
+    -DBUILD_opencv_python=OFF \
+    -DBUILD_opencv_apps=OFF \
+    -DBUILD_PERF_TESTS=OFF \
+    -DBUILD_JASPER=OFF \
+    -DBUILD_DOCS=OFF \
+    -DWITH_TIFF=OFF \
+    -DWITH_1394=OFF \
+    -DWITH_EIGEN=OFF \
+    -DBUILD_OPENEXR=OFF \
+    -DWITH_DSHOW=OFF \
+    -DWITH_VFW=OFF \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DWITH_PNG=OFF \
+    -DWITH_OPENCL=OFF \
+    -DWITH_PVAPI=OFF  | tee ${LOG} 
+    vs-build "OpenCV.sln" Build "Release|x64"
+    vs-build "OpenCV.sln" Build "Debug|x64"
+  fi
     
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
@@ -503,11 +503,11 @@ function build() {
     
     source ../../android_configure.sh $ABI
 
-    echo pwd
     cd platforms
     cp ${FORMULA_DIR}/android.toolchain.cmake android/
-    
     rm -rf $BUILD_FOLDER
+
+    echo ${ANDROID_NDK}
     
     scripts/${BUILD_SCRIPT} \
       -DCMAKE_BUILD_TYPE="Release" \
@@ -523,6 +523,8 @@ function build() {
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
       -DHAVE_opencv_androidcamera=OFF \
+      -DWITH_CAROTENE=OFF \
+      -DWITH_CPUFEATURES=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
       -DWITH_1394=OFF \
@@ -545,11 +547,13 @@ function build() {
       -DBUILD_TESTS=OFF \
       -DANDROID_STL=c++_static \
       -DANDROID_TOOLCHAIN_NAME=${GCC_TOOLCHAIN} \
+      -DANDROID_ALLOW_UNDEFINED_SYMBOLS=TRUE \
       -DANDROID_NATIVE_API_LEVEL=android-${ANDROID_API} \
       -DBUILD_PERF_TESTS=OFF
     cd $BUILD_FOLDER
     make -j${PARALLEL_MAKE}
-    
+    make install
+
   elif [ "$TYPE" == "emscripten" ]; then
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -615,13 +619,13 @@ function copy() {
  
     # copy lib
     cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
-	
+  
   elif [ "$TYPE" == "vs" ] ; then 
-		if [ $ARCH == 32 ] ; then
+    if [ $ARCH == 32 ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/Win32"
-		elif [ $ARCH == 64 ] ; then
-			DEPLOY_PATH="$1/lib/$TYPE/x64"
-		fi
+    elif [ $ARCH == 64 ] ; then
+      DEPLOY_PATH="$1/lib/$TYPE/x64"
+    fi
       mkdir -p "$DEPLOY_PATH/Release"
       mkdir -p "$DEPLOY_PATH/Debug"
       # now make sure the target directories are clean.
@@ -650,8 +654,8 @@ function copy() {
       local BUILD_FOLDER="build_android_x86"
     fi
     
-    cp -r include/opencv $1/include/
-    cp -r include/opencv2 $1/include/
+    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv $1/include/
+    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
     
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*.so
