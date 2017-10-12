@@ -12,7 +12,8 @@ RUN apt-get update && apt install -y \
     unzip \
     build-essential \
     autoconf \
-    libtool
+    libtool \
+    libboost-tools-dev
 
 RUN git clone --depth 1 http://github.com/openFrameworks/openFrameworks.git
 RUN ./openFrameworks/scripts/linux/ubuntu/install_dependencies.sh 
