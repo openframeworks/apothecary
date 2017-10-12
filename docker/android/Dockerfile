@@ -10,7 +10,9 @@ RUN apt-get update && apt install -y \
     wget \
     openjdk-8-jre-headless \ 
     unzip \
-    build-essential
+    build-essential \
+    autoconf \
+    libtool
 
 RUN git clone --depth 1 http://github.com/openFrameworks/openFrameworks.git
 RUN ./openFrameworks/scripts/linux/ubuntu/install_dependencies.sh 
