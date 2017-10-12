@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_50_2
+VER=7_52_1
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -60,7 +60,7 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-	    source ../../android_configure.sh $ABI
+	    # source ../../android_configure.sh $ABI
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
@@ -69,7 +69,14 @@ function build() {
         ./buildconf
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no
+	    ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_DIR --target=$HOST \
+            --with-ssl=$OPENSSL_DIR \
+            --enable-static \
+            --disable-shared \
+            --disable-verbose \
+            --enable-threaded-resolver \
+            --enable-libgcc \
+            --enable-ipv6
         sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make clean
 	    make -j${PARALLEL_MAKE}

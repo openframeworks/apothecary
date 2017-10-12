@@ -275,12 +275,17 @@ EOF
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
-      source ../../android_configure.sh $ABI
-      ESCAPED_NDK_ROOT=$(echo ${NDK_ROOT} | sed s/\\//\\\\\\//g)
-      sed "s/\%{NDK_ROOT}/${ESCAPED_NDK_ROOT}/" $FORMULA_DIR/project-config-android_$ARCH.jam > project-config.jam
-	    ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+        ABI=armeabi-v7a
+        source ../../android_configure.sh $ABI
+        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+
+		# Run ranlib on binaries (not called corectly by b2)
+		${NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/${HOST_PLATFORM}/bin/arm-linux-androideabi-ranlib stage/lib/libboost_filesystem.a
+		${NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/${HOST_PLATFORM}/bin/arm-linux-androideabi-ranlib stage/lib/libboost_system.a	
+		
 	    mv stage stage_$ARCH
 	fi
+		
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root

@@ -247,27 +247,28 @@ function build() {
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
 		perl -pi -e 's/\r//g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
-
-		# armv7
-		if [ "$ARCH" == "armv7" ]; then
-			export _ANDROID_EABI=arm-linux-androideabi-4.9
-			export _ANDROID_ARCH=arch-arm
+		
+        # armv7
+        if [ "$ARCH" == "armv7" ]; then
+            export _ANDROID_EABI=arm-linux-androideabi-4.9
+		    export _ANDROID_ARCH=arch-arm
 		elif [ "$ARCH" == "x86" ]; then
-			export _ANDROID_EABI=x86-4.9
-			export _ANDROID_ARCH=arch-x86
+            export _ANDROID_EABI=x86-4.9
+		    export _ANDROID_ARCH=arch-x86
 		fi
+		
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
+        mkdir -p $BUILD_TO_DIR
+        source Setenv-android.sh
+        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+        make clean
+        make depend -j${PARALLEL_MAKE}
+        make build_libs -j${PARALLEL_MAKE}
+        mkdir -p $BUILD_TO_DIR/lib
+		cp libssl.a $BUILD_TO_DIR/lib/
+        cp libcrypto.a $BUILD_TO_DIR/lib/
 
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-		mkdir -p $BUILD_TO_DIR
-		source Setenv-android.sh
-		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-		make clean
-		make -j1 depend
-		make -j${PARALLEL_MAKE}
-		make install
-		make install
-
-	else
+	else 
 
 		echoWarning "TODO: build $TYPE lib"
 
