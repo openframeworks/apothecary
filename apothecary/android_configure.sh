@@ -8,11 +8,12 @@ export LIBSPATH=android/$ABI
 export NDK_PLATFORM=$ANDROID_PLATFORM
 export TOOLCHAIN_VERSION=4.9
 export CLANG_VERSION=
-export SYSROOT="$NDK_ROOT/platforms/$ANDROID_PLATFORM/arch-arm"
 if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
+    export SYSROOT="$NDK_ROOT/platforms/$ANDROID_PLATFORM/arch-arm"
     export ANDROID_PREFIX=arm-linux-androideabi
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
 elif [ $ABI = x86 ]; then
+    export SYSROOT="$NDK_ROOT/platforms/$ANDROID_PLATFORM/arch-x86"
     export ANDROID_PREFIX=i686-linux-android
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
 fi
@@ -25,8 +26,8 @@ export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=$($NDK_ROOT/ndk-which ar)
 export RANLIB=$($NDK_ROOT/ndk-which ranlib)
-export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/"
-export CPPFLAGS="-I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include/ -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include/ -I${NDK_ROOT}/sources/android/cpufeatures/"
+export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/ -v"
+export CPPFLAGS="-I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include/ -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include/ -I${NDK_ROOT}/sources/android/cpufeatures/ -v"
 export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}" #-lz -llog -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -llog -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
