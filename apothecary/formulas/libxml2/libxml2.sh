@@ -23,10 +23,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     if [ "$TYPE" == "android" ]; then
-        echo "MOVE glob.h"
         cp $FORMULA_DIR/glob.h .
-        echo "MOVE glob.c"
-        cp $FORMULA_DIR/glob.c .
     fi
 
     if [ "$TYPE" == "vs" ]; then
@@ -52,13 +49,12 @@ function build() {
 
     elif [ "$TYPE" == "android" ]; then
         local BUILD_TO_DIR=$BUILD_DIR/libxml2/build/$TYPE/$ABI
-        # source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
             export HOST=x86-linux-android
         fi
-        # ./autogen.sh
        ./configure --prefix=$BUILD_TO_DIR --host=$HOST --target=$HOST \
             --enable-static \
             --without-lzma \
@@ -74,6 +70,7 @@ function build() {
             --without-python
         make clean
         make -j${PARALLEL_MAKE}
+        make install
     elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
