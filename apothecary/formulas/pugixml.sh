@@ -64,6 +64,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
+        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
 		# Compile the program
 		$CXX -O2  $CFLAGS \
 			 -Wall \

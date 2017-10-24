@@ -26,8 +26,8 @@ export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=$(${NDK_ROOT}/ndk-which ar)
 export RANLIB=$(${NDK_ROOT}/ndk-which ranlib)
-export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem ${SYSROOT}/usr/include/ -v"
-export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures  -gcc-toolchain ${GCC_TOOLCHAIN_PATH}"
+export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem ${SYSROOT}/usr/include/"
+export CFLAGS="${CFLAGS} -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures -gcc-toolchain ${GCC_TOOLCHAIN_PATH}"
 export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -llog -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "

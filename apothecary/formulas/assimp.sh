@@ -329,6 +329,7 @@ function build() {
 
         source ../../android_configure.sh $ABI
 
+                
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
@@ -339,7 +340,6 @@ function build() {
             -DASSIMP_BUILD_STATIC_LIB=1 
             -DASSIMP_BUILD_SHARED_LIB=0 
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
             -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN 
             -DANDROID_NDK=$NDK_ROOT 
             -DCMAKE_BUILD_TYPE=Release 
@@ -347,10 +347,10 @@ function build() {
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM 
             -DANDROID_FORCE_ARM_BUILD=TRUE 
             -DCMAKE_INSTALL_PREFIX=install"
-       
+
         mkdir -p build
         cd build
-        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG $CFLAGS" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
+        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
         make assimp -j${PARALLEL_MAKE}
         cd ..
 
