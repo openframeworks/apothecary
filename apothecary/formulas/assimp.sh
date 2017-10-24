@@ -335,14 +335,12 @@ function build() {
             export HOST=x86-linux-android
         fi
 
-        export ANDTOOLCHAIN=$NDK_ROOT/build/cmake/android.toolchain.cmake
-
         local buildOpts="--build build/$TYPE 
             -DASSIMP_BUILD_STATIC_LIB=1 
             -DASSIMP_BUILD_SHARED_LIB=0 
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
-            -DCMAKE_TOOLCHAIN_FILE=$ANDTOOLCHAIN 
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN 
             -DANDROID_NDK=$NDK_ROOT 
             -DCMAKE_BUILD_TYPE=Release 
             -DANDROID_ABI=$ABI 
@@ -395,10 +393,8 @@ function copy() {
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -Rv lib/$TYPE/assimp.a $1/lib/$TYPE/assimp.a
     elif [ "$TYPE" == "android" ]; then
-        mkdir -p $1/lib/$TYPE/armeabi-v7a/
-        mkdir -p $1/lib/$TYPE/x86/
-        cp -Rv build_arm/code/libassimp.a $1/lib/$TYPE/armeabi-v7a/libassimp.a
-        cp -Rv build_x86/code/libassimp.a $1/lib/$TYPE/x86/libassimp.a
+        mkdir -p $1/lib/$TYPE/$ABI/
+        cp -Rv build/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
     fi

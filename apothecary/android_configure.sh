@@ -16,6 +16,7 @@ elif [ $ABI = x86 ]; then
     export ANDROID_PREFIX=i686-linux-android
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
 fi
+export ANDROID_CMAKE_TOOLCHAIN=$NDK_ROOT/build/cmake/android.toolchain.cmake
 export TOOLCHAIN=llvm${CLANG_VERSION}
 export TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN}/prebuilt/${HOST_PLATFORM}/bin
 export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOST_PLATFORM}

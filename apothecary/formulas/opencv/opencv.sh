@@ -504,7 +504,6 @@ function build() {
     source ../../android_configure.sh $ABI
 
     cd platforms
-    export ANDTOOLCHAIN=$NDK_ROOT/build/cmake/android.toolchain.cmake
     rm -rf $BUILD_FOLDER
 
     echo ${ANDROID_NDK}
@@ -549,7 +548,7 @@ function build() {
       -DANDROID_TOOLCHAIN_NAME=${GCC_TOOLCHAIN} \
       -DANDROID_ALLOW_UNDEFINED_SYMBOLS=TRUE \
       -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
-      -DCMAKE_TOOLCHAIN_FILE=$ANDTOOLCHAIN \
+      -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
       -DBUILD_PERF_TESTS=OFF
     cd $BUILD_FOLDER
     make -j${PARALLEL_MAKE}
