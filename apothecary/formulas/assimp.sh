@@ -337,20 +337,25 @@ function build() {
         fi
 
         local buildOpts="--build build/$TYPE 
-            -DASSIMP_BUILD_STATIC_LIB=1 
-            -DASSIMP_BUILD_SHARED_LIB=0 
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN 
+            -DASSIMP_BUILD_STATIC_LIB=ON
+            -DASSIMP_BUILD_SHARED_LIB=OFF
+            -DASSIMP_BUILD_TESTS=OFF
+            -DASSIMP_WERROR=OFF
+            -DASSIMP_BUILD_SAMPLES=OFF
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=ON 
+            -DASSIMP_ANDROID_JNIIOSYSTEM=ON
             -DANDROID_NDK=$NDK_ROOT 
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN 
             -DCMAKE_BUILD_TYPE=Release 
-            -DANDROID_ABI=$ABI 
+            -DANDROID_ABI=$ABI
+            -DANDROID_STL=c++_static
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM 
             -DANDROID_FORCE_ARM_BUILD=TRUE 
             -DCMAKE_INSTALL_PREFIX=install"
 
         mkdir -p build
         cd build
-        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
+        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS} -Wc++11-narrowing" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
         make assimp -j${PARALLEL_MAKE}
         cd ..
 
