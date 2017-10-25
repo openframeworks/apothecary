@@ -453,14 +453,13 @@ PING_LOOP_PID=$!
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-    export CXX=clang++
+    	export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
 					--library-path=$OPENSSL_LIBS/$ABI \
 					--config=Android
-    make clean ANDROID_ABI=$ABI
+    	make clean ANDROID_ABI=$ABI
 		make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
-
 		rm -f lib/Android/$ABI/*d.a
 
 		export PATH=$OLD_PATH
