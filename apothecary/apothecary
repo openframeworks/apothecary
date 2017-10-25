@@ -1139,11 +1139,9 @@ DEPENDS_FORMULA_DIR=$FORMULAS_DIR/$DEPENDS_SUBDIR
 BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
 # set for android sdk info
+# set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
-	if [[ -e "${NDK_ROOT}" ]] ; then
-		ANDROID_NDK_ROOT=${NDK_ROOT}
-		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
+	if [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
 		source ${APOTHECARY_DIR}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
