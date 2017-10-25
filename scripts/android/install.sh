@@ -15,7 +15,7 @@ else
     echo "Uncompressing NDK"
     unzip ${NDK_DIR}-linux-x86_64.zip > /dev/null 2>&1 
 fi
-NDK_ROOT=$(echo ${PWD})
+export NDK_ROOT=$(echo ${PWD})
 echo "APOTHECARY DIR set to $APOTHECARY_DIR"
 echo "NDK_ROOT=${NDK_ROOT}/${NDK_DIR}" > $APOTHECARY_DIR/paths.make
 cat $APOTHECARY_DIR/paths.make
