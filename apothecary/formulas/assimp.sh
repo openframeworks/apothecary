@@ -287,8 +287,15 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
+        local buildOpts="--build build/$TYPE             
+            -DBUILD_SHARED_LIBS=OFF 
+            -DASSIMP_BUILD_STATIC_LIB=1
+            -DASSIMP_BUILD_TESTS=0
+            -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
 
+        # mkdir -p build_osx
+        # cd build_osx
         # 32 bit
         cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
         make assimp -j${PARALLEL_MAKE}
@@ -354,8 +361,8 @@ function build() {
             -DANDROID_FORCE_ARM_BUILD=TRUE 
             -DCMAKE_INSTALL_PREFIX=install"
 
-        mkdir -p build
-        cd build
+        mkdir -p build_android
+        cd build_android
         cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
         make assimp -j${PARALLEL_MAKE}
         cd ..
@@ -382,6 +389,7 @@ function copy() {
     rm -rf $1/include/*
     cp -Rv include/* $1/include
 
+
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ] ; then
@@ -389,20 +397,28 @@ function copy() {
             mkdir -p $1/lib/$TYPE/Win32
             cp -v build_vs_32/code/Release/assimp$ARCH.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
             cp -v build_vs_32/code/Release/assimp$ARCH.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
+            cp -v build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             cp -v build_vs_64/code/Release/assimp$ARCH.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
+            cp -v build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
+        cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        cp -Rv lib/$TYPE/assimp.a $1/lib/$TYPE/assimp.a
+        cp -Rv build_ios/code/assimp.a $1/lib/$TYPE/assimp.a
+         cp -Rv build_android/include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build_android/include/* $1/include
+        cp -Rv build_android/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build_android/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
     elif [ "$TYPE" == "emscripten" ]; then
+        cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
+        cp -Rv build_emscripten/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
     fi
 
     # copy license files

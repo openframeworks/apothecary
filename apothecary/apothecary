@@ -64,6 +64,13 @@ PARALLEL_MAKE=1
 
 ### Xcode/ios specific settings
 
+function getrealpath() { if command -v realpath 2>/dev/null; then
+  echo realpath $1; 
+else 
+	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+fi;
+ }
+
 # xcode Developer root
 if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     XS="xcode-select -print-path" # stupid hack to keep my syntax highlighting from breaking :P
@@ -111,10 +118,10 @@ BUILDROOT_SUBDIR=_buildroot
 
 # paths relative to this script
 mkdir -p ${APOTHECARY_DIR}/build
-FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
-BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
-OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../../)
-LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
+FORMULAS_DIR=$(getrealpath ${APOTHECARY_DIR}/formulas)
+BUILD_DIR=$(getrealpath ${APOTHECARY_DIR}/build)
+OF_ROOT=$(getrealpath ${APOTHECARY_DIR}/../../../)
+LIBS_DIR=$(getrealpath ${APOTHECARY_DIR}/../)
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
 echo "OF: $OF_ROOT"
@@ -292,7 +299,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		a) # set the architecture
 		   ARCH=$OPTARG ;;
 		b) # set the build dir
-		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
+		   BUILD_DIR="$(getrealpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
 		   LIBS_DIR="$OPTARG" ;;
 		s) # set the git tag to switch version
