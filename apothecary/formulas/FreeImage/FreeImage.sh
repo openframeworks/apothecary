@@ -54,15 +54,15 @@ function prepare() {
 
 		# copy across new Makefile for iOS.
 		cp -v $FORMULA_DIR/Makefile.ios Makefile.ios
-	elif [ "$TYPE" == "android" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
-	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
-	    cd $BUILD_DIR/FreeImage_patched
-	    sed -i "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
-	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
-	    #include <stdint.h>
+    elif [ "$TYPE" == "android" ]; then
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
+        cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
+        cd $BUILD_DIR/FreeImage_patched
+        sed -i "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+        cat > Source/LibRawLite/src/swab.h << ENDDELIM
+        #include <stdint.h>
         #include <asm/byteorder.h>
-		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+        #define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
         inline void swab(const void *from, void*to, size_t n)
         {
             size_t i;
@@ -88,7 +88,7 @@ ENDDELIM
         #rm Source/LibWebP/src/dsp/dec_neon.c
 
         sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
-	fi
+    fi
 }
 
 # executed inside the lib src dir
@@ -327,7 +327,7 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
-        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        # export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
         export CC="$CC $CFLAGS $LDFLAGS"
         export CXX="$CXX $CFLAGS $LDFLAGS"
         make clean -f Makefile.gnu
