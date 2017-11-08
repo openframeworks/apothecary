@@ -277,11 +277,11 @@ EOF
 	    rm -rf stage stage_$ARCH
         ABI=armeabi-v7a
         source ../../android_configure.sh $ABI
-        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
 
 		# Run ranlib on binaries (not called corectly by b2)
-		${NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/${HOST_PLATFORM}/bin/arm-linux-androideabi-ranlib stage/lib/libboost_filesystem.a
-		${NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/${HOST_PLATFORM}/bin/arm-linux-androideabi-ranlib stage/lib/libboost_system.a	
+		${RANLIB} stage/lib/libboost_filesystem.a
+		${RANLIB} stage/lib/libboost_system.a	
 		
 	    mv stage stage_$ARCH
 	fi
