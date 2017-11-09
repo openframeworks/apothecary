@@ -63,6 +63,7 @@ elif [ $ABI = x86 ]; then
     export ANDROID_PREFIX=i686-linux-android
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
 fi
+export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 export TOOLCHAIN=llvm${CLANG_VERSION}
 export TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN}/prebuilt/${HOST_PLATFORM}/bin
 export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOST_PLATFORM}
@@ -71,8 +72,8 @@ export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=$($NDK_ROOT/ndk-which ar)
 export RANLIB=$($NDK_ROOT/ndk-which ranlib)
-export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/$ANDROID_PREFIX"
-export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/src/include -I${NDK_ROOT}/sources/android/cpufeatures"
+export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/"
+export CFLAGS="$CFLAGS  -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include  -I${NDK_ROOT}/sources/android/cpufeatures -I${NDK_ROOT}/sources/android/support/include"
 export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -llog -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
