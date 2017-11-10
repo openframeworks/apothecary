@@ -38,7 +38,7 @@ matrix:
         - sudo apt-get install -y --only-upgrade autoconf
         - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
         - chmod +x ./scripts/android/install-cmake.sh
-        - "./scripts/android/nstall-cmake.sh -d -v 3.6.3155560 -p linux"
+        - "./scripts/android/install-cmake.sh -d -v 3.6.3155560 -p linux"
         - "./cmake/3.6.3155560/bin/cmake --version"
       cache:
         directories:
