@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
  
 # define the version
-VER=3.3.0
+VER=3.3.1
  
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -90,6 +90,7 @@ function build() {
       -DWITH_OPENEXR=OFF \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
+      -DWITH_LAPACK=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
     echo "CMAKE Successful"
     echo "--------------------"
