@@ -292,6 +292,10 @@ function build() {
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
+            -DASSIMP_BUILD_STL_IMPORTER=0
+            -DASSIMP_BUILD_BLEND_IMPORTER=0
+            -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
 
         # mkdir -p build_osx
@@ -307,7 +311,17 @@ function build() {
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
-        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_BUILD_ASSIMP_TOOLS=0 -DASSIMP_BUILD_TESTS=0 -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
+        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1 
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
+            -DASSIMP_BUILD_ASSIMP_TOOLS=0 
+            -DASSIMP_BUILD_TESTS=0
+            -DBUILD_SHARED_LIBS=OFF 
+            -DASSIMP_BUILD_STATIC_LIB=1
+            -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_BUILD_STL_IMPORTER=0
+            -DASSIMP_BUILD_BLEND_IMPORTER=0
+            -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
         if [ $ARCH == 32 ] ; then

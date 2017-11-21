@@ -71,6 +71,10 @@ else
 fi;
  }
 
+realpath() {
+[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
 # xcode Developer root
 if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     XS="xcode-select -print-path" # stupid hack to keep my syntax highlighting from breaking :P
@@ -86,6 +90,8 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
+
+	
 fi
 
 # used when building for vs - set to 15 if not set explicitly
