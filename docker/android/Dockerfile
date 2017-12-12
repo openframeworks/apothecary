@@ -35,7 +35,7 @@ RUN echo Y | sdkmanager "platform-tools"
 RUN echo Y | sdkmanager "platforms;android-26"
 
 RUN mkdir $NDK_ROOT
-RUN cd $NDK_ROOT && wget -q http://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip -O android-ndk.zip
+RUN cd $NDK_ROOT && wget -q https://dl.google.com/android/repository/android-ndk-r16-linux-x86_64.zip -O android-ndk.zip
 RUN cd $NDK_ROOT && unzip android-ndk.zip && rm -f android-ndk.zip
-ENV NDK_ROOT $NDK_ROOT/android-ndk-r15c
+ENV NDK_ROOT $NDK_ROOT/android-ndk-r16
 RUN echo $NDK_ROOT

@@ -126,11 +126,11 @@ BUILDROOT_SUBDIR=_buildroot
 mkdir -p ${APOTHECARY_DIR}/build
 FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
 BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
-OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../../)
+OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
 LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
-echo "OF: $OF_ROOT"
+echo "OF: $OF_ROOT/"
 echo "APOTHECARY: $APOTHECARY_DIR"
 echo "FORMULAS: $FORMULAS_DIR"
 echo "BUILD: $BUILD_DIR"

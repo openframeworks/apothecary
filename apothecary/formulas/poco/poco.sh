@@ -90,10 +90,10 @@ function prepare() {
 		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" compile
 		cd ../../
 
-	elif [ "$TYPE" == "osx" ]; then
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
+	# elif [ "$TYPE" == "osx" ]; then
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
 
 	elif [ "$TYPE" == "vs" ] ; then
 		#change the build win cmd file for vs2015 compatibility

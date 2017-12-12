@@ -508,7 +508,7 @@ function build() {
     rm -rf $BUILD_FOLDER
 
     echo ${ANDROID_NDK}
-    
+    pwd
     scripts/${BUILD_SCRIPT} \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
