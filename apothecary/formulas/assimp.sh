@@ -60,12 +60,18 @@ function build() {
 
     rm -f CMakeCache.txt || true
 
+    local IOS_ARCHS
+    if [[ "${TYPE}" == "tvos" ]]; then
+        IOS_ARCHS="x86_64 arm64"
+    elif [[ "$TYPE" == "ios" ]]; then
+        IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+    fi
 
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         if [[ "$TYPE" == "tvos" ]]; then
             export IOS_MIN_SDK_VER=9.0
         fi
-        echo "building $TYPE | $ARCH"
+        echo "building $TYPE | $IOS_ARCHS"
         cd ./port/iOS/
         ./build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 i386 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
         echo "--------------------"
