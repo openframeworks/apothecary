@@ -60,224 +60,14 @@ function build() {
 
     rm -f CMakeCache.txt || true
 
-    # we don't use the build script for iOS now as it is less reliable than doing it our self
+
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        # ref: http://stackoverflow.com/questions/6691927/how-to-build-assimp-library-for-ios-device-and-simulator-with-boost-library
-
-        export TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
-        export TARGET_IOS
-
-        local IOS_ARCHS
-        if [[ "${TYPE}" == "tvos" ]]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [[ "$TYPE" == "ios" ]]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+        if [[ "$TYPE" == "tvos" ]]; then
+            export IOS_MIN_SDK_VER=9.0
         fi
-
-        local STDLIB="libc++"
-        local CURRENTPATH=`pwd`
-
-        echo $CURRENTPATH
-
-        SDKVERSION=""
-        if [[ "${TYPE}" == "tvos" ]]; then
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [[ "$TYPE" == "ios" ]]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-
-        DEVELOPER=$XCODE_DEV_ROOT
-        TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-        VERSION=$VER
-
-        # Validate environment
-        case $XCODE_DEV_ROOT in
-            *\ * )
-                echo "Your Xcode path contains whitespaces, which is not supported."
-                exit 1
-                ;;
-        esac
-        case $CURRENTPATH in
-            *\ * )
-                echo "Your path contains whitespaces, which is not supported by 'make install'."
-                exit 1
-                ;;
-        esac
-
-        mkdir -p "builddir/$TYPE"
-
-        libsToLink=""
-
-        echo $DEVELOPER
-
-        # loop through architectures! yay for loops!
-        for IOS_ARCH in ${IOS_ARCHS}
-        do
-            unset IOS_DEVROOT IOS_SDKROOT
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
-            unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS
-            unset CROSS_TOP CROSS_SDK BUILD_TOOLS PLATFORM
-
-            export CC=$TOOLCHAIN/usr/bin/clang
-            export CPP=$TOOLCHAIN/usr/bin/clang++
-            export CXX=$TOOLCHAIN/usr/bin/clang++
-            export CXXCPP=$TOOLCHAIN/usr/bin/clang++
-
-            export LD=$TOOLCHAIN/usr/bin/ld
-            export AR=$TOOLCHAIN/usr/bin/ar
-            export AS=$TOOLCHAIN/usr/bin/as
-            export NM=$TOOLCHAIN/usr/bin/nm
-            export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-            export LIBTOOL=$TOOLCHAIN/usr/bin/libtool
-
-            echo "Building $IOS_ARCH "
-
-            if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-            then
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVSimulator"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneSimulator"
-                fi
-            else
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVOS"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneOS"
-                fi
-            fi
-
-            export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-            export CROSS_SDK="${PLATFORM}.sdk"
-            export BUILD_TOOLS="${DEVELOPER}"
-
-
-            MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-            # min iOS version for arm64 is iOS 7
-
-            if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-                MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-            elif [ "${IOS_ARCH}" == "i386" ]; then
-                MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
-            fi
-            MIN_TYPE=-miphoneos-version-min=
-            if [ "${TYPE}" == "tvos" ]; then
-                MIN_TYPE=-mtvos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mtvos-simulator-version-min=
-                fi
-            elif [ "$TYPE" == "ios" ]; then
-                MIN_TYPE=-miphoneos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mios-simulator-version-min=
-                fi
-            fi
-
-            BITCODE=""
-            if [[ "$TYPE" == "tvos" ]]; then
-                BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=9.0
-            fi
-
-            export EXTRA_PLATFORM_CFLAGS=""
-            export EXTRA_PLATFORM_LDFLAGS=" -L${CROSS_TOP}/SDKs/$CROSS_SDK/usr/lib/"
-
-            echo $EXTRA_PLATFORM_LDFLAGS
-
-            EXTRA_LINK_FLAGS="-arch $IOS_ARCH $BITCODE -DNDEBUG -stdlib=libc++ -Os -DHAVE_UNISTD_H=1 -DNDEBUG -fPIC "
-            EXTRA_FLAGS="$EXTRA_LINK_FLAGS -pipe -no-cpp-precomp -funroll-loops $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
-
-            unset CFLAGS LDFLAGS CPPFLAGS CXXFLAGS DEVROOT SDKROOT
-
-            export LDFLAGS="$EXTRA_LINK_FLAGS $EXTRA_PLATFORM_LDFLAGS -std=c++11"
-            export DEVROOT="$CROSS_TOP"
-            export SDKROOT="$CROSS_SDK"
-            export CFLAGS="$EXTRA_FLAGS -std=c11"
-            export CPPFLAGS="$EXTRA_FLAGS -std=c++11"
-            export CXXFLAGS="$EXTRA_FLAGS -std=c++11"
-
-            #echo " out c_flags are $OUR_CFLAGS "
-            rm -f CMakeCache.txt
-            cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=./port/iOS/IPHONEOS_$(echo $IOS_ARCH | tr '[:lower:]' '[:upper:]')_TOOLCHAIN.cmake -DASSIMP_ENABLE_BOOST_WORKAROUND=1 -DASSIMP_BUILD_STATIC_LIB=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_C_FLAGS="$EXTRA_FLAGS" -DCMAKE_CXX_FLAGS="$EXTRA_FLAGS" -DCMAKE_CXX_FLAGS="$EXTRA_FLAGS".
-
-            $XCODE_DEV_ROOT/usr/bin/make clean
-
-            echo "--------------------"
-            echo "Running make for ${IOS_ARCH}"
-            echo "Please stand by..."
-
-            $XCODE_DEV_ROOT/usr/bin/make assimp -j 8 -l
-
-            fileToRenameTo="./builddir/$TYPE/libassimp-$IOS_ARCH.a"
-
-            mv ./lib/libassimp.a $fileToRenameTo
-
-            libsToLink="$libsToLink $fileToRenameTo"
-
-            $XCODE_DEV_ROOT/usr/bin/make clean
-
-            echo "--------------------"
-
-        done
-
-        mkdir -p "lib/$TYPE"
-        cd "./builddir/$TYPE/"
-        # link into universal lib
-        echo "Running lipo to create fat lib"
-        echo "Please stand by..."
-
-        SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        DEVELOPER=$XCODE_DEV_ROOT
-        TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-
-        if [[ "${TYPE}" == "tvos" ]] ; then
-             $TOOLCHAIN/usr/bin/lipo -create libassimp-arm64.a \
-                        libassimp-x86_64.a \
-                        -output "../../lib/$TYPE/assimp.a"
-         elif [[ "$TYPE" == "ios" ]]; then
-        #           libassimp-armv7s.a \
-            $TOOLCHAIN/usr/bin/lipo -create libassimp-armv7.a \
-                        libassimp-arm64.a \
-                        libassimp-i386.a \
-                        libassimp-x86_64.a \
-                        -output "../../lib/$TYPE/assimp.a"
-        fi
-
-        cd ../../
-
-
-        if [ $? != 0 ];
-        then
-            echo "Problem while creating fat lib with lipo"
-            exit 1
-        else
-            echo "Lipo Successful."
-        fi
-
-        echo "--------------------"
-        echo "Stripping any lingering symbols"
-
-        set -e
-        CURRENTPATH=`pwd`
-
-        cd lib/$TYPE
-        if [ "$TYPE" == "ios"]; then
-            SLOG="$CURRENTPATH/lib/$TYPE-stripping.log"
-            local TOBESTRIPPED
-            for TOBESTRIPPED in $( ls -1) ; do
-                $TOOLCHAIN/usr/bin/strip -x $TOBESTRIPPED >> "${SLOG}" 2>&1
-                if [ $? != 0 ];
-                then
-                    tail -n 100 "${LOG}"
-                    echo "Problem while stripping lib - Please check ${SLOG}"
-                    exit 1
-                else
-                    echo "Strip Successful for ${SLOG}"
-                fi
-            done
-        fi
-
-        cd ../../
+        echo "building $TYPE | $ARCH"
+        cd ./port/iOS/
+        ./build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 i386 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
         echo "--------------------"
 
         echo "Completed Assimp for $TYPE"
@@ -295,8 +85,7 @@ function build() {
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1
             -DASSIMP_BUILD_STL_IMPORTER=0
             -DASSIMP_BUILD_BLEND_IMPORTER=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
+            -DASSIMP_BUILD_3MF_IMPORTER=0"
 
         # mkdir -p build_osx
         # cd build_osx
@@ -311,13 +100,11 @@ function build() {
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
-        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1 
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 
-            -DASSIMP_BUILD_ASSIMP_TOOLS=0 
-            -DASSIMP_BUILD_TESTS=0
-            -DBUILD_SHARED_LIBS=OFF 
+        local buildOpts="-DBUILD_SHARED_LIBS=OFF 
             -DASSIMP_BUILD_STATIC_LIB=1
+            -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
             -DASSIMP_BUILD_STL_IMPORTER=0
             -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
@@ -422,8 +209,8 @@ function copy() {
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
         cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        cp -Rv build_ios/code/assimp.a $1/lib/$TYPE/assimp.a
-         cp -Rv build_android/include/* $1/include
+        cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
+        cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_android/include/* $1/include
