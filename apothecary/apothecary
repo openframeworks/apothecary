@@ -298,7 +298,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		s) # set the git tag to switch version
 		   SWITCH_VER="$OPTARG" ;;
 		j) # set the -j parameter for make
-		   PARALLEL_MAKE="$OPTARG" ;;
+		   PARALLEL_MAKE="$OPTARG" ; IS_CUSTOM_LIBS_DIR=1 ;;
 		g) # set git usage
 		   USE_GIT=1 ;;
 		h) # print help and exit
@@ -1126,7 +1126,6 @@ else # manually set
 		/*) : ;; # absolute path
 	 	*) LIBS_DIR=$WD/$LIBS_DIR ;; # relative path
 	esac
-	IS_CUSTOM_LIBS_DIR=1
 fi
 echoVerbose "Libs dest dir: $LIBS_DIR"
 if [ ! -e $LIBS_DIR ] ; then
