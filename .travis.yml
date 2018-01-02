@@ -42,7 +42,7 @@ matrix:
         - "./opt/cmake/3.6.3155560/bin/cmake --version"
       cache:
         directories:
-        - ~/android-ndk-r16c
+        - ~/android-ndk-r15c
         - apothecary/build/Toolchains/armv7
 
     - os: linux
