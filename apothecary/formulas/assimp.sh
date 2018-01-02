@@ -178,7 +178,15 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE -DASSIMP_BUILD_STATIC_LIB=1 -DASSIMP_BUILD_SHARED_LIB=0 -DASSIMP_ENABLE_BOOST_WORKAROUND=1"
+        local buildOpts="--build build/$TYPE             
+            -DBUILD_SHARED_LIBS=OFF 
+            -DASSIMP_BUILD_STATIC_LIB=1
+            -DASSIMP_BUILD_TESTS=0
+            -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
+            -DASSIMP_BUILD_STL_IMPORTER=0
+            -DASSIMP_BUILD_BLEND_IMPORTER=0
+            -DASSIMP_BUILD_3MF_IMPORTER=0"
         mkdir -p build_emscripten
         cd build_emscripten
         emcmake cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG" ..
