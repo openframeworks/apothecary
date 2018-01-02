@@ -54,6 +54,9 @@ matrix:
         - sudo apt-get update -q
         - sudo apt-get install -y --only-upgrade autoconf
         - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
+        - chmod +x ./scripts/android/install-cmake.sh
+        - "./scripts/android/install-cmake.sh -d -v 3.6.3155560 -p linux"
+        - "./opt/cmake/3.6.3155560/bin/cmake --version"
       cache:
         directories:
         - ~/android-ndk-r15c
@@ -93,22 +96,21 @@ matrix:
       env: TARGET="linuxarmv7l" SYSROOT="$HOME/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
 
-    # osx
+    # osx xcode7
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode7.3
       compiler: clang
       env: TARGET="osx" OPT2="1"
 
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode7.3
       compiler: clang
       env: TARGET="osx" OPT2="2"
 
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode7.3
       compiler: clang
       env: TARGET="osx" OPT2="3"
-
 
     # ios
     - os: osx
@@ -125,7 +127,6 @@ matrix:
       osx_image: xcode8
       compiler: clang
       env: TARGET="ios" OPT2="3"
-
 
     # tvos
     - os: osx
