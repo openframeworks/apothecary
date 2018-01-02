@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM ubuntu:16.04
 ENV DOCKER true
 
 ENV EMCC_SDK_VERSION 1.36.14
@@ -6,7 +6,7 @@ ENV EMCC_SDK_ARCH 32
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates build-essential curl git-core openjdk-8-jre-headless python libboost-tools-dev unzip autoconf libtool gnupg\
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates build-essential curl git-core openjdk-8-jre-headless python libboost-tools-dev unzip autoconf libtool gnupg git\
     && apt-mark hold openjdk-8-jre-headless \
     && apt-mark hold make \
     && curl -Os https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz \
@@ -40,13 +40,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && apt-get -y autoclean \
     && apt-get -y autoremove \
     && echo "Installed ... testing"
-RUN emcc --version \
-    && mkdir -p /tmp/emscripten_test && cd /tmp/emscripten_test \
-    && printf '#include <iostream>\nint main(){std::cout<<"HELLO"<<std::endl;return 0;}' > test.cpp \
-    && em++ -O2 test.cpp -o test.js && nodejs test.js \
-    && em++ test.cpp -o test.js && nodejs test.js \
-    && cd / \
-    && rm -rf /tmp/emscripten_test \
-
 RUN git clone --depth 1 http://github.com/openFrameworks/openFrameworks.git
 RUN ./openFrameworks/scripts/linux/ubuntu/install_dependencies.sh 
