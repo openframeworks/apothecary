@@ -11,7 +11,7 @@ if [ "$(ls -A ${NDK_DIR})" ]; then
     ls -A ${NDK_DIR}
 else
     echo "Downloading NDK"
-    wget https://dl.google.com/android/repository/${NDK_DIR}-linux-x86_64.zip
+    wget -q --no-check-certificate https://dl.google.com/android/repository/${NDK_DIR}-linux-x86_64.zip
     echo "Uncompressing NDK"
     unzip ${NDK_DIR}-linux-x86_64.zip > /dev/null 2>&1 
 fi
