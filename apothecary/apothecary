@@ -56,7 +56,7 @@ FORMULA_DIR=
 BUILD_DIR=
 
 # full path to the destination dir for compiled libs
-LIBS_DIR=
+LIBS_DIR=""
 
 # number of parallel tasks to run on make.
 # formulas should pass this as -j${PARALLEL_MAKE} to make
@@ -307,7 +307,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		b) # set the build dir
 		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
-		   LIBS_DIR="$OPTARG" ;;
+		   LIBS_DIR="$OPTARG"; IS_CUSTOM_LIBS_DIR=1 ;;
 		s) # set the git tag to switch version
 		   SWITCH_VER="$OPTARG" ;;
 		j) # set the -j parameter for make
