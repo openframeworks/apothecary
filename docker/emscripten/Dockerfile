@@ -6,7 +6,7 @@ ENV EMCC_SDK_ARCH 32
 
 WORKDIR /
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates build-essential curl git-core openjdk-8-jre-headless python libboost-tools-dev unzip autoconf libtool gnupg git\
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates build-essential curl git-core openjdk-8-jre-headless python libboost-tools-dev unzip autoconf libtool gnupg git rsync\
     && apt-mark hold openjdk-8-jre-headless \
     && apt-mark hold make \
     && curl -Os https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz \
