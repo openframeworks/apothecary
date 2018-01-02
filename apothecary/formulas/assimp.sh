@@ -233,7 +233,7 @@ function copy() {
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
-        cp -Rv build_emscripten/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
+        cp -Rv build_emscripten/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     fi
 
     # copy license files
