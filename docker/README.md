@@ -1,4 +1,4 @@
-To run docker locally, these docker images can be used to replicate the setup on Travis.
+To run docker locally, these docker images can be used to replicate the setup on Travis. Its usefull for testing the setup without waiting for travis to build.
 
 
 Build docker image from Dockverfile manually by running
