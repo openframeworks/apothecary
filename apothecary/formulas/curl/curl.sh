@@ -73,8 +73,8 @@ function build() {
             export HOST=x86-linux-android
         fi
         ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 	    ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_DIR --target=$HOST \
             --enable-static \
             --disable-shared \
@@ -152,8 +152,8 @@ function build() {
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
         make clean
 	    make -j${PARALLEL_MAKE}
