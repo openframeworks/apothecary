@@ -58,6 +58,14 @@ echoDots(){
 }
 
 
+travis_fold_start() {
+  echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
+}
+
+travis_fold_end() {
+  echo -e "\ntravis_fold:end:$1\r"
+}
+
 if [ -z ${PARALLEL+x} ]; then
     if [ "$TARGET" == "osx" ]; then
         PARALLEL=4
@@ -90,9 +98,12 @@ if [ "$TARGET" == "emscripten" ]; then
 fi
 
 echo "Running apothecary from $PWD"
+ITER=0
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
     start=`date +%s`
     formula_name="${formula%.*}"
+
+    travis_fold_start "build.$ITER" "Build $formula_name"
 
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
@@ -143,9 +154,17 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     echoDots $apothecaryPID
     wait $apothecaryPID
 
+    echo "Tail of log for $formula_name"    
+    tail -n 30 formula.log    
+
     end=`date +%s`
     runtime=$((end-start))
+    
+    echo ""
     echo "Finished $formula_name in $runtime sec"
+    travis_fold_end "build.$ITER"
+
+    ITER=$(expr $ITER + 1)
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
