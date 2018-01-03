@@ -14,7 +14,7 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
+	wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     unzip glm-$VER.zip
 }
 

@@ -14,7 +14,7 @@ VER=2.9.4
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    wget ftp://xmlsoft.org/libxml2/libxml2-${VER}.tar.gz
+    wget -nv ftp://xmlsoft.org/libxml2/libxml2-${VER}.tar.gz
     tar xzf libxml2-${VER}.tar.gz
     mv libxml2-${VER} libxml2
     rm libxml2-${VER}.tar.gz
@@ -81,8 +81,8 @@ function build() {
 
 
     elif [ "$TYPE" == "emscripten" ]; then
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
         emconfigure ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         emmake make clean
         emmake make -j${PARALLEL_MAKE}

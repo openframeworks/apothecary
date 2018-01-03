@@ -16,11 +16,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
@@ -241,7 +241,7 @@ function build() {
 		unset CC
 		unset AR
 		rm -f Setenv-android.sh
-		wget http://wiki.openssl.org/images/7/70/Setenv-android.sh
+		wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
