@@ -20,3 +20,6 @@ else
 fi
 
 echo "NDK_ROOT=${NDK_ROOT}" > paths.make
+
+sudo apt-get update -q
+sudo apt-get install -y libboost-tools-dev gperf
