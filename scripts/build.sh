@@ -5,6 +5,9 @@ set -o pipefail
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
+OPT=$1
+OPT2=$2
+
 cd $APOTHECARY_PATH
 
 # trap any script errors and exit
@@ -56,16 +59,18 @@ echoDots(){
     done
 }
 
-if [ "$TARGET" == "osx" ]; then
-    PARALLEL=4
-elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-    PARALLEL=2
-elif [ "$TARGET" == "android" ]; then
-    PARALLEL=2
-elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
-    PARALLEL=4
-else
-    PARALLEL=1
+if [ -z ${PARALLEL+x} ]; then
+    if [ "$TARGET" == "osx" ]; then
+        PARALLEL=4
+    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
+        PARALLEL=2
+    elif [ "$TARGET" == "android" ]; then
+        PARALLEL=2
+    elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
+        PARALLEL=4
+    else
+        PARALLEL=1
+    fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -88,27 +93,28 @@ fi
 echo "Running apothecary from $PWD"
 
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
+    start=`date +%s`
     formula_name="${formula%.*}"
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
         echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
         ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
-    # compile everything but poco openssl curl assimp opencv and svg tiny
+        # compile everything but poco openssl curl assimp opencv and svg tiny
         if [ "$OPT2" == "1" ]; then
             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && "$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
                 echo Pass 1 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
-    # only compile poco, openssl, curl
+        # only compile poco, openssl, curl
         elif [ "$OPT2" == "2" ]; then
             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ]; then
                 echo Pass 2 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
-    # only compile assimp, opencv, svgtiny
+        # only compile assimp, opencv, svgtiny
         elif [ "$OPT2" == "3" ]; then
             if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
                 echo Pass 3 - Compiling $formula_name
@@ -137,6 +143,10 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     apothecaryPID=$!
     echoDots $apothecaryPID
     wait $apothecaryPID
+
+    end=`date +%s`
+    runtime=$((end-start))
+    echo "Finished $formula_name in $runtime sec"
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then

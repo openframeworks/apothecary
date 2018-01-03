@@ -20,13 +20,3 @@ else
 fi
 
 echo "NDK_ROOT=${NDK_ROOT}" > paths.make
-
-# Install cmake for android
-sudo add-apt-repository ppa:dns/gnu -y
-sudo apt-get update -q
-sudo apt-get install -y --only-upgrade autoconf
-sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
-chmod +x ./scripts/android/install-cmake.sh
-./scripts/android/install-cmake.sh -d -v 3.6.3155560 -p linux
-echo "Installed cmake"
-cmake --version

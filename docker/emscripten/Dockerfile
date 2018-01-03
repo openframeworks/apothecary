@@ -1,44 +1,24 @@
-FROM ubuntu:16.04
-ENV DOCKER true
+# Based on https://docs.travis-ci.com/user/common-build-problems/#Troubleshooting-Locally-in-a-Docker-Image
+FROM travisci/ci-garnet:packer-1513287432-2ffda03
 
-ENV EMCC_SDK_VERSION 1.36.14
-ENV EMCC_SDK_ARCH 32
+ENV TRAVIS_BUILD_DIR /root
 
-WORKDIR /
+ENV TARGET emscripten
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates build-essential curl git-core openjdk-8-jre-headless python libboost-tools-dev unzip autoconf libtool gnupg git rsync\
-    && apt-mark hold openjdk-8-jre-headless \
-    && apt-mark hold make \
-    && curl -Os https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz \
-    && tar xf cmake-3.6.1.tar.gz \
-    && cd cmake-3.6.1 && ./configure && make && make install && cd ..\
-    && rm -rf cmake* \
-    && curl -sL https://deb.nodesource.com/setup_6.x | bash - \
-    && apt-get install -y nodejs \
-    && curl https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz > emsdk-portable.tar.gz \
-    && tar xzf emsdk-portable.tar.gz \
-    && rm emsdk-portable.tar.gz \
-    && cd emsdk-portable \
-    && ./emsdk update \
-    && ./emsdk install --build=MinSizeRel sdk-tag-$EMCC_SDK_VERSION-${EMCC_SDK_ARCH}bit \
-\
-    && mkdir -p /clang \
-    && cp -r /emsdk-portable/clang/tag-e$EMCC_SDK_VERSION/build_tag-e${EMCC_SDK_VERSION}_${EMCC_SDK_ARCH}/bin /clang \
-    && mkdir -p /clang/src \
-    && cp /emsdk-portable/clang/tag-e$EMCC_SDK_VERSION/src/emscripten-version.txt /clang/src/ \
-    && mkdir -p /emscripten \
-    && cp -r /emsdk-portable/emscripten/tag-$EMCC_SDK_VERSION/* /emscripten \
-    && cp -r /emsdk-portable/emscripten/tag-${EMCC_SDK_VERSION}_${EMCC_SDK_ARCH}bit_optimizer/optimizer /emscripten/ \
-    && echo "import os\nLLVM_ROOT='/clang/bin/'\nNODE_JS='nodejs'\nEMSCRIPTEN_ROOT='/emscripten'\nEMSCRIPTEN_NATIVE_OPTIMIZER='/emscripten/optimizer'\nSPIDERMONKEY_ENGINE = ''\nV8_ENGINE = ''\nTEMP_DIR = '/tmp'\nCOMPILER_ENGINE = NODE_JS\nJS_ENGINES = [NODE_JS]\n" > ~/.emscripten \
-    && rm -rf /emsdk-portable \
-    && rm -rf /emscripten/tests \
-    && rm -rf /emscripten/site \
-    && for prog in em++ em-config emar emcc emconfigure emmake emranlib emrun emscons emcmake; do \
-           ln -sf /emscripten/$prog /usr/local/bin; done \
-    && apt-get -y --purge remove curl git-core build-essential gcc \
-    && apt-get -y clean \
-    && apt-get -y autoclean \
-    && apt-get -y autoremove \
-    && echo "Installed ... testing"
-RUN git clone --depth 1 http://github.com/openFrameworks/openFrameworks.git
-RUN ./openFrameworks/scripts/linux/ubuntu/install_dependencies.sh 
+# Copied from the build logs in travis
+RUN sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
+RUN sudo -E apt-get -yq update
+RUN sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install libstdc++6 gcc-4.9 realpath coreutils libboost-tools-dev gperf
+
+# Install cmake 3.9.2 (preinstalled on travis)
+RUN wget http://www.cmake.org/files/v3.9/cmake-3.9.2.tar.gz
+RUN tar xf cmake-3.9.2.tar.gz
+RUN cd cmake-3.9.2; ./configure; make -j12; make install
+RUN cmake --version
+
+# Run install.sh installing
+ADD scripts/ /root/scripts/
+
+RUN chmod +x $TRAVIS_BUILD_DIR/scripts/emscripten/install.sh
+RUN cd $TRAVIS_BUILD_DIR; ./scripts/emscripten/install.sh
+
