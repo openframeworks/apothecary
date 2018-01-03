@@ -65,7 +65,7 @@ if [ ! -f ${NAME}.zip ]; then
     exit
 fi
 
-DIRECTORY=$ANDROID_HOME/cmake/${VERSION}
+DIRECTORY=/opt/cmake/${VERSION}
 mkdir -p ${DIRECTORY}
 unzip ${NAME}.zip -d ${DIRECTORY}
 rm ${NAME}.zip
@@ -79,4 +79,4 @@ sed -i -- 's/CMAKE_VERSION_MINOR/'"$VERSION_MINOR"'/g' package.xml
 sed -i -- 's/CMAKE_VERSION_MICRO/'"$VERSION_MICRO"'/g' package.xml
 mv package.xml ${DIRECTORY}
 
-ln -s $DIRECTORY/bin/cmake /usr/local/bin/cmake
+sudo ln -s $DIRECTORY/bin/cmake /usr/local/bin/cmake
