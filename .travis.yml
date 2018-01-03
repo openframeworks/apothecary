@@ -32,14 +32,6 @@ matrix:
       sudo: required
       dist: trusty
       env: TARGET="android" OPT="armv7"
-      before_script:
-        - sudo add-apt-repository ppa:dns/gnu -y
-        - sudo apt-get update -q
-        - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
-        - chmod +x ./scripts/android/install-cmake.sh
-        - "./scripts/android/install-cmake.sh -d -v 3.6.3155560 -p linux"
-        - "./opt/cmake/3.6.3155560/bin/cmake --version"
       cache:
         directories:
         - ~/android-ndk-r15c
@@ -49,14 +41,6 @@ matrix:
       sudo: required
       dist: trusty
       env: TARGET="android" OPT="x86"
-      before_script:
-        - sudo add-apt-repository ppa:dns/gnu -y
-        - sudo apt-get update -q
-        - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
-        - chmod +x ./scripts/android/install-cmake.sh
-        - "./scripts/android/install-cmake.sh -d -v 3.6.3155560 -p linux"
-        - "./opt/cmake/3.6.3155560/bin/cmake --version"
       cache:
         directories:
         - ~/android-ndk-r15c

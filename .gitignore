@@ -15,3 +15,4 @@ scripts/linuxarmv7l/CROSS_BUILD_TOOLS/*
 !scripts/linuxarmv7l/CROSS_BUILD_TOOLS/build_cross_gcc.sh
 package.xml
 paths.make
+formula.log
