@@ -58,14 +58,6 @@ echoDots(){
 }
 
 
-travis_fold_start() {
-  echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
-}
-
-travis_fold_end() {
-  echo -e "\ntravis_fold:end:$1\r"
-}
-
 if [ -z ${PARALLEL+x} ]; then
     if [ "$TARGET" == "osx" ]; then
         PARALLEL=4
@@ -98,64 +90,62 @@ if [ "$TARGET" == "emscripten" ]; then
 fi
 
 echo "Running apothecary from $PWD"
-ITER=0
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
     start=`date +%s`
     formula_name="${formula%.*}"
 
-    travis_fold_start "build.$ITER" "Build $formula_name"
-
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name
+        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
         # compile everything but poco openssl curl assimp opencv and svg tiny
         if [ "$OPT2" == "1" ]; then
             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && "$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
                 echo Pass 1 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         # only compile poco, openssl, curl
         elif [ "$OPT2" == "2" ]; then
             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ]; then
                 echo Pass 2 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         # only compile assimp, opencv, svgtiny
         elif [ "$OPT2" == "3" ]; then
             if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
                 echo Pass 3 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
             fi
         else
             echo Compiling $formula_name
-            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
     elif [ "$TARGET" == "msys2" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     else
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
     fi
+
+    apothecaryPID=$!
+    echoDots $apothecaryPID
+    wait $apothecaryPID
 
     end=`date +%s`
     runtime=$((end-start))
     echo "Finished $formula_name in $runtime sec"
-    travis_fold_end "build.$ITER"
-
-    ITER=$(expr $ITER + 1)
 done
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
