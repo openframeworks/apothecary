@@ -336,7 +336,7 @@ function build() {
 			fi
 		fi
 
-		echo "--------------------"
+		echo "--------------------"ø
 		echo "Build Successful for FreeType $TYPE $VER"
 
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
@@ -354,10 +354,6 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "emscripten" ]; then
-	    if [ "$EMSCRIPTEN" == "" ]; then
-	        echo "error emscripten is not installed or environment not set"
-	        exit 1
-	    fi
 	    #patch -p0 -u < $FORMULA_DIR/emscripten.patch
 	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE
 	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
