@@ -34,7 +34,8 @@ matrix:
       env: TARGET="android" OPT="armv7"
       cache:
         directories:
-        - apothecary/build/Toolchains/armv7
+        - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/armv7
 
     - os: linux
       sudo: required
@@ -42,7 +43,8 @@ matrix:
       env: TARGET="android" OPT="x86"
       cache:
         directories:
-        - apothecary/build/Toolchains/x86
+        - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/x86
 
 
     # emscripten

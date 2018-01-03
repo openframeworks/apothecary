@@ -5,7 +5,7 @@ NDK_ROOT="~/android-ndk-${NDK_VERSION}"
 set -e
 
 # Check if cached NDK directory exists
-if [ "$(ls -A ${NDK_ROOT})" ]; then
+if [ -d "$NDK_ROOT" ]; then
     echo "Using cached NDK"
     ls -A ${NDK_ROOT}
 else
