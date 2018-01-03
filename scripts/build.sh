@@ -13,7 +13,7 @@ trap "trapError" ERR
 
 trapError() {
 	echo
-	echo " ^ Received error ^"
+	echo " ^ Received error building $formula_name ^"
 	cat formula.log
 	if [ "$formula_name" == "boost" ]; then
 	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
