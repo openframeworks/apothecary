@@ -336,7 +336,7 @@ function build() {
 			fi
 		fi
 
-		echo "--------------------"ø
+		echo "--------------------"
 		echo "Build Successful for FreeType $TYPE $VER"
 
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB

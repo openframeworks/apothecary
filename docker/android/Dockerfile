@@ -11,6 +11,10 @@ RUN tar xf cmake-3.9.2.tar.gz
 RUN cd cmake-3.9.2; ./configure; make -j12; make install
 RUN cmake --version
 
+RUN sudo apt-get update -q
+RUN sudo apt-get install -y libboost-tools-dev gperf realpath
+
+
 # Run install.sh installing ndk
 ADD scripts/ /root/scripts/
 RUN chmod +x $TRAVIS_BUILD_DIR/scripts/android/install.sh
