@@ -8,8 +8,10 @@
  
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
  
-# define the version
+# define the version 
 VER=3.3.1
+# emscripten needs version 3.1.0 
+EMSCRIPTEN_VER=3.1.0
  
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -25,6 +27,9 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
  
 # download the source code and unpack it into LIB_NAME
 function download() {
+  if [ "$TYPE" == "emscripten" ] ; then
+    VER=EMSCRIPTEN_VER
+  fi 
   curl -Lk https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
   tar -xf opencv-$VER.tar.gz
   mv opencv-$VER $1
@@ -34,6 +39,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
   : # noop
+  
 }
 
 # executed inside the lib src dir
@@ -613,7 +619,6 @@ function build() {
       -DWITH_TBB=OFF \
       -DWITH_OPENNI=OFF \
       -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
       -DWITH_LIBV4L=OFF \
       -DWITH_MATLAB=OFF \
