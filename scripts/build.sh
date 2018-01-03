@@ -133,7 +133,6 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
 
     travis_fold_start "build.$ITER" "Build $formula_name"
     travis_time_start
-    
 
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
@@ -142,10 +141,12 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
         # compile everything but poco openssl curl assimp opencv and svg tiny
         if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && "$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
+            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && ["$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
                 echo Pass 1 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            else 
+                echo "Skipped $formula_name" > formula.log 2>&1
             fi
         # only compile poco, openssl, curl
         elif [ "$OPT2" == "2" ]; then
@@ -153,6 +154,8 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
                 echo Pass 2 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            else 
+                echo "Skipped $formula_name" > formula.log 2>&1
             fi
         # only compile assimp, opencv, svgtiny
         elif [ "$OPT2" == "3" ]; then
@@ -160,6 +163,8 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
                 echo Pass 3 - Compiling $formula_name
                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            else 
+                echo "Skipped $formula_name" > formula.log 2>&1
             fi
         else
             echo Compiling $formula_name
