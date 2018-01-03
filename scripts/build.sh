@@ -131,8 +131,9 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     
     formula_name="${formula%.*}"
 
-    travis_fold_start "build.$ITER" "Build $formula_name"
     travis_time_start
+    travis_fold_start "build.$ITER" "Build $formula_name"
+    
 
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
@@ -189,8 +190,8 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     end=`date +%s`
     runtime=$((end-start))
     
-    travis_time_finish
     travis_fold_end "build.$ITER"
+    travis_time_finish
 
     ITER=$(expr $ITER + 1)
 done
