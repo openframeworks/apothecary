@@ -131,8 +131,8 @@ matrix:
 
   exclude:
     - compiler: gcc
-install: scripts/$TARGET/install.sh $OPT $OPT2
+install: scripts/$TARGET/install.sh
 script:
-    - scripts/build.sh $OPT $OPT2
+    - scripts/build.sh
 git:
     depth: 10

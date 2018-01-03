@@ -5,8 +5,6 @@ set -o pipefail
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
-OPT=$1
-OPT2=$2
 
 cd $APOTHECARY_PATH
 

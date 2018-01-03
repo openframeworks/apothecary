@@ -17,3 +17,4 @@ RUN cd cmake-3.9.2; ./configure; make -j12; make install
 RUN cmake --version
 
 ENV TARGET=android
+
