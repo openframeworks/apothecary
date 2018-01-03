@@ -66,6 +66,34 @@ travis_fold_end() {
   echo -e "\ntravis_fold:end:$1\r"
 }
 
+travis_time_start() {
+  travis_timer_id=$(printf %08x $(( RANDOM * RANDOM )))
+  travis_start_time=$(travis_nanoseconds)
+  echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
+}
+
+travis_time_finish() {
+  local result=$?
+  travis_end_time=$(travis_nanoseconds)
+  local duration=$(($travis_end_time-$travis_start_time))
+  echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
+  return $result
+}
+
+function travis_nanoseconds() {
+  local cmd="date"
+  local format="+%s%N"
+  local os=$(uname)
+
+  if hash gdate > /dev/null 2>&1; then
+    cmd="gdate" # use gdate if available
+  elif [[ "$os" = Darwin ]]; then
+    format="+%s000000000" # fallback to second precision on darwin (does not support %N)
+  fi
+
+  $cmd -u $format
+}
+
 if [ -z ${PARALLEL+x} ]; then
     if [ "$TARGET" == "osx" ]; then
         PARALLEL=4
@@ -100,10 +128,11 @@ fi
 echo "Running apothecary from $PWD"
 ITER=0
 for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-    start=`date +%s`
+    
     formula_name="${formula%.*}"
 
     travis_fold_start "build.$ITER" "Build $formula_name"
+    travis_time_start
 
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
@@ -160,8 +189,7 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
     end=`date +%s`
     runtime=$((end-start))
     
-    echo ""
-    echo "Finished $formula_name in $runtime sec"
+    travis_time_finish
     travis_fold_end "build.$ITER"
 
     ITER=$(expr $ITER + 1)
