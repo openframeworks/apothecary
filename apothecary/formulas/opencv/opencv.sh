@@ -28,7 +28,7 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 # download the source code and unpack it into LIB_NAME
 function download() {
   if [ "$TYPE" == "emscripten" ] ; then
-    VER=EMSCRIPTEN_VER
+    VER=$EMSCRIPTEN_VER
   fi 
   curl -Lk https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
   tar -xf opencv-$VER.tar.gz
