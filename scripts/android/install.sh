@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-NDK_VERSION="r15c"
-NDK_ROOT="~/android-ndk-${NDK_VERSION}"
-
 set -e
 
-ls -A ${NDK_ROOT}
-ls "~/"
+sudo apt-get update -q
+sudo apt-get install -y libboost-tools-dev gperf realpath
+
+NDK_VERSION="r15c"
+NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
+
 # Check if cached NDK directory exists
-if [ -d "$NDK_ROOT" ]; then
+if [ "$(ls -A ${NDK_ROOT})" ]; then
     echo "Using cached NDK"
     ls -A ${NDK_ROOT}
 else
@@ -23,5 +24,3 @@ fi
 
 echo "NDK_ROOT=${NDK_ROOT}" > paths.make
 
-sudo apt-get update -q
-sudo apt-get install -y libboost-tools-dev gperf
