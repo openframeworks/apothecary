@@ -107,52 +107,48 @@ for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | 
 
     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
         # compile everything but poco openssl curl assimp opencv and svg tiny
         if [ "$OPT2" == "1" ]; then
             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && "$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
                 echo Pass 1 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
             fi
         # only compile poco, openssl, curl
         elif [ "$OPT2" == "2" ]; then
             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ]; then
                 echo Pass 2 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
             fi
         # only compile assimp, opencv, svgtiny
         elif [ "$OPT2" == "3" ]; then
             if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
                 echo Pass 3 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
             fi
         else
             echo Compiling $formula_name
-            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
         fi
     elif [ "$TARGET" == "vs" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name
     elif [ "$TARGET" == "msys2" ]; then
         echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
     else
         echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name"
+        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name
     fi
-
-    apothecaryPID=$!
-    echoDots $apothecaryPID
-    wait $apothecaryPID
 
     end=`date +%s`
     runtime=$((end-start))
