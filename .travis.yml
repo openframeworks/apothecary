@@ -35,7 +35,7 @@ matrix:
       cache:
         directories:
         - ~/android-ndk-r15c
-        - apothecary/build/Toolchains/armv7
+        # - apothecary/build/Toolchains/armv7
 
     - os: linux
       sudo: required
@@ -44,7 +44,7 @@ matrix:
       cache:
         directories:
         - ~/android-ndk-r15c
-        - apothecary/build/Toolchains/x86
+        # - apothecary/build/Toolchains/x86
 
 
     # emscripten
