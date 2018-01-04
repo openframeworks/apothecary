@@ -6,7 +6,7 @@ set -o pipefail
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-VERBOSE=0
+VERBOSE=1
 
 cd $APOTHECARY_PATH
 
@@ -216,11 +216,11 @@ fi
 
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
-    if [ "$COMPILER" == "gcc5" ]; then
+    if [ "$OPT" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"
         export COMPILER="g++5 -std=c++11"
-    elif [ "$COMPILER" == "gcc6" ]; then
+    elif [ "$OPT" == "gcc6" ]; then
         export CC="gcc-6 -fPIE"
         export CXX="g++-6 -std=c++11 -fPIE"
         export COMPILER="g++6 -std=c++11 -fPIE"
@@ -305,7 +305,7 @@ if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}.zip
 	7z a $TARBALL $LIBS
 else
-	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$BUNDLE.tar.bz2
+	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 	tar cjf $TARBALL $LIBS
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d

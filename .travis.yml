@@ -17,14 +17,14 @@ matrix:
       dist: trusty
       env:
         - TARGET="linux"
-        - COMPILER="gcc5"
+        - OPT="gcc5"
 
     - os: linux
       sudo: required
       dist: trusty
       env:
         - TARGET="linux"
-        - COMPILER="gcc6"
+        - OPT="gcc6"
 
 
     # android
