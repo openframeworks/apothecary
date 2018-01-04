@@ -17,21 +17,21 @@ matrix:
       dist: trusty
       env:
         - TARGET="linux"
-        - OPT="gcc5"
+        - ARCH="gcc5"
 
     - os: linux
       sudo: required
       dist: trusty
       env:
         - TARGET="linux"
-        - OPT="gcc6"
+        - ARCH="gcc6"
 
 
     # android
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="android" OPT="armv7"
+      env: TARGET="android" ARCH="armv7"
       cache:
         directories:
         - ~/android-ndk-r15c
@@ -40,7 +40,7 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="android" OPT="x86"
+      env: TARGET="android" ARCH="x86"
       cache:
         directories:
         - ~/android-ndk-r15c
@@ -84,49 +84,49 @@ matrix:
     - os: osx
       osx_image: xcode7.3
       compiler: clang
-      env: TARGET="osx" OPT2="1"
+      env: TARGET="osx" BUNDLE="1"
 
     - os: osx
       osx_image: xcode7.3
       compiler: clang
-      env: TARGET="osx" OPT2="2"
+      env: TARGET="osx" BUNDLE="2"
 
     - os: osx
       osx_image: xcode7.3
       compiler: clang
-      env: TARGET="osx" OPT2="3"
+      env: TARGET="osx" BUNDLE="3"
 
     # ios
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="ios" OPT2="1"
+      env: TARGET="ios" BUNDLE="1"
 
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="ios" OPT2="2"
+      env: TARGET="ios" BUNDLE="2"
 
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="ios" OPT2="3"
+      env: TARGET="ios" BUNDLE="3"
 
     # tvos
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="tvos" OPT2="1"
+      env: TARGET="tvos" BUNDLE="1"
 
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="tvos" OPT2="2"
+      env: TARGET="tvos" BUNDLE="2"
 
     - os: osx
       osx_image: xcode8
       compiler: clang
-      env: TARGET="tvos" OPT2="3"
+      env: TARGET="tvos" BUNDLE="3"
 
 
   exclude:

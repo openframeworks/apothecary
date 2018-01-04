@@ -31,11 +31,6 @@ function prepare() {
 	if [ "$TYPE" == "vs" ] ; then
 		cp $FORMULA_DIR/build-openssl.bat projects/build-openssl.bat
 	fi
-
-    apothecaryDepend download openssl
-    apothecaryDepend prepare openssl
-    apothecaryDepend build openssl
-    apothecaryDepend copy openssl
 }
 
 # executed inside the lib src dir

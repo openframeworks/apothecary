@@ -39,6 +39,9 @@ FORMULA_DEPENDS=()
 # set this if you need to do it manually
 FORMULA_DEPENDS_MANUAL=0
 
+# Build dependencies for formula
+BUILD_DEPENDENCIES=1
+
 ### READ ONLY please!
 
 # build settings
@@ -208,6 +211,8 @@ options:
 
   -x    use visual studio express tools
 
+  -p 	dont build dependencies
+
   -h	print this usage guide
 
 examples:
@@ -298,7 +303,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:hgvxf opt ; do
+while getopts t:a:b:d:s:j:hgvxfp opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   TYPE="$OPTARG" ;;
@@ -322,8 +327,10 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		   VS_BUILD_TOOL=WDExpress ;;
         f) # force download
            FORCE_DOWNLOAD=1 ;;
+		p) # Dont build dependencies
+           BUILD_DEPENDENCIES=0 ;;
 		[?]) # print help and exit
-			 echo "$HELP" ; exit 0 ;;
+			echo "$HELP" ; exit 0 ;;
 	esac
 done
 shift $(expr $OPTIND - 1)
@@ -679,7 +686,7 @@ function downloadFormula(){
 
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies download
 	fi
 
@@ -704,7 +711,7 @@ function prepareFormula() {
 	cd $BUILD_DIR/$1
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies prepare $1
 	fi
 
@@ -731,7 +738,7 @@ function buildFormula() {
 	cd $BUILD_DIR/$1
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies build
 		apothecaryDependencies copy
 	fi
@@ -794,7 +801,7 @@ function cleanFormula() {
 	else
 
 		# dependencies
-		if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+		if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 			apothecaryDependencies clean
 		fi
 
@@ -992,6 +999,11 @@ function clean() {
 # $1 = command
 # $2 = dependency name
 function apothecaryDepend() {
+	# Dont do anything if BUILD_DEPENDENCIES is false
+	if [ $BUILD_DEPENDENCIES==0 ] ; then 
+		return
+	fi
+
     local ROOT=$PWD
 	local depend="${2%.*}" # removes extension
 

@@ -1,7 +1,8 @@
-brew install cmake
-brew install coreutils
+# Silent update to prevent long logs
+brew update >/dev/null
+
+brew install cmake coreutils boost-bcp
 brew reinstall libtool
-brew install boost-bcp
 
 set -e
 # capture failing exits in commands obscured behind a pipe

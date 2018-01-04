@@ -5,8 +5,114 @@ set -o pipefail
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
+OUTPUT_FOLDER=$ROOT/out
+VERBOSE=0
 
 cd $APOTHECARY_PATH
+
+if [ -z $TARGET ] ; then 
+    echo "Environment variable TARGET not defined. Should be target os"
+    exit 1
+fi
+
+echo "Running apothecary from $PWD"
+echo "Target: $TARGET"
+echo "Architecture: $ARCH"
+echo "Bundle: $BUNDLE"
+
+FORMULAS=( 
+    # Dependencies for other formulas (cairo)
+    "pixman"
+    "pkg-config"
+    "zlib"
+    
+    # All formulas
+    "assimp"
+    "boost"
+    "FreeImage"
+    "libpng"
+    "libxml2"
+    "freetype"    
+    "fmodex"
+    "glew"
+    "glfw"
+    "glm"
+    "json"
+    "libusb"
+    "kiss"
+    "opencv"
+    "openssl"
+    "portaudio"
+    "pugixml"
+    "utf8"
+    "videoInput"    
+    "rtAudio"
+    "tess2"
+    "uriparser"
+    
+    # Formulas with depenencies in the end
+    "cairo"
+    "curl"
+    "poco"
+    "svgtiny"
+    "uri"
+)
+
+# Seperate in bundles on osx
+if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
+    if [ "$BUNDLE" == "1" ]; then
+        FORMULAS=(
+            # Dependencies for other formulas (cairo)
+            "pixman"
+            "pkg-config"
+            "zlib"
+            
+            # All formulas
+            # "assimp" # bundle 3
+            "boost"
+            "FreeImage"
+            "libpng"
+            # "libxml2" # bundle 3
+            "freetype"    
+            "fmodex"
+            "glew"
+            "glfw"
+            "glm"
+            "json"
+            "libusb"
+            "kiss"
+            # "opencv" # bundle 3
+            # "openssl" # bundle 2
+            "portaudio"
+            "pugixml"
+            "utf8"
+            "videoInput"    
+            "rtAudio"
+            "tess2"
+            "uriparser"
+            
+            # Formulas with depenencies in the end
+            "cairo"
+            # "curl" # bundle 2
+            # "poco" # bundle 2
+            # "svgtiny" # bundle 3
+            "uri"
+        )
+    elif [ "$BUNDLE" == "2" ]; then
+        FORMULAS=(
+            "openssl"
+            "poco"
+            "curl"
+        )
+    elif [ "$BUNDLE" == "3" ]; then
+        FORMULAS=(
+            "assimp"
+            "opencv"
+            "libxml2"
+            "svgtiny"
+        )
+    fi
+fi
 
 # trap any script errors and exit
 trap "trapError" ERR
@@ -50,7 +156,7 @@ echoDots(){
                 printf "\r"
                 return;
             fi
-            sleep 2
+            sleep 1
         done
         printf "\r                    "
         printf "\r"
@@ -110,11 +216,11 @@ fi
 
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
-    if [ "$OPT" == "gcc5" ]; then
+    if [ "$ARCH" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"
         export COMPILER="g++5 -std=c++11"
-    elif [ "$OPT" == "gcc6" ]; then
+    elif [ "$ARCH" == "gcc6" ]; then
         export CC="gcc-6 -fPIE"
         export CXX="g++-6 -std=c++11 -fPIE"
         export COMPILER="g++6 -std=c++11 -fPIE"
@@ -125,111 +231,146 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
-echo "Running apothecary from $PWD"
+function build(){
+    echo Build $formula_name
+
+    local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
+    if [ "$ARCH" != "" ] ; then 
+        ARGS += " -a$ARCH"
+    fi
+    
+    if [[ $VERBOSE == 1 ]] ; then 
+        echo "./apothecary $ARGS update $formula_name"
+        ./apothecary $ARGS update $formula_name
+    else 
+        echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
+        ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
+        
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"    
+        tail -n 30 formula.log    
+    fi
+
+}
+
+# Remove output folder
+rm -rf $OUTPUT_FOLDER
+mkdir $OUTPUT_FOLDER
+
 ITER=0
-for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
+for formula in "${FORMULAS[@]}" ; do
+  
+# for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
     
     formula_name="${formula%.*}"
 
-    travis_fold_start "build.$ITER" "Build $formula_name"
-    travis_time_start
+    echo "Build $formula_name"
 
-    if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
-    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
-        # compile everything but poco openssl curl assimp opencv and svg tiny
-        if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && ["$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
-                echo Pass 1 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            else 
-                echo "Skipped $formula_name" > formula.log 2>&1
-            fi
-        # only compile poco, openssl, curl
-        elif [ "$OPT2" == "2" ]; then
-            if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ]; then
-                echo Pass 2 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            else 
-                echo "Skipped $formula_name" > formula.log 2>&1
-            fi
-        # only compile assimp, opencv, svgtiny
-        elif [ "$OPT2" == "3" ]; then
-            if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
-                echo Pass 3 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            else 
-                echo "Skipped $formula_name" > formula.log 2>&1
-            fi
-        else
-            echo Compiling $formula_name
-            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-        fi
-    elif [ "$TARGET" == "vs" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
-    elif [ "$TARGET" == "msys2" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-    else
-        echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+    if [[ $TRAVIS == 1 ]] ; then
+        travis_fold_start "build.$ITER" "Build $formula_name"
+        travis_time_start
     fi
 
-    apothecaryPID=$!
-    echoDots $apothecaryPID
-    wait $apothecaryPID
+    build
+#     if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
+#         echo Compiling $formula_name
+#         echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
+#         ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
+#     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
+#         # compile everything but poco openssl curl assimp opencv and svg tiny
+#         if [ "$OPT2" == "1" ]; then
+#             if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && ["$formula_name" != "curl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
+#                 echo Pass 1 - Compiling $formula_name
+#                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#             else 
+#                 echo "Skipped $formula_name" > formula.log 2>&1
+#             fi
+#         # only compile poco, openssl, curl
+#         elif [ "$OPT2" == "2" ]; then
+#             if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ] || [ "$formula_name" == "curl" ]; then
+#                 echo Pass 2 - Compiling $formula_name
+#                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#             else 
+#                 echo "Skipped $formula_name" > formula.log 2>&1
+#             fi
+#         # only compile assimp, opencv, svgtiny
+#         elif [ "$OPT2" == "3" ]; then
+#             if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
+#                 echo Pass 3 - Compiling $formula_name
+#                 echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#                 ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#             else 
+#                 echo "Skipped $formula_name" > formula.log 2>&1
+#             fi
+#         else
+#             echo Compiling $formula_name
+#             echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#             ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#         fi
+#     elif [ "$TARGET" == "vs" ]; then
+#         echo Compiling $formula_name
+#         echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
+#         ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
+#     elif [ "$TARGET" == "msys2" ]; then
+#         echo Compiling $formula_name
+#         echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#     else
+#         echo Compiling $formula_name
+#         echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
+#         ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+#     fi
 
-    echo "Tail of log for $formula_name"    
-    tail -n 30 formula.log    
-
-    end=`date +%s`
-    runtime=$((end-start))
     
-    travis_time_finish
-    travis_fold_end "build.$ITER"
+    if [[ $TRAVIS == 1 ]] ; then
+        travis_time_finish
+        travis_fold_end "build.$ITER"
+    fi
     
 
     ITER=$(expr $ITER + 1)
 done
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
-    # exit here on PR's
-    echo "On Master Branch and not a PR";
-else
-    echo "This is a PR or not master branch, exiting build before compressing";
-    exit 0
-fi
+echo ""
+echo ""
 
-if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
-    echo "No secure vars set so exiting before compressing";
-    exit 0
-fi
+# if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
+#     # exit here on PR's
+#     echo "On Master Branch and not a PR";
+# else
+#     echo "This is a PR or not master branch, exiting build before compressing";
+#     exit 0
+# fi
 
-cd $ROOT
-echo "Compressing libraries from $PWD"
-LIBS=$(ls | grep -v \.appveyor.yml | grep -v \.travis.yml | grep -v \.gitignore | grep -v apothecary | grep -v scripts)
-if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}.zip
-	7z a $TARBALL $LIBS
-else
-	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
-	tar cjf $TARBALL $LIBS
-	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
-	cp scripts/ssh_config ~/.ssh/config
-	chmod 600 scripts/id_rsa
-	echo Uploading libraries
-	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm scripts/id_rsa
-fi
+# if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
+#     echo "No secure vars set so exiting before compressing";
+#     exit 0
+# fi
+
+cd $OUTPUT_FOLDER
+echo "Compressing libraries from $OUTPUT_FOLDER"
+LIBS=$(ls)
+
+# Test:
+tar cjf "libs.tar.bz2" $LIBS
+
+# if [ ! -z ${APPVEYOR+x} ]; then
+# 	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}.zip
+# 	7z a $TARBALL $LIBS
+# else
+# 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$BUNDLE.tar.bz2
+# 	tar cjf $TARBALL $LIBS
+# 	echo Unencrypting key
+# 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
+# 	cp scripts/ssh_config ~/.ssh/config
+# 	chmod 600 scripts/id_rsa
+# 	echo Uploading libraries
+# 	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+# 	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+# 	rm scripts/id_rsa
+# fi
