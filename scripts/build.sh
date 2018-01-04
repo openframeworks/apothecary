@@ -6,7 +6,7 @@ set -o pipefail
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-VERBOSE=0
+VERBOSE=1
 
 cd $APOTHECARY_PATH
 
@@ -216,6 +216,7 @@ fi
 
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
+    ARCH=""
     if [ "$ARCH" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"
