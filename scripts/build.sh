@@ -236,7 +236,7 @@ function build(){
 
     local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
     if [ "$ARCH" != "" ] ; then 
-        ARGS += " -a$ARCH"
+        ARGS="$ARGS -a$ARCH"
     fi
     
     if [[ $VERBOSE == 1 ]] ; then 
