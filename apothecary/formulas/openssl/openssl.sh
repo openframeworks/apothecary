@@ -31,7 +31,7 @@ function download() {
 		rm $FILENAME.tar.gz.sha1
 	else
 		if [ "$(shasum $FILENAME.tar.gz | awk '{print $1}')" == "$(cat $FILENAME.tar.gz.sha1)" ] ;  then
-			tar -xvf $FILENAME.tar.gz
+			tar -xf $FILENAME.tar.gz
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
@@ -67,9 +67,9 @@ function build() {
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
-		make -j1 depend
-		make -j1
-		make -j 1 install
+		make -j${PARALLEL_MAKE} depend
+		make -j${PARALLEL_MAKE}
+		make -j${PARALLEL_MAKE} install
 
 
 		rm -f libcrypto.a
@@ -79,9 +79,9 @@ function build() {
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
-		make -j1 depend
-		make -j1
-		make -j1 install
+		make -j${PARALLEL_MAKE} depend
+		make -j${PARALLEL_MAKE}
+		make -j${PARALLEL_MAKE} install
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
@@ -188,9 +188,9 @@ function build() {
 
 			echo "Running make for ${IOS_ARCH}"
 
-			make depend
-			make -j1
-			make install
+			make -j${PARALLEL_MAKE} depend
+			make -j${PARALLEL_MAKE}
+			make -j${PARALLEL_MAKE} install
 
 
 			# reset source file back.
