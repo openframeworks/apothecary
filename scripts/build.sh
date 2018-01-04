@@ -6,7 +6,7 @@ set -o pipefail
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-VERBOSE=1
+VERBOSE=0
 
 cd $APOTHECARY_PATH
 
