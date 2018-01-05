@@ -49,7 +49,7 @@ if [ ! -z ${OPT+x} ]; then
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt-get update -q
         sudo apt-get install gdebi
-        wget http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
+        wget -nv http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
         tar xjf gcc5debs.tar.bz2
         rm gcc5debs.tar.bz2
         sudo gdebi -n cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
