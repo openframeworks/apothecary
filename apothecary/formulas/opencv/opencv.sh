@@ -10,6 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
  
 # define the version 
 VER=3.3.1
+# VER=3.1.0
 # emscripten needs version 3.1.0 
 EMSCRIPTEN_VER=3.1.0
  
@@ -216,6 +217,7 @@ function build() {
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
     local IOS_ARCHS
+
     if [[ "${TYPE}" == "tvos" ]]; then 
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
@@ -230,7 +232,12 @@ function build() {
       echo "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 
       cd build
-      
+
+      WITH_ITT=ON
+      if [[ "${IOS_ARCH}" == "arm64" ]]; then
+        WITH_ITT=OFF
+      fi
+
       cmake .. -DCMAKE_INSTALL_PREFIX="$CURRENTPATH/build/$TYPE/$IOS_ARCH" \
       -DIOS=1 \
       -DAPPLE=1 \
@@ -288,6 +295,7 @@ function build() {
       -DWITH_OPENEXR=OFF \
       -DBUILD_OPENEXR=OFF \
       -DBUILD_TESTS=OFF \
+      -DWITH_ITT=${WITH_ITT} \
       -DBUILD_PERF_TESTS=OFF
 
 
