@@ -20,7 +20,9 @@ docker run -v $(pwd):/apothecary apothecary:android2 ./apothecary/apothecary/apo
 Or the entire build script using 
 
 ```
-docker run -v $(pwd):/apothecary -e "PARALLEL=12" -e"OPT=x86" apothecary:android   apothecary/scripts/build.sh 
+docker run -v $(pwd):/apothecary -e "PARALLEL=12" apothecary:linux.gcc5   apothecary/scripts/build.sh 
 
-docker run -v $(pwd):/apothecary -e "PARALLEL=12" -e"" apothecary:emscripten   apothecary/scripts/build.sh 
+docker run -v $(pwd):/apothecary -e "PARALLEL=12" -e"ARCH=x86" apothecary:android   apothecary/scripts/build.sh 
+
+docker run -v $(pwd):/apothecary -e "PARALLEL=12" apothecary:emscripten   apothecary/scripts/build.sh 
 ```
