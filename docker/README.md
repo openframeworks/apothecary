@@ -14,7 +14,7 @@ docker build -t apothecary:emscripten -f docker/emscripten/Dockerfile .
 Then run apothecary with something like this
 
 ```
-docker run -v $(pwd):/apothecary apothecary:android2 ./apothecary/apothecary/apothecary -t android -a armv7 -j 6 update opencv
+docker run -v $(pwd):/apothecary apothecary:android ./apothecary/apothecary/apothecary -t android -a armv7 -j 6 update opencv
 ```
 
 Or the entire build script using 

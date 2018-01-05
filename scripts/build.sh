@@ -214,6 +214,8 @@ if [ -z ${PARALLEL+x} ]; then
     fi
 fi
 
+echo "Parallel builds: $PARALLEL"
+
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
