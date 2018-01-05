@@ -47,11 +47,11 @@ function build() {
   rm -f CMakeCache.txt
  
   LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
+  mkdir -p $LIB_FOLDER
 
   if [ "$TYPE" == "osx" ] ; then
     LOG="$LIB_FOLDER/opencv2-${VER}.log"
     echo "Logging to $LOG"
-    mkdir -p $LIB_FOLDER
     cd build
     rm -f CMakeCache.txt
     echo "Log:" >> "${LOG}" 2>&1
@@ -214,134 +214,28 @@ function build() {
     
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
-    local LIB_FOLDER_IOS="$BUILD_ROOT_DIR/$TYPE/iOS/opencv"
-    local LIB_FOLDER_IOS_SIM="$BUILD_ROOT_DIR/$TYPE/iOS_SIMULATOR/opencv"
-
-
-    # This was quite helpful as a reference: https://github.com/x2on/OpenSSL-for-iPhone
-    # Refer to the other script if anything drastic changes for future versions
-    SDKVERSION=""
-    if [[ "${TYPE}" == "tvos" ]]; then 
-        SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-    elif [[ "$TYPE" == "ios" ]]; then
-        SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-    fi
-    set -e
-    CURRENTPATH=`pwd`
-    
-    DEVELOPER=$XCODE_DEV_ROOT
-    TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-    VERSION=$VER
-
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then 
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
         IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
     fi
-
-    local STDLIB="libc++"
-    echo "--------------------"
-    echo $CURRENTPATH
-
-
-
-    # Validate environment
-    case $XCODE_DEV_ROOT in  
-         *\ * )
-               echo "Your Xcode path contains whitespaces, which is not supported."
-               exit 1
-              ;;
-    esac
-    case $CURRENTPATH in  
-         *\ * )
-               echo "Your path contains whitespaces, which is not supported by 'make install'."
-               exit 1
-              ;;
-    esac 
-
-
-
-    export THECOMPILER=$TOOLCHAIN/usr/bin
-     
-    
+    CURRENTPATH=`pwd`
 
       # loop through architectures! yay for loops!
     for IOS_ARCH in ${IOS_ARCHS}
     do
-      # make sure backed up
-       rm -f CMakeCache.txt
-      MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-      # min iOS version for arm64 is iOS 7
-  
-      if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-        MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-      elif [[ "${IOS_ARCH}" == "i386" ]]; then
-        MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
-      fi
+      source ${APOTHECARY_DIR}/ios_configure.sh $TYPE $IOS_ARCH
+      echo "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 
-      if [[ "${TYPE}" == "tvos" ]]; then 
-      MIN_TYPE=-mtvos-version-min=
-      if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-        MIN_TYPE=-mtvos-simulator-version-min=
-      fi
-      elif [[ "$TYPE" == "ios" ]]; then
-          MIN_TYPE=-miphoneos-version-min=
-          if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-              MIN_TYPE=-mios-simulator-version-min=
-          fi
-      fi
-
+      cd build
       
-      echo "The compiler: $THECOMPILER"
-
-      if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-      then
-        if [[ "${TYPE}" == "tvos" ]]; then 
-            PLATFORM="AppleTVSimulator"
-            ISSIM="TRUE"
-        elif [[ "$TYPE" == "ios" ]]; then
-            PLATFORM="iPhoneSimulator"
-            ISSIM="TRUE"
-        fi
-      else
-        if [[ "${TYPE}" == "tvos" ]]; then 
-            PLATFORM="AppleTVOS"
-            ISSIM="FALSE"
-        elif [[ "$TYPE" == "ios" ]]; then
-            PLATFORM="iPhoneOS"
-            ISSIM="FALSE"
-        fi
-      fi
-
-      BITCODE=""
-      if [[ "$TYPE" == "tvos" ]]; then
-          BITCODE=-fembed-bitcode;
-          MIN_IOS_VERSION=9.0
-      fi
-
-      
-      export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-      export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-      export BUILD_TOOLS="${DEVELOPER}"
-
-      mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-      LOG="$CURRENTPATH/build/$TYPE/$IOS_ARCH/opencv2-$IOS_ARCH-${VER}.log"
-      set +e
-
-
-      isBuilding=true;
-      echo "Log:" >> "${LOG}" 2>&1
-     # while $isBuilding; do theTail="$(tail -n 1 ${LOG})"; echo $theTail | cut -c -70 ; echo "...";sleep 30; done & # fix for 10 min time out travis
-
-
-
-      cmake . -DCMAKE_INSTALL_PREFIX="$CURRENTPATH/build/$TYPE/$IOS_ARCH" \
+      cmake .. -DCMAKE_INSTALL_PREFIX="$CURRENTPATH/build/$TYPE/$IOS_ARCH" \
       -DIOS=1 \
       -DAPPLE=1 \
       -DUNIX=1 \
-      -DCMAKE_CXX_COMPILER=$THECOMPILER/clang++ \
-      -DCMAKE_CC_COMPILER=$THECOMPILER/clang \
+      -DCMAKE_CXX_COMPILER=$CXX \
+      -DCMAKE_CC_COMPILER=$CC \
       -DIPHONESIMULATOR=$ISSIM \
       -DCMAKE_CXX_COMPILER_WORKS="TRUE" \
       -DCMAKE_C_COMPILER_WORKS="TRUE" \
@@ -349,13 +243,13 @@ function build() {
       -DCMAKE_IOS_DEVELOPER_ROOT="${CROSS_TOP}" \
       -DDEVROOT="${CROSS_TOP}" \
       -DSDKROOT="${CROSS_SDK}" \
-      -DCMAKE_OSX_SYSROOT="${CROSS_TOP}/SDKs/${CROSS_SDK}" \
+      -DCMAKE_OSX_SYSROOT="${SYSROOT}" \
       -DCMAKE_OSX_ARCHITECTURES="${IOS_ARCH}" \
       -DCMAKE_XCODE_EFFECTIVE_PLATFORMS="-$PLATFORM" \
       -DGLFW_BUILD_UNIVERSAL=ON \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION" \
-      -DCMAKE_C_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION"  \
+      -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -isysroot ${SYSROOT} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION" \
+      -DCMAKE_C_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -isysroot ${SYSROOT} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION"  \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
@@ -366,6 +260,7 @@ function build() {
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
+      -DBUILD_opencv_videoio=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
       -DWITH_1394=OFF \
@@ -392,62 +287,22 @@ function build() {
       -DWITH_OPENEXR=OFF \
       -DBUILD_OPENEXR=OFF \
       -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF >> "${LOG}" 2>&1
-
-      if [ $? != 0 ];
-      then
-        tail -n 10 "${LOG}"
-        echo "Problem while CMAKE - Please check ${LOG}"
-        exit 1
-      else
-        tail -n 10 "${LOG}"
-        echo "CMAKE Successful for ${IOS_ARCH}"
-      fi
-
-    echo "--------------------"
-    echo "Running make clean for ${IOS_ARCH}"
-    make clean >> "${LOG}" 2>&1
-    if [ $? != 0 ];
-      then
-        tail -n 10 "${LOG}"
-        echo "Problem while make clean- Please check ${LOG}"
-        exit 1
-      else
-        tail -n 10 "${LOG}"
-        echo "Make Clean Successful for ${IOS_ARCH}"
-    fi
-
-    echo "--------------------"
-    echo "Running make for ${IOS_ARCH}"
-    make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
-    if [ $? != 0 ];
-      then
-        tail -n 10 "${LOG}"
-        echo "Problem while make - Please check ${LOG}"
-        exit 1
-      else
-        tail -n 10 "${LOG}"
-        echo "Make  Successful for ${IOS_ARCH}"
-    fi
-
-    echo "--------------------"
-    echo "Running make install for ${IOS_ARCH}"
-    make install >> "${LOG}" 2>&1
-    if [ $? != 0 ];
-      then
-        tail -n 10 "${LOG}"
-        echo "Problem while make install - Please check ${LOG}"
-        exit 1
-      else
-        tail -n 10 "${LOG}"
-        echo "Make install Successful for ${IOS_ARCH}"
-    fi
-
-    rm -f CMakeCache.txt
-    unset CROSS_TOP CROSS_SDK BUILD_TOOLS
-    isBuilding=false;
+      -DBUILD_PERF_TESTS=OFF
 
 
+        echo "--------------------"
+        echo "Running make clean for ${IOS_ARCH}"
+        make clean
+
+        echo "--------------------"
+        echo "Running make for ${IOS_ARCH}"
+        make -j${PARALLEL_MAKE}
+
+        echo "--------------------"
+        echo "Running make install for ${IOS_ARCH}"
+        make install
+
+        rm -f CMakeCache.txt
     done
 
     mkdir -p lib/$TYPE
@@ -479,18 +334,8 @@ function build() {
     echo "Stripping any lingering symbols"
 
     cd lib/$TYPE
-    SLOG="$CURRENTPATH/lib/$TYPE-stripping.log"
-    local TOBESTRIPPED
     for TOBESTRIPPED in $( ls -1) ; do
-      strip -x $TOBESTRIPPED >> "${SLOG}" 2>&1
-      if [ $? != 0 ];
-        then
-          tail -n 100 "${SLOG}"
-          echo "Problem while stripping lib - Please check ${SLOG}"
-          exit 1
-        else
-          echo "Strip Successful for ${SLOG}"
-        fi
+      strip -x $TOBESTRIPPED
     done
 
     cd ../../
@@ -676,6 +521,25 @@ function copy() {
       #copy the zlib 
       cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
       cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
+
+      cp -R include/opencv $1/include/
+      cp -R include/opencv2 $1/include/
+      cp -R modules/*/include/opencv2/* $1/include/opencv2/
+
+      #copy the ippicv includes and lib
+      IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
+      IPPICV_DST=$1/../ippicv
+      if [ $ARCH == 32 ] ; then
+        IPPICV_PLATFORM="ia32"
+        IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
+      elif [ $ARCH == 64 ] ; then
+        IPPICV_PLATFORM="intel64"
+        IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
+      fi
+      mkdir -p ${IPPICV_DST}/include
+      cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
+      mkdir -p ${IPPICV_DEPLOY}
+      cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
 
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
