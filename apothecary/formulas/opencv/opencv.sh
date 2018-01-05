@@ -126,91 +126,92 @@ function build() {
     unset TEMP
 
     rm -f CMakeCache.txt
-  #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
-  mkdir -p $LIB_FOLDER
+    #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
+    mkdir -p $LIB_FOLDER
     LOG="$LIB_FOLDER/opencv2-${VER}.log"
     echo "Logging to $LOG"
     echo "Log:" >> "${LOG}" 2>&1
     set +e
-  if [ $ARCH == 32 ] ; then
-    mkdir -p build_vs_32
-    cd build_vs_32
-    cmake .. -G "Visual Studio $VS_VER"\
-    -DBUILD_PNG=OFF \
-    -DWITH_OPENCLAMDBLAS=OFF \
-    -DBUILD_TESTS=OFF \
-    -DWITH_CUDA=OFF \
-    -DWITH_FFMPEG=OFF \
-    -DWITH_WIN32UI=OFF \
-    -DBUILD_PACKAGE=OFF \
-    -DWITH_JASPER=OFF \
-    -DWITH_OPENEXR=OFF \
-    -DWITH_GIGEAPI=OFF \
-    -DWITH_JPEG=OFF \
-    -DBUILD_WITH_DEBUG_INFO=OFF \
-    -DWITH_CUFFT=OFF \
-    -DBUILD_TIFF=OFF \
-    -DBUILD_JPEG=OFF \
-    -DWITH_OPENCLAMDFFT=OFF \
-    -DBUILD_WITH_STATIC_CRT=OFF \
-    -DBUILD_opencv_java=OFF \
-    -DBUILD_opencv_python=OFF \
-    -DBUILD_opencv_apps=OFF \
-    -DBUILD_PERF_TESTS=OFF \
-    -DBUILD_JASPER=OFF \
-    -DBUILD_DOCS=OFF \
-    -DWITH_TIFF=OFF \
-    -DWITH_1394=OFF \
-    -DWITH_EIGEN=OFF \
-    -DBUILD_OPENEXR=OFF \
-    -DWITH_DSHOW=OFF \
-    -DWITH_VFW=OFF \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DWITH_PNG=OFF \
-    -DWITH_OPENCL=OFF \
-    -DWITH_PVAPI=OFF  | tee ${LOG} 
-    vs-build "OpenCV.sln"
-    vs-build "OpenCV.sln" Build "Debug"
-  elif [ $ARCH == 64 ] ; then
-    mkdir -p build_vs_64
-    cd build_vs_64
-    cmake .. -G "Visual Studio $VS_VER Win64" \
-    -DBUILD_PNG=OFF \
-    -DWITH_OPENCLAMDBLAS=OFF \
-    -DBUILD_TESTS=OFF \
-    -DWITH_CUDA=OFF \
-    -DWITH_FFMPEG=OFF \
-    -DWITH_WIN32UI=OFF \
-    -DBUILD_PACKAGE=OFF \
-    -DWITH_JASPER=OFF \
-    -DWITH_OPENEXR=OFF \
-    -DWITH_GIGEAPI=OFF \
-    -DWITH_JPEG=OFF \
-    -DBUILD_WITH_DEBUG_INFO=OFF \
-    -DWITH_CUFFT=OFF \
-    -DBUILD_TIFF=OFF \
-    -DBUILD_JPEG=OFF \
-    -DWITH_OPENCLAMDFFT=OFF \
-    -DBUILD_WITH_STATIC_CRT=OFF \
-    -DBUILD_opencv_java=OFF \
-    -DBUILD_opencv_python=OFF \
-    -DBUILD_opencv_apps=OFF \
-    -DBUILD_PERF_TESTS=OFF \
-    -DBUILD_JASPER=OFF \
-    -DBUILD_DOCS=OFF \
-    -DWITH_TIFF=OFF \
-    -DWITH_1394=OFF \
-    -DWITH_EIGEN=OFF \
-    -DBUILD_OPENEXR=OFF \
-    -DWITH_DSHOW=OFF \
-    -DWITH_VFW=OFF \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DWITH_PNG=OFF \
-    -DWITH_OPENCL=OFF \
-    -DWITH_PVAPI=OFF  | tee ${LOG} 
-    vs-build "OpenCV.sln" Build "Release|x64"
-    vs-build "OpenCV.sln" Build "Debug|x64"
-  fi
+    
+    if [ $ARCH == 32 ] ; then
+      mkdir -p build_vs_32
+      cd build_vs_32
+      cmake .. -G "Visual Studio $VS_VER"\
+      -DBUILD_PNG=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DBUILD_TESTS=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_WIN32UI=OFF \
+      -DBUILD_PACKAGE=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_JPEG=OFF \
+      -DBUILD_WITH_DEBUG_INFO=OFF \
+      -DWITH_CUFFT=OFF \
+      -DBUILD_TIFF=OFF \
+      -DBUILD_JPEG=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DBUILD_WITH_STATIC_CRT=OFF \
+      -DBUILD_opencv_java=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_apps=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_JASPER=OFF \
+      -DBUILD_DOCS=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_EIGEN=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -DWITH_DSHOW=OFF \
+      -DWITH_VFW=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      vs-build "OpenCV.sln"
+      vs-build "OpenCV.sln" Build "Debug"
+    elif [ $ARCH == 64 ] ; then
+      mkdir -p build_vs_64
+      cd build_vs_64
+      cmake .. -G "Visual Studio $VS_VER Win64" \
+      -DBUILD_PNG=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DBUILD_TESTS=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_WIN32UI=OFF \
+      -DBUILD_PACKAGE=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_JPEG=OFF \
+      -DBUILD_WITH_DEBUG_INFO=OFF \
+      -DWITH_CUFFT=OFF \
+      -DBUILD_TIFF=OFF \
+      -DBUILD_JPEG=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DBUILD_WITH_STATIC_CRT=OFF \
+      -DBUILD_opencv_java=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_apps=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_JASPER=OFF \
+      -DBUILD_DOCS=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_EIGEN=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -DWITH_DSHOW=OFF \
+      -DWITH_VFW=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      vs-build "OpenCV.sln" Build "Release|x64"
+      vs-build "OpenCV.sln" Build "Debug|x64"
+    fi
     
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
@@ -290,19 +291,20 @@ function build() {
       -DBUILD_PERF_TESTS=OFF
 
 
-        echo "--------------------"
-        echo "Running make clean for ${IOS_ARCH}"
-        make clean
+      echo "--------------------"
+      echo "Running make clean for ${IOS_ARCH}"
+      make clean
 
-        echo "--------------------"
-        echo "Running make for ${IOS_ARCH}"
-        make -j${PARALLEL_MAKE}
+      echo "--------------------"
+      echo "Running make for ${IOS_ARCH}"
+      make -j${PARALLEL_MAKE}
 
-        echo "--------------------"
-        echo "Running make install for ${IOS_ARCH}"
-        make install
+      echo "--------------------"
+      echo "Running make install for ${IOS_ARCH}"
+      make install
 
-        rm -f CMakeCache.txt
+      rm -f CMakeCache.txt
+      cd ..
     done
 
     mkdir -p lib/$TYPE
