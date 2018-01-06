@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_52_1
+VER=7_57_0
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -118,7 +118,16 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --disable-ntlm-wb --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} \
+                --enable-static \
+                --disable-shared \
+                --disable-ntlm-wb \
+                --host=$HOST \
+                --target=$HOST \
+                --enable-threaded-resolver \
+                --enable-ipv6
             #make clean
             make -j${PARALLEL_MAKE}
             make install

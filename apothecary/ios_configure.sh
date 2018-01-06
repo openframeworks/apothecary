@@ -75,7 +75,7 @@ SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
 BITCODE=""
 if [[ "$TYPE" == "tvos" ]]; then
-    MIN_IOS_VERSION=10.3
+    MIN_IOS_VERSION=9.0
     BITCODE=-fembed-bitcode
 fi
 
