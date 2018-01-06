@@ -6,7 +6,7 @@ set -o pipefail
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-VERBOSE=0
+# VERBOSE=1
 
 cd $APOTHECARY_PATH
 
@@ -68,7 +68,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
             "zlib"
             
             # All formulas
-            # "assimp" # bundle 3
+            "assimp"
             "boost"
             "FreeImage"
             "libpng"
@@ -106,7 +106,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
         )
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
-            "assimp"
+            # "assimp"
             "opencv"
             "libxml2"
             "svgtiny"
@@ -234,6 +234,8 @@ if [ "$TARGET" == "emscripten" ]; then
 fi
 
 function build(){
+    trap "trapError" ERR
+
     echo Build $formula_name
 
     local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
