@@ -68,7 +68,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
             "zlib"
             
             # All formulas
-            "assimp"
+            # "assimp" #bundle 3
             "boost"
             "FreeImage"
             "libpng"
@@ -81,7 +81,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
             "json"
             "libusb"
             "kiss"
-            # "opencv" # bundle 3
+            # "opencv" # bundle 4
             # "openssl" # bundle 2
             "portaudio"
             "pugixml"
@@ -106,10 +106,13 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
         )
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
-            # "assimp"
-            "opencv"
+            "assimp"
             "libxml2"
             "svgtiny"
+        )
+    elif [ "$BUNDLE" == "4" ]; then
+        FORMULAS=(
+            "opencv"
         )
     fi
 fi
