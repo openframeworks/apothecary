@@ -1,7 +1,7 @@
 # Silent update to prevent long logs
 brew update >/dev/null
 
-brew install cmake coreutils boost-bcp autoconf automake
+brew install cmake coreutils boost-bcp autoconf automake ccache
 brew reinstall libtool
 
 set -e
