@@ -118,7 +118,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; 
 fi
 
 # trap any script errors and exit
-trap "trapError" ERR
+# trap "trapError" ERR
 
 trapError() {
 	echo
@@ -220,15 +220,7 @@ fi
 
 echo "Parallel builds: $PARALLEL"
 
-
-if [ "$USE_CCACHE" = true ] ; then
-    echo "Using ccache"
-    if [ "$TARGET" == "osx" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-        export PATH="/usr/local/opt/ccache/libexec:$PATH" 
-    else
-        export PATH="/usr/lib/ccache:$PATH"
-    fi
-
+if  type "ccache" > /dev/null; then
     ccache -z
     echo $(ccache -s)
 fi
@@ -305,9 +297,10 @@ done
 echo ""
 echo ""
 
-if [ "$USE_CCACHE" = true ] ; then
+if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
+
 
 if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
     # exit here on PR's

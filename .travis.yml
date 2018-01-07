@@ -1,5 +1,7 @@
 language: c++
 sudo: false
+cache: ccache
+
 matrix:
   include:
 # fully specify builds, include can't dynamically expand matrix entries
@@ -10,27 +12,14 @@ matrix:
       sudo: required
       dist: trusty
       env:
-       - TARGET="linux"
-       - USE_CCACHE=true
-       - CCACHE_DIR=/tmp/ccache/linux/
-      cache:
-        directories:
-        - /tmp/ccache/linux/
-      
+       - TARGET="linux"      
 
     - os: linux
       sudo: required
       dist: trusty
       env:
         - TARGET="linux"
-        - OPT="gcc5"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/linuxgcc5/
-      cache:
-        directories:
-        - /tmp/ccache/linuxgcc5/
-      
-      
+        - OPT="gcc5"      
 
     - os: linux
       sudo: required
@@ -38,12 +27,6 @@ matrix:
       env:
         - TARGET="linux"
         - OPT="gcc6"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/linuxgcc6/
-      cache:
-        directories:
-        - /tmp/ccache/linuxgcc6/
-
 
     # android
     - os: linux
@@ -52,13 +35,10 @@ matrix:
       env: 
         - TARGET="android" 
         - ARCH="armv7"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/androidarmv7/
 
-      cache:
-        directories:
-        - ~/android-ndk-r15c
-        - /tmp/ccache/androidarmv7/
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
         # - apothecary/build/Toolchains/armv7
 
     - os: linux
@@ -67,12 +47,9 @@ matrix:
       env: 
         - TARGET="android" 
         - ARCH="x86"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/androidx86/
-      cache:
-        directories:
-        - ~/android-ndk-r15c
-        - /tmp/ccache/androidx86/
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
         # - apothecary/build/Toolchains/x86
 
 
@@ -82,11 +59,6 @@ matrix:
       dist: trusty
       env: 
         - TARGET="emscripten"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/emscripten/
-      cache:
-        directories:
-        - /tmp/ccache/emscripten/
       addons:
         apt:
           sources:
@@ -111,7 +83,6 @@ matrix:
         - TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" 
         - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
-
     # linux arm7
     - os: linux
       sudo: required
@@ -122,7 +93,6 @@ matrix:
         - TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" 
         - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
-
     # osx xcode7
     - os: osx
       osx_image: xcode8.3
@@ -130,11 +100,6 @@ matrix:
       env: 
         - TARGET="osx" 
         - BUNDLE="1"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/osx1/
-      cache:
-        directories:
-        - /tmp/ccache/osx1/
 
     - os: osx
       osx_image: xcode8.3
@@ -142,12 +107,6 @@ matrix:
       env: 
         - TARGET="osx" 
         - BUNDLE="2"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/osx2/
-      cache:
-        directories:
-        - /tmp/ccache/osx1/
-
 
     - os: osx
       osx_image: xcode8.3
@@ -155,12 +114,6 @@ matrix:
       env: 
         - TARGET="osx" 
         - BUNDLE="3"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/osx3/
-      cache:
-        directories:
-        - /tmp/ccache/osx3/
-
 
     - os: osx
       osx_image: xcode8.3
@@ -168,11 +121,6 @@ matrix:
       env: 
         - TARGET="osx" 
         - BUNDLE="4"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/osx4/
-      cache:
-        directories:
-        - /tmp/ccache/osx4/
 
     # ios
     - os: osx
@@ -181,11 +129,6 @@ matrix:
       env: 
         - TARGET="ios" 
         - BUNDLE="1"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/ios1/
-      cache:
-        directories:
-        - /tmp/ccache/ios1/
 
     - os: osx
       osx_image: xcode8.3
@@ -193,11 +136,6 @@ matrix:
       env: 
         - TARGET="ios" 
         - BUNDLE="2"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/ios2/
-      cache:
-        directories:
-        - /tmp/ccache/ios2/
 
     - os: osx
       osx_image: xcode8.3
@@ -205,11 +143,6 @@ matrix:
       env: 
         - TARGET="ios" 
         - BUNDLE="3"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/ios3/
-      cache:
-        directories:
-        - /tmp/ccache/ios3/
 
     - os: osx
       osx_image: xcode8.3
@@ -217,11 +150,6 @@ matrix:
       env: 
         - TARGET="ios" 
         - BUNDLE="4"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/ios4/
-      cache:
-        directories:
-        - /tmp/ccache/ios4/
 
     # tvos
     - os: osx
@@ -230,11 +158,6 @@ matrix:
       env: 
         - TARGET="tvos" 
         - BUNDLE="1"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/tvos1/
-      cache:
-        directories:
-        - /tmp/ccache/tvos1/
 
     - os: osx
       osx_image: xcode8.3
@@ -242,11 +165,6 @@ matrix:
       env: 
         - TARGET="tvos" 
         - BUNDLE="2"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/tvos2/
-      cache:
-        directories:
-        - /tmp/ccache/tvos2/
 
     - os: osx
       osx_image: xcode8.3
@@ -254,11 +172,6 @@ matrix:
       env: 
         - TARGET="tvos" 
         - BUNDLE="3"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/tvos3/
-      cache:
-        directories:
-        - /tmp/ccache/tvos3/
   
     - os: osx
       osx_image: xcode8.3
@@ -266,12 +179,6 @@ matrix:
       env: 
         - TARGET="tvos" 
         - BUNDLE="4"
-        - USE_CCACHE=true
-        - CCACHE_DIR=/tmp/ccache/tvos4/
-      cache:
-        directories:
-        - /tmp/ccache/tvos4/
-
 
   exclude:
     - compiler: gcc
