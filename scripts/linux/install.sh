@@ -102,3 +102,5 @@ else
     sudo apt-get update -q
     sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
 fi
+
+sudo apt-get install -y ccache

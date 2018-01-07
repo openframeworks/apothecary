@@ -6,7 +6,7 @@ set -o pipefail
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-# VERBOSE=1
+# VERBOSE=true
 
 cd $APOTHECARY_PATH
 
@@ -152,6 +152,7 @@ isRunning(){
 }
 
 echoDots(){
+    sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
@@ -219,6 +220,16 @@ fi
 
 echo "Parallel builds: $PARALLEL"
 
+
+if [ "$USE_CCACHE" = true ] ; then
+    echo "Using ccache"
+    if [ "$TARGET" == "linux" ]; then
+        export PATH="/usr/lib/ccache:$PATH"
+    fi
+
+    echo $(ccache -s)
+fi
+
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
@@ -246,7 +257,7 @@ function build(){
         ARGS="$ARGS -a$ARCH"
     fi
     
-    if [[ $VERBOSE == 1 ]] ; then 
+    if [ "$VERBOSE" = true ] ; then 
         echo "./apothecary $ARGS update $formula_name"
         ./apothecary $ARGS update $formula_name
     else 
