@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=4.1.0
+VER=4.0.1
 
 # tools for git use
 GIT_URL=
@@ -106,6 +106,7 @@ function build() {
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
+        
         local buildOpts="-DBUILD_SHARED_LIBS=OFF 
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
@@ -114,6 +115,7 @@ function build() {
             -DASSIMP_BUILD_STL_IMPORTER=0
             -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_BUILD_ASSIMP_TOOLS=0
             -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
@@ -215,6 +217,10 @@ function copy() {
             cp -v build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
+            
+            build_vs_64/code/
+            ls build_vs_64/code/Release/
+
             cp -v build_vs_64/code/Release/assimp$ARCH.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
             cp -v build_vs_64/include/* $1/include
