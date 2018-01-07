@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_57_0
+VER=7_53_1
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -88,14 +88,24 @@ function build() {
 
         export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
+		./configure \
+            --with-darwinssl \
+            --prefix=$BUILD_DIR/curl/build/osx/x86 \
+            --enable-static \
+            --disable-shared \
+            --host=x86-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
 
         export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
+		./configure \
+            --with-darwinssl \
+            --prefix=$BUILD_DIR/curl/build/osx/x64 \
+            --enable-static \
+            --disable-shared \
+            --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
