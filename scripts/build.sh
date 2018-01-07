@@ -221,6 +221,10 @@ fi
 echo "Parallel builds: $PARALLEL"
 
 if  type "ccache" > /dev/null; then
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+       export PATH="/usr/local/opt/ccache/libexec:$PATH";
+    fi
+  
     ccache -z
     echo $(ccache -s)
 fi
