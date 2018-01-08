@@ -116,6 +116,7 @@ function build() {
             -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_BUILD_ASSIMP_TOOLS=0
+            -DASSIMP_BUILD_X3D_IMPORTER=0
             -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
