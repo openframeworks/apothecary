@@ -222,8 +222,9 @@ function copy() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             
-            # ls build_vs_64/code/
-            ls -a build_vs_64/
+            ls build_vs_64/code/
+            echo "-----"
+            ls -a build_vs_64/x64
             
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
