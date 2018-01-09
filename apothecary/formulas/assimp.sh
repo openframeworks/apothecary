@@ -213,16 +213,19 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
-            cp -v build_vs_32/code/Release/assimp$ARCH.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
+            
+            ls -a build_vs_32/code/Release/
+
+            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
             cp -v build_vs_32/code/Release/assimp$ARCH.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
             cp -v build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             
-            ls build_vs_64/code/
-            ls build_vs_64/code/Release/
+            # ls build_vs_64/code/
+            ls -a build_vs_64/code/Release/
 
-            cp -v build_vs_64/code/Release/assimp$ARCH.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
+            cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
             cp -v build_vs_64/include/* $1/include
         fi
