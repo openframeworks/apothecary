@@ -217,7 +217,7 @@ function copy() {
 
             cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
             cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
-            cp -v build_vs_32/include/* $1/include
+            cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             
@@ -227,7 +227,7 @@ function copy() {
             
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
-            cp -v build_vs_64/include/* $1/include
+            cp -v -r build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
