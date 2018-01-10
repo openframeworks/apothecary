@@ -68,6 +68,7 @@ function prepare() {
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
 	elif [ "$TYPE" == "vs" ]; then
 		cmd.exe /c "bootstrap"
+		cat bootstrap.log
 	fi
 }
 
