@@ -2,7 +2,7 @@ version: 2.0.{build}
 
 environment:
   global:
-    APPVEYOR_RDP_PASSWORD: "'4T_xK}uNCnY!Up7"
+    APPVEYOR_RDP_PASSWORD: "gUXX95v5xExwecKb"
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
