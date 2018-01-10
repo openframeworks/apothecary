@@ -23,7 +23,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     if [ "$TYPE" == "android" ]; then
-        cp $FORMULA_DIR/glob.h .
+        cp $FORMULA_DIR/glob.h .        
     fi
 
     if [ "$TYPE" == "vs" ]; then
@@ -46,11 +46,11 @@ function build() {
 		else
 			vs-build libxml2.vcxproj Build "Release|x64"
 		fi
-
-	elif [ "$TYPE" == "android" ]; then
+    elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+
+        # wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        # wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
@@ -161,10 +161,6 @@ function copy() {
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
-	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/$ABI
-		# copy lib
-		cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
 	elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p $1/lib/$TYPE
 		# copy lib
