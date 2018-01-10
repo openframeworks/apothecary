@@ -537,7 +537,7 @@ function copy() {
       cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
       #copy the ippicv includes and lib
-      IPPICV_SRC=3rdparty/ippicv/ippicv_win
+      IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win
       IPPICV_DST=$1/../ippicv
       if [ $ARCH == 32 ] ; then
         IPPICV_PLATFORM="ia32"
