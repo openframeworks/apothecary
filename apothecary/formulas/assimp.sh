@@ -107,8 +107,7 @@ function build() {
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
         
-        local buildOpts="-DBUILD_SHARED_LIBS=OFF 
-            -DASSIMP_BUILD_STATIC_LIB=1
+        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1
@@ -216,8 +215,8 @@ function copy() {
             
             ls -a build_vs_32/
 
-            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
-            cp -v build_vs_32/code/Release/assimp$ARCH.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
+            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
+            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
             cp -v build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
@@ -227,7 +226,7 @@ function copy() {
             ls -a build_vs_64/x64
             
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
-            cp -v build_vs_64/code/Release/assimp$ARCH.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
+            cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
             cp -v build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
