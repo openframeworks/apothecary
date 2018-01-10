@@ -18,7 +18,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --no-check-certificate https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
+	wget -nv --no-check-certificate https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
 	tar -xjf uriparser-$VER.tar.bz2
 	mv uriparser-$VER uriparser
 	rm uriparser*.tar.bz2
@@ -66,6 +66,7 @@ function build() {
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
+
 		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         make clean
 		make -j${PARALLEL_MAKE}

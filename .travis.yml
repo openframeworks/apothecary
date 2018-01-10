@@ -1,5 +1,7 @@
 language: c++
 sudo: false
+cache: ccache
+
 matrix:
   include:
 # fully specify builds, include can't dynamically expand matrix entries
@@ -10,14 +12,14 @@ matrix:
       sudo: required
       dist: trusty
       env:
-       - TARGET="linux"
+       - TARGET="linux"      
 
     - os: linux
       sudo: required
       dist: trusty
       env:
         - TARGET="linux"
-        - OPT="gcc5"
+        - OPT="gcc5"      
 
     - os: linux
       sudo: required
@@ -26,42 +28,37 @@ matrix:
         - TARGET="linux"
         - OPT="gcc6"
 
-
     # android
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="android" OPT="armv7"
-      before_script:
-        - sudo add-apt-repository ppa:dns/gnu -y
-        - sudo apt-get update -q
-        - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
-      cache:
-        directories:
-        - ~/android-ndk-r12b
-        - apothecary/build/Toolchains/armv7
+      env: 
+        - TARGET="android" 
+        - ARCH="armv7"
+
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/armv7
 
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="android" OPT="x86"
-      before_script:
-        - sudo add-apt-repository ppa:dns/gnu -y
-        - sudo apt-get update -q
-        - sudo apt-get install -y --only-upgrade autoconf
-        - sudo apt-get install -y xutils-dev coreutils realpath libboost-tools-dev gperf
-      cache:
-        directories:
-        - ~/android-ndk-r12b
-        - apothecary/build/Toolchains/x86
+      env: 
+        - TARGET="android" 
+        - ARCH="x86"
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/x86
 
 
     # emscripten
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="emscripten"
+      env: 
+        - TARGET="emscripten"
       addons:
         apt:
           sources:
@@ -80,71 +77,113 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linuxarmv6l" SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
-
+      env: 
+        - TARGET="linuxarmv6l" 
+        - SYSROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/raspbian" 
+        - TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain" 
+        - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
     # linux arm7
     - os: linux
       sudo: required
       dist: trusty
-      env: TARGET="linuxarmv7l" SYSROOT="$HOME/archlinux" TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+      env: 
+        - TARGET="linuxarmv7l" 
+        - SYSROOT="$HOME/archlinux" 
+        - TOOLCHAIN_ROOT="$HOME/rpi2_toolchain" 
+        - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
-
-    # osx
+    # osx xcode7
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="osx" OPT2="1"
+      env: 
+        - TARGET="osx" 
+        - BUNDLE="1"
 
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="osx" OPT2="2"
+      env: 
+        - TARGET="osx" 
+        - BUNDLE="2"
 
     - os: osx
-      osx_image: xcode7.3.1
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="osx" OPT2="3"
+      env: 
+        - TARGET="osx" 
+        - BUNDLE="3"
 
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env: 
+        - TARGET="osx" 
+        - BUNDLE="4"
 
     # ios
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="ios" OPT2="1"
+      env: 
+        - TARGET="ios" 
+        - BUNDLE="1"
 
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="ios" OPT2="2"
+      env: 
+        - TARGET="ios" 
+        - BUNDLE="2"
 
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="ios" OPT2="3"
+      env: 
+        - TARGET="ios" 
+        - BUNDLE="3"
 
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env: 
+        - TARGET="ios" 
+        - BUNDLE="4"
 
     # tvos
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="tvos" OPT2="1"
+      env: 
+        - TARGET="tvos" 
+        - BUNDLE="1"
 
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="tvos" OPT2="2"
+      env: 
+        - TARGET="tvos" 
+        - BUNDLE="2"
 
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: TARGET="tvos" OPT2="3"
-
+      env: 
+        - TARGET="tvos" 
+        - BUNDLE="3"
+  
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      env: 
+        - TARGET="tvos" 
+        - BUNDLE="4"
 
   exclude:
     - compiler: gcc
-install: scripts/$TARGET/install.sh $OPT $OPT2
+install: scripts/$TARGET/install.sh
 script:
-    - scripts/build.sh $OPT $OPT2
+    - scripts/build.sh
 git:
     depth: 10

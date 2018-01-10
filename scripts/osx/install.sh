@@ -1,3 +1,5 @@
-brew install cmake
-brew install coreutils
+# Silent update to prevent long logs
+brew update >/dev/null
+
+brew install cmake coreutils autoconf automake ccache
 brew reinstall libtool

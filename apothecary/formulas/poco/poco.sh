@@ -8,7 +8,7 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.6.1-release
+VER=1.7.2-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
@@ -90,10 +90,10 @@ function prepare() {
 		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" compile
 		cd ../../
 
-	elif [ "$TYPE" == "osx" ]; then
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
-		sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
+	# elif [ "$TYPE" == "osx" ]; then
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
+		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
 
 	elif [ "$TYPE" == "vs" ] ; then
 		#change the build win cmd file for vs2015 compatibility
@@ -453,14 +453,13 @@ PING_LOOP_PID=$!
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-    export CXX=clang++
+    	export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
 					--library-path=$OPENSSL_LIBS/$ABI \
 					--config=Android
-    make clean ANDROID_ABI=$ABI
+    	make clean ANDROID_ABI=$ABI
 		make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
-
 		rm -f lib/Android/$ABI/*d.a
 
 		export PATH=$OLD_PATH

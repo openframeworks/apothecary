@@ -20,7 +20,7 @@ URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSI
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget ${URL}
+	wget -nv ${URL}
 	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
 	rm ${TARBALL}
@@ -275,12 +275,17 @@ EOF
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
-      source ../../android_configure.sh $ABI
-      ESCAPED_NDK_ROOT=$(echo ${NDK_ROOT} | sed s/\\//\\\\\\//g)
-      sed "s/\%{NDK_ROOT}/${ESCAPED_NDK_ROOT}/" $FORMULA_DIR/project-config-android_$ARCH.jam > project-config.jam
-	    ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+        ABI=armeabi-v7a
+        source ../../android_configure.sh $ABI
+        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+
+		# Run ranlib on binaries (not called corectly by b2)
+		${RANLIB} stage/lib/libboost_filesystem.a
+		${RANLIB} stage/lib/libboost_system.a	
+		
 	    mv stage stage_$ARCH
 	fi
+		
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root

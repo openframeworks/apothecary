@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_50_2
+VER=7_53_1
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -59,17 +59,25 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
+        local OPENSSL_DIR=$BUILD_DIR/openssl/
 	    source ../../android_configure.sh $ABI
+
 	    if [ "$ARCH" == "armv7" ]; then
-            HOST=armv7a-linux-android
+            export HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
-            HOST=x86-linux-android
+            export HOST=x86-linux-android
         fi
         ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+	    ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_DIR --target=$HOST \
+            --enable-static \
+            --disable-shared \
+            --disable-verbose \
+            --enable-threaded-resolver \
+            --enable-libgcc \
+            --enable-ipv6
+
         sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -80,14 +88,24 @@ function build() {
 
         export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x86 --enable-static --disable-shared --host=x86-apple-darwin
+		./configure \
+            --with-darwinssl \
+            --prefix=$BUILD_DIR/curl/build/osx/x86 \
+            --enable-static \
+            --disable-shared \
+            --host=x86-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
 
         export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/osx/x64 --enable-static --disable-shared --host=x86_64-apple-darwin
+		./configure \
+            --with-darwinssl \
+            --prefix=$BUILD_DIR/curl/build/osx/x64 \
+            --enable-static \
+            --disable-shared \
+            --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
@@ -110,7 +128,16 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            ./configure --with-darwinssl --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} --enable-static --disable-shared --disable-ntlm-wb --host=$HOST --target=$HOST --enable-threaded-resolver --enable-ipv6
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} \
+                --enable-static \
+                --disable-shared \
+                --disable-ntlm-wb \
+                --host=$HOST \
+                --target=$HOST \
+                --enable-threaded-resolver \
+                --enable-ipv6
             #make clean
             make -j${PARALLEL_MAKE}
             make install
@@ -139,8 +166,8 @@ function build() {
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
 		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
         make clean
 	    make -j${PARALLEL_MAKE}

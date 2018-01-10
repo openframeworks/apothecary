@@ -21,14 +21,15 @@ function download() {
 
 	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
-		wget http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
+		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	else
+	
+	else 
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL for OSX/iOS"
 		echo $GIT_URL
-		wget $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
 		mv FreeImage-$GIT_TAG FreeImage
 		rm FreeImage-$GIT_TAG.tar.gz
@@ -61,13 +62,14 @@ function prepare() {
 	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
 	    #include <stdint.h>
         #include <asm/byteorder.h>
-        inline void swab(const void *from, void*to, ssize_t n)
+		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+        inline void swab(const void *from, void*to, size_t n)
         {
-            ssize_t i;
+            size_t i;
             if (n < 0)
                 return;
             for (i = 0; i < (n/2)*2; i += 2)
-                *((uint16_t*)to+i) = __arch__swab16(*((uint16_t*)from+i));
+                *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
         }
 ENDDELIM
 
@@ -325,6 +327,7 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
+        # export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
         export CC="$CC $CFLAGS $LDFLAGS"
         export CXX="$CXX $CFLAGS $LDFLAGS"
         make clean -f Makefile.gnu

@@ -10,9 +10,11 @@ VER=1.2.8
 GIT_URL=https://github.com/madler/zlib.git
 GIT_TAG=v$VER
 
+FORMULA_TYPES=( "vs" )
+
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget https://github.com/madler/zlib/archive/v$VER.tar.gz -O zlib-$VER.tar.gz
+	wget -nv --no-check-certificate https://github.com/madler/zlib/archive/v$VER.tar.gz -O zlib-$VER.tar.gz
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
 	rm zlib-$VER.tar.gz
