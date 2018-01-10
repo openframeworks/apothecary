@@ -72,6 +72,9 @@ function prepare() {
 	    echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
 	elif [ "$TYPE" == "vs" ]; then
+		pwd
+		ls
+		cd boost
 		bootstrap.bat
 	fi
 }
