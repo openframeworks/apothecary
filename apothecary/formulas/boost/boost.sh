@@ -12,11 +12,16 @@ VERSION=1.64.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
 TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 
+# need to maybe migrate to github https://github.com/boostorg/boost
+
+
 BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=http://downloads.sourceforge.net/project/boost/boost/${VERSION}/boost_$VERSION_UNDERSCORES.tar.gz
+URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
+
+WIN_URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
 
 # download the source code and unpack it into LIB_NAME
 function download() {
