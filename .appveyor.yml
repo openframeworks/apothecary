@@ -45,9 +45,10 @@ shallow_clone: true
 clone_depth: 10
 
 init:
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
-- set PATH=%MSYS2_PATH%\usr\bin;%PATH%
+- set PATH=%PATH%;%MSYS2_PATH%\usr\bin;
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
