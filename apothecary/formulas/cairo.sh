@@ -21,7 +21,7 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.14.6
+VER=1.14.11
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
@@ -89,11 +89,11 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ "$ARCH" == "64" ]; then
-       		export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
- 	    else
-			export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
- 	    fi
+		# if [ "$ARCH" == "64" ]; then
+       	# 	export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
+ 	    # else
+		# 	export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
+ 	    # fi
 
 		ROOT=${PWD}/..
 		export INCLUDE="$INCLUDE;$ROOT/zlib"
