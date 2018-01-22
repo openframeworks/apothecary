@@ -1,6 +1,5 @@
 language: c++
 sudo: false
-cache: ccache
 
 matrix:
   include:
@@ -9,12 +8,14 @@ matrix:
 
     # linux 64
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env:
        - TARGET="linux"      
 
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env:
@@ -22,6 +23,7 @@ matrix:
         - OPT="gcc5"      
 
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env:
@@ -30,6 +32,7 @@ matrix:
 
     # android
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env: 
@@ -42,6 +45,7 @@ matrix:
         # - apothecary/build/Toolchains/armv7
 
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env: 
@@ -75,6 +79,7 @@ matrix:
 
     # linux arm6
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env: 
@@ -85,6 +90,7 @@ matrix:
 
     # linux arm7
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env: 
@@ -95,6 +101,7 @@ matrix:
 
     # osx xcode7
     - os: osx
+      cache: ccache
       osx_image: xcode8.3
       compiler: clang
       env: 
@@ -102,6 +109,7 @@ matrix:
         - BUNDLE="1"
 
     - os: osx
+      cache: ccache
       osx_image: xcode8.3
       compiler: clang
       env: 
@@ -109,6 +117,7 @@ matrix:
         - BUNDLE="2"
 
     - os: osx
+      cache: ccache
       osx_image: xcode8.3
       compiler: clang
       env: 
@@ -116,6 +125,7 @@ matrix:
         - BUNDLE="3"
 
     - os: osx
+      cache: ccache
       osx_image: xcode8.3
       compiler: clang
       env: 
