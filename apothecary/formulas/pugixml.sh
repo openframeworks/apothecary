@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" "msys2" )
 
 # define the version by sha
-VER=1.7
+VER=1.8
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -17,7 +17,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
+	wget -nv http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
     tar xzf pugixml-$VER.tar.gz
     mv pugixml-$VER pugixml
     rm pugixml-$VER.tar.gz
@@ -64,6 +64,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
+        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
 		# Compile the program
 		$CXX -O2  $CFLAGS \
 			 -Wall \

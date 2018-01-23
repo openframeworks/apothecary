@@ -16,11 +16,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
@@ -31,7 +31,7 @@ function download() {
 		rm $FILENAME.tar.gz.sha1
 	else
 		if [ "$(shasum $FILENAME.tar.gz | awk '{print $1}')" == "$(cat $FILENAME.tar.gz.sha1)" ] ;  then
-			tar -xvf $FILENAME.tar.gz
+			tar -xf $FILENAME.tar.gz
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
@@ -67,9 +67,9 @@ function build() {
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
-		make -j1 depend
+		make -j1 depend # running make multithreaded is unreliable
 		make -j1
-		make -j 1 install
+		make -j1 install
 
 
 		rm -f libcrypto.a
@@ -188,9 +188,9 @@ function build() {
 
 			echo "Running make for ${IOS_ARCH}"
 
-			make depend
+			make -j1 depend # running make multithreaded is unreliable
 			make -j1
-			make install
+			make -j1 install
 
 
 			# reset source file back.
@@ -241,33 +241,34 @@ function build() {
 		unset CC
 		unset AR
 		rm -f Setenv-android.sh
-		wget http://wiki.openssl.org/images/7/70/Setenv-android.sh
+		wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
 		perl -pi -e 's/\r//g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
-
-		# armv7
-		if [ "$ARCH" == "armv7" ]; then
-			export _ANDROID_EABI=arm-linux-androideabi-4.9
-			export _ANDROID_ARCH=arch-arm
+		
+        # armv7
+        if [ "$ARCH" == "armv7" ]; then
+            export _ANDROID_EABI=arm-linux-androideabi-4.9
+		    export _ANDROID_ARCH=arch-arm
 		elif [ "$ARCH" == "x86" ]; then
-			export _ANDROID_EABI=x86-4.9
-			export _ANDROID_ARCH=arch-x86
+            export _ANDROID_EABI=x86-4.9
+		    export _ANDROID_ARCH=arch-x86
 		fi
+		
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
+        mkdir -p $BUILD_TO_DIR
+        source Setenv-android.sh
+        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+        make clean
+        make depend -j${PARALLEL_MAKE}
+        make build_libs -j${PARALLEL_MAKE}
+        mkdir -p $BUILD_TO_DIR/lib
+		cp libssl.a $BUILD_TO_DIR/lib/
+        cp libcrypto.a $BUILD_TO_DIR/lib/
 
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-		mkdir -p $BUILD_TO_DIR
-		source Setenv-android.sh
-		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-		make clean
-		make -j1 depend
-		make -j${PARALLEL_MAKE}
-		make install
-		make install
-
-	else
+	else 
 
 		echoWarning "TODO: build $TYPE lib"
 

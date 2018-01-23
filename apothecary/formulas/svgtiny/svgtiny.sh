@@ -20,25 +20,13 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	git clone git://git.netsurf-browser.org/libsvgtiny.git
+	git clone -b release/$VER --depth 1 git://git.netsurf-browser.org/libsvgtiny.git
     mv libsvgtiny svgtiny
     cd svgtiny
-    git checkout release/$VER
-
-    git clone git://git.netsurf-browser.org/libdom.git
-    cd libdom
-    git checkout release/0.3.0
-    cd ..
-
-    git clone git://git.netsurf-browser.org/libparserutils.git
-    cd libparserutils
-    git checkout release/0.2.3
-    cd ..
-
-    git clone git://git.netsurf-browser.org/libwapcaplet.git
-    cd libwapcaplet
-    git checkout release/0.3.0
-    cd ..
+    
+    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libdom.git
+    git clone -b release/0.2.3 --depth 1 git://git.netsurf-browser.org/libparserutils.git    
+    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git    
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -69,11 +57,6 @@ function prepare() {
 
     gperf src/colors.gperf > src/svg_colors.c
     cp -rf libdom/bindings libdom/include/dom/
-
-    apothecaryDepend download libxml2
-    apothecaryDepend prepare libxml2
-    apothecaryDepend build libxml2
-    apothecaryDepend copy libxml2
 }
 
 # executed inside the lib src dir

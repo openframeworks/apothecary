@@ -24,7 +24,7 @@ GIT_TAG=master
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	wget $GIT_URL/archive/master.tar.gz -O rtaudio-$GIT_TAG.tar.gz
+	wget -nv --no-check-certificate $GIT_URL/archive/master.tar.gz -O rtaudio-$GIT_TAG.tar.gz
 	tar -xf rtaudio-$GIT_TAG.tar.gz
 	mv rtaudio-$GIT_TAG rtAudio
 	rm rtaudio-$GIT_TAG.tar.gz
@@ -149,7 +149,7 @@ function copy() {
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	cp -v readme $1/license/
+	cp -v README.md $1/license/
 }
 
 # executed inside the lib src dir
