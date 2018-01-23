@@ -48,7 +48,6 @@ init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
-- set PATH=%PATH%;%MSYS2_PATH%\usr\bin;
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
@@ -60,7 +59,9 @@ init:
 - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - if "%TARGET%_%VS_VER%"=="vs_15" set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX64\x64;%PATH%
-
+# !Important: append %MSYS2_PATH% to PATH so that it is the **last** element. That way, any environment settings set and executables reachable through `vcvars[...]` take precedence
+# Otherwise link.exe for example won't be resolved correctly to msbuild link.exe, but will use mingw's own /usr/bin/link
+- set PATH=%PATH%;%MSYS2_PATH%\usr\bin;
 
 build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
