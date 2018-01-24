@@ -350,13 +350,22 @@ if [ $# -lt 1 ] ; then
 	exit 1
 fi
 
-# if [ "$TYPE" == "vs" ]; then
+ if [ "$TYPE" == "vs" ]; then
+
+ 	# At this point we assume that $PATH begins with "/usr/local/bin:/usr/bin:/bin:/opt/bin:", which 
+ 	# means that the bash environment will take precedence over windows build tools when resolving PATH
+ 	# We must re-order PATH, so that the linux paths are placed at the very end.
+
+ 	TMP_PATH = ${PATH#/usr/local/bin:/usr/bin:/bin:/opt/bin:}
+ 	TMP_PATH = "$TMP_PATH:/usr/local/bin:/usr/bin:/bin:/opt/bin"
+ 	export PATH=$TMP_PATH
+
 #     if [ "$ARCH" == "64" ]; then
 #         # export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
 #     else
 #         # export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
 #     fi
-# fi
+ fi
 
 ################################################################################
 ### FUNCTIONS
