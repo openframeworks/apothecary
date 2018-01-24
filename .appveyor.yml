@@ -6,32 +6,32 @@ environment:
     CHERE_INVOKING: 1
   matrix:
   # VisualStudio 2017 64 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      platform: x64
-      TARGET: vs
-      VS_VER: 15
-      ARCH: 64
-      VS_NAME: 2017
-  # VisualStudio 2017 32 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      platform: x86
-      TARGET: vs
-      VS_VER: 15
-      ARCH: 32
-      VS_NAME: 2017
-  # MSYS2 Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      TARGET: msys2
-      ARCH: 32
-      VS_NAME: 
-  #VisualStudio 2015 32 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      TARGET: vs
-      VS_VER: 14
-      ARCH: 32
-      VS_NAME: 2015
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  #     platform: x64
+  #     TARGET: vs
+  #     VS_VER: 15
+  #     ARCH: 64
+  #     VS_NAME: 2017
+  # # VisualStudio 2017 32 bit Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+  #     platform: x86
+  #     TARGET: vs
+  #     VS_VER: 15
+  #     ARCH: 32
+  #     VS_NAME: 2017
+  # # MSYS2 Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #     platform: x86
+  #     TARGET: msys2
+  #     ARCH: 32
+  #     VS_NAME: 
+  # #VisualStudio 2015 32 bit Building
+  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #     platform: x86
+  #     TARGET: vs
+  #     VS_VER: 14
+  #     ARCH: 32
+  #     VS_NAME: 2015
   #VisualStudio 2015 64 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x64
@@ -54,8 +54,10 @@ init:
 # visual studio 2015
 - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x86_14" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN
-- if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
-- if "%PLATFORM%_%VS_VER%"=="x64_14" set VS_BIN_PATH=/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
+- if "%PLATFORM%_%VS_VER%"=="x64_14" 
+    call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
+    set VS_BIN_PATH=/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
+
 # visual studio 2017
 - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x86_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x86
