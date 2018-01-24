@@ -55,7 +55,7 @@ init:
 - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x86_14" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN
 - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
-- if "%PLATFORM%_%VS_VER%"=="x64_14" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
+- if "%PLATFORM%_%VS_VER%"=="x64_14" set VS_BIN_PATH=/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
 # visual studio 2017
 - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x86_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x86
