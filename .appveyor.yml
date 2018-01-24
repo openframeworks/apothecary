@@ -54,11 +54,11 @@ init:
 # visual studio 2015
 - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
-- if "%TARGET%_%VS_VER%"=="vs_14" set VS_BIN_PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
+- if "%TARGET%_%VS_VER%"=="vs_14" set VS_BIN_PATH="C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%"
 # visual studio 2017
 - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-- if "%TARGET%_%VS_VER%"=="vs_15" set VS_BIN_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\HostX64\x64;%PATH%
+- if "%TARGET%_%VS_VER%"=="vs_15" set VS_BIN_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\HostX64\x64;%PATH%"
 # !Important: append %MSYS2_PATH% to PATH so that it is the **last** element. That way, any environment settings set and executables reachable through `vcvars[...]` take precedence
 # Otherwise link.exe for example won't be resolved correctly to msbuild link.exe, but will use mingw's own /usr/bin/link
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
