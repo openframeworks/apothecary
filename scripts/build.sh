@@ -330,11 +330,11 @@ else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 	tar cjf $TARBALL $LIBS
 	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
-	cp scripts/ssh_config ~/.ssh/config
-	chmod 600 scripts/id_rsa
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
+	cp $ROOT/scripts/ssh_config ~/.ssh/config
+	chmod 600 $ROOT/scripts/id_rsa
 	echo Uploading libraries
-	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm scripts/id_rsa
+	scp -i $ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i $ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm $ROOT/scripts/id_rsa
 fi
