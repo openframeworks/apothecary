@@ -12,33 +12,33 @@ environment:
       VS_VER: 15
       ARCH: 64
       VS_NAME: 2017
-  # # VisualStudio 2017 32 bit Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #     platform: x86
-  #     TARGET: vs
-  #     VS_VER: 15
-  #     ARCH: 32
-  #     VS_NAME: 2017
-  # # MSYS2 Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x86
-  #     TARGET: msys2
-  #     ARCH: 32
-  #     VS_NAME: 
-  # #VisualStudio 2015 32 bit Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x86
-  #     TARGET: vs
-  #     VS_VER: 14
-  #     ARCH: 32
-  #     VS_NAME: 2015
-  # #VisualStudio 2015 64 bit Building
-  #   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-  #     platform: x64
-  #     TARGET: vs
-  #     VS_VER: 14
-  #     ARCH: 64
-  #     VS_NAME: 2015
+  # VisualStudio 2017 32 bit Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 32
+      VS_NAME: 2017
+  # MSYS2 Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: msys2
+      ARCH: 32
+      VS_NAME: 
+  #VisualStudio 2015 32 bit Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 32
+      VS_NAME: 2015
+  #VisualStudio 2015 64 bit Building
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 64
+      VS_NAME: 2015
 
 configuration: Debug
 shallow_clone: true
