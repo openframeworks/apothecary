@@ -202,12 +202,12 @@ function build() {
         fi
  # -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD TERRAGEN 3D X X3D GLTF 3MF MMD
 
-            # -DASSIMP_BUILD_STL_IMPORTER=0
-            # -DASSIMP_BUILD_BLEND_IMPORTER=0
-        rm -rf build_android
-        mkdir -p build_android
-        cd build_android
-        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
+        # -DASSIMP_BUILD_STL_IMPORTER=0
+        # -DASSIMP_BUILD_BLEND_IMPORTER=0
+        rm -rf build_$ABI
+        mkdir -p build_$ABI
+        cd build_$ABI
+        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
         make assimp -j${PARALLEL_MAKE}
         cd ..
 
@@ -268,9 +268,9 @@ function copy() {
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build_android/include/* $1/include
-        cp -Rv build_android/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        cp -Rv build_android/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
+        cp -Rv build_$ABI/include/* $1/include
+        cp -Rv build_$ABI/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
