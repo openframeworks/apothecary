@@ -9,10 +9,10 @@ import feature ;
 # file.
 if ! gcc in [ feature.values <toolset> ]
 {
-    using clang : arm : %{NDK_ROOT}/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ ;
+    using clang : intel : "%{NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++" ;
 }
 
-project : default-build <toolset>clang ;
+project : default-build <toolset>gcc ;
 
 # List of --with-<library> and --without-<library>
 # options. If left empty, all libraries will be built.

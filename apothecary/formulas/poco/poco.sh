@@ -408,21 +408,21 @@ function build() {
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
         # get the absolute path to the included openssl libs
-        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
+        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/apothecary/build/$(basename $OF_LIBS_OPENSSL)
         local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
         local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-        source ../../android_configure.sh $ABI
-        #export CXX=clang++
+        export CXX=clang++
         ./configure $BUILD_OPTS \
-                    --include-path=$OPENSSL_INCLUDE \
-                    --library-path=$OPENSSL_LIBS/$ABI \
-                    --config=Android
+                --include-path=$OPENSSL_INCLUDE \
+                --library-path=$OPENSSL_LIBS/$ABI \
+                --config=Android
         make clean ANDROID_ABI=$ABI
         make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
         rm -f lib/Android/$ABI/*d.a
 
         export PATH=$OLD_PATH
+
 
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
         ./configure $BUILD_OPTS
