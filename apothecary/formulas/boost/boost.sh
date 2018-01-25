@@ -333,8 +333,8 @@ function copy() {
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
 		# BCP is missing to build bcp go to build/boost and run:
-		# ./bootstrap.sh
-		# ./bjam tools/bcp
+		./bootstrap.sh
+		./bjam tools/bcp
 		# run apothecary again
 		dist/bin/bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
