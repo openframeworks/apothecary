@@ -350,13 +350,21 @@ if [ $# -lt 1 ] ; then
 	exit 1
 fi
 
-# if [ "$TYPE" == "vs" ]; then
-#     if [ "$ARCH" == "64" ]; then
-#         # export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
-#     else
-#         # export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
-#     fi
-# fi
+ if [ "$TYPE" == "vs" ]; then
+
+ 	# At this point we assume that $PATH begins with "/usr/local/bin:/usr/bin:/bin:/opt/bin:", which 
+ 	# means that the bash environment will take precedence over windows build tools - this can lead
+ 	# to some name-clashes, esp. with `link` for example, which has the same name, but might either 
+ 	# be the microsoft linker, or the gcc linker bundled with mingw. In most cases, the microsoft
+ 	# build tools will be preferred, and we therefore need to make sure that the ms build tools occur 
+ 	# earlier in $PATH.
+ 	#
+ 	# We prepend the ms build tools path via a special environment variable which we receive via 
+ 	# `appveyor.yml`: `VS_BIN_PATH`, which is set in the `init:` step
+
+	export PATH="$VS_BIN_PATH:$PATH"
+
+ fi
 
 ################################################################################
 ### FUNCTIONS
@@ -1000,7 +1008,7 @@ function clean() {
 # $2 = dependency name
 function apothecaryDepend() {
 	# Dont do anything if BUILD_DEPENDENCIES is false
-	if [ $BUILD_DEPENDENCIES==0 ] ; then 
+	if [ $BUILD_DEPENDENCIES == 0 ] ; then 
 		return
 	fi
 

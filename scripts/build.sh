@@ -305,8 +305,7 @@ if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
 
-
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]]; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else

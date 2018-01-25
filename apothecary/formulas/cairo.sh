@@ -38,6 +38,11 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	# manually download dependencies
+
+	echo
+	echoInfo " Current PATH set to: $PATH"
+	echo 
+
 	apothecaryDependencies download
 
 	if [ "$TYPE" == "vs" ] ; then
