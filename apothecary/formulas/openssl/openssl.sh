@@ -235,40 +235,31 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-		export _ANDROID_NDK_ROOT=$NDK_ROOT
-		export FIPS_SIG=
-		unset CXX
-		unset CC
-		unset AR
-		rm -f Setenv-android.sh
-		wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
-		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
-		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
-		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
-		perl -pi -e 's/\r//g' Setenv-android.sh
-		export _ANDROID_API=$ANDROID_PLATFORM
-		
-        # armv7
-        if [ "$ARCH" == "armv7" ]; then
-            export _ANDROID_EABI=arm-linux-androideabi-4.9
-		    export _ANDROID_ARCH=arch-arm
-		elif [ "$ARCH" == "x86" ]; then
-            export _ANDROID_EABI=x86-4.9
-		    export _ANDROID_ARCH=arch-x86
-		fi
-		
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-        mkdir -p $BUILD_TO_DIR
-        source Setenv-android.sh
-        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-        make clean
-        make depend -j${PARALLEL_MAKE}
-        make build_libs -j${PARALLEL_MAKE}
-        mkdir -p $BUILD_TO_DIR/lib
-		cp libssl.a $BUILD_TO_DIR/lib/
-        cp libcrypto.a $BUILD_TO_DIR/lib/
 
-	else 
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/fbuild/
+		mkdir -p BUILD_TO_DIR
+		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+
+		CURRENTPATH=`pwd`
+
+		cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
+		cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
+		cp $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt $CURRENTPATH/ssl/
+
+		echo `pwd`
+		cp crypto/comp/comp.h include/openssl/
+		cp crypto/engine/engine.h include/
+
+		BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
+
+		mkdir -p build_$ABI
+		cd build_$ABI
+		cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
+		make VERBOSE=1
+		mkdir inst
+		make DESTDIR="inst" install 
+
+	else
 
 		echoWarning "TODO: build $TYPE lib"
 
@@ -344,7 +335,8 @@ function copy() {
 			rm -r $1/lib/$TYPE/$ABI
 		fi
 		mkdir -p $1/lib/$TYPE/$ABI
-		cp -rv build/android/$ABI/lib/*.a $1/lib/$TYPE/$ABI/
+		cp -rv build_$ABI/ssl/*.a $1/lib/$TYPE/$ABI/
+		cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
 		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
 		# 	mkdir -p $1/lib/$TYPE/armeabi-v7a
