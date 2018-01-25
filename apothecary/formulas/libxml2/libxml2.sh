@@ -48,29 +48,43 @@ function build() {
         fi
 
     elif [ "$TYPE" == "android" ]; then
-        local BUILD_TO_DIR=$BUILD_DIR/libxml2/build/$TYPE/$ABI
+        cp $FORMULA_DIR/config.h .
+
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+        
         source ../../android_configure.sh $ABI
-        if [ "$ARCH" == "armv7" ]; then
-            export HOST=armv7a-linux-android
-        elif [ "$ARCH" == "x86" ]; then
-            export HOST=x86-linux-android
-        fi
-       ./configure --prefix=$BUILD_TO_DIR --host=$HOST --target=$HOST \
-            --enable-static \
-            --without-lzma \
-            --without-zlib \
-            --disable-shared  \
-            --without-ftp \
-            --without-html \
-            --without-http \
-            --without-iconv \
-            --without-legacy \
-            --without-modules \
-            --without-output \
-            --without-python
-        make clean
-        make -j${PARALLEL_MAKE}
-        make install
+        mkdir -p cmake
+        cd cmake
+        ln -s .. libxml2
+        wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
+        perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CmakeLists.txt
+        cd ..
+
+        mkdir -p build_$ABI
+        cd build_$ABI
+        
+        export CMAKE_CFLAGS="$CFLAGS"
+        export CFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+        export LDFLAGS=""
+        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-DLIBXML_THREAD_ENABLED"  ../cmake/
+        make -j${PARALLEL_MAKE} VERBOSE=1
+        cd ..
+
+        unlink cmake/libxml2
+
+        #source ../../android_configure.sh $ABI
+        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        #if [ "$ARCH" == "armv7" ]; then
+        #    HOST=armv7a-linux-android
+        #elif [ "$ARCH" == "x86" ]; then
+        #    HOST=x86-linux-android
+        #fi
+        #./configure --host=$HOST --without-lzma --without-zlib --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        #make clean
+        #make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -176,7 +190,7 @@ function copy() {
     elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
         # copy lib
-        cp -Rv .libs/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+        cp -Rv build_$ABI/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib

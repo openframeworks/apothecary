@@ -332,7 +332,11 @@ function copy() {
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
-		bcp filesystem install_dir
+		# BCP is missing to build bcp go to build/boost and run:
+		# ./bootstrap.sh
+		# ./bjam tools/bcp
+		# run apothecary again
+		dist/bin/bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI

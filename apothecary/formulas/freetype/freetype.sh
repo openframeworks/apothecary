@@ -342,17 +342,32 @@ function build() {
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
 
 	elif [ "$TYPE" == "android" ] ; then
-	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
-	    source ../../android_configure.sh $ABI
-	    if [ "$ARCH" == "armv7" ]; then
-            HOST=armv7a-linux-android
-        elif [ "$ARCH" == "x86" ]; then
-            HOST=x86-linux-android
-        fi
-	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no
-	    make clean
-	    make -j${PARALLEL_MAKE}
-	    make install
+	    #local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
+	    #source ../../android_configure.sh $ABI
+	    #if [ "$ARCH" == "armv7" ]; then
+        #    HOST=armv7a-linux-android
+        #elif [ "$ARCH" == "x86" ]; then
+        #    HOST=x86-linux-android
+        #fi
+#
+	    #./configure --prefix=$BUILD_TO_DIR --host $HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no
+	    #make clean
+	    #make -j${PARALLEL_MAKE}
+	    #make install
+
+
+        source ../../android_configure.sh $ABI
+		mkdir -p build_$ABI
+		cd build_$ABI
+        export CMAKE_CFLAGS="$CFLAGS"
+        export CFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+        export LDFLAGS=""
+        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI ..
+		make -j${PARALLEL_MAKE} VERBOSE=1
+		cd ..
+
+
 	elif [ "$TYPE" == "emscripten" ]; then
 	    #patch -p0 -u < $FORMULA_DIR/emscripten.patch
 	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE
@@ -409,7 +424,8 @@ function copy() {
 	elif [ "$TYPE" == "android" ] ; then
 	    rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-	    cp -v build/$TYPE/$ABI/lib/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
+	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
+
 	elif [ "$TYPE" == "emscripten" ] ; then
 		cp -v build/$TYPE/lib/libfreetype.bc $1/lib/$TYPE/libfreetype.bc
 	fi
