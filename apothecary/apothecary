@@ -66,8 +66,8 @@ LIBS_DIR=""
 PARALLEL_MAKE=1
 
 function getrealpath() { if command -v realpath 2>/dev/null; then
-  echo realpath $1;
-else
+  echo realpath $1; 
+else 
 	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 fi;
  }
@@ -94,7 +94,7 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
 
-
+	
 fi
 
 # paths to android SDK, etc
@@ -324,14 +324,15 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 			echo "$HELP" ; exit 0 ;;
 	esac
 done
-shift $(( $OPTIND - 1))
+shift $(expr $OPTIND - 1)
+
 
 # used when building for vs - set to 15 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
-    if [ -z ${VS_VER+x} ]; then
+    if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 15"
 	    VS_VER=15
-    else
+    else 
 	    echo "VS_VER is set to '$VS_VER'"
     fi
 
@@ -1264,12 +1265,11 @@ if [[ "$TYPE" == "android" ]] ; then
 		exit 1
 	fi
 	if [ "$ARCH" == "armv7" ]; then
-		echo setting arch to armv7
-		ABI=armeabi-v7a
-	elif [ "$ARCH" == "arm64" ]; then
-		ABI=arm64-v8a
+	    ABI=armeabi-v7a
 	elif [ "$ARCH" == "x86" ]; then
-		ABI=x86
+	    ABI=x86
+	elif [ "$ARCH" == "arm64" ]; then
+	    ABI=arm64-v8a
 	fi
 fi
 
