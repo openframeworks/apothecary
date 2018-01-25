@@ -29,24 +29,18 @@ export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOS
 export PATH=${PATH}:${TOOLCHAIN_PATH}
 export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
-export AR=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ar
-export RANLIB=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ranlib
-export CFLAGS="--sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/"
-
-if [ "$ABI" != "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS -nostdlib"
-fi
-
-export CFLAGS="$CFLAGS  -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include  -I${NDK_ROOT}/sources/android/cpufeatures -I${NDK_ROOT}/sources/android/support/include"
-export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
-export LIBS="-lz -llog -lc -lm -ldl"
-# -lstdc++ -lgcc
+export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ar
+export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-{TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ranlib
+export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums"
+export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures "
+export LDFLAGS=" -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
+export LIBS="-lz -llog  -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
 
 if [ "$ABI" = "armeabi-v7a" ]; then
-    export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
-    export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -Wl,--fix-cortex-a8 -Wl,--no-undefined"
+    export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+    export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ "$ABI" = "armeabi" ]; then
     export CFLAGS="$CFLAGS"
     export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
