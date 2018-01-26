@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
+APOTHECARY_PATH=$ROOT/apothecary
 
 sudo apt-get update -q
 sudo apt-get install -y libboost-tools-dev gperf realpath
@@ -23,5 +24,5 @@ else
     cd -
 fi
 
-echo "NDK_ROOT=${NDK_ROOT}" > ${ROOT}/paths.make
+echo "NDK_ROOT=${NDK_ROOT}" > ${APOTHECARY_PATH}/paths.make
 
