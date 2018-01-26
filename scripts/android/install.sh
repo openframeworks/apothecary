@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-APOTHECARY_PATH=$(cd $(dirname "$0"); pwd -P)/../..
+APOTHECARY_PATH=$(cd $(dirname "$0"); pwd -P)/../../apothecary
 
 sudo apt-get update -q
 sudo apt-get install -y libboost-tools-dev gperf realpath
