@@ -1174,8 +1174,8 @@ BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 # set for android sdk info
 # set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
-	if [[ -e ${TRAVIS_BUILD_DIR}/paths.make ]] ; then
-		source ${TRAVIS_BUILD_DIR}/paths.make
+	if [[ -e ${OF_ROOT}/paths.make ]] ; then
+		source ${OF_ROOT}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
 	elif [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then

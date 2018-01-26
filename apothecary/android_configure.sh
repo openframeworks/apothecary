@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 export ABI=$1
-if [ "$(uname)" == "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
     export HOST_PLATFORM=darwin-x86_64
 else
     export HOST_PLATFORM=linux-x86_64
@@ -8,11 +9,11 @@ export LIBSPATH=android/$ABI
 export NDK_PLATFORM=$ANDROID_PLATFORM
 export TOOLCHAIN_VERSION=4.9
 export CLANG_VERSION=
-if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
+if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
     export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm"
     export ANDROID_PREFIX=arm-linux-androideabi
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
-elif [ $ABI = x86 ]; then
+elif [ "$ABI" = "x86" ]; then
     export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86"
     export ANDROID_PREFIX=i686-linux-android
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
@@ -32,13 +33,13 @@ export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${ND
 export LIBS="-lz -llog -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
-if [ $ABI = armeabi-v7a ]; then
+if [ "$ABI" = "armeabi-v7a" ]; then
     export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16"
     export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -Wl,--fix-cortex-a8 -Wl,--no-undefined"
-elif [ $ABI = armeabi ]; then
+elif [ "$ABI" = "armeabi" ]; then
     export CFLAGS="$CFLAGS"
     export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
-elif [ $ABI = x86 ]; then
+elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
     export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
 fi

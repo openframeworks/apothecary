@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # OpenCV
 # library of programming functions mainly aimed at real-time computer vision
@@ -9,10 +9,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
  
 # define the version 
-VER=3.3.1
-# VER=3.1.0
-# emscripten needs version 3.1.0 
-EMSCRIPTEN_VER=3.1.0
+VER=3.1.0
  
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -28,9 +25,6 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
  
 # download the source code and unpack it into LIB_NAME
 function download() {
-  if [ "$TYPE" == "emscripten" ] ; then
-    VER=$EMSCRIPTEN_VER
-  fi 
   curl -Lk https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
   tar -xf opencv-$VER.tar.gz
   mv opencv-$VER $1
@@ -355,10 +349,10 @@ function build() {
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
     
-    if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
+    if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
-    elif [ $ABI = x86 ]; then
+    elif [ "$ABI" = "x86" ]; then
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
@@ -417,11 +411,12 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    if [ -n "${EMSCRIPTEN-}"]; then
+    if [ -z "${EMSCRIPTEN+x}" ]; then
       echo "emscripten is not set.  sourcing emsdk_env.sh"
       source ~/emscripten-sdk/emsdk_env.sh
     fi
   
+    cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
     cd build_${TYPE}
     emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
@@ -485,6 +480,9 @@ function build() {
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF
     make -j${PARALLEL_MAKE}
