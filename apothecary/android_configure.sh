@@ -30,7 +30,7 @@ export PATH=${PATH}:${TOOLCHAIN_PATH}
 export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ar
-export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-{TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ranlib
+export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ranlib
 export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums"
 export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures "
 export LDFLAGS=" -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
