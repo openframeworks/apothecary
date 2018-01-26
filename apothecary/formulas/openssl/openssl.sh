@@ -256,7 +256,7 @@ function build() {
 		cd build_$ABI
 		cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
 		make VERBOSE=1
-		mkdir inst
+		mkdir -p inst
 		make DESTDIR="inst" install 
 
 	else
