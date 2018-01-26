@@ -58,53 +58,17 @@ function build() {
         fi
 
 	elif [ "$TYPE" == "android" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
-	    #source ../../android_configure.sh $ABI
-	    #if [ "$ARCH" == "armv7" ]; then
-        #    HOST=armv7a-linux-android
-        #elif [ "$ARCH" == "x86" ]; then
-        #    HOST=x86-linux-android
-        #fi
-        #./buildconf
-        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-	    #./configure --prefix=$BUILD_TO_DIR --host $HOST --with-ssl=$OPENSSL_DIR --enable-static=yes --enable-shared=no
-        #perl -pi -e "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
-        #make clean
-	    #make -j${PARALLEL_MAKE}
-	    #make install
-
         perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
         perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
 
-        # arm
-        source ../../android_configure.sh $ABI
         mkdir -p build_$ABI
         cd build_$ABI
-        export CMAKE_CFLAGS="$CFLAGS"
-        export CFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
 
-        cmake -C "$FORMULA_DIR/tryrun.cmake" -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=ON  -DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR="${BUILD_DIR}/openssl/build_$ABI/inst/usr/local" -DOPENSSL_INCLUDE_DIR="${BUILD_DIR}/openssl/include" -DOPENSSL_LIBRARIES="${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/" -DOPENSSL_CRYPTO_LIBRARY="${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libcrypto.a" -DOPENSSL_SSL_LIBRARY="${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libssl.a" ..
+        OPENSSL_OPTS="-DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libssl.a"
+
+        cmake -C "$FORMULA_DIR/tryrun.cmake" -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=ON $OPENSSL_OPTS ..
         make -j${PARALLEL_MAKE} libcurl VERBOSE=1
         cd ..
-
-
-        ## x86
-        #ABI=x86
-        #source ../../android_configure.sh $ABI
-        #mkdir -p build_x86
-        #cd build_x86
-        #export CMAKE_CFLAGS="$CFLAGS"
-        #export CFLAGS=""
-        #export CMAKE_LDFLAGS="$LDFLAGS"
-        #export LDFLAGS=""
-#
-        #CMAKE_MODULE_PATH="${BUILD_DIR}/../openssl" cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=1 ..
-        #make -j${PARALLEL_MAKE}
-        #cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
