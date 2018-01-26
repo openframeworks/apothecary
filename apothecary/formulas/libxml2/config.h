@@ -309,7 +309,7 @@
 #define SUPPORT_IP6 /**/
 
 /* Define if va_list is an array type */
-#define VA_LIST_IS_ARRAY 1
+//#define VA_LIST_IS_ARRAY 1
 
 /* Version number of package */
 #define VERSION "2.9.4"
