@@ -323,7 +323,7 @@ echo "Compressing libraries from $OUTPUT_FOLDER"
 LIBS=$(ls)
 
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
+	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
