@@ -33,13 +33,13 @@ createRaspbianImg(){
 }
 
 downloadToolchain(){
-    wget http://ci.openframeworks.cc/rpi_toolchain.tar.bz2
+    wget -nv http://ci.openframeworks.cc/rpi_toolchain.tar.bz2
     tar xjf rpi_toolchain.tar.bz2
     rm rpi_toolchain.tar.bz2
 }
 
 downloadFirmware(){
-    wget https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
+    wget -nv https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
     unzip firmware.zip
     cp -r firmware-master/opt raspbian/
     rm -r firmware-master

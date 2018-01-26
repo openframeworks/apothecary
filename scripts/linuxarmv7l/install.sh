@@ -23,7 +23,7 @@ createArchImg(){
     sudo apt-get update -q
     sudo apt-get install -y coreutils realpath gperf
 	cd $HOME
-	wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+	wget -nv http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 	mkdir archlinux
 	tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C archlinux/ 2> /dev/null
 	sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g archlinux/etc/pacman.conf

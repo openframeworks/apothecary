@@ -39,6 +39,9 @@ FORMULA_DEPENDS=()
 # set this if you need to do it manually
 FORMULA_DEPENDS_MANUAL=0
 
+# Build dependencies for formula
+BUILD_DEPENDENCIES=1
+
 ### READ ONLY please!
 
 # build settings
@@ -56,11 +59,22 @@ FORMULA_DIR=
 BUILD_DIR=
 
 # full path to the destination dir for compiled libs
-LIBS_DIR=
+LIBS_DIR=""
 
 # number of parallel tasks to run on make.
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
+
+function getrealpath() { if command -v realpath 2>/dev/null; then
+  echo realpath $1; 
+else 
+	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+fi;
+ }
+
+realpath() {
+[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
 
 ### Xcode/ios specific settings
 
@@ -79,6 +93,8 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
+
+	
 fi
 
 # used when building for vs - set to 15 if not set explicitly
@@ -113,11 +129,11 @@ BUILDROOT_SUBDIR=_buildroot
 mkdir -p ${APOTHECARY_DIR}/build
 FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
 BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
-OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../../)
+OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
 LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
-echo "OF: $OF_ROOT"
+echo "OF: $OF_ROOT/"
 echo "APOTHECARY: $APOTHECARY_DIR"
 echo "FORMULAS: $FORMULAS_DIR"
 echo "BUILD: $BUILD_DIR"
@@ -194,6 +210,8 @@ options:
   -f    force download even if build folder already exists
 
   -x    use visual studio express tools
+
+  -p 	dont build dependencies
 
   -h	print this usage guide
 
@@ -285,7 +303,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:hgvxf opt ; do
+while getopts t:a:b:d:s:j:hgvxfp opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   TYPE="$OPTARG" ;;
@@ -294,7 +312,7 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		b) # set the build dir
 		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
-		   LIBS_DIR="$OPTARG" ;;
+		   LIBS_DIR="$OPTARG"; IS_CUSTOM_LIBS_DIR=1 ;;
 		s) # set the git tag to switch version
 		   SWITCH_VER="$OPTARG" ;;
 		j) # set the -j parameter for make
@@ -309,8 +327,10 @@ while getopts t:a:b:d:s:j:hgvxf opt ; do
 		   VS_BUILD_TOOL=WDExpress ;;
         f) # force download
            FORCE_DOWNLOAD=1 ;;
+		p) # Dont build dependencies
+           BUILD_DEPENDENCIES=0 ;;
 		[?]) # print help and exit
-			 echo "$HELP" ; exit 0 ;;
+			echo "$HELP" ; exit 0 ;;
 	esac
 done
 shift $(expr $OPTIND - 1)
@@ -330,13 +350,21 @@ if [ $# -lt 1 ] ; then
 	exit 1
 fi
 
-if [ "$TYPE" == "vs" ]; then
-    if [ "$ARCH" == "64" ]; then
-        export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin/amd64:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64:$PATH"
-    else
-        export PATH="/c/Program Files (x86)/MSBuild/14.0/Bin:/C/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin:$PATH"
-    fi
-fi
+ if [ "$TYPE" == "vs" ]; then
+
+ 	# At this point we assume that $PATH begins with "/usr/local/bin:/usr/bin:/bin:/opt/bin:", which 
+ 	# means that the bash environment will take precedence over windows build tools - this can lead
+ 	# to some name-clashes, esp. with `link` for example, which has the same name, but might either 
+ 	# be the microsoft linker, or the gcc linker bundled with mingw. In most cases, the microsoft
+ 	# build tools will be preferred, and we therefore need to make sure that the ms build tools occur 
+ 	# earlier in $PATH.
+ 	#
+ 	# We prepend the ms build tools path via a special environment variable which we receive via 
+ 	# `appveyor.yml`: `VS_BIN_PATH`, which is set in the `init:` step
+
+	export PATH="$VS_BIN_PATH:$PATH"
+
+ fi
 
 ################################################################################
 ### FUNCTIONS
@@ -380,7 +408,7 @@ function installAndroidToolchain() {
 		    ./make_standalone_toolchain.py \
 			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
 			    --arch=x86 \
-          --api $ANDROID_API \
+				--api $ANDROID_API \
 			    --stl=libc++
 	    fi
 	fi
@@ -666,7 +694,7 @@ function downloadFormula(){
 
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies download
 	fi
 
@@ -691,7 +719,7 @@ function prepareFormula() {
 	cd $BUILD_DIR/$1
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies prepare $1
 	fi
 
@@ -718,7 +746,7 @@ function buildFormula() {
 	cd $BUILD_DIR/$1
 
 	# dependencies
-	if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 		apothecaryDependencies build
 		apothecaryDependencies copy
 	fi
@@ -781,7 +809,7 @@ function cleanFormula() {
 	else
 
 		# dependencies
-		if [ FORMULA_DEPENDS_MANUAL == 0 ] ; then
+		if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 			apothecaryDependencies clean
 		fi
 
@@ -979,6 +1007,11 @@ function clean() {
 # $1 = command
 # $2 = dependency name
 function apothecaryDepend() {
+	# Dont do anything if BUILD_DEPENDENCIES is false
+	if [ $BUILD_DEPENDENCIES == 0 ] ; then 
+		return
+	fi
+
     local ROOT=$PWD
 	local depend="${2%.*}" # removes extension
 
@@ -1139,8 +1172,13 @@ DEPENDS_FORMULA_DIR=$FORMULAS_DIR/$DEPENDS_SUBDIR
 BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
 # set for android sdk info
+# set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
-	if [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
+	if [[ -e ${TRAVIS_BUILD_DIR}/paths.make ]] ; then
+		source ${TRAVIS_BUILD_DIR}/paths.make
+		ANDROID_NDK_ROOT=${NDK_ROOT}
+		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
+	elif [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
 		source ${APOTHECARY_DIR}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
@@ -1148,6 +1186,8 @@ if [[ "$TYPE" == "android" ]] ; then
 		source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
+	elif [[ -e ${NDK_ROOT} ]] ; then
+		ANDROID_NDK_ROOT=${NDK_ROOT}
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"
 		echoError "paths.make in apothecary folder or"

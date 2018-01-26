@@ -10,9 +10,11 @@ VER=0.32.4
 GIT_URL=http://anongit.freedesktop.org/git/pixman.git
 GIT_TAG=pixman-$VER
 
+FORMULA_TYPES=( "osx" "vs" )
+
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
+	wget -nv --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
 	rm pixman-$VER.tar.gz
@@ -45,7 +47,7 @@ function build() {
 		# only build & install lib, ignore demos/tests
 		cd pixman
 		make clean
-		make
+		make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
 		sed -i s/-MD/-MT/ Makefile.win32.common
 		cd pixman
@@ -63,7 +65,7 @@ function build() {
 		# only build & install lib, ignore demos/tests
 		cd pixman
 		make clean
-		make
+		make -j${PARALLEL_MAKE}
 	fi
 }
 

@@ -5,14 +5,124 @@ set -o pipefail
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
+OUTPUT_FOLDER=$ROOT/out
+# VERBOSE=true
+
 cd $APOTHECARY_PATH
 
+if [ -z $TARGET ] ; then 
+    echo "Environment variable TARGET not defined. Should be target os"
+    exit 1
+fi
+
+echo "Running apothecary from $PWD"
+echo "Target: $TARGET"
+echo "Architecture: $ARCH"
+echo "Bundle: $BUNDLE"
+
+FORMULAS=( 
+    # Dependencies for other formulas (cairo)
+    "pixman"
+    "pkg-config"
+    "zlib"
+    
+    # All formulas
+    "assimp"
+    "boost"
+    "FreeImage"
+    "libpng"
+    "libxml2"
+    "freetype"    
+    "fmodex"
+    "glew"
+    "glfw"
+    "glm"
+    "json"
+    "libusb"
+    "kiss"
+    "opencv"
+    "openssl"
+    "portaudio"
+    "pugixml"
+    "utf8"
+    "videoInput"    
+    "rtAudio"
+    "tess2"
+    "uriparser"
+    
+    # Formulas with depenencies in the end
+    "curl"
+    "poco"
+    "svgtiny"
+    "uri"
+    "cairo"
+)
+
+# Seperate in bundles on osx
+if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] || [ "$TARGET" == "vs" ]; then
+    if [ "$BUNDLE" == "1" ]; then
+        FORMULAS=(
+            # Dependencies for other formulas (cairo)
+            "pixman"
+            "pkg-config"
+            "zlib"
+            
+            # All formulas
+            # "assimp" #bundle 3
+            "boost"
+            "FreeImage"
+            "libpng"
+            # "libxml2" # bundle 3
+            "freetype"    
+            "fmodex"
+            "glew"
+            "glfw"
+            "glm"
+            "json"
+            "libusb"
+            "kiss"
+            # "opencv" # bundle 4
+            # "openssl" # bundle 2
+            "portaudio"
+            "pugixml"
+            "utf8"
+            "videoInput"    
+            "rtAudio"
+            "tess2"
+            "uriparser"
+            
+            # Formulas with depenencies in the end
+            "cairo"
+            # "curl" # bundle 2
+            # "poco" # bundle 2
+            # "svgtiny" # bundle 3
+            "uri"
+        )
+    elif [ "$BUNDLE" == "2" ]; then
+        FORMULAS=(
+            "openssl"
+            "poco"
+            "curl"
+        )
+    elif [ "$BUNDLE" == "3" ]; then
+        FORMULAS=(
+            "assimp"
+            "libxml2"
+            "svgtiny"
+        )
+    elif [ "$BUNDLE" == "4" ]; then
+        FORMULAS=(
+            "opencv"
+        )
+    fi
+fi
+
 # trap any script errors and exit
-trap "trapError" ERR
+# trap "trapError" ERR
 
 trapError() {
 	echo
-	echo " ^ Received error ^"
+	echo " ^ Received error building $formula_name ^"
 	cat formula.log
 	if [ "$formula_name" == "boost" ]; then
 	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
@@ -42,6 +152,7 @@ isRunning(){
 }
 
 echoDots(){
+    sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
@@ -49,23 +160,73 @@ echoDots(){
                 printf "\r"
                 return;
             fi
-            sleep 2
+            sleep 1
         done
         printf "\r                    "
         printf "\r"
     done
 }
 
-if [ "$TARGET" == "osx" ]; then
-    PARALLEL=4
-elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-    PARALLEL=2
-elif [ "$TARGET" == "android" ]; then
-    PARALLEL=2
-elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
-    PARALLEL=4
-else
-    PARALLEL=1
+
+travis_fold_start() {
+  echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
+}
+
+travis_fold_end() {
+  echo -e "\ntravis_fold:end:$1\r"
+}
+
+travis_time_start() {
+  travis_timer_id=$(printf %08x $(( RANDOM * RANDOM )))
+  travis_start_time=$(travis_nanoseconds)
+  echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
+}
+
+travis_time_finish() {
+  local result=$?
+  travis_end_time=$(travis_nanoseconds)
+  local duration=$(($travis_end_time-$travis_start_time))
+  echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
+  return $result
+}
+
+function travis_nanoseconds() {
+  local cmd="date"
+  local format="+%s%N"
+  local os=$(uname)
+
+  if hash gdate > /dev/null 2>&1; then
+    cmd="gdate" # use gdate if available
+  elif [[ "$os" = Darwin ]]; then
+    format="+%s000000000" # fallback to second precision on darwin (does not support %N)
+  fi
+
+  $cmd -u $format
+}
+
+if [ -z ${PARALLEL+x} ]; then
+    if [ "$TARGET" == "osx" ]; then
+        PARALLEL=4
+    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
+        PARALLEL=2
+    elif [ "$TARGET" == "android" ]; then
+        PARALLEL=2
+    elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
+        PARALLEL=4
+    else
+        PARALLEL=1
+    fi
+fi
+
+echo "Parallel builds: $PARALLEL"
+
+if  type "ccache" > /dev/null; then
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+       export PATH="/usr/local/opt/ccache/libexec:$PATH";
+    fi
+  
+    ccache -z
+    echo $(ccache -s)
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -85,58 +246,66 @@ if [ "$TARGET" == "emscripten" ]; then
     source ~/emscripten-sdk/emsdk_env.sh
 fi
 
-echo "Running apothecary from $PWD"
+function build(){
+    trap "trapError" ERR
 
-for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-    formula_name="${formula%.*}"
-    if [ "$OPT" != "" -a "$TARGET" != "linux64" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$OPT update $formula_name >> formula.log 2>&1 &
-    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ]; then
-        if [ "$OPT2" == "1" ]; then
-            if [ "$formula_name" != "poco" ] && [ "$formula_name" != "openssl" ] && [ "$formula_name" != "assimp" ] && [ "$formula_name" != "opencv" ] && [ "$formula_name" != "svgtiny" ]; then
-                echo Pass 1 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            fi
-        elif [ "$OPT2" == "2" ]; then
-            if [ "$formula_name" == "poco" ] || [ "$formula_name" == "openssl" ]; then
-                echo Pass 2 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            fi
-        elif [ "$OPT2" == "3" ]; then
-            if [ "$formula_name" == "assimp" ] || [ "$formula_name" == "opencv" ] || [ "$formula_name" == "svgtiny" ]; then
-                echo Pass 3 - Compiling $formula_name
-                echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-                ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-            fi
-        else
-            echo Compiling $formula_name
-            echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-            ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-        fi
-    elif [ "$TARGET" == "vs" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET -a$ARCH update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET -a$ARCH update $formula_name >> formula.log 2>&1 &
-    elif [ "$TARGET" == "msys2" ]; then
-        echo Compiling $formula_name
-        echo "./apothecary -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
-    else
-        echo Compiling $formula_name
-        echo "./apothecary -f -j$PARALLEL -t$TARGET update $formula_name" > formula.log 2>&1
-        ./apothecary -f -j$PARALLEL -t$TARGET update $formula_name >> formula.log 2>&1 &
+    echo Build $formula_name
+
+    local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
+    if [ "$ARCH" != "" ] ; then 
+        ARGS="$ARGS -a$ARCH"
+    fi
+    
+    if [ "$VERBOSE" = true ] ; then 
+        echo "./apothecary $ARGS update $formula_name"
+        ./apothecary $ARGS update $formula_name
+    else 
+        echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
+        ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
+        
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"    
+        tail -n 30 formula.log    
     fi
 
-    apothecaryPID=$!
-    echoDots $apothecaryPID
-    wait $apothecaryPID
+}
+
+# Remove output folder
+rm -rf $OUTPUT_FOLDER
+mkdir $OUTPUT_FOLDER
+
+ITER=0
+for formula in "${FORMULAS[@]}" ; do
+  
+# for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
+    
+    formula_name="${formula%.*}"
+
+    if [ "$TRAVIS" = true ] ; then
+        travis_fold_start "build.$ITER" "Build $formula_name"
+        travis_time_start
+    fi
+
+    build
+
+    if [ "$TRAVIS" = true ] ; then
+        travis_time_finish
+        travis_fold_end "build.$ITER"
+        ITER=$(expr $ITER + 1)
+    fi       
 done
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [ ! -z ${APPVEYOR+x} ]; then
+echo ""
+echo ""
+
+if  type "ccache" > /dev/null; then
+    echo $(ccache -s)
+fi
+
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]]; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else
@@ -149,21 +318,22 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-cd $ROOT
-echo "Compressing libraries from $PWD"
-LIBS=$(ls | grep -v \.appveyor.yml | grep -v \.travis.yml | grep -v \.gitignore | grep -v apothecary | grep -v scripts)
+cd $OUTPUT_FOLDER
+echo "Compressing libraries from $OUTPUT_FOLDER"
+LIBS=$(ls)
+
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}.zip
+	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
 else
-	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$OPT2.tar.bz2
+	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 	tar cjf $TARBALL $LIBS
 	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in scripts/id_rsa.enc -out scripts/id_rsa -d
-	cp scripts/ssh_config ~/.ssh/config
-	chmod 600 scripts/id_rsa
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
+	cp $ROOT/scripts/ssh_config ~/.ssh/config
+	chmod 600 $ROOT/scripts/id_rsa
 	echo Uploading libraries
-	scp -i scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm scripts/id_rsa
+	scp -i $ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i $ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm $ROOT/scripts/id_rsa
 fi

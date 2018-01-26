@@ -10,6 +10,8 @@ VER=0.28
 GIT_URL=http://anongit.freedesktop.org/git/pkg-config.git
 GIT_TAG=pkg-config-$VER
 
+FORMULA_TYPES=( "osx" )
+
 # download the source code and unpack it into LIB_NAME
 function download() {
 	curl -LO http://pkgconfig.freedesktop.org/releases/pkg-config-$VER.tar.gz
@@ -34,7 +36,7 @@ function build() {
 	# it is a tool and does not contribute static lib objects to the core
     ./configure --prefix=$BUILD_ROOT_DIR --with-internal-glib GLIB_CFLAGS="" GLIB_LIBS=""
 
-	make
+	make -j${PARALLEL_MAKE}
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root

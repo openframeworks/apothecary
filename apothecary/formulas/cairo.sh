@@ -21,7 +21,7 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.14.6
+VER=1.14.12
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
@@ -29,7 +29,7 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget http://cairographics.org/releases/cairo-$VER.tar.xz
+	wget -nv --no-check-certificate http://cairographics.org/releases/cairo-$VER.tar.xz
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz
@@ -38,6 +38,11 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	# manually download dependencies
+
+	echo
+	echoInfo " Current PATH set to: $PATH"
+	echo 
+
 	apothecaryDependencies download
 
 	if [ "$TYPE" == "vs" ] ; then

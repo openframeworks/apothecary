@@ -12,6 +12,28 @@ environment:
       VS_VER: 15
       ARCH: 64
       VS_NAME: 2017
+      BUNDLE: 1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 64
+      VS_NAME: 2017
+      BUNDLE: 2
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 64
+      VS_NAME: 2017
+      BUNDLE: 3
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 64
+      VS_NAME: 2017
+      BUNDLE: 4
   # VisualStudio 2017 32 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x86
@@ -19,6 +41,28 @@ environment:
       VS_VER: 15
       ARCH: 32
       VS_NAME: 2017
+      BUNDLE: 1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 32
+      VS_NAME: 2017
+      BUNDLE: 2
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 32
+      VS_NAME: 2017
+      BUNDLE: 3
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      TARGET: vs
+      VS_VER: 15
+      ARCH: 32
+      VS_NAME: 2017
+      BUNDLE: 4
   # MSYS2 Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x86
@@ -32,38 +76,89 @@ environment:
       VS_VER: 14
       ARCH: 32
       VS_NAME: 2015
+      BUNDLE: 1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 32
+      VS_NAME: 2015
+      BUNDLE: 2
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 32
+      VS_NAME: 2015
+      BUNDLE: 3
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 32
+      VS_NAME: 2015
+      BUNDLE: 4
   #VisualStudio 2015 64 bit Building
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x64
-      VS_VER: 14
       TARGET: vs
+      VS_VER: 14
       ARCH: 64
       VS_NAME: 2015
+      BUNDLE: 1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 64
+      VS_NAME: 2015
+      BUNDLE: 2
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 64
+      VS_NAME: 2015
+      BUNDLE: 3
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 64
+      VS_NAME: 2015
+      BUNDLE: 4
 
 configuration: Debug
 shallow_clone: true
 clone_depth: 10
 
 init:
+# - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
-- set PATH=%MSYS2_PATH%\usr\bin;%PATH%
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
 # visual studio 2015
 - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
+- if "%PLATFORM%_%VS_VER%"=="x86_14" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN
+- if "%PLATFORM%_%VS_VER%"=="x64_14" set VS_BIN_PATH=/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
 - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
-- if "%TARGET%_%VS_VER%"=="vs_14" set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin;%PATH%
 # visual studio 2017
 - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+- if "%PLATFORM%_%VS_VER%"=="x86_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x86
 - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-- if "%TARGET%_%VS_VER%"=="vs_15" set PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\bin\HostX64\x64;%PATH%
-
+- if "%PLATFORM%_%VS_VER%"=="x64_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64
+# prepend PATH after msbuild command line environment has been set up.
+- set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
 build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
 
 test: off
+
+# on_finish:
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 artifacts:
     - path: 'openFrameworks*.zip'
