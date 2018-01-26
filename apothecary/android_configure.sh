@@ -17,6 +17,10 @@ elif [ "$ABI" = "x86" ]; then
     export SYSROOT="${NDK_ROOT}/sysroot"
     export ANDROID_PREFIX=i686-linux-android
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
+elif [ $ABI = arm64-v8a ]; then
+    export SYSROOT=${NDK_ROOT}/sysroot
+    export ANDROID_PREFIX=aarch64-linux-android
+    export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
 fi
 export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 export TOOLCHAIN=llvm${CLANG_VERSION}
@@ -39,6 +43,9 @@ if [ "$ABI" = "armeabi-v7a" ]; then
 elif [ "$ABI" = "armeabi" ]; then
     export CFLAGS="$CFLAGS"
     export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
+elif [ $ABI = "arm64-v8a" ]; then
+    export CFLAGS="$CFLAGS -target aarch64-linux-android"
+    export LDFLAGS="$LDFLAGS -target aarch64-linux-android"
 elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
     export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
