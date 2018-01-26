@@ -174,7 +174,7 @@ function build() {
 
         mkdir -p build_$ABI
         cd build_$ABI
-        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
+        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG -fsigned-char ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -fsigned-char ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..
         make assimp -j${PARALLEL_MAKE}
         cd ..
 
@@ -239,9 +239,9 @@ function copy() {
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build_$ABI/include/* $1/include
+        cp -Rv include/* $1/include
         cp -Rv build_$ABI/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
+        #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
