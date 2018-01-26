@@ -1176,7 +1176,7 @@ fi
 echoVerbose "Build type: $TYPE"
 
 # check if we have a valid arch
-if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 ] ; then
+if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 -a $ARCH != arm64 ] ; then
 	echoError " Invalid architecture: $ARCH"
 	exit 1
 fi
