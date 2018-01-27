@@ -22,25 +22,24 @@ local LIB_FOLDER64="$LIB_FOLDER-64"
 local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
 local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
- 
+
 # download the source code and unpack it into LIB_NAME
 function download() {
-  curl -Lk https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
+  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -o opencv-$VER.tar.gz
   tar -xf opencv-$VER.tar.gz
   mv opencv-$VER $1
   rm opencv*.tar.gz
 }
- 
+
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
   : # noop
-  
 }
 
 # executed inside the lib src dir
 function build() {
   rm -f CMakeCache.txt
- 
+
   LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
   mkdir -p $LIB_FOLDER
 
@@ -66,6 +65,7 @@ function build() {
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
+      -DBUILD_opencv_videoio=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
       -DWITH_1394=OFF \
@@ -209,10 +209,8 @@ function build() {
     fi
     
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
     local IOS_ARCHS
-
-    if [[ "${TYPE}" == "tvos" ]]; then 
+    if [[ "${TYPE}" == "tvos" ]]; then
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
         IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
@@ -223,7 +221,6 @@ function build() {
     for IOS_ARCH in ${IOS_ARCHS}
     do
       source ${APOTHECARY_DIR}/ios_configure.sh $TYPE $IOS_ARCH
-      echo "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 
       cd build
 
@@ -321,11 +318,11 @@ function build() {
       local renamedLib=$(echo $lib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
         echo "renamed";
-        if [[ "${TYPE}" == "tvos" ]] ; then 
+        if [[ "${TYPE}" == "tvos" ]] ; then
           lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
           lipo -c armv7/lib/$lib arm64/lib/$lib i386/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
-        fi  
+        fi
       fi
     done
 
@@ -469,6 +466,7 @@ function build() {
       -DWITH_TBB=OFF \
       -DWITH_OPENNI=OFF \
       -DWITH_QT=OFF \
+      -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
       -DWITH_LIBV4L=OFF \
       -DWITH_MATLAB=OFF \
@@ -506,13 +504,13 @@ function copy() {
     # copy headers
 
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
-    
+
     cp -R $LIB_FOLDER/include/ $1/include/
- 
+
     # copy lib
     cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
-  
-  elif [ "$TYPE" == "vs" ] ; then 
+
+  elif [ "$TYPE" == "vs" ] ; then
     if [ $ARCH == 32 ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/Win32"
     elif [ $ARCH == 64 ] ; then
@@ -535,7 +533,7 @@ function copy() {
       cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
       #copy the ippicv includes and lib
-      IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win
+      IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/unpack/ippicv_win
       IPPICV_DST=$1/../ippicv
       if [ $ARCH == 32 ] ; then
         IPPICV_PLATFORM="ia32"
@@ -573,12 +571,9 @@ function copy() {
     cp -r platforms/$BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
     
   elif [ "$TYPE" == "emscripten" ]; then
-    cp -r include/opencv $1/include/
-    cp -r include/opencv2 $1/include/
-    
-    rm -f build_emscripten/lib/*pch_dephelp.a
-    rm -f build_emscripten/lib/*.so
-    cp -r build_emscripten/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/include/* $1/include/
+    cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
@@ -587,7 +582,7 @@ function copy() {
   cp -v LICENSE $1/license/
 
 }
- 
+
 # executed inside the lib src dir
 function clean() {
   if [ "$TYPE" == "osx" ] ; then
