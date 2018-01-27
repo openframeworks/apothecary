@@ -97,15 +97,6 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
 	
 fi
 
-# used when building for vs - set to 15 if not set explicitly
-if [ -z ${VS_VER+x} ] ; then 
-	echo "VS_VER was unset - set to 15"
-	VS_VER=15
-else 
-	echo "VS_VER is set to '$VS_VER'"
-fi
-VS_64_BIT_ENV='VC\vcvarsall'
-
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
@@ -334,6 +325,48 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 	esac
 done
 shift $(expr $OPTIND - 1)
+
+
+# used when building for vs - set to 15 if not set explicitly
+if [ "$TYPE" = "vs" ]; then
+    if [ -z ${VS_VER+x} ]; then 
+	    echo "VS_VER was not set - setting to 15"
+	    VS_VER=15
+    else 
+	    echo "VS_VER is set to '$VS_VER'"
+    fi
+
+    VS_64_BIT_ENV='VC\vcvarsall'
+
+    if [ -z ${PLATFORM+x}]; then
+        if [ $ARCH == 32 ]; then
+            PLATFORM=x86
+        elif [ $ARCH == 64 ]; then
+            PLATFORM=x64
+        fi
+    fi
+
+    if [ -z ${VS_BIN_PATH+x} ]; then
+        if [ "${PLATFORM}_${VS_VER}" = "x86_14" ]; then
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN"
+        elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
+            VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
+        elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x86"
+        elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
+        fi
+        if [ ! -d "$VS_BIN_PATH" ]; then
+            echo "Couldn't autodetect Visual Studio paths, probably installed on a non standard location?"
+            exit 1
+        fi
+        echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
+
+        if [ -d "/c/Program Files/CMake/bin/" ]; then
+            export PATH="/c/Program Files/CMake/bin/:$PATH"
+        fi
+    fi
+fi
 
 # get command
 if [ $# -gt 0 ] ; then
