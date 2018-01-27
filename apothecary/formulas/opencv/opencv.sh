@@ -516,36 +516,36 @@ function copy() {
     elif [ $ARCH == 64 ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/x64"
     fi
-      mkdir -p "$DEPLOY_PATH/Release"
-      mkdir -p "$DEPLOY_PATH/Debug"
-      # now make sure the target directories are clean.
-      rm -Rf "${DEPLOY_PATH}/Release/*"
-      rm -Rf "${DEPLOY_PATH}/Debug/*"
-      #copy the cv libs
-      cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-      cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-      #copy the zlib 
-      cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-      cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
+    mkdir -p "$DEPLOY_PATH/Release"
+    mkdir -p "$DEPLOY_PATH/Debug"
+    # now make sure the target directories are clean.
+    rm -Rf "${DEPLOY_PATH}/Release/*"
+    rm -Rf "${DEPLOY_PATH}/Debug/*"
+    #copy the cv libs
+    cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
+    cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
+    #copy the zlib 
+    cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
+    cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
 
-      cp -R include/opencv $1/include/
-      cp -R include/opencv2 $1/include/
-      cp -R modules/*/include/opencv2/* $1/include/opencv2/
+    cp -R include/opencv $1/include/
+    cp -R include/opencv2 $1/include/
+    cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
-      #copy the ippicv includes and lib
-      IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/unpack/ippicv_win
-      IPPICV_DST=$1/../ippicv
-      if [ $ARCH == 32 ] ; then
-        IPPICV_PLATFORM="ia32"
-        IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-      elif [ $ARCH == 64 ] ; then
-        IPPICV_PLATFORM="intel64"
-        IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-      fi
-      mkdir -p ${IPPICV_DST}/include
-      cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-      mkdir -p ${IPPICV_DEPLOY}
-      cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
+    #copy the ippicv includes and lib
+    IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
+    IPPICV_DST=$1/../ippicv
+    if [ $ARCH == 32 ] ; then
+    IPPICV_PLATFORM="ia32"
+    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
+    elif [ $ARCH == 64 ] ; then
+    IPPICV_PLATFORM="intel64"
+    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
+    fi
+    mkdir -p ${IPPICV_DST}/include
+    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
+    mkdir -p ${IPPICV_DEPLOY}
+    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
 
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
