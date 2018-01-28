@@ -83,8 +83,8 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE             
-            -DBUILD_SHARED_LIBS=OFF 
+        local buildOpts="--build build/$TYPE
+            -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
@@ -96,7 +96,9 @@ function build() {
         # mkdir -p build_osx
         # cd build_osx
         # 32 bit
-        cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops  -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        cmake -G 'Unix Makefiles' $buildOpts \
+        -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+        -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
         make assimp -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "vs" ] ; then
@@ -106,7 +108,7 @@ function build() {
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
-        
+
         local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
@@ -145,7 +147,7 @@ function build() {
 
         source ../../android_configure.sh $ABI
 
-                
+
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
         elif [ "$ARCH" == "x86" ]; then
@@ -153,7 +155,7 @@ function build() {
         fi
  # -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD TERRAGEN 3D X X3D GLTF 3MF MMD
         local buildOpts="--build build/$TYPE
-            -DBUILD_SHARED_LIBS=OFF 
+            -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
@@ -161,13 +163,13 @@ function build() {
             -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DANDROID_NDK=$NDK_ROOT 
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN 
-            -DCMAKE_BUILD_TYPE=Release 
+            -DANDROID_NDK=$NDK_ROOT
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+            -DCMAKE_BUILD_TYPE=Release
             -DANDROID_ABI=$ABI
             -DANDROID_STL=c++_static
-            -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM 
-            -DANDROID_FORCE_ARM_BUILD=TRUE 
+            -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+            -DANDROID_FORCE_ARM_BUILD=TRUE
             -DCMAKE_INSTALL_PREFIX=install"
 
         mkdir -p build_android
@@ -180,8 +182,8 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE             
-            -DBUILD_SHARED_LIBS=OFF 
+        local buildOpts="--build build/$TYPE
+            -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
@@ -212,7 +214,7 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
-            
+
             ls -a build_vs_32/
 
             cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
@@ -220,11 +222,11 @@ function copy() {
             cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
-            
+
             ls build_vs_64/code/
             echo "-----"
             ls -a build_vs_64/x64
-            
+
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
             cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
             cp -v -r build_vs_64/include/* $1/include
