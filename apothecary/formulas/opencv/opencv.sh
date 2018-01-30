@@ -557,6 +557,9 @@ function copy() {
     LIB_FOLDER="$BUILD_ROOT_DIR/$TYPE/FAT/opencv"
 
     cp -Rv lib/include/ $1/include/
+    cp -R include/opencv $1/include/
+    cp -R include/opencv2 $1/include/
+    cp -R modules/*/include/opencv2/* $1/include/opencv2/
     mkdir -p $1/lib/$TYPE
     cp -v lib/$TYPE/*.a $1/lib/$TYPE
   elif [ "$TYPE" == "android" ]; then
@@ -568,6 +571,9 @@ function copy() {
     
     cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv $1/include/
     cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
+    cp -R include/opencv $1/include/
+    cp -R include/opencv2 $1/include/
+    cp -R modules/*/include/opencv2/* $1/include/opencv2/
     
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*.so
@@ -575,6 +581,9 @@ function copy() {
     
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
+    cp -R include/opencv $1/include/
+    cp -R include/opencv2 $1/include/
+    cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
     cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/*.a $1/lib/$TYPE/
   fi
