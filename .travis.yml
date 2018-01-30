@@ -13,6 +13,7 @@ matrix:
       dist: trusty
       env:
        - TARGET="linux"
+       - OPT="gcc4"
 
     - os: linux
       cache: ccache
