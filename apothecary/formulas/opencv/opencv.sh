@@ -505,7 +505,10 @@ function copy() {
 
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
 
-    cp -R $LIB_FOLDER/include/ $1/include/
+    cp -R $LIB_FOLDER/include/ $1/include/    
+    cp -R include/opencv $1/include/
+    cp -R include/opencv2 $1/include/
+    cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     # copy lib
     cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
