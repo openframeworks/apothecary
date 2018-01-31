@@ -306,14 +306,13 @@ function build() {
 
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
-
-		if [ "$ARCH" == "arm64" ] ; then
-			CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
-		fi
-        
-		# export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
-        export CC="$CC $CFLAGS $LDFLAGS"
-        export CXX="$CXX $CFLAGS $LDFLAGS"
+        if [ "$ARCH" == "arm64" ] ; then
+            CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
+        fi
+        # export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        export CC="$CC $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
+        export CXX="$CXX $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
+        export CFLAGS="$CFLAGS -mfpu=vfpv3-d16"
         make clean -f Makefile.gnu
         make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
