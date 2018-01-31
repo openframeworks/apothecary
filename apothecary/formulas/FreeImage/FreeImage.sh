@@ -60,7 +60,7 @@ function prepare() {
 	    cd $BUILD_DIR/FreeImage_patched
 	    perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
 	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
-	    /*#include <stdint.h>
+	    #include <stdint.h>
         #include <asm/byteorder.h>
 		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
         inline void swab(const void *from, void*to, size_t n)
@@ -70,8 +70,8 @@ function prepare() {
                 return;
             for (i = 0; i < (n/2)*2; i += 2)
                 *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
-        }*/
-        #include <unistd.h>
+        }
+        //#include <unistd.h>
 ENDDELIM
 
         perl -pi -e "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
@@ -329,8 +329,9 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
         # export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
-        export CC="$CC $CFLAGS $LDFLAGS"
-        export CXX="$CXX $CFLAGS $LDFLAGS"
+        export CC="$CC $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
+        export CXX="$CXX $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
+        export CFLAGS="$CFLAGS -mfpu=vfpv3-d16"
         make clean -f Makefile.gnu
         make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
