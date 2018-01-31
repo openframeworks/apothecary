@@ -28,10 +28,10 @@
 project( openssl )
 cmake_minimum_required( VERSION 2.8.3 )
 
-add_definitions( -DZLIB )
-if(BUILD_SHARED_LIBS)
-    add_definitions( -DZLIB_SHARED )
-endif()
+#add_definitions( -DZLIB )
+#if(BUILD_SHARED_LIBS)
+#    add_definitions( -DZLIB_SHARED )
+#endif()
 
 if( WIN32 AND NOT CYGWIN )
   add_definitions( -DOPENSSL_SYSNAME_WIN32 )
