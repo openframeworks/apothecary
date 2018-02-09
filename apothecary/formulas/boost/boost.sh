@@ -67,7 +67,6 @@ function prepare() {
         SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
 
 		cp -v tools/build/example/user-config.jam.orig tools/build/example/user-config.jam
-		cp $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator${SDKVERSION}.sdk/usr/include/{crt_externs,bzlib}.h .
 		BOOST_LIBS_COMMA=$(echo $BOOST_LIBS | sed -e "s/ /,/g")
 	    echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
@@ -320,7 +319,9 @@ function copy() {
 		cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
 		cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
 	elif  [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
-		bcp filesystem install_dir
+		./bootstrap.sh
+		./bjam tools/bcp
+		dist/bin/bcp filesystem install_dir
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
 		rsync -ar install_dir/boost/* $1/include/boost/
         lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a

@@ -84,7 +84,7 @@ export CXX="$(xcrun -find -sdk ${SDK} clang++)"
 #export CPP="$(xcrun -find -sdk ${SDK} clang)"
 export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -Wno-ignored-optimization-argument -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
