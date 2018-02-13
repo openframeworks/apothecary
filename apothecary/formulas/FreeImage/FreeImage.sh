@@ -442,9 +442,9 @@ function clean() {
 		make clean
 		rm -rf Dist
 		rm -f *.a *.lib
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+		rm -rf builddir/$TYPE
+		rm -rf builddir
+		rm -rf lib
 	else
 		make clean
 		# run dedicated clean script
