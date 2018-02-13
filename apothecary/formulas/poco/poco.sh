@@ -308,7 +308,7 @@ function build() {
                 fi
             fi
 
-            BITCODE=""
+            BITCODE="-fembed-bitcode"
             NOFORK=""
             if [[ "$TYPE" == "tvos" ]]; then
                 BITCODE=-fembed-bitcode;

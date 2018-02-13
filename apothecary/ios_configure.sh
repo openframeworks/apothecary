@@ -73,7 +73,7 @@ export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-BITCODE=""
+BITCODE="-fembed-bitcode"
 if [[ "$TYPE" == "tvos" ]]; then
     MIN_IOS_VERSION=9.0
     BITCODE=-fembed-bitcode

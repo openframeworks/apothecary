@@ -219,7 +219,7 @@ function build() {
 	            fi
 	        fi
 
-	        BITCODE=""
+	        BITCODE="-fembed-bitcode"
 	        if [[ "$TYPE" == "tvos" ]]; then
 	            BITCODE=-fembed-bitcode;
 	            MIN_IOS_VERSION=9.0

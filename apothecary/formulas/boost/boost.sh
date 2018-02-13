@@ -138,7 +138,7 @@ function build() {
         OUTPUT_DIR_LIB=`pwd`/lib/boost/ios
         OUTPUT_DIR_SRC=`pwd`/lib/boost/include/boost
         BOOST_SRC=$CURRENTPATH
-        BITCODE=""
+        BITCODE="-fembed-bitcode"
         MIN_IOS_VERSION=$IOS_MIN_SDK_VER
         if [ "${TYPE}" == "tvos" ]; then
 			local CROSS_TOP_IOS="${DEVELOPER}/Platforms/AppleTVOS.platform/Developer"

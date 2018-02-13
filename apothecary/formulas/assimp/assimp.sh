@@ -72,6 +72,7 @@ function build() {
             export IOS_MIN_SDK_VER=9.0
         fi
         echo "building $TYPE | $IOS_ARCHS"
+        cp $FORMULA_DIR/build.sh ./port/iOS/build.sh
         cd ./port/iOS/
         ./build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 i386 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
         echo "--------------------"
