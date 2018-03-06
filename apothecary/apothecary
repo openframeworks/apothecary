@@ -344,6 +344,8 @@ if [ "$TYPE" = "vs" ]; then
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
         fi
+
+        echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
     fi
 
     if [ -z ${VS_BIN_PATH+x} ]; then
@@ -356,12 +358,27 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
         fi
-        if [ ! -d "$VS_BIN_PATH" ]; then
-            echo "Couldn't autodetect Visual Studio paths, probably installed on a non standard location?"
-            exit 1
-        fi
+
+        (
+        	# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
+	        # set input field separator to colon (:) for current scope 
+	        IFS=:
+	        for vs_bin_directory in ${VS_BIN_PATH}; do
+	        	# we must make sure each given directory exists
+	 	        if [ ! -d ${vs_bin_directory} ]; then
+	    	        echo "Couldn't confirm Visual Studio path exists: '$vs_bin_directory', probably installed on a non standard location?"
+	        	    exit 1
+	        	else
+	        		echo "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'" 
+		        fi
+
+	        done
+        )
+
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 
+        # Test for existence of directory where cmake should live
+        # then prepend cmake path to PATH
         if [ -d "/c/Program Files/CMake/bin/" ]; then
             export PATH="/c/Program Files/CMake/bin/:$PATH"
         fi
