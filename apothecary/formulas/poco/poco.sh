@@ -8,11 +8,11 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.7.2-release
+VER=1.8.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.7.2-release
+GIT_TAG=poco-1.8.1-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l")
 
