@@ -8,11 +8,11 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.8.1-release
+VER=1.7.2-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.8.1-release
+GIT_TAG=poco-1.7.2-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l")
 
@@ -103,9 +103,7 @@ function prepare() {
 
 
 		# Patch the components to exclude those that we aren't using.
-		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/components.patch 2>/dev/null ; then
-			patch -p0 -u < $FORMULA_DIR/components.patch
-		fi
+		cp -v $FORMULA_DIR/components $CURRENTPATH
 
 		# Locate the path of the openssl libs distributed with openFrameworks.
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
