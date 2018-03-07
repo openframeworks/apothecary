@@ -101,13 +101,13 @@ matrix:
         - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
     # osx xcode7
-    - os: osx
-      cache: ccache
-      osx_image: xcode7.3
-      compiler: clang
-      env:
-        - TARGET="osx"
-        - BUNDLE="1"
+    # - os: osx
+    #   cache: ccache
+    #   osx_image: xcode7.3
+    #   compiler: clang
+    #   env:
+    #     - TARGET="osx"
+    #     - BUNDLE="1"
 
     - os: osx
       cache: ccache
@@ -117,29 +117,29 @@ matrix:
         - TARGET="osx"
         - BUNDLE="2"
 
-    - os: osx
-      cache: ccache
-      osx_image: xcode7.3
-      compiler: clang
-      env:
-        - TARGET="osx"
-        - BUNDLE="3"
+    # - os: osx
+    #   cache: ccache
+    #   osx_image: xcode7.3
+    #   compiler: clang
+    #   env:
+    #     - TARGET="osx"
+    #     - BUNDLE="3"
 
-    - os: osx
-      cache: ccache
-      osx_image: xcode7.3
-      compiler: clang
-      env:
-        - TARGET="osx"
-        - BUNDLE="4"
+    # - os: osx
+    #   cache: ccache
+    #   osx_image: xcode7.3
+    #   compiler: clang
+    #   env:
+    #     - TARGET="osx"
+    #     - BUNDLE="4"
 
     # ios
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="ios"
-        - BUNDLE="1"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="ios"
+    #     - BUNDLE="1"
 
     - os: osx
       osx_image: xcode8
@@ -148,27 +148,27 @@ matrix:
         - TARGET="ios"
         - BUNDLE="2"
 
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="ios"
-        - BUNDLE="3"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="ios"
+    #     - BUNDLE="3"
 
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="ios"
-        - BUNDLE="4"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="ios"
+    #     - BUNDLE="4"
 
     # tvos
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="tvos"
-        - BUNDLE="1"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="tvos"
+    #     - BUNDLE="1"
 
     - os: osx
       osx_image: xcode8
@@ -177,19 +177,19 @@ matrix:
         - TARGET="tvos"
         - BUNDLE="2"
 
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="tvos"
-        - BUNDLE="3"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="tvos"
+    #     - BUNDLE="3"
 
-    - os: osx
-      osx_image: xcode8
-      compiler: clang
-      env:
-        - TARGET="tvos"
-        - BUNDLE="4"
+    # - os: osx
+    #   osx_image: xcode8
+    #   compiler: clang
+    #   env:
+    #     - TARGET="tvos"
+    #     - BUNDLE="4"
 
   exclude:
     - compiler: gcc
