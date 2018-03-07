@@ -398,7 +398,7 @@ echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 echo.
 
-  devenv !PROJECT_FILE! /Upgrade
+  devenv !PROJECT_FILE! /Upgrade /AllowDuringSetup
   if ERRORLEVEL 1 exit /b 1
   echo. && echo. && echo.
 
