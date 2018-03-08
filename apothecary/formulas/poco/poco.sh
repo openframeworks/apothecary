@@ -8,11 +8,11 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.7.2-release
+VER=1.8.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.7.2-release
+GIT_TAG=poco-1.8.1-release
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l")
 
@@ -97,9 +97,9 @@ function prepare() {
 
 	elif [ "$TYPE" == "vs" ] ; then
 		#change the build win cmd file for vs2015 compatibility
-		rm buildwin.cmd
 		CURRENTPATH=`pwd`
-		cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
+		# rm buildwin.cmd
+		# cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
 
 
 		# Patch the components to exclude those that we aren't using.
@@ -120,11 +120,13 @@ function prepare() {
 		export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
 		echo $OPENSSL_DIR
 
-		# replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
-		sed -i.tmp "s|C:\\\OpenSSL|$ESCAPED_OPENSSL_DIR|g" buildwin.cmd
+		# # replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
+		# sed -i.tmp "s|C:\\\OpenSSL|$ESCAPED_OPENSSL_DIR|g" buildwin.cmd
 
-		# replace OPENSSL_LIB=%OPENSSL_DIR%\lib;%OPENSSL_DIR%\lib\VC with OPENSSL_LIB=%OPENSSL_DIR%\lib\vs
-		sed -i.tmp "s|%OPENSSL_DIR%\\\lib;.*|%OPENSSL_DIR%\\\lib\\\vs|g" buildwin.cmd
+		# # replace OPENSSL_LIB=%OPENSSL_DIR%\lib;%OPENSSL_DIR%\lib\VC with OPENSSL_LIB=%OPENSSL_DIR%\lib\vs
+		# sed -i.tmp "s|%OPENSSL_DIR%\\\lib;.*|%OPENSSL_DIR%\\\lib\\\vs|g" buildwin.cmd
+
+		sed -i.tmp "s|set OPENSSL_DIR=C:\\\OpenSSL||g" buildwin.cmd
 	elif [ "$TYPE" == "android" ] ; then
 		installAndroidToolchain
 		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/android.patch 2>/dev/null ; then
