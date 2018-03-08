@@ -66,8 +66,8 @@ LIBS_DIR=""
 PARALLEL_MAKE=1
 
 function getrealpath() { if command -v realpath 2>/dev/null; then
-  echo realpath $1; 
-else 
+  echo realpath $1;
+else
 	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
 fi;
  }
@@ -94,7 +94,7 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
 
-	
+
 fi
 
 # paths to android SDK, etc
@@ -329,10 +329,10 @@ shift $(expr $OPTIND - 1)
 
 # used when building for vs - set to 15 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
-    if [ -z ${VS_VER+x} ]; then 
+    if [ -z ${VS_VER+x} ]; then
 	    echo "VS_VER was not set - setting to 15"
 	    VS_VER=15
-    else 
+    else
 	    echo "VS_VER is set to '$VS_VER'"
     fi
 
@@ -402,14 +402,14 @@ fi
 
  if [ "$TYPE" == "vs" ]; then
 
- 	# At this point we assume that $PATH begins with "/usr/local/bin:/usr/bin:/bin:/opt/bin:", which 
+ 	# At this point we assume that $PATH begins with "/usr/local/bin:/usr/bin:/bin:/opt/bin:", which
  	# means that the bash environment will take precedence over windows build tools - this can lead
- 	# to some name-clashes, esp. with `link` for example, which has the same name, but might either 
+ 	# to some name-clashes, esp. with `link` for example, which has the same name, but might either
  	# be the microsoft linker, or the gcc linker bundled with mingw. In most cases, the microsoft
- 	# build tools will be preferred, and we therefore need to make sure that the ms build tools occur 
+ 	# build tools will be preferred, and we therefore need to make sure that the ms build tools occur
  	# earlier in $PATH.
  	#
- 	# We prepend the ms build tools path via a special environment variable which we receive via 
+ 	# We prepend the ms build tools path via a special environment variable which we receive via
  	# `appveyor.yml`: `VS_BIN_PATH`, which is set in the `init:` step
 
 	export PATH="$VS_BIN_PATH:$PATH"
@@ -937,7 +937,7 @@ function vs-build() {
 	if [ $VS_VER -gt 14 ] ; then
 
 		echo "-- Searching for vs-build"
-		# vswhere is a utility to find the most recent vs compiler toolchain. it is 
+		# vswhere is a utility to find the most recent vs compiler toolchain. it is
 		# assumed to be installed at a fixed location
 		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
@@ -967,10 +967,10 @@ function vs-build() {
 		BUILD_EXEC="\"${MSBUILD_PATH}\" \"$1\" /t:${2:-Build} /p:Platform=\"$BUILD_PLATFORM\" /p:Configuration=\"$BUILD_CONFIGURATION\""
 		echo "-- Build parameters: $BUILD_EXEC"
 
-		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might 
+		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
 		cmd.exe /c "\"$BUILD_EXEC\""
-		
+
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
@@ -990,7 +990,7 @@ function vs-upgrade() {
 
 	if [ $VS_VER -gt 14 ] ; then
 		echo "-- Searching for devenv"
-		# vswhere is a utility to find the most recent vs compiler toolchain. it is 
+		# vswhere is a utility to find the most recent vs compiler toolchain. it is
 		# assumed to be installed at a fixed location
 		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
@@ -1000,14 +1000,14 @@ function vs-upgrade() {
 		# msbuild is the tool used to build visual studio solutions
 		DEVENV_PATH="${VS_IDE_INSTALL_PATH}\Common7\IDE\devenv.exe"
 		echo "-- Found devenv path: ${DEVENV_PATH}"
-		
+
 		UPGRADE_EXEC="\"${DEVENV_PATH}\" $1 /Upgrade"
 		echo "-- Upgrade parameters: $UPGRADE_EXEC"
 
-		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might 
+		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
 		cmd.exe /c "\"$UPGRADE_EXEC\""
-		
+
 	else
 		if [ $ARCH == 32 ] ; then
 			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Upgrade"
@@ -1058,7 +1058,7 @@ function clean() {
 # $2 = dependency name
 function apothecaryDepend() {
 	# Dont do anything if BUILD_DEPENDENCIES is false
-	if [ $BUILD_DEPENDENCIES == 0 ] ; then 
+	if [ $BUILD_DEPENDENCIES == 0 ] ; then
 		return
 	fi
 
