@@ -113,12 +113,12 @@ function build() {
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=0
+            -DASSIMP_BUILD_STL_IMPORTER=1
             -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_BUILD_ASSIMP_TOOLS=0
             -DASSIMP_BUILD_X3D_IMPORTER=0
-            -DASSIMP_LIBRARY_SUFFIX=${ARCH}"
+            -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
         if [ $ARCH == 32 ] ; then
@@ -229,21 +229,17 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
-
-            ls -a build_vs_32/
-
-            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/Win32/assimp$ARCH.lib
-            cp -v build_vs_32/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/Win32/assimp$ARCH.dll
+            # copy .lib and .dll artifacts
+            cp -v build_vs_32/code/Release/*.lib $1/lib/$TYPE/Win32
+            cp -v build_vs_32/code/Release/*.dll $1/lib/$TYPE/Win32
+            # copy header files
             cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
-
-            ls build_vs_64/code/
-            echo "-----"
-            ls -a build_vs_64/x64
-
-            cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.lib $1/lib/$TYPE/x64/assimp$ARCH.lib
-            cp -v build_vs_64/code/Release/assimp$ARCH-vc140-mt.dll $1/lib/$TYPE/x64/assimp$ARCH.dll
+            # copy .lib and .dll artifacts
+            cp -v build_vs_64/code/Release/*.lib $1/lib/$TYPE/x64
+            cp -v build_vs_64/code/Release/*.dll $1/lib/$TYPE/x64
+            # copy header files
             cp -v -r build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
