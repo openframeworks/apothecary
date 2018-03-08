@@ -117,7 +117,7 @@ function prepare() {
 		# escape windows slashes and a few common escape sequences before passing to sed
 		#local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
 		export OPENSSL_DIR="$(cygpath -w $OF_LIBS_OPENSSL_ABS_PATH)"
-		export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
+		# export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
 		echo $OPENSSL_DIR
 
 		# # replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
@@ -141,7 +141,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,JSON,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
+    local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
 	if [ "$TYPE" == "osx" ] ; then
 		CURRENTPATH=`pwd`
 		echo "--------------------"
