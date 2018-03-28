@@ -62,6 +62,7 @@ build_arch()
     echo "[!] Moving built library into: $BUILD_DIR/$1/"
 
     mv ./lib/libassimp.a $BUILD_DIR/$1/
+    mv ./lib/libIrrXML.a $BUILD_DIR/$1/
 }
 
 echo "[!] $0 - assimp iOS build script"
@@ -111,13 +112,21 @@ for ARCH_TARGET in $DEPLOY_ARCHS; do
 done
 
 if [[ "$DEPLOY_FAT" -eq 1 ]]; then
-    echo '[+] Creating fat binary ...'
+    echo '[+] Creating assimp fat binary ...'
     for ARCH_TARGET in $DEPLOY_ARCHS; do
         LIPO_ARGS="$LIPO_ARGS-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libassimp.a "
     done
     LIPO_ARGS="$LIPO_ARGS-create -output $BUILD_DIR/libassimp-fat.a"
     lipo $LIPO_ARGS
-    echo "[!] Done! The fat binary can be found at $BUILD_DIR"
+    echo "[!] Done! The assimp fat binary can be found at $BUILD_DIR"
+
+    echo '[+] Creating libIrrXML fat binary ...'
+    for ARCH_TARGET in $DEPLOY_ARCHS; do
+        LIPO_ARGS_B="$LIPO_ARGS_B-arch $ARCH_TARGET $BUILD_DIR/$ARCH_TARGET/libIrrXML.a "
+    done
+    LIPO_ARGS_B="$LIPO_ARGS_B-create -output $BUILD_DIR/libIrrXML-fat.a"
+    lipo $LIPO_ARGS_B
+    echo "[!] Done! The libIrrXML fat binary can be found at $BUILD_DIR"
 fi
 
 
