@@ -6,22 +6,23 @@
 #
 
 # define the version
-VER=0.9.8.4
+VER=0.9.8.5
 
 # tools for git use
-GIT_URL=
-GIT_TAG=v$VER
+GIT_URL=https://github.com/g-truc/glm
+GIT_TAG=0.9.8.5
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
-    unzip glm-$VER.zip
+	# wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
+    # unzip glm-$VER.zip
+	git clone --branch $GIT_TAG --depth=1 $GIT_URL
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	echo
-	# nothing to do
+	cd glm
+	git apply $FORMULA_DIR/gcc73.patch
 }
 
 # executed inside the lib src dir
