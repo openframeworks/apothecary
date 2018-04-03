@@ -13,7 +13,7 @@ VER=bugfix-cmake-compile-error
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/glfw.git
-GIT_BRANCH =$VER
+GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
