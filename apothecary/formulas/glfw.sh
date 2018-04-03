@@ -8,19 +8,17 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-# define the version by sha
-VER=58cc4b2c5c2c9a245e09451437dd6f5af4d60c84
+# define the version by branch
+VER=bugfix-cmake-compile-error
 
 # tools for git use
-GIT_URL=https://github.com/glfw/glfw.git
-GIT_TAG=$VER
+GIT_URL=https://github.com/ofTheo/glfw.git
+GIT_BRANCH =$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -Lk https://github.com/glfw/glfw/archive/$GIT_TAG.tar.gz -o glfw-$GIT_TAG.tar.gz
-	tar -xf glfw-$GIT_TAG.tar.gz
-	mv glfw-$GIT_TAG glfw
-	rm glfw*.tar.gz
+	 echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
+     git clone --branch ${GIT_BRANCH} ${GIT_URL}
 }
 
 # prepare the build environment, executed inside the lib src dir
