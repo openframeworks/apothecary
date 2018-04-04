@@ -6,7 +6,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 VER=1.0.2k
-VERDIR=1.0.2k
+VERDIR=1.0.2
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
@@ -16,11 +16,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
+		wget -nv --no-check-certificate ${MIRROR}/source/old/$VERDIR/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		wget -nv --no-check-certificate ${MIRROR}/source/old/$VERDIR/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
