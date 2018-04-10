@@ -7,75 +7,75 @@ matrix:
 # relative order of sudo and env is important so that addons: is recognized
 
     # linux 64
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #    - TARGET="linux"
-    #    - OPT="gcc4"
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+       - TARGET="linux"
+       - OPT="gcc4"
 
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="linux"
-    #     - OPT="gcc5"
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="linux"
+        - OPT="gcc5"
 
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="linux"
-    #     - OPT="gcc6"
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="linux"
+        - OPT="gcc6"
 
-    # # android
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="android"
-    #     - ARCH="armv7"
+    # android
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="android"
+        - ARCH="armv7"
 
-    #   # cache:
-    #     # directories:
-    #     # - ~/android-ndk-r15c
-    #     # - apothecary/build/Toolchains/armv7
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/armv7
 
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="android"
-    #     - ARCH="x86"
-    #   # cache:
-    #     # directories:
-    #     # - ~/android-ndk-r15c
-    #     # - apothecary/build/Toolchains/x86
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="android"
+        - ARCH="x86"
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/x86
 
 
-    # # emscripten
-    # - os: linux
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="emscripten"
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - libstdc++6
-    #         - gcc-4.9
-    #         - realpath
-    #         - coreutils
-    #         - libboost-tools-dev
-    #         - gperf
-    #         #- libboost-dev
+    # emscripten
+    - os: linux
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="emscripten"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libstdc++6
+            - gcc-4.9
+            - realpath
+            - coreutils
+            - libboost-tools-dev
+            - gperf
+            #- libboost-dev
 
 
     # linux arm6
@@ -89,107 +89,107 @@ matrix:
         - TOOLCHAIN_ROOT="$TRAVIS_BUILD_DIR/scripts/$TARGET/rpi_toolchain"
         - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
-    # # linux arm7
-    # - os: linux
-    #   cache: ccache
-    #   sudo: required
-    #   dist: trusty
-    #   env:
-    #     - TARGET="linuxarmv7l"
-    #     - SYSROOT="$HOME/archlinux"
-    #     - TOOLCHAIN_ROOT="$HOME/rpi2_toolchain"
-    #     - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+    # linux arm7
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="linuxarmv7l"
+        - SYSROOT="$HOME/archlinux"
+        - TOOLCHAIN_ROOT="$HOME/rpi2_toolchain"
+        - TOOLCHAIN_PREFIX=arm-linux-gnueabihf
 
-    # # osx xcode7
-    # - os: osx
-    #   cache: ccache
-    #   osx_image: xcode7.3
-    #   compiler: clang
-    #   env:
-    #     - TARGET="osx"
-    #     - BUNDLE="1"
+    # osx xcode7
+    - os: osx
+      cache: ccache
+      osx_image: xcode7.3
+      compiler: clang
+      env:
+        - TARGET="osx"
+        - BUNDLE="1"
 
-    # - os: osx
-    #   cache: ccache
-    #   osx_image: xcode7.3
-    #   compiler: clang
-    #   env:
-    #     - TARGET="osx"
-    #     - BUNDLE="2"
+    - os: osx
+      cache: ccache
+      osx_image: xcode7.3
+      compiler: clang
+      env:
+        - TARGET="osx"
+        - BUNDLE="2"
 
-    # - os: osx
-    #   cache: ccache
-    #   osx_image: xcode7.3
-    #   compiler: clang
-    #   env:
-    #     - TARGET="osx"
-    #     - BUNDLE="3"
+    - os: osx
+      cache: ccache
+      osx_image: xcode7.3
+      compiler: clang
+      env:
+        - TARGET="osx"
+        - BUNDLE="3"
 
-    # - os: osx
-    #   cache: ccache
-    #   osx_image: xcode7.3
-    #   compiler: clang
-    #   env:
-    #     - TARGET="osx"
-    #     - BUNDLE="4"
+    - os: osx
+      cache: ccache
+      osx_image: xcode7.3
+      compiler: clang
+      env:
+        - TARGET="osx"
+        - BUNDLE="4"
 
-    # # ios
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="ios"
-    #     - BUNDLE="1"
+    # ios
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="ios"
+        - BUNDLE="1"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="ios"
-    #     - BUNDLE="2"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="ios"
+        - BUNDLE="2"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="ios"
-    #     - BUNDLE="3"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="ios"
+        - BUNDLE="3"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="ios"
-    #     - BUNDLE="4"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="ios"
+        - BUNDLE="4"
 
-    # # tvos
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="tvos"
-    #     - BUNDLE="1"
+    # tvos
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="tvos"
+        - BUNDLE="1"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="tvos"
-    #     - BUNDLE="2"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="tvos"
+        - BUNDLE="2"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="tvos"
-    #     - BUNDLE="3"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="tvos"
+        - BUNDLE="3"
 
-    # - os: osx
-    #   osx_image: xcode8
-    #   compiler: clang
-    #   env:
-    #     - TARGET="tvos"
-    #     - BUNDLE="4"
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env:
+        - TARGET="tvos"
+        - BUNDLE="4"
 
   exclude:
     - compiler: gcc
