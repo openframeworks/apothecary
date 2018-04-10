@@ -16,7 +16,7 @@ installPackages(){
     UBUNTU_VERSION=`lsb_release -r | awk '{ print $2 }'`
     if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION" == "14.04" ]; then
         echo "installing ppa"
-        sudo add-apt-repository ppa:dns/gnu -y
+        #sudo add-apt-repository ppa:dns/gnu -y
     else
         echo "$UBUNTU_VERSION doesn\'t need ppa"
     fi
@@ -33,7 +33,7 @@ createRaspbianImg(){
 }
 
 downloadToolchain(){
-    wget -nv http://ci.openframeworks.cc/rpi_toolchain.tar.bz2
+    wget -nv http://ci.openframeworks.cc/rpi_toolchain_gcc6.tar.bz2
     tar xjf rpi_toolchain.tar.bz2
     rm rpi_toolchain.tar.bz2
 }
@@ -47,16 +47,16 @@ downloadFirmware(){
 }
 
 relativeSoftLinks(){
-    for link in $(ls -la | grep "\-> /" | sed "s/.* \([^ ]*\) \-> \/\(.*\)/\1->\/\2/g"); do 
-        lib=$(echo $link | sed "s/\(.*\)\->\(.*\)/\1/g"); 
-        link=$(echo $link | sed "s/\(.*\)\->\(.*\)/\2/g"); 
+    for link in $(ls -la | grep "\-> /" | sed "s/.* \([^ ]*\) \-> \/\(.*\)/\1->\/\2/g"); do
+        lib=$(echo $link | sed "s/\(.*\)\->\(.*\)/\1/g");
+        link=$(echo $link | sed "s/\(.*\)\->\(.*\)/\2/g");
         rm $lib
-        ln -s ../../..$link $lib 
+        ln -s ../../..$link $lib
     done
 
-    for f in *; do 
-        error=$(grep " \/lib/" $f > /dev/null 2>&1; echo $?) 
-        if [ $error -eq 0 ]; then 
+    for f in *; do
+        error=$(grep " \/lib/" $f > /dev/null 2>&1; echo $?)
+        if [ $error -eq 0 ]; then
             sed -i "s/ \/lib/ ..\/..\/..\/lib/g" $f
             sed -i "s/ \/usr/ ..\/..\/..\/usr/g" $f
         fi
@@ -80,6 +80,6 @@ cd $ROOT/raspbian/usr/lib/gcc/arm-linux-gnueabihf/4.9
 
 cd $ROOT/rpi_toolchain/arm-linux-gnueabihf/lib
 #sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" libc.so
-for f in *.so; do 
+for f in *.so; do
     sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" $f
 done

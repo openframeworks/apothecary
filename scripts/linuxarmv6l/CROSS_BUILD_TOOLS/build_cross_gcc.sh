@@ -22,18 +22,20 @@ CONFIGURATION_OPTIONS="--disable-werror"
 SYSROOT_OPTIONS="--with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT"
 
 PARALLEL_MAKE=-j4
-BINUTILS_VERSION=binutils-2.25.1
-GCC_VERSION=gcc-4.9.2
-LINUX_KERNEL_VERSION=linux-4.1.7
-GLIBC_VERSION=glibc-2.20
-MPFR_VERSION=mpfr-3.1.2
-GMP_VERSION=gmp-6.0.0a
-MPC_VERSION=mpc-1.0.2
-ISL_VERSION=isl-0.12.2
+BINUTILS_VERSION=binutils-2.28
+GCC_VERSION=gcc-6.3.0
+LINUX_KERNEL_VERSION=linux-4.9.1
+GLIBC_VERSION=glibc-2.24
+MPFR_VERSION=mpfr-3.1.5
+GMP_VERSION=gmp-6.1.2
+MPC_VERSION=mpc-1.0.3
+ISL_VERSION=isl-0.18
 CLOOG_VERSION=cloog-0.18.1
 USE_NEWLIB=0
 export PATH=$INSTALL_PATH/bin:$PATH
 
+# Install dependencies
+sudo apt-get install -y gawk
 
 # Download packages
 export http_proxy=$HTTP_PROXY https_proxy=$HTTP_PROXY ftp_proxy=$HTTP_PROXY
@@ -83,7 +85,7 @@ cd ..
 # Step 1. Binutils
 mkdir -p build-binutils
 cd build-binutils
-../$BINUTILS_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS  
+../$BINUTILS_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS
 make $PARALLEL_MAKE
 make install
 cd ..
@@ -101,7 +103,7 @@ cd build-gcc
 if [ $USE_NEWLIB -ne 0 ]; then
     NEWLIB_OPTION=--with-newlib
 fi
-../$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET --enable-languages=c,c++ --with-float=hard  --enable-multiarch --target=arm-linux-gnueabihf $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS  
+../$GCC_VERSION/configure --prefix=$INSTALL_PATH --target=$TARGET --enable-languages=c,c++ --with-float=hard  --enable-multiarch --target=arm-linux-gnueabihf $CONFIGURATION_OPTIONS $SYSROOT_OPTIONS
 make $PARALLEL_MAKE all-gcc
 make install-gcc
 cd ..
@@ -116,6 +118,7 @@ if [ $USE_NEWLIB -ne 0 ]; then
     cd ..
 else
     # Step 4. Standard C Library Headers and Startup Files
+    echo "Building sub glibc"
     mkdir -p build-glibc
     cd build-glibc
     ../$GLIBC_VERSION/configure --prefix=$INSTALL_PATH/$TARGET --build=$MACHTYPE --host=$TARGET --target=$TARGET --with-headers=$INSTALL_PATH/$TARGET/include $CONFIGURATION_OPTIONS libc_cv_forced_unwind=yes
@@ -127,12 +130,14 @@ else
     cd ..
 
     # Step 5. Compiler Support Library
+    echo "Building gcc"
     cd build-gcc
     make $PARALLEL_MAKE all-target-libgcc
     make install-target-libgcc
     cd ..
 
     # Step 6. Standard C Library & the rest of Glibc
+    echo "Building glibc"
     cd build-glibc
     make $PARALLEL_MAKE
     make install
