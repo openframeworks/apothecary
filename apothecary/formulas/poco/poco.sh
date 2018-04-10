@@ -14,7 +14,7 @@ VER=1.8.1-release
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-1.8.1-release
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" "linuxarmv6l")
+FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" )
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )
