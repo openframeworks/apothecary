@@ -354,14 +354,16 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
         elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x86"
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
         elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
         fi
 
         (
         	# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
-	        # set input field separator to colon (:) for current scope 
+	        # set input field separator to colon (:) for current scope
 	        IFS=:
 	        for vs_bin_directory in ${VS_BIN_PATH}; do
 	        	# we must make sure each given directory exists
@@ -369,7 +371,7 @@ if [ "$TYPE" = "vs" ]; then
 	    	        echo "Couldn't confirm Visual Studio path exists: '$vs_bin_directory', probably installed on a non standard location?"
 	        	    exit 1
 	        	else
-	        		echo "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'" 
+	        		echo "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'"
 		        fi
 
 	        done
