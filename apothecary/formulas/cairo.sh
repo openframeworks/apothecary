@@ -107,6 +107,7 @@ function build() {
 		systeminfo
 		which link
 		echo "PATH=$PATH"
+		exit 1
 		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
