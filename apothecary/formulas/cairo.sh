@@ -107,6 +107,8 @@ function build() {
 		systeminfo
 		which link
 		echo "PATH=$PATH"
+		ls /c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64
+		find /c/Program Files (x86)/Microsoft Visual Studio/2017/ -iname link.exe
 		exit 1
 		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
