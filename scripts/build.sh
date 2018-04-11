@@ -70,26 +70,26 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "freetype"
 
             # All formulas
-            # "boost"
-            # "FreeImage"
-            # "fmodex"
-            # "glew"
-            # "glfw"
-            # "glm"
-            # "json"
-            # "libusb"
-            # "kiss"
-            # "portaudio"
-            # "pugixml"
-            # "utf8"
-            # "videoInput"
-            # "rtAudio"
-            # "tess2"
-            # "uriparser"
+            "boost"
+            "FreeImage"
+            "fmodex"
+            "glew"
+            "glfw"
+            "glm"
+            "json"
+            "libusb"
+            "kiss"
+            "portaudio"
+            "pugixml"
+            "utf8"
+            "videoInput"
+            "rtAudio"
+            "tess2"
+            "uriparser"
 
             # Formulas with depenencies in the end
             "cairo"
-            # "uri"
+            "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
