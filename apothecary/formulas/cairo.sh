@@ -110,7 +110,7 @@ function build() {
 		# ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
 		# find "/c/Program Files (x86)/Microsoft Visual Studio/2017/" -iname link.exe
 		# exit 1
-		make -f Makefile.win32 "CFG=release"
+		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \

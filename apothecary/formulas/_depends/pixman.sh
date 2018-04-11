@@ -51,7 +51,7 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		sed -i s/-MD/-MT/ Makefile.win32.common
 		cd pixman
-		make -f Makefile.win32 CFG=release MMX=off
+		with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
 		#CURRENTPATH=`pwd`
 		#WINPATH=$(echo "$CURRENTPATH" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
 		#cmd.exe /c 'call "%VS'${VS_VER}'0COMNTOOLS%vsvars32.bat" && nmake -f Makefile.win32 "CFG=release"'

@@ -932,6 +932,23 @@ function gitclone() {
 	}
 }
 
+function with_vs_env(){
+	if [ $VS_VER -gt 14 ] ; then
+		if [ $ARCH == 32 ] ; then
+			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && \"$1\""
+		elif [ $ARCH == 64 ] ; then
+			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && \"$1\""
+		fi
+	else
+		#statements
+		if [ $ARCH == 32 ] ; then
+			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && \"$1\""
+		elif [ $ARCH == 64 ] ; then
+	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && \"$1\""
+		fi
+	fi
+}
+
 # visual studio builder
 # args: <"path/to/sol.sln"> [action] [config]
 # example: vs-build "./tess2.sln" Build Debug
