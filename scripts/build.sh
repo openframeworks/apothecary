@@ -66,12 +66,12 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "pixman"
             "pkg-config"
             "zlib"
+            "libpng"
+            "freetype"
 
             # All formulas
             # "boost"
             # "FreeImage"
-            # "libpng"
-            # "freetype"
             # "fmodex"
             # "glew"
             # "glfw"
