@@ -361,6 +361,8 @@ if [ "$TYPE" = "vs" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
         fi
 
+		export PATH=$VS_BIN_PATH:$PATH
+
         (
         	# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
 	        # set input field separator to colon (:) for current scope

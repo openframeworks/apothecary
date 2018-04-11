@@ -20,9 +20,6 @@ echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
 
-ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC"
-exit 1
-
 FORMULAS=(
     # Dependencies for other formulas (cairo)
     "pixman"
