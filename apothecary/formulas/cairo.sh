@@ -104,12 +104,12 @@ function build() {
 		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
 		sed -i "s/-MD/-MT/" build/Makefile.win32.common
 		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
-		systeminfo
-		which link
-		echo "PATH=$PATH"
-		ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
-		find "/c/Program Files (x86)/Microsoft Visual Studio/2017/" -iname link.exe
-		exit 1
+		# systeminfo
+		# which link
+		# echo "PATH=$PATH"
+		# ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
+		# find "/c/Program Files (x86)/Microsoft Visual Studio/2017/" -iname link.exe
+		# exit 1
 		make -f Makefile.win32 "CFG=release"
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
