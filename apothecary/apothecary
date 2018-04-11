@@ -953,9 +953,10 @@ function vs-build() {
 		echo "-- Found MSBuild path: ${MSBUILD_PATH}"
 
 		# define fallback build selection if vs-build was not called with enough parameters.
-		DEFAULT_BUILD="Release|x64"
 		if [ $ARCH == 32 ] ; then
 			DEFAULT_BUILD="Release|Win32"
+		elif [ $ARCH == 64 ] ; then
+			DEFAULT_BUILD="Release|x64"
 		fi
 
 		# Cut part before '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_CONFIGURATION
@@ -974,9 +975,9 @@ function vs-build() {
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "\"$BUILD_EXEC\""
+			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && \"$BUILD_EXEC\""
 		elif [ $ARCH == 64 ] ; then
-			cmd.exe /c "\"$BUILD_EXEC\""
+			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && \"$BUILD_EXEC\""
 		fi
 
 	else

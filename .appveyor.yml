@@ -139,17 +139,12 @@ init:
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-# visual studio 2015
-- if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
-# - if "%PLATFORM%_%VS_VER%"=="x86_14" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN
-# - if "%PLATFORM%_%VS_VER%"=="x64_14" set VS_BIN_PATH=/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64
-- if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
-# visual studio 2017
-# - if "%VS_VER%"=="15" set for /f "delims=" %a in ('%MSYS2_PATH%\usr\bin\bash -lc ls /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio/2017/Community/VC/Tools/MSVC/') do @set VS_SDK_VER=%a
-- if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
-# - if "%PLATFORM%_%VS_VER%"=="x86_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/%VS_VER%/bin/HostX86/x86
-- if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-# - if "%PLATFORM%_%VS_VER%"=="x64_15" set VS_BIN_PATH=/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/%VS_VER%/bin/HostX64/x64
+# # visual studio 2015
+# - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
+# - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
+# # visual studio 2017
+# - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+# - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
