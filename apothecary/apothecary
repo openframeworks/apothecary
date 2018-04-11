@@ -974,9 +974,9 @@ function vs-build() {
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "\"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && \"$BUILD_EXEC\""
+			cmd.exe /c "\"$BUILD_EXEC\""
 		elif [ $ARCH == 64 ] ; then
-			cmd.exe /c "\"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && \"$BUILD_EXEC\""
+			cmd.exe /c "\"$BUILD_EXEC\""
 		fi
 
 	else
