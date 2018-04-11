@@ -10,7 +10,7 @@ OUTPUT_FOLDER=$ROOT/out
 
 cd $APOTHECARY_PATH
 
-if [ -z $TARGET ] ; then 
+if [ -z $TARGET ] ; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
 fi
@@ -20,19 +20,19 @@ echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
 
-FORMULAS=( 
+FORMULAS=(
     # Dependencies for other formulas (cairo)
     "pixman"
     "pkg-config"
     "zlib"
-    
+
     # All formulas
     "assimp"
     "boost"
     "FreeImage"
     "libpng"
     "libxml2"
-    "freetype"    
+    "freetype"
     "fmodex"
     "glew"
     "glfw"
@@ -45,11 +45,11 @@ FORMULAS=(
     "portaudio"
     "pugixml"
     "utf8"
-    "videoInput"    
+    "videoInput"
     "rtAudio"
     "tess2"
     "uriparser"
-    
+
     # Formulas with depenencies in the end
     "curl"
     "poco"
@@ -66,37 +66,30 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "pixman"
             "pkg-config"
             "zlib"
-            
+
             # All formulas
-            # "assimp" #bundle 3
-            "boost"
-            "FreeImage"
-            "libpng"
-            # "libxml2" # bundle 3
-            "freetype"    
-            "fmodex"
-            "glew"
-            "glfw"
-            "glm"
-            "json"
-            "libusb"
-            "kiss"
-            # "opencv" # bundle 4
-            # "openssl" # bundle 2
-            "portaudio"
-            "pugixml"
-            "utf8"
-            "videoInput"    
-            "rtAudio"
-            "tess2"
-            "uriparser"
-            
+            # "boost"
+            # "FreeImage"
+            # "libpng"
+            # "freetype"
+            # "fmodex"
+            # "glew"
+            # "glfw"
+            # "glm"
+            # "json"
+            # "libusb"
+            # "kiss"
+            # "portaudio"
+            # "pugixml"
+            # "utf8"
+            # "videoInput"
+            # "rtAudio"
+            # "tess2"
+            # "uriparser"
+
             # Formulas with depenencies in the end
             "cairo"
-            # "curl" # bundle 2
-            # "poco" # bundle 2
-            # "svgtiny" # bundle 3
-            "uri"
+            # "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
@@ -224,7 +217,7 @@ if  type "ccache" > /dev/null; then
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
-  
+
     ccache -z
     echo $(ccache -s)
 fi
@@ -252,23 +245,23 @@ function build(){
     echo Build $formula_name
 
     local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
-    if [ "$ARCH" != "" ] ; then 
+    if [ "$ARCH" != "" ] ; then
         ARGS="$ARGS -a$ARCH"
     fi
-    
-    if [ "$VERBOSE" = true ] ; then 
+
+    if [ "$VERBOSE" = true ] ; then
         echo "./apothecary $ARGS update $formula_name"
         ./apothecary $ARGS update $formula_name
-    else 
+    else
         echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
         ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
-        
+
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
 
-        echo "Tail of log for $formula_name"    
-        tail -n 30 formula.log    
+        echo "Tail of log for $formula_name"
+        tail -n 30 formula.log
     fi
 
 }
@@ -279,9 +272,9 @@ mkdir $OUTPUT_FOLDER
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
-  
+
 # for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-    
+
     formula_name="${formula%.*}"
 
     if [ "$TRAVIS" = true ] ; then
@@ -295,7 +288,7 @@ for formula in "${FORMULAS[@]}" ; do
         travis_time_finish
         travis_fold_end "build.$ITER"
         ITER=$(expr $ITER + 1)
-    fi       
+    fi
 done
 
 echo ""
