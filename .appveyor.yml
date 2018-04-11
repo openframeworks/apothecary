@@ -70,13 +70,13 @@ environment:
     #   ARCH: 32
     #   VS_NAME:
   #VisualStudio 2015 32 bit Building
-    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    #   platform: x86
-    #   TARGET: vs
-    #   VS_VER: 14
-    #   ARCH: 32
-    #   VS_NAME: 2015
-    #   BUNDLE: 1
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      TARGET: vs
+      VS_VER: 14
+      ARCH: 32
+      VS_NAME: 2015
+      BUNDLE: 1
     # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     #   platform: x86
     #   TARGET: vs
