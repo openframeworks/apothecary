@@ -25,9 +25,9 @@ GIT_TAG=master
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
 	wget -nv --no-check-certificate http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-${VER}.tar.gz
-	tar -xf rtaudio-$GIT_TAG.tar.gz
-	mv rtaudio-$GIT_TAG rtAudio
-	rm rtaudio-$GIT_TAG.tar.gz
+	tar -xf rtaudio-${VER}.tar.gz
+	mv rtaudio-${VER} rtAudio
+	rm rtaudio-${VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
