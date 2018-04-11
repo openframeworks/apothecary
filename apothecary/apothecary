@@ -935,16 +935,17 @@ function gitclone() {
 function with_vs_env(){
 	if [ $VS_VER -gt 14 ] ; then
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && \"$1\""
+			cmd.exe /c "call 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat' && $@"
 		elif [ $ARCH == 64 ] ; then
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && \"$1\""
+            echo "call 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat' && $@"
+			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
 		fi
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && \"$1\""
+			cmd.exe /c 'call "%VS${VS_VER}0COMNTOOLS%vsvars32.bat" && $@'
 		elif [ $ARCH == 64 ] ; then
-	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && \"$1\""
+	        cmd.exe /c 'call "%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}" amd64 && $@'
 		fi
 	fi
 }
@@ -991,20 +992,23 @@ function vs-build() {
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
-		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && \"$BUILD_EXEC\""
-		elif [ $ARCH == 64 ] ; then
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && \"$BUILD_EXEC\""
-		fi
+        with_vs_env "$BUILD_EXEC"
+#		if [ $ARCH == 32 ] ; then
+#			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $BUILD_EXEC"
+#		elif [ $ARCH == 64 ] ; then
+#			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $BUILD_EXEC"
+#		fi
 
 	else
 		#statements
-		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
-		elif [ $ARCH == 64 ] ; then
-			echo "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
-	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
-		fi
+        BUILD_EXEC="$VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+        with_vs_env "$BUILD_EXEC"
+#		if [ $ARCH == 32 ] ; then
+#			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+#		elif [ $ARCH == 64 ] ; then
+#			echo "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+#	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
+#		fi
 	fi
 
 }
@@ -1032,27 +1036,31 @@ function vs-upgrade() {
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
-		cmd.exe /c "\"$UPGRADE_EXEC\""
+#		cmd.exe /c "\"$UPGRADE_EXEC\""
+        with_vs_env "$UPGRADE_EXEC"
 
 	else
-		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Upgrade"
-		elif [ $ARCH == 64 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Upgrade"
-		fi
+        with_vs_env "$VS_BUILD_TOOL $1 /Upgrade"
+#		if [ $ARCH == 32 ] ; then
+#			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Upgrade"
+#		elif [ $ARCH == 64 ] ; then
+#			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Upgrade"
+#		fi
 	fi
 }
 
 # visual studio clean
 # http://msdn.microsoft.com/en-us/library/vstudio/w15a82ay(v=vs.110).aspx
 function vs-clean() {
-	if [ $ARCH == 32 ] ; then
-		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Release"
-		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Debug"
-	elif [ $ARCH == 64 ] ; then
-		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Release"
-		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Debug"
-	fi
+    with_vs_env $VS_BUILD_TOOL $1 /Clean Release
+    with_vs_env $VS_BUILD_TOOL $1 /Clean Debug
+#	if [ $ARCH == 32 ] ; then
+#		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Release"
+#		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $VS_BUILD_TOOL $1 /Clean Debug"
+#	elif [ $ARCH == 64 ] ; then
+#		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Release"
+#		cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $VS_BUILD_TOOL $1 /Clean Debug"
+#	fi
 }
 
 ################################################################################

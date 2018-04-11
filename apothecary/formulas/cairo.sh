@@ -95,12 +95,12 @@ function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		ROOT=${PWD}/..
-		export INCLUDE="$INCLUDE;$ROOT/zlib"
+		export INCLUDE="$ROOT/zlib"
 		export INCLUDE="$INCLUDE;$ROOT/libpng"
 		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"
 		export INCLUDE="$INCLUDE;$ROOT/cairo/boilerplate"
 		export INCLUDE="$INCLUDE;$ROOT/cairo/src"
-		export LIB="$LIB;$ROOT/zlib/Release/"
+		export LIB="$ROOT/zlib/Release/"
 		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
 		sed -i "s/-MD/-MT/" build/Makefile.win32.common
 		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
@@ -110,7 +110,7 @@ function build() {
 		# ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
 		# find "/c/Program Files (x86)/Microsoft Visual Studio/2017/" -iname link.exe
 		# exit 1
-		with_vs_env "nmake -f Makefile.win32 \"CFG=release\""
+		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
