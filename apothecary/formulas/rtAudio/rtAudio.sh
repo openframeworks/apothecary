@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" "msys2" )
 #FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=4.1.1
+VER=5.0.0
 
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
@@ -24,10 +24,10 @@ GIT_TAG=master
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	wget -nv --no-check-certificate $GIT_URL/archive/master.tar.gz -O rtaudio-$GIT_TAG.tar.gz
-	tar -xf rtaudio-$GIT_TAG.tar.gz
-	mv rtaudio-$GIT_TAG rtAudio
-	rm rtaudio-$GIT_TAG.tar.gz
+	wget -nv --no-check-certificate http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-${VER}.tar.gz
+	tar -xf rtaudio-${VER}.tar.gz
+	mv rtaudio-${VER} rtAudio
+	rm rtaudio-${VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -110,7 +110,7 @@ function build() {
 			-DAUDIO_WINDOWS_DS=ON \
 			-DAUDIO_WINDOWS_ASIO=ON \
 			-DBUILD_TESTING=OFF
-		make 
+		make
 	fi
 
 	# clean up env vars
@@ -149,7 +149,7 @@ function copy() {
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	cp -v README.md $1/license/
+	cp -v readme $1/license/
 }
 
 # executed inside the lib src dir
