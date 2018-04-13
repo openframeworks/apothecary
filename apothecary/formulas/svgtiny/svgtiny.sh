@@ -74,14 +74,14 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $VS_VER -eq 14 ]
+		if [ $VS_VER -eq 14 ]; then
 			cd vs2015
 			if [ $ARCH == 32 ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
 			else
 				vs-build svgtiny.sln Build "Release|x64"
 			fi
-		elif [ $VS_VER -eq 15 ]
+		elif [ $VS_VER -eq 15 ]; then
 			cd vs2017
 			if [ $ARCH == 32 ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
