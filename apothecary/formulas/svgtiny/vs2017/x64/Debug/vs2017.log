@@ -1,0 +1,221 @@
+﻿  libxml_xmlparser.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\bindings\xml\libxml_xmlparser.c': No such file or directory
+  attr.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\attr.c': No such file or directory
+  cdatasection.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\cdatasection.c': No such file or directory
+  characterdata.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\characterdata.c': No such file or directory
+  comment.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\comment.c': No such file or directory
+  document.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\document.c': No such file or directory
+  document_type.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\document_type.c': No such file or directory
+  doc_fragment.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\doc_fragment.c': No such file or directory
+  element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\element.c': No such file or directory
+  entity_ref.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\entity_ref.c': No such file or directory
+  implementation.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\implementation.c': No such file or directory
+  namednodemap.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\namednodemap.c': No such file or directory
+  node.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\node.c': No such file or directory
+  nodelist.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\nodelist.c': No such file or directory
+  pi.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\pi.c': No such file or directory
+  string.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\string.c': No such file or directory
+  text.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\text.c': No such file or directory
+  typeinfo.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\core\typeinfo.c': No such file or directory
+  custom_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\custom_event.c': No such file or directory
+  dispatch.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\dispatch.c': No such file or directory
+  Generating Code...
+  Compiling...
+  document_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\document_event.c': No such file or directory
+  event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\event.c': No such file or directory
+  event_listener.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\event_listener.c': No such file or directory
+  event_target.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\event_target.c': No such file or directory
+  keyboard_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\keyboard_event.c': No such file or directory
+  mouse_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\mouse_event.c': No such file or directory
+  mouse_multi_wheel_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\mouse_multi_wheel_event.c': No such file or directory
+  mouse_wheel_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\mouse_wheel_event.c': No such file or directory
+  mutation_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\mutation_event.c': No such file or directory
+  mutation_name_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\mutation_name_event.c': No such file or directory
+  text_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\text_event.c': No such file or directory
+  ui_event.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\events\ui_event.c': No such file or directory
+  html_anchor_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_anchor_element.c': No such file or directory
+  html_applet_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_applet_element.c': No such file or directory
+  html_area_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_area_element.c': No such file or directory
+  html_basefont_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_basefont_element.c': No such file or directory
+  html_base_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_base_element.c': No such file or directory
+  html_body_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_body_element.c': No such file or directory
+  html_br_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_br_element.c': No such file or directory
+  html_button_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_button_element.c': No such file or directory
+  Generating Code...
+  Compiling...
+  html_collection.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_collection.c': No such file or directory
+  html_directory_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_directory_element.c': No such file or directory
+  html_div_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_div_element.c': No such file or directory
+  html_dlist_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_dlist_element.c': No such file or directory
+  html_document.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_document.c': No such file or directory
+  html_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_element.c': No such file or directory
+  html_fieldset_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_fieldset_element.c': No such file or directory
+  html_font_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_font_element.c': No such file or directory
+  html_form_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_form_element.c': No such file or directory
+  html_frameset_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_frameset_element.c': No such file or directory
+  html_frame_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_frame_element.c': No such file or directory
+  html_heading_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_heading_element.c': No such file or directory
+  html_head_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_head_element.c': No such file or directory
+  html_hr_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_hr_element.c': No such file or directory
+  html_html_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_html_element.c': No such file or directory
+  html_iframe_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_iframe_element.c': No such file or directory
+  html_image_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_image_element.c': No such file or directory
+  html_input_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_input_element.c': No such file or directory
+  html_isindex_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_isindex_element.c': No such file or directory
+  html_label_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_label_element.c': No such file or directory
+  Generating Code...
+  Compiling...
+  html_legend_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_legend_element.c': No such file or directory
+  html_link_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_link_element.c': No such file or directory
+  html_li_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_li_element.c': No such file or directory
+  html_map_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_map_element.c': No such file or directory
+  html_menu_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_menu_element.c': No such file or directory
+  html_meta_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_meta_element.c': No such file or directory
+  html_mod_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_mod_element.c': No such file or directory
+  html_object_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_object_element.c': No such file or directory
+  html_olist_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_olist_element.c': No such file or directory
+  html_options_collection.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_options_collection.c': No such file or directory
+  html_option_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_option_element.c': No such file or directory
+  html_opt_group_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_opt_group_element.c': No such file or directory
+  html_paragraph_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_paragraph_element.c': No such file or directory
+  html_param_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_param_element.c': No such file or directory
+  html_pre_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_pre_element.c': No such file or directory
+  html_quote_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_quote_element.c': No such file or directory
+  html_script_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_script_element.c': No such file or directory
+  html_select_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_select_element.c': No such file or directory
+  html_style_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_style_element.c': No such file or directory
+  html_tablecaption_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_tablecaption_element.c': No such file or directory
+  Generating Code...
+  Compiling...
+  html_tablecell_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_tablecell_element.c': No such file or directory
+  html_tablecol_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_tablecol_element.c': No such file or directory
+  html_tablerow_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_tablerow_element.c': No such file or directory
+  html_tablesection_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_tablesection_element.c': No such file or directory
+  html_table_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_table_element.c': No such file or directory
+  html_text_area_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_text_area_element.c': No such file or directory
+  html_title_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_title_element.c': No such file or directory
+  html_ulist_element.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\html\html_ulist_element.c': No such file or directory
+  character_valid.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\utils\character_valid.c': No such file or directory
+  hashtable.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\utils\hashtable.c': No such file or directory
+  namespace.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\utils\namespace.c': No such file or directory
+  validate.c
+c1 : fatal error C1083: Cannot open source file: '..\libdom\src\utils\validate.c': No such file or directory
+  codec.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codec.c': No such file or directory
+  codec_8859.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codecs\codec_8859.c': No such file or directory
+  codec_ascii.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codecs\codec_ascii.c': No such file or directory
+  codec_ext8.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codecs\codec_ext8.c': No such file or directory
+  codec_utf16.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codecs\codec_utf16.c': No such file or directory
+  codec_utf8.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\codecs\codec_utf8.c': No such file or directory
+  utf16.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\encodings\utf16.c': No such file or directory
+  utf8.c
+c1 : fatal error C1083: Cannot open source file: '..\libparserutils\src\charset\encodings\utf8.c': No such file or directory
+  Generating Code...
+  Compiling...
+  libwapcaplet.c
+c1 : fatal error C1083: Cannot open source file: '..\libwapcaplet\src\libwapcaplet.c': No such file or directory
+  svgtiny.c
+c1 : fatal error C1083: Cannot open source file: '..\src\svgtiny.c': No such file or directory
+  svgtiny_gradient.c
+c1 : fatal error C1083: Cannot open source file: '..\src\svgtiny_gradient.c': No such file or directory
+  svgtiny_list.c
+c1 : fatal error C1083: Cannot open source file: '..\src\svgtiny_list.c': No such file or directory
+  svg_colors.c
+c1 : fatal error C1083: Cannot open source file: '..\src\svg_colors.c': No such file or directory
+  Generating Code...
