@@ -8,23 +8,25 @@ FORMULA_TYPES=( "vs" "osx" )
 # for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
 #for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers
 
-GIT_URL=https://github.com/ofTheo/libusb
-GIT_BRANCH_VS=windows-patched
-GIT_BRANCH_OSX=osx-kinect
+GIT_URL=https://github.com/libusb/libusb
+GIT_TAG=1.0.22
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	if [ "$TYPE" == "vs" ] ; then
-        echo "Running: git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}"
-        git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
-	fi
+	# if [ "$TYPE" == "vs" ] ; then
+  #       echo "Running: git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}"
+  #       git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
+	# fi
+  #
+	# if [ "$TYPE" == "osx" ] ; then
+  #       echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}"
+  #       git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}
+	# fi
 
-	if [ "$TYPE" == "osx" ] ; then
-        echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}"
-        git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}
-	fi
-
+	wget https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
+	tar xjf libusb-${GIT_TAG}.tar.bz2
+	mv libusb-${GIT_TAG} libusb
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -39,11 +41,18 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 
 		cd msvc
-
-		if [ $ARCH == 32 ] ; then
-			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
-		elif [ $ARCH == 64 ] ; then
-			MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
+		if [ $VS_VER -eq 14 ]; then
+			vs-build libusb_2015.sln
+			# if [ $ARCH == 32 ] ; then
+			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
+			# elif [ $ARCH == 64 ] ; then
+			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
+			# fi
+		elif [ $VS_VER -eq 15 ]; then
+			vs-build libusb_2017.sln
+		else
+			echo "VS version $VS_VER not supported yet"
+			exit 1
 		fi
 
 	fi
