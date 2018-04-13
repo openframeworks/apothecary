@@ -47,14 +47,22 @@ function build() {
 		if [ $VS_VER -eq 14 ]; then
 			unset TMP
 			unset TEMP
-			vs-build libusb_2015.sln
+			if [ $ARCH == 32 ] ; then
+				vs-build libusb_2015.sln Build "Release|x86"
+			elif [ $ARCH == 64 ] ; then
+				vs-build libusb_2015.sln Build "Release|x64"
+			fi
 			# if [ $ARCH == 32 ] ; then
 			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
 			# elif [ $ARCH == 64 ] ; then
 			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
 			# fi
 		elif [ $VS_VER -eq 15 ]; then
-			vs-build libusb_2017.sln
+			if [ $ARCH == 32 ] ; then
+				vs-build libusb_2017.sln Build "Release|x86"
+			elif [ $ARCH == 64 ] ; then
+				vs-build libusb_2017.sln Build "Release|x64"
+			fi
 		else
 			echo "VS version $VS_VER not supported yet"
 			exit 1

@@ -23,10 +23,10 @@ function download() {
 	git clone -b release/$VER --depth 1 git://git.netsurf-browser.org/libsvgtiny.git
     mv libsvgtiny svgtiny
     cd svgtiny
-    
+
     git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libdom.git
-    git clone -b release/0.2.3 --depth 1 git://git.netsurf-browser.org/libparserutils.git    
-    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git    
+    git clone -b release/0.2.3 --depth 1 git://git.netsurf-browser.org/libparserutils.git
+    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -74,11 +74,22 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		cd vs2015
-		if [ $ARCH == 32 ] ; then
-			vs-build svgtiny.sln Build "Release|x86"
+		if [ $VS_VER -eq 14 ]
+			cd vs2015
+			if [ $ARCH == 32 ] ; then
+				vs-build svgtiny.sln Build "Release|x86"
+			else
+				vs-build svgtiny.sln Build "Release|x64"
+			fi
+		elif [ $VS_VER -eq 15 ]
+			cd vs2017
+			if [ $ARCH == 32 ] ; then
+				vs-build svgtiny.sln Build "Release|x86"
+			else
+				vs-build svgtiny.sln Build "Release|x64"
+			fi
 		else
-			vs-build svgtiny.sln Build "Release|x64"
+			echo "VS Version not supported yet"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
