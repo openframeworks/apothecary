@@ -31,7 +31,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+	if [ "$TYPE" == "osx" ] ; then
+		sed -i -e "s/libusb-1\.0\.0\.dylib/libusb-1\.0\.0\.a/g" Xcode/libusb.xcodeproj/project.pbxproj
+		sed -i -e "s/productType = \"com\.apple\.product-type\.library\.dynamic\";/productType = \"com\.apple\.product-type\.library\.static\";/g"
+	fi
 }
 
 # executed inside the lib src dir
