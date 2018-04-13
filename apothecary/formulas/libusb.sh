@@ -45,6 +45,8 @@ function build() {
 
 		cd msvc
 		if [ $VS_VER -eq 14 ]; then
+			unset TMP
+			unset TEMP
 			vs-build libusb_2015.sln
 			# if [ $ARCH == 32 ] ; then
 			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
