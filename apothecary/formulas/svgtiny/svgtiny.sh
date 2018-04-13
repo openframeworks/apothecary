@@ -51,6 +51,7 @@ function prepare() {
 	if [ "$TYPE" == "vs" ]; then
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
 		cp -r $FORMULA_DIR/vs2015 ./
+		cp -r $FORMULA_DIR/vs2017 ./
 	else
     	cp $FORMULA_DIR/Makefile .
 	fi
