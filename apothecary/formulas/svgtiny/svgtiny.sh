@@ -169,7 +169,7 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2017/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
-		elif
+		else
 			echo "VS Version not supported yet"
 		fi
 
