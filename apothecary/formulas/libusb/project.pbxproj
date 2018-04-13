@@ -465,7 +465,7 @@
 			name = libusb;
 			productName = libusb;
 			productReference = 008FBF311628B79300BC5BE2 /* libusb-1.0.0.a */;
-			productType = "com.apple.product-type.library.static";
+			productType = "com.apple.product-type.library.dynamic";
 		};
 		008FBFBC1628B9FE00BC5BE2 /* xusb */ = {
 			isa = PBXNativeTarget;
