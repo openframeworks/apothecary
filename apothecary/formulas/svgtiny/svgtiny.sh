@@ -153,13 +153,26 @@ function copy() {
 	cp -Rv include/* $1/include
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
+		if [ $VS_VER -eq 14 ]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
+			fi
+		elif [ $VS_VER -eq 15 ]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "vs2017/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "vs2017/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
+			fi
+		elif
+			echo "VS Version not supported yet"
 		fi
+
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/svgtiny.a
