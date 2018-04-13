@@ -94,7 +94,7 @@ function copy() {
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v Xcode/build/Release/libusb-1.0.0.so $1/lib/$TYPE/usb-1.0.0.a
+        cp -v Xcode/build/Release/libusb-1.0.0.dylib $1/lib/$TYPE/usb-1.0.0.a
 	fi
 
 	echoWarning "TODO: License Copy"
