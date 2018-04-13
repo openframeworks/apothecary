@@ -31,9 +31,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "osx" ] ; then
-		cp $FORMULA_DIR/project.pbxproj Xcode/libusb.xcodeproj # changes project to build static lib
-	fi
+	: #noop
+	# if [ "$TYPE" == "osx" ] ; then
+	# 	cp $FORMULA_DIR/project.pbxproj Xcode/libusb.xcodeproj # changes project to build static lib
+	# fi
 }
 
 # executed inside the lib src dir
@@ -96,7 +97,7 @@ function copy() {
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v Xcode/build/Release/libusb-1.0.0.a $1/lib/$TYPE/usb-1.0.0.a
+        cp -v Xcode/build/Release/libusb-1.0.0.so $1/lib/$TYPE/usb-1.0.0.a
 	fi
 
 	echoWarning "TODO: License Copy"
