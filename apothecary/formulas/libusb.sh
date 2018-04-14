@@ -56,7 +56,7 @@ function build() {
 			# fi
 		elif [ $VS_VER -eq 15 ]; then
 			if [ $ARCH == 32 ] ; then
-				vs-build libusb_2017.sln Build "Release|x86"
+				vs-build libusb_2017.sln Build "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2017.sln Build "Release|x64"
 			fi
