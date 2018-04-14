@@ -68,7 +68,6 @@ function build() {
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
-        ./autogen.sh
 		CFLAGS="-arch i386 -arch x86_64" ./configure --disable-shared --enable-static
  		make -j${PARALLEL_MAKE}
 	fi
