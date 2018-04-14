@@ -45,7 +45,7 @@ function build() {
 			unset TMP
 			unset TEMP
 			if [ $ARCH == 32 ] ; then
-				vs-build libusb_2015.sln Build "Release|x86"
+				vs-build libusb_2015.sln Build "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2015.sln Build "Release|x64"
 			fi
