@@ -32,9 +32,6 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	: # noop
-    if [ "$TYPE" == "osx" ] ; then
-		cp $FORMULA_DIR/project.pbxproj Xcode/libusb.xcodeproj/
-	fi
 }
 
 # executed inside the lib src dir
@@ -71,8 +68,9 @@ function build() {
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
-        cd Xcode
-        xcodebuild ARCHS="i386 x86_64" ONLY_ACTIVE_ARCH=NO -configuration Release -target libusb -project libusb.xcodeproj/
+        ./autogen.sh
+		CFLAGS="-arch i386 -arch x86_64" ./configure --disable-shared --enable-static
+ 		make -j${PARALLEL_MAKE}
 	fi
 
 }
@@ -97,7 +95,7 @@ function copy() {
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v Xcode/build/Release/libusb-1.0.0.a $1/lib/$TYPE/usb-1.0.0.a
+        cp -v libusb/.libs/libusb-1.0.a $1/lib/$TYPE/usb-1.0.0.a
 	fi
 
 	echoWarning "TODO: License Copy"
