@@ -8,7 +8,7 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.8.1-release
+VER=1.7.9-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
