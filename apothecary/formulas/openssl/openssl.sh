@@ -5,8 +5,8 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.0.2k
-VERDIR=1.0.2
+VER=1.1.0h
+VERDIR=1.1.0
 CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
@@ -247,7 +247,7 @@ function build() {
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
 		perl -pi -e 's/\r//g' Setenv-android.sh
 		export _ANDROID_API=$ANDROID_PLATFORM
-		
+
         # armv7
         if [ "$ARCH" == "armv7" ]; then
             export _ANDROID_EABI=arm-linux-androideabi-4.9
@@ -256,7 +256,7 @@ function build() {
             export _ANDROID_EABI=x86-4.9
 		    export _ANDROID_ARCH=arch-x86
 		fi
-		
+
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
@@ -268,7 +268,7 @@ function build() {
 		cp libssl.a $BUILD_TO_DIR/lib/
         cp libcrypto.a $BUILD_TO_DIR/lib/
 
-	else 
+	else
 
 		echoWarning "TODO: build $TYPE lib"
 
