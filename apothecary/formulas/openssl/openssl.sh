@@ -16,11 +16,11 @@ function download() {
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget -nv --no-check-certificate ${MIRROR}/source/old/$VERDIR/$FILENAME.tar.gz
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		wget -nv --no-check-certificate ${MIRROR}/source/old/$VERDIR/$FILENAME.tar.gz.sha1
+		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
 		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
