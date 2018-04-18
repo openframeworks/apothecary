@@ -108,10 +108,6 @@ function build() {
 		# Refer to the other script if anything drastic changes for future versions
 
 		CURRENTPATH=`pwd`
-		# export CC=clang;
-		# export CROSS_TOP=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer
-		# export CROSS_SDK=iPhoneOS.sdk
-		# export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
 
 		local IOS_ARCHS
 		if [ "${TYPE}" == "tvos" ]; then
@@ -134,16 +130,11 @@ function build() {
 			# cp "Configure" "Configure.orig"
 			# cp "apps/speed.c" "apps/speed.c.orig"
 
-			# ## Fix for tvOS fork undef 9.0
-			# if [ "${TYPE}" == "tvos" ]; then
-			# 	# Patch apps/speed.c to not use fork() since it's not available on tvOS
-			# 	sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-			# 	# Patch Configure to build for tvOS, not iOS
-			# 	sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
-			# 	chmod u+x ./Configure
-			# else
-			# 	sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
-			# fi
+			## Fix for tvOS fork undef 9.0
+			if [ "${TYPE}" == "tvos" ]; then
+				# Patch apps/speed.c to not use fork() since it's not available on tvOS
+				sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
+			fi
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			source ../../ios_configure.sh $TYPE $IOS_ARCH
 			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
@@ -163,9 +154,13 @@ function build() {
 				./Configure darwin-i386-cc $FLAGS
 			elif [ "${IOS_ARCH}" == "x86_64" ]; then
 				./Configure darwin64-x86_64-cc $FLAGS
-			elif [ "${IOS_ARCH}" == "armv7" ]; then
+			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "tvos" ]; then
+				./Configure tvos-cross $FLAGS
+			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "ios" ]; then
 				./Configure ios-cross $FLAGS
-			elif [ "${IOS_ARCH}" == "arm64" ]; then
+			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "tvos" ]; then
+				./Configure tvos64-cross $FLAGS
+			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "ios" ]; then
 				./Configure ios64-cross $FLAGS
 			fi
 			make clean
