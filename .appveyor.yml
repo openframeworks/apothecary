@@ -139,19 +139,14 @@ init:
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-
-# prepend PATH after msbuild command line environment has been set up.
-- set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
-
 # # visual studio 2015
 # - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
 # - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
 # # visual studio 2017
 # - if "%PLATFORM%_%VS_VER%"=="x86_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 # - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-
-install:
-- if "%TARGET%"=="vs" choco install -y strawberryperl
+# prepend PATH after msbuild command line environment has been set up.
+- set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
 build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
