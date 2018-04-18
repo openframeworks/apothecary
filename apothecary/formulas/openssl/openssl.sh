@@ -143,10 +143,7 @@ function build() {
 			# fi
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-shared no-dso no-hw no-engine --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-			if [ "$TYPE" == "tvos" ]; then
-				FLAGS="$FLAGS no-async"
-			fi
+			FLAGS="no-deprecated no-async no-shared no-dso no-hw no-engine --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 
 			rm -f libcrypto.a
 			rm -f libssl.a
@@ -154,12 +151,10 @@ function build() {
 				./Configure darwin-i386-cc $FLAGS
 			elif [ "${IOS_ARCH}" == "x86_64" ]; then
 				./Configure darwin64-x86_64-cc $FLAGS
-			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "tvos" ]; then
-				./Configure tvos-cross $FLAGS
 			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "ios" ]; then
 				./Configure ios-cross $FLAGS
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "tvos" ]; then
-				./Configure tvos64-cross $FLAGS
+				./Configure tvos64-cross-arm64 $FLAGS
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "ios" ]; then
 				./Configure ios64-cross $FLAGS
 			fi
