@@ -47,6 +47,8 @@ function prepare() {
 		if patch -p1 -u -N --dry-run --silent < $FORMULA_DIR/winOpenSSL.patch 2>/dev/null ; then
 			patch -p1 -u < $FORMULA_DIR/winOpenSSL.patch
 		fi
+	elif [ "$TYPE" == "tvos" ]; then
+		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
 	fi
 }
 
