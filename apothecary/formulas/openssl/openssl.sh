@@ -163,9 +163,9 @@ function build() {
 				./Configure darwin-i386-cc $FLAGS
 			elif [ "${IOS_ARCH}" == "x86_64" ]; then
 				./Configure darwin64-x86_64-cc $FLAGS
-			elif armv7
+			elif [ "${IOS_ARCH}" == "armv7" ]; then
 				./Configure ios-cross $FLAGS
-			elif arm64
+			elif [ "${IOS_ARCH}" == "arm64" ]; then
 				./Configure ios64-cross $FLAGS
 			fi
 			make clean
