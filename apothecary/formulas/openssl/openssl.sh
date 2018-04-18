@@ -302,26 +302,26 @@ function copy() {
 	# opensslconf.h that detects the platform and includes the
 	# correct one. Then every platform checkouts the rest of the config
 	# files that were deleted here
-	# if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-	# 	if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-	# 		mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-	# 	fi
-	# 	cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-	#
-	# elif [ "$TYPE" == "vs" ]; then
-	# 	mv ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf.h ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf_${TYPE}.h
-	# 	cp -RHv ${PREFIX}/ms/${PLATFORM}/include/openssl/* $1/include/openssl/
-	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-	#
-	# elif [ -f include/openssl/opensslconf.h ]; then
-	# 	mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
-	# 	cp -RHv include/openssl/* $1/include/openssl/
-	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-	# fi
+	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+		if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
+			mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
+		fi
+		cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+
+	elif [ "$TYPE" == "vs" ]; then
+		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
+		cp -RHv include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+
+	elif [ -f include/openssl/opensslconf.h ]; then
+		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
+		cp -RHv include/openssl/* $1/include/openssl/
+		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	fi
 	# suppress file not found errors
-	#same here doesn't seem to be a solid reason to delete the files
-	#rm -rf $1/lib/$TYPE/* 2> /dev/null
+	# same here doesn't seem to be a solid reason to delete the files
+	rm -rf $1/lib/$TYPE/* 2> /dev/null
 
 	# libs
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
