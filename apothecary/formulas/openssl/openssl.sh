@@ -108,6 +108,10 @@ function build() {
 		# Refer to the other script if anything drastic changes for future versions
 
 		CURRENTPATH=`pwd`
+		# export CC=clang;
+		# export CROSS_TOP=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer
+		# export CROSS_SDK=iPhoneOS.sdk
+		# export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
 
 		local IOS_ARCHS
 		if [ "${TYPE}" == "tvos" ]; then
@@ -126,29 +130,29 @@ function build() {
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
-			# make sure backed up
-			cp "Configure" "Configure.orig"
-			cp "apps/speed.c" "apps/speed.c.orig"
+			# # make sure backed up
+			# cp "Configure" "Configure.orig"
+			# cp "apps/speed.c" "apps/speed.c.orig"
 
-			## Fix for tvOS fork undef 9.0
-			if [ "${TYPE}" == "tvos" ]; then
-				# Patch apps/speed.c to not use fork() since it's not available on tvOS
-				sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-				# Patch Configure to build for tvOS, not iOS
-				sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
-				chmod u+x ./Configure
-			else
-				sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
-			fi
+			# ## Fix for tvOS fork undef 9.0
+			# if [ "${TYPE}" == "tvos" ]; then
+			# 	# Patch apps/speed.c to not use fork() since it's not available on tvOS
+			# 	sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
+			# 	# Patch Configure to build for tvOS, not iOS
+			# 	sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:tvOS/' "Configure"
+			# 	chmod u+x ./Configure
+			# else
+			# 	sed -i -- 's/D\_REENTRANT\:.+OS/D\_REENTRANT\:iOS/' "Configure"
+			# fi
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			source ../../ios_configure.sh $TYPE $IOS_ARCH
-			if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
-				cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
-				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
-			fi
+			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
+			# 	cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
+			# 	sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
+			# fi
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-asm no-shared --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			FLAGS="no-shared no-dso no-hw no-engine --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			if [ "$TYPE" == "tvos" ]; then
 				FLAGS="$FLAGS no-async"
 			fi
@@ -160,19 +164,19 @@ function build() {
 			elif [ "${IOS_ARCH}" == "x86_64" ]; then
 				./Configure darwin64-x86_64-cc $FLAGS
 			else
-				./Configure iphoneos-cross $FLAGS
+				./Configure ios-cross $FLAGS
 			fi
 			make clean
 
 			# For openssl 1.1.0
-			#if [ "$TYPE" == "ios" ]; then
-			#    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-			#fi
+			if [ "$TYPE" == "ios" ]; then
+			   CFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			   CXXFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			fi
 
 			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
 
 			sed -ie "s!^CFLAG=\(.*\)!CFLAG=\1 $CFLAGS !" Makefile
-			#sed -ie "s!AR= ar $(ARFLAGS) r!AR= libtool -o!g" Makefile
 			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
@@ -184,10 +188,10 @@ function build() {
 
 
 			# reset source file back.
-			if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
-				cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-			fi
-			cp "apps/speed.c.orig" "apps/speed.c"
+			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
+			# 	cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
+			# fi
+			# cp "apps/speed.c.orig" "apps/speed.c"
 
 		done
 
@@ -221,7 +225,7 @@ function build() {
 			-output $BUILD_TO_DIR/lib/libssl.a
 		fi
 
-		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
+		# cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
 	elif [ "$TYPE" == "android" ]; then
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
