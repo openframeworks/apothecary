@@ -95,22 +95,12 @@ function build() {
 		-output $BUILD_TO_DIR/lib/libssl.a
 
 	elif [ "$TYPE" == "vs" ] ; then
-		PREFIX=`pwd`/build/
-		cp -v $FORMULA_DIR/buildwin.cmd ./
-		WINPREFIX=$(echo "$PREFIX" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
 		if [ $ARCH == 32 ] ; then
-			if [ -d ms/Win32 ]; then
-				rm -r ms/Win32
-			fi
-			mkdir ms/Win32
-			cmd //c buildwin.cmd Win32 "${WINPREFIX}"
+			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm"
 		elif [ $ARCH == 64 ] ; then
-			if [ -d ms/x64 ]; then
-				rm -r ms/x64
-			fi
-			mkdir ms/x64
-			cmd //c buildwin.cmd x64 "${WINPREFIX}"
+			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm"
 		fi
+		with_vs_env "nmake"
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
@@ -280,14 +270,14 @@ function copy() {
 	#echoWarning "TODO: copy $TYPE lib"
 
 	# # headers
-	if [ -d $1/include/ ]; then
-		# keep a copy of the platform specific headers
-		find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
-		# remove old headers
-		rm -r $1/include/
-		# restore platform specific headers
-		find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
-	fi
+	# if [ -d $1/include/ ]; then
+	# 	# keep a copy of the platform specific headers
+	# 	find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
+	# 	# remove old headers
+	# 	rm -r $1/include/
+	# 	# restore platform specific headers
+	# 	find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
+	# fi
 
 	mkdir -pv $1/include/openssl/
 	mkdir -p $1/lib/$TYPE
@@ -306,23 +296,23 @@ function copy() {
 	# opensslconf.h that detects the platform and includes the
 	# correct one. Then every platform checkouts the rest of the config
 	# files that were deleted here
-	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-			mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-		fi
-		cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-
-	elif [ "$TYPE" == "vs" ]; then
-		mv ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf.h ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf_${TYPE}.h
-		cp -RHv ${PREFIX}/ms/${PLATFORM}/include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-
-	elif [ -f include/openssl/opensslconf.h ]; then
-		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
-		cp -RHv include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-	fi
+	# if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+	# 	if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
+	# 		mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
+	# 	fi
+	# 	cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
+	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	#
+	# elif [ "$TYPE" == "vs" ]; then
+	# 	mv ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf.h ${PREFIX}/ms/${PLATFORM}/include/openssl/opensslconf_${TYPE}.h
+	# 	cp -RHv ${PREFIX}/ms/${PLATFORM}/include/openssl/* $1/include/openssl/
+	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	#
+	# elif [ -f include/openssl/opensslconf.h ]; then
+	# 	mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
+	# 	cp -RHv include/openssl/* $1/include/openssl/
+	# 	cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	# fi
 	# suppress file not found errors
 	#same here doesn't seem to be a solid reason to delete the files
 	#rm -rf $1/lib/$TYPE/* 2> /dev/null
@@ -334,11 +324,11 @@ function copy() {
 	elif [ "$TYPE" == "vs" ] ; then
 		rm -rf $1/lib/$TYPE/${PLATFORM}
 		mkdir -p $1/lib/$TYPE/${PLATFORM}
-		cp -v ${PREFIX}/ms/${PLATFORM}/lib/*.lib $1/lib/$TYPE/${PLATFORM}/
-		for f in $1/lib/$TYPE/${PLATFORM}/*; do
-			base=`basename $f .lib`
-			mv -v $f $1/lib/$TYPE/${PLATFORM}/${base}md.lib
-		done
+		cp -v *.lib $1/lib/$TYPE/${PLATFORM}/
+		# for f in $1/lib/$TYPE/${PLATFORM}/*; do
+		# 	base=`basename $f .lib`
+		# 	mv -v $f $1/lib/$TYPE/${PLATFORM}/${base}md.lib
+		# done
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d $1/lib/$TYPE/$ABI ]; then
 			rm -r $1/lib/$TYPE/$ABI
