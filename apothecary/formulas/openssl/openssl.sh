@@ -118,10 +118,10 @@ function build() {
 		# Refer to the other script if anything drastic changes for future versions
 
 		CURRENTPATH=`pwd`
-		export CC=clang;
-		export CROSS_TOP=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer
-		export CROSS_SDK=iPhoneOS.sdk
-		export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
+		# export CC=clang;
+		# export CROSS_TOP=/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer
+		# export CROSS_SDK=iPhoneOS.sdk
+		# export PATH="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin:$PATH"
 
 		local IOS_ARCHS
 		if [ "${TYPE}" == "tvos" ]; then
@@ -180,7 +180,8 @@ function build() {
 
 			# For openssl 1.1.0
 			if [ "$TYPE" == "ios" ]; then
-			   CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			   CFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			   CXXFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 			fi
 
 			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
