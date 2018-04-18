@@ -179,9 +179,9 @@ function build() {
 			make clean
 
 			# For openssl 1.1.0
-			# if [ "$TYPE" == "ios" ]; then
-			#    CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-			# fi
+			if [ "$TYPE" == "ios" ]; then
+			   CFLAGS="-arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+			fi
 
 			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
 
