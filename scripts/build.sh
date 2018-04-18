@@ -63,33 +63,33 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
     if [ "$BUNDLE" == "1" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
-            "pixman"
-            "pkg-config"
-            "zlib"
-            "libpng"
-            "freetype"
+            # "pixman"
+            # "pkg-config"
+            # "zlib"
+            # "libpng"
+            # "freetype"
 
             # All formulas
             "boost"
-            "FreeImage"
-            "fmodex"
-            "glew"
-            "glfw"
-            "glm"
-            "json"
-            "libusb"
-            "kiss"
-            "portaudio"
-            "pugixml"
-            "utf8"
-            "videoInput"
-            "rtAudio"
-            "tess2"
-            "uriparser"
+            # "FreeImage"
+            # "fmodex"
+            # "glew"
+            # "glfw"
+            # "glm"
+            # "json"
+            # "libusb"
+            # "kiss"
+            # "portaudio"
+            # "pugixml"
+            # "utf8"
+            # "videoInput"
+            # "rtAudio"
+            # "tess2"
+            # "uriparser"
 
             # Formulas with depenencies in the end
-            "cairo"
-            "uri"
+            # "cairo"
+            # "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
