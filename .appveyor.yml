@@ -139,7 +139,7 @@ init:
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-- if "%TARGET%=="vs" call choco install -y strawberryperl  # needed for building openssl
+- if "%TARGET%"=="vs" '%MSYS2_PATH%\usr\bin\bash -lc "scripts/install.sh"
 # # visual studio 2015
 # - if "%PLATFORM%_%VS_VER%"=="x86_14" call "%VS140COMNTOOLS%\vsvars32.bat"
 # - if "%PLATFORM%_%VS_VER%"=="x64_14" call "%VS140COMNTOOLS%..\..\VC\vcvarsall" amd64
