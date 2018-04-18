@@ -139,7 +139,7 @@ init:
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
 - if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
 - if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/vs/install.sh"'
+- if "%TARGET%"=="vs" '%MSYS2_PATH%\usr\bin\bash -lc "scripts/vs/install.sh"'
 
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
