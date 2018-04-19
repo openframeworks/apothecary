@@ -28,10 +28,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	echo prepare
-	# if [ "$TYPE" == "vs" ] ; then
-	# 	cp $FORMULA_DIR/build-openssl.bat projects/build-openssl.bat
-	# fi
+	if [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        # apply https://github.com/curl/curl/commit/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4
+		patch -p0 -u < $FORMULA_DIR/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4.patch
+	fi
 }
 
 # executed inside the lib src dir
@@ -51,11 +51,11 @@ function build() {
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
 
-    if [ $ARCH == 32 ] ; then
-        PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-    else
-        PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
-    fi
+        if [ $ARCH == 32 ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+        else
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+        fi
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
