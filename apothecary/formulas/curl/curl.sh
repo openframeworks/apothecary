@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_53_1
+VER=7_59_0
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -28,9 +28,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "vs" ] ; then
-		cp $FORMULA_DIR/build-openssl.bat projects/build-openssl.bat
-	fi
+	echo prepare
+	# if [ "$TYPE" == "vs" ] ; then
+	# 	cp $FORMULA_DIR/build-openssl.bat projects/build-openssl.bat
+	# fi
 }
 
 # executed inside the lib src dir
@@ -43,19 +44,18 @@ function build() {
 		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14"
-		cd projects/Windows/VC14/lib
+		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
+		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc15"
+		cd projects/Windows/VC$VS_VER/lib
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
 
-        # perform upgrade for vs2017, as project file will be for vs 2015
-        if [ $VS_VER -gt 14 ] ; then
-            vs-upgrade libcurl.sln
-        fi
-
-        if [ $ARCH == 32 ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-        else
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
-        fi
+    if [ $ARCH == 32 ] ; then
+        PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+    else
+        PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+    fi
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
@@ -189,10 +189,10 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+			cp -v "build/Win32/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
+			cp -v "build/Win64/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
@@ -203,32 +203,32 @@ function copy() {
 		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
 
-    if [ "$TYPE" == "osx" ]; then
-        cp build/$TYPE/x86/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-        cp build/$TYPE/x64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-    elif [ "$TYPE" == "ios" ]; then
-        cp build/$TYPE/i386/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-        cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-    elif [ "$TYPE" == "tvos" ]; then
-        cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-    elif [ "$TYPE" == "vs" ]; then
-		if [ $ARCH == 32 ] ; then
-            cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-        else
-            cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-        fi
-    elif [ "$TYPE" == "android" ]; then
-		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-    fi
+    # if [ "$TYPE" == "osx" ]; then
+    #     cp build/$TYPE/x86/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     cp build/$TYPE/x64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "ios" ]; then
+    #     cp build/$TYPE/i386/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "tvos" ]; then
+    #     cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "vs" ]; then
+		# if [ $ARCH == 32 ] ; then
+    #         cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     else
+    #         cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    #     fi
+    # elif [ "$TYPE" == "android" ]; then
+		# 		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    # fi
 
-cat > $1/include/curl/curlbuild.h << EOF
-/* The size of long, as computed by sizeof. */
-#if defined(__LP64__) || defined(_WIN64)
-#include "curl/curlbuild64.h"
-#else
-#include "curl/curlbuild32.h"
-#endif
-EOF
+# cat > $1/include/curl/curlbuild.h << EOF
+# /* The size of long, as computed by sizeof. */
+# #if defined(__LP64__) || defined(_WIN64)
+# #include "curl/curlbuild64.h"
+# #else
+# #include "curl/curlbuild32.h"
+# #endif
+# EOF
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists

@@ -323,6 +323,7 @@ function copy() {
 		rm -rf $1/lib/$TYPE/${PLATFORM}
 		mkdir -p $1/lib/$TYPE/${PLATFORM}
 		cp -v *.lib $1/lib/$TYPE/${PLATFORM}/
+		mv include/openssl/opensslconf_vs.h include/openssl/opensslconf.h
 		# for f in $1/lib/$TYPE/${PLATFORM}/*; do
 		# 	base=`basename $f .lib`
 		# 	mv -v $f $1/lib/$TYPE/${PLATFORM}/${base}md.lib
