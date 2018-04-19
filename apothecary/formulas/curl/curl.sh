@@ -45,7 +45,7 @@ function build() {
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
-		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc15"
+		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc$VS_VER"
 		cd projects/Windows/VC$VS_VER/lib
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
