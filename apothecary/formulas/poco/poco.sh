@@ -12,7 +12,7 @@ VER=1.8.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
-GIT_TAG=poco-1.8.1-release
+GIT_TAG=poco-${VER}
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" "linux" "linux64" )
 
@@ -51,7 +51,7 @@ function prepare() {
 		git reset --hard $SHA
 	fi
 
-	if [ "$TYPE" != "msys2" ] && [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
+	if [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
 		# manually prepare dependencies
 		apothecaryDependencies download
 		apothecaryDependencies prepare
@@ -65,35 +65,30 @@ function prepare() {
 		mkdir -p lib/$TYPE
 		mkdir -p lib/iPhoneOS
 
-		cd build/config
-
 		if [[ "$TYPE" == "tvos" ]]; then
-			cp $FORMULA_DIR/AppleTV AppleTV
-			cp $FORMULA_DIR/AppleTVSimulator AppleTVSimulator
+			cp $FORMULA_DIR/AppleTV build/config/AppleTV
+			cp $FORMULA_DIR/AppleTVSimulator build/config/AppleTVSimulator
 		fi
 
-		cp iPhoneSimulator-clang-libc++ iPhoneSimulator-clang-libc++.orig
-		cp iPhone-clang-libc++ iPhone-clang-libc++.orig
+		cp build/config/iPhoneSimulator-clang-libc++ build/config/iPhoneSimulator-clang-libc++.orig
+		cp build/config/iPhone-clang-libc++ build/config/iPhone-clang-libc++.orig
 
 		# fix using sed i636 reference and allow overloading variable
-		sed -i .tmp "s|POCO_TARGET_OSARCH.* = .*|POCO_TARGET_OSARCH ?= i386|" iPhoneSimulator-clang-libc++
-		sed -i .tmp "s|OSFLAGS            = -arch|OSFLAGS            ?= -arch|" iPhoneSimulator-clang-libc++
-		sed -i .tmp "s|STATICOPT_CC    =|STATICOPT_CC    ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" iPhone-clang-libc++
-		sed -i .tmp "s|STATICOPT_CXX   =|STATICOPT_CXX   ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" iPhone-clang-libc++
-		sed -i .tmp "s|OSFLAGS                 = -arch|OSFLAGS                ?= -arch|" iPhone-clang-libc++
-		sed -i .tmp "s|RELEASEOPT_CC   = -DNDEBUG -O2|RELEASEOPT_CC   =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" iPhone-clang-libc++
-		sed -i .tmp "s|RELEASEOPT_CXX  = -DNDEBUG -O |RELEASEOPT_CXX  =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" iPhone-clang-libc++
+		sed -i .tmp "s|POCO_TARGET_OSARCH.* = .*|POCO_TARGET_OSARCH ?= i386|" build/config/iPhoneSimulator-clang-libc++
+		sed -i .tmp "s|OSFLAGS            = -arch|OSFLAGS            ?= -arch|" build/config/iPhoneSimulator-clang-libc++
+		sed -i .tmp "s|STATICOPT_CC    =|STATICOPT_CC    ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
+		sed -i .tmp "s|STATICOPT_CXX   =|STATICOPT_CXX   ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
+		sed -i .tmp "s|OSFLAGS                 = -arch|OSFLAGS                ?= -arch|" build/config/iPhone-clang-libc++
+		sed -i .tmp "s|RELEASEOPT_CC   = -DNDEBUG -O2|RELEASEOPT_CC   =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
+		sed -i .tmp "s|RELEASEOPT_CXX  = -DNDEBUG -O |RELEASEOPT_CXX  =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
 
-		cd ../rules/
-		cp compile compile.orig
+		# sed -i .tmp "s|EVP_CIPHER_CTX_cleanup(_pContext);||g" Crypto/src/CipherImpl.cpp
+		# sed -i -e "s|#include <openssl/evp.h>|#include <openssl/evp.h>\n#include <openssl/bn.h>|" Crypto/src/X509Certificate.cpp
+
+		cp build/rules/compile build/rules/compile.orig
 		# Fix for making debug and release, making just release
-		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" compile
-		cd ../../
+		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
 
-	# elif [ "$TYPE" == "osx" ]; then
-		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin-clang-libc++
-		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin32-clang-libc++
-		# sed -ie "s/libtool -static -o/ar cr/" build/config/Darwin64-clang-libc++
 
 	elif [ "$TYPE" == "vs" ] ; then
 		#change the build win cmd file for vs2015 compatibility
@@ -187,18 +182,6 @@ function build() {
 					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 				fi
 		fi
-
-	elif [ "$TYPE" == "msys2" ] ; then
-	    cp $FORMULA_DIR/MinGWConfig64 build/config/MinGW
-
-		./configure $BUILD_OPTS \
-					--config=MinGW
-
-		make -j${PARALLEL_MAKE}
-
-		# Delete debug libs.
-		rm -f lib/MinGW/i686/*d.a
-		rm -f lib/MinGW/x86_64/*d.a
 
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		set -e
@@ -321,7 +304,6 @@ function build() {
 			export BUILD_TOOLS="${DEVELOPER}"
 
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-			LOG="$CURRENTPATH/build/$TYPE/$IOS_ARCH/poco-$IOS_ARCH-${VER}.log"
 			set +e
 
 			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
@@ -334,41 +316,13 @@ function build() {
 			echo "Making Poco-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
 			echo "--------------------"
 			echo "Configuring for ${IOS_ARCH} ..."
-			./configure $BUILD_OPTS --config=$BUILD_POCO_CONFIG > "${LOG}" 2>&1
+			./configure $BUILD_OPTS --config=$BUILD_POCO_CONFIG
 
-			if [ $? != 0 ]; then
-				tail -n 100 "${LOG}"
-		    	echo "Problem while configure - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Configure successful"
-		    fi
 		    echo "--------------------"
 		    echo "Running make for ${IOS_ARCH}"
-		    echo "${LOG}"
 
-		    export BUILD_OUTPUT=$LOG
-		    export PING_SLEEP=30s
-		    export PING_LOOP_PID
-		    trap 'error_handler' ERR
-		    bash -c "while true; do echo \$(date) - Building Poco ...; sleep $PING_SLEEP; done" &
-PING_LOOP_PID=$!
+			make -j${PARALLEL_MAKE}
 
-
-			make -j${PARALLEL_MAKE} >> "${BUILD_OUTPUT}" 2>&1
-			dump_output
-			kill $PING_LOOP_PID
-			trap - ERR
-
-			if [ $? != 0 ];
-		    then
-		    	tail -n 100 "${LOG}"
-		    	echo "Problem while make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	#tail -n 10 "${LOG}"
-		    	echo "Make Successful for ${IOS_ARCH}"
-		    fi
 			unset POCO_TARGET_OSARCH IPHONE_SDK_VERSION_MIN OSFLAGS
 			unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
@@ -412,18 +366,9 @@ PING_LOOP_PID=$!
 			echo "Stripping any lingering symbols"
 
 			cd lib/$TYPE
-			SLOG="$CURRENTPATH/lib/$TYPE-stripping.log"
 			local TOBESTRIPPED
 			for TOBESTRIPPED in $( ls -1) ; do
-				strip -x $TOBESTRIPPED >> "${SLOG}" 2>&1
-				if [ $? != 0 ];
-			    then
-			    	tail -n 100 "${SLOG}"
-			    	echo "Problem while stripping lib - Please check ${SLOG}"
-			    	exit 1
-			    else
-			    	echo "Strip Successful for ${SLOG}"
-			    fi
+				strip -x $TOBESTRIPPED
 			done
 			cd ../../
 		fi
