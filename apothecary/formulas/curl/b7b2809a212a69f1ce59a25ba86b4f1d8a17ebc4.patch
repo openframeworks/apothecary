@@ -1,0 +1,33 @@
+diff --git lib/vtls/darwinssl.c lib/vtls/darwinssl.c
+index 694ac57..fc15d13 100644
+--- lib/vtls/darwinssl.c
++++ lib/vtls/darwinssl.c
+@@ -1011,11 +1011,13 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
+   if(status == noErr) {
+     status = SecKeychainSearchCopyNext(search,
+                                        (SecKeychainItemRef *)&cert);
++#if CURL_BUILD_MAC_10_7
+     if(status == noErr && cert) {
+       /* If we found a certificate, does it have a private key? */
+       status = SecIdentityCreateWithCertificate(NULL, cert, out_c_a_k);
+       CFRelease(cert);
+     }
++#endif
+   }
+ 
+   if(search)
+@@ -1195,12 +1197,14 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
+           *out_cert_and_key = (SecIdentityRef) identity;
+           break;
+         }
++#if CURL_BUILD_MAC_10_7
+         else if(itemID == SecCertificateGetTypeID()) {
+           status = SecIdentityCreateWithCertificate(NULL,
+                                                  (SecCertificateRef) item,
+                                                  out_cert_and_key);
+           break;
+         }
++#endif
+       }
+     }
+ 
