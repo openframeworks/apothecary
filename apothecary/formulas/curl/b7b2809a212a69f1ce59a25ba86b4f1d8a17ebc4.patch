@@ -1,17 +1,22 @@
-From b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4 Mon Sep 17 00:00:00 2001
-From: Chris Araman <chris-araman@users.noreply.github.com>
-Date: Sat, 17 Mar 2018 13:49:27 -0700
-Subject: [PATCH] darwinssl: fix iOS build
-
----
- lib/vtls/darwinssl.c | 2 ++
- 1 file changed, 2 insertions(+)
-
 diff --git a/lib/vtls/darwinssl.c b/lib/vtls/darwinssl.c
-index f00a94295c..f445302fa0 100644
+index 694ac57..fc15d13 100644
 --- a/lib/vtls/darwinssl.c
 +++ b/lib/vtls/darwinssl.c
-@@ -1195,12 +1195,14 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
+@@ -1011,11 +1011,13 @@ static OSStatus CopyIdentityWithLabelOldSchool(char *label,
+   if(status == noErr) {
+     status = SecKeychainSearchCopyNext(search,
+                                        (SecKeychainItemRef *)&cert);
++#if CURL_BUILD_MAC_10_7
+     if(status == noErr && cert) {
+       /* If we found a certificate, does it have a private key? */
+       status = SecIdentityCreateWithCertificate(NULL, cert, out_c_a_k);
+       CFRelease(cert);
+     }
++#endif
+   }
+ 
+   if(search)
+@@ -1195,12 +1197,14 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
            *out_cert_and_key = (SecIdentityRef) identity;
            break;
          }
