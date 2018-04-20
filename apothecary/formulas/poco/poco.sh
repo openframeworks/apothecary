@@ -136,7 +136,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB,JSON"
+    local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
 	if [ "$TYPE" == "osx" ] ; then
 		CURRENTPATH=`pwd`
 		echo "--------------------"
@@ -442,6 +442,7 @@ function copy() {
 	cp -Rv Data/include/Poco/Data $1/include/Poco
 	cp -Rv Data/SQLite/include/Poco/Data $1/include/Poco
 	cp -Rv Foundation/include/Poco/* $1/include/Poco
+	cp -Rv JSON/include/Poco/JSON $1/include/Poco
 	cp -Rv MongoDB/include/Poco/MongoDB $1/include/Poco
 	cp -Rv Net/include/Poco/Net $1/include/Poco
 	cp -Rv NetSSL_OpenSSL/include/Poco/Net/* $1/include/Poco/Net
