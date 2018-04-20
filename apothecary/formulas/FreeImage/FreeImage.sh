@@ -24,8 +24,8 @@ function download() {
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	
-	else 
+
+	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL for OSX/iOS"
 		echo $GIT_URL
@@ -54,6 +54,10 @@ function prepare() {
 
 		# copy across new Makefile for iOS.
 		cp -v $FORMULA_DIR/Makefile.ios Makefile.ios
+
+		# delete problematic file including a main fucntion
+		# https://github.com/openframeworks/openFrameworks/issues/5980
+		rm Source/OpenEXR/llmlmf/b44ExpLogTable.cpp
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
 	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
