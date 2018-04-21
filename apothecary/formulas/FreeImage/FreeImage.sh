@@ -57,7 +57,7 @@ function prepare() {
 
 		# delete problematic file including a main fucntion
 		# https://github.com/openframeworks/openFrameworks/issues/5980
-		rm Source/OpenEXR/llmlmf/b44ExpLogTable.cpp
+		rm Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
 	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
