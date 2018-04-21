@@ -57,7 +57,8 @@ function prepare() {
 
 		# delete problematic file including a main fucntion
 		# https://github.com/openframeworks/openFrameworks/issues/5980
-		rm Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+		rm -f Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+		touch Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
 	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
@@ -234,7 +235,6 @@ function build() {
 			export LDFLAGS_PHONE=$LDFLAGS
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
-			LOG="$CURRENTPATH/builddir/$TYPE/$IOS_ARCH/build-freeimage-${VER}-$IOS_ARCH.log"
 			echo "-----------------"
 			echo "Building FreeImage-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
 			set +e
@@ -243,15 +243,7 @@ function build() {
 			echo "Please stand by..."
 
 			# run makefile
-			make -j${PARALLEL_MAKE} -f Makefile.ios >> "${LOG}" 2>&1
-			if [ $? != 0 ];
-		    then
-                tail -n 100 "${LOG}"
-		    	echo "Problem while make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Make Successful for ${IOS_ARCH}"
-		    fi
+			make -j${PARALLEL_MAKE} -f Makefile.ios
 
      		echo "Completed Build for $IOS_ARCH of FreeImage"
 
@@ -280,24 +272,15 @@ function build() {
         if [[ "${TYPE}" == "tvos" ]] ; then
             lipo -create libfreeimage-arm64.a \
                     libfreeimage-x86_64.a \
-                    -output freeimage.a >> "${LOG}" 2>&1
+                    -output freeimage.a
         elif [[ "$TYPE" == "ios" ]]; then
 		    #			libfreeimage-armv7s.a \
 		    lipo -create libfreeimage-armv7.a \
 					libfreeimage-arm64.a \
 					libfreeimage-i386.a \
 					libfreeimage-x86_64.a \
-					-output freeimage.a >> "${LOG}" 2>&1
+					-output freeimage.a
         fi
-
-		if [ $? != 0 ];
-		then
-            tail -n 100 "${LOG}"
-		    echo "Problem while creating fat lib with lipo - Please check ${LOG}"
-		    exit 1
-		else
-		   	echo "Lipo Successful."
-		fi
 
 		lipo -info freeimage.a
 
@@ -306,15 +289,7 @@ function build() {
     		echo "Stripping any lingering symbols"
     		echo "Please stand by..."
     		# validate all stripped debug:
-    		strip -x freeimage.a  >> "${LOG}" 2>&1
-    		if [ $? != 0 ];
-    		then
-                tail -n 10 "${LOG}"
-    		    echo "Problem while stripping lib - Please check ${LOG}"
-    		    exit 1
-    		else
-    		    echo "Strip Successful for ${LOG}"
-    		fi
+    		strip -x freeimage.a
         fi
 		cd ../../
 
