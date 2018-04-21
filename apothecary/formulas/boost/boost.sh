@@ -42,15 +42,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$VERSION" == "1.58.0" ]; then
-		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/operations.cpp.patch_1.58 2>/dev/null ; then
-            patch -p0 -u < $FORMULA_DIR/operations.cpp.patch_1.58
-        fi
-
-		if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/visualc.hpp.patch_1.58 2>/dev/null ; then
-            patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch_1.58
-        fi
-	fi
+	patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
 
 	if [ "$TYPE" == "osx" ]; then
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
