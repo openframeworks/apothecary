@@ -19,4 +19,4 @@ sed -i "s|%HOME%|${HOME}|g" ~/.emscripten
 cd ~/
 git clone --depth 1 --single-branch --branch v1.38.4-trusty https://github.com/urho3d/emscripten-sdk
 cd emscripten-sdk
-./emsdk activate latest
+./emsdk activate incoming
