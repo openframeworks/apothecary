@@ -10,7 +10,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
-VER=3170 # 3.16.0
+VER=3180 # 3.16.0
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/FreeImage
