@@ -48,23 +48,24 @@ if [ "$OPT" == "gcc4" ]; then
     sudo apt-get update -q
     sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
 elif [ "$OPT" == "gcc5" ]; then
-    sudo add-apt-repository -y ppa:dns/gnu
-    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    # sudo add-apt-repository -y ppa:dns/gnu
+    # sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo apt-get update -q
-    sudo apt-get install gdebi
+    # sudo apt-get install gdebi
     wget -nv http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
     tar xjf gcc5debs.tar.bz2
     rm gcc5debs.tar.bz2
-    sudo gdebi -n cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n gcc-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n gcc-5-base_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n g++-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n libstdc++-5-pic_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n libstdc++-5-dev_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n gcc-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo gdebi -n g++-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends gcc-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends gcc-5-base_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends g++-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends libstdc++-5-pic_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends libstdc++-5-dev_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends gcc-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
+    sudo dpkg -i --force-depends g++-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
     rm *.deb
 
+    sudo apt-get install -f
     sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get remove -y --purge g++-4.8
     sudo apt-get autoremove
