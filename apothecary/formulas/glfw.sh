@@ -8,7 +8,7 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-# define the version by branch
+# define the version by branch  
 VER=2018-cmake-fix
 
 # tools for git use
