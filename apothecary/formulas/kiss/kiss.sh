@@ -5,7 +5,7 @@
 # http://sourceforge.net/projects/kissfft/
 #
 # has a Makefile
-FORMULA_TYPES=( "linux" "linux64" "linuxarmv6l" "linuxarmv7l" )
+FORMULA_TYPES=( "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2")
 
 # define the version
 VER=130
