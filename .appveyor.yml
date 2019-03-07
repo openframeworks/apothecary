@@ -69,6 +69,11 @@ environment:
     TARGET: msys2
     ARCH: 32
     VS_NAME:
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    platform: x64
+    TARGET: msys2
+    ARCH: 64
+    VS_NAME:
   # VisualStudio 2015 32 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     platform: x86
