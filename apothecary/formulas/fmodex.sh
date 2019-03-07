@@ -19,6 +19,11 @@ GIT_TAG=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	#Nothing to do for mingw64
+	if [ "$TYPE" == "msys2" ] && [ "$ARCH" == "64" ]; then
+		mkdir fmodex
+		return;
+	fi
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmodex_${TYPE}${ARCH}.tar.bz2
 	else
