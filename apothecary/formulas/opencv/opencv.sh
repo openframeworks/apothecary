@@ -5,12 +5,12 @@
 # http://opencv.org
 #
 # uses a CMake build system
- 
+
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
- 
-# define the version 
-VER=3.1.0
- 
+
+# define the version
+VER=4.0.1
+
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
 GIT_TAG=$VER
@@ -127,7 +127,7 @@ function build() {
     echo "Logging to $LOG"
     echo "Log:" >> "${LOG}" 2>&1
     set +e
-    
+
     if [ $ARCH == 32 ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
@@ -164,7 +164,7 @@ function build() {
       -DBUILD_SHARED_LIBS=OFF \
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      -DWITH_PVAPI=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|Win32"
       vs-build "OpenCV.sln" Build "Debug|Win32"
     elif [ $ARCH == 64 ] ; then
@@ -203,11 +203,11 @@ function build() {
       -DBUILD_SHARED_LIBS=OFF \
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      -DWITH_PVAPI=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
     fi
-    
+
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
@@ -342,10 +342,10 @@ function build() {
     cd ../../
 
   # end if iOS
-  
+
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
-    
+
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
@@ -353,7 +353,7 @@ function build() {
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
-    
+
     source ../../android_configure.sh $ABI
 
     cd platforms
@@ -412,7 +412,7 @@ function build() {
       echo "emscripten is not set.  sourcing emsdk_env.sh"
       source ~/emscripten-sdk/emsdk_env.sh
     fi
-  
+
     cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -485,7 +485,7 @@ function build() {
       -DBUILD_PERF_TESTS=OFF
     make -j${PARALLEL_MAKE}
     make install
-  fi 
+  fi
 
 }
 
@@ -505,7 +505,7 @@ function copy() {
 
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
 
-    cp -R $LIB_FOLDER/include/ $1/include/    
+    cp -R $LIB_FOLDER/include/ $1/include/
     cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
@@ -527,7 +527,7 @@ function copy() {
     #copy the cv libs
     cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
     cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-    #copy the zlib 
+    #copy the zlib
     cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
     cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
 
@@ -568,17 +568,17 @@ function copy() {
     elif [ $ABI = x86 ]; then
       local BUILD_FOLDER="build_android_x86"
     fi
-    
+
     cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv $1/include/
     cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
     cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    
+
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
     rm -f platforms/$BUILD_FOLDER/lib/$ABI/*.so
     cp -r platforms/$BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
-    
+
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
     cp -R include/opencv $1/include/
