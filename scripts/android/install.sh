@@ -41,5 +41,5 @@ else
 fi
 
 echo "NDK_ROOT=${NDK_ROOT}" > ${APOTHECARY_PATH}/paths.make
-echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" > ${APOTHECARY_PATH}/paths.make
+echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ${APOTHECARY_PATH}/paths.make
 
