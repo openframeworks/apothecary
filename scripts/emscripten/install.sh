@@ -25,4 +25,3 @@ git clone --depth=1 https://github.com/emscripten-core/emsdk.git emscripten-sdk
 cd emscripten-sdk
 ./emsdk install latest
 ./emsdk activate latest
-source ./emsdk_env.sh
