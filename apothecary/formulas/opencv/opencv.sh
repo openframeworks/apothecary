@@ -553,19 +553,20 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     #copy the ippicv includes and lib
-    IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
-    IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
-    IPPICV_PLATFORM="ia32"
-    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-    IPPICV_PLATFORM="intel64"
-    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-    fi
-    mkdir -p ${IPPICV_DST}/include
-    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-    mkdir -p ${IPPICV_DEPLOY}
-    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
+    ls
+    # IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
+    # IPPICV_DST=$1/../ippicv
+    # if [ $ARCH == 32 ] ; then
+    #   IPPICV_PLATFORM="ia32"
+    #   IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
+    # elif [ $ARCH == 64 ] ; then
+    #   IPPICV_PLATFORM="intel64"
+    #   IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
+    # fi
+    # mkdir -p ${IPPICV_DST}/include
+    # cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
+    # mkdir -p ${IPPICV_DEPLOY}
+    # cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
 
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
