@@ -356,12 +356,14 @@ function build() {
 
     source ../../android_configure.sh $ABI
 
-    cd platforms
     rm -rf $BUILD_FOLDER
+    mkdir $BUILD_FOLDER
+    cd $BUILD_FOLDER
 
     echo ${ANDROID_NDK}
     pwd
-    scripts/${BUILD_SCRIPT} \
+    cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
+      -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
@@ -403,7 +405,6 @@ function build() {
       -DANDROID_FORCE_ARM_BUILD=TRUE \
       -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
       -DBUILD_PERF_TESTS=OFF
-    cd $BUILD_FOLDER
     make -j${PARALLEL_MAKE}
     make install
 
@@ -586,13 +587,13 @@ function copy() {
       local BUILD_FOLDER="build_android_x86"
     fi
 
-    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
+    cp -r $BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
-    rm -f platforms/$BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
-    rm -f platforms/$BUILD_FOLDER/lib/$ABI/*.so
-    cp -r platforms/$BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
+    rm -f $BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
+    rm -f $BUILD_FOLDER/lib/$ABI/*.so
+    cp -r $BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
 
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
