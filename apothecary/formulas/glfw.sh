@@ -8,8 +8,8 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-# define the version by branch
-VER=bugfix-cmake-compile-error
+# define the version by branch  
+VER=2018-cmake-fix
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/glfw.git

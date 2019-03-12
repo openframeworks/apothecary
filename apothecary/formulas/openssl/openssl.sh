@@ -98,9 +98,9 @@ function build() {
 
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm"
+			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
 		elif [ $ARCH == 64 ] ; then
-			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm"
+			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
 		fi
 		with_vs_env "nmake"
 

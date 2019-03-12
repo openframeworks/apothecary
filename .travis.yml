@@ -135,28 +135,28 @@ matrix:
 
     # ios
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="1"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="2"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="3"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="ios"
@@ -164,28 +164,28 @@ matrix:
 
     # tvos
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="1"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="2"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="3"
 
     - os: osx
-      osx_image: xcode8.1
+      osx_image: xcode8.3
       compiler: clang
       env:
         - TARGET="tvos"
