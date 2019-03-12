@@ -35,7 +35,8 @@ else
     echo "Uncompressing SDK"
     unzip sdk-tools-linux-4333796.zip > /dev/null 2>&1
     rm sdk-tools-linux-4333796.zip
-    mv tools android-sdk
+    mkdir android-sdk
+    mv tools android-sdk/
     echo "SDK installed at $ANDROID_SDK_ROOT"
     cd -
 fi
