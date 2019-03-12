@@ -317,7 +317,7 @@ function build() {
     for lib in $( ls -1 arm64/lib) ; do
       local renamedLib=$(echo $lib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
-        echo "renamed";
+        echo "renamed $renamedLib";
         if [[ "${TYPE}" == "tvos" ]] ; then
           lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
