@@ -1242,7 +1242,7 @@ if [[ "$TYPE" == "android" ]] ; then
 		source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [[ -e ${NDK_ROOT} ]] ; then
+	elif [[ -e ${NDK_ROOT} ] && [ -e ${ANDROID_SDK_ROOT} ]]; then
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"
