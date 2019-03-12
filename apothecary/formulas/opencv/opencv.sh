@@ -364,6 +364,7 @@ function build() {
     pwd
     cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
       -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
+      -DBUILD_ANDROID_PROJECTS=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
