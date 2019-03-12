@@ -525,7 +525,6 @@ function copy() {
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
 
     cp -R $LIB_FOLDER/include/ $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
@@ -550,7 +549,6 @@ function copy() {
     cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
     cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
 
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
@@ -576,7 +574,6 @@ function copy() {
     LIB_FOLDER="$BUILD_ROOT_DIR/$TYPE/FAT/opencv"
 
     cp -Rv lib/include/ $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     mkdir -p $1/lib/$TYPE
@@ -588,9 +585,7 @@ function copy() {
       local BUILD_FOLDER="build_android_x86"
     fi
 
-    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv $1/include/
     cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
