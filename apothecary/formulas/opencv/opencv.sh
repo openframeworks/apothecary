@@ -418,6 +418,10 @@ function build() {
     cd build_${TYPE}
     emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
       -DCMAKE_BUILD_TYPE="Release" \
+      -DBUILD_opencv_js=ON \
+      -DCPU_BASELINE='' \
+      -DCPU_DISPATCH='' \
+      -DCV_TRACE=OFF \
       -DCMAKE_C_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
       -DCMAKE_CXX_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
       -DBUILD_SHARED_LIBS=OFF \
@@ -426,17 +430,25 @@ function build() {
       -DBUILD_FAT_JAVA_LIB=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
       -DBUILD_CUDA_STUBS=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
-      -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
       -DBUILD_opencv_highgui=OFF \
       -DBUILD_opencv_imgcodecs=OFF \
       -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_gapi=OFF \
+      -DBUILD_opencv_ml=OFF \
+      -DBUILD_opencv_shape=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_superres=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
       -DENABLE_SSE=OFF \
       -DENABLE_SSE2=OFF \
       -DENABLE_SSE3=OFF \
@@ -446,15 +458,16 @@ function build() {
       -DENABLE_AVX=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
+      -DWITH_OPENGL=OFF \
+      -DWITH_OPENVX=OFF \
       -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
       -DWITH_JPEG=OFF \
       -DWITH_PNG=OFF \
       -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
       -DWITH_GIGEAPI=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_CUFFT=OFF \
-      -DWITH_FFMPEG=OFF \
       -DWITH_GIGEAPI=OFF \
       -DWITH_GPHOTO2=OFF \
       -DWITH_GSTREAMER=OFF \
@@ -464,7 +477,9 @@ function build() {
       -DWITH_IPP=OFF \
       -DWITH_IPP_A=OFF \
       -DWITH_TBB=OFF \
+      -DWITH_PTHREADS_PF=OFF \
       -DWITH_OPENNI=OFF \
+      -DWITH_OPENNI2=OFF \
       -DWITH_QT=OFF \
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
@@ -474,11 +489,15 @@ function build() {
       -DWITH_OPENCLCLAMDBLAS=OFF \
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
+      -DWITH_LAPACK=OFF \
+      -DWITH_ITT=OFF \
+      -DBUILD_ZLIB=OFF \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
       -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
@@ -581,11 +600,10 @@ function copy() {
 
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
