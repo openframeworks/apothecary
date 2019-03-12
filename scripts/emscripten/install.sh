@@ -21,6 +21,7 @@ cd $TRAVIS_BUILD_DIR
 # cd emscripten-sdk
 # ./emsdk activate --build=Release sdk-master-64bit
 
+cd ~/
 git clone --depth=1 --single-branch --branch master https://github.com/emscripten-core/emsdk.git emscripten-sdk
 cd emscripten-sdk
 ./emsdk install latest
