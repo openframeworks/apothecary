@@ -22,40 +22,40 @@ echo "Bundle: $BUNDLE"
 
 FORMULAS=(
     # Dependencies for other formulas (cairo)
-    "pixman"
-    "pkg-config"
-    "zlib"
+    # "pixman"
+    # "pkg-config"
+    # "zlib"
 
     # All formulas
-    "assimp"
-    "boost"
-    "FreeImage"
-    "libpng"
-    "libxml2"
-    "freetype"
-    "fmodex"
-    "glew"
-    "glfw"
-    "glm"
-    "json"
-    "libusb"
-    "kiss"
+    # "assimp"
+    # "boost"
+    # "FreeImage"
+    # "libpng"
+    # "libxml2"
+    # "freetype"
+    # "fmodex"
+    # "glew"
+    # "glfw"
+    # "glm"
+    # "json"
+    # "libusb"
+    # "kiss"
     "opencv"
-    "openssl"
-    "portaudio"
-    "pugixml"
-    "utf8"
-    "videoInput"
-    "rtAudio"
-    "tess2"
-    "uriparser"
+    # "openssl"
+    # "portaudio"
+    # "pugixml"
+    # "utf8"
+    # "videoInput"
+    # "rtAudio"
+    # "tess2"
+    # "uriparser"
 
     # Formulas with depenencies in the end
-    "curl"
-    "poco"
-    "svgtiny"
-    "uri"
-    "cairo"
+    # "curl"
+    # "poco"
+    # "svgtiny"
+    # "uri"
+    # "cairo"
 )
 
 # Seperate in bundles on osx
@@ -207,7 +207,7 @@ if [ -z ${PARALLEL+x} ]; then
     elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
         PARALLEL=4
     else
-        PARALLEL=1
+        PARALLEL=2
     fi
 fi
 
