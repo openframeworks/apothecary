@@ -93,7 +93,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 		for IOS_ARCH in ${IOS_ARCHS}; do
             echo
@@ -109,8 +109,7 @@ function build() {
         done
 
         if [ "$TYPE" == "ios" ]; then
-            lipo -create libpugixml_i386.a \
-                         libpugixml_x86_64.a \
+            lipo -create libpugixml_x86_64.a \
                          libpugixml_armv7.a \
                          libpugixml_arm64.a \
                         -output libpugixml.a

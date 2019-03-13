@@ -115,7 +115,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
         local STDLIB="libc++"

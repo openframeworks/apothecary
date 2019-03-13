@@ -153,7 +153,7 @@ function build() {
 			local CROSS_SDK_SIM="iPhoneSimulator${SDKVERSION}.sdk"
 			local TARGET_OS="iphone"
 			local ARCH="-arch armv7 -arch arm64"
-			local ARCHSIM="-arch i386 -arch x86_64"
+			local ARCHSIM="-arch x86_64"
 			local TARGET_TYPE="iphone"
 			local TARGET_TYPE_SIM="iphonesim"
 			MIN_TYPE=-miphoneos-version-min=
@@ -190,7 +190,6 @@ EOF
 	        echo "Splitting '$NAME' to $IOSBUILDDIR/*/$NAME.a"
 	        if [[ "$TYPE" == "ios" ]]; then
 	        	$ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin armv7 -o $IOSBUILDDIR/armv7/$NAME.a
-	        	$ARM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" -thin i386 -o $IOSBUILDDIR/i386/$NAME.a
 	        fi
 	        $ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin arm64 -o $IOSBUILDDIR/arm64/$NAME.a
 			$ARM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" -thin x86_64 -o $IOSBUILDDIR/x86_64/$NAME.a
@@ -244,7 +243,6 @@ EOF
 	    		echo "Lipo -c for $NAME for all iOS Architectures (arm64, armv7, i386, x86_64)"
 		    	lipo -c $IOSBUILDDIR/armv7/re-$NAME.a \
 		            $IOSBUILDDIR/arm64/re-$NAME.a \
-		            $IOSBUILDDIR/i386/re-$NAME.a \
 		            $IOSBUILDDIR/x86_64/re-$NAME.a \
 		            -output $OUTPUT_DIR_LIB/boost_$NAME.a
 	        fi

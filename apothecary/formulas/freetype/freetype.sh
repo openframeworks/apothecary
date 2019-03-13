@@ -89,7 +89,7 @@ function build() {
 		unset TEMP
 		unset temp
 		cd builds/windows/vc2010 #this upgrades without issue to vs2015
-		
+
 		vs-upgrade freetype.sln
 
 		if [ "$ARCH" ==  "32" ] ; then
@@ -122,7 +122,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="arm64 x86_64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -302,7 +302,6 @@ function build() {
 			# libfreetype-armv7s.a  \
 			lipo -create libfreetype-armv7.a \
 						libfreetype-arm64.a \
-						libfreetype-i386.a \
 						libfreetype-x86_64.a \
 						-output libfreetype.a \
 				 	>> "${LOG}" 2>&1

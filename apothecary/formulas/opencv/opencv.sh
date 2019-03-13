@@ -213,7 +213,7 @@ function build() {
     if [[ "${TYPE}" == "tvos" ]]; then
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
-        IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+        IOS_ARCHS="x86_64 armv7 arm64" #armv7s
     fi
     CURRENTPATH=`pwd`
 
@@ -352,7 +352,7 @@ function build() {
         if [[ "${TYPE}" == "tvos" ]] ; then
           lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/lib/$lib arm64/lib/$lib i386/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+          lipo -c armv7/lib/$lib arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         fi
       fi
     done
