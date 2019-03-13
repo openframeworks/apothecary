@@ -1237,19 +1237,13 @@ if [[ "$TYPE" == "android" ]] ; then
 	if [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
 		source ${APOTHECARY_DIR}/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
-		ANDROID_SDK=${ANDROID_SDK_ROOT}
-		ANDROID_HOME=${ANDROID_SDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
 	elif [[ -e ${OF_ROOT}/libs/openFrameworksCompiled/project/android/paths.make ]] ; then
 		source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
-		ANDROID_SDK=${ANDROID_SDK_ROOT}
-		ANDROID_HOME=${ANDROID_SDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [ -e ${NDK_ROOT} ] && [ -e ${ANDROID_SDK_ROOT} ]; then
+	elif [[ -e ${NDK_ROOT} ]]; then
 		ANDROID_NDK_ROOT=${NDK_ROOT}
-		ANDROID_SDK=${ANDROID_SDK_ROOT}
-		ANDROID_HOME=${ANDROID_SDK_ROOT}
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"
 		echoError "paths.make in apothecary folder or"

@@ -8,8 +8,6 @@ sudo apt-get install -y libboost-tools-dev gperf realpath
 NDK_VERSION="r15c"
 NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
 
-ANDROID_SDK_ROOT="$(realpath ~/)/android-sdk/"
-
 # Check if cached NDK directory exists
 if [ "$(ls -A ${NDK_ROOT})" ]; then
     echo "Using cached NDK"
@@ -25,22 +23,5 @@ else
     cd -
 fi
 
-if [ "$(ls -A ${ANDROID_SDK_ROOT})" ]; then
-    echo "Using cached SDK"
-    ls -A ${ANDROID_SDK_ROOT}
-else
-    cd ~/
-    echo "Downloading SDK"
-    wget -q --no-check-certificate https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-    echo "Uncompressing SDK"
-    unzip sdk-tools-linux-4333796.zip > /dev/null 2>&1
-    rm sdk-tools-linux-4333796.zip
-    mkdir android-sdk
-    mv tools android-sdk/
-    echo "SDK installed at $ANDROID_SDK_ROOT"
-    cd -
-fi
-
 echo "NDK_ROOT=${NDK_ROOT}" > ${APOTHECARY_PATH}/paths.make
-echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT}" >> ${APOTHECARY_PATH}/paths.make
 
