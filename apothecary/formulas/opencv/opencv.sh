@@ -345,14 +345,15 @@ function build() {
     local lib
     rm -rf arm64/lib/pkgconfig
 
-    for lib in $( ls -1 arm64/lib/*.a) ; do
+    for lib in arm64/lib/*.a ; do
       local renamedLib=$(echo $lib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
         echo "renamed $renamedLib";
+        baselib=$(basename $lib)
         if [[ "${TYPE}" == "tvos" ]] ; then
-          lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+          lipo -c arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/lib/$lib arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+          lipo -c armv7/lib/$baselib arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         fi
       fi
     done
