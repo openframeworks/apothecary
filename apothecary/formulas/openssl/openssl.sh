@@ -115,7 +115,7 @@ function build() {
 		if [ "${TYPE}" == "tvos" ]; then
 			IOS_ARCHS="x86_64 arm64"
 		elif [ "$TYPE" == "ios" ]; then
-			IOS_ARCHS="i386 x86_64 arm64 armv7" #armv7s
+			IOS_ARCHS="x86_64 arm64 armv7" #armv7s
 		fi
 
 		unset LANG
@@ -208,13 +208,11 @@ function build() {
 		elif [ "$TYPE" == "ios" ]; then
 			lipo -create $BUILD_TO_DIR/armv7/lib/libcrypto.a \
 			$BUILD_TO_DIR/arm64/lib/libcrypto.a \
-			$BUILD_TO_DIR/i386/lib/libcrypto.a \
 			$BUILD_TO_DIR/x86_64/lib/libcrypto.a \
 			-output $BUILD_TO_DIR/lib/libcrypto.a
 
 			lipo -create $BUILD_TO_DIR/armv7/lib/libssl.a \
 			$BUILD_TO_DIR/arm64/lib/libssl.a \
-			$BUILD_TO_DIR/i386/lib/libssl.a \
 			$BUILD_TO_DIR/x86_64/lib/libssl.a \
 			-output $BUILD_TO_DIR/lib/libssl.a
 		fi

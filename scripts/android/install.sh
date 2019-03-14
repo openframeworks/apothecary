@@ -17,8 +17,8 @@ else
     echo "Downloading NDK"
     wget -q --no-check-certificate https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-x86_64.zip
     echo "Uncompressing NDK"
-    unzip android-ndk-${NDK_VERSION}-linux-x86_64.zip > /dev/null 2>&1 
-    rm android-ndk-${NDK_VERSION}-linux-x86_64.zip    
+    unzip android-ndk-${NDK_VERSION}-linux-x86_64.zip > /dev/null 2>&1
+    rm android-ndk-${NDK_VERSION}-linux-x86_64.zip
     echo "NDK installed at $NDK_ROOT"
     cd -
 fi

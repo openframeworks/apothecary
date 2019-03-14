@@ -115,7 +115,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
         local STDLIB="libc++"
@@ -277,7 +277,6 @@ function build() {
 		    #			libfreeimage-armv7s.a \
 		    lipo -create libfreeimage-armv7.a \
 					libfreeimage-arm64.a \
-					libfreeimage-i386.a \
 					libfreeimage-x86_64.a \
 					-output freeimage.a
         fi

@@ -354,10 +354,10 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
         elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
         elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
         fi
 
@@ -1242,7 +1242,7 @@ if [[ "$TYPE" == "android" ]] ; then
 		source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [[ -e ${NDK_ROOT} ]] ; then
+	elif [[ -e ${NDK_ROOT} ]]; then
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"

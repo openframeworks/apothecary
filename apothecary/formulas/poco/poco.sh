@@ -201,7 +201,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		echo "--------------------"
@@ -351,7 +351,6 @@ function build() {
 				if [ ! -e $renamedLib ] ; then
 						lipo -c armv7/$lib \
 						arm64/$lib \
-						../iPhoneSimulator/i386/$lib \
 						../iPhoneSimulator/x86_64/$lib \
 						-o ../ios/$renamedLib
 				fi

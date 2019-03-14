@@ -75,7 +75,8 @@ matrix:
             - coreutils
             - libboost-tools-dev
             - gperf
-            #- libboost-dev
+            - libboost-dev
+
 
 
     # linux arm6

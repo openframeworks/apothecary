@@ -207,7 +207,7 @@ if [ -z ${PARALLEL+x} ]; then
     elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
         PARALLEL=4
     else
-        PARALLEL=1
+        PARALLEL=2
     fi
 fi
 

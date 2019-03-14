@@ -5,12 +5,12 @@
 # http://opencv.org
 #
 # uses a CMake build system
- 
+
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
- 
-# define the version 
-VER=3.1.0
- 
+
+# define the version
+VER=4.0.1
+
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
 GIT_TAG=$VER
@@ -53,7 +53,7 @@ function build() {
     cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
       -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
@@ -127,7 +127,7 @@ function build() {
     echo "Logging to $LOG"
     echo "Log:" >> "${LOG}" 2>&1
     set +e
-    
+
     if [ $ARCH == 32 ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
@@ -164,7 +164,7 @@ function build() {
       -DBUILD_SHARED_LIBS=OFF \
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      -DWITH_PVAPI=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|Win32"
       vs-build "OpenCV.sln" Build "Debug|Win32"
     elif [ $ARCH == 64 ] ; then
@@ -203,17 +203,17 @@ function build() {
       -DBUILD_SHARED_LIBS=OFF \
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG} 
+      -DWITH_PVAPI=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
     fi
-    
+
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
         IOS_ARCHS="x86_64 arm64"
     elif [[ "$TYPE" == "ios" ]]; then
-        IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+        IOS_ARCHS="x86_64 armv7 arm64" #armv7s
     fi
     CURRENTPATH=`pwd`
 
@@ -256,35 +256,66 @@ function build() {
       -DBUILD_FAT_JAVA_LIB=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_CUDA_STUBS=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_imgcodecs=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_gapi=OFF \
+      -DBUILD_opencv_ml=OFF \
+      -DBUILD_opencv_shape=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_superres=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_OPENGL=OFF \
+      -DWITH_OPENVX=OFF \
       -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
       -DWITH_JPEG=OFF \
       -DWITH_PNG=OFF \
-      -DWITH_CARBON=OFF \
       -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
       -DWITH_GIGEAPI=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_CUFFT=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
       -DWITH_JASPER=OFF \
-      -DWITH_LIBV4L=OFF \
       -DWITH_IMAGEIO=OFF \
       -DWITH_IPP=OFF \
+      -DWITH_IPP_A=OFF \
       -DWITH_OPENNI=OFF \
+      -DWITH_OPENNI2=OFF \
       -DWITH_QT=OFF \
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
+      -DWITH_LIBV4L=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_OPENCLCLAMDBLAS=OFF \
+      -DWITH_OPENCLCLAMDFFT=OFF \
+      -DWITH_OPENCL_SVM=OFF \
+      -DWITH_LAPACK=OFF \
+      -DBUILD_ZLIB=OFF \
+      -DWITH_WEBP=OFF \
+      -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DBUILD_OPENEXR=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       -DWITH_ITT=${WITH_ITT} \
       -DBUILD_PERF_TESTS=OFF
@@ -314,14 +345,15 @@ function build() {
     local lib
     rm -rf arm64/lib/pkgconfig
 
-    for lib in $( ls -1 arm64/lib) ; do
-      local renamedLib=$(echo $lib | sed 's|lib||')
+    for lib in arm64/lib/*.a ; do
+      baselib=$(basename $lib)
+      local renamedLib=$(echo $baselib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
-        echo "renamed";
+        echo "renamed $renamedLib";
         if [[ "${TYPE}" == "tvos" ]] ; then
-          lipo -c arm64/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+          lipo -c arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/lib/$lib arm64/lib/$lib i386/lib/$lib x86_64/lib/$lib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+          lipo -c armv7/lib/$baselib arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         fi
       fi
     done
@@ -342,10 +374,10 @@ function build() {
     cd ../../
 
   # end if iOS
-  
+
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
-    
+
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
@@ -353,15 +385,18 @@ function build() {
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
-    
+
     source ../../android_configure.sh $ABI
 
-    cd platforms
     rm -rf $BUILD_FOLDER
+    mkdir $BUILD_FOLDER
+    cd $BUILD_FOLDER
 
     echo ${ANDROID_NDK}
     pwd
-    scripts/${BUILD_SCRIPT} \
+    cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
+      -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
+      -DBUILD_ANDROID_PROJECTS=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
@@ -403,7 +438,6 @@ function build() {
       -DANDROID_FORCE_ARM_BUILD=TRUE \
       -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
       -DBUILD_PERF_TESTS=OFF
-    cd $BUILD_FOLDER
     make -j${PARALLEL_MAKE}
     make install
 
@@ -412,12 +446,16 @@ function build() {
       echo "emscripten is not set.  sourcing emsdk_env.sh"
       source ~/emscripten-sdk/emsdk_env.sh
     fi
-  
+
     cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
     cd build_${TYPE}
     emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
       -DCMAKE_BUILD_TYPE="Release" \
+      -DBUILD_opencv_js=ON \
+      -DCPU_BASELINE='' \
+      -DCPU_DISPATCH='' \
+      -DCV_TRACE=OFF \
       -DCMAKE_C_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
       -DCMAKE_CXX_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
       -DBUILD_SHARED_LIBS=OFF \
@@ -426,17 +464,25 @@ function build() {
       -DBUILD_FAT_JAVA_LIB=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
       -DBUILD_CUDA_STUBS=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
-      -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
       -DBUILD_opencv_highgui=OFF \
       -DBUILD_opencv_imgcodecs=OFF \
       -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_gapi=OFF \
+      -DBUILD_opencv_ml=OFF \
+      -DBUILD_opencv_shape=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_superres=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
       -DENABLE_SSE=OFF \
       -DENABLE_SSE2=OFF \
       -DENABLE_SSE3=OFF \
@@ -446,15 +492,16 @@ function build() {
       -DENABLE_AVX=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
+      -DWITH_OPENGL=OFF \
+      -DWITH_OPENVX=OFF \
       -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
       -DWITH_JPEG=OFF \
       -DWITH_PNG=OFF \
       -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
       -DWITH_GIGEAPI=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_CUFFT=OFF \
-      -DWITH_FFMPEG=OFF \
       -DWITH_GIGEAPI=OFF \
       -DWITH_GPHOTO2=OFF \
       -DWITH_GSTREAMER=OFF \
@@ -464,7 +511,9 @@ function build() {
       -DWITH_IPP=OFF \
       -DWITH_IPP_A=OFF \
       -DWITH_TBB=OFF \
+      -DWITH_PTHREADS_PF=OFF \
       -DWITH_OPENNI=OFF \
+      -DWITH_OPENNI2=OFF \
       -DWITH_QT=OFF \
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
@@ -474,18 +523,22 @@ function build() {
       -DWITH_OPENCLCLAMDBLAS=OFF \
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
+      -DWITH_LAPACK=OFF \
+      -DWITH_ITT=OFF \
+      -DBUILD_ZLIB=OFF \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
       -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF
     make -j${PARALLEL_MAKE}
     make install
-  fi 
+  fi
 
 }
 
@@ -505,8 +558,7 @@ function copy() {
 
     LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
 
-    cp -R $LIB_FOLDER/include/ $1/include/    
-    cp -R include/opencv $1/include/
+    cp -R $LIB_FOLDER/include/ $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
@@ -527,28 +579,28 @@ function copy() {
     #copy the cv libs
     cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
     cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-    #copy the zlib 
+    #copy the zlib
     cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
     cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
 
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     #copy the ippicv includes and lib
-    IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
-    IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
-    IPPICV_PLATFORM="ia32"
-    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-    IPPICV_PLATFORM="intel64"
-    IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-    fi
-    mkdir -p ${IPPICV_DST}/include
-    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-    mkdir -p ${IPPICV_DEPLOY}
-    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
+    ls
+    # IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
+    # IPPICV_DST=$1/../ippicv
+    # if [ $ARCH == 32 ] ; then
+    #   IPPICV_PLATFORM="ia32"
+    #   IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
+    # elif [ $ARCH == 64 ] ; then
+    #   IPPICV_PLATFORM="intel64"
+    #   IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
+    # fi
+    # mkdir -p ${IPPICV_DST}/include
+    # cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
+    # mkdir -p ${IPPICV_DEPLOY}
+    # cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
 
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
@@ -557,7 +609,6 @@ function copy() {
     LIB_FOLDER="$BUILD_ROOT_DIR/$TYPE/FAT/opencv"
 
     cp -Rv lib/include/ $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     mkdir -p $1/lib/$TYPE
@@ -568,24 +619,21 @@ function copy() {
     elif [ $ABI = x86 ]; then
       local BUILD_FOLDER="build_android_x86"
     fi
-    
-    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv $1/include/
-    cp -r platforms/$BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
-    cp -R include/opencv $1/include/
+
+    cp -r $BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    
-    rm -f platforms/$BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
-    rm -f platforms/$BUILD_FOLDER/lib/$ABI/*.so
-    cp -r platforms/$BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
-    
+
+    rm -f $BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
+    rm -f $BUILD_FOLDER/lib/$ABI/*.so
+    cp -r $BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
+
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
-    cp -R include/opencv $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/share/OpenCV/3rdparty/lib/*.a $1/lib/$TYPE/
+    cp -r build_emscripten/install/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
