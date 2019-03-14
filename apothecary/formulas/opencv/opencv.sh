@@ -345,7 +345,7 @@ function build() {
     local lib
     rm -rf arm64/lib/pkgconfig
 
-    for lib in $( ls -1 arm64/lib) ; do
+    for lib in $( ls -1 arm64/lib/*.a) ; do
       local renamedLib=$(echo $lib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
         echo "renamed $renamedLib";
