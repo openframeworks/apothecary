@@ -277,7 +277,6 @@ function build() {
 		    #			libfreeimage-armv7s.a \
 		    lipo -create libfreeimage-armv7.a \
 					libfreeimage-arm64.a \
-					libfreeimage-i386.a \
 					libfreeimage-x86_64.a \
 					-output freeimage.a
         fi
