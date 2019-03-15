@@ -235,10 +235,6 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
-if [ "$TARGET" == "emscripten" ]; then
-    source ~/emscripten-sdk/emsdk_env.sh
-fi
-
 function build(){
     trap "trapError" ERR
 
