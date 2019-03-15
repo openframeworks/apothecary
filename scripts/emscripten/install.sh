@@ -23,8 +23,7 @@
 # cd emscripten-sdk
 # ./emsdk activate --build=Release sdk-master-64bit
 
-docker exec -it emscripten sudo touch echo <<< EOF;
-#!/usr/bin/env bash
-$@
-EOF > /usr/bin/emcmake
-docker exec -it emscripten sudo chmod 755 /usr/bin/emcmake;
+docker exec -it emscripten echo $PATH
+docker exec -it emscripten echo '#!/usr/bin/env bash' > emcmake
+docker exec -it emscripten echo '$@' >> emcmake
+docker exec -it emscripten chmod 755 emcmake;
