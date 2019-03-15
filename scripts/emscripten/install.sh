@@ -24,6 +24,6 @@
 # ./emsdk activate --build=Release sdk-master-64bit
 
 # docker exec -it emscripten echo $PATH
-docker exec -it emscripten echo '#!/usr/bin/env bash' > /home/travis/bin/emcmake
-docker exec -it emscripten echo '$@' >> /home/travis/bin/emcmake
-docker exec -it emscripten chmod 755 /home/travis/bin/emcmake;
+docker exec -it emscripten "echo '#!/usr/bin/env bash' > /home/travis/bin/emcmake"
+docker exec -it emscripten "echo '$@' >> /home/travis/bin/emcmake"
+docker exec -it emscripten "chmod 755 /home/travis/bin/emcmake;"
