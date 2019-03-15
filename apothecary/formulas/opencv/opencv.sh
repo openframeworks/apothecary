@@ -627,6 +627,7 @@ function copy() {
     rm -f $BUILD_FOLDER/lib/$ABI/*pch_dephelp.a
     rm -f $BUILD_FOLDER/lib/$ABI/*.so
     cp -r $BUILD_FOLDER/lib/$ABI $1/lib/$TYPE/
+    find $BUILD_FOLDER/install/ -name "*.a"
 
   elif [ "$TYPE" == "emscripten" ]; then
     cp -r build_emscripten/install/include/* $1/include/
