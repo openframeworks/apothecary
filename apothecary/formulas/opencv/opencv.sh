@@ -624,7 +624,7 @@ function copy() {
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
-    cp -r $BUILD_FOLDER/install/sdk/staticlibs/$ABI/*.a $1/lib/$TYPE/
+    cp -r $BUILD_FOLDER/install/sdk/native/staticlibs/$ABI/*.a $1/lib/$TYPE/
     cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/
 
   elif [ "$TYPE" == "emscripten" ]; then
