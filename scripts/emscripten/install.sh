@@ -22,3 +22,6 @@
 # git clone --depth 1 --single-branch --branch master https://github.com/urho3d/emscripten-sdk
 # cd emscripten-sdk
 # ./emsdk activate --build=Release sdk-master-64bit
+
+docker exec -it emscripten sudo touch /usr/bin/emcmake;
+docker exec -it emscripten sudo chmod 755 /usr/bin/emcmake;
