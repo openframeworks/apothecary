@@ -202,7 +202,7 @@ install:
   - scripts/$TARGET/install.sh
 script:
   - if [ "$TARGET" == "emscripten" ]; then
-      docker exec -it emscripten scripts/build.sh;
+      docker exec -it emscripten TARGET="emscripten" scripts/build.sh;
     else
       scripts/build.sh;
     fi
