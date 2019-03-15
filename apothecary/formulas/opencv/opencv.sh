@@ -587,7 +587,7 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     #copy the ippicv includes and lib
-    ls
+    find .
     # IPPICV_SRC=3rdparty/ippicv/unpack/ippicv_win
     # IPPICV_DST=$1/../ippicv
     # if [ $ARCH == 32 ] ; then
