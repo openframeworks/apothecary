@@ -624,6 +624,7 @@ function copy() {
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
+    mkdir -p $1/lib/$TYPE/$ABI/
     cp -r $BUILD_FOLDER/install/sdk/native/staticlibs/$ABI/*.a $1/lib/$TYPE/$ABI/
     cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/$ABI/
 
