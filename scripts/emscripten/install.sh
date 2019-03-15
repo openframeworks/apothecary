@@ -29,4 +29,4 @@
 # docker exec -it emscripten sh -c "echo '$@' >> /home/travis/bin/emcmake"
 # docker exec -it emscripten sh -c "chmod 755 /home/travis/bin/emcmake;"
 
-docker exect -it emscripten apt install realpath coreutils libboost-tools-dev gperf libboost-dev
+docker exec -it emscripten apt install realpath coreutils libboost-tools-dev gperf libboost-dev
