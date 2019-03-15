@@ -261,7 +261,7 @@ function build(){
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        tail -n 30 formula.log
+        tail -n 10000 formula.log
     fi
 
 }
