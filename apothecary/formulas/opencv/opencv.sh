@@ -584,7 +584,7 @@ function copy() {
     cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
 
     cp -R include/opencv2 $1/include/
-    cp -R build_vs_${ARCH}/opencv2/* $1/include/
+    cp -R build_vs_${ARCH}/opencv2/* $1/include/opencv2/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     #copy the ippicv includes and lib
