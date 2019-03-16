@@ -8,8 +8,6 @@ APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
 # VERBOSE=true
 
-cd $APOTHECARY_PATH
-
 if [ -z $TARGET ] ; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
@@ -235,6 +233,12 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    APOTHECARY_PREFIX=docker exec -it emscripten sh -c 'TARGET="emscripten"'
+else
+    APOTHECARY_PREFIX=
+fi
+
 function build(){
     trap "trapError" ERR
 
@@ -247,10 +251,10 @@ function build(){
 
     if [ "$VERBOSE" = true ] ; then
         echo "./apothecary $ARGS update $formula_name"
-        ./apothecary $ARGS update $formula_name
+        $APOTHECARY_PREFIX sh -c "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
         echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-        ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
+        $APOTHECARY_PREFIX sh -c "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name" >> formula.log 2>&1 &
 
         apothecaryPID=$!
         echoDots $apothecaryPID
@@ -263,8 +267,8 @@ function build(){
 }
 
 # Remove output folder
-rm -rf $OUTPUT_FOLDER
-mkdir $OUTPUT_FOLDER
+$APOTHECARY_PREFIX rm -rf $OUTPUT_FOLDER
+$APOTHECARY_PREFIX mkdir $OUTPUT_FOLDER
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
@@ -307,16 +311,18 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-cd $OUTPUT_FOLDER
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$(ls)
+LIBS=$($APOTHECARY_PREFIX ls $OUTPUT_FOLDER)
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
-else
+elif [ "$TRAVIS" = true ]
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-	tar cjf $TARBALL $LIBS
+	$APOTHECARY_PREFIX sh -c "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
+    if [ "$TARGET" == "emscripten" ]; then
+        docker cp ${OUTPUT_FOLDER}/${TARBALL} .
+    fi
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
 	cp $ROOT/scripts/ssh_config ~/.ssh/config
