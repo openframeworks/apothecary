@@ -294,7 +294,7 @@ for formula in "${FORMULAS[@]}" ; do
         travis_time_start
     fi
 
-    run "$ROOT/scripts/run_one.sh"
+    run "scripts/run_one.sh"
 
     if [ "$TRAVIS" = true ] ; then
         travis_time_finish
