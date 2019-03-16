@@ -9,7 +9,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     }
 
     run_bg(){
-        docker exec emscripten sh -c "TARGET=\"emscripten\" $@" &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -26,7 +26,7 @@ else
     }
 
     run_bg(){
-        $@ &
+        $@ >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -287,8 +287,8 @@ function build(){
         echo "./apothecary $ARGS update $formula_name"
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
-        echo "./apothecary $ARGS update $formula_name > formula.log 2>&1"
-        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name >> formula.log 2>&1"
+        echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
+        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
 }
