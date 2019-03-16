@@ -216,6 +216,10 @@ if  type "ccache" > /dev/null; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
 
+    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+        docker cp /home/travis/.ccache emscripten:/home/travis/.ccache
+    fi
+
     ccache -z
     echo $(ccache -s)
 fi
@@ -293,6 +297,11 @@ done
 
 echo ""
 echo ""
+
+
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    docker cp emscripten:/home/travis/.ccache /home/travis/.ccache
+fi
 
 if  type "ccache" > /dev/null; then
     echo $(ccache -s)
