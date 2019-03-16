@@ -4,10 +4,14 @@ set -e
 set -o pipefail
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    APOTHECARY_PREFIX="docker exec -it emscripten sh -c 'TARGET=\"emscripten\"'"
+    run(){
+        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
+    }
     CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
 else
-    APOTHECARY_PREFIX=
+    run(){
+        @$
+    }
 fi
 
 ROOT=$($APOTHECARY_PREFIX cd $(dirname "$0"); pwd -P)/..
@@ -228,8 +232,8 @@ if  type "ccache" > /dev/null; then
         docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
     fi
 
-    $APOTHECARY_PREFIX ccache -z
-    echo $($APOTHECARY_PREFIX ccache -s)
+    run ccache -z
+    run ccache -s
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -257,10 +261,10 @@ function build(){
 
     if [ "$VERBOSE" = true ] ; then
         echo "./apothecary $ARGS update $formula_name"
-        $APOTHECARY_PREFIX sh -c "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
+        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
         echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-        $APOTHECARY_PREFIX sh -c "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name" >> formula.log 2>&1 &
+        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name" >> formula.log 2>&1 &
 
         apothecaryPID=$!
         echoDots $apothecaryPID
@@ -273,8 +277,8 @@ function build(){
 }
 
 # Remove output folder
-$APOTHECARY_PREFIX rm -rf $OUTPUT_FOLDER
-$APOTHECARY_PREFIX mkdir $OUTPUT_FOLDER
+run rm -rf $OUTPUT_FOLDER
+run mkdir $OUTPUT_FOLDER
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
@@ -323,14 +327,14 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$($APOTHECARY_PREFIX ls $OUTPUT_FOLDER)
+LIBS=$(run ls $OUTPUT_FOLDER)
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
 elif [ "$TRAVIS" = true ]
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-	$APOTHECARY_PREFIX sh -c "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
+	run "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
     if [ "$TARGET" == "emscripten" ]; then
         docker cp ${OUTPUT_FOLDER}/${TARBALL} .
     fi
