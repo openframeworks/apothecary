@@ -70,12 +70,11 @@ function build() {
       -DBUILD_opencv_highgui=OFF \
       -DBUILD_opencv_imgcodecs=OFF \
       -DBUILD_opencv_stitching=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
       -DWITH_1394=OFF \
       -DWITH_CARBON=OFF \
       -DWITH_JPEG=OFF \
       -DWITH_PNG=OFF \
+      -DWITH_TIFF=OFF \
       -DWITH_FFMPEG=OFF \
       -DWITH_OPENCL=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
@@ -97,6 +96,17 @@ function build() {
       -DBUILD_TESTS=OFF \
       -DWITH_LAPACK=OFF \
       -DWITH_WEBP=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_VTK=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_OPENVX=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
     echo "CMAKE Successful"
     echo "--------------------"
