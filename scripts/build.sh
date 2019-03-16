@@ -265,15 +265,15 @@ function build(){
         echo "./apothecary $ARGS update $formula_name"
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
-        echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name" >> formula.log 2>&1 &
+        echo "./apothecary $ARGS update $formula_name > formula.log 2>&1"
+        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name >> formula.log 2>&1" &
 
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        tail -n 100 formula.log
+        run "tail -n 100 formula.log"
     fi
 
 }
