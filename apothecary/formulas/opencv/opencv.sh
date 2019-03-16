@@ -113,7 +113,7 @@ function build() {
 
     echo "--------------------"
     echo "Joining all libs in one"
-    outputlist="$LIB_FOLDER/lib*.a $LIB_FOLDER/opencv4/3rdparty/*.a"
+    outputlist="$LIB_FOLDER/lib/lib*.a $LIB_FOLDER/lib/opencv4/3rdparty/*.a"
     libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
     echo "Joining all libs in one Successful"
 
