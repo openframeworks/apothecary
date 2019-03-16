@@ -30,4 +30,4 @@
 # docker exec -it emscripten sh -c "chmod 755 /home/travis/bin/emcmake;"
 
 docker exec -it emscripten apt update
-docker exec -it emscripten apt install -y coreutils libboost-tools-dev rsync
+docker exec -it emscripten apt install -y coreutils libboost-tools-dev rsync gperf
