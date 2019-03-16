@@ -17,8 +17,9 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
         echo "Tail of log for $formula_name"
         run "tail -n 100 formula.log"
     }
-    CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/") | sed s/\r//
-    ROOT=$(docker exec -it emscripten pwd) | sed s/\r//
+
+    CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/" | sed s/\r//)
+    ROOT=$(docker exec -i emscripten pwd | sed s/\r//)
 else
     run(){
         $@
@@ -33,6 +34,7 @@ else
         echo "Tail of log for $formula_name"
         run "tail -n 100 formula.log"
     }
+
     ROOT=$(cd $(dirname "$0"); pwd -P)/..
 fi
 
