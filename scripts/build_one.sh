@@ -1,4 +1,4 @@
-trap "trapError" ERR
+#!/usr/bin/env bash
 
 echo Build $formula_name
 

@@ -294,6 +294,7 @@ for formula in "${FORMULAS[@]}" ; do
         travis_time_start
     fi
 
+    trap "trapError" ERR
     run "scripts/build_one.sh"
 
     if [ "$TRAVIS" = true ] ; then
