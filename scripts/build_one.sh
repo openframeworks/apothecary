@@ -2,6 +2,22 @@
 
 echo Build $formula_name
 
+echoDots(){
+    sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
+    while isRunning $1; do
+        for i in $(seq 1 10); do
+            echo -ne .
+            if ! isRunning $1; then
+                printf "\r"
+                return;
+            fi
+            sleep 1
+        done
+        printf "\r                    "
+        printf "\r"
+    done
+}
+
 ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
 if [ "$ARCH" != "" ] ; then
     ARGS="$ARGS -a$ARCH"
