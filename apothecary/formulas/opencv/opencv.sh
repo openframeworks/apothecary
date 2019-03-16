@@ -96,6 +96,7 @@ function build() {
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
       -DWITH_LAPACK=OFF \
+      -DWITH_WEBP=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
     echo "CMAKE Successful"
     echo "--------------------"
