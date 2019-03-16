@@ -300,6 +300,7 @@ echo ""
 
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    APOTHECARY_PREFIX=docker exec -it emscripten pwd
     docker cp emscripten:/home/travis/.ccache /home/travis/.ccache
 fi
 
