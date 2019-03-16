@@ -25,11 +25,11 @@ fi
 
 if [ "$VERBOSE" = true ] ; then
     echo "./apothecary $ARGS update $formula_name"
-    cd $APOTHECARY_PATH
+    cd scripts/apothecary
     ./apothecary $ARGS update $formula_name
 else
     echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-    cd $APOTHECARY_PATH
+    cd scripts/apothecary
     ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
 
     apothecaryPID=$!
