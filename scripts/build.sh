@@ -8,13 +8,14 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
     }
     CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+    ROOT=$(docker exec -it emscripten pwd)
 else
     run(){
         @$
     }
+    ROOT=$(cd $(dirname "$0"); pwd -P)/..
 fi
 
-ROOT=$($APOTHECARY_PREFIX cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
 # VERBOSE=true
@@ -232,6 +233,7 @@ if  type "ccache" > /dev/null; then
         docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
     fi
 
+    ccache -z
     run "ccache -z"
     run "ccache -s"
 fi
@@ -307,6 +309,7 @@ echo ""
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+    docker cp emscripten:/root/.emscripten_cache /home/travis/.emscripten_cache
 fi
 
 if  type "ccache" > /dev/null; then
