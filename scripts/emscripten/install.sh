@@ -33,3 +33,4 @@ docker exec -it emscripten apt update
 docker exec -it emscripten apt install -y coreutils libboost-tools-dev
 docker exec -it emscripten apt install -y rsync
 docker exec -it emscripten apt install -y gperf
+docker exec -it emscripten apt install -y ccache
