@@ -66,6 +66,9 @@ function build() {
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_imgcodecs=OFF \
       -DBUILD_opencv_stitching=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
