@@ -321,7 +321,6 @@ echo ""
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
-    docker cp emscripten:/root/.emscripten_cache /home/travis/.emscripten_cache
 fi
 
 if  type "ccache" > /dev/null; then
