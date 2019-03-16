@@ -113,7 +113,7 @@ function build() {
 
     echo "--------------------"
     echo "Joining all libs in one"
-    outputlist="lib/lib*.a"
+    outputlist="$LIB_FOLDER/lib*.a $LIB_FOLDER/opencv4/3rdparty/*.a"
     libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
     echo "Joining all libs in one Successful"
 
@@ -346,7 +346,7 @@ function build() {
     local lib
     rm -rf arm64/lib/pkgconfig
 
-    for lib in arm64/lib/*.a ; do
+    for lib in arm64/lib/*.a; do
       baselib=$(basename $lib)
       local renamedLib=$(echo $baselib | sed 's|lib||')
       if [ ! -e $renamedLib ] ; then
@@ -355,6 +355,19 @@ function build() {
           lipo -c arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
         elif [[ "$TYPE" == "ios" ]]; then
           lipo -c armv7/lib/$baselib arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+        fi
+      fi
+    done
+
+    for lib in arm64/opencv4/3rdparty/*.a; do
+      baselib=$(basename $lib)
+      local renamedLib=$(echo $baselib | sed 's|lib||')
+      if [ ! -e $renamedLib ] ; then
+        echo "renamed $renamedLib";
+        if [[ "${TYPE}" == "tvos" ]] ; then
+          lipo -c arm64/opencv4/3rdparty/$baselib x86_64/opencv4/3rdparty/$baselib -o "$CURRENTPATH/opencv4/3rdparty/$TYPE/$renamedLib"
+        elif [[ "$TYPE" == "ios" ]]; then
+          lipo -c armv7/opencv4/3rdparty/$baselib arm64/opencv4/3rdparty/$baselib x86_64/opencv4/3rdparty/$baselib -o "$CURRENTPATH/opencv4/3rdparty/$TYPE/$renamedLib"
         fi
       fi
     done
@@ -614,6 +627,7 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     mkdir -p $1/lib/$TYPE
     cp -v lib/$TYPE/*.a $1/lib/$TYPE
+    cp -v lib/$TYPE/opencv4/3rdparty/*.a $1/lib/$TYPE
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
       local BUILD_FOLDER="build_android_arm"
