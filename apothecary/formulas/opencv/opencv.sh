@@ -627,7 +627,6 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     mkdir -p $1/lib/$TYPE
     cp -v lib/$TYPE/*.a $1/lib/$TYPE
-    cp -v lib/$TYPE/opencv4/3rdparty/*.a $1/lib/$TYPE
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
       local BUILD_FOLDER="build_android_arm"
