@@ -359,19 +359,6 @@ function build() {
       fi
     done
 
-    for lib in arm64/opencv4/3rdparty/*.a; do
-      baselib=$(basename $lib)
-      local renamedLib=$(echo $baselib | sed 's|lib||')
-      if [ ! -e $renamedLib ] ; then
-        echo "renamed $renamedLib";
-        if [[ "${TYPE}" == "tvos" ]] ; then
-          lipo -c arm64/opencv4/3rdparty/$baselib x86_64/opencv4/3rdparty/$baselib -o "$CURRENTPATH/opencv4/3rdparty/$TYPE/$renamedLib"
-        elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/opencv4/3rdparty/$baselib arm64/opencv4/3rdparty/$baselib x86_64/opencv4/3rdparty/$baselib -o "$CURRENTPATH/opencv4/3rdparty/$TYPE/$renamedLib"
-        fi
-      fi
-    done
-
     cd ../../
     echo "--------------------"
     echo "Copying includes"
