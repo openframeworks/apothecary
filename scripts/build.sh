@@ -3,7 +3,14 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ROOT=$(cd $(dirname "$0"); pwd -P)/..
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    APOTHECARY_PREFIX="docker exec -it emscripten sh -c 'TARGET=\"emscripten\"'"
+    CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+else
+    APOTHECARY_PREFIX=
+fi
+
+ROOT=$($APOTHECARY_PREFIX cd $(dirname "$0"); pwd -P)/..
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
 # VERBOSE=true
@@ -217,12 +224,12 @@ if  type "ccache" > /dev/null; then
     fi
 
     if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-        docker exec -it emscripten pwd
-        docker cp /home/travis/.ccache emscripten:/home/travis/.ccache
+        docker exec -it emscripten sh -c 'echo $HOME'
+        docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
     fi
 
-    ccache -z
-    echo $(ccache -s)
+    $APOTHECARY_PREFIX ccache -z
+    echo $($APOTHECARY_PREFIX ccache -s)
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -236,12 +243,6 @@ if [ "$TARGET" == "linux" ]; then
         export CXX="g++-6 -std=c++11 -fPIE"
         export COMPILER="g++6 -std=c++11 -fPIE"
     fi
-fi
-
-if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    APOTHECARY_PREFIX="docker exec -it emscripten sh -c 'TARGET=\"emscripten\"'"
-else
-    APOTHECARY_PREFIX=
 fi
 
 function build(){
@@ -301,7 +302,7 @@ echo ""
 
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    docker cp emscripten:/home/travis/.ccache /home/travis/.ccache
+    docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
 fi
 
 if  type "ccache" > /dev/null; then
