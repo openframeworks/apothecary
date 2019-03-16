@@ -7,11 +7,31 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
     }
+
+    run_bg(){
+        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@" &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
+    }
     CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/") | sed s/\r//
     ROOT=$(docker exec -it emscripten pwd) | sed s/\r//
 else
     run(){
-        @$
+        $@
+    }
+
+    run_bg(){
+        $@ &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
     }
     ROOT=$(cd $(dirname "$0"); pwd -P)/..
 fi
@@ -266,14 +286,7 @@ function build(){
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
         echo "./apothecary $ARGS update $formula_name > formula.log 2>&1"
-        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name >> formula.log 2>&1" &
-
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        run "tail -n 100 formula.log"
+        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name >> formula.log 2>&1"
     fi
 
 }
@@ -294,8 +307,9 @@ for formula in "${FORMULAS[@]}" ; do
         travis_time_start
     fi
 
-    trap "trapError" ERR
-    run "scripts/build_one.sh"
+    # trap "trapError" ERR
+    # run "scripts/build_one.sh"
+    build()
 
     if [ "$TRAVIS" = true ] ; then
         travis_time_finish
