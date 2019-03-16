@@ -217,7 +217,7 @@ if  type "ccache" > /dev/null; then
     fi
 
     if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-        APOTHECARY_PREFIX=docker exec -it emscripten pwd
+        docker exec -it emscripten pwd
         docker cp /home/travis/.ccache emscripten:/home/travis/.ccache
     fi
 
@@ -239,7 +239,7 @@ if [ "$TARGET" == "linux" ]; then
 fi
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    APOTHECARY_PREFIX=docker exec -it emscripten sh -c 'TARGET="emscripten"'
+    APOTHECARY_PREFIX="docker exec -it emscripten sh -c 'TARGET=\"emscripten\"'"
 else
     APOTHECARY_PREFIX=
 fi
