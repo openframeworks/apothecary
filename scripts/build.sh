@@ -232,8 +232,8 @@ if  type "ccache" > /dev/null; then
         docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
     fi
 
-    run ccache -z
-    run ccache -s
+    run "ccache -z"
+    run "ccache -s"
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -277,8 +277,8 @@ function build(){
 }
 
 # Remove output folder
-run rm -rf $OUTPUT_FOLDER
-run mkdir $OUTPUT_FOLDER
+run "rm -rf $OUTPUT_FOLDER"
+run "mkdir $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
@@ -327,7 +327,7 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$(run ls $OUTPUT_FOLDER)
+LIBS=$(run "ls $OUTPUT_FOLDER")
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
