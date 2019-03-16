@@ -7,8 +7,8 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
     }
-    CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
-    ROOT=$(docker exec -it emscripten pwd)
+    CCACHE_DOCKER=$(docker exec -it emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/") | sed s/\r//
+    ROOT=$(docker exec -it emscripten pwd) | sed s/\r//
 else
     run(){
         @$

@@ -60,7 +60,9 @@ matrix:
 
     # emscripten
     - os: linux
-      cache: ccache
+      cache:
+        - ccache
+        - ~/.emscripten_cache
       sudo: required
       dist: trusty
       env:
