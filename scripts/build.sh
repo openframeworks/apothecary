@@ -297,9 +297,6 @@ run "mkdir $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
-
-# for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-
     formula_name="${formula%.*}"
 
     if [ "$TRAVIS" = true ] ; then
@@ -307,9 +304,7 @@ for formula in "${FORMULAS[@]}" ; do
         travis_time_start
     fi
 
-    # trap "trapError" ERR
-    # run "scripts/build_one.sh"
-    build()
+    build
 
     if [ "$TRAVIS" = true ] ; then
         travis_time_finish
