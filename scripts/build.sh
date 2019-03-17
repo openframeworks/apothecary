@@ -22,12 +22,12 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     ROOT=$(docker exec -i emscripten pwd)
 else
     run(){
-        $@
+        eval "$@"
     }
 
     run_bg(){
-        echo $@
-        eval $@ >> formula.log 2>&1 &
+        echo "$@"
+        eval "$@" >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
