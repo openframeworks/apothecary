@@ -9,7 +9,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     }
 
     run_bg(){
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        docker exec -i emscripten sh -c "PATH=/usr/lib/ccache/emcc;\$PATH TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
