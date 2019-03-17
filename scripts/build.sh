@@ -258,8 +258,11 @@ if  type "ccache" > /dev/null; then
     fi
 
     ccache -z
-    run "ccache -z"
-    run "ccache -s"
+    ccache -s
+    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+        run "ccache -z"
+        run "ccache -s"
+    fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
