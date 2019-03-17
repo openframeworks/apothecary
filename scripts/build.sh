@@ -3,12 +3,31 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+
+# trap any script errors and exit
+# trap "trapError" ERR
+
+trapError() {
+	echo
+	echo " ^ Received error building $formula_name ^"
+	cat formula.log
+	if [ "$formula_name" == "boost" ]; then
+	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
+	fi
+    if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
+        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
+    fi
+	exit 1
+}
+
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
     run_bg(){
+        trap "trapError" ERR
+
         docker exec -i emscripten sh -c "PATH=/usr/lib/ccache/emcc;\$PATH TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
@@ -26,6 +45,8 @@ else
     }
 
     run_bg(){
+        trap "trapError" ERR
+
         echo "$@"
         eval "$@" >> formula.log 2>&1 &
         apothecaryPID=$!
@@ -143,22 +164,6 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
         )
     fi
 fi
-
-# trap any script errors and exit
-# trap "trapError" ERR
-
-trapError() {
-	echo
-	echo " ^ Received error building $formula_name ^"
-	cat formula.log
-	if [ "$formula_name" == "boost" ]; then
-	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
-	fi
-    if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
-        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
-    fi
-	exit 1
-}
 
 isRunning(){
     if [ “$(uname)” == “Linux” ]; then
