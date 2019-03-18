@@ -41,6 +41,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
 
     # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
+    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/..
 else
     run(){
         echo "$@"
@@ -61,6 +62,7 @@ else
     }
 
     ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    LOCAL_ROOT=$ROOT
 fi
 
 APOTHECARY_PATH=$ROOT/apothecary
@@ -374,11 +376,11 @@ else
         tar cjf $TARBALL $LIBS
     fi
 	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
-	cp $ROOT/scripts/ssh_config ~/.ssh/config
-	chmod 600 $ROOT/scripts/id_rsa
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
+	chmod 600 $LOCAL_ROOT/scripts/id_rsa
 	echo Uploading libraries
-	scp -i $ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i $ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm $ROOT/scripts/id_rsa
+	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm $LOCAL_ROOT/scripts/id_rsa
 fi
