@@ -352,7 +352,11 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$(run "ls $OUTPUT_FOLDER | sed s/\n//g")
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    LIBS=$(docker -i ls $OUTPUT_FOLDER)
+else
+    LIBS=$(ls $OUTPUT_FOLDER)
+fi
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
