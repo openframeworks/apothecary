@@ -369,7 +369,7 @@ else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
     if [ "$TARGET" == "emscripten" ]; then
 	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-        docker cp ${OUTPUT_FOLDER}/${TARBALL} .
+        docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
     else
         tar cjf $TARBALL $LIBS
     fi
