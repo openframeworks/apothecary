@@ -3,12 +3,66 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ROOT=$(cd $(dirname "$0"); pwd -P)/..
+
+# trap any script errors and exit
+# trap "trapError" ERR
+
+trapError() {
+	echo
+	echo " ^ Received error building $formula_name ^"
+	cat formula.log
+	if [ "$formula_name" == "boost" ]; then
+	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
+	fi
+    if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
+        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
+    fi
+	exit 1
+}
+
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    run(){
+        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
+    }
+
+    run_bg(){
+        trap "trapError" ERR
+
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
+    }
+
+    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+    ROOT=$(docker exec -i emscripten pwd)
+else
+    run(){
+        eval "$@"
+    }
+
+    run_bg(){
+        trap "trapError" ERR
+
+        echo "$@"
+        eval "$@" >> formula.log 2>&1 &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
+    }
+
+    ROOT=$(cd $(dirname "$0"); pwd -P)/..
+fi
+
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
 # VERBOSE=true
-
-cd $APOTHECARY_PATH
 
 if [ -z $TARGET ] ; then
     echo "Environment variable TARGET not defined. Should be target os"
@@ -19,6 +73,7 @@ echo "Running apothecary from $PWD"
 echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
+echo "Apothecary path: $APOTHECARY_PATH"
 
 FORMULAS=(
     # Dependencies for other formulas (cairo)
@@ -28,34 +83,34 @@ FORMULAS=(
 
     # All formulas
     "assimp"
-    "boost"
-    "FreeImage"
-    "libpng"
-    "libxml2"
-    "freetype"
-    "fmodex"
-    "glew"
-    "glfw"
-    "glm"
-    "json"
-    "libusb"
-    "kiss"
-    "opencv"
-    "openssl"
-    "portaudio"
-    "pugixml"
-    "utf8"
-    "videoInput"
-    "rtAudio"
-    "tess2"
-    "uriparser"
+    # "boost"
+    # "FreeImage"
+    # "libpng"
+    # "libxml2"
+    # "freetype"
+    # "fmodex"
+    # "glew"
+    # "glfw"
+    # "glm"
+    # "json"
+    # "libusb"
+    # "kiss"
+    # "opencv"
+    # "openssl"
+    # "portaudio"
+    # "pugixml"
+    # "utf8"
+    # "videoInput"
+    # "rtAudio"
+    # "tess2"
+    # "uriparser"
 
-    # Formulas with depenencies in the end
-    "curl"
-    "poco"
-    "svgtiny"
-    "uri"
-    "cairo"
+    # # Formulas with depenencies in the end
+    # "curl"
+    # "poco"
+    # "svgtiny"
+    # "uri"
+    # "cairo"
 )
 
 # Seperate in bundles on osx
@@ -109,22 +164,6 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
         )
     fi
 fi
-
-# trap any script errors and exit
-# trap "trapError" ERR
-
-trapError() {
-	echo
-	echo " ^ Received error building $formula_name ^"
-	cat formula.log
-	if [ "$formula_name" == "boost" ]; then
-	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
-	fi
-    if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
-        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
-    fi
-	exit 1
-}
 
 isRunning(){
     if [ “$(uname)” == “Linux” ]; then
@@ -218,8 +257,17 @@ if  type "ccache" > /dev/null; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
 
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     docker exec -it emscripten sh -c 'echo $HOME'
+    #     docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
+    # fi
+
     ccache -z
-    echo $(ccache -s)
+    ccache -s
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     run "ccache -z"
+    #     run "ccache -s"
+    # fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -235,10 +283,6 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
-if [ "$TARGET" == "emscripten" ]; then
-    source ~/emscripten-sdk/emsdk_env.sh
-fi
-
 function build(){
     trap "trapError" ERR
 
@@ -251,30 +295,20 @@ function build(){
 
     if [ "$VERBOSE" = true ] ; then
         echo "./apothecary $ARGS update $formula_name"
-        ./apothecary $ARGS update $formula_name
+        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
         echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-        ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
-
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        tail -n 100 formula.log
+        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
 }
 
 # Remove output folder
-rm -rf $OUTPUT_FOLDER
-mkdir $OUTPUT_FOLDER
+run "rm -rf $OUTPUT_FOLDER"
+run "mkdir $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
-
-# for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-
     formula_name="${formula%.*}"
 
     if [ "$TRAVIS" = true ] ; then
@@ -294,6 +328,11 @@ done
 echo ""
 echo ""
 
+
+# if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+#     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+# fi
+
 if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
@@ -311,16 +350,18 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-cd $OUTPUT_FOLDER
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$(ls)
+LIBS=$(run "ls $OUTPUT_FOLDER")
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
-else
+elif [ "$TRAVIS" = true ]
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-	tar cjf $TARBALL $LIBS
+	run "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
+    if [ "$TARGET" == "emscripten" ]; then
+        docker cp ${OUTPUT_FOLDER}/${TARBALL} .
+    fi
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
 	cp $ROOT/scripts/ssh_config ~/.ssh/config

@@ -60,23 +60,15 @@ matrix:
 
     # emscripten
     - os: linux
+      cache: ccache
       sudo: required
       dist: trusty
       env:
         - TARGET="emscripten"
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libstdc++6
-            - gcc-4.9
-            - realpath
-            - coreutils
-            - libboost-tools-dev
-            - gperf
-            - libboost-dev
-
+      services:
+        - docker
+      before_install:
+        - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
 
 
     # linux arm6
@@ -194,8 +186,10 @@ matrix:
 
   exclude:
     - compiler: gcc
-install: scripts/$TARGET/install.sh
+install:
+  - scripts/$TARGET/install.sh
 script:
-    - scripts/build.sh
+  - scripts/build.sh
+
 git:
     depth: 10

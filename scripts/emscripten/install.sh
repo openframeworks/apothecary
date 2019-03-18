@@ -1,22 +1,10 @@
 #!/bin/bash
-#set -e
-#set -o pipefail
-# trap any script errors and exit
-trap "trapError" ERR
 
-SUDO=
-
-trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
-}
-
-cd $TRAVIS_BUILD_DIR
-
-cp scripts/emscripten/.emscripten ~/
-sed -i "s|%HOME%|${HOME}|g" ~/.emscripten
-cd ~/
-git clone --depth 1 --single-branch --branch master https://github.com/urho3d/emscripten-sdk
-cd emscripten-sdk
-./emsdk activate --build=Release sdk-master-64bit
+docker exec -it emscripten apt update
+docker exec -it emscripten apt install -y coreutils libboost-tools-dev
+docker exec -it emscripten apt install -y rsync
+docker exec -it emscripten apt install -y gperf
+# docker exec -it emscripten apt install -y ccache
+# docker exec -it emscripten ln -s /usr/bin/ccache /usr/lib/ccache/emcc
+# docker exec -i emscripten sh -c "echo \$PATH"
+# TODO: ccache doesn't work cause emmake and similar set CXX to an absolute path
