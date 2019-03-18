@@ -28,7 +28,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run_bg(){
         trap "trapError" ERR
 
-        docker exec -i emscripten sh -c "PATH=/usr/lib/ccache:\$PATH TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -37,7 +37,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
         run "tail -n 100 formula.log"
     }
 
-    CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
 else
     run(){
@@ -257,17 +257,17 @@ if  type "ccache" > /dev/null; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
 
-    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-        docker exec -it emscripten sh -c 'echo $HOME'
-        docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
-    fi
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     docker exec -it emscripten sh -c 'echo $HOME'
+    #     docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
+    # fi
 
     ccache -z
     ccache -s
-    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-        run "ccache -z"
-        run "ccache -s"
-    fi
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     run "ccache -z"
+    #     run "ccache -s"
+    # fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -329,9 +329,9 @@ echo ""
 echo ""
 
 
-if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
-fi
+# if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+#     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+# fi
 
 if  type "ccache" > /dev/null; then
     echo $(ccache -s)
