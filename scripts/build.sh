@@ -355,7 +355,7 @@ fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    LIBS=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
+    LIBS=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls" | sed s/\n//g)
 else
     cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
