@@ -22,12 +22,14 @@ trapError() {
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
+        echo "TARGET=\"emscripten\" $@"
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
     run_bg(){
         trap "trapError" ERR
 
+        echo "TARGET=\"emscripten\" $@"
         docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
@@ -353,7 +355,7 @@ fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    LIBS=$(docker exec -i emscripten ls $OUTPUT_FOLDER)
+    LIBS=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
 else
     cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
