@@ -355,6 +355,7 @@ echo "Compressing libraries from $OUTPUT_FOLDER"
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     LIBS=$(docker -i ls $OUTPUT_FOLDER)
 else
+    cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
 fi
 
@@ -363,11 +364,11 @@ if [ ! -z ${APPVEYOR+x} ]; then
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-	run "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
     if [ "$TARGET" == "emscripten" ]; then
+	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
         docker cp ${OUTPUT_FOLDER}/${TARBALL} .
     else
-        mv ${OUTPUT_FOLDER}/${TARBALL} .
+        tar cjf $TARBALL $LIBS
     fi
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
