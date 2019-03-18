@@ -41,6 +41,7 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     ROOT=$(docker exec -i emscripten pwd)
 else
     run(){
+        echo "$@"
         eval "$@"
     }
 
@@ -356,11 +357,13 @@ LIBS=$(run "ls $OUTPUT_FOLDER")
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
-elif [ "$TRAVIS" = true ]; then
+else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 	run "cd $OUTPUT_FOLDER; tar cjf $TARBALL $LIBS"
     if [ "$TARGET" == "emscripten" ]; then
         docker cp ${OUTPUT_FOLDER}/${TARBALL} .
+    else
+        mv ${OUTPUT_FOLDER}/${TARBALL} .
     fi
 	echo Unencrypting key
 	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
