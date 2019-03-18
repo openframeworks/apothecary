@@ -22,15 +22,15 @@ trapError() {
 
 if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
+        echo "TARGET=\"emscripten\" PATH=\"$DOCKER_HOME/bin:\$PATH\" $@"
+        docker exec -it emscripten sh -c "TARGET=\"emscripten\" PATH=\"$DOCKER_HOME/bin:\$PATH\" $@"
     }
 
     run_bg(){
         trap "trapError" ERR
 
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        echo "TARGET=\"emscripten\" PATH=\"$DOCKER_HOME/bin:\$PATH\" $@"
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" PATH=\"$DOCKER_HOME/bin:\$PATH\" $@"  >> formula.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -39,7 +39,8 @@ if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
         run "tail -n 100 formula.log"
     }
 
-    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+    DOCKER_HOME=$(docker exec -i emscripten echo \$HOME)
+    CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
     LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/..
 else
@@ -262,17 +263,17 @@ if  type "ccache" > /dev/null; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
 
-    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    #     docker exec -it emscripten sh -c 'echo $HOME'
-    #     docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
-    # fi
+    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+        docker exec -it emscripten sh -c 'echo $HOME'
+        docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
+    fi
 
     ccache -z
     ccache -s
-    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    #     run "ccache -z"
-    #     run "ccache -s"
-    # fi
+    if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+        run "ccache -z"
+        run "ccache -s"
+    fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -334,9 +335,9 @@ echo ""
 echo ""
 
 
-# if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-#     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
-# fi
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+fi
 
 if  type "ccache" > /dev/null; then
     echo $(ccache -s)
