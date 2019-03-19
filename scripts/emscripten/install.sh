@@ -7,7 +7,7 @@ docker exec -it emscripten apt install -y gperf
 docker exec -it emscripten apt install -y ccache
 docker exec -i emscripten sh -c "echo \$PATH"
 
-DOCKER_HOME=$(docker exec -i emscripten echo \$HOME)
+DOCKER_HOME=$(docker exec -i emscripten 'echo $HOME')
 docker exec -i emscripten mkdir $DOCKER_HOME/bin
 
 EMMAKE=$(docker exec -i emscripten which emmake)
