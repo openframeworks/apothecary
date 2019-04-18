@@ -329,13 +329,13 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBE
     echo "DETECTED PULL REQUEST"
     COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
     echo "$COMMIT_MESSAGE"
-    FORMULAS_FROM_COMMIT=$(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
+    FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p"))
 fi
 
 echo "FORMULAS_FROM_COMMIT: $FORMULAS_FROM_COMMIT"
 if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FILTERED_FORMULAS=()
-    for formula in ($FORMULAS_FROM_COMMIT); do
+    for formula in $FORMULAS_FROM_COMMIT; do
         echo "checking $formula"
         if array_contains $FORMULAS $formula; then
             FILTERED_FORMULAS+=($formula)
