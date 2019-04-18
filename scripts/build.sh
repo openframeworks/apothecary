@@ -327,10 +327,12 @@ function build(){
 # this will only work on a pull request, not when commiting to master
 if [ "$TRAVIS_PULL_REQUEST" == "true" ]; then
     echo "DETECTED TRAVIS PULL REQUEST"
+    echo "$TRAVIS_COMMIT_MESSAGE"
     FORMULAS_FROM_COMMIT=$(echo $TRAVIS_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
 fi
 
-if [ "${APPVEYOR_REPO_BRANCH}" != "master" ]; then
+echo "$APPVEYOR_REPO_BRANCH"
+if [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
     echo "DETECTED APPVEYOR PULL REQUEST"
     FORMULAS_FROM_COMMIT=$(echo $APPVEYOR_REPO_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
 fi
