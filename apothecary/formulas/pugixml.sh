@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" "msys2" )
 
 # define the version by sha
-VER=1.8
+VER=1.9
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -54,11 +54,11 @@ function build() {
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2015.vcxproj" build "Release"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug"
+					vs-build "pugixml_vs2017.vcxproj" build "Release"
+					vs-build "pugixml_vs2017.vcxproj" build "Debug"
 			else
-					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
+					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
 		fi
 

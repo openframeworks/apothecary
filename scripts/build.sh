@@ -243,6 +243,19 @@ function travis_nanoseconds() {
   $cmd -u $format
 }
 
+array_contains () {
+    local array="$1[@]"
+    local seeking=$2
+    local in=1
+    for element in "${!array}"; do
+        if [[ $element == $seeking ]]; then
+            in=0
+            break
+        fi
+    done
+    return $in
+}
+
 if [ -z ${PARALLEL+x} ]; then
     if [ "$TARGET" == "osx" ]; then
         PARALLEL=4
@@ -309,6 +322,26 @@ function build(){
     fi
 
 }
+
+# If commit contains [build_only:formula1 formula2] only those formulas will be built
+# this will only work on a pull request, not when commiting to master
+if [ "$TRAVIS_PULL_REQUEST" == "true" ]; then
+    FORMULAS_FROM_COMMIT=$(echo $TRAVIS_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
+fi
+
+if [ ! -z ${APPVEYOR+x} ] && [ "${APPVEYOR_REPO_BRANCH}" != "master" ]; then
+    FORMULAS_FROM_COMMIT=$(echo $APPVEYOR_REPO_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
+fi
+
+if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
+    FILTERED_FORMULAS=()
+    for formula in $FORMULAS_FROM_COMMIT; do
+        if array_contains $FORMULAS $formula
+            FILTERED_FORMULAS+=($formula)
+        fi
+    done
+    FORMULAS=$FILTERED_FORMULAS
+fi
 
 # Remove output folder
 run "rm -rf $OUTPUT_FOLDER"
