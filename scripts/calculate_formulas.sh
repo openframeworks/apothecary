@@ -131,7 +131,7 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FORMULAS=(${FILTERED_FORMULAS})
 fi
 
-echo "FORMULAS: ${FORMULAS[@]} "
+echo "FORMULAS: ${FORMULAS[@]}"
 
 if [ -z ${FORMULAS} ]; then
     echo "No formulas to build, failing"
