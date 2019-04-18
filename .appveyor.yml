@@ -134,7 +134,6 @@ clone_depth: 10
 
 init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/calculate_formulas.sh"'
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
@@ -152,6 +151,7 @@ init:
 # - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 install:
+- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/calculate_formulas.sh"'
 - if "%TARGET%"=="vs" choco install -y strawberryperl
 
 build_script:
