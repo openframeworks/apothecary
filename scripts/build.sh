@@ -243,11 +243,17 @@ function travis_nanoseconds() {
   $cmd -u $format
 }
 
-contains_element () {
-  local e match="$1"
-  shift
-  for e; do [[ "$e" == "$match" ]] && return 0; done
-  return 1
+array_contains () {
+    local array="$1[@]"
+    local seeking=$2
+    local in=0
+    for element in "${!array}"; do
+        if [[ $element == $seeking ]]; then
+            in=1
+            break
+        fi
+    done
+    return $in
 }
 
 if [ -z ${PARALLEL+x} ]; then
@@ -332,11 +338,10 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FILTERED_FORMULAS=()
     for formula in $FORMULAS_FROM_COMMIT; do
         echo "checking $formula"
-        contains_element $formula $FORMULAS
-        if [ $? -eq 1 ]; then
-            echo "$formula is in this bundle"
+        if [[ " ${FORMULAS[*]} " == *" $formula "* ]]; then
             FILTERED_FORMULAS+=($formula)
         fi
+        # array_contains $FORMULAS $formula && FILTERED_FORMULAS+=($formula)
     done
     echo "FILTERED_FORMULAS: $FILTERED_FORMULAS"
     FORMULAS=(${FILTERED_FORMULAS})
