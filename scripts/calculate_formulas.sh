@@ -114,8 +114,8 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBE
     echo "DETECTED PULL REQUEST"
     COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
     echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
-    FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\([^\]]*\)\]/\1/p"))
-    PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\([^\]]*\)\]/\1/p"))
+    FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"
+    PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"
 fi
 
 echo "FORMULAS_FROM_COMMIT: $FORMULAS_FROM_COMMIT"
