@@ -346,7 +346,7 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FORMULAS=${FORMULAS[@]}
 fi
 
-echo "FORMULAS: ${FORMULAS[@]}"
+echo "FORMULAS: ${FORMULAS[@]} "
 
 # Remove output folder
 run "rm -rf $OUTPUT_FOLDER"
