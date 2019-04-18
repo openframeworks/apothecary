@@ -84,6 +84,8 @@ installJunest(){
 	git clone git://github.com/fsquillace/junest ~/.local/share/junest
 	export PATH=~/.local/share/junest/bin:$PATH
 	junest -u << EOF
+        pacman-key --init --config archlinux/etc/pacman.conf
+        echo "SigLevel = Optional TrustAll" >> archlinux/etc/pacman.conf
 		pacman -Syy --noconfirm
 		pacman -S --noconfirm git flex grep gcc pkg-config make wget
 EOF
