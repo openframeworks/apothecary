@@ -243,17 +243,11 @@ function travis_nanoseconds() {
   $cmd -u $format
 }
 
-array_contains () {
-    local array="$1[@]"
-    local seeking=$2
-    local in=0
-    for element in "${!array}"; do
-        if [[ $element == $seeking ]]; then
-            in=1
-            break
-        fi
-    done
-    return $in
+contains_element () {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
 }
 
 if [ -z ${PARALLEL+x} ]; then
@@ -338,7 +332,8 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FILTERED_FORMULAS=()
     for formula in $FORMULAS_FROM_COMMIT; do
         echo "checking $formula"
-        if array_contains $FORMULAS $formula; then
+        contains_element $formula $FORMULAS
+        if [ $? -eq 1 ]; then
             echo "$formula is in this bundle"
             FILTERED_FORMULAS+=($formula)
         fi
@@ -348,6 +343,11 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
 fi
 
 echo "FORMULAS: ${FORMULAS[@]} "
+
+if [ -z "$FORMULAS" ]; then
+    echo "No formulas to build"
+    exit 0
+fi
 
 # Remove output folder
 run "rm -rf $OUTPUT_FOLDER"

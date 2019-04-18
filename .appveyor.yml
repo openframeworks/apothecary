@@ -129,7 +129,7 @@ environment:
     BUNDLE: 4
 
 configuration: Debug
-shallow_clone: true
+shallow_clone: false
 clone_depth: 10
 
 init:
