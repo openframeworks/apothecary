@@ -221,7 +221,7 @@ function build(){
 
 }
 
-source $APOTHECARY_PATH/../scripts/calculate_formulas.sh
+source $LOCAL_ROOT/scripts/calculate_formulas.sh
 
 if [ -z "$FORMULAS" ]; then
     echo "No formulas to build"
