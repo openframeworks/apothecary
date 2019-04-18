@@ -343,7 +343,7 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
         fi
     done
     echo "FILTERED_FORMULAS: $FILTERED_FORMULAS"
-    FORMULAS=${FILTERED_FORMULAS[@]}
+    FORMULAS=(${FILTERED_FORMULAS})
 fi
 
 echo "FORMULAS: ${FORMULAS[@]} "
