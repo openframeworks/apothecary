@@ -325,17 +325,11 @@ function build(){
 
 # If commit contains [build_only:formula1 formula2] only those formulas will be built
 # this will only work on a pull request, not when commiting to master
-if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-    echo "DETECTED TRAVIS PULL REQUEST"
-    echo "$TRAVIS_COMMIT_MESSAGE"
-    FORMULAS_FROM_COMMIT=$(echo $TRAVIS_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
-fi
-
-echo "$APPVEYOR_REPO_BRANCH"
-if [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
-    echo "DETECTED APPVEYOR PULL REQUEST"
-    echo "$APPVEYOR_REPO_COMMIT_MESSAGE"
-    FORMULAS_FROM_COMMIT=$(echo $APPVEYOR_REPO_COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
+    echo "DETECTED PULL REQUEST"
+    COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
+    echo "$COMMIT_MESSAGE"
+    FORMULAS_FROM_COMMIT=$(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p")
 fi
 
 echo "FORMULAS_FROM_COMMIT: $FORMULAS_FROM_COMMIT"
