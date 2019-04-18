@@ -110,10 +110,10 @@ array_contains () {
 
 # If commit contains [build_only:formula1 formula2] only those formulas will be built
 # this will only work on a pull request, not when commiting to master
-if [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openFrameworks/apothecary" ]]; then
+if [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
     echo ${APPVEYOR_REPO_NAME}
 fi
-if [[ ! -z "${TRAVIS_BRANCH+x}" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_PULL_REQUEST" != "false" ]] || [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openFrameworks/apothecary" ]]; then
+if [[ ! -z "${TRAVIS_BRANCH+x}" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_PULL_REQUEST" != "false" ]] || [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
     echo "DETECTED PULL REQUEST OR NOT MASTER BRANCH, CHECKING FILTERS"
     COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
     echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
