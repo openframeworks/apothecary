@@ -336,7 +336,7 @@ fi
 if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     FILTERED_FORMULAS=()
     for formula in $FORMULAS_FROM_COMMIT; do
-        if array_contains $FORMULAS $formula
+        if array_contains $FORMULAS $formula; then
             FILTERED_FORMULAS+=($formula)
         fi
     done
