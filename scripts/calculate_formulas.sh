@@ -134,7 +134,7 @@ fi
 echo "FORMULAS: ${FORMULAS[@]}"
 
 if [ -z ${FORMULAS} ]; then
-    echo "No formulas to build, failing"
+    echo "No formulas to build, failing "
     exit 1
 fi
 
