@@ -246,10 +246,10 @@ function travis_nanoseconds() {
 array_contains () {
     local array="$1[@]"
     local seeking=$2
-    local in=1
+    local in=0
     for element in "${!array}"; do
         if [[ $element == $seeking ]]; then
-            in=0
+            in=1
             break
         fi
     done
@@ -338,10 +338,11 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
     for formula in $FORMULAS_FROM_COMMIT; do
         echo "checking $formula"
         if array_contains $FORMULAS $formula; then
+            echo "$formula is in this bundle"
             FILTERED_FORMULAS+=($formula)
         fi
     done
-    echo "FILTERED_FORMULAS $FILTERED_FORMULAS"
+    echo "FILTERED_FORMULAS: $FILTERED_FORMULAS"
     FORMULAS=$FILTERED_FORMULAS
 fi
 
