@@ -343,10 +343,10 @@ if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then
         fi
     done
     echo "FILTERED_FORMULAS: $FILTERED_FORMULAS"
-    FORMULAS=$FILTERED_FORMULAS
+    FORMULAS=${FORMULAS[@]}
 fi
 
-echo "FORMULAS: $FORMULAS"
+echo "FORMULAS: ${FORMULAS[@]}"
 
 # Remove output folder
 run "rm -rf $OUTPUT_FOLDER"
