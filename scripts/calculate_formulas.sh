@@ -115,6 +115,7 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ ! -z "$APPVEYOR_PULL_REQUEST_NUMBE
     COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
     echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
     FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\(.*\)\]/\1/p"))
+    PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\(.*\)\]/\1/p"))
 fi
 
 echo "FORMULAS_FROM_COMMIT: $FORMULAS_FROM_COMMIT"
@@ -136,3 +137,15 @@ if [ -z ${FORMULAS} ]; then
     echo "No formulas to build, failing"
     exit 1
 fi
+
+echo "PLATFORMS_FROM_COMMIT: $PLATFORMS_FROM_COMMIT"
+if [ ! -z "$PLATFORMS_FROM_COMMIT" ]; then
+    if [[ " ${PLATFORMS_FROM_COMMIT[*]} " == *" $TARGET "* ]]; then
+        echo "Platform $TARGET allowed in commit message"
+        exit 0
+    else
+        echo "Platform $TARGET NOT allowed in commit message"
+        exit 1
+    fi
+fi
+

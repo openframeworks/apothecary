@@ -85,10 +85,11 @@ installJunest(){
 	export PATH=~/.local/share/junest/bin:$PATH
 	junest -u << EOF
         echo updating keys
-        pacman-key --init
-        echo "SigLevel = Optional TrustAll" >> /usr/local/etc/pacman.conf
+        pacman -S gnupg --noconfirm
+        pacman-key --populate archlinux
+        pacman-key --refresh-keys
         echo updating packages
-		pacman -Syy --noconfirm
+		pacman -Syyu --noconfirm
 		pacman -S --noconfirm git flex grep gcc pkg-config make wget
 EOF
 }
