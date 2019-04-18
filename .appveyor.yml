@@ -129,7 +129,7 @@ environment:
     BUNDLE: 4
 
 configuration: Debug
-shallow_clone: true
+shallow_clone: false
 clone_depth: 10
 
 init:
@@ -151,6 +151,7 @@ init:
 # - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 install:
+- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/calculate_formulas.sh"'
 - if "%TARGET%"=="vs" choco install -y strawberryperl
 
 build_script:
