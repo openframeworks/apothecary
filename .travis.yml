@@ -187,6 +187,7 @@ matrix:
   exclude:
     - compiler: gcc
 install:
+  - scripts/calculate_formulas.sh
   - scripts/$TARGET/install.sh
 script:
   - scripts/build.sh

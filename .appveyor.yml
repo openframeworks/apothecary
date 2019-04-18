@@ -134,6 +134,7 @@ clone_depth: 10
 
 init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/calculate_formulas.sh"'
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
