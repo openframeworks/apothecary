@@ -1260,7 +1260,7 @@ fi
 
 CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
-    if [ "$(uname -m)" != "armv6" -a "$(uname -m)" != "armv7" ]; then
+    if [[ $(uname -m) != armv* ]]; then
         CROSSCOMPILING=1
         if [ -z $TOOLCHAIN_PREFIX ]; then
             export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
