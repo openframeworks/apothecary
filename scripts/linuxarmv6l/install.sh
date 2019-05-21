@@ -63,23 +63,26 @@ relativeSoftLinks(){
     done
 }
 
+if [[ $(uname -m) != armv* ]]; then
 
-ROOT=$( cd "$(dirname "$0")" ; pwd -P )
-echo $ROOT
-cd $ROOT
-installPackages
-createRaspbianImg
-downloadToolchain
-downloadFirmware
+	ROOT=$( cd "$(dirname "$0")" ; pwd -P )
+	echo $ROOT
+	cd $ROOT
+	installPackages
+	createRaspbianImg
+	downloadToolchain
+	downloadFirmware
 
-cd $ROOT/raspbian/usr/lib
-relativeSoftLinks
-cd $ROOT/raspbian/usr/lib/arm-linux-gnueabihf
-relativeSoftLinks
-cd $ROOT/raspbian/usr/lib/gcc/arm-linux-gnueabihf/4.9
+	cd $ROOT/raspbian/usr/lib
+	relativeSoftLinks
+	cd $ROOT/raspbian/usr/lib/arm-linux-gnueabihf
+	relativeSoftLinks
+	cd $ROOT/raspbian/usr/lib/gcc/arm-linux-gnueabihf/4.9
 
-cd $ROOT/rpi_toolchain/arm-linux-gnueabihf/lib
-#sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" libc.so
-for f in *.so; do
-    sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" $f
-done
+	cd $ROOT/rpi_toolchain/arm-linux-gnueabihf/lib
+	#sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" libc.so
+	for f in *.so; do
+	    sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" $f
+	done
+	
+fi
