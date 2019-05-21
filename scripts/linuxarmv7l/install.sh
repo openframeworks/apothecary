@@ -84,7 +84,12 @@ installJunest(){
 	git clone git://github.com/fsquillace/junest ~/.local/share/junest
 	export PATH=~/.local/share/junest/bin:$PATH
 	junest -u << EOF
-		pacman -Syy --noconfirm
+        echo updating keys
+        pacman -S gnupg --noconfirm
+        pacman-key --populate archlinux
+        pacman-key --refresh-keys
+        echo updating packages
+		pacman -Syyu --noconfirm
 		pacman -S --noconfirm git flex grep gcc pkg-config make wget
 EOF
 }

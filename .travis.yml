@@ -186,6 +186,8 @@ matrix:
 
   exclude:
     - compiler: gcc
+before_install:
+  - scripts/calculate_formulas.sh
 install:
   - scripts/$TARGET/install.sh
 script:
