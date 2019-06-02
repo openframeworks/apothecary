@@ -48,7 +48,7 @@ BUILD_DEPENDENCIES=1
 HOST_OS= # compile os ("osx", "windows", "linux")
 TYPE= # library build type ("osx", "ios", "vs", etc)
 ARCH=32 # library build arch, 32 or 64 bit (not used for some build types)
-
+ARCH_FLAG=i386
 # full path to this script's dir
 APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -88,12 +88,13 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     OSX_SDK_VER=10.11
     OSX_MIN_SDK_VER=10.9
 
-    # used when building for ios, the sdks you have installed are found in:
-    # $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
-    IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
-    IOS_SDK_VER=9.1
-    IOS_MIN_SDK_VER=7.0
-
+	if [ "$TYPE" == "ios" ]; then
+		# used when building for ios, the sdks you have installed are found in:
+		# $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
+		IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
+		IOS_SDK_VER=9.1
+		IOS_MIN_SDK_VER=7.0
+	fi
 
 fi
 
@@ -1190,7 +1191,9 @@ echoVerbose "Valid build types: ${VALID_TYPES[*]}"
 if [ "$HOST_OS" == "osx" ] ; then
 	XCODE_DEV_ROOT=$($XS) # Sets to path from Xcode Path
 	OSX_SDK_VER=$($OSX_LATEST_SDK) # sets to latest OSX SDK
-	IOS_SDK_VER=$($IOS_LATEST_SDK) # sets to latest iOS SDK
+	if [ "$TYPE" == "ios" ]; then
+		IOS_SDK_VER=$($IOS_LATEST_SDK) # sets to latest iOS SDK
+	fi
 fi
 
 # check if we have a valid build type
