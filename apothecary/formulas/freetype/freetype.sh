@@ -346,7 +346,7 @@ function build() {
 	    source ../../android_configure.sh $ABI
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
-		elif [ "$ARCH" == "arm64-v8a" ]; then
+		elif [ "$ARCH" == "arm64" ]; then
             HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
