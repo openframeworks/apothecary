@@ -32,7 +32,10 @@ export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ar
 export RANLIB=${GCC_TOOLCHAIN_PATH}/bin/${ANDROID_PREFIX}-ranlib
 export CFLAGS="--sysroot=${SYSROOT} -fno-short-enums -isystem $SYSROOT/usr/include/"
-#-nostdlib
+
+if [ "$ABI" != "arm64-v8a" ]; then
+    export CFLAGS="$CFLAGS -nostdlib"
+fi
 
 export CFLAGS="$CFLAGS  -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include  -I${NDK_ROOT}/sources/android/cpufeatures -I${NDK_ROOT}/sources/android/support/include"
 export LDFLAGS="-gcc-toolchain ${GCC_TOOLCHAIN_PATH} --sysroot=${SYSROOT} -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
