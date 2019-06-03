@@ -239,7 +239,7 @@ function build() {
         if [ "$ARCH" == "armv7" ]; then
             export _ANDROID_EABI=arm-linux-androideabi-4.9
 		    export _ANDROID_ARCH=arch-arm
-		elif [ "$ARCH" == "arm64-v8a" ]; then
+		elif [ "$ARCH" == "arm64" ]; then
 			export _ANDROID_EABI=aarch64-linux-android-4.9
 			export _ANDROID_ARCH=arch-arm64
 		elif [ "$ARCH" == "x86" ]; then
@@ -251,7 +251,7 @@ function build() {
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
 
-		if [ "$ARCH" == "arm64-v8a" ]; then
+		if [ "$ARCH" == "arm64" ]; then
 			./Configure --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared android64-aarch64
 		else
 			./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared

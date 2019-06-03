@@ -198,20 +198,17 @@ fi
 export MACHINE=armv7
 export RELEASE=2.6.37
 export SYSTEM=android
-export ARCH=arm
 export CROSS_COMPILE="arm-linux-androideabi-"
 
 if [ "$_ANDROID_ARCH" == "arch-x86" ]; then
 	export MACHINE=i686
 	export RELEASE=2.6.37
 	export SYSTEM=android
-	export ARCH=x86
 	export CROSS_COMPILE="i686-linux-android-"
 elif [ "$_ANDROID_ARCH" == "arch-arm64" ] ; then
 	export MACHINE=arm64
 	export RELEASE=2.6.37
 	export SYSTEM=android
-	export ARCH=arm64-v8a
 	export CROSS_COMPILE="aarch64-linux-android-"
 fi
 
