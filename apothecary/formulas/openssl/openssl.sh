@@ -227,7 +227,8 @@ function build() {
 		unset CC
 		unset AR
 		rm -f Setenv-android.sh
-		wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
+		cp ../../formulas/openssl/Setenv-android.sh ./
+		#wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
@@ -238,6 +239,9 @@ function build() {
         if [ "$ARCH" == "armv7" ]; then
             export _ANDROID_EABI=arm-linux-androideabi-4.9
 		    export _ANDROID_ARCH=arch-arm
+		elif [ "$ARCH" == "arm64-v8a" ]; then
+			export _ANDROID_EABI=aarch64-linux-android-4.9
+			export _ANDROID_ARCH=arch-arm64
 		elif [ "$ARCH" == "x86" ]; then
             export _ANDROID_EABI=x86-4.9
 		    export _ANDROID_ARCH=arch-x86
@@ -246,8 +250,13 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
-        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-        make clean
+
+		if [ "$ARCH" == "arm64-v8a" ]; then
+			./Configure --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared android64-aarch64
+		else
+			./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+		fi
+		make clean
         make depend -j${PARALLEL_MAKE}
         make build_libs -j${PARALLEL_MAKE}
         mkdir -p $BUILD_TO_DIR/lib

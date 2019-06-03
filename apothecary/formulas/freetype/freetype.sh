@@ -18,7 +18,8 @@ GIT_TAG=VER-2-7
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --quiet --no-check-certificate https://sourceforge.net/projects/freetype/files/freetype2/$VER/freetype-$VER.tar.gz/download -O freetype-$VER.tar.gz
+	wget --quiet --no-check-certificate https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
+	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
 	rm freetype*.tar.gz
@@ -345,6 +346,8 @@ function build() {
 	    source ../../android_configure.sh $ABI
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
+		elif [ "$ARCH" == "arm64-v8a" ]; then
+            HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
         fi

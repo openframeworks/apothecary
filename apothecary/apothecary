@@ -100,7 +100,7 @@ fi
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
-ANDROID_API=19
+ANDROID_API=23
 ANDROID_PLATFORM=android-${ANDROID_API}
 
 ################################################################################
@@ -448,23 +448,31 @@ function installAndroidToolchain() {
 	    exit 1
 	fi
 
-    if [ "$ARCH" == "armv7" ]; then
-	    if [ ! -d "$BUILD_DIR/Toolchains/Android/armv7" ]; then
-            echo $PWD
-		    ./make_standalone_toolchain.py \
-			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
-			    --arch=arm \
-                --api $ANDROID_API \
-			    --stl=libc++
-	    fi
-	elif [ "$ARCH" == "x86" ]; then
-	    if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
-		    ./make_standalone_toolchain.py \
-			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
-			    --arch=x86 \
+	if [ "$ARCH" == "armv7" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/armv7" ]; then
+			echo $PWD
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=arm \
 				--api $ANDROID_API \
-			    --stl=libc++
-	    fi
+				--stl=libc++
+		fi
+	elif [ "$ARCH" == "arm64-v8a" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/arm64-v8a" ]; then
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=arm64 \
+				--api $ANDROID_API \
+				--stl=libc++
+		fi
+	elif [ "$ARCH" == "x86" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=x86 \
+				--api $ANDROID_API \
+				--stl=libc++
+		fi
 	fi
 
 	cd $WD
@@ -1203,7 +1211,7 @@ fi
 echoVerbose "Build type: $TYPE"
 
 # check if we have a valid arch
-if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 ] ; then
+if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != arm64 -a $ARCH != x86 ] ; then
 	echoError " Invalid architecture: $ARCH"
 	exit 1
 fi
@@ -1251,10 +1259,12 @@ if [[ "$TYPE" == "android" ]] ; then
 		exit 1
 	fi
 	if [ "$ARCH" == "armv7" ]; then
-        echo setting arch to armv7
-	    ABI=armeabi-v7a
+		echo setting arch to armv7
+		ABI=armeabi-v7a
+	elif [ "$ARCH" == "arm64" ]; then
+		ABI=arm64-v8a
 	elif [ "$ARCH" == "x86" ]; then
-	    ABI=x86
+		ABI=x86
 	fi
 fi
 

@@ -396,6 +396,9 @@ function build() {
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
+    elif [ "$ABI" = "arm64-v8a" ]; then
+      local BUILD_FOLDER="build_android_arm64"
+      local BUILD_SCRIPT="cmake_android_arm64.sh"
     elif [ "$ABI" = "x86" ]; then
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
@@ -631,6 +634,8 @@ function copy() {
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
       local BUILD_FOLDER="build_android_arm"
+    elif [ $ABI = arm64-v8a ]; then
+      local BUILD_FOLDER="build_android_arm64"
     elif [ $ABI = x86 ]; then
       local BUILD_FOLDER="build_android_x86"
     fi

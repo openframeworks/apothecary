@@ -52,6 +52,8 @@ function build() {
         source ../../android_configure.sh $ABI
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
+        elif [ "$ARCH" == "arm64-v8a" ]; then
+            export HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             export HOST=x86-linux-android
         fi
