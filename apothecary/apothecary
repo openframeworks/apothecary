@@ -457,8 +457,8 @@ function installAndroidToolchain() {
 				--api $ANDROID_API \
 				--stl=libc++
 		fi
-	elif [ "$ARCH" == "arm64-v8a" ]; then
-		if [ ! -d "$BUILD_DIR/Toolchains/Android/arm64-v8a" ]; then
+	elif [ "$ARCH" == "arm64" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/arm64" ]; then
 			./make_standalone_toolchain.py \
 				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
 				--arch=arm64 \

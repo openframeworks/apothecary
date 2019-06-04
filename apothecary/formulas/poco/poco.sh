@@ -397,7 +397,8 @@ function build() {
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-    	export CXX=clang++
+		source ../../android_configure.sh $ABI
+		#export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
 					--library-path=$OPENSSL_LIBS/$ABI \
