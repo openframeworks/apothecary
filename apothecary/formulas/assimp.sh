@@ -165,6 +165,24 @@ function build() {
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DANDROID_FORCE_ARM_BUILD=TRUE
                 -DCMAKE_INSTALL_PREFIX=install"
+
+        elif [ "$ABI" == "arm64-v8a" ]; then
+            export HOST=aarch64-linux-android
+            local buildOpts="--build build/$TYPE
+                -DBUILD_SHARED_LIBS=OFF
+                -DASSIMP_BUILD_STATIC_LIB=1
+                -DASSIMP_BUILD_TESTS=0
+                -DASSIMP_BUILD_SAMPLES=0
+                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
+                -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DANDROID_NDK=$NDK_ROOT
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+                -DCMAKE_BUILD_TYPE=Release
+                -DANDROID_ABI=$ABI
+                -DANDROID_STL=c++_static
+                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+                -DANDROID_FORCE_ARM_BUILD=TRUE
+                -DCMAKE_INSTALL_PREFIX=install"
         elif [ "$ABI" == "x86" ]; then
             export HOST=x86-linux-android
             local buildOpts="--build build/$TYPE
@@ -186,7 +204,7 @@ function build() {
 
             # -DASSIMP_BUILD_STL_IMPORTER=0
             # -DASSIMP_BUILD_BLEND_IMPORTER=0
-
+        rm -rf build_android
         mkdir -p build_android
         cd build_android
         cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG ${CFLAGS}" -DCMAKE_LD_FLAGS="$LDFLAGS" ..

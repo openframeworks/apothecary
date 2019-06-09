@@ -44,6 +44,18 @@ matrix:
         # directories:
         # - ~/android-ndk-r15c
         # - apothecary/build/Toolchains/armv7
+    - os: linux
+      cache: ccache
+      sudo: required
+      dist: trusty
+      env:
+        - TARGET="android"
+        - ARCH="arm64"
+
+      # cache:
+        # directories:
+        # - ~/android-ndk-r15c
+        # - apothecary/build/Toolchains/arm64
 
     - os: linux
       cache: ccache
