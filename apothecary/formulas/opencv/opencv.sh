@@ -25,7 +25,7 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
+  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz 
   tar -xf opencv-$VER.tar.gz
   mv opencv-$VER $1
   rm opencv*.tar.gz
