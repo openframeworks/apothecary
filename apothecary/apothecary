@@ -100,7 +100,7 @@ fi
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
-ANDROID_API=23
+ANDROID_API=21
 ANDROID_PLATFORM=android-${ANDROID_API}
 
 ################################################################################
