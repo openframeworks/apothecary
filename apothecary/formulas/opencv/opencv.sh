@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
-VER=4.0.1
+VER=4.1.0
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
