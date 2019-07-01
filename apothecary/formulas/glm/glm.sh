@@ -39,7 +39,7 @@ function copy() {
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	cp -v copying.txt $1/license/
+	cp -v readme.md $1/license/
 }
 
 # executed inside the lib src dir
