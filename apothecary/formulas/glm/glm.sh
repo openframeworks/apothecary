@@ -16,7 +16,7 @@ GIT_TAG=0.9.9.5
 function download() {
 	# wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     # unzip glm-$VER.zip
-	git clone --branch $GIT_TAG --depth=1 $GIT_URL
+	git clone --branch $GIT_TAG --depth=1 $GIT_URL 
 }
 
 # prepare the build environment, executed inside the lib src dir
