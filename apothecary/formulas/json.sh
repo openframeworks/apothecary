@@ -6,7 +6,7 @@
 #
 
 # define the version
-VER=2.1.1
+VER=3.6.1
 
 # tools for git use
 GIT_URL=

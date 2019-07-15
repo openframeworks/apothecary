@@ -18,7 +18,8 @@ GIT_TAG=VER-2-7
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --quiet --no-check-certificate https://sourceforge.net/projects/freetype/files/freetype2/$VER/freetype-$VER.tar.gz/download -O freetype-$VER.tar.gz
+	wget --quiet --no-check-certificate https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
+	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
 	rm freetype*.tar.gz
@@ -89,7 +90,7 @@ function build() {
 		unset TEMP
 		unset temp
 		cd builds/windows/vc2010 #this upgrades without issue to vs2015
-		
+
 		vs-upgrade freetype.sln
 
 		if [ "$ARCH" ==  "32" ] ; then
@@ -122,7 +123,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="arm64 x86_64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -302,7 +303,6 @@ function build() {
 			# libfreetype-armv7s.a  \
 			lipo -create libfreetype-armv7.a \
 						libfreetype-arm64.a \
-						libfreetype-i386.a \
 						libfreetype-x86_64.a \
 						-output libfreetype.a \
 				 	>> "${LOG}" 2>&1
@@ -346,6 +346,8 @@ function build() {
 	    source ../../android_configure.sh $ABI
 	    if [ "$ARCH" == "armv7" ]; then
             HOST=armv7a-linux-android
+		elif [ "$ARCH" == "arm64" ]; then
+            HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             HOST=x86-linux-android
         fi

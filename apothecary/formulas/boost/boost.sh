@@ -8,7 +8,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
-VERSION=1.64.0
+VERSION=1.65.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
 TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 
@@ -90,7 +90,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		SDKVERSION=""
@@ -153,7 +153,7 @@ function build() {
 			local CROSS_SDK_SIM="iPhoneSimulator${SDKVERSION}.sdk"
 			local TARGET_OS="iphone"
 			local ARCH="-arch armv7 -arch arm64"
-			local ARCHSIM="-arch i386 -arch x86_64"
+			local ARCHSIM="-arch x86_64"
 			local TARGET_TYPE="iphone"
 			local TARGET_TYPE_SIM="iphonesim"
 			MIN_TYPE=-miphoneos-version-min=
@@ -182,7 +182,7 @@ EOF
     	./b2 -j${PARALLEL_MAKE} --toolset=darwin-${IPHONE_SDKVERSION}~$TARGET_TYPE_SIM cxxflags="-stdlib=libc++ $MIN_TYPE$MIN_IOS_VERSION $BITCODE" linkflags="-stdlib=libc++" --build-dir=iphonesim-build variant=release -sBOOST_BUILD_USER_CONFIG=$BOOST_SRC/tools/build/example/user-config.jam --stagedir=iphonesim-build/stage architecture=x86 target-os=iphone link=static stage
 		mkdir -p $OUTPUT_DIR_LIB
 		mkdir -p $OUTPUT_DIR_SRC
-		mkdir -p $IOSBUILDDIR/armv7/ $IOSBUILDDIR/arm64/ $IOSBUILDDIR/i386/ $IOSBUILDDIR/x86_64/
+		mkdir -p $IOSBUILDDIR/armv7/ $IOSBUILDDIR/arm64/ $IOSBUILDDIR/x86_64/
 		ALL_LIBS=""
 		echo Splitting all existing fat binaries...
 	    for NAME in $BOOST_LIBS; do
@@ -190,7 +190,6 @@ EOF
 	        echo "Splitting '$NAME' to $IOSBUILDDIR/*/$NAME.a"
 	        if [[ "$TYPE" == "ios" ]]; then
 	        	$ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin armv7 -o $IOSBUILDDIR/armv7/$NAME.a
-	        	$ARM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" -thin i386 -o $IOSBUILDDIR/i386/$NAME.a
 	        fi
 	        $ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin arm64 -o $IOSBUILDDIR/arm64/$NAME.a
 			$ARM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" -thin x86_64 -o $IOSBUILDDIR/x86_64/$NAME.a
@@ -201,12 +200,10 @@ EOF
 	    for NAME in $ALL_LIBS; do
 	    	mkdir -p $IOSBUILDDIR/armv7/$NAME-obj
 			mkdir -p $IOSBUILDDIR/arm64/$NAME-obj
-	    	mkdir -p $IOSBUILDDIR/i386/$NAME-obj
 			mkdir -p $IOSBUILDDIR/x86_64/$NAME-obj
 	        echo Decomposing $NAME ...
 	        if [[ "$TYPE" == "ios" ]]; then
 	        	(cd $IOSBUILDDIR/armv7/$NAME-obj;  ar -x ../$NAME.a; );
-	        	(cd $IOSBUILDDIR/i386/$NAME-obj;   ar -x ../$NAME.a; );
 	        fi
 			(cd $IOSBUILDDIR/arm64/$NAME-obj;  ar -x ../$NAME.a; );
 			(cd $IOSBUILDDIR/x86_64/$NAME-obj; ar -x ../$NAME.a; );
@@ -216,7 +213,6 @@ EOF
 		# remove broken symbol file (empty symbol)
 		if [[  "$TYPE" == "ios" ]]; then
 			rm $IOSBUILDDIR/armv7/filesystem-obj/windows_file_codecvt.o;
-			rm $IOSBUILDDIR/i386/filesystem-obj/windows_file_codecvt.o;
 		fi
 		rm $IOSBUILDDIR/arm64/filesystem-obj/windows_file_codecvt.o;
 		rm $IOSBUILDDIR/x86_64/filesystem-obj/windows_file_codecvt.o;
@@ -224,7 +220,6 @@ EOF
 	    for NAME in $ALL_LIBS; do
 	    	echo ar crus $NAME ...
 	    	if [[ "$TYPE" == "ios" ]]; then
-	    		(cd $IOSBUILDDIR/i386;    $SIM_DEV_CMD ar crus re-$NAME.a $NAME-obj/*.o;  )
 	    		(cd $IOSBUILDDIR/armv7;   $ARM_DEV_CMD ar crus re-$NAME.a $NAME-obj/*.o; )
 	    	fi
 		    (cd $IOSBUILDDIR/arm64;   $ARM_DEV_CMD ar crus re-$NAME.a $NAME-obj/*.o;  )
@@ -241,10 +236,9 @@ EOF
 		            $IOSBUILDDIR/x86_64/re-$NAME.a \
 		            -output $OUTPUT_DIR_LIB/boost_$NAME.a
 	    	elif [[ "$TYPE" == "ios" ]]; then
-	    		echo "Lipo -c for $NAME for all iOS Architectures (arm64, armv7, i386, x86_64)"
+	    		echo "Lipo -c for $NAME for all iOS Architectures (arm64, armv7, x86_64)"
 		    	lipo -c $IOSBUILDDIR/armv7/re-$NAME.a \
 		            $IOSBUILDDIR/arm64/re-$NAME.a \
-		            $IOSBUILDDIR/i386/re-$NAME.a \
 		            $IOSBUILDDIR/x86_64/re-$NAME.a \
 		            -output $OUTPUT_DIR_LIB/boost_$NAME.a
 	        fi
