@@ -52,17 +52,6 @@ function build() {
 		sed -i s/-MD/-MT/ Makefile.win32.common
 		cd pixman
 		with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
-	else
-		./configure LDFLAGS="-arch i386 -arch x86_64" \
-					CFLAGS="-O3 -arch i386 -arch x86_64" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-dependency-tracking \
-					--disable-gtk \
-					--disable-shared
-		# only build & install lib, ignore demos/tests
-		cd pixman
-		make clean
-		make -j${PARALLEL_MAKE}
 	fi
 }
 
@@ -76,7 +65,7 @@ function copy() {
 		fi
 		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
 		cp -v pixman/release/pixman-1.lib $1/../cairo/lib/$TYPE/$PLATFORM/
-	else
+	else # osx
 		# lib
 		cd pixman
 		make install

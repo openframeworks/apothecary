@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" "msys2" )
 
 # define the version by sha
-VER=1.8
+VER=1.9
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -46,11 +46,11 @@ function build() {
 
 		if [[ $VS_VER -gt 14 ]]; then
 			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2015.vcxproj" build "Release|Win32"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug|Win32"
+					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
+					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
 			else
-					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
+					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
@@ -93,7 +93,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 		for IOS_ARCH in ${IOS_ARCHS}; do
             echo
@@ -109,8 +109,7 @@ function build() {
         done
 
         if [ "$TYPE" == "ios" ]; then
-            lipo -create libpugixml_i386.a \
-                         libpugixml_x86_64.a \
+            lipo -create libpugixml_x86_64.a \
                          libpugixml_armv7.a \
                          libpugixml_arm64.a \
                         -output libpugixml.a
@@ -136,14 +135,26 @@ function copy() {
 	cp -Rv src/*.hpp $1/include/
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-			cp -v "scripts/vs2015/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-			cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+		if [[ $VS_VER -gt 14 ]]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2017/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			fi
+		else
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2015/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			fi
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "msys2" ]; then
 		# copy lib

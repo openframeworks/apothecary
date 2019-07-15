@@ -1,22 +1,21 @@
 #!/bin/bash
-#set -e
-#set -o pipefail
-# trap any script errors and exit
-trap "trapError" ERR
 
-SUDO=
+docker exec -it emscripten apt update
+docker exec -it emscripten apt install -y coreutils libboost-tools-dev
+docker exec -it emscripten apt install -y rsync
+docker exec -it emscripten apt install -y gperf
+docker exec -it emscripten apt install -y ccache
+docker exec -i emscripten sh -c "echo \$PATH"
 
-trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
-}
+# DOCKER_HOME=$(docker exec -i emscripten 'echo $HOME')
+# docker exec -i emscripten mkdir $DOCKER_HOME/bin
 
-cd $TRAVIS_BUILD_DIR
+# EMMAKE=$(docker exec -i emscripten which emmake)
+# docker exec -i emscripten sh -c "echo #!/usr/bin/env bash > $DOCKER_HOME/bin/emmake"
+# docker exec -i emscripten sh -c "echo $EMMAKE sh -c 'CXX=\"ccache \$CXX\" \$1' >> $DOCKER_HOME/bin/emmake"
+# docker exec -i emscripten cat $DOCKER_HOME/bin/emmake
 
-cp scripts/emscripten/.emscripten ~/
-sed -i "s|%HOME%|${HOME}|g" ~/.emscripten
-cd ~/
-git clone --depth 1 --single-branch --branch master https://github.com/urho3d/emscripten-sdk
-cd emscripten-sdk
-./emsdk activate --build=Release sdk-master-64bit
+# EMCMAKE=$(docker exec -i emscripten which emcmake)
+# docker exec -i emscripten sh -c "echo #!/usr/bin/env bash > $DOCKER_HOME/bin/emcmake"
+# docker exec -i emscripten sh -c "echo $EMCMAKE sh -c 'CXX=\"ccache \$CXX\" \$1' >> $DOCKER_HOME/bin/emcmake"
+# docker exec -i emscripten cat $DOCKER_HOME/bin/emcmake

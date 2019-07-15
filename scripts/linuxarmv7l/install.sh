@@ -84,22 +84,31 @@ installJunest(){
 	git clone git://github.com/fsquillace/junest ~/.local/share/junest
 	export PATH=~/.local/share/junest/bin:$PATH
 	junest -u << EOF
-		pacman -Syy --noconfirm
+        echo updating keys
+        pacman -S gnupg --noconfirm
+        pacman-key --populate archlinux
+        pacman-key --refresh-keys
+        echo updating packages
+		pacman -Syyu --noconfirm
 		pacman -S --noconfirm git flex grep gcc pkg-config make wget
 EOF
 }
 
-ROOT=$( cd "$(dirname "$0")" ; pwd -P )
-echo $ROOT
-cd $ROOT
-installJunest
-createArchImg
-downloadToolchain
-downloadFirmware
+if [[ $(uname -m) != armv* ]]; then
 
-cd $HOME/archlinux/usr/lib
-relativeSoftLinks "../.." "..\/.."
-#cd $ROOT/archlinux/usr/lib/arm-unknown-linux-gnueabihf
-#relativeSoftLinks  "../../.." "..\/..\/.."
-#cd $ROOT/raspbian/usr/lib/gcc/arm-unknown-linux-gnueabihf/5.3
-#relativeSoftLinks  "../../../.." "..\/..\/..\/.."
+	ROOT=$( cd "$(dirname "$0")" ; pwd -P )
+	echo $ROOT
+	cd $ROOT
+	installJunest
+	createArchImg
+	downloadToolchain
+	downloadFirmware
+
+	cd $HOME/archlinux/usr/lib
+	relativeSoftLinks "../.." "..\/.."
+	#cd $ROOT/archlinux/usr/lib/arm-unknown-linux-gnueabihf
+	#relativeSoftLinks  "../../.." "..\/..\/.."
+	#cd $ROOT/raspbian/usr/lib/gcc/arm-unknown-linux-gnueabihf/5.3
+	#relativeSoftLinks  "../../../.." "..\/..\/..\/.."
+	
+fi

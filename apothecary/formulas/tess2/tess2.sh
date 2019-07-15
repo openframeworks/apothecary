@@ -294,6 +294,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ] ; then
 	    source ../../android_configure.sh $ABI
+		CFLAGS="$CFLAGS -DANDROID"
 	    mkdir -p Build
 	    cd Build
 	    cp -v $FORMULA_DIR/Makefile .
