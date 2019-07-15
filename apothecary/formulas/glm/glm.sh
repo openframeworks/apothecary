@@ -22,7 +22,6 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	cd glm
-	git apply $FORMULA_DIR/gcc73.patch
 }
 
 # executed inside the lib src dir
