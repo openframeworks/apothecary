@@ -17,7 +17,6 @@ function download() {
 	# wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     # unzip glm-$VER.zip
 	git clone --branch $GIT_TAG --depth=1 $GIT_URL
-	cd glm
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -33,6 +32,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
+	cd glm
 	# headers
 	mkdir -p $1/include
 	cp -rv glm $1/include
