@@ -144,8 +144,8 @@ init:
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
-- if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
-- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf ${MINGW_PACKAGE_PREFIX}-libxml2"'
+- if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su unzip dos2unix gperf ${MINGW_PACKAGE_PREFIX}-libxml2")
+#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf ${MINGW_PACKAGE_PREFIX}-libxml2"'
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
