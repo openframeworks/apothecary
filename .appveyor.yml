@@ -40,7 +40,7 @@ environment:
     ARCH: 64
     VS_NAME: 2017
     BUNDLE: 4
- - # VisualStudio 2017 32 bit Building
+  # VisualStudio 2017 32 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x86
     TARGET: vs
