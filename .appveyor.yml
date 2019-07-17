@@ -164,7 +164,7 @@ build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
 
 after_build:
-- '%MSYS2_PATH%\usr\bin\bash -lc "for file in openFrameworks*.zip do md5sum ${file} > ${file}.md5 done"'
+- '%MSYS2_PATH%\usr\bin\bash -lc "for file in openFrameworks*.zip do md5sum ${file} ^> ${file}.md5 done"'
 
 test: off
 
