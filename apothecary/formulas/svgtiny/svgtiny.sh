@@ -56,7 +56,7 @@ function prepare() {
     	cp $FORMULA_DIR/Makefile .
 	fi
 
-    ##gperf src/colors.gperf > src/svg_colors.c
+    gperf src/colors.gperf > src/svg_colors.c
     cp -rf libdom/bindings libdom/include/dom/
 }
 
