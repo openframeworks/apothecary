@@ -5,6 +5,12 @@ environment:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: msys2
+    ARCH: 64
+    VS_NAME:
+    MSYSTEM: MINGW64
   # VisualStudio 2017 64 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x64
@@ -34,7 +40,7 @@ environment:
     ARCH: 64
     VS_NAME: 2017
     BUNDLE: 4
-  # VisualStudio 2017 32 bit Building
+ - # VisualStudio 2017 32 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x86
     TARGET: vs
@@ -70,12 +76,6 @@ environment:
     ARCH: 32
     VS_NAME:
     MSYSTEM: MINGW32
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    platform: x64
-    TARGET: msys2
-    ARCH: 64
-    VS_NAME:
-    MSYSTEM: MINGW64
   # VisualStudio 2015 32 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     platform: x86
@@ -145,7 +145,7 @@ init:
 - set MSYS2_PATH=c:\msys64
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
-- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
+- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf ${MINGW_PACKAGE_PREFIX}-libxml2"'
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
