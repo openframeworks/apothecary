@@ -135,7 +135,6 @@ environment:
     VS_NAME: 2015
     BUNDLE: 4
 
-configuration: Debug
 shallow_clone: true
 clone_depth: 10
 
@@ -179,3 +178,5 @@ deploy:
     password:
         secure: ALHv+04sZ49FZ4OCj6tTSg==
     folder: libs
+    on:
+      APPVEYOR_REPO_NAME: openframeworks/apothecary
