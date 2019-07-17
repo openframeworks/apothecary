@@ -110,7 +110,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 		for IOS_ARCH in ${IOS_ARCHS}; do
             echo
@@ -124,8 +124,7 @@ function build() {
         done
 
         if [ "$TYPE" == "ios" ]; then
-            lipo -create libsvgtiny_i386.a \
-                         libsvgtiny_x86_64.a \
+            lipo -create libsvgtiny_x86_64.a \
                          libsvgtiny_armv7.a \
                          libsvgtiny_arm64.a \
                         -output libsvgtiny.a

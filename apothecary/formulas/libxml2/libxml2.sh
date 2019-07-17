@@ -52,6 +52,8 @@ function build() {
         source ../../android_configure.sh $ABI
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
+        elif [ "$ARCH" == "arm64" ]; then
+            export HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             export HOST=x86-linux-android
         fi
@@ -95,7 +97,7 @@ function build() {
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
-        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c 
+        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         make clean
         #echo "int main(){ return 0; }" > xmllint.c
@@ -109,7 +111,7 @@ function build() {
         #echo "int main(){ return 0; }" > testThreads.c
         #echo "int main(){ return 0; }" > testC14N.c
         make -j${PARALLEL_MAKE}
-    
+
 
     elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -123,7 +125,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
         for IOS_ARCH in ${IOS_ARCHS}; do
             echo
@@ -140,8 +142,7 @@ function build() {
         cp -r build/$TYPE/arm64/* build/$TYPE/
 
         if [ "$TYPE" == "ios" ]; then
-            lipo -create build/$TYPE/i386/lib/libxml2.a \
-                         build/$TYPE/x86_64/lib/libxml2.a \
+            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
                          build/$TYPE/armv7/lib/libxml2.a \
                          build/$TYPE/arm64/lib/libxml2.a \
                         -output build/$TYPE/lib/libxml2.a

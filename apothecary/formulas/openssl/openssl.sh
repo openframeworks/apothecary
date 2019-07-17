@@ -115,7 +115,7 @@ function build() {
 		if [ "${TYPE}" == "tvos" ]; then
 			IOS_ARCHS="x86_64 arm64"
 		elif [ "$TYPE" == "ios" ]; then
-			IOS_ARCHS="i386 x86_64 arm64 armv7" #armv7s
+			IOS_ARCHS="x86_64 arm64 armv7" #armv7s
 		fi
 
 		unset LANG
@@ -208,13 +208,11 @@ function build() {
 		elif [ "$TYPE" == "ios" ]; then
 			lipo -create $BUILD_TO_DIR/armv7/lib/libcrypto.a \
 			$BUILD_TO_DIR/arm64/lib/libcrypto.a \
-			$BUILD_TO_DIR/i386/lib/libcrypto.a \
 			$BUILD_TO_DIR/x86_64/lib/libcrypto.a \
 			-output $BUILD_TO_DIR/lib/libcrypto.a
 
 			lipo -create $BUILD_TO_DIR/armv7/lib/libssl.a \
 			$BUILD_TO_DIR/arm64/lib/libssl.a \
-			$BUILD_TO_DIR/i386/lib/libssl.a \
 			$BUILD_TO_DIR/x86_64/lib/libssl.a \
 			-output $BUILD_TO_DIR/lib/libssl.a
 		fi
@@ -229,7 +227,8 @@ function build() {
 		unset CC
 		unset AR
 		rm -f Setenv-android.sh
-		wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
+		cp ../../formulas/openssl/Setenv-android.sh ./
+		#wget -nv http://wiki.openssl.org/images/7/70/Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_EABI=(.*)$/#_ANDROID_EABI=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_ARCH=(.*)$/#_ANDROID_ARCH=\1/g' Setenv-android.sh
 		perl -pi -e 's/^_ANDROID_API=(.*)$/#_ANDROID_API=\1/g' Setenv-android.sh
@@ -240,6 +239,9 @@ function build() {
         if [ "$ARCH" == "armv7" ]; then
             export _ANDROID_EABI=arm-linux-androideabi-4.9
 		    export _ANDROID_ARCH=arch-arm
+		elif [ "$ARCH" == "arm64" ]; then
+			export _ANDROID_EABI=aarch64-linux-android-4.9
+			export _ANDROID_ARCH=arch-arm64
 		elif [ "$ARCH" == "x86" ]; then
             export _ANDROID_EABI=x86-4.9
 		    export _ANDROID_ARCH=arch-x86
@@ -248,8 +250,13 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/$ABI
         mkdir -p $BUILD_TO_DIR
         source Setenv-android.sh
-        ./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
-        make clean
+
+		if [ "$ARCH" == "arm64" ]; then
+			./Configure --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared android64-aarch64
+		else
+			./config --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+		fi
+		make clean
         make depend -j${PARALLEL_MAKE}
         make build_libs -j${PARALLEL_MAKE}
         mkdir -p $BUILD_TO_DIR/lib

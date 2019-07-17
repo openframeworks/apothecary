@@ -31,10 +31,10 @@ function build() {
 		unset TMP
 		unset TEMP
 		if [ $ARCH == 32 ] ; then
-			cmake -G "Visual Studio $VS_VER"
+			cmake . -G "Visual Studio $VS_VER"
 			vs-build "zlib.sln" Build "Release|Win32"
 		elif [ $ARCH == 64 ] ; then
-			cmake -G "Visual Studio $VS_VER Win64"
+			cmake . -G "Visual Studio $VS_VER Win64"
 			vs-build "zlib.sln" Build "Release|x64"
 		fi
 	fi

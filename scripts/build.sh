@@ -3,112 +3,6 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ROOT=$(cd $(dirname "$0"); pwd -P)/..
-APOTHECARY_PATH=$ROOT/apothecary
-OUTPUT_FOLDER=$ROOT/out
-# VERBOSE=true
-
-cd $APOTHECARY_PATH
-
-if [ -z $TARGET ] ; then
-    echo "Environment variable TARGET not defined. Should be target os"
-    exit 1
-fi
-
-echo "Running apothecary from $PWD"
-echo "Target: $TARGET"
-echo "Architecture: $ARCH"
-echo "Bundle: $BUNDLE"
-
-FORMULAS=(
-    # Dependencies for other formulas (cairo)
-    "pixman"
-    "pkg-config"
-    "zlib"
-
-    # All formulas
-    "assimp"
-    "boost"
-    "FreeImage"
-    "libpng"
-    "libxml2"
-    "freetype"
-    "fmodex"
-    "glew"
-    "glfw"
-    "glm"
-    "json"
-    "libusb"
-    "kiss"
-    "opencv"
-    "openssl"
-    "portaudio"
-    "pugixml"
-    "utf8"
-    "videoInput"
-    "rtAudio"
-    "tess2"
-    "uriparser"
-
-    # Formulas with depenencies in the end
-    "curl"
-    "poco"
-    "svgtiny"
-    "uri"
-    "cairo"
-)
-
-# Seperate in bundles on osx
-if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] || [ "$TARGET" == "vs" ]; then
-    if [ "$BUNDLE" == "1" ]; then
-        FORMULAS=(
-            # Dependencies for other formulas (cairo)
-            "pixman"
-            "pkg-config"
-            "zlib"
-            "libpng"
-            "freetype"
-
-            # All formulas
-            "boost"
-            "FreeImage"
-            "fmodex"
-            "glew"
-            "glfw"
-            "glm"
-            "json"
-            "libusb"
-            "kiss"
-            "portaudio"
-            "pugixml"
-            "utf8"
-            "videoInput"
-            "rtAudio"
-            "tess2"
-            "uriparser"
-
-            # Formulas with depenencies in the end
-            "cairo"
-            "uri"
-        )
-    elif [ "$BUNDLE" == "2" ]; then
-        FORMULAS=(
-            "openssl"
-            "poco"
-            "curl"
-        )
-    elif [ "$BUNDLE" == "3" ]; then
-        FORMULAS=(
-            "assimp"
-            "libxml2"
-            "svgtiny"
-        )
-    elif [ "$BUNDLE" == "4" ]; then
-        FORMULAS=(
-            "opencv"
-        )
-    fi
-fi
 
 # trap any script errors and exit
 # trap "trapError" ERR
@@ -125,6 +19,69 @@ trapError() {
     fi
 	exit 1
 }
+
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    run(){
+        echo "TARGET=\"emscripten\" $@"
+        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
+    }
+
+    run_bg(){
+        trap "trapError" ERR
+
+        #PATH=\"$DOCKER_HOME/bin:\$PATH\"
+        echo "TARGET=\"emscripten\" $@"
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
+    }
+
+    # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
+    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
+    ROOT=$(docker exec -i emscripten pwd)
+    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/..
+else
+    run(){
+        echo "$@"
+        eval "$@"
+    }
+
+    run_bg(){
+        trap "trapError" ERR
+
+        echo "$@"
+        eval "$@" >> formula.log 2>&1 &
+        apothecaryPID=$!
+        echoDots $apothecaryPID
+        wait $apothecaryPID
+
+        echo "Tail of log for $formula_name"
+        run "tail -n 100 formula.log"
+    }
+
+    ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    LOCAL_ROOT=$ROOT
+fi
+
+APOTHECARY_PATH=$ROOT/apothecary
+OUTPUT_FOLDER=$ROOT/out
+# VERBOSE=true
+
+if [ -z $TARGET ] ; then
+    echo "Environment variable TARGET not defined. Should be target os"
+    exit 1
+fi
+
+echo "Running apothecary from $PWD"
+echo "Target: $TARGET"
+echo "Architecture: $ARCH"
+echo "Bundle: $BUNDLE"
+echo "Apothecary path: $APOTHECARY_PATH"
+
 
 isRunning(){
     if [ “$(uname)” == “Linux” ]; then
@@ -207,7 +164,7 @@ if [ -z ${PARALLEL+x} ]; then
     elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
         PARALLEL=4
     else
-        PARALLEL=1
+        PARALLEL=2
     fi
 fi
 
@@ -218,8 +175,17 @@ if  type "ccache" > /dev/null; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
     fi
 
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     docker exec -it emscripten sh -c 'echo $HOME'
+    #     docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
+    # fi
+
     ccache -z
-    echo $(ccache -s)
+    ccache -s
+    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    #     run "ccache -z"
+    #     run "ccache -s"
+    # fi
 fi
 
 if [ "$TARGET" == "linux" ]; then
@@ -235,10 +201,6 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
-if [ "$TARGET" == "emscripten" ]; then
-    source ~/emscripten-sdk/emsdk_env.sh
-fi
-
 function build(){
     trap "trapError" ERR
 
@@ -251,30 +213,27 @@ function build(){
 
     if [ "$VERBOSE" = true ] ; then
         echo "./apothecary $ARGS update $formula_name"
-        ./apothecary $ARGS update $formula_name
+        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
         echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
-        ./apothecary $ARGS update $formula_name >> formula.log 2>&1 &
-
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        tail -n 30 formula.log
+        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
 }
 
+source $LOCAL_ROOT/scripts/calculate_formulas.sh
+
+if [ -z "$FORMULAS" ]; then
+    echo "No formulas to build"
+    exit 0
+fi
+
 # Remove output folder
-rm -rf $OUTPUT_FOLDER
-mkdir $OUTPUT_FOLDER
+run "rm -rf $OUTPUT_FOLDER"
+run "mkdir $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
-
-# for formula in openssl $( ls -1 formulas | grep -v _depends | grep -v openssl | grep -v libpng | grep -v zlib | grep -v libxml2 ) ; do
-
     formula_name="${formula%.*}"
 
     if [ "$TRAVIS" = true ] ; then
@@ -294,6 +253,11 @@ done
 echo ""
 echo ""
 
+
+# if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+#     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+# fi
+
 if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
@@ -311,22 +275,32 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
     exit 0
 fi
 
-cd $OUTPUT_FOLDER
 echo "Compressing libraries from $OUTPUT_FOLDER"
-LIBS=$(ls)
+if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
+    LIBS=${LIBSX//[$'\t\r\n']/ }
+else
+    cd $OUTPUT_FOLDER;
+    LIBS=$(ls $OUTPUT_FOLDER)
+fi
 
 if [ ! -z ${APPVEYOR+x} ]; then
 	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-	tar cjf $TARBALL $LIBS
+    if [ "$TARGET" == "emscripten" ]; then
+	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+        docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
+    else
+        tar cjf $TARBALL $LIBS
+    fi
 	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $ROOT/scripts/id_rsa.enc -out $ROOT/scripts/id_rsa -d
-	cp $ROOT/scripts/ssh_config ~/.ssh/config
-	chmod 600 $ROOT/scripts/id_rsa
+	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
+	chmod 600 $LOCAL_ROOT/scripts/id_rsa
 	echo Uploading libraries
-	scp -i $ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i $ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm $ROOT/scripts/id_rsa
+	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+	rm $LOCAL_ROOT/scripts/id_rsa
 fi

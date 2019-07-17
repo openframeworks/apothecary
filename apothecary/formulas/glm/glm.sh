@@ -17,12 +17,13 @@ function download() {
 	# wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     # unzip glm-$VER.zip
 	git clone --branch $GIT_TAG --depth=1 $GIT_URL
+	cd glm
+	git apply $FORMULA_DIR/gcc73.patch
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	cd glm
-	git apply $FORMULA_DIR/gcc73.patch
+	echo
 }
 
 # executed inside the lib src dir

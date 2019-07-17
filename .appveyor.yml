@@ -135,7 +135,8 @@ environment:
     VS_NAME: 2015
     BUNDLE: 4
 
-shallow_clone: true
+configuration: Debug
+shallow_clone: false
 clone_depth: 10
 
 init:
@@ -145,7 +146,6 @@ init:
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
 - '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
-
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
@@ -157,6 +157,7 @@ init:
 # - if "%PLATFORM%_%VS_VER%"=="x64_15" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 install:
+- '%MSYS2_PATH%\usr\bin\bash -lc "scripts/calculate_formulas.sh"'
 - if "%TARGET%"=="vs" choco install -y strawberryperl
 
 build_script:

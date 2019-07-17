@@ -100,7 +100,7 @@ fi
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
-ANDROID_API=19
+ANDROID_API=21
 ANDROID_PLATFORM=android-${ANDROID_API}
 
 ################################################################################
@@ -354,10 +354,10 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
         elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
         elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/")
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
             VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
         fi
 
@@ -448,23 +448,31 @@ function installAndroidToolchain() {
 	    exit 1
 	fi
 
-    if [ "$ARCH" == "armv7" ]; then
-	    if [ ! -d "$BUILD_DIR/Toolchains/Android/armv7" ]; then
-            echo $PWD
-		    ./make_standalone_toolchain.py \
-			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
-			    --arch=arm \
-                --api $ANDROID_API \
-			    --stl=libc++
-	    fi
-	elif [ "$ARCH" == "x86" ]; then
-	    if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
-		    ./make_standalone_toolchain.py \
-			    --install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
-			    --arch=x86 \
+	if [ "$ARCH" == "armv7" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/armv7" ]; then
+			echo $PWD
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=arm \
 				--api $ANDROID_API \
-			    --stl=libc++
-	    fi
+				--stl=libc++
+		fi
+	elif [ "$ARCH" == "arm64" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/arm64" ]; then
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=arm64 \
+				--api $ANDROID_API \
+				--stl=libc++
+		fi
+	elif [ "$ARCH" == "x86" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
+			./make_standalone_toolchain.py \
+				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
+				--arch=x86 \
+				--api $ANDROID_API \
+				--stl=libc++
+		fi
 	fi
 
 	cd $WD
@@ -1203,7 +1211,7 @@ fi
 echoVerbose "Build type: $TYPE"
 
 # check if we have a valid arch
-if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != x86 ] ; then
+if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != arm64 -a $ARCH != x86 ] ; then
 	echoError " Invalid architecture: $ARCH"
 	exit 1
 fi
@@ -1242,7 +1250,7 @@ if [[ "$TYPE" == "android" ]] ; then
 		source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 		echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	elif [[ -e ${NDK_ROOT} ]] ; then
+	elif [[ -e ${NDK_ROOT} ]]; then
 		ANDROID_NDK_ROOT=${NDK_ROOT}
 	else
 		echoError "Targeting android, but can't find the SDK. Missing"
@@ -1251,16 +1259,18 @@ if [[ "$TYPE" == "android" ]] ; then
 		exit 1
 	fi
 	if [ "$ARCH" == "armv7" ]; then
-        echo setting arch to armv7
-	    ABI=armeabi-v7a
+		echo setting arch to armv7
+		ABI=armeabi-v7a
+	elif [ "$ARCH" == "arm64" ]; then
+		ABI=arm64-v8a
 	elif [ "$ARCH" == "x86" ]; then
-	    ABI=x86
+		ABI=x86
 	fi
 fi
 
 CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
-    if [ "$(uname -m)" != "armv6" -a "$(uname -m)" != "armv7" ]; then
+    if [[ $(uname -m) != armv* ]]; then
         CROSSCOMPILING=1
         if [ -z $TOOLCHAIN_PREFIX ]; then
             export TOOLCHAIN_PREFIX=arm-linux-gnueabihf

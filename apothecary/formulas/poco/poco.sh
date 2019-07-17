@@ -201,7 +201,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		echo "--------------------"
@@ -351,7 +351,6 @@ function build() {
 				if [ ! -e $renamedLib ] ; then
 						lipo -c armv7/$lib \
 						arm64/$lib \
-						../iPhoneSimulator/i386/$lib \
 						../iPhoneSimulator/x86_64/$lib \
 						-o ../ios/$renamedLib
 				fi
@@ -398,7 +397,8 @@ function build() {
 		local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
-    	export CXX=clang++
+		source ../../android_configure.sh $ABI
+		#export CXX=clang++
 		./configure $BUILD_OPTS \
 					--include-path=$OPENSSL_INCLUDE \
 					--library-path=$OPENSSL_LIBS/$ABI \
