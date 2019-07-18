@@ -5,6 +5,13 @@ environment:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
+  # MSYS2 Building
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: msys2
+    ARCH: 32
+    VS_NAME:
+    MSYSTEM: MINGW32
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x64
     TARGET: msys2
@@ -69,13 +76,6 @@ environment:
     ARCH: 32
     VS_NAME: 2017
     BUNDLE: 4
-  # MSYS2 Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    platform: x86
-    TARGET: msys2
-    ARCH: 32
-    VS_NAME:
-    MSYSTEM: MINGW32
   # VisualStudio 2015 32 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     platform: x86
@@ -146,7 +146,6 @@ init:
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su")
 - if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su unzip dos2unix gperf ${MINGW_PACKAGE_PREFIX}-libxml2")
 - if "%TARGET%"=="vs" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su unzip dos2unix gperf")
-#- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf "'
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
@@ -165,6 +164,7 @@ build_script:
 - '%MSYS2_PATH%\usr\bin\bash -lc "scripts/build.sh"'
 
 after_build:
+# build a md5 file for each package
 - '%MSYS2_PATH%\usr\bin\bash -lc "for file in openFrameworks*.zip; do md5sum ${file} > ${file}.md5; done"'
 
 test: off
