@@ -80,7 +80,7 @@ function build() {
 
 
 	elif [ "$TYPE" == "osx" ]; then
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then

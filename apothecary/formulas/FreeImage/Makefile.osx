@@ -15,7 +15,7 @@ MACOSX_SYSROOT = $(shell xcode-select -print-path)/Platforms/MacOSX.platform/Dev
 CC_X86_64 = $(shell xcrun -find clang)
 CPP_X86_64 = $(shell xcrun -find clang++)
 
-COMPILERFLAGS = -arch x86_64 -arch i386 -Wno-ctor-dtor-privacy -stdlib=libc++ -Wc++11-narrowing -Os -fexceptions -fvisibility=hidden -DNO_LCMS -fPIC -DNDEBUG -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -mmacosx-version-min=$(MACOSX_MIN_SDK)
+COMPILERFLAGS = -arch x86_64 -Wno-ctor-dtor-privacy -stdlib=libc++ -Wc++11-narrowing -Os -fexceptions -fvisibility=hidden -DNO_LCMS -fPIC -DNDEBUG -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -mmacosx-version-min=$(MACOSX_MIN_SDK)
 
 INCLUDE_X86_64 = -isysroot $(MACOSX_SYSROOT)
 CFLAGS_X86_64 = $(COMPILERFLAGS) $(INCLUDE) $(INCLUDE_X86_64)

@@ -142,7 +142,7 @@ function build() {
 		echo "--------------------"
 		echo "Making Poco-${VER}"
 		echo "--------------------"
-		echo "Configuring for universal i386 and x86_64 libc++ ..."
+		echo "Configuring for universal x86_64 libc++ ..."
 
 		# Locate the path of the openssl libs distributed with openFrameworks.
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
@@ -152,7 +152,7 @@ function build() {
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
 
 		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
-		export ARCHFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		export ARCHFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}

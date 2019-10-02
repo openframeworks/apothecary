@@ -36,19 +36,12 @@ function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
 
-		# GLEW will not allow one to simply supply OPT="-arch i386 -arch x86_64"
-		# so we build them separately.
-
-		# 32 bit
-		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch i386  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		mv lib/libGLEW.a libGLEW-i386.a
-
 		# 64 bit
 		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch x86_64  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		mv lib/libGLEW.a libGLEW-x86_64.a
 
 		# link into fat universal lib
-		lipo -c libGLEW-i386.a libGLEW-x86_64.a -o libGLEW.a
+		lipo -c libGLEW-x86_64.a -o libGLEW.a
 
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
