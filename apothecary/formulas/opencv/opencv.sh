@@ -464,6 +464,8 @@ function build() {
       echo "emscripten is not set.  sourcing emsdk_env.sh"
       source ~/emscripten-sdk/emsdk_env.sh
     fi
+    
+    export USE_PTHREADS=0
 
     cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
