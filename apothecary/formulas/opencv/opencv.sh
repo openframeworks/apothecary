@@ -464,8 +464,6 @@ function build() {
       echo "emscripten is not set.  sourcing emsdk_env.sh"
       source ~/emscripten-sdk/emsdk_env.sh
     fi
-    
-    export USE_PTHREADS=0
 
     cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
@@ -476,8 +474,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
-      -DCMAKE_CXX_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
+      -DCMAKE_C_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ -s USE_PTHREADS=0  \
+      -DCMAKE_CXX_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ -s USE_PTHREADS=0  \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
