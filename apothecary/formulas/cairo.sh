@@ -21,7 +21,7 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.14.12
+VER=1.16.0
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo

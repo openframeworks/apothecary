@@ -4,7 +4,7 @@
 # http://pixman.org/
 
 # define the version
-VER=0.32.4
+VER=0.36.0
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pixman.git
