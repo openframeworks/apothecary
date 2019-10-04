@@ -152,7 +152,11 @@ function build() {
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
 
 		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
-		export ARCHFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ $ARCH == 32 ] ; then
+		export ARCHFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+		export ARCHFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}

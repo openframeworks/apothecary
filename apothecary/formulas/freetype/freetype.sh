@@ -38,7 +38,11 @@ function build() {
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_CFLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$ARCH" == "32" ] ; then
+		local FAT_CFLAGS="-arch i386 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ $ARCH == 64 ] ; then
+		local FAT_CFLAGS="-arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		fi
 
 		set -e
 		CURRENTPATH=`pwd`

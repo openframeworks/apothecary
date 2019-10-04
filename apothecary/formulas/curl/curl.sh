@@ -87,7 +87,7 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
-
+        if [ "$ARCH" == "32" ] ; then
         export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure \
@@ -99,7 +99,7 @@ function build() {
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
-
+        elif [ $ARCH == 64 ] ; then
         export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure \
@@ -111,7 +111,7 @@ function build() {
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
-
+        fi
         cp -r build/osx/x64/* build/osx/
 
         lipo -create build/osx/x86/lib/libcurl.a \

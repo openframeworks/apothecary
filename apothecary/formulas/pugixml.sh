@@ -73,7 +73,11 @@ function build() {
 			 -o src/pugixml.o
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+			if [ $ARCH == 32 ] ; then
+        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		  elif [ $ARCH == 64 ] ; then
+		   export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		  fi
 		clang++ -O2  $CFLAGS \
 			 -Wall \
 			 -Iinclude \

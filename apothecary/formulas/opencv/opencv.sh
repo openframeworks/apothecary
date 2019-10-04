@@ -50,11 +50,12 @@ function build() {
     rm -f CMakeCache.txt
     echo "Log:" >> "${LOG}" 2>&1
     set +e
+    if [ $ARCH == 32 ] ; then
     cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
       -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
@@ -108,6 +109,66 @@ function build() {
       -DWITH_1394=OFF \
       -DWITH_ADE=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
+    else
+       cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
+      -DENABLE_FAST_MATH=OFF \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_BUILD_TYPE="Release" \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DBUILD_DOCS=OFF \
+      -DBUILD_EXAMPLES=OFF \
+      -DBUILD_FAT_JAVA_LIB=OFF \
+      -DBUILD_JASPER=OFF \
+      -DBUILD_PACKAGE=OFF \
+      -DBUILD_opencv_java=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_apps=OFF \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_imgcodecs=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_CARBON=OFF \
+      -DWITH_JPEG=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_CUFFT=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_LIBV4L=OFF \
+      -DWITH_IMAGEIO=OFF \
+      -DWITH_IPP=OFF \
+      -DWITH_OPENNI=OFF \
+      -DWITH_QT=OFF \
+      -DWITH_QUICKTIME=OFF \
+      -DWITH_V4L=OFF \
+      -DWITH_PVAPI=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_EIGEN=OFF \
+      -DBUILD_TESTS=OFF \
+      -DWITH_LAPACK=OFF \
+      -DWITH_WEBP=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_VTK=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_OPENVX=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
+      -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
+    fi
     echo "CMAKE Successful"
     echo "--------------------"
     echo "Running make clean"

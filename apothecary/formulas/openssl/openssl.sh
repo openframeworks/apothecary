@@ -59,7 +59,7 @@ function build() {
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
 		rm -f libcrypto.a libssl.a
-
+		if [ $ARCH == 32 ] ; then
 		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
@@ -73,7 +73,7 @@ function build() {
 		make -j1
 		make -j1 install
 
-
+		elif [ $ARCH == 64 ] ; then
 		rm -f libcrypto.a
 		rm -f libssl.a
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
@@ -84,7 +84,7 @@ function build() {
 		make -j1 depend
 		make -j1
 		make -j1 install
-
+		fi
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 

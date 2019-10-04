@@ -60,10 +60,17 @@ function build() {
 	    cd _build
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage/lib
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
+        if [ $ARCH == 32 ] ; then
 		cmake -DCMAKE_BUILD_TYPE=Release \
-			  -DCMAKE_C_FLAGS="-arch i386 -arch x86_64" \
-			  -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -std=c++11 -stdlib=libc++" \
+			  -DCMAKE_C_FLAGS="-arch i386" \
+			  -DCMAKE_CXX_FLAGS="-arch i386 -std=c++11 -stdlib=libc++" \
 			  ..
+        elif [ $ARCH == 64 ] ; then
+        cmake -DCMAKE_BUILD_TYPE=Release \
+			  -DCMAKE_C_FLAGS="-arch x86_64" \
+			  -DCMAKE_CXX_FLAGS="-arch x86_64 -std=c++11 -stdlib=libc++" \
+			  ..
+        fi
 		make -j${PARALLEL_MAKE}
 	
 	elif [ "$TYPE" == "ios" ]; then

@@ -52,6 +52,7 @@ function build() {
         rm -f librtaudio-x86_64
 
 		# Compile the program
+		if [ $ARCH == 32 ] ; then
 		/usr/bin/g++ -O2 \
 					 -Wall \
 					 -fPIC \
@@ -62,7 +63,18 @@ function build() {
 					 -D__MACOSX_CORE__ \
 					 -c RtAudio.cpp \
 					 -o RtAudio.o
-
+		else
+		/usr/bin/g++ -O2 \
+					 -Wall \
+					 -fPIC \
+					 -stdlib=libc++ \
+					 -arch i386 -arch x86_64 \
+					 -Iinclude \
+					 -DHAVE_GETTIMEOFDAY \
+					 -D__MACOSX_CORE__ \
+					 -c RtAudio.cpp \
+					 -o RtAudio.o
+		fi
 		/usr/bin/ar ruv librtaudio.a RtAudio.o
 		/usr/bin/ranlib librtaudio.a
 
