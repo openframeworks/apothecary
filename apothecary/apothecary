@@ -1199,6 +1199,11 @@ if [ "$HOST_OS" == "osx" ] ; then
 	XCODE_DEV_ROOT=$($XS) # Sets to path from Xcode Path
 	OSX_SDK_VER=$($OSX_LATEST_SDK) # sets to latest OSX SDK
 	IOS_SDK_VER=$($IOS_LATEST_SDK) # sets to latest iOS SDK
+	OSX_VERSION=$(sw_vers -productVersion | awk '{if($1>10.13)print$1}' )
+	OSX_no32bit="10.13"
+	if [ "$OSX_VERSION>$OSX_no32bit" ]; then 
+		ARCH=64
+	fi
 fi
 
 # check if we have a valid build type
@@ -1209,6 +1214,12 @@ if [ $typeIsValid == 0 ] ; then
 	exit 1
 fi
 echoVerbose "Build type: $TYPE"
+
+# OSX_VERSION=$(sw_vers -productVersion | awk '{if($1>10.13)print$1}' )
+# OSX_no32bit="10.13"
+# if [ "$OSX_VERSION>$OSX_no32bit" ]; then 
+# 	ARCH=64
+# fi
 
 # check if we have a valid arch
 if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != arm64 -a $ARCH != x86 ] ; then
