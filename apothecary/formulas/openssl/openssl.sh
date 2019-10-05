@@ -87,6 +87,7 @@ function build() {
 		elif [ "$ARCH" == "64" ] ; then
 		rm -f libcrypto.a
 		rm -f libssl.a
+		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
