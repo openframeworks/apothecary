@@ -128,42 +128,11 @@ function build() {
 					--disable-qt
 		make -j${PARALLEL_MAKE}
 		make install
-		else
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386" \
-					CFLAGS="-Os -arch i386" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt
-		make -j${PARALLEL_MAKE}
-		make install
-		fi
 		elif [ "$ARCH" == "64" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
 					LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					CFLAGS="-Os -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt
-		make -j${PARALLEL_MAKE}
-		make install
-		else
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch x86_64" \
-					CFLAGS="-Os -arch x86_64" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \
