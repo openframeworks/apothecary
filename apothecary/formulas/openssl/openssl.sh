@@ -74,21 +74,20 @@ function build() {
 		make -j1 install
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+		cp -r $BUILD_TO_DIR/x86/* $BUILD_TO_DIR/
 
 		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
-		$BUILD_TO_DIR/x64/lib/libcrypto.a \
 		-output $BUILD_TO_DIR/lib/libcrypto.a
 
 		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
-		$BUILD_TO_DIR/x64/lib/libssl.a \
 		-output $BUILD_TO_DIR/lib/libssl.a
 
 		elif [ "$ARCH" == "64" ] ; then
-		rm -f libcrypto.a
-		rm -f libssl.a
 		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+
+		rm -f libcrypto.a
+		rm -f libssl.a
 		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
@@ -100,12 +99,10 @@ function build() {
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
-		$BUILD_TO_DIR/x64/lib/libcrypto.a \
+		lipo -create $BUILD_TO_DIR/x64/lib/libcrypto.a \
 		-output $BUILD_TO_DIR/lib/libcrypto.a
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
-		$BUILD_TO_DIR/x64/lib/libssl.a \
+		lipo -create $BUILD_TO_DIR/x64/lib/libssl.a \
 		-output $BUILD_TO_DIR/lib/libssl.a
 		fi
 
