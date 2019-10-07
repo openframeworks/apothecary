@@ -64,7 +64,6 @@ function build() {
 
 		/usr/bin/ar ruv librtaudio.a RtAudio.o
 		/usr/bin/ranlib librtaudio.a
-		fi
 		elif [ "$ARCH" == "64" ] ; then
 		# Compile the program
 		/usr/bin/g++ -O2 \
