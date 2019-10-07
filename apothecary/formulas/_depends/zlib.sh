@@ -30,10 +30,10 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			cmake . -G "Visual Studio $VS_VER"
 			vs-build "zlib.sln" Build "Release|Win32"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			cmake . -G "Visual Studio $VS_VER Win64"
 			vs-build "zlib.sln" Build "Release|x64"
 		fi
@@ -45,7 +45,7 @@ function copy() {
 	if [ "$TYPE" == "osx" ] ; then
 		return
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

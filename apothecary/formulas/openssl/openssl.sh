@@ -107,9 +107,9 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
 		fi
 		with_vs_env "nmake"
@@ -299,7 +299,7 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ]; then
 		PREFIX=`pwd`/build/
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

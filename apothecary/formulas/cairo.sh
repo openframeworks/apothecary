@@ -158,11 +158,11 @@ function copy() {
 		# copy the cairo headers
 		cp -Rv src/*.h $1/include/cairo
 
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
 			echo $PWD

@@ -40,7 +40,7 @@ function build() {
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		if [ "$ARCH" == "32" ] ; then
 		local FAT_CFLAGS="-arch i386 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 		local FAT_CFLAGS="-arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		fi
 
@@ -108,7 +108,7 @@ function build() {
 		# configure with arch
 		if [ $ARCH ==  32 ] ; then
 			./configure CFLAGS="-arch i386"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			./configure CFLAGS="-arch x86_64"
 		fi
 

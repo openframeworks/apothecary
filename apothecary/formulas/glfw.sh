@@ -33,12 +33,12 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
 			cmake .. -G "Visual Studio $VS_VER"
 			vs-build "GLFW.sln"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
 			cmake .. -G "Visual Studio $VS_VER Win64"
@@ -67,7 +67,7 @@ function build() {
 					-DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_C_FLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					$EXTRA_CONFIG
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
 					-DGLFW_BUILD_TESTS=OFF \
 					-DGLFW_BUILD_EXAMPLES=OFF \
@@ -76,17 +76,9 @@ function build() {
 					-DCMAKE_C_FLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					$EXTRA_CONFIG
 			fi
-		else
-			cmake .. -DGLFW_BUILD_DOCS=OFF \
-					-DGLFW_BUILD_TESTS=OFF \
-					-DGLFW_BUILD_EXAMPLES=OFF \
-					-DBUILD_SHARED_LIBS=OFF \
-					-DCMAKE_BUILD_TYPE=Release
-					$EXTRA_CONFIG
+			make clean
+ 			make -j${PARALLEL_MAKE}
 		fi
-
- 		make clean
- 		make -j${PARALLEL_MAKE}
 	fi
 }
 
@@ -100,10 +92,10 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		cp -Rv include/* $1/include
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_32/src/Release/glfw3.lib $1/lib/$TYPE/Win32/glfw3.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
 		fi

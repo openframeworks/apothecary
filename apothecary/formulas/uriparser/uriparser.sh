@@ -44,9 +44,9 @@ function build() {
 			vs-upgrade uriparser.sln
 		fi
 
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			vs-build uriparser.sln Build "Release|Win32"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			vs-build uriparser.sln Build "Release|x64"
 		fi
 
@@ -65,10 +65,10 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 		export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 		export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		fi
@@ -135,7 +135,7 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"
