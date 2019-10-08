@@ -128,42 +128,11 @@ function build() {
 					--disable-qt
 		make -j${PARALLEL_MAKE}
 		make install
-		else
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386" \
-					CFLAGS="-Os -arch i386" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt
-		make -j${PARALLEL_MAKE}
-		make install
-		fi
 		elif [ "$ARCH" == "64" ] ; then
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
 					LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					CFLAGS="-Os -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt
-		make -j${PARALLEL_MAKE}
-		make install
-		else
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch x86_64" \
-					CFLAGS="-Os -arch x86_64" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \
@@ -189,11 +158,11 @@ function copy() {
 		# copy the cairo headers
 		cp -Rv src/*.h $1/include/cairo
 
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			# make the libs path
 			mkdir -p $1/lib/$TYPE/x64
 			echo $PWD

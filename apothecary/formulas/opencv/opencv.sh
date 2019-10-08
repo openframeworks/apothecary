@@ -50,7 +50,7 @@ function build() {
     rm -f CMakeCache.txt
     echo "Log:" >> "${LOG}" 2>&1
     set +e
-    if [ $ARCH == 32 ] ; then
+    if [ "$ARCH" == "32" ] ; then
     cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
       -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
       -DENABLE_FAST_MATH=OFF \
@@ -109,7 +109,7 @@ function build() {
       -DWITH_1394=OFF \
       -DWITH_ADE=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
-    else
+    elif [ "$ARCH" == "64" ] ; then
        cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
       -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
       -DENABLE_FAST_MATH=OFF \
@@ -204,7 +204,7 @@ function build() {
     echo "Log:" >> "${LOG}" 2>&1
     set +e
 
-    if [ $ARCH == 32 ] ; then
+    if [ "$ARCH" == "32" ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
       cmake .. -G "Visual Studio $VS_VER"\
@@ -243,7 +243,7 @@ function build() {
       -DWITH_PVAPI=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|Win32"
       vs-build "OpenCV.sln" Build "Debug|Win32"
-    elif [ $ARCH == 64 ] ; then
+    elif [ "$ARCH" == "64" ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
       cmake .. -G "Visual Studio $VS_VER Win64" \
@@ -645,9 +645,9 @@ function copy() {
     cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
 
   elif [ "$TYPE" == "vs" ] ; then
-    if [ $ARCH == 32 ] ; then
+    if [ "$ARCH" == "32" ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
+    elif [ "$ARCH" == "64" ] ; then
       DEPLOY_PATH="$1/lib/$TYPE/x64"
     fi
     mkdir -p "$DEPLOY_PATH/Release"
@@ -669,10 +669,10 @@ function copy() {
     #copy the ippicv includes and lib
     IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win/icv
     IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
+    if [ "$ARCH" == "32" ] ; then
       IPPICV_PLATFORM="ia32"
       IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
+    elif [ "$ARCH" == "64" ] ; then
       IPPICV_PLATFORM="intel64"
       IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
     fi

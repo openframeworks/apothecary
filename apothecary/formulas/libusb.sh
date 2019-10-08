@@ -44,20 +44,20 @@ function build() {
 		if [ $VS_VER -eq 14 ]; then
 			unset TMP
 			unset TEMP
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				vs-build libusb_2015.sln Build "Release|Win32"
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				vs-build libusb_2015.sln Build "Release|x64"
 			fi
-			# if [ $ARCH == 32 ] ; then
+			# if [ "$ARCH" == "32" ] ; then
 			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=Win32
-			# elif [ $ARCH == 64 ] ; then
+			# elif [ "$ARCH" == "64" ] ; then
 			# 	MSBuild.exe libusb_2015.sln //t:Build //p:Configuration=Release //p:Platform=x64
 			# fi
 		elif [ $VS_VER -eq 15 ]; then
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				vs-build libusb_2017.sln Build "Release|Win32"
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				vs-build libusb_2017.sln Build "Release|x64"
 			fi
 		else
@@ -70,7 +70,7 @@ function build() {
     if [ "$TYPE" == "osx" ] ; then
 	 	if [ "$ARCH" == "32" ] ; then
 		CFLAGS="-arch i386" ./configure --disable-shared --enable-static
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 		CFLAGS="-arch x86_64" ./configure --disable-shared --enable-static
 		fi
  		make -j${PARALLEL_MAKE}
@@ -86,10 +86,10 @@ function copy() {
 	cp -Rv libusb/libusb.h $1/include
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Win32/Release/lib/libusb-1.0.lib $1/lib/$TYPE/Win32/libusb-1.0.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v x64/Release/lib/libusb-1.0.lib $1/lib/$TYPE/x64/libusb-1.0.lib
 		fi

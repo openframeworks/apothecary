@@ -59,7 +59,7 @@ function build() {
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
 		rm -f libcrypto.a libssl.a
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
@@ -73,10 +73,21 @@ function build() {
 		make -j1
 		make -j1 install
 
-		elif [ $ARCH == 64 ] ; then
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		cp -r $BUILD_TO_DIR/x86/* $BUILD_TO_DIR/
+
+		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+		-output $BUILD_TO_DIR/lib/libcrypto.a
+
+		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
+		-output $BUILD_TO_DIR/lib/libssl.a
+
+		elif [ "$ARCH" == "64" ] ; then
+		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+
 		rm -f libcrypto.a
 		rm -f libssl.a
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
 		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
@@ -84,22 +95,21 @@ function build() {
 		make -j1 depend
 		make -j1
 		make -j1 install
-		fi
+
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
-		$BUILD_TO_DIR/x64/lib/libcrypto.a \
+		lipo -create $BUILD_TO_DIR/x64/lib/libcrypto.a \
 		-output $BUILD_TO_DIR/lib/libcrypto.a
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
-		$BUILD_TO_DIR/x64/lib/libssl.a \
+		lipo -create $BUILD_TO_DIR/x64/lib/libssl.a \
 		-output $BUILD_TO_DIR/lib/libssl.a
+		fi
 
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
 		fi
 		with_vs_env "nmake"
@@ -289,7 +299,7 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ]; then
 		PREFIX=`pwd`/build/
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

@@ -152,11 +152,11 @@ function build() {
 		local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
 
 		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 		export ARCHFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		else
+		elif [ "$ARCH" == "64" ] ; then
 		export ARCHFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		if
+		fi
 		./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
 		    --prefix=$BUILD_DIR/poco/install/$TYPE
 		make -j${PARALLEL_MAKE}
@@ -168,20 +168,20 @@ function build() {
 
 		if [[ $VS_VER -gt 14 ]]; then
 
-				if [ $ARCH == 32 ] ; then
+				if [ "$ARCH" == "32" ] ; then
 					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
 					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
-				elif [ $ARCH == 64 ] ; then
+				elif [ "$ARCH" == "64" ] ; then
 					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
 					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 				fi
 
 			else
 
-				if [ $ARCH == 32 ] ; then
+				if [ "$ARCH" == "32" ] ; then
 					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
 					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
-				elif [ $ARCH == 64 ] ; then
+				elif [ "$ARCH" == "64" ] ; then
 					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
 					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 				fi
@@ -467,13 +467,13 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		cp -v lib/$TYPE/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32/Debug
 			cp -v lib/*mdd.lib $1/lib/$TYPE/Win32/Debug/
 
 			mkdir -p $1/lib/$TYPE/Win32/Release
 			cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64/Debug
 			cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
 

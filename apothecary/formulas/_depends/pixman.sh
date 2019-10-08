@@ -37,7 +37,7 @@ function build() {
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		if [ "$ARCH" == "32" ] ; then
 			local FAT_LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			local FAT_LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		fi
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
@@ -61,7 +61,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

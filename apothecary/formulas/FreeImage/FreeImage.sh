@@ -102,7 +102,7 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
 		if [ "$ARCH" == "32" ] ; then
 			MACOSX_ARCHS="-arch i386"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			MACOSX_ARCHS="-arch x86_64"
 		fi
 		make -j${PARALLEL_MAKE} -f Makefile.osx
@@ -366,7 +366,7 @@ function copy() {
 		#mkdir -p $1/include/x64
 	    cp -v Dist/x32/*.h $1/include #/Win32/
 		#cp -v Dist/x64/*.h $1/include/x64/
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
 			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
