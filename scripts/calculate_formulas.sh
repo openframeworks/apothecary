@@ -3,6 +3,9 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin"
+
 FORMULAS=(
     # Dependencies for other formulas (cairo)
     # "pixman"
