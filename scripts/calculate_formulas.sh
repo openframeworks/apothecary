@@ -3,7 +3,7 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
+refreshenv
 
 FORMULAS=(
     # Dependencies for other formulas (cairo)
