@@ -324,7 +324,7 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 			echo "$HELP" ; exit 0 ;;
 	esac
 done
-shift $(expr $OPTIND - 1)
+# shift $(expr $OPTIND - 1)
 
 
 # used when building for vs - set to 15 if not set explicitly
