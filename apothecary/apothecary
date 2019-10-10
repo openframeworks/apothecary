@@ -326,7 +326,6 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 done
 # shift $(expr $OPTIND - 1)
 
-
 # used when building for vs - set to 15 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then
