@@ -13,7 +13,7 @@ FORMULAS=(
     # "assimp"
     # "boost"
     # "FreeImage"
-    # "libpng"
+    "libpng"
     # "libxml2"
     # "freetype"
     # "fmodex"
@@ -30,7 +30,7 @@ FORMULAS=(
     # "utf8"
     # "videoInput"
     # "rtAudio"
-    "tess2"
+    # "tess2"
     # "uriparser"
 
     # # Formulas with depenencies in the end
@@ -49,7 +49,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             # "pixman"
             # "pkg-config"
             # "zlib"
-            # "libpng"
+            "libpng"
             # "freetype"
 
             # All formulas
@@ -67,7 +67,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             # "utf8"
             # "videoInput"
             # "rtAudio"
-            "tess2"
+            # "tess2"
             # "uriparser"
 
             # Formulas with depenencies in the end
