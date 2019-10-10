@@ -5,40 +5,40 @@ set -o pipefail
 
 FORMULAS=(
     # Dependencies for other formulas (cairo)
-    "pixman"
-    "pkg-config"
-    "zlib"
+    # "pixman"
+    # "pkg-config"
+    # "zlib"
 
-    # All formulas
-    "assimp"
-    "boost"
-    "FreeImage"
-    "libpng"
-    "libxml2"
-    "freetype"
-    "fmodex"
-    "glew"
-    "glfw"
-    "glm"
-    "json"
-    "libusb"
-    "kiss"
-    "opencv"
-    "openssl"
-    "portaudio"
-    "pugixml"
-    "utf8"
-    "videoInput"
-    "rtAudio"
+    # # All formulas
+    # "assimp"
+    # "boost"
+    # "FreeImage"
+    # "libpng"
+    # "libxml2"
+    # "freetype"
+    # "fmodex"
+    # "glew"
+    # "glfw"
+    # "glm"
+    # "json"
+    # "libusb"
+    # "kiss"
+    # "opencv"
+    # "openssl"
+    # "portaudio"
+    # "pugixml"
+    # "utf8"
+    # "videoInput"
+    # "rtAudio"
     "tess2"
-    "uriparser"
+    # "uriparser"
 
-    # Formulas with depenencies in the end
-    "curl"
-    "poco"
-    "svgtiny"
-    "uri"
-    "cairo"
+    # # Formulas with depenencies in the end
+    # "curl"
+    # "poco"
+    # "svgtiny"
+    # "uri"
+    # "cairo"
 )
 
 # Seperate in bundles on osx
@@ -46,49 +46,49 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
     if [ "$BUNDLE" == "1" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
-            "pixman"
-            "pkg-config"
-            "zlib"
-            "libpng"
-            "freetype"
+            # "pixman"
+            # "pkg-config"
+            # "zlib"
+            # "libpng"
+            # "freetype"
 
             # All formulas
-            "boost"
-            "FreeImage"
-            "fmodex"
-            "glew"
-            "glfw"
-            "glm"
-            "json"
-            "libusb"
-            "kiss"
-            "portaudio"
-            "pugixml"
-            "utf8"
-            "videoInput"
-            "rtAudio"
+            # "boost"
+            # "FreeImage"
+            # "fmodex"
+            # "glew"
+            # "glfw"
+            # "glm"
+            # "json"
+            # "libusb"
+            # "kiss"
+            # "portaudio"
+            # "pugixml"
+            # "utf8"
+            # "videoInput"
+            # "rtAudio"
             "tess2"
-            "uriparser"
+            # "uriparser"
 
             # Formulas with depenencies in the end
-            "cairo"
-            "uri"
+            # "cairo"
+            # "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
-            "openssl"
-            "poco"
-            "curl"
+            # "openssl"
+            # "poco"
+            # "curl"
         )
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
-            "assimp"
-            "libxml2"
-            "svgtiny"
+            # "assimp"
+            # "libxml2"
+            # "svgtiny"
         )
     elif [ "$BUNDLE" == "4" ]; then
         FORMULAS=(
-            "opencv"
+            # "opencv"
         )
     fi
 fi
