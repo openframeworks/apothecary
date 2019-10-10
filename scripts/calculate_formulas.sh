@@ -3,8 +3,6 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-refreshenv
-
 FORMULAS=(
     # Dependencies for other formulas (cairo)
     # "pixman"
