@@ -948,7 +948,7 @@ function with_vs_env(){
             #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
 			echo "before call"
 			ENV_TOOL_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-			echo `cmd.exe //c "${ENV_TOOL_PATH}" && $@`
+			echo `cmd.exe //c \""${ENV_TOOL_PATH}"\" && $@`
 			echo "after call ${ENV_TOOL_PATH}"
 		fi
 	else
