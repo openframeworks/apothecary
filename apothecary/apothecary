@@ -943,10 +943,12 @@ function with_vs_env(){
 	if [ $VS_VER -gt 14 ] ; then
 		if [ $ARCH == 32 ] ; then
             #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $@"
-			cmd.exe /C "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" & $@"
+			cmd.exe /C "call $@"
 		elif [ $ARCH == 64 ] ; then
             #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
-			cmd.exe /C "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" & $@"			
+			echo "before call"
+			cmd.exe /C "call $@"	
+			echo "after call"
 		fi
 	else
 		#statements
