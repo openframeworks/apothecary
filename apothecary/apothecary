@@ -946,14 +946,14 @@ function with_vs_env(){
 			cmd.exe /C "call $@"
 		elif [ $ARCH == 64 ] ; then
             #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
-			echo "before call"
+			# echo "before call"
 			# ls "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build"
 			echo "" > with_env.bat
 			cat "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" >> with_env.bat
 			echo $@ >> with_env.bat
 			# cmd.exe \/C "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
 			cmd.exe //C "call with_env.bat"
-			cat with_env.bat
+			# cat with_env.bat
 			echo "after call"
 		fi
 	else

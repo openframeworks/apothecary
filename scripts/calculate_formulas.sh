@@ -48,7 +48,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             # Dependencies for other formulas (cairo)
             # "pixman"
             # "pkg-config"
-            # "zlib"
+            "zlib"
             "libpng"
             # "freetype"
 
