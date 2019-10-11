@@ -941,19 +941,25 @@ function gitclone() {
 
 function with_vs_env(){
 	if [ $VS_VER -gt 14 ] ; then
+		# we want to make sure that the build command is called with the correct environment variables set up 
+		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 		if [ $ARCH == 32 ] ; then
-            #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $@"
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $@"
+			echo "" > with_env.bat # cleanup temporary bat file
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
+			echo $@ >> with_env.bat
+			cmd.exe //C "call with_env.bat"
 		elif [ $ARCH == 64 ] ; then
-            #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
+			echo "" > with_env.bat # cleanup temporary bat file
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
+			echo $@ >> with_env.bat
+			cmd.exe //C "call with_env.bat"
 		fi
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $@"
+			cmd.exe \/c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $@"
 		elif [ $ARCH == 64 ] ; then
-	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $@"
+	        cmd.exe \/c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $@"
 		fi
 	fi
 }
