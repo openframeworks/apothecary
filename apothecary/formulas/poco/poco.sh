@@ -165,21 +165,21 @@ function build() {
 		if [[ $VS_VER -gt 14 ]]; then
 
 				if [ $ARCH == 32 ] ; then
-					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
-					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
+					cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
+					cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
 				elif [ $ARCH == 64 ] ; then
-					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
-					cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
+					cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
+					cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 				fi
 
 			else
 
 				if [ $ARCH == 32 ] ; then
-					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
-					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
+					cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
+					cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
 				elif [ $ARCH == 64 ] ; then
-					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
-					cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
+					cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
+					cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
 				fi
 		fi
 
