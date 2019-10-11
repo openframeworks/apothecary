@@ -948,13 +948,11 @@ function with_vs_env(){
 			cat "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
-			cat with_env.bat | echo
 		elif [ $ARCH == 64 ] ; then
 			echo "" > with_env.bat # cleanup temporary bat file
 			cat "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
-			cat with_env.bat | echo
 		fi
 	else
 		#statements
