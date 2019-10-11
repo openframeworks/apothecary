@@ -952,7 +952,7 @@ function with_vs_env(){
 			cat "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat" >> with_env.bat
 			echo $@ >> with_env.bat
 			# cmd.exe \/C "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
-			cmd.exe \/C "with_env.bat"
+			cmd.exe //C "call with_env.bat"
 			cat with_env.bat
 			echo "after call"
 		fi
