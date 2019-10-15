@@ -474,8 +474,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
-      -DCMAKE_CXX_FLAGS=-I${EMSCRIPTEN}/system/lib/libcxxabi/include/ \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
