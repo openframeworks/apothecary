@@ -6,7 +6,7 @@
 #
 
 # define the version
-VER=0.9.8.5
+VER=0.9.8.6
 
 # tools for git use
 GIT_URL=https://github.com/g-truc/glm
