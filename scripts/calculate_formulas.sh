@@ -70,7 +70,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "tess2"
             "uriparser"
 
-            # Formulas with depenencies in the end
+            # # Formulas with depenencies in the end
             "cairo"
             "uri"
         )
