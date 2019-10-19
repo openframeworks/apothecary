@@ -100,16 +100,19 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "osx" ]; then
-		  if [ "$ARCH" == "32" ] ; then
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
         export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		  elif [ "$ARCH" == "64" ] ; then
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ]; then
 		  export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		  fi
-        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-        make clean
-	    make -j${PARALLEL_MAKE}
+		else
+		  export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		fi
+		export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
+		make clean
+	   make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then

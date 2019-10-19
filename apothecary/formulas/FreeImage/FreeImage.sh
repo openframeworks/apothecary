@@ -100,10 +100,12 @@ ENDDELIM
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
-		if [ "$ARCH" == "32" ] ; then
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]  ; then
 			MACOSX_ARCHS="-arch i386"
-		elif [ "$ARCH" == "64" ] ; then
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
 			MACOSX_ARCHS="-arch x86_64"
+		else
+			MACOSX_ARCHS="-arch i386 -arch x86_64"
 		fi
 		make -j${PARALLEL_MAKE} -f Makefile.osx
 		strip -x Dist/libfreeimage.a

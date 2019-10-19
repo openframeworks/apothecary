@@ -50,35 +50,51 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
         rm -f librtaudio.a
         rm -f librtaudio-x86_64
-		if [ "$ARCH" == "32" ] ; then
-		/usr/bin/g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -stdlib=libc++ \
-					-arch i386 \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__MACOSX_CORE__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]; then
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch i386 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
 
-		/usr/bin/ar ruv librtaudio.a RtAudio.o
-		/usr/bin/ranlib librtaudio.a
-		elif [ "$ARCH" == "64" ] ; then
-		# Compile the program
-		/usr/bin/g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -stdlib=libc++ \
-					-arch x86_64 \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__MACOSX_CORE__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			# Compile the program
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch x86_64 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
 
-		/usr/bin/ar ruv librtaudio.a RtAudio.o
-		/usr/bin/ranlib librtaudio.a
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+		else
+			# Compile the program
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch i386 -arch x86_64 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
+
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+
 		fi
 
 		#/usr/bin/g++ -O2 \

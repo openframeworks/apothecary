@@ -61,10 +61,12 @@ function build() {
 
 		STD_LIB_FLAGS="-stdlib=libc++"
 		OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
-		if [ "$ARCH" == "32" ] ; then
-		export CFLAGS="-arch i386 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		elif [ "$ARCH" == "64" ] ; then
-		export CFLAGS="-arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+			export CFLAGS="-arch i386 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ]  ; then
+			export CFLAGS="-arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+			export CFLAGS="-arch i386 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		fi
 		export CPPFLAGS=$CFLAGS
 		export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"

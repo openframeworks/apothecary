@@ -96,14 +96,18 @@ function build() {
         # mkdir -p build_osx
         # cd build_osx
         # 32 bit
-        if [ "$ARCH" == "32" ] ; then
-        cmake -G 'Unix Makefiles' $buildOpts \
-        -DCMAKE_C_FLAGS="-arch i386 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-        -DCMAKE_CXX_FLAGS="-arch i386 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
-        elif [ "$ARCH" == "64" ] ; then
-         cmake -G 'Unix Makefiles' $buildOpts \
-        -DCMAKE_C_FLAGS="-arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-        -DCMAKE_CXX_FLAGS="-arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch i386 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch i386 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        else
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
         fi
         make assimp -j${PARALLEL_MAKE}
 

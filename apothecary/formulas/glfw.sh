@@ -59,21 +59,29 @@ function build() {
 		# OS X needs both arches specified to be universal
 		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call
 		if [ "$TYPE" == "osx" ] ; then
-			if [ "$ARCH" == "32" ] ; then
-			cmake .. -DGLFW_BUILD_DOCS=OFF \
+			if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+				cmake .. -DGLFW_BUILD_DOCS=OFF \
+						-DGLFW_BUILD_TESTS=OFF \
+						-DGLFW_BUILD_EXAMPLES=OFF \
+						-DBUILD_SHARED_LIBS=OFF \
+						-DCMAKE_BUILD_TYPE=Release \
+						-DCMAKE_C_FLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+						$EXTRA_CONFIG
+			elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+				cmake .. -DGLFW_BUILD_DOCS=OFF \
+						-DGLFW_BUILD_TESTS=OFF \
+						-DGLFW_BUILD_EXAMPLES=OFF \
+						-DBUILD_SHARED_LIBS=OFF \
+						-DCMAKE_BUILD_TYPE=Release \
+						-DCMAKE_C_FLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+						$EXTRA_CONFIG
+			else
+				cmake .. -DGLFW_BUILD_DOCS=OFF \
 					-DGLFW_BUILD_TESTS=OFF \
 					-DGLFW_BUILD_EXAMPLES=OFF \
 					-DBUILD_SHARED_LIBS=OFF \
 					-DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_C_FLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					$EXTRA_CONFIG
-			elif [ "$ARCH" == "64" ] ; then
-			cmake .. -DGLFW_BUILD_DOCS=OFF \
-					-DGLFW_BUILD_TESTS=OFF \
-					-DGLFW_BUILD_EXAMPLES=OFF \
-					-DBUILD_SHARED_LIBS=OFF \
-					-DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_C_FLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					-DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					$EXTRA_CONFIG
 			fi
 			make clean

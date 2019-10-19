@@ -87,38 +87,62 @@ function build() {
 	elif [ "$TYPE" == "osx" ]; then
         
         ./buildconf
-        if [ "$ARCH" == "32" ] ; then
-        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure \
-            --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x86 \
-            --enable-static \
-            --disable-shared \
-            --host=x86-apple-darwin
-        make clean
-	    make -j${PARALLEL_MAKE}
-        make install
-        cp -r build/osx/x86/* build/osx/
-        lipo -create build/osx/x86/lib/libcurl.a \
-        -output build/osx/lib/libcurl.a
-        make install
-        elif [ "$ARCH" == "64" ] ; then
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure \
-            --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x64 \
-            --enable-static \
-            --disable-shared \
-            --host=x86_64-apple-darwin
-        make clean
-	    make -j${PARALLEL_MAKE}
-        make install
-        cp -r build/osx/x64/* build/osx/
-        lipo -create build/osx/x64/lib/libcurl.a \
-        -output build/osx/lib/libcurl.a
-        make install
+            if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x86 \
+                --enable-static \
+                --disable-shared \
+                --host=x86-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+            cp -r build/osx/x86/* build/osx/
+            lipo -create build/osx/x86/lib/libcurl.a \
+            -output build/osx/lib/libcurl.a
+            make install
+        elif  [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x64 \
+                --enable-static \
+                --disable-shared \
+                --host=x86_64-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+            cp -r build/osx/x64/* build/osx/
+            lipo -create build/osx/x64/lib/libcurl.a \
+            -output build/osx/lib/libcurl.a
+            make install
+        else
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x86 \
+                --enable-static \
+                --disable-shared \
+                --host=x86-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x64 \
+                --enable-static \
+                --disable-shared \
+                --host=x86_64-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
         fi
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         ./buildconf

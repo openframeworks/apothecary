@@ -65,12 +65,15 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-		if [ "$ARCH" == "32" ] ; then
-		export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		elif [ "$ARCH" == "64" ] ; then
-		export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]; then
+			export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+			export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+			export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+			export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+			export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		fi
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
 
