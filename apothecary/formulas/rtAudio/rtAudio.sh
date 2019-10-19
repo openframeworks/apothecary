@@ -50,21 +50,52 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
         rm -f librtaudio.a
         rm -f librtaudio-x86_64
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]; then
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch i386 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
 
-		# Compile the program
-		/usr/bin/g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -stdlib=libc++ \
-					 -arch i386 -arch x86_64 \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__MACOSX_CORE__ \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			# Compile the program
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch x86_64 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
 
-		/usr/bin/ar ruv librtaudio.a RtAudio.o
-		/usr/bin/ranlib librtaudio.a
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+		else
+			# Compile the program
+			/usr/bin/g++ -O2 \
+						-Wall \
+						-fPIC \
+						-stdlib=libc++ \
+						-arch i386 -arch x86_64 \
+						-Iinclude \
+						-DHAVE_GETTIMEOFDAY \
+						-D__MACOSX_CORE__ \
+						-c RtAudio.cpp \
+						-o RtAudio.o
+
+			/usr/bin/ar ruv librtaudio.a RtAudio.o
+			/usr/bin/ranlib librtaudio.a
+
+		fi
 
 		#/usr/bin/g++ -O2 \
 		#			 -Wall \
@@ -86,13 +117,13 @@ function build() {
 		unset TMP
 		unset TEMP
 		local API="--with-wasapi --with-ds" # asio as well?
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
 			cmake .. -G "Visual Studio $VS_VER"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 			vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
 			vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
 			cmake .. -G "Visual Studio $VS_VER Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
@@ -128,11 +159,11 @@ function copy() {
 	# libs
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_32/Release/rtaudio_static.lib $1/lib/$TYPE/Win32/rtAudio.lib
 			cp -v build_vs_32/Debug/rtaudio_static.lib $1/lib/$TYPE/Win32/rtAudioD.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
 			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib

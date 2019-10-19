@@ -326,8 +326,7 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 			echo "$HELP" ; exit 0 ;;
 	esac
 done
-shift $(expr $OPTIND - 1)
-
+shift $(( $OPTIND - 1))
 
 # used when building for vs - set to 15 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
@@ -944,19 +943,25 @@ function gitclone() {
 
 function with_vs_env(){
 	if [ $VS_VER -gt 14 ] ; then
+		# we want to make sure that the build command is called with the correct environment variables set up 
+		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 		if [ $ARCH == 32 ] ; then
-            #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $@"
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && $@"
+			echo "" > with_env.bat # cleanup temporary bat file
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
+			echo $@ >> with_env.bat
+			cmd.exe //C "call with_env.bat"
 		elif [ $ARCH == 64 ] ; then
-            #echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
-			cmd.exe /c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\" && $@"
+			echo "" > with_env.bat # cleanup temporary bat file
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
+			echo $@ >> with_env.bat
+			cmd.exe //C "call with_env.bat"
 		fi
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
-			cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $@"
+			cmd.exe \/c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && $@"
 		elif [ $ARCH == 64 ] ; then
-	        cmd.exe /c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $@"
+	        cmd.exe \/c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $@"
 		fi
 	fi
 }
@@ -1201,6 +1206,11 @@ if [ "$HOST_OS" == "osx" ] ; then
 	XCODE_DEV_ROOT=$($XS) # Sets to path from Xcode Path
 	OSX_SDK_VER=$($OSX_LATEST_SDK) # sets to latest OSX SDK
 	IOS_SDK_VER=$($IOS_LATEST_SDK) # sets to latest iOS SDK
+	OSX_VERSION=$(sw_vers -productVersion | awk '{if($1>10.13)print$1}' )
+	OSX_no32bit="10.13"
+	if [ "$OSX_VERSION>$OSX_no32bit" ]; then 
+		ARCH=64
+	fi
 fi
 
 # check if we have a valid build type
@@ -1211,6 +1221,12 @@ if [ $typeIsValid == 0 ] ; then
 	exit 1
 fi
 echoVerbose "Build type: $TYPE"
+
+# OSX_VERSION=$(sw_vers -productVersion | awk '{if($1>10.13)print$1}' )
+# OSX_no32bit="10.13"
+# if [ "$OSX_VERSION>$OSX_no32bit" ]; then 
+# 	ARCH=64
+# fi
 
 # check if we have a valid arch
 if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != arm64 -a $ARCH != x86 ] ; then

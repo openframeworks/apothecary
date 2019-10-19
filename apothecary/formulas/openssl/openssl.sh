@@ -43,11 +43,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if  [ "$TYPE" == "vs" ] ; then
-		if patch -p1 -u -N --dry-run --silent < $FORMULA_DIR/winOpenSSL.patch 2>/dev/null ; then
-			patch -p1 -u < $FORMULA_DIR/winOpenSSL.patch
-		fi
-	elif [ "$TYPE" == "tvos" ]; then
+	if [ "$TYPE" == "tvos" ]; then
 		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
 	fi
 }
@@ -59,47 +55,93 @@ function build() {
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
 		rm -f libcrypto.a libssl.a
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+			local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
 
-		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
+			rm -f libcrypto.a
+			rm -f libssl.a
+			KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			make clean
+			make -j1 depend # running make multithreaded is unreliable
+			make -j1
+			make -j1 install
 
-		rm -f libcrypto.a
-		rm -f libssl.a
-		KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-		make clean
-		make -j1 depend # running make multithreaded is unreliable
-		make -j1
-		make -j1 install
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+			cp -r $BUILD_TO_DIR/x86/* $BUILD_TO_DIR/
+
+			lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+			-output $BUILD_TO_DIR/lib/libcrypto.a
+
+			lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
+			-output $BUILD_TO_DIR/lib/libssl.a
+
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+
+			rm -f libcrypto.a
+			rm -f libssl.a
+			KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			make clean
+			make -j1 depend
+			make -j1
+			make -j1 install
+
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+			cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+
+			lipo -create $BUILD_TO_DIR/x64/lib/libcrypto.a \
+			-output $BUILD_TO_DIR/lib/libcrypto.a
+
+			lipo -create $BUILD_TO_DIR/x64/lib/libssl.a \
+			-output $BUILD_TO_DIR/lib/libssl.a
+		else
+			local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
+
+			rm -f libcrypto.a
+			rm -f libssl.a
+			KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			make clean
+			make -j1 depend # running make multithreaded is unreliable
+			make -j1
+			make -j1 install
 
 
-		rm -f libcrypto.a
-		rm -f libssl.a
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
-		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-		make clean
-		make -j1 depend
-		make -j1
-		make -j1 install
+			rm -f libcrypto.a
+			rm -f libssl.a
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+			KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+			make clean
+			make -j1 depend
+			make -j1
+			make -j1 install
 
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+			local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+			cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
-		$BUILD_TO_DIR/x64/lib/libcrypto.a \
-		-output $BUILD_TO_DIR/lib/libcrypto.a
+			lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+			$BUILD_TO_DIR/x64/lib/libcrypto.a \
+			-output $BUILD_TO_DIR/lib/libcrypto.a
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
-		$BUILD_TO_DIR/x64/lib/libssl.a \
-		-output $BUILD_TO_DIR/lib/libssl.a
+			lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
+			$BUILD_TO_DIR/x64/lib/libssl.a \
+			-output $BUILD_TO_DIR/lib/libssl.a
+		fi
 
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
 		fi
 		with_vs_env "nmake"
@@ -289,7 +331,7 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ]; then
 		PREFIX=`pwd`/build/
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

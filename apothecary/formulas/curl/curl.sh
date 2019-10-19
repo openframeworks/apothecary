@@ -51,7 +51,7 @@ function build() {
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
 
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
         else
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
@@ -85,39 +85,65 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        
         ./buildconf
+            if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x86 \
+                --enable-static \
+                --disable-shared \
+                --host=x86-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+            cp -r build/osx/x86/* build/osx/
+            lipo -create build/osx/x86/lib/libcurl.a \
+            -output build/osx/lib/libcurl.a
+            make install
+        elif  [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x64 \
+                --enable-static \
+                --disable-shared \
+                --host=x86_64-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+            cp -r build/osx/x64/* build/osx/
+            lipo -create build/osx/x64/lib/libcurl.a \
+            -output build/osx/lib/libcurl.a
+            make install
+        else
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x86 \
+                --enable-static \
+                --disable-shared \
+                --host=x86-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
 
-        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure \
-            --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x86 \
-            --enable-static \
-            --disable-shared \
-            --host=x86-apple-darwin
-        make clean
-	    make -j${PARALLEL_MAKE}
-        make install
-
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		./configure \
-            --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x64 \
-            --enable-static \
-            --disable-shared \
-            --host=x86_64-apple-darwin
-        make clean
-	    make -j${PARALLEL_MAKE}
-        make install
-
-        cp -r build/osx/x64/* build/osx/
-
-        lipo -create build/osx/x86/lib/libcurl.a \
-                     build/osx/x64/lib/libcurl.a \
-                    -output build/osx/lib/libcurl.a
-	    make install
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            ./configure \
+                --with-darwinssl \
+                --prefix=$BUILD_DIR/curl/build/osx/x64 \
+                --enable-static \
+                --disable-shared \
+                --host=x86_64-apple-darwin
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+        fi
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         ./buildconf
         if [ "${TYPE}" == "tvos" ]; then
@@ -188,10 +214,10 @@ function copy() {
 	cp -Rv include/curl/* $1/include/curl/
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v "build/Win32/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v "build/Win64/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
 		fi
@@ -213,7 +239,7 @@ function copy() {
     # elif [ "$TYPE" == "tvos" ]; then
     #     cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
     # elif [ "$TYPE" == "vs" ]; then
-		# if [ $ARCH == 32 ] ; then
+		# if [ "$ARCH" == "32" ] ; then
     #         cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
     #     else
     #         cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h

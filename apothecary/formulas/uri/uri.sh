@@ -44,11 +44,11 @@ function build() {
 		cd build_vs$ARCH
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_$ARCH/lib
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			cmake .. -G "Visual Studio $VS_VER"  
 			vs-build "ALL_BUILD.vcxproj"
 			vs-build "ALL_BUILD.vcxproj" Build "Debug"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			cmake .. -G "Visual Studio $VS_VER Win64"  
 			vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
 			vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
@@ -60,10 +60,17 @@ function build() {
 	    cd _build
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage/lib
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
+        if [ "$ARCH" == "32" ] ; then
 		cmake -DCMAKE_BUILD_TYPE=Release \
-			  -DCMAKE_C_FLAGS="-arch i386 -arch x86_64" \
-			  -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -std=c++11 -stdlib=libc++" \
+			  -DCMAKE_C_FLAGS="-arch i386" \
+			  -DCMAKE_CXX_FLAGS="-arch i386 -std=c++11 -stdlib=libc++" \
 			  ..
+        elif [ "$ARCH" == "64" ] ; then
+        cmake -DCMAKE_BUILD_TYPE=Release \
+			  -DCMAKE_C_FLAGS="-arch x86_64" \
+			  -DCMAKE_CXX_FLAGS="-arch x86_64 -std=c++11 -stdlib=libc++" \
+			  ..
+        fi
 		make -j${PARALLEL_MAKE}
 	
 	elif [ "$TYPE" == "ios" ]; then
@@ -277,11 +284,11 @@ function copy() {
 		: #noop by now
 		
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs32/src/Release/network-uri.lib $1/lib/$TYPE/Win32/
 			cp -v build_vs32/src/Debug/network-uri.lib $1/lib/$TYPE/Win32/network-uri_debug.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs64/src/Release/network-uri.lib $1/lib/$TYPE/x64/
 			cp -v build_vs64/src/Debug/network-uri.lib $1/lib/$TYPE/x64/network-uri_debug.lib

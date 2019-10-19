@@ -35,8 +35,14 @@ function build() {
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+			local FAT_LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			local FAT_LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+			local FAT_LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+			local FAT_LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		fi
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
@@ -58,7 +64,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] || [ "$ARCH" == "32" ]; then
 			PLATFORM="Win32"
 		else
 			PLATFORM="x64"

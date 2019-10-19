@@ -34,10 +34,10 @@ function build() {
 		unset TMP
 		unset TEMP
 		cd VS-videoInputcompileAsLib
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			vs-build "videoInput.sln" Build "Release|Win32"
 			vs-build "videoInput.sln" Build "Debug|Win32"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			vs-build "videoInput.sln" Build "Release|x64"
 			vs-build "videoInput.sln" Build "Debug|x64"
 		fi
@@ -55,11 +55,11 @@ function copy() {
 	cp -Rv videoInputSrcAndDemos/libs/videoInput/videoInput.h $1/include
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/Debug/videoInputD.lib $1/lib/$TYPE/Win32/videoInputD.lib
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/Release/videoInput.lib $1/lib/$TYPE/Win32/videoInput.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Debug/videoInputD.lib $1/lib/$TYPE/x64/videoInputD.lib
 			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Release/videoInput.lib $1/lib/$TYPE/x64/videoInput.lib

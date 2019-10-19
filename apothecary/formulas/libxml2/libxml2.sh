@@ -41,7 +41,7 @@ function build() {
 
         vs-upgrade libxml2.vcxproj
 
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             vs-build libxml2.vcxproj Build "Release|Win32"
         else
             vs-build libxml2.vcxproj Build "Release|x64"
@@ -74,8 +74,16 @@ function build() {
         make -j${PARALLEL_MAKE}
         make install
     elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        else
+            export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        fi
 
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
@@ -114,8 +122,16 @@ function build() {
 
 
     elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        if [ "$ARCH" == "32" ] ; then
+            export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        elif [ "$ARCH" == "64" ] ; then
+            export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        else
+            export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+            export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        fi
 
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
@@ -164,10 +180,10 @@ function copy() {
     cp -Rv include/libxml/* $1/include/libxml/
 
     if [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             mkdir -p $1/lib/$TYPE/Win32
             cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/Win32/
-        elif [ $ARCH == 64 ] ; then
+        elif [ "$ARCH" == "64" ] ; then
             mkdir -p $1/lib/$TYPE/x64
             cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
         fi

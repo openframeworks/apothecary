@@ -100,8 +100,14 @@ ENDDELIM
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]  ; then
+			MACOSX_ARCHS="-arch i386"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			MACOSX_ARCHS="-arch x86_64"
+		else
+			MACOSX_ARCHS="-arch i386 -arch x86_64"
+		fi
 		make -j${PARALLEL_MAKE} -f Makefile.osx
-
 		strip -x Dist/libfreeimage.a
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
@@ -362,7 +368,7 @@ function copy() {
 		#mkdir -p $1/include/x64
 	    cp -v Dist/x32/*.h $1/include #/Win32/
 		#cp -v Dist/x64/*.h $1/include/x64/
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
 			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll

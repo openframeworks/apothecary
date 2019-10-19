@@ -44,8 +44,13 @@ function build() {
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch i386 -arch x86_64 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
-
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+			local FAT_LDFLAGS="-arch i386 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			local FAT_LDFLAGS="-arch x86_64 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
+		else
+			local FAT_LDFLAGS="-arch i386 -arch x86_64 -stdlib=libstdc++ -Xarch_x86_64 -stdlib=libc++"
+		fi
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
@@ -59,9 +64,9 @@ function build() {
 
 		vs-upgrade libpng.sln
 
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			vs-build libpng.sln Build "LIB Release|x86"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			vs-build libpng.sln Build "LIB Release|x64"
 		fi
 	fi
@@ -88,7 +93,7 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			echo "to do clean vs build"
 		fi
 	else

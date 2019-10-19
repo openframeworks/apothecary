@@ -64,7 +64,7 @@ function prepare() {
 	    echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
 	elif [ "$TYPE" == "vs" ]; then
-		cmd.exe /c bootstrap.bat
+		cmd.exe //c bootstrap.bat
 	fi
 }
 
@@ -80,7 +80,13 @@ function build() {
 
 
 	elif [ "$TYPE" == "osx" ]; then
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ]; then
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		else
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		fi
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
@@ -147,7 +153,7 @@ function build() {
 			BITCODE=-fembed-bitcode;
 			MIN_IOS_VERSION=9.0
         elif [ "$TYPE" == "ios" ]; then
-	        local CROSS_TOP_IOS="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer"
+	      local CROSS_TOP_IOS="${DEVELOPER}/Platforms/iPhoneOS.platform/Developer"
 			local CROSS_SDK_IOS="iPhoneOS${SDKVERSION}.sdk"
 			local CROSS_TOP_SIM="${DEVELOPER}/Platforms/iPhoneSimulator.platform/Developer"
 			local CROSS_SDK_SIM="iPhoneSimulator${SDKVERSION}.sdk"

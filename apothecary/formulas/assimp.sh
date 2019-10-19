@@ -96,9 +96,19 @@ function build() {
         # mkdir -p build_osx
         # cd build_osx
         # 32 bit
-        cmake -G 'Unix Makefiles' $buildOpts \
-        -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-        -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch i386 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch i386 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        else
+            cmake -G 'Unix Makefiles' $buildOpts \
+            -DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+            -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        fi
         make assimp -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "vs" ] ; then
@@ -121,12 +131,12 @@ function build() {
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             mkdir -p build_vs_32
             cd build_vs_32
             cmake .. -G "$generatorName" $buildOpts
             vs-build "Assimp.sln" build "Release|Win32"
-        elif [ $ARCH == 64 ] ; then
+        elif [ "$ARCH" == "64" ] ; then
             mkdir -p build_vs_64
             cd build_vs_64
             generatorName+=' Win64'
@@ -245,14 +255,14 @@ function copy() {
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             mkdir -p $1/lib/$TYPE/Win32
             # copy .lib and .dll artifacts
             cp -v build_vs_32/code/Release/*.lib $1/lib/$TYPE/Win32
             cp -v build_vs_32/code/Release/*.dll $1/lib/$TYPE/Win32
             # copy header files
             cp -v -r build_vs_32/include/* $1/include
-        elif [ $ARCH == 64 ] ; then
+        elif [ "$ARCH" == "64" ] ; then
             mkdir -p $1/lib/$TYPE/x64
             # copy .lib and .dll artifacts
             cp -v build_vs_64/code/Release/*.lib $1/lib/$TYPE/x64
@@ -287,9 +297,9 @@ function copy() {
 function clean() {
 
     if [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
+        if [ "$ARCH" == "32" ] ; then
             vs-clean "build_vs_32/Assimp.sln";
-        elif [ $ARCH == 64 ] ; then
+        elif [ "$ARCH" == "64" ] ; then
             vs-clean "build_vs_64/Assimp.sln";
         fi
         rm -f CMakeCache.txt

@@ -45,7 +45,7 @@ function build() {
 		cd scripts
 
 		if [[ $VS_VER -gt 14 ]]; then
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
 			else
@@ -53,7 +53,7 @@ function build() {
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
 		else
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 					vs-build "pugixml_vs2015.vcxproj" build "Release"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug"
 			else
@@ -73,7 +73,13 @@ function build() {
 			 -o src/pugixml.o
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ]; then
+      	export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
+			export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+			export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		fi
 		clang++ -O2  $CFLAGS \
 			 -Wall \
 			 -Iinclude \
@@ -136,21 +142,21 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		if [[ $VS_VER -gt 14 ]]; then
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
 				cp -v "scripts/vs2017/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
 			fi
 		else
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
 				cp -v "scripts/vs2015/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib

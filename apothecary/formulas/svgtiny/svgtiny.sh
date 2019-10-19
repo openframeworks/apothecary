@@ -77,14 +77,14 @@ function build() {
 		unset TEMP
 		if [ $VS_VER -eq 14 ]; then
 			cd vs2015
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
 			else
 				vs-build svgtiny.sln Build "Release|x64"
 			fi
 		elif [ $VS_VER -eq 15 ]; then
 			cd vs2017
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
 			else
 				vs-build svgtiny.sln Build "Release|x64"
@@ -100,11 +100,19 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ]; then
+		  export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+		  export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-        make clean
-	    make -j${PARALLEL_MAKE}
+		fi
+		export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
+		make clean
+	   make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
@@ -153,18 +161,18 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $VS_VER -eq 14 ]; then
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "vs2015/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
 		elif [ $VS_VER -eq 15 ]; then
-			if [ $ARCH == 32 ] ; then
+			if [ "$ARCH" == "32" ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "vs2017/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
-			elif [ $ARCH == 64 ] ; then
+			elif [ "$ARCH" == "64" ] ; then
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2017/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi

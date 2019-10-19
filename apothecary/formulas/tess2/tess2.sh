@@ -61,8 +61,13 @@ function build() {
 
 		STD_LIB_FLAGS="-stdlib=libc++"
 		OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
-
-		export CFLAGS="-arch i386 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+			export CFLAGS="-arch i386 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		elif [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ]  ; then
+			export CFLAGS="-arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		else
+			export CFLAGS="-arch i386 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		fi
 		export CPPFLAGS=$CFLAGS
 		export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"
 		export LDFLAGS="$LINKFLAGS"
@@ -79,12 +84,12 @@ function build() {
 		unset TMP
 		unset TEMP
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p build_vs_32
 			cd build_vs_32
 			cmake .. -G "Visual Studio $VS_VER" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 			vs-build "tess2.sln"
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
 			cmake .. -G "Visual Studio $VS_VER Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
@@ -347,10 +352,10 @@ function copy() {
 	# lib
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
+		if [ "$ARCH" == "32" ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_32/Release/tess2.lib $1/lib/$TYPE/Win32/tess2.lib
-		elif [ $ARCH == 64 ] ; then
+		elif [ "$ARCH" == "64" ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/Release/tess2.lib $1/lib/$TYPE/x64/tess2.lib
 		fi
