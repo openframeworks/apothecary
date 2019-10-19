@@ -48,7 +48,7 @@ BUILD_DEPENDENCIES=1
 HOST_OS= # compile os ("osx", "windows", "linux")
 TYPE= # library build type ("osx", "ios", "vs", etc)
 ARCH=32 # library build arch, 32 or 64 bit (not used for some build types)
-
+EXPLICIT_ARCH=0 #see if the arch is specified (bool)
 # full path to this script's dir
 APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -299,7 +299,9 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 		t) # set the library build type
 		   TYPE="$OPTARG" ;;
 		a) # set the architecture
-		   ARCH=$OPTARG ;;
+		   ARCH=$OPTARG 
+			EXPLICIT_ARCH=1
+			;;
 		b) # set the build dir
 		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
