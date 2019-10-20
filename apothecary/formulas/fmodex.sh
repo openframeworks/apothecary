@@ -43,11 +43,9 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "osx" ]; then
-
 		cd lib/osx
 		install_name_tool -id "@executable_path/libfmodex.dylib" libfmodex.dylib
 		cd ../
-
 	fi
 
 

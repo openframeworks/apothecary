@@ -77,63 +77,63 @@ environment:
     VS_NAME: 2017
     BUNDLE: 4
   # VisualStudio 2015 32 bit Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 32
-    VS_NAME: 2015
-    BUNDLE: 1
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 32
-    VS_NAME: 2015
-    BUNDLE: 2
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 32
-    VS_NAME: 2015
-    BUNDLE: 3
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 32
-    VS_NAME: 2015
-    BUNDLE: 4
-  # VisualStudio 2015 64 bit Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x64
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 64
-    VS_NAME: 2015
-    BUNDLE: 1
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x64
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 64
-    VS_NAME: 2015
-    BUNDLE: 2
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x64
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 64
-    VS_NAME: 2015
-    BUNDLE: 3
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x64
-    TARGET: vs
-    VS_VER: 14
-    ARCH: 64
-    VS_NAME: 2015
-    BUNDLE: 4
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x86
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 32
+  #   VS_NAME: 2015
+  #   BUNDLE: 1
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x86
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 32
+  #   VS_NAME: 2015
+  #   BUNDLE: 2
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x86
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 32
+  #   VS_NAME: 2015
+  #   BUNDLE: 3
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x86
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 32
+  #   VS_NAME: 2015
+  #   BUNDLE: 4
+  # # VisualStudio 2015 64 bit Building
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x64
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 64
+  #   VS_NAME: 2015
+  #   BUNDLE: 1
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x64
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 64
+  #   VS_NAME: 2015
+  #   BUNDLE: 2
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x64
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 64
+  #   VS_NAME: 2015
+  #   BUNDLE: 3
+  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+  #   platform: x64
+  #   TARGET: vs
+  #   VS_VER: 14
+  #   ARCH: 64
+  #   VS_NAME: 2015
+  #   BUNDLE: 4
 
 configuration: Debug
 shallow_clone: false

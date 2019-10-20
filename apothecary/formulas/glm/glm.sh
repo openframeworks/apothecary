@@ -6,7 +6,7 @@
 #
 
 # define the version
-VER=0.9.9.5
+VER=0.9.8.6
 
 # tools for git use
 GIT_URL=https://github.com/g-truc/glm
@@ -16,7 +16,7 @@ GIT_TAG=0.9.9.5
 function download() {
 	# wget -nv https://github.com/g-truc/glm/releases/download/$VER/glm-$VER.zip
     # unzip glm-$VER.zip
-	git clone --branch $GIT_TAG --depth=1 $GIT_URL
+	git clone --branch $GIT_TAG --depth=1 $GIT_URL 
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -39,7 +39,6 @@ function copy() {
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	##cp -v copying.txt $1/license/
 	cp -v readme.md $1/license/
 }
 
