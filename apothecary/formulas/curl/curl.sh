@@ -85,9 +85,8 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-        
         ./buildconf
-            if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
+        if [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "32" ] ; then
             export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
             export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
             ./configure \
@@ -99,9 +98,10 @@ function build() {
             make clean
             make -j${PARALLEL_MAKE}
             make install
+
             cp -r build/osx/x86/* build/osx/
             lipo -create build/osx/x86/lib/libcurl.a \
-            -output build/osx/lib/libcurl.a
+                 -output build/osx/lib/libcurl.a
             make install
         elif  [ "$EXPLICIT_ARCH" == "1" && "$ARCH" == "64" ] ; then
             export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -115,9 +115,10 @@ function build() {
             make clean
             make -j${PARALLEL_MAKE}
             make install
+
             cp -r build/osx/x64/* build/osx/
             lipo -create build/osx/x64/lib/libcurl.a \
-            -output build/osx/lib/libcurl.a
+                 -output build/osx/lib/libcurl.a
             make install
         else
             export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -143,6 +144,13 @@ function build() {
             make clean
             make -j${PARALLEL_MAKE}
             make install
+
+            cp -r build/osx/x64/* build/osx/
+
+            lipo -create build/osx/x86/lib/libcurl.a \
+                         build/osx/x64/lib/libcurl.a \
+                 -output build/osx/lib/libcurl.a
+	        make install
         fi
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         ./buildconf
