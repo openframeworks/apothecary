@@ -145,8 +145,8 @@ function build() {
 		else
 			./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					CFLAGS="-Os -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					LDFLAGS="-arch i386 -arch x86_64" \
+					CFLAGS="-Os -arch i386 -arch x86_64" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \
