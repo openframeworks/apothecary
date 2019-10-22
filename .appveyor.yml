@@ -143,10 +143,12 @@ init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
-- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
-- if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
-- if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-
+# Update MSYS2 packages
+- '%MSYS2_PATH%\usr\bin\pacman --noconfirm --needed -Su'
+# Install unzip, dos2unix & gperf for VS and MSYS2
+- '%MSYS2_PATH%\usr\bin\pacman --noconfirm --needed -S unzip dos2unix gperf'
+# Install libxml2 on MSYS2
+- if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su ${MINGW_PACKAGE_PREFIX}-libxml2")
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
