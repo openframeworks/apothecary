@@ -182,3 +182,5 @@ deploy:
     password:
         secure: ALHv+04sZ49FZ4OCj6tTSg==
     folder: libs
+    on:
+      APPVEYOR_REPO_NAME: openframeworks/apothecary
