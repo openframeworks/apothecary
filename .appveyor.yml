@@ -5,6 +5,19 @@ environment:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
+  # MSYS2 Building
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: msys2
+    ARCH: 32
+    VS_NAME:
+    MSYSTEM: MINGW32
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: msys2
+    ARCH: 64
+    VS_NAME:
+    MSYSTEM: MINGW64
   # VisualStudio 2017 64 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x64
@@ -63,12 +76,6 @@ environment:
     ARCH: 32
     VS_NAME: 2017
     BUNDLE: 4
-  # MSYS2 Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: msys2
-    ARCH: 32
-    VS_NAME:
   # VisualStudio 2015 32 bit Building
   # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   #   platform: x86
