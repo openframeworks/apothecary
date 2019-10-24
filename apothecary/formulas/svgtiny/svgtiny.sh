@@ -56,6 +56,12 @@ function prepare() {
     	cp $FORMULA_DIR/Makefile .
 	fi
 
+	#On MINGW64, gperf generates svgtiny_color_lookup(register const char *str, register size_t len);
+	#but it is defined int the header as svgtiny_color_lookup(register const char *str, register unsigned int len);
+	 if [ "$TYPE" == "msys2" ]; then
+	 	sed -i.tmp "s|unsigned int len|size_t len|" src/svgtiny_internal.h
+	 fi
+
     gperf src/colors.gperf > src/svg_colors.c
     cp -rf libdom/bindings libdom/include/dom/
 }

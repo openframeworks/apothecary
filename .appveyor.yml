@@ -5,6 +5,19 @@ environment:
     APPVEYOR_OS_NAME: windows
     CHERE_INVOKING: 1
   matrix:
+  # MSYS2 Building
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: msys2
+    ARCH: 32
+    VS_NAME:
+    MSYSTEM: MINGW32
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: msys2
+    ARCH: 64
+    VS_NAME:
+    MSYSTEM: MINGW64
   # VisualStudio 2017 64 bit Building
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     platform: x64
@@ -63,12 +76,6 @@ environment:
     ARCH: 32
     VS_NAME: 2017
     BUNDLE: 4
-  # MSYS2 Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-    platform: x86
-    TARGET: msys2
-    ARCH: 32
-    VS_NAME:
   # VisualStudio 2015 32 bit Building
   # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   #   platform: x86
@@ -136,10 +143,12 @@ init:
 # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 - set PATH_BK=%PATH%
 - set MSYS2_PATH=c:\msys64
-- '%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm -S unzip dos2unix gperf mingw-w64-i686-libxml2"'
-- if "%TARGET%_%PLATFORM%"=="msys2_x86" set MSYSTEM=MINGW32
-- if "%TARGET%_%PLATFORM%"=="msys2_x64" set MSYSTEM=MINGW64
-
+# Update MSYS2 packages
+- '%MSYS2_PATH%\usr\bin\pacman --noconfirm --needed -Su'
+# Install unzip, dos2unix & gperf for VS and MSYS2
+- '%MSYS2_PATH%\usr\bin\pacman --noconfirm --needed -S unzip dos2unix gperf'
+# Install libxml2 on MSYS2
+- if "%TARGET%"=="msys2" (%MSYS2_PATH%\usr\bin\bash -lc "pacman --noconfirm --needed -Su ${MINGW_PACKAGE_PREFIX}-libxml2")
 # prepend PATH after msbuild command line environment has been set up.
 - set PATH=%PATH%;%MSYS2_PATH%/usr/bin;
 
@@ -173,3 +182,5 @@ deploy:
     password:
         secure: ALHv+04sZ49FZ4OCj6tTSg==
     folder: libs
+    on:
+      APPVEYOR_REPO_NAME: openframeworks/apothecary
