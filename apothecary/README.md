@@ -200,7 +200,7 @@ OpenFrameworks is cross platform and currently supports the following build type
 * linux: 32 bit linux
 * linux64: 64 bit linux
 * vs: Windows, Visual Studio
-* msys2: Windows, Msys2 (Mingw32 only)
+* msys2: Windows, Msys2 32 bits (Mingw32) and Msys2 64 bits  (Mingw64)
 * ios: iOS (can only build on OSX), arm7, arm7s, & 32 bit simulator fat libs
 * android: (requires android sdk)
 
