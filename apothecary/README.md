@@ -22,7 +22,9 @@ Requirements
 * Xcode and the iOS SDK (to compile for iOS)
 * Android SDK (to compile for android)
 
-Mac OSX & Linux users already have a Bash environment installed. Windows users are recommended to use Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io) or the MinGW shell included with [Codeblocks+MiniGW](http://www.codeblocks.org/downloads/26).
+Mac OSX & Linux users already have a Bash environment installed.
+MSYS2 Windows users should run scripts from a MINGW32 or MINGW64 shell.
+Other Windows users are recommended to use Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io).
 
 Quick Start
 ----------
