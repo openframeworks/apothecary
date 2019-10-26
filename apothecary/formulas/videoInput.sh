@@ -12,7 +12,7 @@ FORMULA_TYPES=( "vs" "msys2" )
 VER=master
 
 # tools for git use
-GIT_URL=https://github.com/arturoc/videoInput.git
+GIT_URL=https://github.com/ofTheo/videoInput.git
 GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
