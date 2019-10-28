@@ -22,7 +22,9 @@ Requirements
 * Xcode and the iOS SDK (to compile for iOS)
 * Android SDK (to compile for android)
 
-Mac OSX & Linux users already have a Bash environment installed. Windows users are recommended to use Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io) or the MinGW shell included with [Codeblocks+MiniGW](http://www.codeblocks.org/downloads/26).
+Mac OSX & Linux users already have a Bash environment installed.
+MSYS2 Windows users should run scripts from a MINGW32 or MINGW64 shell.
+Other Windows users are recommended to use Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io).
 
 Quick Start
 ----------
@@ -198,7 +200,7 @@ OpenFrameworks is cross platform and currently supports the following build type
 * linux: 32 bit linux
 * linux64: 64 bit linux
 * vs: Windows, Visual Studio
-* msys2: Windows, Msys2 (Mingw32 only)
+* msys2: Windows, Msys2 32 bits (Mingw32) and Msys2 64 bits  (Mingw64)
 * ios: iOS (can only build on OSX), arm7, arm7s, & 32 bit simulator fat libs
 * android: (requires android sdk)
 
