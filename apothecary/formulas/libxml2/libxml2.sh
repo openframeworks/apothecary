@@ -14,7 +14,7 @@ VER=2.9.4
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    wget -nv ftp://xmlsoft.org/libxml2/libxml2-${VER}.tar.gz
+    wget -v http://xmlsoft.org/sources/libxml2-${VER}.tar.gz
     tar xzf libxml2-${VER}.tar.gz
     mv libxml2-${VER} libxml2
     rm libxml2-${VER}.tar.gz
