@@ -23,18 +23,17 @@ createArchImg(){
     sudo apt-get update -q
     sudo apt-get install -y coreutils realpath gperf
 	cd $HOME
-	wget -nv http://archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 	mkdir archlinux
-	tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C archlinux/ 2> /dev/null
-	sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g archlinux/etc/pacman.conf
+	
 
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
-	cat > $ROOT/install_image.sh << EOF
-		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -Syu
-		pacman --noconfirm -r archlinux/ --config archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
+	junest -- <<EOF
+        tar xzf ~/ArchLinuxARM-rpi-2-latest.tar.gz -C ~/archlinux/ 2> /dev/null
+        sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g ~/archlinux/etc/pacman.conf
+		pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -Syu
+		pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
 EOF
-	chmod 755 $ROOT/install_image.sh
-	junest -u $ROOT/install_image.sh
 	touch $HOME/archlinux/timestamp
 }
 
@@ -83,14 +82,15 @@ relativeSoftLinks(){
 installJunest(){
 	git clone git://github.com/fsquillace/junest ~/.local/share/junest
 	export PATH=~/.local/share/junest/bin:$PATH
-	junest -u << EOF
+    junest setup
+    junest -- << EOF
         echo updating keys
         pacman -S gnupg --noconfirm
         pacman-key --populate archlinux
         pacman-key --refresh-keys
         echo updating packages
 		pacman -Syyu --noconfirm
-		pacman -S --noconfirm git flex grep gcc pkg-config make wget
+		pacman -S --noconfirm git flex grep gcc pkg-config make wget sed
 EOF
 }
 
