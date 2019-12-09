@@ -285,7 +285,11 @@ else
 fi
 
 if [ ! -z ${APPVEYOR+x} ]; then
-	TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
+    if [ "$TARGET" == "msys2" ]; then
+        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}_mingw${ARCH}.zip
+    else 
+        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
+    fi
 	7z a $TARBALL $LIBS
 else
 	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
