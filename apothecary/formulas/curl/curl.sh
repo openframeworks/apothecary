@@ -95,6 +95,8 @@ function build() {
             --prefix=$BUILD_DIR/curl/build/osx/x86 \
             --enable-static \
             --disable-shared \
+            --disable-ldap \
+            --disable-ldaps \
             --host=x86-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -107,6 +109,8 @@ function build() {
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
             --enable-static \
             --disable-shared \
+            --disable-ldap \
+            --disable-ldaps \
             --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
