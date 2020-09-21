@@ -45,7 +45,6 @@ See the help section for more options
 ```
 
 
-
 ------------
 
 2014 OpenFrameworks team  
