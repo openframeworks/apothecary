@@ -56,7 +56,7 @@ function build() {
 					 -Wall \
 					 -fPIC \
 					 -stdlib=libc++ \
-					 -arch i386 -arch x86_64 \
+					 -arch arm64 -arch x86_64 \
 					 -Iinclude \
 					 -DHAVE_GETTIMEOFDAY \
 					 -D__MACOSX_CORE__ \

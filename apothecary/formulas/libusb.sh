@@ -68,7 +68,7 @@ function build() {
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
-		CFLAGS="-arch i386 -arch x86_64" ./configure --disable-shared --enable-static
+		CFLAGS="-arch arm64 -arch x86_64" ./configure --disable-shared --enable-static
  		make -j${PARALLEL_MAKE}
 	fi
 

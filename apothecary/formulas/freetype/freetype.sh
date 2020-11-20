@@ -36,9 +36,9 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
 		local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/
 
-		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
+		# these flags are used to create a fat arm64/x86_64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_CFLAGS="-arch i386 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		local FAT_CFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
 		set -e
 		CURRENTPATH=`pwd`
