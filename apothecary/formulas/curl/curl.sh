@@ -88,16 +88,16 @@ function build() {
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
 
-        export CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		./configure \
             --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x86 \
+            --prefix=$BUILD_DIR/curl/build/osx/arm64 \
             --enable-static \
             --disable-shared \
             --disable-ldap \
             --disable-ldaps \
-            --host=x86-apple-darwin
+            --host=arm-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
@@ -118,7 +118,7 @@ function build() {
 
         cp -r build/osx/x64/* build/osx/
 
-        lipo -create build/osx/x86/lib/libcurl.a \
+        lipo -create build/osx/arm64/lib/libcurl.a \
                      build/osx/x64/lib/libcurl.a \
                     -output build/osx/lib/libcurl.a
 	    make install

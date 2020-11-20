@@ -35,7 +35,7 @@ function download() {
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
-		else
+        else
 			echoError "Invalid shasum for $FILENAME."
 		fi
 	fi
@@ -45,7 +45,9 @@ function download() {
 function prepare() {
 	if [ "$TYPE" == "tvos" ]; then
 		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
-	fi
+    elif [ "$TYPE" == "osx" ]; then
+        cp $FORMULA_DIR/13-macos-arm.conf Configurations/
+    fi
 }
 
 # executed inside the lib src dir
@@ -56,39 +58,42 @@ function build() {
 		rm -rf $BUILD_TO_DIR
 		rm -f libcrypto.a libssl.a
 
-		local BUILD_OPTS="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared"
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x86
-
+		local BUILD_OPTS_ARM="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc"
+		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/arm64
+        KERNEL_BITS=64
+                
 		rm -f libcrypto.a
 		rm -f libssl.a
-		KERNEL_BITS=32 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+		./Configure $BUILD_OPTS_ARM --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
 		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 		make clean
 		make -j1 depend # running make multithreaded is unreliable
 		make -j1
-		make -j1 install
+		make -j1 install_sw
+  
+        local BUILD_OPTS_X86_64="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc"
 
-
-		rm -f libcrypto.a
-		rm -f libssl.a
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
-		KERNEL_BITS=64 ./config $BUILD_OPTS --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-		make clean
-		make -j1 depend
-		make -j1
-		make -j1 install
+        rm -f libcrypto.a
+        rm -f libssl.a
+        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+        
+        ./Configure $BUILD_OPTS_X86_64 --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+        make clean
+        make -j1 depend
+        make -j1
+        make -j1 install_sw
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libcrypto.a \
+		lipo -create $BUILD_TO_DIR/arm64/lib/libcrypto.a \
 		$BUILD_TO_DIR/x64/lib/libcrypto.a \
 		-output $BUILD_TO_DIR/lib/libcrypto.a
 
-		lipo -create $BUILD_TO_DIR/x86/lib/libssl.a \
+		lipo -create $BUILD_TO_DIR/arm64/lib/libssl.a \
 		$BUILD_TO_DIR/x64/lib/libssl.a \
 		-output $BUILD_TO_DIR/lib/libssl.a
 
@@ -174,7 +179,7 @@ function build() {
 
 			make -j1 depend # running make multithreaded is unreliable
 			make -j1
-			make -j1 install
+			make -j1 install_sw
 
 
 			# reset source file back.

@@ -61,8 +61,8 @@ function build() {
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage/lib
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
 		cmake -DCMAKE_BUILD_TYPE=Release \
-			  -DCMAKE_C_FLAGS="-arch i386 -arch x86_64" \
-			  -DCMAKE_CXX_FLAGS="-arch i386 -arch x86_64 -std=c++11 -stdlib=libc++" \
+			  -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64" \
+			  -DCMAKE_CXX_FLAGS="-arch arm64 -arch x86_64 -std=c++11 -stdlib=libc++" \
 			  ..
 		make -j${PARALLEL_MAKE}
 	

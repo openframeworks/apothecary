@@ -112,10 +112,16 @@ function build() {
 		# exit 1
 		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+
+        # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
+        ROOT=${PWD}/..
+        FREETYPE_LIB_PATH="-L$ROOT/freetype/build/osx/lib -lfreetype"
+        
+        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					CFLAGS="-Os -arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+                    FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
+					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					CFLAGS="-Os -arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \
@@ -123,7 +129,12 @@ function build() {
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
-					--disable-qt
+					--disable-qt \
+                    --disable-shared \
+                    --disable-quartz-font \
+                    --disable-quartz \
+                    --disable-quartz-image
+                            
 		make -j${PARALLEL_MAKE}
 		make install
 	else
