@@ -9,10 +9,10 @@
 FORMULA_TYPES=( "osx" "vs" )
 
 # define the version by branch  
-VER=2018-cmake-fix
+VER=master
 
 # tools for git use
-GIT_URL=https://github.com/ofTheo/glfw.git
+GIT_URL=https://github.com/glfw/glfw.git
 GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
@@ -64,7 +64,7 @@ function build() {
 					-DGLFW_BUILD_EXAMPLES=OFF \
 					-DBUILD_SHARED_LIBS=OFF \
 					-DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_C_FLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					-DCMAKE_C_FLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					$EXTRA_CONFIG
 		else
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
