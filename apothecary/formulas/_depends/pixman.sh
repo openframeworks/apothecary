@@ -38,7 +38,8 @@ function build() {
         local SDK_PATH=$(xcrun --show-sdk-path)
 
         echo "SDK PATH IS ${SDK_PATH}"
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
+        echo "DEVELOPER_DIR IS ${DEVELOPER_DIR}"
+		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
