@@ -36,14 +36,7 @@ function build() {
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
         local SDK_PATH=$(xcrun --show-sdk-path)
-        
-        if [ ${TRAVIS:-notset} == "notset" ] ; then
-            echo "not running in travis"
-        else
-            # this is needed because travis is compiling pixman with the wrong sdk path
-            SDK_PATH="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-        fi
-        
+
         echo "SDK PATH IS ${SDK_PATH}"
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
 
