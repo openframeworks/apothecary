@@ -41,7 +41,7 @@ function build() {
             echo "not running in travis"
         else
             # this is needed because travis is compiling pixman with the wrong sdk path
-            SDK_PATH="/Applications/Xcode-12.2.app/Contents/Developer/SDKs/MacOSX.sdk"
+            SDK_PATH="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
         fi
         
         echo "SDK PATH IS ${SDK_PATH}"
