@@ -173,9 +173,8 @@ echo "Parallel builds: $PARALLEL"
 if  type "ccache" > /dev/null; then
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
-       export SDKROOT="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-       echo "xcode-select -p       is $(xcode-select -p)"
-       echo "xcrun -f ld           is $(xcrun -f ld)"
+       export SDKROOT="{$DEVELOPER_DIR}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+       echo "SDKROOT IS ${SDKROOT}"
        echo "xcrun --show-sdk-path is $(xcrun --show-sdk-path)"
     fi
 
