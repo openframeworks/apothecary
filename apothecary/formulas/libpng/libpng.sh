@@ -44,24 +44,13 @@ function build() {
 
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-  
-        local SDK_PATH=$(xcrun --show-sdk-path)
-        
-        if [ ${TRAVIS:-notset} == "notset" ] ; then
-            echo "not running in travis"
-        else
-            # this is needed because travis is compiling pixman with the wrong sdk path
-            SDK_PATH="${DEVELOPER_DIR}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-        fi
-        
-        echo "SDK PATH IS ${SDK_PATH}"
-  
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -isysroot ${SDK_PATH}"
+		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
-				--disable-dependency-tracking
+				--disable-dependency-tracking \
+                --disable-arm-neon
 		make clean
 		make
 	elif [ "$TYPE" == "vs" ] ; then
