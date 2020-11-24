@@ -173,9 +173,7 @@ echo "Parallel builds: $PARALLEL"
 if  type "ccache" > /dev/null; then
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
        export PATH="/usr/local/opt/ccache/libexec:$PATH";
-       export SDKROOT="{$DEVELOPER_DIR}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-       echo "SDKROOT IS ${SDKROOT}"
-       echo "xcrun --show-sdk-path is $(xcrun --show-sdk-path)"
+       export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     fi
 
     # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
