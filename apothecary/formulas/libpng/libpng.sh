@@ -41,10 +41,12 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
-
+        local SDK_PATH=$(xcrun --show-sdk-path)
+        echo "SDK PATH IS ${SDK_PATH}"
+        
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++"
+		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -isysroot ${SDK_PATH}"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \

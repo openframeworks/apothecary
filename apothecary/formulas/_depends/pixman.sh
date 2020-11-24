@@ -35,7 +35,9 @@ function build() {
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        local SDK_PATH=$(xcrun --show-sdk-path)        
+        echo "SDK PATH IS ${SDK_PATH}"
+		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
