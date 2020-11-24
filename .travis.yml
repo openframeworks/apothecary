@@ -113,7 +113,7 @@ matrix:
       env:
         - TARGET="osx"
         - BUNDLE="1"
-        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
+        - SYSROOT="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
     - os: osx
       cache: ccache
@@ -122,7 +122,7 @@ matrix:
       env:
         - TARGET="osx"
         - BUNDLE="2"
-        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
+        - SYSROOT="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
     - os: osx
       cache: ccache
@@ -131,7 +131,7 @@ matrix:
       env:
         - TARGET="osx"
         - BUNDLE="3"
-        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
+        - SYSROOT="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
     - os: osx
       cache: ccache
@@ -140,7 +140,7 @@ matrix:
       env:
         - TARGET="osx"
         - BUNDLE="4"
-        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
+        - SYSROOT="/Applications/Xcode-12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
     # ios
     - os: osx
