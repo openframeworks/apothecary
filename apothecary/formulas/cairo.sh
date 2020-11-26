@@ -123,14 +123,19 @@ function build() {
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
-					--disable-qt
+					--disable-qt \
+                    --disable-shared \
+                    --disable-quartz-font \
+                    --disable-quartz \
+                    --disable-quartz-image
+                    
 		make -j${PARALLEL_MAKE}
 		make install
 	else
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch arm64 -arch x86_64" \
-					CFLAGS="-Os -arch arm64 -arch x86_64" \
+					LDFLAGS="-arch i386 -arch x86_64" \
+					CFLAGS="-Os -arch i386 -arch x86_64" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-gtk-doc-html \

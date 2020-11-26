@@ -46,13 +46,14 @@ function build() {
         
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -isysroot ${SDK_PATH}"
+		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -isysroot ${SDK_PATH} -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
 				--disable-dependency-tracking \
-                --disable-arm-neon
+                --disable-arm-neon \
+                --disable-shared
 		make clean
 		make
 	elif [ "$TYPE" == "vs" ] ; then
