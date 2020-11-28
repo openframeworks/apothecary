@@ -120,8 +120,13 @@ function build() {
         
         echo " what is in freetype2.pc: "
         cat "$BUILD_ROOT_DIR/lib/pkgconfig/freetype2.pc"
+        
+        FREETYPE_LIB_PATH="-L$ROOT/freetype/build/osx/lib -lfreetype"
+        echo "FREETYPE_LIB_PATH is $FREETYPE_LIB_PATH"
+        
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
+                    FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
 					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					CFLAGS="-Os -arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					--prefix=$BUILD_ROOT_DIR \
