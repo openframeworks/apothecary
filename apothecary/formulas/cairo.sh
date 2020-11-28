@@ -112,6 +112,14 @@ function build() {
 		# exit 1
 		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
+
+        echo " testng freetype paths - is file there? "
+        echo " path is $BUILD_ROOT_DIR/lib/pkgconfig - lets list it: "
+
+        ls -la "$BUILD_ROOT_DIR/lib/pkgconfig"
+        
+        echo " what is in freetype2.pc: "
+        cat "$BUILD_ROOT_DIR/lib/pkgconfig/freetype2.pc"
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
 					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
@@ -128,7 +136,7 @@ function build() {
                     --disable-quartz-font \
                     --disable-quartz \
                     --disable-quartz-image
-                    
+                            
 		make -j${PARALLEL_MAKE}
 		make install
 	else
