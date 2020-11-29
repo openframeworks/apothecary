@@ -112,20 +112,12 @@ function build() {
 		# exit 1
 		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
-        ROOT=${PWD}/..
-                
-        echo " testng freetype paths - is file there? "
-        echo " path is $BUILD_ROOT_DIR/lib/pkgconfig - lets list it: "
 
-        ls -la "$BUILD_ROOT_DIR/lib/pkgconfig"
-        
-        echo " what is in freetype2.pc: "
-        cat "$BUILD_ROOT_DIR/lib/pkgconfig/freetype2.pc"
-        
+        # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
+        ROOT=${PWD}/..
         FREETYPE_LIB_PATH="-L$ROOT/freetype/build/osx/lib -lfreetype"
-        echo "FREETYPE_LIB_PATH is $FREETYPE_LIB_PATH"
         
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
                     FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
 					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
