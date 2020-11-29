@@ -112,7 +112,8 @@ function build() {
 		# exit 1
 		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
-
+        ROOT=${PWD}/..
+                
         echo " testng freetype paths - is file there? "
         echo " path is $BUILD_ROOT_DIR/lib/pkgconfig - lets list it: "
 
