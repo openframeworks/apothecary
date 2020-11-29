@@ -35,7 +35,7 @@ function download() {
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
-        else
+		else
 			echoError "Invalid shasum for $FILENAME."
 		fi
 	fi
