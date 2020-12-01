@@ -69,7 +69,7 @@ fi
 
 APOTHECARY_PATH=$ROOT/apothecary
 OUTPUT_FOLDER=$ROOT/out
-# VERBOSE=true
+VERBOSE=true
 
 if [ -z $TARGET ] ; then
     echo "Environment variable TARGET not defined. Should be target os"
