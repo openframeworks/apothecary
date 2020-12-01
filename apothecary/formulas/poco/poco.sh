@@ -31,12 +31,18 @@ SHA=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+    echo "0 - download"
+
 	if [ "$SHA" == "" ] ; then
+        echo "2 - about to download"
+
 		echo "SHA=="" Using $GIT_URL with GIT_TAG=$GIT_TAG"
 		curl -Lk $GIT_URL/archive/$GIT_TAG.tar.gz -o poco-$GIT_TAG.tar.gz
 		tar -xf poco-$GIT_TAG.tar.gz
 		mv poco-$GIT_TAG poco
 		rm poco*.tar.gz
+  
+        echo "1 - unpacking"
 	else
 		echo "$GIT_URL - Using SHA=$SHA"
 		git clone $GIT_URL -b poco-$VER
@@ -45,6 +51,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+    echo "0 - prepare"
 
 	if [ "$SHA" != "" ] ; then
 		echo "Setting git repo to SHA=$SHA"
@@ -52,9 +59,12 @@ function prepare() {
 	fi
 
 	if [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
+        echo "1 - apothecaryDependencies download"
 		# manually prepare dependencies
 		apothecaryDependencies download
 		apothecaryDependencies prepare
+  
+        echo "2 - apothecaryDependencies buiild openssl"
 		# Build and copy all dependencies in preparation
 	    apothecaryDepend build openssl
 		apothecaryDepend copy openssl
@@ -136,6 +146,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+    echo "0 - build"
+
     local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
 	if [ "$TYPE" == "osx" ] ; then
 		CURRENTPATH=`pwd`
@@ -531,6 +543,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
+    echo "0 - clean"
 
 	if [ "$TYPE" == "vs" ] ; then
 		cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
@@ -543,6 +556,8 @@ function clean() {
 		make clean ANDROID_ABI=x86
 		unset PATH
 	else
+        echo "1 - clean"
+
 		make clean
 	fi
 }
