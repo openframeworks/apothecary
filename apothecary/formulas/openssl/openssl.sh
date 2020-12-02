@@ -35,7 +35,7 @@ function download() {
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
-		else
+        else
 			echoError "Invalid shasum for $FILENAME."
 		fi
 	fi
@@ -70,7 +70,7 @@ function build() {
 		make clean
 		make -j1 depend # running make multithreaded is unreliable
 		make -j1
-		make -j1 install
+		make -j1 install_sw
   
         local BUILD_OPTS_X86_64="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc"
 
@@ -84,7 +84,7 @@ function build() {
         make clean
         make -j1 depend
         make -j1
-        make -j1 install
+        make -j1 install_sw
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
@@ -179,7 +179,7 @@ function build() {
 
 			make -j1 depend # running make multithreaded is unreliable
 			make -j1
-			make -j1 install
+			make -j1 install_sw
 
 
 			# reset source file back.
