@@ -42,7 +42,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	#patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
+	patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
 
 	if [ "$TYPE" == "osx" ]; then
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem

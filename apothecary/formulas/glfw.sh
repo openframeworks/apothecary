@@ -9,11 +9,11 @@
 FORMULA_TYPES=( "osx" "vs" )
 
 # define the version by branch  
-VER=master
+VER=2018-cmake-fix
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/glfw.git
-GIT_BRANCH=2018-cmake-fix
+GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
