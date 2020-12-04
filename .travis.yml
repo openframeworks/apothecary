@@ -1,5 +1,4 @@
 language: c++
-sudo: false
 
 matrix:
   include:
@@ -9,7 +8,6 @@ matrix:
     # linux 64
     - os: linux
       cache: ccache
-      sudo: required
       dist: trusty
       env:
        - TARGET="linux"
@@ -17,7 +15,6 @@ matrix:
 
     - os: linux
       cache: ccache
-      sudo: required
       dist: trusty
       env:
         - TARGET="linux"
@@ -201,11 +198,11 @@ matrix:
 before_install:
   - scripts/calculate_formulas.sh
 install:
-  if: $TARGET == "linuxarmv7l"
-  - sudo -E env "PATH=$PATH" scripts/$TARGET/install.sh
-  if: $TARGET != "linuxarmv7l"
-  - scripts/$TARGET/install.sh
-
+  - if [ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]; then
+     sudo -E env "PATH=$PATH" scripts/$TARGET/install.sh
+    else
+     scripts/$TARGET/install.sh
+    fi
 script:
   - scripts/build.sh
 
