@@ -86,7 +86,7 @@ installJunest(){
     junest -- << EOF
         echo updating keys
         pacman -S gnupg --noconfirm
-        pacman-key --populate archlinux
+        sudo pacman-key --populate archlinux
         sudo pacman-key --refresh-keys
         echo updating packages
 		pacman -Syyu --noconfirm
