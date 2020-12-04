@@ -8,6 +8,7 @@ matrix:
     # linux 64
     - os: linux
       cache: ccache
+      sudo: required
       dist: trusty
       env:
        - TARGET="linux"
@@ -15,6 +16,7 @@ matrix:
 
     - os: linux
       cache: ccache
+      sudo: required
       dist: trusty
       env:
         - TARGET="linux"
@@ -198,11 +200,7 @@ matrix:
 before_install:
   - scripts/calculate_formulas.sh
 install:
-  - if [ $TARGET == "linuxarmv7l" ]; then
-     sudo -E env "PATH=$PATH" scripts/$TARGET/install.sh;
-    else
-     scripts/$TARGET/install.sh;
-    fi
+  - scripts/$TARGET/install.sh
 script:
   - scripts/build.sh
 
