@@ -201,9 +201,9 @@ matrix:
 before_install:
   - scripts/calculate_formulas.sh
 install:
-  if $TARGET == "linuxarmv7l"
+  if: $TARGET == "linuxarmv7l"
   - sudo -E env "PATH=$PATH" scripts/$TARGET/install.sh
-  if $TARGET != "linuxarmv7l"
+  if: $TARGET != "linuxarmv7l"
   - scripts/$TARGET/install.sh
 
 script:
