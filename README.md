@@ -47,5 +47,5 @@ See the help section for more options
 
 ------------
 
-2014 OpenFrameworks team  
+2014 OpenFrameworks team   
 2013 Dan Wilcox <danomatika@gmail.com> supported by the CMU [Studio for Creative Inquiry](http://studioforcreativeinquiry.org/)
