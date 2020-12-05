@@ -85,12 +85,12 @@ installJunest(){
     junest setup
     junest -- << EOF
         echo updating keys
-        pacman -S gnupg --noconfirm
-        pacman-key --populate archlinux
-        pacman-key --refresh-keys
+        sudo pacman -S gnupg --noconfirm
+        sudo pacman-key --populate archlinux
+        sudo pacman-key --refresh-keys
         echo updating packages
-		pacman -Syyu --noconfirm
-		pacman -S --noconfirm git flex grep gcc pkg-config make wget sed
+		sudo pacman -Syyu --noconfirm
+		sudo pacman -S --noconfirm git flex grep gcc pkg-config make wget sed
 EOF
 }
 
