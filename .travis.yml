@@ -143,61 +143,69 @@ matrix:
 
     # ios
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="1"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="2"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="3"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="ios"
         - BUNDLE="4"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     # tvos
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="1"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="2"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="3"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode12.2
       compiler: clang
       env:
         - TARGET="tvos"
         - BUNDLE="4"
+        - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
   exclude:
     - compiler: gcc
