@@ -42,7 +42,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	# patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
+	#patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
 
 	if [ "$TYPE" == "osx" ]; then
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
@@ -63,6 +63,9 @@ function prepare() {
 		BOOST_LIBS_COMMA=$(echo $BOOST_LIBS | sed -e "s/ /,/g")
 	    echo "Bootstrapping (with libs $BOOST_LIBS_COMMA)"
 	    ./bootstrap.sh --with-libraries=$BOOST_LIBS_COMMA
+     
+        # fix a bug with adding invalid flags with newer compilers
+        sed -i '' 's/flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;/#flags darwin.compile.c++ OPTIONS $(condition) : -fcoalesce-templates ;/g' tools/build/src/tools/darwin.jam
 	elif [ "$TYPE" == "vs" ]; then
 		cmd.exe //c bootstrap.bat
 	fi
@@ -192,7 +195,7 @@ EOF
 	        	$ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin armv7 -o $IOSBUILDDIR/armv7/$NAME.a
 	        fi
 	        $ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin arm64 -o $IOSBUILDDIR/arm64/$NAME.a
-			$ARM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" -thin x86_64 -o $IOSBUILDDIR/x86_64/$NAME.a
+			cp "iphonesim-build/stage/lib/libboost_$NAME.a" $IOSBUILDDIR/x86_64/$NAME.a
 	    done
 	    echo "done"
 		echo "---------------"
