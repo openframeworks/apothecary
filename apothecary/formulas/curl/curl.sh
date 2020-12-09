@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 #dependencies
-#FORMULA_DEPENDS=( "openssl" )
+FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
 VER=7_59_0
