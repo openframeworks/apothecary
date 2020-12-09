@@ -144,6 +144,10 @@ matrix:
     # ios
     - os: osx
       osx_image: xcode12.2
+      cache: 
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="ios"
@@ -152,6 +156,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="ios"
@@ -160,6 +168,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="ios"
@@ -168,6 +180,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="ios"
@@ -177,6 +193,10 @@ matrix:
     # tvos
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="tvos"
@@ -185,6 +205,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="tvos"
@@ -193,6 +217,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="tvos"
@@ -201,6 +229,10 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
+      cache:
+        directories:
+            - /usr/local/Homebrew
+            - /usr/local/Cellar
       compiler: clang
       env:
         - TARGET="tvos"
