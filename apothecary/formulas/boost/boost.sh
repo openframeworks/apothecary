@@ -161,17 +161,19 @@ function build() {
 			local TARGET_TYPE_SIM="iphonesim"
 			MIN_TYPE=-miphoneos-version-min=
 		fi
+            
+        EXTRA_CPPFLAGS="$EXTRA_CPPFLAGS -Wno-nullability-completeness"
 
 		local BUILD_TOOLS="${DEVELOPER}"
 		# Patch the user-config file -- Add some dynamic flags
 	    cat >> tools/build/example/user-config.jam <<EOF
 using darwin : ${IPHONE_SDKVERSION}~$TARGET_TYPE
-: $XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ $ARCH $EXTRA_CPPFLAGS $BITCODE "-isysroot ${CROSS_TOP_IOS}/SDKs/${CROSS_SDK_IOS}" -I${CROSS_TOP_IOS}/SDKs/${CROSS_SDK_IOS}/usr/include/
+: $XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ $ARCH $EXTRA_CPPFLAGS $BITCODE "-isysroot${CROSS_TOP_IOS}/SDKs/${CROSS_SDK_IOS}" -I${CROSS_TOP_IOS}/SDKs/${CROSS_SDK_IOS}/usr/include/
 : <striper> <root>$CROSS_TOP_IOS
 : <architecture>arm <target-os>$TARGET_OS
 ;
 using darwin : ${IPHONE_SDKVERSION}~$TARGET_TYPE_SIM
-: $XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ $ARCHSIM $EXTRA_CPPFLAGS $BITCODE "-isysroot ${CROSS_TOP_SIM}/SDKs/${CROSS_SDK_SIM}" -I${CROSS_TOP_SIM}/SDKs/${CROSS_SDK_SIM}/usr/include/
+: $XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++ $ARCHSIM $EXTRA_CPPFLAGS $BITCODE "-isysroot${CROSS_TOP_SIM}/SDKs/${CROSS_SDK_SIM}" -I${CROSS_TOP_SIM}/SDKs/${CROSS_SDK_SIM}/usr/include/
 : <striper> <root>$CROSS_TOP_SIM
 : <architecture>x86 <target-os>$TARGET_OS
 ;
@@ -193,8 +195,10 @@ EOF
 	        echo "Splitting '$NAME' to $IOSBUILDDIR/*/$NAME.a"
 	        if [[ "$TYPE" == "ios" ]]; then
 	        	$ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin armv7 -o $IOSBUILDDIR/armv7/$NAME.a
-	        fi
-	        $ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin arm64 -o $IOSBUILDDIR/arm64/$NAME.a
+                $ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" -thin arm64 -o $IOSBUILDDIR/arm64/$NAME.a
+	        else
+                cp "iphone-build/stage/lib/libboost_$NAME.a" $IOSBUILDDIR/arm64/$NAME.a
+            fi
 			cp "iphonesim-build/stage/lib/libboost_$NAME.a" $IOSBUILDDIR/x86_64/$NAME.a
 	    done
 	    echo "done"

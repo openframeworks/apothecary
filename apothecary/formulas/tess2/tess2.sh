@@ -242,16 +242,20 @@ function build() {
 		echo "Running lipo to create fat lib"
 		echo "Please stand by..."
 
+        # on arm64 machines it seems to force build arm64 archs for others - so here we make sure its just the arch we intended
+        # redirect errors as we don't care if there is just one arch - we just want to make sure.
+        lipo -thin x86_64 builddir/$TYPE/libtess2-x86_64.a -o builddir/$TYPE/libtess2-x86_64.a 2>/dev/null
+
 		if [[ "${TYPE}" == "tvos" ]]; then
 			lipo -create builddir/$TYPE/libtess2-arm64.a \
 			 	builddir/$TYPE/libtess2-x86_64.a \
 			 	-output builddir/$TYPE/libtess2.a
 		 elif [[ "$TYPE" == "ios" ]]; then
-		# builddir/$TYPE/libtess2-armv7s.a
-        lipo -thin armv7 builddir/$TYPE/libtess2-armv7.a -o builddir/$TYPE/libtess2-armv7.a
-        lipo -thin x86_64 builddir/$TYPE/libtess2-x86_64.a -o builddir/$TYPE/libtess2-x86_64.a
+            # builddir/$TYPE/libtess2-armv7s.a
+        
+            lipo -thin armv7 builddir/$TYPE/libtess2-armv7.a -o builddir/$TYPE/libtess2-armv7.a 2>/dev/null
 
-		lipo -create builddir/$TYPE/libtess2-armv7.a \
+            lipo -create builddir/$TYPE/libtess2-armv7.a \
 			 	builddir/$TYPE/libtess2-arm64.a \
 			 	builddir/$TYPE/libtess2-x86_64.a \
 			 	-output builddir/$TYPE/libtess2.a
