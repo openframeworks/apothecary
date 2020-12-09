@@ -155,7 +155,6 @@ function build() {
 
 		local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
         
-        # only build release libs
         sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
             
 		export ARCHFLAGS="-arch arm64 -arch x86_64 -isysroot ${SDK_PATH} -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -271,6 +270,8 @@ function build() {
 
 		STATICOPT_CC=-fPIC
 		STATICOPT_CXX=-fPIC
+  
+        sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
 
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
