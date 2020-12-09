@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" )
+#FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
 VER=7_59_0
@@ -145,6 +145,11 @@ function build() {
                 --enable-threaded-resolver \
                 --enable-ipv6
             #make clean
+            
+            # solution from this issue: https://github.com/curl/curl/issues/3189
+            # force config to see stuff that is there
+            printf '%s\n' '#ifndef HAVE_SOCKET' '#define HAVE_SOCKET  1' '#endif' '#ifndef HAVE_FCNTL_O_NONBLOCK' '#define HAVE_FCNTL_O_NONBLOCK 1' '#endif' >> lib/curl_config.h
+            
             make -j${PARALLEL_MAKE}
             make install
         done
