@@ -443,7 +443,7 @@ function build() {
 		make -j${PARALLEL_MAKE}
 		# delete debug builds
 		rm -f lib/Linux/$(uname -m)/*d.a
-    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
@@ -516,6 +516,8 @@ function copy() {
 	elif [ "$TYPE" == "linuxarmv6l" ] ; then
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "linuxarmv7l" ] ; then
+		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "linuxaarch64" ] ; then
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "android" ] ; then
 		rm -rf $1/lib/$TYPE/$ABI
