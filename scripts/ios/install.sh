@@ -1,9 +1,9 @@
 # Silent update to prevent long logs
 brew update >/dev/null
 
-brew install coreutils boost-bcp autoconf ccache
-brew reinstall libtool
-export PATH="/usr/local/opt/ccache/libexec:$PATH"
+brew install coreutils boost-bcp autoconf
+# brew reinstall libtool
+# export PATH="/usr/local/opt/ccache/libexec:$PATH"
 
 set -e
 # capture failing exits in commands obscured behind a pipe
