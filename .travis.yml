@@ -106,7 +106,11 @@ matrix:
 
     # osx xcode12
     - os: osx
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       osx_image: xcode12.2
       compiler: clang
       env:
@@ -115,7 +119,11 @@ matrix:
         - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       osx_image: xcode12.2
       compiler: clang
       env:
@@ -124,7 +132,11 @@ matrix:
         - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       osx_image: xcode12.2
       compiler: clang
       env:
@@ -133,7 +145,11 @@ matrix:
         - DEVELOPER_DIR="/Applications/Xcode-12.2.app/Contents/Developer"
 
     - os: osx
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       osx_image: xcode12.2
       compiler: clang
       env:
@@ -144,7 +160,11 @@ matrix:
     # ios
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="ios"
@@ -153,7 +173,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="ios"
@@ -162,7 +186,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="ios"
@@ -171,7 +199,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="ios"
@@ -181,7 +213,11 @@ matrix:
     # tvos
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="tvos"
@@ -190,7 +226,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="tvos"
@@ -199,7 +239,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="tvos"
@@ -208,7 +252,11 @@ matrix:
 
     - os: osx
       osx_image: xcode12.2
-      cache: ccache
+      cache:
+        ccache: true
+        directories:
+         - $HOME/Library/Caches/Homebrew
+         - ${HOME}/.homebrew-cache
       compiler: clang
       env:
         - TARGET="tvos"
@@ -223,6 +271,14 @@ install:
   - scripts/$TARGET/install.sh
 script:
   - scripts/build.sh
+  
+before_cache:
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew cleanup; fi
+# Credit https://discourse.brew.sh/t/best-practice-for-homebrew-on-travis-brew-update-is-5min-to-build-time/5215/9
+# Cache only .git files under "/usr/local/Homebrew" so "brew update" does not take 5min every build
+# Find workaround on macOS due to https://superuser.com/a/1459901/151744
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then rm -rf "${HOME}/.homebrew-cache" && cp -f -R "/usr/local/Homebrew" "${HOME}/.homebrew-cache"; fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then cd "${HOME}/.homebrew-cache" && find . \! -regex ".+\.git.+" -delete; fi
 
 git:
     depth: 10
