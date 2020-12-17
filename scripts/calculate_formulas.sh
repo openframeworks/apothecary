@@ -16,7 +16,7 @@ FORMULAS=(
     "libpng"
     "libxml2"
     "freetype"
-    "fmodex"
+    "fmod"
     "glew"
     "glfw"
     "glm"
@@ -55,7 +55,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             # All formulas
             "boost"
             "FreeImage"
-            "fmodex"
+            "fmod"
             "glew"
             "glfw"
             "glm"
