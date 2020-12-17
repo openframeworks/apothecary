@@ -70,24 +70,21 @@ function prepare() {
 			cp $FORMULA_DIR/AppleTVSimulator build/config/AppleTVSimulator
 		fi
 
-		cp build/config/iPhoneSimulator-clang-libc++ build/config/iPhoneSimulator-clang-libc++.orig
-		cp build/config/iPhone-clang-libc++ build/config/iPhone-clang-libc++.orig
-
-		# fix using sed i636 reference and allow overloading variable
-		sed -i .tmp "s|POCO_TARGET_OSARCH.* = .*|POCO_TARGET_OSARCH ?= i386|" build/config/iPhoneSimulator-clang-libc++
-		sed -i .tmp "s|OSFLAGS            = -arch|OSFLAGS            ?= -arch|" build/config/iPhoneSimulator-clang-libc++
-		sed -i .tmp "s|STATICOPT_CC    =|STATICOPT_CC    ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
-		sed -i .tmp "s|STATICOPT_CXX   =|STATICOPT_CXX   ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
-		sed -i .tmp "s|OSFLAGS                 = -arch|OSFLAGS                ?= -arch|" build/config/iPhone-clang-libc++
-		sed -i .tmp "s|RELEASEOPT_CC   = -DNDEBUG -O2|RELEASEOPT_CC   =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
-		sed -i .tmp "s|RELEASEOPT_CXX  = -DNDEBUG -O |RELEASEOPT_CXX  =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone-clang-libc++
+		# fix using sed i686 reference and allow overloading variable
+		sed -i "" "s|POCO_TARGET_OSARCH.* = .*|POCO_TARGET_OSARCH ?= x86_64|" build/config/iPhoneSimulator-clang-libc++
+		sed -i "" "s|OSFLAGS            = -arch|OSFLAGS            ?= -arch arm64 -arch|" build/config/iPhoneSimulator-clang-libc++
+		sed -i "" "s|STATICOPT_CC    =|STATICOPT_CC    ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone
+		sed -i "" "s|STATICOPT_CXX   =|STATICOPT_CXX   ?= -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone
+		sed -i "" "s|OSFLAGS                 = -arch|OSFLAGS                ?= -arch|" build/config/iPhone
+		sed -i "" "s|RELEASEOPT_CC   = -DNDEBUG -O2|RELEASEOPT_CC   =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone
+		sed -i "" "s|RELEASEOPT_CXX  = -DNDEBUG -O |RELEASEOPT_CXX  =  -DNDEBUG -DPOCO_ENABLE_CPP11 -Os -fPIC|" build/config/iPhone
 
 		# sed -i .tmp "s|EVP_CIPHER_CTX_cleanup(_pContext);||g" Crypto/src/CipherImpl.cpp
 		# sed -i -e "s|#include <openssl/evp.h>|#include <openssl/evp.h>\n#include <openssl/bn.h>|" Crypto/src/X509Certificate.cpp
 
 		cp build/rules/compile build/rules/compile.orig
 		# Fix for making debug and release, making just release
-		sed -i .tmp "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
+		sed -i "" "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
 
 
 	elif [ "$TYPE" == "vs" ] ; then
