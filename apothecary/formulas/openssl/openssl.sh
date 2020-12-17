@@ -160,7 +160,7 @@ function build() {
 			# fi
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-async no-shared no-dso no-hw no-engine --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH}"
+			FLAGS="no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH}"
 
 			rm -f libcrypto.a
 			rm -f libssl.a
