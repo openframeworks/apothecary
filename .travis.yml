@@ -268,7 +268,7 @@ matrix:
 before_install:
   - if [ "${TRAVIS_OS_NAME}" = "osx" ] && [ -d "${HOME}/.homebrew-cache" ]; then cp -f -R "${HOME}/.homebrew-cache" "/usr/local/Homebrew"; fi
   - scripts/calculate_formulas.sh
-  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew pin gdal; brew pin postgis; brew pin gnupg fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then brew pin gdal; brew pin postgis; brew pin gnupg; fi
 install:
   - scripts/$TARGET/install.sh
 script:
