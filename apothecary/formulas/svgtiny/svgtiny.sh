@@ -40,7 +40,7 @@ function prepare() {
 		cd ..
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
 		# remove restrict attribute
-		sed -i 's/restrict / /g' libwapcaplet/src/libwapcaplet.c
+		sed -i -e 's/restrict//g' libwapcaplet/src/libwapcaplet.c
 		cp -r $FORMULA_DIR/vs2015 ./
 		cp -r $FORMULA_DIR/vs2017 ./
 	else
