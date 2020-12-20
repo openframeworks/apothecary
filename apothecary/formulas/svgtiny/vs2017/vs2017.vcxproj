@@ -302,6 +302,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -314,6 +315,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -328,6 +330,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -344,6 +347,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
