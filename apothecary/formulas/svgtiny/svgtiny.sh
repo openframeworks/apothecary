@@ -31,23 +31,6 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "msys2" ] || [ "$TYPE" == "vs" ]; then
-		dos2unix $FORMULA_DIR/libparseutils.patch
-		dos2unix $FORMULA_DIR/libdom.patch
-	fi
-
-	cd libparserutils
-    if git apply $FORMULA_DIR/libparseutils.patch  --check; then
-        git apply $FORMULA_DIR/libparseutils.patch
-    fi
-    cd ..
-
-	cd libdom
-    if git apply $FORMULA_DIR/libdom.patch  --check; then
-        git apply $FORMULA_DIR/libdom.patch
-    fi
-	cd ..
-
 	if [ "$TYPE" == "vs" ]; then
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
 		cp -r $FORMULA_DIR/vs2015 ./
