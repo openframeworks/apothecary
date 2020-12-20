@@ -32,7 +32,15 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	if [ "$TYPE" == "vs" ]; then
+		dos2unix $FORMULA_DIR/libdom.patch
+		cd libdom
+		if git apply $FORMULA_DIR/libdom.patch  --check; then
+			git apply $FORMULA_DIR/libdom.patch
+		fi
+		cd ..
 		cp $FORMULA_DIR/libwapcaplet.h libwapcaplet/include/libwapcaplet/
+		# remove restrict attribute
+		sed -i 's/restrict / /g' libwapcaplet/src/libwapcaplet.c
 		cp -r $FORMULA_DIR/vs2015 ./
 		cp -r $FORMULA_DIR/vs2017 ./
 	else
