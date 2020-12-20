@@ -20,13 +20,13 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	git clone -b release/$VER --depth 1 git://git.netsurf-browser.org/libsvgtiny.git
+	git -c advice.detachedHead=false clone -b release/$VER --depth 1 git://git.netsurf-browser.org/libsvgtiny.git
     mv libsvgtiny svgtiny
     cd svgtiny
 
-    git clone -b release/0.4.1 --depth 1 git://git.netsurf-browser.org/libdom.git
-    git clone -b release/0.2.4 --depth 1 git://git.netsurf-browser.org/libparserutils.git
-    git clone -b release/0.4.3 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
+    git -c advice.detachedHead=false clone -b release/0.4.1 --depth 1 git://git.netsurf-browser.org/libdom.git
+    git -c advice.detachedHead=false clone -b release/0.2.4 --depth 1 git://git.netsurf-browser.org/libparserutils.git
+    git -c advice.detachedHead=false clone -b release/0.4.3 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
 }
 
 # prepare the build environment, executed inside the lib src dir
