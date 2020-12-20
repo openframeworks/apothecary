@@ -12,7 +12,7 @@ FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "osx" "vs" "ios" "tvos" "a
 FORMULA_DEPENDS=( "libxml2" )
 
 # define the version by sha
-VER=0.1.4
+VER=0.1.7
 
 # tools for git use
 GIT_URL=git://git.netsurf-browser.org/libsvgtiny.git
@@ -24,9 +24,9 @@ function download() {
     mv libsvgtiny svgtiny
     cd svgtiny
 
-    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libdom.git
-    git clone -b release/0.2.3 --depth 1 git://git.netsurf-browser.org/libparserutils.git
-    git clone -b release/0.3.0 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
+    git clone -b release/0.4.1 --depth 1 git://git.netsurf-browser.org/libdom.git
+    git clone -b release/0.2.4 --depth 1 git://git.netsurf-browser.org/libparserutils.git
+    git clone -b release/0.4.3 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
 }
 
 # prepare the build environment, executed inside the lib src dir
