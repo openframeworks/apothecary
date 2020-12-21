@@ -82,7 +82,7 @@ function prepare() {
 		# sed -i .tmp "s|EVP_CIPHER_CTX_cleanup(_pContext);||g" Crypto/src/CipherImpl.cpp
 		# sed -i -e "s|#include <openssl/evp.h>|#include <openssl/evp.h>\n#include <openssl/bn.h>|" Crypto/src/X509Certificate.cpp
 
-		cp build/rules/compile build/rules/compile.orig
+		# cp build/rules/compile build/rules/compile.orig
 		# Fix for making debug and release, making just release
 		sed -i "" "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
 
@@ -398,17 +398,6 @@ function build() {
 			done
 			cd ../../
 		fi
-
-
-		echo "--------------------"
-		echo "Reseting changed files back to originals"
-		cd build/config
-		cp iPhoneSimulator-clang-libc++.orig iPhoneSimulator-clang-libc++
-		cp iPhone-clang-libc++.orig iPhone-clang-libc++
-		cd ../rules/
-		cp compile.orig compile
-		cd ../../
-		echo "--------------------"
 
 		echo "Completed."
 

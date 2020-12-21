@@ -5,13 +5,17 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-ios:
     runs-on: macos-10.15
     env:
         TARGET: ios
-        BUNDLE: 2
+    strategy:
+        matrix:
+            job: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
+      - env:
+            BUNDLE: $JOB
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
