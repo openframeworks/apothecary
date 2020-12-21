@@ -1,5 +1,8 @@
 name: build
 
+with:
+ persist-credentials: false
+
 on:
   push:
   pull_request:
