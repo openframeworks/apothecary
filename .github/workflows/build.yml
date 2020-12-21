@@ -10,12 +10,12 @@ jobs:
     env:
         TARGET: ios
         BUNDLE: 2
-        ROOT_DIR: ../../
     steps:
+      - uses: actions/checkout@v2
       - name: Scripts Calc Formula
-        run: ./${ROOT_DIR}scripts/calculate_formulas.sh
+        run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
-        run: ./${ROOT_DIR}scripts/$TARGET/install.sh
+        run: ./scripts/$TARGET/install.sh
       - name: Build
-        run: ./${ROOT_DIR}scripts/build.sh
+        run: ./scripts/build.sh
 
