@@ -44,6 +44,13 @@ function prepare() {
 		cp -r $FORMULA_DIR/vs2015 ./
 		cp -r $FORMULA_DIR/vs2017 ./
 	else
+		# Apply patch for 'N_ELEMENTS() implicit declaration' for OSX and Emscripten
+		if [ "$TYPE" == "osx" ] || [ "$TYPE" == "emscripten" ] ; then
+			cd libparserutils
+			patch -up1 < $FORMULA_DIR/libparseutils.patch
+			cd ..
+		fi
+		# Use custom Makefile
     	cp $FORMULA_DIR/Makefile .
 	fi
 

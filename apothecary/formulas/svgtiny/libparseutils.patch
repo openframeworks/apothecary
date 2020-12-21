@@ -1,0 +1,24 @@
+diff -Naru a/src/charset/codecs/codec_8859.c b/src/charset/codecs/codec_8859.c
+--- a/src/charset/codecs/codec_8859.c	2020-12-21 00:09:41 +0000
++++ b/src/charset/codecs/codec_8859.c	2020-12-21 08:45:19 +0000
+@@ -40,6 +40,8 @@
+ 	{ 0, "ISO-8859-16", SLEN("ISO-8859-16"), t16 }
+ };
+ 
++#define N_ELEMENTS(array) sizeof(array)/sizeof(array[0])
++
+ /**
+  * ISO-8859-n charset codec
+  */
+diff -Naru a/src/charset/codecs/codec_ext8.c b/src/charset/codecs/codec_ext8.c
+--- a/src/charset/codecs/codec_ext8.c	2020-12-21 00:09:41 +0000
++++ b/src/charset/codecs/codec_ext8.c	2020-12-21 08:45:24 +0000
+@@ -34,6 +34,8 @@
+ 	{ 0, "Windows-1258", SLEN("Windows-1258"), w1258 },
+ };
+ 
++#define N_ELEMENTS(array) sizeof(array)/sizeof(array[0])
++
+ /**
+  * Windows charset codec
+  */
