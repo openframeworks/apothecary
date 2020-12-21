@@ -110,16 +110,16 @@ array_contains () {
 
 # If commit contains [build_only:formula1 formula2] only those formulas will be built
 # this will only work on a pull request, not when commiting to master
-if [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
-    echo ${APPVEYOR_REPO_NAME}
-fi
-if [[ ! -z "${TRAVIS_BRANCH+x}" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_PULL_REQUEST" != "false" ]] || [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
-    echo "DETECTED PULL REQUEST OR NOT MASTER BRANCH, CHECKING FILTERS"
-    COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
-    echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
-    FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
-    PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
-fi
+# if [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
+#     echo ${APPVEYOR_REPO_NAME}
+# fi
+# if [[ ! -z "${TRAVIS_BRANCH+x}" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_PULL_REQUEST" != "false" ]] || [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
+#     echo "DETECTED PULL REQUEST OR NOT MASTER BRANCH, CHECKING FILTERS"
+#     COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
+#     echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
+#     FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
+#     PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
+# fi
 
 echo "FORMULAS_FROM_COMMIT: $FORMULAS_FROM_COMMIT"
 if [ ! -z "$FORMULAS_FROM_COMMIT" ]; then

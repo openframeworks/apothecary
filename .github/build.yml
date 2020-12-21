@@ -1,0 +1,19 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-10.15
+    env:
+        TARGET: ios
+        BUNDLE: 2
+    steps:
+      - name: Scripts Calc Formula
+        run: ./scripts/calculate_formulas.sh
+      - name: Scripts Install
+        run: ./scripts/$TARGET/install.sh
+      - name: Build
+        run: ./scripts/build.sh
