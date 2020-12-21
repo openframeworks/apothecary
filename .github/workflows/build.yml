@@ -14,11 +14,13 @@ jobs:
             job: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v2
+      - name: "Scripts Calc Formula - Bundle ${JOB}"
+        run: ./scripts/calculate_formulas.sh
         env:
             BUNDLE: $JOB
-      - name: Scripts Calc Formula
-        run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
       - name: Build
         run: ./scripts/build.sh
+        env:
+            BUNDLE: $JOB
