@@ -113,8 +113,12 @@ function build() {
 		CURRENTPATH=`pwd`
 
 		local IOS_ARCHS
+        local IOS_OS="iphoneos"
+        local SIM_OS="macosx"
+
 		if [ "${TYPE}" == "tvos" ]; then
 			IOS_ARCHS="x86_64 arm64"
+            IOS_OS="appletvos"
 		elif [ "$TYPE" == "ios" ]; then
 			IOS_ARCHS="x86_64 arm64 armv7" #armv7s
 		fi
@@ -125,19 +129,29 @@ function build() {
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
-
+  
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
 			# # make sure backed up
 			# cp "Configure" "Configure.orig"
 			# cp "apps/speed.c" "apps/speed.c.orig"
+        
+            ## Fix for tvOS fork undef 9.0
+            if [ "${TYPE}" == "tvos" ]; then
+                # Patch apps/speed.c to not use fork() since it's not available on tvOS
+                sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
+            fi
+            
+            if [ "${IOS_ARCH}" == "x86_64" ]; then
+                CUR_OS=$SIM_OS
+            else
+                CUR_OS=$IOS_OS
+            fi
+            
+            local SDK_PATH=$(xcrun --sdk $CUR_OS --show-sdk-path)
+            echo "SDK PATH IS ${SDK_PATH}"
 
-			## Fix for tvOS fork undef 9.0
-			if [ "${TYPE}" == "tvos" ]; then
-				# Patch apps/speed.c to not use fork() since it's not available on tvOS
-				sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-			fi
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			source ../../ios_configure.sh $TYPE $IOS_ARCH
 			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
@@ -146,7 +160,7 @@ function build() {
 			# fi
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-async no-shared no-dso no-hw no-engine --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			FLAGS="no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH}"
 
 			rm -f libcrypto.a
 			rm -f libssl.a
@@ -170,7 +184,6 @@ function build() {
 			# fi
 
 			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
-
 			sed -ie "s!^CFLAG=\(.*\)!CFLAG=\1 $CFLAGS !" Makefile
 			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
