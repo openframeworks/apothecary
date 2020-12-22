@@ -148,7 +148,10 @@ function build() {
         local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
         local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
         
-        local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
+        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        echo " SDK_PATH is $SDK_PATH "
+
+        local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS -isysroot ${SDK_PATH}"
         
         sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
             
