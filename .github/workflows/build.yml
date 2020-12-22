@@ -24,3 +24,23 @@ jobs:
         run: ./scripts/build.sh
         env:
             BUNDLE: ${{matrix.job}}
+
+  build-ios:
+    runs-on: macos-10.15
+    env:
+      TARGET: ios
+    strategy:
+      matrix:
+          job: [1,2,3,4]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Scripts Calc Formula - Bundle ${{matrix.job}}
+      run: ./scripts/calculate_formulas.sh
+      env:
+          BUNDLE: ${{matrix.job}}
+    - name: Scripts Install
+      run: ./scripts/$TARGET/install.sh
+    - name: Build
+      run: ./scripts/build.sh
+      env:
+          BUNDLE: ${{matrix.job}}

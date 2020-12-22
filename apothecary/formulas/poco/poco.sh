@@ -364,8 +364,8 @@ function build() {
 			for lib in $( ls -1 arm64) ; do
 				local renamedLib=$(echo $lib | sed 's|lib||')
 				if [ ! -e $renamedLib ] ; then
-						lipo -c arm64/$lib \
-						../AppleTVSimulator/x86_64/$lib \
+						lipo -c -arch arm64 arm64/$lib \
+						-arch x86_64 ../AppleTVSimulator/x86_64/$lib \
 						-o ../tvos/$renamedLib
 				fi
 			done
@@ -376,9 +376,9 @@ function build() {
 			for lib in $( ls -1 arm64) ; do
 				local renamedLib=$(echo $lib | sed 's|lib||')
 				if [ ! -e $renamedLib ] ; then
-						lipo -c armv7/$lib \
-						arm64/$lib \
-						../iPhoneSimulator/x86_64/$lib \
+						lipo -c -arch armv7 armv7/$lib \
+						-arch arm64 arm64/$lib \
+						-arch x86_64 ../iPhoneSimulator/x86_64/$lib \
 						-o ../ios/$renamedLib
 				fi
 			done
