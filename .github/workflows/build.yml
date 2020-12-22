@@ -26,7 +26,9 @@ jobs:
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
       - name: Build
-        run: sudo xcode-select -switch $DEVELOPER_DIR && ./scripts/build.sh
+        run: ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
+            SDKROOT: "$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk"
+
 
