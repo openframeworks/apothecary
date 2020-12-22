@@ -25,7 +25,6 @@ jobs:
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
-       DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
     steps:
       - uses: actions/checkout@v2
       - name: Scripts Calc Formula - $TARGET Bundle $BUNDLE
