@@ -203,7 +203,7 @@ function build() {
 			export CPPFLAGS=$CFLAGS
 			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS "
 			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++11 -stdlib=libc++"
-			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS"
+			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS -mmacosx-version-min="
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
 			LOG="$CURRENTPATH/builddir/$TYPE/$IOS_ARCH/build-tess2-${VER}-$IOS_ARCH.log"
