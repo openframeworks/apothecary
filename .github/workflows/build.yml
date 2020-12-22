@@ -11,6 +11,9 @@ jobs:
         matrix:
             cfg:
             - {target: osx, job: 1}
+            - {target: osx, job: 2}
+            - {target: osx, job: 3}
+            - {target: osx, job: 4}
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
