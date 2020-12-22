@@ -313,7 +313,7 @@ function copy() {
 		cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
 		cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
 	elif  [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
-		bcp filesystem install_dir
+		dist/bin/bcp filesystem install_dir
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
 		rsync -ar install_dir/boost/* $1/include/boost/
         lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a
