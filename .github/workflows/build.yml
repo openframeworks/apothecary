@@ -10,18 +10,7 @@ jobs:
     strategy:
         matrix:
             cfg:
-            - {target: osx, job: 1}
             - {target: osx, job: 2}
-            - {target: osx, job: 3}
-            - {target: osx, job: 4}
-            - {target: ios, job: 1}
-            - {target: ios, job: 2}
-            - {target: ios, job: 3}
-            - {target: ios, job: 4}
-            - {target: tvos, job: 1}
-            - {target: tvos, job: 2}
-            - {target: tvos, job: 3}
-            - {target: tvos, job: 4}
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
