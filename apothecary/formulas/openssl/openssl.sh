@@ -54,11 +54,15 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
+ 
+        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        echo "SDK PATH IS ${SDK_PATH}"
+ 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
 		rm -f libcrypto.a libssl.a
 
-		local BUILD_OPTS_ARM="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc"
+		local BUILD_OPTS_ARM="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc -isysroot${SDK_PATH}"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/arm64
         KERNEL_BITS=64
                 
@@ -72,7 +76,7 @@ function build() {
 		make -j1
 		make -j1 install_sw
   
-        local BUILD_OPTS_X86_64="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc"
+        local BUILD_OPTS_X86_64="-fPIC -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc -isysroot${SDK_PATH}"
 
         rm -f libcrypto.a
         rm -f libssl.a
