@@ -22,11 +22,11 @@ jobs:
             - {target: tvos, job: 2}
             - {target: tvos, job: 3}
             - {target: tvos, job: 4}
+        env:
+           TARGET: ${{matrix.cfg.target}}
+           BUNDLE: ${{matrix.cfg.job}}
     steps:
       - uses: actions/checkout@v2
-      env:
-        TARGET: ${{matrix.cfg.target}}
-        BUNDLE: ${{matrix.cfg.job}}
       - name: Scripts Calc Formula - $TARGET Bundle $BUNDLE
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
