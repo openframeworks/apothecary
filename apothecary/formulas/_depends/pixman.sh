@@ -35,6 +35,9 @@ function build() {
 
         echo " SDK_PATH is already $SDK_PATH "
         "xcode-select -p " xcode-select -p
+        "print env"
+        
+        printenv
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
