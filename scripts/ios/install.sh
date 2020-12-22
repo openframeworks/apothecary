@@ -2,8 +2,6 @@
 brew update >/dev/null
 
 brew install coreutils autoconf automake
-brew reinstall libtool
-
 # brew reinstall libtool
 # export PATH="/usr/local/opt/ccache/libexec:$PATH"
 

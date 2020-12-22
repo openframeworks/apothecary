@@ -215,7 +215,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-			cmake -G 'Unix Makefiles' -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET=""
+			cmake -G 'Unix Makefiles' -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET=""  #need these flags because newer cmake tries to be smart and breaks simulator builds 
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 
