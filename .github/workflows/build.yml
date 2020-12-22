@@ -5,42 +5,32 @@ on:
   pull_request:
 
 jobs:
-  build-tvos:
+  build-macos-platforms:
     runs-on: macos-10.15
-    env:
-        TARGET: tvos
     strategy:
         matrix:
-            job: [2]
+            cfg:
+            - {target: osx, job: 1}
+            - {target: osx, job: 2}
+            - {target: osx, job: 3}
+            - {target: osx, job: 4}
+            - {target: ios, job: 1}
+            - {target: ios, job: 2}
+            - {target: ios, job: 3}
+            - {target: ios, job: 4}
+            - {target: tvos, job: 1}
+            - {target: tvos, job: 2}
+            - {target: tvos, job: 3}
+            - {target: tvos, job: 4}
     steps:
       - uses: actions/checkout@v2
-      - name: Scripts Calc Formula - Bundle ${{matrix.job}}
+      - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
         run: ./scripts/calculate_formulas.sh
         env:
-            BUNDLE: ${{matrix.job}}
+            BUNDLE: ${{matrix.cfg.job}}
       - name: Scripts Install
-        run: ./scripts/$TARGET/install.sh
+        run: ./scripts/${{matrix.cfg.target}}/install.sh
       - name: Build
         run: ./scripts/build.sh
         env:
-            BUNDLE: ${{matrix.job}}
-
-  build-ios:
-    runs-on: macos-10.15
-    env:
-      TARGET: ios
-    strategy:
-      matrix:
-          job: [2]
-    steps:
-    - uses: actions/checkout@v2
-    - name: Scripts Calc Formula - Bundle ${{matrix.job}}
-      run: ./scripts/calculate_formulas.sh
-      env:
-          BUNDLE: ${{matrix.job}}
-    - name: Scripts Install
-      run: ./scripts/$TARGET/install.sh
-    - name: Build
-      run: ./scripts/build.sh
-      env:
-          BUNDLE: ${{matrix.job}}
+            BUNDLE: ${{matrix.cfg.job}}
