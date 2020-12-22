@@ -18,14 +18,15 @@ jobs:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
        DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
+       SDKROOT: "/Applications/Xcode_12.2.app/Contents/Developer"
     steps:
       - uses: actions/checkout@v2
-      - name: Scripts Calc Formula - ${TARGET} Bundle ${BUNDLE}
+      - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
-        run: ./scripts/${TARGET}/install.sh
+        run: ./scripts/$TARGET/install.sh
       - name: Build
-        run: sudo xcode-select -switch ${DEVELOPER_DIR} && ./scripts/build.sh
+        run: sudo xcode-select -switch $DEVELOPER_DIR && ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
 
