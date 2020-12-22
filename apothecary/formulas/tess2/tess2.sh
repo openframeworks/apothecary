@@ -150,7 +150,6 @@ function build() {
 		do
 
 			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
-            MACOSX_DEPLOYMENT_TARGET=
 			rm -f CMakeCache.txt
 			set +e
 
@@ -215,6 +214,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
+            CMAKE_OSX_DEPLOYMENT_TARGET="" # older cmake sets latest macosx regardless 
 			cmake -G 'Unix Makefiles'
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
