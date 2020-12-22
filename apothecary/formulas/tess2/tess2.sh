@@ -149,7 +149,10 @@ function build() {
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
 
-			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS CMAKE_CXX_FLAGS OTHER_CFLAGS
+			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS CMAKE_CXX_FLAGS OTHER_CFLAGS CC CXX
+            echo "WHERE DOES THIS LIVE?"
+            printenv
+   
 			rm -f CMakeCache.txt
 			set +e
 
