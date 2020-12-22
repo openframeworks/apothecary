@@ -149,10 +149,8 @@ function build() {
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
 
-			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS CMAKE_CXX_FLAGS OTHER_CFLAGS CC CXX
-            echo "WHERE DOES THIS LIVE?"
-            printenv
-   
+			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
+            MACOSX_DEPLOYMENT_TARGET=
 			rm -f CMakeCache.txt
 			set +e
 
@@ -217,7 +215,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-			cmake -G 'Unix Makefiles' -DCMAKE_C_FLAGS=-DNDEBUG  # add DCMAKE_C_FLAGS as a hack to avoid pollution
+			cmake -G 'Unix Makefiles'
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 
