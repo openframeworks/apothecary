@@ -214,12 +214,8 @@ function build() {
 
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
-   
-            CMAKE_OSX_DEPLOYMENT_TARGET=""
-            MACOSX_DEPLOYMENT_TARGET=""
-            CMAKE_OSX_SYSROOT=""
 
-			cmake -G 'Unix Makefiles'
+			cmake -G 'Unix Makefiles' -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET=""
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 
