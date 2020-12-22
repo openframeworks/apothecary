@@ -148,13 +148,11 @@ function build() {
         local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
         local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
         
-        local SDK_PATH=$(xcrun --show-sdk-path)
-
         local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
         
         sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
             
-        export ARCHFLAGS="-arch arm64 -arch x86_64 -isysroot ${SDK_PATH} -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export ARCHFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         ./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
             --prefix=$BUILD_DIR/poco/install/$TYPE
             
