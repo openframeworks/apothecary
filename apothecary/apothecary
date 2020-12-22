@@ -94,8 +94,10 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
 
-
+    echo "set sdk to $OSX_MIN_SDK_VER"
 fi
+
+echo "double check sdk is set to $OSX_MIN_SDK_VER MACOSX_DEPLOYMENT_TARGET is $MACOSX_DEPLOYMENT_TARGET"
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
