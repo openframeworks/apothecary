@@ -17,8 +17,6 @@ jobs:
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
-       DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
-       SDKROOT: "/Applications/Xcode_12.2.app/Contents/Developer"
     steps:
       - uses: actions/checkout@v2
       - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
@@ -29,6 +27,6 @@ jobs:
         run: ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
-            SDKROOT: "$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk"
+            SDKROOT: "Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk"
 
 
