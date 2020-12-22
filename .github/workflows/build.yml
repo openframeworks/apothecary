@@ -5,10 +5,10 @@ on:
   pull_request:
 
 jobs:
-  build-ios:
+  build-tvos:
     runs-on: macos-10.15
     env:
-        TARGET: ios
+        TARGET: tvos
     strategy:
         matrix:
             job: [1,2,3,4]
