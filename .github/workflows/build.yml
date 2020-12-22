@@ -24,8 +24,9 @@ jobs:
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
       - name: Build
-        run:  export SDKROOT="${xcrun --sdk macosx --show-sdk-path}" && ./scripts/build.sh
+        run: ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
+            SDKROOT: "Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
 
