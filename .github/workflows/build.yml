@@ -22,9 +22,9 @@ jobs:
             - {target: tvos, job: 2}
             - {target: tvos, job: 3}
             - {target: tvos, job: 4}
-        env:
-           TARGET: ${{matrix.cfg.target}}
-           BUNDLE: ${{matrix.cfg.job}}
+    env:
+       TARGET: ${{matrix.cfg.target}}
+       BUNDLE: ${{matrix.cfg.job}}
     steps:
       - uses: actions/checkout@v2
       - name: Scripts Calc Formula - $TARGET Bundle $BUNDLE
