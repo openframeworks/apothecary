@@ -348,12 +348,7 @@ function build() {
 
             echo "--------------------"
             echo "Running make for ${IOS_ARCH}"
-
-            VALID_ARCHS="$POCO_TARGET_OSARCH"
-            ARCHS=$VALID_ARCHS
-
             make -j${PARALLEL_MAKE}
-
             unset POCO_TARGET_OSARCH IPHONE_SDK_VERSION_MIN OSFLAGS
             unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
@@ -368,6 +363,7 @@ function build() {
             for lib in $( ls -1 arm64) ; do
                 local renamedLib=$(echo $lib | sed 's|lib||')
                 if [ ! -e $renamedLib ] ; then
+                        lipo -extract x86_64 ../AppleTVSimulator/x86_64/$lib -o ../AppleTVSimulator/x86_64/$lib
                         lipo -c arm64/$lib \
                         ../AppleTVSimulator/x86_64/$lib \
                         -o ../tvos/$renamedLib
