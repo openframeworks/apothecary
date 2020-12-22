@@ -33,17 +33,13 @@ function prepare() {
 function build() {
 	if [ "$TYPE" == "osx" ] ; then
 
-        echo " SDK_PATH is already $SDK_PATH "
-        "xcode-select -p " xcode-select -p
-        "print env"
-        
         printenv
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
                 
-        echo " SDK_PATH is now $SDK_PATH "
+        echo " SDK_PATH is $SDK_PATH "
 
                 
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"

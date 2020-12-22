@@ -22,7 +22,7 @@ jobs:
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
       - name: Build
-        run: ./scripts/build.sh
+        run: sudo xcode-select -switch $DEVELOPER_DIR && ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
 
