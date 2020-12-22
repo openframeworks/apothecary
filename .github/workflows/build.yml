@@ -13,7 +13,7 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: 10.9
     strategy:
         matrix:
-            job: [1, 2, 3, 4]
+            job: [1]
     steps:
       - uses: actions/checkout@v2
       - name: Scripts Calc Formula - Bundle ${{matrix.job}}
