@@ -214,7 +214,6 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-            CMAKE_OSX_DEPLOYMENT_TARGET="" # older cmake sets latest macosx regardless 
 			cmake -G 'Unix Makefiles'
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
