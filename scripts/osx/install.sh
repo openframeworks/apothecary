@@ -9,5 +9,6 @@ sudo xcode-select -switch $DEVELOPER_DIR
 SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 echo "SDK PATH IS ${SDK_PATH}"
 echo "DEVELOPER_DIR is $DEVELOPER_DIR"
+"xcode-select -p " xcode-select -p
 
 export PATH="/usr/local/opt/ccache/libexec:$PATH"

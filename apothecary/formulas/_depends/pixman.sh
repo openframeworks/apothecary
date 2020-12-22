@@ -34,7 +34,7 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
 
         echo " SDK_PATH is already $SDK_PATH "
-
+        "xcode-select -p " xcode-select -p
 
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
