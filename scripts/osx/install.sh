@@ -6,7 +6,8 @@ brew reinstall libtool
 
 sudo xcode-select -switch $DEVELOPER_DIR
 
-local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 echo "SDK PATH IS ${SDK_PATH}"
+echo "DEVELOPER_DIR is $DEVELOPER_DIR"
 
 export PATH="/usr/local/opt/ccache/libexec:$PATH"
