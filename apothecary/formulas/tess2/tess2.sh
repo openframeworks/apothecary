@@ -214,7 +214,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-			cmake -G 'Unix Makefiles'
+			cmake -G 'Unix Makefiles' -DCMAKE_C_FLAGS=-DNDEBUG  # add DCMAKE_C_FLAGS as a hack to avoid pollution 
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 

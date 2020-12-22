@@ -45,6 +45,7 @@ FORMULAS=(
 if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] || [ "$TARGET" == "vs" ]; then
     if [ "$BUNDLE" == "1" ]; then
         FORMULAS=(
+            "tess2"
             # Dependencies for other formulas (cairo)
             "pixman"
             "pkg-config"
@@ -67,7 +68,6 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "utf8"
             "videoInput"
             "rtAudio"
-            "tess2"
             "uriparser"
 
             # # Formulas with depenencies in the end

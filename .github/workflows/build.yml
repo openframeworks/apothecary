@@ -9,8 +9,6 @@ jobs:
     runs-on: macos-10.15
     env:
         TARGET: ios
-        OSX_MIN_SDK_VER: 10.9
-        MACOSX_DEPLOYMENT_TARGET: 10.9
     strategy:
         matrix:
             job: [1]
