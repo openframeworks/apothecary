@@ -2,7 +2,7 @@
 brew update >/dev/null
 
 brew install coreutils boost-bcp autoconf
-brew cask install cmake
+brew install --cask cmake
 
 # brew reinstall libtool
 # export PATH="/usr/local/opt/ccache/libexec:$PATH"
