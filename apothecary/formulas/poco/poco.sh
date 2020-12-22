@@ -364,6 +364,7 @@ function build() {
 			for lib in $( ls -1 arm64) ; do
 				local renamedLib=$(echo $lib | sed 's|lib||')
 				if [ ! -e $renamedLib ] ; then
+                        lipo -extract x86_64 ../AppleTVSimulator/x86_64/$lib -o ../AppleTVSimulator/x86_64/$lib  # because AppleTV simulator does arm64 and x86_64
 						lipo -c -arch arm64 arm64/$lib \
 						-arch x86_64 ../AppleTVSimulator/x86_64/$lib \
 						-o ../tvos/$renamedLib
