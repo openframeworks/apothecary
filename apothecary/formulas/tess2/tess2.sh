@@ -150,6 +150,7 @@ function build() {
 		do
 
 			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
+            
 			rm -f CMakeCache.txt
 			set +e
 
@@ -213,6 +214,10 @@ function build() {
 
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
+   
+            CMAKE_OSX_DEPLOYMENT_TARGET=""
+            MACOSX_DEPLOYMENT_TARGET=""
+            CMAKE_OSX_SYSROOT=""
 
 			cmake -G 'Unix Makefiles'
 			make clean >> "${LOG}" 2>&1
