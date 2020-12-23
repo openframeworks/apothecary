@@ -1,6 +1,5 @@
 #!/bin/bash
-pwd
-ls -la
+
 docker exec emscripten apt update
 docker exec emscripten apt install -y coreutils libboost-tools-dev
 docker exec emscripten apt install -y rsync
