@@ -325,7 +325,6 @@ function copy() {
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
-        ls -la 
 		bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
 	    rm -rf $1/lib/$TYPE/$ABI
