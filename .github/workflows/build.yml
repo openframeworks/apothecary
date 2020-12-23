@@ -58,7 +58,7 @@ jobs:
         - name: Scripts Install
           run: ./scripts/$TARGET/install.sh
         - name: build
-          run:  SYSROOOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian" && TOOLCHAIN_ROOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain" && TOOLCHAIN_PREFIX"arm-linux-gnueabihf" && ./scripts/build.sh
+          run:  export SYSROOOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian" && export TOOLCHAIN_ROOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain" && export TOOLCHAIN_PREFIX"arm-linux-gnueabihf" && ./scripts/build.sh
           
   build-linux-arm7:
         runs-on: ubuntu-16.04
