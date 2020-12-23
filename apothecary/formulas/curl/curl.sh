@@ -86,10 +86,11 @@ function build() {
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         ./buildconf
 
-        export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
 		./configure \
             --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
@@ -102,8 +103,8 @@ function build() {
 	    make -j${PARALLEL_MAKE}
         make install
 
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
 		./configure \
             --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
