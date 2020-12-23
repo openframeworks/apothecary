@@ -1,11 +1,11 @@
 #!/bin/bash
 
-docker exec emscripten apt update
-docker exec emscripten apt install -y coreutils libboost-tools-dev
-docker exec emscripten apt install -y rsync
-docker exec emscripten apt install -y gperf
-docker exec emscripten apt install -y ccache
-docker exec emscripten sh -c "echo \$PATH"
+docker exec -it emscripten apt update
+docker exec -it emscripten apt install -y coreutils libboost-tools-dev
+docker exec -it emscripten apt install -y rsync
+docker exec -it emscripten apt install -y gperf
+docker exec -it emscripten apt install -y ccache
+docker exec -i emscripten sh -c "echo \$PATH"
 
 # DOCKER_HOME=$(docker exec -i emscripten 'echo $HOME')
 # docker exec -i emscripten mkdir $DOCKER_HOME/bin

@@ -23,7 +23,7 @@ trapError() {
 if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
         echo "TARGET=\"emscripten\" $@"
-        docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
     run_bg(){
