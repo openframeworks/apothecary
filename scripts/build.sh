@@ -230,7 +230,7 @@ if [ -z "$FORMULAS" ]; then
 fi
 
 # Remove output folder
-run "rm -rf $OUTPUT_FOLDER" 2> /dev/null
+run "rm -rf $OUTPUT_FOLDER"
 run "mkdir $OUTPUT_FOLDER"
 
 ITER=0
