@@ -20,7 +20,7 @@ trapError() {
 	exit 1
 }
 
-if [[ "$TRAVIS" = true ] || [ "$GITHUB_ACTIONS" = true ]] && [ "$TARGET" == "emscripten" ]; then
+if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
     run(){
         echo "TARGET=\"emscripten\" $@"
         docker exec -it emscripten sh -c "TARGET=\"emscripten\" $@"
@@ -277,7 +277,7 @@ if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
-if [[ "$TRAVIS" = true ] || [ "$GITHUB_ACTIONS" = true ]] && [ "$TARGET" == "emscripten" ]; then
+if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
     LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
     LIBS=${LIBSX//[$'\t\r\n']/ }
 else
