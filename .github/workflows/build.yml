@@ -85,10 +85,8 @@ jobs:
        TARGET: "emscripten"
       steps:
       - uses: actions/checkout@v2
-      - name: sanity check
-        run:  ls -la /home/runner/work && ls -la /home/runner/work/apothecary && ls -la /home/runner/work/apothecary/apothecary
       - name: Docker Step
-        run:  docker run -dit --name emscripten -v /home/runner/work/apothecary/apothecary:/src trzeci/emscripten:sdk-incoming-64bit bash
+        run:  "docker run -dit --name emscripten -v ${PWD}:/src trzeci/emscripten:sdk-incoming-64bit bash"
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
