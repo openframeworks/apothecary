@@ -51,6 +51,9 @@ jobs:
         runs-on: ubuntu-16.04
         env:
          TARGET: "linuxarmv6l"
+         SYSROOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian"
+         TOOLCHAIN_ROOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain"
+         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
         steps:
         - uses: actions/checkout@v2
         - name: Scripts Calc Formula
@@ -58,12 +61,15 @@ jobs:
         - name: Scripts Install
           run: ./scripts/$TARGET/install.sh
         - name: build
-          run:  export SYSROOOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian" && export TOOLCHAIN_ROOT="$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain" && export TOOLCHAIN_PREFIX="arm-linux-gnueabihf" && ./scripts/build.sh
+          run: ./scripts/build.sh
           
   build-linux-arm7:
         runs-on: ubuntu-16.04
         env:
          TARGET: "linuxarmv7l"
+         SYSROOT: "/home/runner/archlinux"
+         TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
+         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
         steps:
         - uses: actions/checkout@v2
         - name: Scripts Calc Formula
@@ -71,7 +77,7 @@ jobs:
         - name: Scripts Install
           run: ./scripts/$TARGET/install.sh
         - name: build
-          run: export SYSROOOT="/home/runner/archlinux" && export TOOLCHAIN_ROOT="/home/runner/rpi2_toolchain" && export TOOLCHAIN_PREFIX="arm-linux-gnueabihf" && ./scripts/build.sh
+          run: ./scripts/build.sh
 
 #  build-emscripten:
 #      runs-on: ubuntu-16.04
