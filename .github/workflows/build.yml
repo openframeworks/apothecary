@@ -59,10 +59,10 @@ jobs:
           run: ./scripts/$TARGET/install.sh
         - name: build
           run: ./scripts/build.sh
-            env:
-              SYSROOOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian"
-              TOOLCHAIN_ROOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain"
-              TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+          env:
+            SYSROOOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/raspbian"
+            TOOLCHAIN_ROOT: "$GITHUB_WORKSPACE/scripts/linuxarmv6l/rpi_toolchain"
+            TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
           
   build-linux-arm7:
         runs-on: ubuntu-16.04
@@ -76,10 +76,10 @@ jobs:
           run: ./scripts/$TARGET/install.sh
         - name: build
           run: ./scripts/build.sh
-            env:
-              SYSROOOT: "/home/runner/archlinux"
-              TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
-              TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+          env:
+            SYSROOOT: "/home/runner/archlinux"
+            TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
+            TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
 
   build-emscripten:
       runs-on: ubuntu-16.04
