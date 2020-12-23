@@ -14,6 +14,14 @@ jobs:
             - {target: osx, job: 2, cc: "clang", cxx: "clang++"}
             - {target: osx, job: 3, cc: "clang", cxx: "clang++"}
             - {target: osx, job: 4, cc: "clang", cxx: "clang++"}
+            - {target: ios, job: 1}
+            - {target: ios, job: 2}
+            - {target: ios, job: 3}
+            - {target: ios, job: 4}
+            - {target: tvos, job: 1}
+            - {target: tvos, job: 2}
+            - {target: tvos, job: 3}
+            - {target: tvos, job: 4}
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
@@ -29,6 +37,5 @@ jobs:
         run: ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
-            # SDKROOT: "Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
 
