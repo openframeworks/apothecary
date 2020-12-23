@@ -84,11 +84,9 @@ jobs:
       env:
        TARGET: "emscripten"
       steps:
-      - uses: actions/checkout@v2
       - name: Docker Step
-        uses: docker
-        with:
-            args: run -dit --name emscripten -v $GITHUB_WORKSPACE:/src trzeci/emscripten:sdk-incoming-64bit bash
+        run: docker run -dit --name emscripten -v /home/runner:/src trzeci/emscripten:sdk-incoming-64bit bash
+      - uses: actions/checkout@v2
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
