@@ -23,10 +23,12 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
-      - name: Build
+      - name: rm-dev
+        run: sudo rm -rf /Library/Developer
+      - name: build
         run: ./scripts/build.sh
         env:
-            DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
+            DEVELOPER_DIR: $XCODE_12_DEVELOPER_DIR
             # SDKROOT: "Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
 
