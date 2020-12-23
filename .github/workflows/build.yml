@@ -27,25 +27,25 @@ jobs:
 #      run: ./scripts/build.sh
 #
 #
-#  build-android:
-#    runs-on: ubuntu-16.04
-#    strategy:
-#        matrix:
-#          cfg:
-#          - {target: android, arch: armv7}
-#          - {target: android, arch: arm64}
-#          - {target: android, arch: x86}
-#    env:
-#     TARGET: ${{matrix.cfg.target}}
-#     ARCH: ${{matrix.cfg.arch}}
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
-#      run: ./scripts/calculate_formulas.sh
-#    - name: Scripts Install
-#      run: ./scripts/$TARGET/install.sh
-#    - name: build
-#      run: ./scripts/build.sh
+  build-android:
+    runs-on: ubuntu-16.04
+    strategy:
+        matrix:
+          cfg:
+          - {target: android, arch: armv7}
+          - {target: android, arch: arm64}
+          - {target: android, arch: x86}
+    env:
+     TARGET: ${{matrix.cfg.target}}
+     ARCH: ${{matrix.cfg.arch}}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
+      run: ./scripts/calculate_formulas.sh
+    - name: Scripts Install
+      run: ./scripts/$TARGET/install.sh
+    - name: build
+      run: ./scripts/build.sh
       
 #  build-linux-arm6:
 #        runs-on: ubuntu-16.04
@@ -79,20 +79,20 @@ jobs:
 #        - name: build
 #          run: ./scripts/build.sh
 
-  build-emscripten:
-      runs-on: ubuntu-16.04
-      env:
-       TARGET: "emscripten"
-      steps:
-      - uses: actions/checkout@v2
-      - name: Docker Step
-        run:  "docker run -di --name emscripten -v $PWD:/src trzeci/emscripten:sdk-incoming-64bit bash"
-      - name: Scripts Calc Formula
-        run: ./scripts/calculate_formulas.sh
-      - name: Scripts Install
-        run: ./scripts/$TARGET/install.sh
-      - name: build
-        run: ./scripts/build.sh
+#  build-emscripten:
+#      runs-on: ubuntu-16.04
+#      env:
+#       TARGET: "emscripten"
+#      steps:
+#      - uses: actions/checkout@v2
+#      - name: Docker Step
+#        run:  "docker run -di --name emscripten -v $PWD:/src trzeci/emscripten:sdk-incoming-64bit bash"
+#      - name: Scripts Calc Formula
+#        run: ./scripts/calculate_formulas.sh
+#      - name: Scripts Install
+#        run: ./scripts/$TARGET/install.sh
+#      - name: build
+#        run: ./scripts/build.sh
 
 #  build-macos-platforms:
 #    runs-on: macos-10.15
