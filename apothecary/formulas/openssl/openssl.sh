@@ -60,7 +60,6 @@ function build() {
 		rm -f libcrypto.a libssl.a
   
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        echo " SDK_PATH is $SDK_PATH "
 
 		local BUILD_OPTS_ARM="-fPIC -isysroot${SDK_PATH} -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc"
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/arm64
@@ -154,7 +153,6 @@ function build() {
             fi
             
             local SDK_PATH=$(xcrun --sdk $CUR_OS --show-sdk-path)
-            echo "SDK PATH IS ${SDK_PATH}"
 
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			source ../../ios_configure.sh $TYPE $IOS_ARCH

@@ -42,7 +42,6 @@ function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        echo " SDK_PATH is $SDK_PATH "
         
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
