@@ -87,7 +87,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Docker Step
         uses: docker
-            with:
+        with:
             args: run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
