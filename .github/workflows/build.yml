@@ -26,42 +26,42 @@ jobs:
 #    - name: build
 #      run: ./scripts/build.sh
 #
+#  build-android:
+#    runs-on: ubuntu-16.04
+#    strategy:
+#        matrix:
+#          cfg:
+#          - {target: android, arch: armv7}
+#          - {target: android, arch: arm64}
+#          - {target: android, arch: x86}
+#    env:
+#     TARGET: ${{matrix.cfg.target}}
+#     ARCH: ${{matrix.cfg.arch}}
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
+#      run: ./scripts/calculate_formulas.sh
+#    - name: Scripts Install
+#      run: ./scripts/$TARGET/install.sh
+#    - name: build
+#      run: ./scripts/build.sh
 #
-  build-android:
-    runs-on: ubuntu-16.04
-    strategy:
-        matrix:
-          cfg:
-          - {target: android, arch: armv7}
-          - {target: android, arch: arm64}
-          - {target: android, arch: x86}
-    env:
-     TARGET: ${{matrix.cfg.target}}
-     ARCH: ${{matrix.cfg.arch}}
-    steps:
-    - uses: actions/checkout@v2
-    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
-      run: ./scripts/calculate_formulas.sh
-    - name: Scripts Install
-      run: ./scripts/$TARGET/install.sh
-    - name: build
-      run: ./scripts/build.sh
-      
-#  build-linux-arm6:
-#        runs-on: ubuntu-16.04
-#        env:
-#         TARGET: "linuxarmv6l"
-#         SYSROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/raspbian"
-#         TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/rpi_toolchain"
-#         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
-#        steps:
-#        - uses: actions/checkout@v2
-#        - name: Scripts Calc Formula
-#          run: ./scripts/calculate_formulas.sh
-#        - name: Scripts Install
-#          run: ./scripts/$TARGET/install.sh
-#        - name: build
-#          run: ./scripts/build.sh
+  build-linux-arm6:
+        runs-on: ubuntu-16.04
+        env:
+         TARGET: "linuxarmv6l"
+         SYSROOT: "$PWD/scripts/linuxarmv6l/raspbian"
+         TOOLCHAIN_ROOT: "$PWD/scripts/linuxarmv6l/rpi_toolchain"
+         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+        steps:
+        - uses: actions/checkout@v2
+        - name: Scripts Calc Formula
+          run: ./scripts/calculate_formulas.sh
+        - name: Scripts Install
+          run: ./scripts/$TARGET/install.sh
+        - name: build
+          run: ./scripts/build.sh
+
 #
 #  build-linux-arm7:
 #        runs-on: ubuntu-16.04
@@ -78,7 +78,7 @@ jobs:
 #          run: ./scripts/$TARGET/install.sh
 #        - name: build
 #          run: ./scripts/build.sh
-
+#
 #  build-emscripten:
 #      runs-on: ubuntu-16.04
 #      env:
@@ -93,7 +93,7 @@ jobs:
 #        run: ./scripts/$TARGET/install.sh
 #      - name: build
 #        run: ./scripts/build.sh
-
+#
 #  build-macos-platforms:
 #    runs-on: macos-10.15
 #    strategy:
@@ -126,5 +126,5 @@ jobs:
 #        run: ./scripts/build.sh
 #        env:
 #            DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
-#
-#
+
+

@@ -4,7 +4,6 @@ set -e
 set -o pipefail
 
 FORMULAS=(
-    "boost"
     # Dependencies for other formulas (cairo)
     "pixman"
     "pkg-config"
@@ -12,6 +11,7 @@ FORMULAS=(
 
     # All formulas
     "assimp"
+    "boost"
     "FreeImage"
     "libpng"
     "libxml2"
