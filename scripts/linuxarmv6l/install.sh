@@ -36,6 +36,9 @@ downloadToolchain(){
     wget -nv http://ci.openframeworks.cc/rpi_toolchain_gcc6.tar.bz2
     tar xjf rpi_toolchain_gcc6.tar.bz2
     rm rpi_toolchain_gcc6.tar.bz2
+    pwd
+    ls -la rpi_toolchain/bin
+    chmod +x rpi_toolchain/bin/*
 }
 
 downloadFirmware(){
