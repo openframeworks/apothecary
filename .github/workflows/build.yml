@@ -5,6 +5,27 @@ on:
   pull_request:
 
 jobs:
+
+  build-linux64:
+    runs-on: ubuntu-16.04
+    strategy:
+        matrix:
+          cfg:
+          - {target: linux, opt: gcc4}
+          - {target: linux, opt: gcc5}
+          - {target: linux, opt: gcc6}
+    env:
+     TARGET: ${{matrix.cfg.target}}
+     OPT: ${{matrix.cfg.opt}}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
+      run: ./scripts/calculate_formulas.sh
+    - name: Scripts Install
+      run: ./scripts/$TARGET/install.sh
+    - name: build
+      run: ./scripts/build.sh
+
   build-macos-platforms:
     runs-on: macos-10.15
     strategy:
