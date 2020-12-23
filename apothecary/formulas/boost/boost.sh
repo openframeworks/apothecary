@@ -45,6 +45,9 @@ function prepare() {
 	#patch -p0 -u < $FORMULA_DIR/visualc.hpp.patch
 
 	if [ "$TYPE" == "osx" ]; then
+        echo "DEVELOPER_DIR is $DEVELOPER_DIR "
+        printenv
+    
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI
