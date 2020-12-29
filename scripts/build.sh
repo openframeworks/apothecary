@@ -296,7 +296,7 @@ else
     
     CUR_BRANCH="master";
     if [ "$GITHUB_ACTIONS" = true ]; then
-        CUR_BRANCH="$GITHUB_REF"
+        CUR_BRANCH="${GITHUB_REF##*/}"
     else
         CUR_BRANCH="$TRAVIS_BRANCH"
     fi
