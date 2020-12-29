@@ -58,9 +58,11 @@ function build() {
 		esac
 
 		local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
+        
+        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
 		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --with-harfbuzz=no --enable-static=yes --enable-shared=no \
-			CFLAGS="$FAT_CFLAGS -fPIC -pipe -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden"
+			CFLAGS="$FAT_CFLAGS -fPIC -pipe -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden -isysroot${SDK_PATH}"
 		make clean
 		make -j${PARALLEL_MAKE}
 		make install
