@@ -268,7 +268,6 @@ if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[
     echo "On Master Branch and not a PR";
 else
     echo "This is a PR or not master branch, exiting build before compressing";
-    echo ${GITHUB_REF##*/}
     exit 0
 fi
 
