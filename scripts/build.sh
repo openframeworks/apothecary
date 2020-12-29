@@ -295,7 +295,7 @@ if [ ! -z ${APPVEYOR+x} ]; then
 else
     
     CUR_BRANCH="master";
-    if["$GITHUB_ACTIONS" = true]; then
+    if[ "$GITHUB_ACTIONS" = true ]; then
         CUR_BRANCH="$GITHUB_REF"
     else
         CUR_BRANCH="$TRAVIS_BRANCH"
@@ -309,7 +309,7 @@ else
         tar cjf $TARBALL $LIBS
     fi
     
-    if["$GITHUB_ACTIONS" = true]; then
+    if[ "$GITHUB_ACTIONS" = true ]; then
         echo Unencrypting key for github actions
         openssl aes-256-cbc -salt -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
     else
