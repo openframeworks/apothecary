@@ -263,7 +263,7 @@ if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]]; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "$GITHUB_REF" == "master" && "$GITHUB_HEAD_REF" == "" ]] ; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else
@@ -271,7 +271,7 @@ else
     exit 0
 fi
 
-if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]]; then
+if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]] || [[ -z "${GA_CI_SECRET}" ]]; then
     echo "No secure vars set so exiting before compressing";
     exit 0
 fi
@@ -293,15 +293,30 @@ if [ ! -z ${APPVEYOR+x} ]; then
     fi
 	7z a $TARBALL $LIBS
 else
-	TARBALL=openFrameworksLibs_${TRAVIS_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+    
+    CUR_BRANCH="master";
+    if["$GITHUB_ACTIONS" = true]; then
+        CUR_BRANCH="$GITHUB_REF"
+    else
+        CUR_BRANCH="$TRAVIS_BRANCH"
+    fi
+    
+	TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
     if [ "$TARGET" == "emscripten" ]; then
 	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
         docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
     else
         tar cjf $TARBALL $LIBS
     fi
-	echo Unencrypting key
-	openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+    
+    if["$GITHUB_ACTIONS" = true]; then
+        echo Unencrypting key for github actions
+        openssl aes-256-cbc -salt -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
+    else
+        echo Unencrypting key for travis
+        openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+    fi
+ 
 	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
 	chmod 600 $LOCAL_ROOT/scripts/id_rsa
 	echo Uploading libraries

@@ -3,6 +3,8 @@ name: build
 on:
   push:
   pull_request:
+  
+environment: CI 
 
 jobs:
 
@@ -25,6 +27,8 @@ jobs:
       run: ./scripts/$TARGET/install.sh
     - name: build
       run: ./scripts/build.sh
+      env:
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
   build-android:
     runs-on: ubuntu-16.04
@@ -45,7 +49,9 @@ jobs:
       run: ./scripts/$TARGET/install.sh
     - name: build
       run: ./scripts/build.sh
-      
+      env:
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+
   build-linux-arm6:
         runs-on: ubuntu-16.04
         env:
@@ -61,6 +67,8 @@ jobs:
           run: ./scripts/$TARGET/install.sh
         - name: build
           run: ./scripts/build.sh
+          env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
   build-linux-arm7:
         runs-on: ubuntu-16.04
@@ -77,6 +85,8 @@ jobs:
           run: ./scripts/$TARGET/install.sh
         - name: build
           run: ./scripts/build.sh
+          env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
   build-emscripten:
       runs-on: ubuntu-16.04
@@ -92,6 +102,8 @@ jobs:
         run: ./scripts/$TARGET/install.sh
       - name: build
         run: ./scripts/build.sh
+        env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
   build-macos-platforms:
     runs-on: macos-10.15
@@ -125,5 +137,5 @@ jobs:
         run: ./scripts/build.sh
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
-
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
