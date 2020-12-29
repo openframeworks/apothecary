@@ -98,7 +98,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
 		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
@@ -150,6 +150,7 @@ function build() {
 		do
 
 			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
+            
 			rm -f CMakeCache.txt
 			set +e
 
@@ -214,7 +215,7 @@ function build() {
 			echo "Running make for ${IOS_ARCH}"
 			echo "Please stand by..."
 
-			cmake -G 'Unix Makefiles'
+			cmake -G 'Unix Makefiles' -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET=""  #need these flags because newer cmake tries to be smart and breaks simulator builds 
 			make clean >> "${LOG}" 2>&1
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 
@@ -235,7 +236,6 @@ function build() {
 		echo `pwd`
 		echo "Finished for all architectures."
 		mkdir -p "$CURRENTPATH/builddir/$TYPE/"
-		LOG="$CURRENTPATH/builddir/$TYPE/build-tess2-${VER}-lipo.log"
 
 		mkdir -p "lib/$TYPE"
 
@@ -244,18 +244,15 @@ function build() {
 		echo "Please stand by..."
 
 		if [[ "${TYPE}" == "tvos" ]]; then
-			lipo -create builddir/$TYPE/libtess2-arm64.a \
-			 	builddir/$TYPE/libtess2-x86_64.a \
-			 	-output builddir/$TYPE/libtess2.a \
-			 	>> "${LOG}" 2>&1
+			lipo -create -arch arm64 builddir/$TYPE/libtess2-arm64.a \
+			 	-arch x86_64 builddir/$TYPE/libtess2-x86_64.a \
+			 	-output builddir/$TYPE/libtess2.a
 		 elif [[ "$TYPE" == "ios" ]]; then
-		# builddir/$TYPE/libtess2-armv7s.a \
-		lipo -create builddir/$TYPE/libtess2-armv7.a \
-			 	builddir/$TYPE/libtess2-arm64.a \
-			 	builddir/$TYPE/libtess2-i386.a \
-			 	builddir/$TYPE/libtess2-x86_64.a \
-			 	-output builddir/$TYPE/libtess2.a \
-			 	>> "${LOG}" 2>&1
+            # builddir/$TYPE/libtess2-armv7s.a
+            lipo -create -arch armv7 builddir/$TYPE/libtess2-armv7.a \
+			 	-arch arm64 builddir/$TYPE/libtess2-arm64.a \
+			 	-arch x86_64 builddir/$TYPE/libtess2-x86_64.a \
+			 	-output builddir/$TYPE/libtess2.a
 		fi
 
 		if [ $? != 0 ];
