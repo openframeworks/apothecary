@@ -73,13 +73,13 @@ function build() {
 			 -o src/pugixml.o
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 		clang++ -O2  $CFLAGS \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
 			 -o src/pugixml.o
-        ar ruv libpugixml.a src/pugixml.o
+        libtool src/pugixml.o -o libpugixml.a
         ranlib libpugixml.a
 	elif [ "$TYPE" == "msys2" ]; then
 		g++ -O2 \

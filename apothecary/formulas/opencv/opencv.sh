@@ -51,7 +51,7 @@ function build() {
     echo "Log:" >> "${LOG}" 2>&1
     set +e
     cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7 \
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
       -DENABLE_FAST_MATH=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
@@ -107,6 +107,7 @@ function build() {
       -DWITH_OPENVX=OFF \
       -DWITH_1394=OFF \
       -DWITH_ADE=OFF \
+      -DWITH_TBB=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
     echo "CMAKE Successful"
     echo "--------------------"

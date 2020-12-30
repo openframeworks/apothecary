@@ -95,6 +95,8 @@ function build() {
             --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
             --enable-static \
+            --without-nghttp2 \
+            --without-libidn2 \
             --disable-shared \
             --disable-ldap \
             --disable-ldaps \
@@ -109,6 +111,8 @@ function build() {
             --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
             --enable-static \
+            --without-nghttp2 \
+            --without-libidn2 \
             --disable-shared \
             --disable-ldap \
             --disable-ldaps \
