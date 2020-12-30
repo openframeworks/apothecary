@@ -312,7 +312,7 @@ else
     if [ "$GITHUB_ACTIONS" = true ]; then
         echo Unencrypting key for github actions
         openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
-        mkdir ~/.ssh
+        mkdir -p ~/.ssh
     else
         echo Unencrypting key for travis
         openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
