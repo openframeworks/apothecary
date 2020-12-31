@@ -59,6 +59,7 @@ function build() {
 		# OS X needs both arches specified to be universal
 		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call
 		if [ "$TYPE" == "osx" ] ; then
+            echo "sanity check OSX_MIN_SDK_VER is ${OSX_MIN_SDK_VER}"
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
 					-DGLFW_BUILD_TESTS=OFF \
 					-DGLFW_BUILD_EXAMPLES=OFF \
