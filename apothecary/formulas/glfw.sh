@@ -76,9 +76,7 @@ function build() {
 		fi
 
  		make clean
- 		make -j${PARALLEL_MAKE}
-   
-        echo "sanity check OSX_MIN_SDK_VER is ${OSX_MIN_SDK_VER}"
+ 		make -j${PARALLEL_MAKE}   
 	fi
 }
 
