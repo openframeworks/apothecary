@@ -76,7 +76,7 @@ function build() {
 		fi
 
  		make clean
- 		make -j${PARALLEL_MAKE}   
+ 		make -j${PARALLEL_MAKE}
 	fi
 }
 
