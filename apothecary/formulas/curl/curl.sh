@@ -88,6 +88,30 @@ function build() {
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         ./buildconf
+        
+        local SDK_PATH_XCODE_X86=SDK_PATH;
+        if [ "$GITHUB_ACTIONS" = true ]; then
+            # this is because Xcode 11.4 and newer links curl with a symbol which isn't present on 10.14 and older
+            # in the future we will need to remove this, but this will provide legacy compatiblity while Github Actions has Xcode 11
+            # note: Xcode 11.3.1 should be okay too.
+            SDK_PATH_XCODE_X86="/Applications/Xcode_11.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        fi
+        
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
+        ./configure \
+            --with-darwinssl \
+            --prefix=$BUILD_DIR/curl/build/osx/x64 \
+            --enable-static \
+            --without-nghttp2 \
+            --without-libidn2 \
+            --disable-shared \
+            --disable-ldap \
+            --disable-ldaps \
+            --host=x86_64-apple-darwin
+        make clean
+        make -j${PARALLEL_MAKE}
+        make install
 
         export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
         export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
@@ -101,22 +125,6 @@ function build() {
             --disable-ldap \
             --disable-ldaps \
             --host=arm-apple-darwin
-        make clean
-	    make -j${PARALLEL_MAKE}
-        make install
-
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
-		./configure \
-            --with-darwinssl \
-            --prefix=$BUILD_DIR/curl/build/osx/x64 \
-            --enable-static \
-            --without-nghttp2 \
-            --without-libidn2 \
-            --disable-shared \
-            --disable-ldap \
-            --disable-ldaps \
-            --host=x86_64-apple-darwin
         make clean
 	    make -j${PARALLEL_MAKE}
         make install
