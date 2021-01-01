@@ -77,8 +77,8 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
             "openssl"
-            "curl"
             "poco"
+            "curl"
         )
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
