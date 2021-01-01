@@ -64,7 +64,8 @@ function build() {
 					-DGLFW_BUILD_EXAMPLES=OFF \
 					-DBUILD_SHARED_LIBS=OFF \
 					-DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_C_FLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
+                    -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64" \
 					$EXTRA_CONFIG
 		else
 			cmake .. -DGLFW_BUILD_DOCS=OFF \
