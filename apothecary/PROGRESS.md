@@ -17,7 +17,7 @@
 | Poco                            | ✓   | ✗     | ✗      | ✗           | ✗          | ✓? | P      | ✓   | ✗       |
 | OpenSSL                         | ✓   | ✗     | ✗      | ✗           | ✗          | ✗  | P      | ✓   | N/A     |
 | cairo                           | ✓   | N/A   | N/A     | N/A         | N/A         | ✗  | P      | N/A | N/A     |
-| fmodex                          | ✓C  | ✗     | ✗      | ✗           | ✗          | ✗  | ✓C    | N/A | N/A     |
+| fmod                            | ✓C  | ✗     | ✗      | ✗           | ✗          | ✗  | ✓C    | N/A | N/A     |
 | glew                            | ✓   | ✗     | ✗      | ✗           | ✗          | ✓  | P      | N/A | N/A     |
 | glfw                            | ✓   | ✗     | ✗      | ✗           | ✗          | ✓? | P      | N/A | N/A     |
 | glm                             |     |        |        |              |            |     | ✓C    |     |        |
