@@ -191,7 +191,11 @@ fi
 
 if [ "$TARGET" == "linux" ]; then
     TARGET="linux64"
-    if [ "$OPT" == "gcc5" ]; then
+    if [ "$OPT" == "gcc4" ]; then
+        export CC="gcc-4"
+        export CXX="g++-4 -std=c++11"
+        export COMPILER="g++4 -std=c++11"
+    elif [ "$OPT" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"
         export COMPILER="g++5 -std=c++11"
