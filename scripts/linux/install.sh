@@ -45,8 +45,10 @@ echoDots(){
 
 if [ "$OPT" == "gcc4" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
+    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo apt-get update -q
     sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install gcc-4.9 g++-4.9
 elif [ "$OPT" == "gcc5" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
