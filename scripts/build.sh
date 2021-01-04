@@ -275,9 +275,11 @@ else
     exit 0
 fi
 
-if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]] || [[ -z "${GA_CI_SECRET}" ]]; then
-    echo "No secure vars set so exiting before compressing";
-    exit 0
+if [ -z ${APPVEYOR+x} ]; then
+    if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]] && [[ -z "${GA_CI_SECRET}" ]]; then
+        echo "No secure vars set so exiting before compressing";
+        exit 0
+    fi
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
@@ -301,7 +303,7 @@ else
     CUR_BRANCH="master";
     if [ "$GITHUB_ACTIONS" = true ]; then
         CUR_BRANCH="${GITHUB_REF##*/}"
-    else
+    elif [ "$TRAVIS" = true ]; then
         CUR_BRANCH="$TRAVIS_BRANCH"
     fi
     
