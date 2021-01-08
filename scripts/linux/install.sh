@@ -49,6 +49,13 @@ if [ "$OPT" == "gcc4" ]; then
     sudo apt-get update -q
     sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get install gcc-4.9 g++-4.9
+    #needed because github actions defaults to gcc 5
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 60
+    sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 60
+    sudo update-alternatives --set cc /usr/bin/gcc
+    sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 60
+    sudo update-alternatives --set c++ /usr/bin/g++
 elif [ "$OPT" == "gcc5" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
