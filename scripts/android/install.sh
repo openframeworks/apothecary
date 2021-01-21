@@ -6,7 +6,7 @@ sudo apt-get update -q
 sudo apt-get remove mssql-tools 2> /dev/null # this is because mysql-tools includes a program called bcp which conflicts with boosts bcp
 sudo apt-get install -y libboost-tools-dev gperf realpath
 
-NDK_VERSION="r15c"
+NDK_VERSION="r21d"
 NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
 
 # Check if cached NDK directory exists
