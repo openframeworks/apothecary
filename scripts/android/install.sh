@@ -6,6 +6,11 @@ sudo apt-get update -q
 sudo apt-get remove mssql-tools 2> /dev/null # this is because mysql-tools includes a program called bcp which conflicts with boosts bcp
 sudo apt-get install -y libboost-tools-dev gperf realpath
 
+sudo apt remove --purge --auto-remove cmake
+sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+sudo apt update
+sudo apt install -y cmake
+
 NDK_VERSION="r21d"
 NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
 
