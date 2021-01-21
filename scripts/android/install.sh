@@ -10,6 +10,7 @@ sudo apt remove --purge --auto-remove cmake
 sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
 sudo apt update
 sudo apt install -y cmake
+cmake --version
 
 NDK_VERSION="r21d"
 NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
