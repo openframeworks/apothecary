@@ -463,7 +463,7 @@ function build() {
   elif [ "$TYPE" == "emscripten" ]; then
     if [ -z "${EMSCRIPTEN+x}" ]; then
       echo "emscripten is not set.  sourcing emsdk_env.sh"
-      source ~/emscripten-sdk/emsdk_env.sh
+      source /emsdk/emsdk_env.sh
     fi
 
     cd ${BUILD_DIR}/${1}
