@@ -461,10 +461,7 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    if [ -z "${EMSCRIPTEN+x}" ]; then
-      echo "emscripten is not set.  sourcing emsdk_env.sh"
-      source /emsdk/emsdk_env.sh
-    fi
+    source /emsdk/emsdk_env.sh
 
     cd ${BUILD_DIR}/${1}
     mkdir -p build_${TYPE}
@@ -475,8 +472,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
