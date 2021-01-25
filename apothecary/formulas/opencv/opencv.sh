@@ -461,22 +461,27 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    if [ -z "${EMSCRIPTEN+x}" ]; then
-      echo "emscripten is not set.  sourcing emsdk_env.sh"
-      source ~/emscripten-sdk/emsdk_env.sh
-    fi
+    source /emsdk/emsdk_env.sh
 
     cd ${BUILD_DIR}/${1}
+    
+    # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
+    # these can be removed when we move to latest opencv 
+    sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
+    sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
+    sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
+
     mkdir -p build_${TYPE}
     cd build_${TYPE}
+    
     emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_opencv_js=ON \
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I${EMSCRIPTEN}/system/lib/libcxxabi/include/" \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
