@@ -19,12 +19,9 @@ GIT_TAG=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	#Nothing to do for mingw64
 	if [ "$TYPE" == "msys2" ] && [ "$ARCH" == "64" ]; then
-		mkdir fmod
-		return;
-	fi
-	if [ "$TYPE" == "vs" ]; then
+        PKG=fmod_${TYPE}${ARCH}.tar.bz2
+	elif [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
 	else
 		PKG=fmod_${TYPE}.tar.bz2
