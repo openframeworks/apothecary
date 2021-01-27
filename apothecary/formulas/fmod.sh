@@ -21,7 +21,6 @@ GIT_TAG=
 function download() {
 	if [ "$TYPE" == "msys2" ] && [ "$ARCH" == "64" ]; then
         PKG=fmod_${TYPE}${ARCH}.tar.bz2
-        echo "grabbing fmod from ${PKG}"
 	elif [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
 	else
