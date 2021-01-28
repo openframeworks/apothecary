@@ -13,11 +13,12 @@ VER=stable
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/videoInput.git
-GIT_TAG=$VER
+GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	git clone ${GIT_URL}
+    echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
+	git clone --branch ${GIT_BRANCH} ${GIT_URL}
 }
 
 # prepare the build environment, executed inside the lib src dir
