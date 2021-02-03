@@ -7,7 +7,7 @@ sudo apt-get remove mssql-tools 2> /dev/null # this is because mysql-tools inclu
 sudo apt-get install -y libboost-tools-dev gperf realpath
 
 NDK_VERSION="r15c"
-NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
+NDK_ROOT="$(getrealpath ~/)/android-ndk-${NDK_VERSION}/"
 
 # Check if cached NDK directory exists
 if [ "$(ls -A ${NDK_ROOT})" ]; then
