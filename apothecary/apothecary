@@ -100,7 +100,8 @@ fi
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
-ANDROID_API=21
+NDK_VERSION=21e
+ANDROID_API=30
 ANDROID_PLATFORM=android-${ANDROID_API}
 
 ################################################################################
@@ -480,7 +481,7 @@ function installAndroidToolchain() {
 				--stl=libc++
 		fi
 	elif [ "$ARCH" == "x86_64" ]; then
-		if [ ! -d "$BUILD_DIR/Toolchains/Android/x86" ]; then
+		if [ ! -d "$BUILD_DIR/Toolchains/Android/x86_64" ]; then
 			./make_standalone_toolchain.py \
 				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
 				--arch=x86_64 \

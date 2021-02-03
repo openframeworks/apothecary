@@ -19,7 +19,11 @@ elif [ "$ABI" = "arm64-v8a" ]; then
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
 elif [ "$ABI" = "x86" ]; then
     export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86"
-    export ANDROID_PREFIX=i686-linux-android
+    export ANDROID_PREFIX=x86-linux-android
+    export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
+elif [ "$ABI" = "x86_64" ]; then
+    export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86_64"
+    export ANDROID_PREFIX=x86_64
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
 elif [ $ABI = arm64-v8a ]; then
     export SYSROOT=${NDK_ROOT}/sysroot
@@ -51,6 +55,9 @@ elif [ "$ABI" = "armeabi" ]; then
 elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS -target aarch64-linux-android"
     export LDFLAGS="$LDFLAGS -target aarch64-linux-android"
+elif [ "$ABI" = "x86_64" ]; then
+    export CFLAGS="$CFLAGS -target x86_64 -march=x86_64 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
+    export LDFLAGS="$LDFLAGS -target x86_64 -march=x86_64"
 elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
     export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
