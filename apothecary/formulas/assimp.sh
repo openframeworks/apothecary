@@ -146,71 +146,22 @@ function build() {
     elif [ "$TYPE" == "android" ] ; then
 
         #source ../../android_configure.sh $ABI
-
-
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
-            local buildOpts="--build build/$TYPE
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DANDROID_FORCE_ARM_BUILD=TRUE
-                -DCMAKE_INSTALL_PREFIX=install"
-
+            export FORCE_ARM="TRUE"
         elif [ "$ABI" == "arm64-v8a" ]; then
             export HOST=aarch64-linux-android
-            local buildOpts="--build build/$TYPE
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DANDROID_FORCE_ARM_BUILD=TRUE
-                -DCMAKE_INSTALL_PREFIX=install"
+            export FORCE_ARM="TRUE"
         elif [ "$ABI" == "x86" ]; then
             export HOST=x86-linux-android
-
-            local buildOpts="--build build/$TYPE
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DCMAKE_INSTALL_PREFIX=install"
- # -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD TERRAGEN 3D X X3D GLTF 3MF MMD
-
-        # -DASSIMP_BUILD_STL_IMPORTER=0
-        # -DASSIMP_BUILD_BLEND_IMPORTER=0
-        
-        elif [ "$ARCH" == "arm64" ]; then
-            export HOST=aarch-linux-android
+            export FORCE_ARM="FALSE"
+        elif [ "$ABI" == "x86_64" ]; then
+            export HOST=x86_64-linux-android
+            export FORCE_ARM="FALSE"
         fi
  # -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD TERRAGEN 3D X X3D GLTF 3MF MMD
 
-        local buildOpts="
+        local buildOpts="--build build/$TYPE
             -DBUILD_SHARED_LIBS=OFF 
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
@@ -220,11 +171,12 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1
             -DANDROID_NDK=$NDK_ROOT 
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
             -DCMAKE_BUILD_TYPE=Release
             -DANDROID_ABI=$ABI
             -DANDROID_STL=c++_static
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-            -DANDROID_FORCE_ARM_BUILD=TRUE
+            -DANDROID_FORCE_ARM_BUILD=$FORCE_ARM
             -DCMAKE_INSTALL_PREFIX=install"
 
         CFLAGS=""
