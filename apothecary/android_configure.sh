@@ -56,8 +56,8 @@ elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS -target aarch64-linux-android"
     export LDFLAGS="$LDFLAGS -target aarch64-linux-android"
 elif [ "$ABI" = "x86_64" ]; then
-    export CFLAGS="$CFLAGS -target x86_64 -march=x86_64 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
-    export LDFLAGS="$LDFLAGS -target x86_64 -march=x86_64"
+    export CFLAGS="$CFLAGS -target x86_64-linux-android"
+    export LDFLAGS="$LDFLAGS -target x86_64-linux-android -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
 elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
     export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
