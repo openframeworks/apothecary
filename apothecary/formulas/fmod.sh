@@ -41,7 +41,7 @@ function build() {
 
 	if [ "$TYPE" == "osx" ]; then
 		cd lib/osx
-		install_name_tool -id "@rpath/libfmod.dylib" libfmod.dylib
+		install_name_tool -id @executable_path/../Frameworks/libfmod.dylib libfmod.dylib
 		cd ../
 	fi
 
