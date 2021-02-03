@@ -14,7 +14,7 @@ VER=3180 # 3.16.0
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.17.0-header-changes
+GIT_TAG=3.18.0 #$3.17.0-header-changes
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -27,7 +27,7 @@ function download() {
 
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL for OSX/iOS"
+        echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
 		echo $GIT_URL
 		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
@@ -60,36 +60,9 @@ function prepare() {
 		rm -f Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
 		touch Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
 	elif [ "$TYPE" == "android" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
-	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
-	    cd $BUILD_DIR/FreeImage_patched
+	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage
+	    cd $BUILD_DIR/FreeImage
 	    perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
-	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
-	    /*#include <stdint.h>
-        #include <asm/byteorder.h>
-		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
-        inline void swab(const void *from, void*to, size_t n)
-        {
-            size_t i;
-            if (n < 0)
-                return;
-            for (i = 0; i < (n/2)*2; i += 2)
-                *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
-        }*/
-        #include <unistd.h>
-ENDDELIM
-
-        perl -pi -e "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
-        echo "#include \"swab.h\"" > Source/LibRawLite/internal/dcraw_common_patched.cpp;
-        cat Source/LibRawLite/internal/dcraw_common.cpp >> Source/LibRawLite/internal/dcraw_common_patched.cpp
-        cat Source/LibRawLite/internal/dcraw_common_patched.cpp > Source/LibRawLite/internal/dcraw_common.cpp
-        rm Source/LibRawLite/internal/dcraw_common_patched.cpp
-
-        perl -pi -e "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
-        echo "#include \"swab.h\"" > Source/LibRawLite/src/libraw_cxx_patched.cpp
-        cat Source/LibRawLite/src/libraw_cxx.cpp >> Source/LibRawLite/src/libraw_cxx_patched.cpp
-        cat Source/LibRawLite/src/libraw_cxx_patched.cpp > Source/LibRawLite/src/libraw_cxx.cpp
-        rm Source/LibRawLite/src/libraw_cxx_patched.cpp
 
         #rm Source/LibWebP/src/dsp/dec_neon.c
 
@@ -301,10 +274,7 @@ function build() {
 		unset TOOLCHAIN
 
 	elif [ "$TYPE" == "android" ] ; then
-        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
-        cd $BUILD_DIR/FreeImage_patched
-
-        local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE/$ABI
         source ../../android_configure.sh $ABI
         if [ "$ARCH" == "arm64" ] ; then
             CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
