@@ -309,7 +309,7 @@ function build() {
         if [ "$ARCH" == "arm64" ] ; then
             CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
         fi
-        # export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/" # fix missing features.h
         export CC="$CC $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
         export CXX="$CXX $CFLAGS -D__ANDROID_API__=${ANDROID_API} $LDFLAGS"
         export CFLAGS="$CFLAGS -mfpu=vfpv3-d16"
