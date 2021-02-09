@@ -8,7 +8,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
-VERSION=1.66.0
+VERSION=1.74.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
 TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 
@@ -83,12 +83,13 @@ function build() {
 
 
 	elif [ "$TYPE" == "osx" ]; then
+		./bootstrap.sh -with-toolset=clang
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
 		# set some initial variables
-
+		./bootstrap.sh -with-toolset=clang
 		local IOS_ARCHS
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -270,14 +271,19 @@ EOF
 	    echo "Finished Build for $TYPE"
 	elif [ "$TYPE" == "emscripten" ]; then
 	    cp $FORMULA_DIR/project-config-emscripten.jam project-config.jam
+	    ./bootstrap.sh -with-toolset=clang
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
+	    # ./build.sh clang
+	    installAndroidToolchain
 
+	    ./bootstrap.sh -with-toolset=clang
         source ../../android_configure.sh $ABI
         ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
 
 		# Run ranlib on binaries (not called corectly by b2)
+
 		${RANLIB} stage/lib/libboost_filesystem.a
 		${RANLIB} stage/lib/libboost_system.a
 
