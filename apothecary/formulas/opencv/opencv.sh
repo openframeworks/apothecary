@@ -128,10 +128,11 @@ function build() {
     echo "Make install Successful"
 
     echo "--------------------"
-    echo "Joining all libs in one"
-    outputlist="$LIB_FOLDER/lib/lib*.a $LIB_FOLDER/lib/opencv4/3rdparty/*.a"
-    libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
-    echo "Joining all libs in one Successful"
+    # we don't do this anymore as it results in duplicate symbol issues
+    # echo "Joining all libs in one"
+    # outputlist="$LIB_FOLDER/lib/lib*.a $LIB_FOLDER/lib/opencv4/3rdparty/*.a"
+    # libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
+    # echo "Joining all libs in one Successful"
 
   elif [ "$TYPE" == "vs" ] ; then
     unset TMP
@@ -588,7 +589,8 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
 
     # copy lib
-    cp -R $LIB_FOLDER/lib/opencv.a $1/lib/$TYPE/
+    cp -R $LIB_FOLDER/lib/lib*.a $1/lib/$TYPE/
+    cp -R $LIB_FOLDER/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
 
   elif [ "$TYPE" == "vs" ] ; then
     if [ $ARCH == 32 ] ; then
