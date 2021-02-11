@@ -45,6 +45,11 @@ function build() {
 
   if [ "$TYPE" == "osx" ] ; then
     LOG="$LIB_FOLDER/opencv2-${VER}.log"
+    
+    # fix for arm64 builds for 4.0.1 which the ittnotify_config.h doesn't detect correctly.
+    # this can prob be removed in later opencv versions
+    sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
+    
     echo "Logging to $LOG"
     cd build
     rm -f CMakeCache.txt
