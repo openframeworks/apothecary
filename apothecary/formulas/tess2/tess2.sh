@@ -62,7 +62,7 @@ function build() {
 		STD_LIB_FLAGS="-stdlib=libc++"
 		OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
 
-		export CFLAGS="-arch arm64 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		export CFLAGS="-arch arm64 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC"
 		export CPPFLAGS=$CFLAGS
 		export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"
 		export LDFLAGS="$LINKFLAGS"
@@ -70,7 +70,7 @@ function build() {
 
 		mkdir -p build
 		cd build
-		cmake -G 'Unix Makefiles' \
+		cmake -G 'Unix Makefiles' -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
 				..
 		make clean
 		make -j${PARALLEL_MAKE}
