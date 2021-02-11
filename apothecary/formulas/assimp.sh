@@ -97,8 +97,9 @@ function build() {
         # cd build_osx
         # 32 bit
         cmake -G 'Unix Makefiles' $buildOpts \
-        -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64 -O3 -DNDEBUG -funroll-loops -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-        -DCMAKE_CXX_FLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11 -mmacosx-version-min=${OSX_MIN_SDK_VER}" .
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
+        -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64 -O3 -DNDEBUG -funroll-loops" \
+        -DCMAKE_CXX_FLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11" .
         make assimp -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "vs" ] ; then

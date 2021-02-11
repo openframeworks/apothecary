@@ -68,7 +68,7 @@ function build() {
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
-		CFLAGS="-arch arm64 -arch x86_64" ./configure --disable-shared --enable-static
+		CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" ./configure --disable-shared --enable-static
  		make -j${PARALLEL_MAKE}
 	fi
 
