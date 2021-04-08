@@ -146,7 +146,7 @@ function build() {
 
     elif [ "$TYPE" == "android" ] ; then
 
-        #source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
             export FORCE_ARM="TRUE"
