@@ -39,9 +39,9 @@ export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ar
 export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ranlib
-export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums"
+export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -fPIE -fPIC"
 export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures "
-export LDFLAGS=" -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
+export LDFLAGS="-pie -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -llog  -lstdc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
@@ -53,8 +53,8 @@ elif [ "$ABI" = "armeabi" ]; then
     export CFLAGS="$CFLAGS"
     export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS -target aarch64-linux-android"
-    export LDFLAGS="$LDFLAGS -target aarch64-linux-android"
+    export CFLAGS="$CFLAGS -target aarch64-linux-android -mfpu=neon"
+    export LDFLAGS="$LDFLAGS -target aarch64-linux-android -mfpu=neon"
 elif [ "$ABI" = "x86_64" ]; then
     export CFLAGS="$CFLAGS -target x86_64-linux-android"
     export LDFLAGS="$LDFLAGS -target x86_64-linux-android -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
