@@ -28,9 +28,10 @@ WIN_URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_U
 function download() {
 
 	if [ "$TYPE" == "android" ]; then  
-		VERSION=1.74.0
-		VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
-		TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
+		echo "Android setting to 1.74.0"
+		export VERSION=1.74.0
+		export VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
+		export TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 	fi
 
 	wget -nv ${URL}
