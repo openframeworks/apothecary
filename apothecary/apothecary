@@ -451,7 +451,7 @@ function installAndroidToolchain() {
 	elif [ "${HOST}" == "osx" ]; then
 	    ANDROID_HOST="Darwin"
 	elif [ "${HOST}" == "windows" ]; then
-	    ANDROID_HOST="Darwin"
+	    ANDROID_HOST="windows-x86_64"
 	else
 	    echoError "Building for android only supported on linux and osx by now"
 	    exit 1
