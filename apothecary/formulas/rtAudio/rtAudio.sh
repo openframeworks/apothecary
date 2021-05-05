@@ -60,6 +60,7 @@ function build() {
 					 -Iinclude \
 					 -DHAVE_GETTIMEOFDAY \
 					 -D__MACOSX_CORE__ \
+					 -mmacosx-version-min=10.9 \
 					 -c RtAudio.cpp \
 					 -o RtAudio.o
 
