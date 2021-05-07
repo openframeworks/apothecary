@@ -19,9 +19,9 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
+URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
 
-WIN_URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
+WIN_URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
 
 # download the source code and unpack it into LIB_NAME
 function download() {
