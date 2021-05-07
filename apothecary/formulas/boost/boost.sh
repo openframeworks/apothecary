@@ -8,7 +8,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
-VERSION=1.76.0
+VERSION=1.66.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
 TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
 
