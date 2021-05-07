@@ -151,7 +151,7 @@ function build() {
 
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
-            local buildOpts="--build build/$TYPE
+            local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
                 -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
@@ -169,7 +169,7 @@ function build() {
 
         elif [ "$ABI" == "arm64-v8a" ]; then
             export HOST=aarch64-linux-android
-            local buildOpts="--build build/$TYPE
+            local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
                 -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
@@ -186,7 +186,7 @@ function build() {
                 -DCMAKE_INSTALL_PREFIX=install"
         elif [ "$ABI" == "x86" ]; then
             export HOST=x86-linux-android
-            local buildOpts="--build build/$TYPE
+            local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
                 -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
