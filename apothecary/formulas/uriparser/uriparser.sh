@@ -18,10 +18,10 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate https://sourceforge.net/projects/uriparser/files/Sources/$VER/uriparser-$VER.tar.bz2
-	tar -xjf uriparser-$VER.tar.bz2
+	wget -nv --no-check-certificate https://github.com/uriparser/uriparser/archive/refs/tags/uriparser-$VER.tar.gz
+	tar -zxf uriparser-$VER.tar.gz
 	mv uriparser-$VER uriparser
-	rm uriparser*.tar.bz2
+	rm uriparser*.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
