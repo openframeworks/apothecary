@@ -19,7 +19,7 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/$TARBALL
+URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
 
 WIN_URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
 
