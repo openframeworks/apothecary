@@ -20,7 +20,7 @@ GIT_TAG=$VER
 function download() {
 	wget -nv --no-check-certificate https://github.com/uriparser/uriparser/archive/refs/tags/uriparser-$VER.tar.gz
 	tar -zxf uriparser-$VER.tar.gz
-	mv uriparser-$VER uriparser
+	mv uriparser-uriparser-$VER uriparser
 	rm uriparser*.tar.gz
 }
 
