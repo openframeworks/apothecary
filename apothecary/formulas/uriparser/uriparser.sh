@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
 
 
 # define the version by sha
-VER=0.8.4
+VER=0.8.5
 
 # tools for git use
 GIT_URL=git://git.code.sf.net/p/uriparser/git
@@ -18,10 +18,10 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --no-check-certificate https://github.com/uriparser/uriparser/archive/uriparser-$VER.tar.gz
-	tar -xzf uriparser-$VER.tar.gz
-	mv uriparser-uriparser-$VER uriparser
-	rm uriparser*.tar.gz
+	wget -nv --no-check-certificate https://github.com/uriparser/uriparser/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
+	tar -xjf uriparser-$VER.tar.bz2
+	mv uriparser-$VER uriparser
+	rm uriparser*.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir

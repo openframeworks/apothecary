@@ -83,7 +83,7 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE
+        local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
@@ -250,7 +250,7 @@ function build() {
 
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
-        local buildOpts="--build build/$TYPE
+        local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
