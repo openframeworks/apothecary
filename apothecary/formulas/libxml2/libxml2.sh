@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxa
 
 
 # define the version by sha
-VER=2.9.4
+VER=2.9.10
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -23,11 +23,11 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     if [ "$TYPE" == "android" ]; then
-        cp $FORMULA_DIR/glob.h .
+        cp -fr $FORMULA_DIR/glob.h .
     fi
 
     if [ "$TYPE" == "vs" ]; then
-        cp $FORMULA_DIR/vs2015/*.h include/libxml/
+        cp -fr $FORMULA_DIR/vs2015/*.h include/libxml/
         cp -r $FORMULA_DIR/vs2015/* win32/VC10/
     fi
 }
@@ -57,8 +57,10 @@ function build() {
         mkdir -p cmake
         cd cmake
         ln -s .. libxml2
-        wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
-        perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CmakeLists.txt
+
+        cp -fr $FORMULA_DIR/CMakeLists.txt .
+        #wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
+        perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
         cd ..
 
         mkdir -p build_$ABI
