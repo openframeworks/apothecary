@@ -5,9 +5,11 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.1.0h
-VERDIR=1.1.0
-CSTANDARD=gnu11 # c89 | c99 | c11 | gnu11
+VER=1.1.1k
+VERDIR=1.1.1
+SHA1=bad9dc4ae6dcc1855085463099b5dacb0ec6130b
+
+CSTANDARD=gnu17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
 
@@ -30,13 +32,16 @@ function download() {
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
 	else
-		if [ "$(shasum $FILENAME.tar.gz | awk '{print $1}')" == "$(cat $FILENAME.tar.gz.sha1)" ] ;  then
-			tar -xf $FILENAME.tar.gz
+		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
+		if [ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ] ;  then
+			echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        else
+        	tar -xf $FILENAME.tar.gz
+			echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
 			mv $FILENAME openssl
 			rm $FILENAME.tar.gz
 			rm $FILENAME.tar.gz.sha1
-        else
-			echoError "Invalid shasum for $FILENAME."
+			
 		fi
 	fi
 }
@@ -82,7 +87,6 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
         
         ./Configure $BUILD_OPTS_X86_64 --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
         sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
         make clean
         make -j1 depend
@@ -167,14 +171,19 @@ function build() {
 			rm -f libcrypto.a
 			rm -f libssl.a
 			if [ "${IOS_ARCH}" == "i386" ]; then
+				KERNEL_BITS=32
 				./Configure darwin-i386-cc $FLAGS
 			elif [ "${IOS_ARCH}" == "x86_64" ]; then
+				KERNEL_BITS=64
 				./Configure darwin64-x86_64-cc $FLAGS
 			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "ios" ]; then
+				KERNEL_BITS=32
 				./Configure ios-cross $FLAGS
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "tvos" ]; then
+				KERNEL_BITS=64
 				./Configure tvos64-cross-arm64 $FLAGS
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "ios" ]; then
+				KERNEL_BITS=64
 				./Configure ios64-cross $FLAGS
 			fi
 			make clean
@@ -236,30 +245,56 @@ function build() {
 		# cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
 	elif [ "$TYPE" == "android" ]; then
+		 source ../../android_configure.sh $ABI
+
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/fbuild/
 		mkdir -p BUILD_TO_DIR
+		echo "Build Dir $BUILD_TO_DIR"
 		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
 
 		CURRENTPATH=`pwd`
 
-		cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
-		cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
-		cp $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt $CURRENTPATH/ssl/
+		# cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
+		# cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
+		# mkdir -p $CURRENTPATH/cmake/
+		# cp $FORMULA_DIR/openssl-cmake/cmake/* $CURRENTPATH/cmake/
+		# cp $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt $CURRENTPATH/ssl/
 
 		echo `pwd`
-		cp crypto/comp/comp.h include/openssl/
-		cp crypto/engine/engine.h include/
+		# cp crypto/comp/comp.h include/openssl/
+		# cp crypto/engine/engine.h include/
 
 		BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
 
-		mkdir -p build_$ABI
-		cd build_$ABI
-		cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
-		make VERBOSE=1
-		mkdir -p inst
-		make DESTDIR="inst" install 
+		if [ "$ABI" = "armeabi-v7a" ]; then
+			KERNEL_BITS=32
+		    export CONFIGURE="android-arm"
+		elif [ "$ABI" = "armeabi" ]; then
+			KERNEL_BITS=32
+		    export CONFIGURE="android-arm"
+		elif [ $ABI = "arm64-v8a" ]; then
+			KERNEL_BITS=64
+		    export CONFIGURE="android-arm64"
+		elif [ "$ABI" = "x86_64" ]; then
+			KERNEL_BITS=32
+		    export CONFIGURE="android-x86_64"
+		elif [ "$ABI" = "x86" ]; then
+			KERNEL_BITS=32
+		    export CONFIGURE="android-x86"
+		fi
+		export ANDROID_NDK_ROOT=$NDK_ROOT
+		PATH=$TOOLCHAIN_PATH:$PATH
+		FLAGS="no-asm -static no-async no-shared std=c++17 no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
+		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS
+		make
+		# mkdir -p build_$ABI
+		# cd build_$ABI
+		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
+		# make VERBOSE=1
+		# mkdir -p inst
+		# make DESTDIR="inst" install 
 
 	else
 

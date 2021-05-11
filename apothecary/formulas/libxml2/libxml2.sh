@@ -70,6 +70,7 @@ function build() {
         export CFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         export LDFLAGS=""
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-DLIBXML_THREAD_ENABLED -DTRIO_HAVE_CONFIG_H"  ../cmake/
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
