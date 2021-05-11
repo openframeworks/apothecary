@@ -9,18 +9,16 @@ FORMULA_TYPES=( "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "msys2")
 
 # define the version
 VER=130
-VER_UNDERSCORE=1_3_0
 
 # tools for git use
-GIT_URL=
+GIT_URL=https://github.com/mborgerding/kissfft.git
 GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv http://downloads.sourceforge.net/project/kissfft/kissfft/v$VER_UNDERSCORE/kiss_fft$VER.tar.gz
-	tar -xf kiss_fft$VER.tar.gz
-	mv kiss_fft$VER kiss
-	rm kiss_fft$VER.tar.gz
+    echo "Running: git clone --branch ${GIT_TAG} ${GIT_URL}"
+    git clone --branch ${GIT_TAG} ${GIT_URL}
+    mv  kissfft kiss
 }
 
 # prepare the build environment, executed inside the lib src dir

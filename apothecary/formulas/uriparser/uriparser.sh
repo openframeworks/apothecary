@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
 
 
 # define the version by sha
-VER=0.8.4
+VER=0.8.5
 
 # tools for git use
 GIT_URL=git://git.code.sf.net/p/uriparser/git
@@ -18,10 +18,10 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget --no-check-certificate https://github.com/uriparser/uriparser/archive/uriparser-$VER.tar.gz
-	tar -xzf uriparser-$VER.tar.gz
-	mv uriparser-uriparser-$VER uriparser
-	rm uriparser*.tar.gz
+	wget -nv --no-check-certificate https://github.com/uriparser/uriparser/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
+	tar -xjf uriparser-$VER.tar.bz2
+	mv uriparser-$VER uriparser
+	rm uriparser*.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -51,14 +51,19 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
-	    cp $FORMULA_DIR/CMakeLists.txt .
-
-		mkdir -p build_$ABI
-		cd build_$ABI
-		cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_BUILD_TYPE=Release ..
-		make VERBOSE=1
-		cd ..
-
+	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$ABI
+	    source ../../android_configure.sh $ABI
+	    if [ "$ARCH" == "armv7" ]; then
+            HOST=armv7a-linux-android
+        elif [ "$ARCH" == "arm64" ]; then
+            HOST=aarch64-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            HOST=x86-linux-android
+        fi
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --disable-test --disable-doc --enable-static=yes --enable-shared=no
+        make clean
+	    make -j${PARALLEL_MAKE}
+	    make install
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -150,8 +155,7 @@ function copy() {
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		mkdir -p $1/lib/$TYPE/$ABI/
-		cp -Rv build_$ABI/*.a $1/lib/$TYPE/$ABI/
+		cp -Rv build/$TYPE/$ABI/lib/*.a $1/lib/$TYPE/$ABI
 	fi
 
 	# copy license file
