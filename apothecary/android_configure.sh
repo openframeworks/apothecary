@@ -2,6 +2,8 @@
 export ABI=$1
 if [ "$(uname)" = "Darwin" ]; then
     export HOST_PLATFORM=darwin-x86_64
+elif [ "$(uname)" == "windows" ]; then
+        ANDROID_HOST="windows-x86_64"
 else
     export HOST_PLATFORM=linux-x86_64
 fi
@@ -41,8 +43,8 @@ export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt
 export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_PREFIX}/bin/ranlib
 export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -fPIE -fPIC"
 export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures "
-export LDFLAGS="-pie -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog  -lstdc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
-export LIBS="-lz -llog  -lstdc++ -lgcc -lc -lm -ldl"
+export LDFLAGS="-pie -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -std=c++17 -stdlib=libc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
+export LIBS="-lz -llog  -std=c++17 -stdlib=libc++  -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
 

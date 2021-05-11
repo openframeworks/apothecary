@@ -5,7 +5,7 @@
 #
 # uses a own build system
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "vs" )
 
 # define the version
 
@@ -26,13 +26,6 @@ WIN_URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-
-	if [ "$TYPE" == "android" ]; then  
-		echo "Android setting to 1.74.0"
-		export VERSION=1.74.0
-		export VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
-		export TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
-	fi
 
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
@@ -137,7 +130,7 @@ function build() {
 
 	elif [ "$TYPE" == "osx" ]; then
 		./bootstrap.sh -with-toolset=clang
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++17 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then

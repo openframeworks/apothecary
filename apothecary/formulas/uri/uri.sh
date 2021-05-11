@@ -236,23 +236,21 @@ function build() {
 	
 	elif [ "$TYPE" == "android" ]; then
 	    git apply $FORMULA_DIR/uri-remove-tests.patch
-		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
 	    
 	    ABI=armeabi-v7a
 	    source ../../android_configure.sh $ABI
-		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_arm/lib
 		mkdir -p build_arm
 		cd build_arm
-		cmake .. -DCMAKE_CXX_FLAGS="-I${BOOST_INCLUDEDIR} $CFLAGS" -DCMAKE_BUILD_TYPE=Release -DBOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_arm/lib -DBoost_INCLUDE_DIR=${BUILD_DIR}/boost
+		cmake .. -DCMAKE_CXX_FLAGS="-I$$CFLAGS" -DCMAKE_BUILD_TYPE=Release 
 		make -j${PARALLEL_MAKE}
 		cd ..
 		
 	    ABI=x86
 	    source ../../android_configure.sh $ABI
-		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_x86/lib
+		
 		mkdir -p build_x86
 		cd build_x86
-		cmake .. -DCMAKE_CXX_FLAGS="-I${BOOST_INCLUDEDIR} $CFLAGS" -DCMAKE_BUILD_TYPE=Release -DBOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_x86/lib -DBoost_INCLUDE_DIR=${BUILD_DIR}/boost
+		cmake .. -DCMAKE_CXX_FLAGS="-I$$CFLAGS" -DCMAKE_BUILD_TYPE=Release 
 		make -j${PARALLEL_MAKE}
 		cd ..
 	
