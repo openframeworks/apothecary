@@ -400,7 +400,6 @@ function build() {
 
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
-
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
@@ -410,7 +409,6 @@ function build() {
     elif [ "$ABI" = "x86_64" ]; then
       local BUILD_FOLDER="build_android_x86_64"
       local BUILD_SCRIPT="cmake_android_x86_64.sh"
-    fi
     elif [ "$ABI" = "x86" ]; then
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
