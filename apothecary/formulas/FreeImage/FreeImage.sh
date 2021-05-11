@@ -204,8 +204,8 @@ function build() {
 
 		    export CC="$CC $EXTRA_FLAGS"
 			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS"
-			export CXXFLAGS="$EXTRA_FLAGS -std=c++11 -stdlib=libc++"
-			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION -std=c++11 -stdlib=libc++"
+			export CXXFLAGS="$EXTRA_FLAGS -std=c++17 -stdlib=libc++"
+			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION -std=c++17 -stdlib=libc++"
 			export LDFLAGS_PHONE=$LDFLAGS
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"

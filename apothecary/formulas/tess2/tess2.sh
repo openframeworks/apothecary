@@ -203,7 +203,7 @@ function build() {
 
 			export CPPFLAGS=$CFLAGS
 			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS "
-			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++11 -stdlib=libc++"
+			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++17 -stdlib=libc++"
 			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS"
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
