@@ -17,6 +17,7 @@ jobs:
           - {target: android, arch: armv7}
           - {target: android, arch: arm64}
           - {target: android, arch: x86}
+          - {target: android, arch: x86_64}
     env:
      TARGET: ${{matrix.cfg.target}}
      ARCH: ${{matrix.cfg.arch}}
