@@ -12,17 +12,30 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_59_0
+VER=7_76_1
+VER_D=7.76.1
+SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
 GIT_TAG=$VER
 
+
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -Lk https://github.com/curl/curl/archive/curl-$VER.tar.gz -o curl-$VER.tar.gz
+	curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz
+
+    local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
+
+    if [ "$CHECKSHA" != "$SHA1" ] ; then
+        echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
+
 	tar -xf curl-$VER.tar.gz
-	mv curl-curl-$VER curl
+	mv curl-$VER_D curl
+
 	rm curl*.tar.gz
 }
 
@@ -58,6 +71,9 @@ function build() {
         fi
 
 	elif [ "$TYPE" == "android" ]; then
+
+        source ../../android_configure.sh $ABI
+        
         perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
         perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
 
