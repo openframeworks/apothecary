@@ -14,6 +14,7 @@ export LIBSPATH=android/$ABI
 export NDK_PLATFORM=$ANDROID_PLATFORM
 export TOOLCHAIN_VERSION=4.9
 export CLANG_VERSION=
+export ANDROID_NDK_HOME=$NDK_ROOT
 if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
     export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm"
     export ANDROID_PREFIX=arm-${ANDROID_TOOLHOST}eabi
