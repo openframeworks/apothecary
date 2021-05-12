@@ -90,7 +90,6 @@ function build() {
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         ./buildconf
-        
         local SDK_PATH_XCODE_X86=SDK_PATH;
         if [ "$GITHUB_ACTIONS" = true ]; then
             # this is because Xcode 11.4 and newer links curl with a symbol which isn't present on 10.14 and older

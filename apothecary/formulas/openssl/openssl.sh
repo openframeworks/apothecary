@@ -9,7 +9,7 @@ VER=1.1.1k
 VERDIR=1.1.1
 SHA1=bad9dc4ae6dcc1855085463099b5dacb0ec6130b
 
-CSTANDARD=gnu17 # c89 | c99 | c11 | gnu11
+CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
 
@@ -267,16 +267,19 @@ function build() {
 		# cp crypto/engine/engine.h include/
 
 		BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
-
+		export ANDROID_NDK_ROOT=$NDK_ROOT
 		if [ "$ABI" = "armeabi-v7a" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-arm"
+		    PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$HOST_PLATFORM/bin:$PATH
 		elif [ "$ABI" = "armeabi" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-arm"
+		    PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
 		elif [ $ABI = "arm64-v8a" ]; then
 			KERNEL_BITS=64
 		    export CONFIGURE="android-arm64"
+		    PATH=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/aarch64-$HOST_PLATFORM/bin:$PATH
 		elif [ "$ABI" = "x86_64" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-x86_64"
@@ -284,11 +287,19 @@ function build() {
 			KERNEL_BITS=32
 		    export CONFIGURE="android-x86"
 		fi
-		export ANDROID_NDK_ROOT=$NDK_ROOT
-		PATH=$TOOLCHAIN_PATH:$PATH
+		
+		
+		export PATH=$TOOLCHAIN_PATH:$PATH
+		echo "PATH:$PATH"
+		#export PATH=-I${SYSROOT}/usr/lib/
 		FLAGS="no-asm -static no-async no-shared std=c++17 no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
-		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS
-		make
+		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=/usr --openssldir=/etc/ssl
+
+		#perl configdata.pm --dump
+		#make
+		make depend
+		echo "Make Depend Complete"
+		make all
 		# mkdir -p build_$ABI
 		# cd build_$ABI
 		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
