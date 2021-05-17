@@ -17,43 +17,47 @@ export CLANG_VERSION=
 export ANDROID_NDK_HOME=$NDK_ROOT
 if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
     export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm"
+    export LIB_SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm"
     export ANDROID_PREFIX=arm-${ANDROID_TOOLHOST}eabi
     export ANDROID_POSTFIX=${ANDROID_PREFIX}
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
+    export PLATFORM_LIBS=$SYSROOT/usr/lib
 elif [ "$ABI" = "arm64-v8a" ]; then
-    export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm64"
+    export SYSROOT="${NDK_ROOT}/sysroot"
+    export LIB_SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-arm64"
     export ANDROID_PREFIX=aarch64-${ANDROID_TOOLHOST}
     export ANDROID_POSTFIX=${ANDROID_PREFIX}
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
+    export PLATFORM_LIBS=$LIB_SYSROOT/usr/lib
 elif [ "$ABI" = "x86" ]; then
-    export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86"
+    export SYSROOT="${NDK_ROOT}/sysroot"
+    export LIB_SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86"
     export ANDROID_PREFIX=x86
     export ANDROID_POSTFIX=i686-${ANDROID_TOOLHOST}
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
+    export PLATFORM_LIBS=$LIB_SYSROOT/usr/lib
 elif [ "$ABI" = "x86_64" ]; then
-    export SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86_64"
+    export SYSROOT="${NDK_ROOT}/sysroot"
+    export LIB_SYSROOT="${NDK_ROOT}/platforms/$ANDROID_PLATFORM/arch-x86_64"
     export ANDROID_PREFIX=x86_64
     export ANDROID_POSTFIX=x86_64-${ANDROID_TOOLHOST}
     export GCC_TOOLCHAIN=x86_64-${TOOLCHAIN_VERSION}
-elif [ $ABI = arm64-v8a ]; then
-    export SYSROOT=${NDK_ROOT}/sysroot
-    export ANDROID_PREFIX=aarch64-${ANDROID_TOOLHOST}
-    export ANDROID_POSTFIX=${ANDROID_PREFIX}
-    export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
+    export PLATFORM_LIBS=$LIB_SYSROOT/usr/lib64
 fi
 export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 export TOOLCHAIN=llvm${CLANG_VERSION}
 export TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN}/prebuilt/${HOST_PLATFORM}/bin
+export DEEP_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN}/prebuilt/${HOST_PLATFORM}/sysroot/usr/lib/$ANDROID_POSTFIX/$ANDROID_API
 export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOST_PLATFORM}
 export PATH=${PATH}:${TOOLCHAIN_PATH}
 export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ar
 export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ranlib
-export CFLAGS="-nostdlib --sysroot=${SYSROOT} -fno-short-enums -fPIE -fPIC"
-export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures "
-export LDFLAGS="-pie -nostdlib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -std=c++17 -stdlib=libc++ -lgcc -lc -lm -ldl" #-lc++ -lc++abi -lunwind
-export LIBS="-lz -llog  -std=c++17 -stdlib=libc++  \-lgcc -lc -lm -ldl"
+export CFLAGS="--sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC" #s-fuse-ld=gold"
+export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures"
+export LDFLAGS="-pie -I${SYSROOT}/usr/include -L${LIB_SYSROOT}/usr/lib  -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -std=c++17 -stdlib=libc++ -lc++ -lc -lm -ldl -L$PLATFORM_LIBS -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
+export LIBS="-lz -std=c++17 -stdlib=libc++ -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
 
