@@ -249,12 +249,13 @@ function build() {
 
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/fbuild/
+		export BUILD_TO_DIR=build_$ABI
+		CURRENTPATH=`pwd`
 		mkdir -p BUILD_TO_DIR
 		echo "Build Dir $BUILD_TO_DIR"
-		./config --prefix=$BUILD_TO_DIR --openssldir=$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+		./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
 
-		CURRENTPATH=`pwd`
+		
 
 		# cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
 		# cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
@@ -289,19 +290,22 @@ function build() {
 		fi
 		
 		
-		export PATH=$TOOLCHAIN_PATH:$PATH
+		export PATH="$TOOLCHAIN_PATH:$LIB_SYSROOT/usr/lib:$PATH"
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
-		FLAGS="no-asm -static no-async no-shared std=c++17 no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
-		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=/usr --openssldir=/etc/ssl
+		export OUTPUT_DIR=
+		FLAGS="no-asm  no-async no-shared std=c++17 no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
+		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR
 
 		#perl configdata.pm --dump
 		#make
+		 
+		
 		make depend
 		echo "Make Depend Complete"
 		make all
-		# mkdir -p build_$ABI
-		# cd build_$ABI
+		
+		
 		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
 		# make VERBOSE=1
 		# mkdir -p inst
@@ -364,7 +368,7 @@ function copy() {
 	fi
 	# suppress file not found errors
 	# same here doesn't seem to be a solid reason to delete the files
-	rm -rf $1/lib/$TYPE/* 2> /dev/null
+	#rm -rf $1/lib/$TYPE/* 2> /dev/null
 
 	# libs
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
@@ -384,8 +388,8 @@ function copy() {
 			rm -r $1/lib/$TYPE/$ABI
 		fi
 		mkdir -p $1/lib/$TYPE/$ABI
-		cp -rv build_$ABI/ssl/*.a $1/lib/$TYPE/$ABI/
-		cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
+		cp -rv *.a $1/lib/$TYPE/$ABI/
+		# cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
 		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
 		# 	mkdir -p $1/lib/$TYPE/armeabi-v7a
