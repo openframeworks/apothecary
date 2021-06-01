@@ -200,7 +200,7 @@ function build() {
 			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
 
 			echo "Running make for ${IOS_ARCH}"
-
+			make clean
 			make -j1 depend # running make multithreaded is unreliable
 			make -j1
 			make -j1 install_sw
@@ -247,13 +247,19 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 		 source ../../android_configure.sh $ABI
 
+		 wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
+		 # source ./setenv-android.sh
+
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
+
+
+
 
 		export BUILD_TO_DIR=build_$ABI
 		CURRENTPATH=`pwd`
 		mkdir -p BUILD_TO_DIR
 		echo "Build Dir $BUILD_TO_DIR"
-		./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine no-shared
+		./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
 
 		
 
@@ -294,7 +300,7 @@ function build() {
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
-		FLAGS="no-asm  no-async no-shared std=c++17 no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
+		FLAGS="no-asm  no-async no-threads shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
 		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR
 
 		#perl configdata.pm --dump
@@ -304,6 +310,8 @@ function build() {
 		make depend
 		echo "Make Depend Complete"
 		make all
+
+		#ake all
 		
 		
 		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..

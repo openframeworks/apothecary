@@ -65,17 +65,6 @@ LIBS_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
-function getrealpath() { if command -v realpath 2>/dev/null; then
-  echo realpath $1; 
-else 
-	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-fi;
- }
-
-realpath() {
-[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-
 ### Xcode/ios specific settings
 
 # xcode Developer root
@@ -93,6 +82,19 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
     IOS_SDK_VER=9.1
     IOS_MIN_SDK_VER=7.0
+
+if ! which realpath >&/dev/null; then
+  if ! which brew >&/dev/null; then
+    msg="ERROR: This script requires brew. See https://brew.sh for installation instructions."
+    echo "$(tput setaf 1)$msg$(tput sgr0)" >&2
+    exit 1
+  fi
+  echo "Installing coreutils/realpath"
+  brew install coreutils >&/dev/null
+fi
+
+thisDir=$( dirname "`realpath "$0"`" )
+echo "This script is run from \"$thisDir\""
 
 	
 fi

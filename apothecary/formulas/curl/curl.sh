@@ -49,12 +49,16 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
+
+    local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/openssl/)
+	
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
+		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
+        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
@@ -73,18 +77,97 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 
         source ../../android_configure.sh $ABI
+
+        local OPENSSL_ABS_PATH=$(realpath ${BUILD_DIR}/openssl/build_${ABI})
+
+        local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
+        local OPENSSL_DIR=$BUILD_DIR/openssl #/lib/$TYPE/$ABI
+        #local OPENSSL_DIR=$OF_LIBS_OPENSSL_ABS_PATH #/lib/$TYPE/$ABI
+
+        echo "OpenSSL Dir: $OPENSSL_ABS_PATH"
+
+        local OPENSSL_LIBRARIES=$OPENSSL_DIR/lib/$TYPE/$ABI
+
+        if [ "$ARCH" == "armv7" ]; then
+            export HOST=armv7a-linux-android
+        elif [ "$ARCH" == "arm64" ]; then
+            export HOST=aarch64-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            export HOST=x86-linux-android
+        elif [ "$ARCH" == "x86_64" ]; then
+            export HOST=x86_64-linux-android
+        fi
+
+        chmod 777 buildconf
+        ./buildconf
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+
+        # CURL_ARGS="--with-ssl --with-zlib --disable-ftp --disable-gopher 
+        #     --disable-file --disable-imap --disable-ldap --disable-ldaps 
+        #     --disable-pop3 --disable-proxy --disable-rtsp --disable-smtp 
+        #     --disable-telnet --disable-tftp --without-gnutls --without-libidn 
+        #     --without-librtmp --disable-dict"
+
         
-        perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
-        perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
+        export PATH="$OPENSSL_LIBRARIES:$PATH"
 
-        mkdir -p build_$ABI
-        cd build_$ABI
+        #mkdir -p $OPENSSL_DIR/lib
+        #cp -Rv $OPENSSL_LIBRARIES/* $OPENSSL_DIR/lib/
+        #sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" configure
 
-        OPENSSL_OPTS="-DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libssl.a"
+        export PKG_CONFIG_PATH=$OPENSSL_ABS_PATH/lib/pkgconfig
+        export LD_LIBRARY_PATH=$OPENSSL_ABS_PATH/lib/
 
-        cmake -C "$FORMULA_DIR/tryrun.cmake" -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=ON $OPENSSL_OPTS ..
-        make -j${PARALLEL_MAKE} libcurl VERBOSE=1
-        cd ..
+        export DESTDIR="$BUILD_TO_DIR"
+        export CPPFLAGS="-I${OPENSSL_ABS_PATH}/include $CPPFLAGS"
+        export LDFLAGS="-L${OPENSSL_ABS_PATH}/lib $LDFLAGS"
+        export LIBS="-lssl -lcrypto $LIBS"
+
+        ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_ABS_PATH --target=$HOST \
+            --enable-static \
+            --disable-shared \
+            --disable-verbose \
+            --disable-threaded-resolver \
+            --enable-libgcc \
+            --enable-ipv6 \
+            --without-nghttp2 \
+            --without-libidn2 \
+            --disable-ldap \
+            --disable-ldaps 
+
+        # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
+        make clean
+        make -j${PARALLEL_MAKE}
+        make install
+        
+        # perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
+        # perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
+
+        # mkdir -p build_$ABI
+        # cd build_$ABI
+
+        # OPENSSL_OPTS="-DTHREADS_HAVE_PTHREAD_ARG=0 -DENABLE_THREADED_RESOLVER=0 -CMAKE_SHARED_LINKER_FLAGS -DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/lib/android/$ABI/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/lib/android/$ABI/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/lib/android/$ABI/libssl.a"
+
+        # cmake -C "$FORMULA_DIR/tryrun.cmake" -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=ON $OPENSSL_OPTS ..
+        # # mkdir -p build_$ABI
+
+        # # ./configure \
+        # #     --with-darwinssl \
+        # #     --prefix="$build_$ABI" \
+        # #     --enable-static \
+        # #     --without-nghttp2 \
+        # #     --without-libidn2 \
+        # #     --disable-shared \
+        # #     --disable-pthreads \
+        # #     --disable-ldap \
+        # #     --disable-ldaps \
+        # #     --host=x86_64-apple-darwin
+        # # make clean
+        # #make -j${PARALLEL_MAKE} libcurl VERBOSE=1
+        # #make install
+        # make -j${PARALLEL_MAKE} libcurl VERBOSE=1
+        # cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
