@@ -54,26 +54,35 @@ export CC=${TOOLCHAIN_PATH}/clang
 export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ar
 export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ranlib
-export CFLAGS="--sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC" #s-fuse-ld=gold"
-export CFLAGS="$CFLAGS -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures"
-export LDFLAGS="-pie -I${SYSROOT}/usr/include -L${LIB_SYSROOT}/usr/lib  -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -lz -llog -std=c++17 -stdlib=libc++ -lc++ -lc -lm -ldl -L$PLATFORM_LIBS -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
-export LIBS="-lz -std=c++17 -stdlib=libc++ -lgcc -lc -lm -ldl"
+export CFLAGS="-std=c17 --sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC -fuse-ld=gold"
+export CPPFLAGS="-DANDROID_STL=c++_static -stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures"
+export CXXFLAGS="-std=c++17 -stdlib=libc++ --sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC -fuse-ld=gold"
+
+export LDFLAGS="-pie -L${LIB_SYSROOT}/usr/lib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -DANDROID_STL=c++_static -L$PLATFORM_LIBS -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
+export LIBS="-lz -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
 
 if [ "$ABI" = "armeabi-v7a" ]; then
-    export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -I${NDK_ROOT}/sysroot/usr/include/arm-linux-androideabi"
+    export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+    export CPPFLAGS="$CPPFLAGS -I${NDK_ROOT}/sysroot/usr/include/arm-linux-androideabi -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
     export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ "$ABI" = "armeabi" ]; then
-    export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/arm-linux-androideabi"
-    export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
+    export CFLAGS="$CFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+    export CPPFLAGS="$CPPFLAGS -I${NDK_ROOT}/sysroot/usr/include/arm-linux-androideabi -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+    export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS -target aarch64-linux-android -mfpu=neon -isystem -I${NDK_ROOT}/sysroot/usr/include/aarch64-linux-android"
+    export CFLAGS="$CFLAGS -target aarch64-linux-android -mfpu=neon"
+    export CPPFLAGS="$CPPFLAGS -isystem -I${NDK_ROOT}/sysroot/usr/include/aarch64-linux-android -target aarch64-linux-android -mfpu=neon"
     export LDFLAGS="$LDFLAGS -target aarch64-linux-android -mfpu=neon"
 elif [ "$ABI" = "x86_64" ]; then
-    export CFLAGS="$CFLAGS -target x86_64-linux-android -I${NDK_ROOT}/sysroot/usr/include/x86_64-linux-android"
+    export CFLAGS="$CFLAGS -target x86_64-linux-android "
+    export CPPFLAGS="$CFLAGS $CPPFLAGS -isystem -I${NDK_ROOT}/sysroot/usr/include/x86_64-linux-android -target x86_64-linux-android "
     export LDFLAGS="$LDFLAGS -target x86_64-linux-android -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
 elif [ "$ABI" = "x86" ]; then
-    export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector -I${NDK_ROOT}/sysroot/usr/include/i686-linux-android" 
+    export CFLAGS="$CFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector" 
+    export CPPFLAGS="$CFLAGS $CPPFLAGS -I${NDK_ROOT}/sysroot/usr/include/i686-linux-android -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
     export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
 fi
+
+export CXXFLAGS="$CXXFLAGS $CPPFLAGS"
