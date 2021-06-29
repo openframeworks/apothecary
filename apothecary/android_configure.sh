@@ -55,10 +55,10 @@ export CXX=${TOOLCHAIN_PATH}/clang++
 export AR=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ar
 export RANLIB=${NDK_ROOT}/toolchains/${ANDROID_PREFIX}-${TOOLCHAIN_VERSION}/prebuilt/${HOST_PLATFORM}/${ANDROID_POSTFIX}/bin/ranlib
 export CFLAGS="-std=c17 --sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC -fuse-ld=gold"
-export CPPFLAGS="-DANDROID_STL=c++_static -stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures"
+export CPPFLAGS="-stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include -I${NDK_ROOT}/sources/android/cpufeatures" #-DANDROID_STL=c++_static -
 export CXXFLAGS="-std=c++17 -stdlib=libc++ --sysroot=${LIB_SYSROOT} -fno-short-enums -fPIE -fPIC -fuse-ld=gold"
 
-export LDFLAGS="-pie -L${LIB_SYSROOT}/usr/lib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -DANDROID_STL=c++_static -L$PLATFORM_LIBS -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
+export LDFLAGS="-pie -L${LIB_SYSROOT}/usr/lib -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$PLATFORM_LIBS -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
 export LIBS="-lz -lgcc -lc -lm -ldl"
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
@@ -72,7 +72,7 @@ elif [ "$ABI" = "armeabi" ]; then
     export CPPFLAGS="$CPPFLAGS -I${NDK_ROOT}/sysroot/usr/include/arm-linux-androideabi -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
     export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS -target aarch64-linux-android -mfpu=neon"
+    export CFLAGS="$CFLAGS -target aarch64-linux-android " 
     export CPPFLAGS="$CPPFLAGS -isystem -I${NDK_ROOT}/sysroot/usr/include/aarch64-linux-android -target aarch64-linux-android -mfpu=neon"
     export LDFLAGS="$LDFLAGS -target aarch64-linux-android -mfpu=neon"
 elif [ "$ABI" = "x86_64" ]; then
