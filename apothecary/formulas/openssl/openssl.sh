@@ -15,6 +15,11 @@ MIRROR=https://www.openssl.org
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+
+	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	fi
+
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
@@ -31,6 +36,16 @@ function download() {
 		mv $FILENAME openssl
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
+
+	# elif [ "$TYPE" == "android" ] ; then
+	# 	wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/openssl_1.1.1d-android-arm64.zip
+	# 	tar -xf openssl_1.1.1d-android-arm64.zip
+	# 	#wget -nv https://www.openssl.org/source/openssl-1.1.1i.tar.gz
+
+	# 	#https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/openssl_1.1.1d-ios-arm64.zip
+		
+	# fi
+
 	else
 		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
 		if [ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ] ;  then
@@ -57,6 +72,11 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+
+	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	fi
+
 
 	if [ "$TYPE" == "osx" ] ; then
   
@@ -300,7 +320,7 @@ function build() {
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
-		FLAGS="no-asm  no-async no-threads shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++"
+		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++ -ldl "
 		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR
 
 		#perl configdata.pm --dump
@@ -329,6 +349,10 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	#echoWarning "TODO: copy $TYPE lib"
+
+	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	fi
 
 	# # headers
 	# if [ -d $1/include/ ]; then

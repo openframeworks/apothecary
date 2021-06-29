@@ -12,8 +12,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_76_1
-VER_D=7.76.1
+VER=7_77_0
+VER_D=7.77.0
 SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
@@ -23,20 +23,40 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz
 
+    if [ "$TYPE" == "android" ] ; then
+   
+        git clone https://github.com/robertying/openssl-curl-android.git
+
+        mv openssl-curl-android curl 
+
+       
+    #     wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-android-arm64.zip
+    #     unzip curl_7.68.0-android-arm64
+    #     mv curl_7.68.0-android-arm64 curl 
+
+    #     wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-android-arm64.zip
+    #     unzip curl_7.68.0-android-arm64
+    #     mv curl_$VER_D curl 
+    #     # wget -nv https://curl.haxx.se/download/curl-7.74.0.tar.gz #wget a curl
+    #     # https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-ios-arm64.zip
+    else
+        curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
+        tar -xf curl-$VER.tar.gz
+        mv curl-$VER_D curl 
+        # if [ "$CHECKSHA" != "$SHA1" ] ; then
+        # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        # else
+        #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+        # fi
+        rm curl*.tar.gz
+    fi
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
 
-    if [ "$CHECKSHA" != "$SHA1" ] ; then
-        echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    else
-        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    fi
+   
 
-	tar -xf curl-$VER.tar.gz
-	mv curl-$VER_D curl
-
-	rm curl*.tar.gz
+	
+	
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -51,7 +71,7 @@ function prepare() {
 function build() {
 
 
-    local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/openssl/)
+    local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
 	
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
@@ -77,16 +97,23 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 
         source ../../android_configure.sh $ABI
+        # cd tools
+        # export api=19
+        # ./build-android-curl.sh arm
+        # ./build-android-curl.sh arm
 
-        local OPENSSL_ABS_PATH=$(realpath ${BUILD_DIR}/openssl/build_${ABI})
+        export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH/openssl
+
+
+        # local OPENSSL_ABS_PATH=$(realpath ${BUILD_DIR}/openssl/build_${ABI})
 
         local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        local OPENSSL_DIR=$BUILD_DIR/openssl #/lib/$TYPE/$ABI
-        #local OPENSSL_DIR=$OF_LIBS_OPENSSL_ABS_PATH #/lib/$TYPE/$ABI
+        #local OPENSSL_DIR=$BUILD_DIR/openssl #/lib/$TYPE/$ABI
+       # local OPENSSL_DIR=$OF_LIBS_OPENSSL_ABS_PATH #/lib/$TYPE/$ABI
 
-        echo "OpenSSL Dir: $OPENSSL_ABS_PATH"
+        # echo "OpenSSL Dir: $OPENSSL_ABS_PATH"
 
-        local OPENSSL_LIBRARIES=$OPENSSL_DIR/lib/$TYPE/$ABI
+        export OPENSSL_LIBRARIES=$OPENSSL_PATH/lib/$TYPE/$ABI
 
         if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
@@ -98,48 +125,64 @@ function build() {
             export HOST=x86_64-linux-android
         fi
 
-        chmod 777 buildconf
-        ./buildconf
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        git submodule update --init --recursive
+        
 
-        # CURL_ARGS="--with-ssl --with-zlib --disable-ftp --disable-gopher 
-        #     --disable-file --disable-imap --disable-ldap --disable-ldaps 
-        #     --disable-pop3 --disable-proxy --disable-rtsp --disable-smtp 
-        #     --disable-telnet --disable-tftp --without-gnutls --without-libidn 
-        #     --without-librtmp --disable-dict"
+        export NDK=$ANDROID_PLATFORM # e.g. $HOME/Library/Android/sdk/ndk/22.1.7171670
+        export HOST_TAG=$HOST_PLATFORM # e.g. darwin-x86_64, see https://developer.android.com/ndk/guides/other_build_systems#overview
+        export MIN_SDK_VERSION=21 # or any version you want
+
+        chmod +x ./build.sh
+        ./build.sh
+
+
+        # chmod 777 buildconf
+        # ./buildconf
+        # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+
+        # # CURL_ARGS="--with-ssl --with-zlib --disable-ftp --disable-gopher 
+        # #     --disable-file --disable-imap --disable-ldap --disable-ldaps 
+        # #     --disable-pop3 --disable-proxy --disable-rtsp --disable-smtp 
+        # #     --disable-telnet --disable-tftp --without-gnutls --without-libidn 
+        # #     --without-librtmp --disable-dict"
 
         
-        export PATH="$OPENSSL_LIBRARIES:$PATH"
+        # export PATH="$OPENSSL_LIBRARIES:$PATH"
 
-        #mkdir -p $OPENSSL_DIR/lib
-        #cp -Rv $OPENSSL_LIBRARIES/* $OPENSSL_DIR/lib/
-        #sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" configure
+        # #mkdir -p $OPENSSL_DIR/lib
+        # #cp -Rv $OPENSSL_LIBRARIES/* $OPENSSL_DIR/lib/
+        # #sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" configure
 
-        export PKG_CONFIG_PATH=$OPENSSL_ABS_PATH/lib/pkgconfig
-        export LD_LIBRARY_PATH=$OPENSSL_ABS_PATH/lib/
+        # # export PKG_CONFIG_PATH=$OPENSSL_ABS_PATH/lib/pkgconfig
+        # # export LD_LIBRARY_PATH=$OPENSSL_ABS_PATH/lib/
 
-        export DESTDIR="$BUILD_TO_DIR"
-        export CPPFLAGS="-I${OPENSSL_ABS_PATH}/include $CPPFLAGS"
-        export LDFLAGS="-L${OPENSSL_ABS_PATH}/lib $LDFLAGS"
-        export LIBS="-lssl -lcrypto $LIBS"
+        # export DESTDIR="$BUILD_TO_DIR"
+        # export CPPFLAGS="-I${OPENSSL_PATH}/include $CPPFLAGS"
+        # export LDFLAGS="-L${OPENSSL_PATH}/lib $LDFLAGS "
+        # export LIBS="-l${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -l${OPENSSL_PATH}/lib/${TYPE}/${ABI}//libcrypto.a "
 
-        ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_ABS_PATH --target=$HOST \
-            --enable-static \
-            --disable-shared \
-            --disable-verbose \
-            --disable-threaded-resolver \
-            --enable-libgcc \
-            --enable-ipv6 \
-            --without-nghttp2 \
-            --without-libidn2 \
-            --disable-ldap \
-            --disable-ldaps 
+        # ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_PATH --target=$HOST \
+        #     --enable-static \
+        #     --disable-shared \
+        #     --disable-verbose \
+        #     --disable-threaded-resolver \
+        #     --enable-libgcc \
+        #     --enable-ipv6 \
+        #     --without-nghttp2 \
+        #     --without-libidn2 \
+        #     --disable-ldap \
+        #     --disable-ldaps 
 
-        # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
-        make clean
-        make -j${PARALLEL_MAKE}
-        make install
+        # # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
+        # make clean
+        # make -j${PARALLEL_MAKE}
+        # make install
+        
+
+        # ///
+
+        
         
         # perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
         # perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
