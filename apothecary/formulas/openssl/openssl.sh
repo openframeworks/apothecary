@@ -75,6 +75,7 @@ function build() {
 
 	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
 	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	    return
 	fi
 
 
@@ -326,7 +327,7 @@ function build() {
 		#perl configdata.pm --dump
 		#make
 		 
-		
+		make clean
 		make depend
 		echo "Make Depend Complete"
 		make all

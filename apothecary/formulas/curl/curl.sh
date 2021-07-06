@@ -334,7 +334,7 @@ function copy() {
 
 	# Standard *nix style copy.
 	# copy headers
-	cp -Rv include/curl/* $1/include/curl/
+	cp -Rv $BUILD_DIR/include/curl/* $1/include/curl/
 
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
