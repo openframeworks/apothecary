@@ -359,13 +359,17 @@ function build() {
 
 
         source ../../android_configure.sh $ABI
-		mkdir -p build_$ABI
-		cd build_$ABI
+		mkdir -p "build_$ABI"
+		cd "./build_$ABI"
         export CMAKE_CFLAGS="$CFLAGS"
-        export CFLAGS=""
+        #export CFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
-        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI ..
+       # export LDFLAGS=""
+        cmake -G 'Unix Makefiles' .. \
+        	-DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
+        	-DANDROID_ABI="${ABI}" \
+        	-DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" -DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG $CFLAGS" #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
+        	
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 

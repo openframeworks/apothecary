@@ -79,13 +79,13 @@ export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
 
 
-export CFLAGS="-Oz -std=c17 --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fno-short-enums -fPIE -fPIC -fuse-ld=gold -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH}"
+export CFLAGS="-Oz -std=c17 --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fno-short-enums -fPIE -fPIC -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"
 export CPPFLAGS="-Oz -stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
 export CXXFLAGS="-std=c++17 -stdlib=libc++ --sysroot=${SYSROOT}/usr -fno-short-enums -fPIE -fPIC -fuse-ld=gold"
 #export CPPFLAGS="-v" # verbose output to test issues
 
 export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH" #-lc++ -lc++abi -lunwind
-export LIBS="-lz -lc -lm -ldl"
+export LIBS="-lz -lc -lm -ldl -lgcc"
 
 # -ldl -lm -lc "
 #export ANDROID_SYSROOT=${SYSROOT}
@@ -100,7 +100,7 @@ elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS -target aarch64-linux-android " 
     export CPPFLAGS="$CPPFLAGS -target aarch64-linux-android -mfpu=neon"
     export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/aarch64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS -target aarch64-linux-android -mfpu=neon"
+    export LDFLAGS="$LDFLAGS"
 elif [ "$ABI" = "x86-64" ]; then
     export CFLAGS="$CFLAGS -target x86_64-linux-android "
     export CPPFLAGS="$CPPFLAGS -target x86_64-linux-android "
