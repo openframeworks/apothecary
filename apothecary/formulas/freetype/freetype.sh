@@ -363,8 +363,9 @@ function build() {
 		cd "./build_$ABI"
         export CMAKE_CFLAGS="$CFLAGS"
         #export CFLAGS=""
+        export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
-       # export LDFLAGS=""
+       	export LDFLAGS=""
         cmake -G 'Unix Makefiles' .. \
         	-DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
         	-DANDROID_ABI="${ABI}" \

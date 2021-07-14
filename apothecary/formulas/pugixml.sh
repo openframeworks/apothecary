@@ -66,11 +66,11 @@ function build() {
         source ../../android_configure.sh $ABI
         #export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
 		# Compile the program
-		$CXX -O2 $CPPFLAGS $CXXFLAGS \
+		$CXX -Oz $CPPFLAGS $CXXFLAGS \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o src/pugixml.o
+			 -o src/pugixml.o $LDFLAGS -v
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"

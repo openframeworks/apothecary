@@ -51,12 +51,18 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
+		source ../../android_configure.sh $ABI
 	    cp $FORMULA_DIR/CMakeLists.txt .
 
 		mkdir -p build_$ABI
 		cd build_$ABI
-		cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_BUILD_TYPE=Release ..
-		make VERBOSE=1
+		export CMAKE_CFLAGS="$CFLAGS"
+        export CMAKE_LDFLAGS="$LDFLAGS"
+		cmake -G 'Unix Makefiles' .. \
+		-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
+		-DANDROID_ABI=$ABI -DCMAKE_BUILD_TYPE=Release -DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" \
+		-DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG" #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
+		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
