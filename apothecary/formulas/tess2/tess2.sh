@@ -291,15 +291,63 @@ function build() {
 
 	elif [ "$TYPE" == "android" ] ; then
 	    source ../../android_configure.sh $ABI
-		CFLAGS="$CFLAGS -DANDROID"
-	    mkdir -p Build
-	    cd Build
-	    cp -v $FORMULA_DIR/Makefile .
-	    cp -v $FORMULA_DIR/tess2.make .
-	    make config=release tess2
-	    cd ..
-	    mkdir -p build/android/$ABI
-	    mv Build/libtess2.a build/android/$ABI
+
+
+		cp -v $FORMULA_DIR/CMakeLists.txt .
+
+		
+
+		mkdir -p "build_$ABI"
+		cd "./build_$ABI"
+        export CMAKE_CFLAGS="$CFLAGS"
+        #export CFLAGS=""
+        export CPPFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+       	export LDFLAGS=""
+        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        	-D CMAKE_OSX_SYSROOT:PATH==${SYSROOT} \
+      		-D CMAKE_C_COMPILER==${CC} \
+     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER=${CXX} \
+     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
+     	 	-D CMAKE_CXX_FLAGS=${CPPFLAGS} \
+        	-D ANDROID_ABI=${ABI} \
+        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+        	-D ANDROID_TOOLCHAIN=clang \
+        	-G 'Unix Makefiles' ..
+        	#=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
+        	
+		make -j${PARALLEL_MAKE} VERBOSE=1
+		cd ..
+
+
+	    # mkdir -p Build
+	    # cd Build
+	    # cp -v $FORMULA_DIR/Makefile .
+	    # cp -v $FORMULA_DIR/tess2.make .
+	   
+	   	# RELEASE=release
+
+
+     #    make -j${PARALLEL_MAKE} \
+     #    	CC=${CC} \
+     #    	AR=${AR} \
+     #    	CXX=${CXX} \
+    	# 	RANLIB=${RANLIB} \
+    	# 	LD=${LD} \
+    	# 	STRIP=${STRIP} \
+    	# 	config=release tess2  
+
+	    # cd ..
+	    # mkdir -p build/android/$ABI
+	    # mv Build/libtess2.a build/android/$ABI
 	elif [ "$TYPE" == "emscripten" ] ; then
     	cp -v $FORMULA_DIR/CMakeLists.txt .
     	mkdir -p build
@@ -366,7 +414,8 @@ function copy() {
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
-		cp -v build/$TYPE/$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
+		#cp -v build/$TYPE/$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a #make
+		cp -v build_$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
 	else
 		cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
 	fi
