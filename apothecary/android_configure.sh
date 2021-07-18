@@ -79,8 +79,9 @@ export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
 
 export OPTIMISE="-Oz "
-export CFLAGS="${OPTIMISE} -std=c17 --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fno-short-enums -fPIE -fPIC -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} "
-export CPPFLAGS="${OPTIMISE} -stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
+export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
+export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fno-short-enums -fPIE -fPIC -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} "
+export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
 export CXXFLAGS="-std=c++17 -stdlib=libc++ -fno-short-enums -fPIE -fPIC"
 #export CPPFLAGS="-v" # verbose output to test issues
 
@@ -92,15 +93,17 @@ export ANDROID_SYSROOT=${SYSROOT}
 
 echo "Toolchain: ${TOOLCHAIN_INCLUDE_PATH}"
 
+export PATH=${TOOLCHAIN}:$PATH
+
 echo "AR: ${AR}"
 if [ "$ABI" = "armeabi-v7a" ]; then
-    export CFLAGS="$CFLAGS -target armv7-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
-    export CPPFLAGS="$CPPFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+    export CFLAGS="$CFLAGS -target armv7-linux-androideabi -march=armv7-a -mfloat-abi=softfp "
+    export CPPFLAGS="$CPPFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp "
     export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/arm-linux-androideabi"
-    export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -mfpu=neon -Wl,--fix-cortex-a8 -Wl,--no-undefined"
+    export LDFLAGS="$LDFLAGS -target armv7-none-linux-androideabi -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS -target aarch64-linux-android " 
-    export CPPFLAGS="$CPPFLAGS -target aarch64-linux-android -mfpu=neon"
+    export CPPFLAGS="$CPPFLAGS -target aarch64-linux-android "
     export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/aarch64-linux-android" # for ASM includes
     export LDFLAGS="$LDFLAGS"
 elif [ "$ABI" = "x86-64" ]; then
