@@ -100,6 +100,7 @@ echo "This script is run from \"$thisDir\""
 fi
 
 NDK_ROOT=/Users/eyenine/Documents/android-ndk-r22b
+#NDK_ROOT=/Users/eyenine/Documents/AndroidNDK7171670/Contents/NDK
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=

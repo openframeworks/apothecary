@@ -290,7 +290,7 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
-	    source ../../android_configure.sh $ABI
+	    source ../../android_configure.sh $ABI cmake
 
 
 		cp -v $FORMULA_DIR/CMakeLists.txt .
@@ -429,11 +429,16 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
+	cd ../tess2_patched
+
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f CMakeCache.txt *.lib
 
 	elif [ "$TYPE" == "android" ] ; then
-		echoWarning "TODO: clean android"
+		rm -f CMakeCache.txt *.a *.o
+		rm -f builddir/$TYPE
+		rm -f builddir
+		rm -f lib
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		make clean
 		rm -f CMakeCache.txt *.a *.lib

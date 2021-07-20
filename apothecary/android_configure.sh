@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 export ABI=$1
+
+if  [ -z "$2" ]; then
+    export BUILD_SYSTEM=make
+else
+    export BUILD_SYSTEM=$2 #make / cmake
+fi
+
 if [ "$(uname)" = "Darwin" ]; then
     export HOST_PLATFORM=darwin-x86_64
     export ANDROID_TOOLHOST="linux-android"
@@ -60,6 +67,11 @@ if [ "$NDK_VERSION_MAJOR" = "22" ]; then
     export LIB_SYSROOT="${SYSROOT}/usr/lib/$ANDROID_PLATFORM/arch-arm"
 fi
 
+if [ "$BUILD_SYSTEM" = "cmake" ]; then
+    export ANDROID_FIX_API="" # defined by default in cmake
+else 
+    export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
+fi
 
 export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 
@@ -79,14 +91,15 @@ export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
 
 export OPTIMISE="-Oz "
-export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
+
+
 export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fno-short-enums -fPIE -fPIC -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} "
 export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
 export CXXFLAGS="-std=c++17 -stdlib=libc++ -fno-short-enums -fPIE -fPIC"
 #export CPPFLAGS="-v" # verbose output to test issues
 
 export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
-export LIBS="-lz -lc -lm -ldl -lgcc -lc++ -lc++abi -lz -lc -lm -ldl"
+export LIBS="-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
 #export LDFLAGS="$LDFLAGS $LIBS"
 # -ldl -lm -lc "
 export ANDROID_SYSROOT=${SYSROOT}
@@ -112,10 +125,10 @@ elif [ "$ABI" = "x86-64" ]; then
     export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/x86_64-linux-android" # for ASM includes
     export LDFLAGS="$LDFLAGS -target x86_64-linux-android -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
 elif [ "$ABI" = "x86" ]; then
-    export CFLAGS="$CFLAGS -target i686-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector" 
-    export CPPFLAGS="$CPPFLAGS -target i686-none-linux-android -march=i686 -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"
+    export CFLAGS="$CFLAGS -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector"  #march=i686  -target i686-linux-android 
+    export CPPFLAGS="$CPPFLAGS -msse3 -mstackrealign -mfpmath=sse -fno-stack-protector" #  -target i686-none-linux-android
     export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/i686-linux-android"
-    export LDFLAGS="$LDFLAGS -target i686-none-linux-android -march=i686"
+    export LDFLAGS="$LDFLAGS  "
 fi
 
 export CXXFLAGS="$CXXFLAGS $CPPFLAGS"
