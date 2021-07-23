@@ -290,12 +290,11 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
+ 
+        # setup android paths / variables
 	    source ../../android_configure.sh $ABI cmake
-
-
+        
 		cp -v $FORMULA_DIR/CMakeLists.txt .
-
-		
 
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"

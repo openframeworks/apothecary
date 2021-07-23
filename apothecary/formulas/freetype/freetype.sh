@@ -9,12 +9,12 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.7
-FVER=27
+VER=2.11.0
+FVER=211
 
 # tools for git use
 GIT_URL=http://git.savannah.gnu.org/r/freetype/freetype2.git
-GIT_TAG=VER-2-7
+GIT_TAG=VER-2-11
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -358,7 +358,7 @@ function build() {
 	    #make install
 
 
-        source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI cmake
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"
         export CMAKE_CFLAGS="$CFLAGS"
@@ -366,10 +366,30 @@ function build() {
         export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
-        cmake -G 'Unix Makefiles' .. \
-        	-DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
-        	-DANDROID_ABI="${ABI}" \
-        	-DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" -DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG $CFLAGS" #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
+
+        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        	-D CMAKE_OSX_SYSROOT:PATH==${SYSROOT} \
+      		-D CMAKE_C_COMPILER==${CC} \
+     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER=${CXX} \
+     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
+     	 	-D CMAKE_CXX_FLAGS=${CPPFLAGS} \
+        	-D ANDROID_ABI=${ABI} \
+        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+        	-D ANDROID_TOOLCHAIN=clang \
+        	-G 'Unix Makefiles' ..
+
+        # cmake -G 'Unix Makefiles' .. \
+        # 	-DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
+        # 	-DANDROID_ABI="${ABI}" \
+        # 	-DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" -DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG $CFLAGS" #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
         	
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
@@ -440,7 +460,7 @@ function copy() {
 	# copy license files
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	cp -v docs/LICENSE.TXT $1/license/
+	#cp -v docs/LICENSE.TXT $1/license/
 	cp -v docs/FTL.TXT $1/license/
 	cp -v docs/GPLv2.TXT $1/license/
 }
@@ -451,8 +471,10 @@ function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		vs-clean "freetype.sln"
 	elif [ "$TYPE" == "android" ] ; then
-		make clean
-		rm -f build/$TYPE
+		rm -f CMakeCache.txt *.a *.o
+		rm -f builddir/$TYPE
+		rm -f builddir
+		rm -f lib
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		make clean
 		rm -f *.a *.lib
