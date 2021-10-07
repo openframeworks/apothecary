@@ -27,7 +27,7 @@ export ANDROID_NDK_HOME=$NDK_ROOT
 export TOOLCHAIN_TYPE=llvm${CLANG_VERSION}
 export TOOLCHAIN=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}
 
-if [ "$NDK_VERSION_MAJOR" = "22" ]; then
+if [ "$NDK_VERSION_MAJOR" = "23" ]; then
     export SYSROOT="${TOOLCHAIN}/sysroot"
     echo "NDK_VERfsysrootSION_MAJOR: ${NDK_VERSION_MAJOR}"
 fi
@@ -99,7 +99,7 @@ export CXXFLAGS="-std=c++17 -stdlib=libc++ -fno-short-enums -fPIE -fPIC"
 #export CPPFLAGS="-v" # verbose output to test issues
 
 export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
-export LIBS="-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
+export LIBS="" #"-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
 #export LDFLAGS="$LDFLAGS $LIBS"
 # -ldl -lm -lc "
 export ANDROID_SYSROOT=${SYSROOT}
