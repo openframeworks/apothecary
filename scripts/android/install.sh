@@ -4,7 +4,7 @@ APOTHECARY_PATH=$(cd $(dirname "$0"); pwd -P)/../../apothecary
 
 sudo apt-get update -q
 sudo apt-get remove mssql-tools 2> /dev/null # this is because mysql-tools includes a program called bcp which conflicts with boosts bcp
-sudo apt-get install -y libboost-tools-dev gperf realpath
+sudo apt-get install -y libboost-tools-dev gperf
 
 NDK_VERSION="r15c"
 NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"

@@ -21,7 +21,7 @@ createArchImg(){
     #sudo ./arch-bootstrap.sh archlinux
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
-    sudo apt-get install -y coreutils realpath gperf
+    sudo apt-get install -y coreutils gperf
 	cd $HOME
 	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
 	mkdir archlinux
