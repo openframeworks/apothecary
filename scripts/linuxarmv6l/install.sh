@@ -21,7 +21,7 @@ installPackages(){
         echo "$UBUNTU_VERSION doesn\'t need ppa"
     fi
     sudo apt-get update -q
-    sudo apt-get -y install multistrap unzip coreutils realpath gperf
+    sudo apt-get -y install multistrap unzip coreutils gperf
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
     if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION"=="14.04" ]; then
         sudo sed -i s/\$forceyes//g /usr/sbin/multistrap
@@ -29,6 +29,9 @@ installPackages(){
 }
 
 createRaspbianImg(){
+    #needed since Ubuntu 18.04 - allow non https repositories
+    mkdir -p raspbian/etc/apt/apt.conf.d/
+	echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee raspbian/etc/apt/apt.conf.d/90insecure
     multistrap -a armhf -d raspbian -f multistrap.conf
 }
 
