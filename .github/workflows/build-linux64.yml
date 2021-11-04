@@ -14,8 +14,6 @@ jobs:
     strategy:
         matrix:
           cfg:
-#          - {target: linux, opt: gcc4}
-#          - {target: linux, opt: gcc5}
           - {target: linux, opt: gcc6}
     env:
      TARGET: ${{matrix.cfg.target}}
