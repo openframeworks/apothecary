@@ -99,16 +99,13 @@ echo "This script is run from \"$thisDir\""
 	
 fi
 
-NDK_ROOT=/Users/eyenine/Library/Android/sdk/ndk/23.0.7599858 
-
-#NDK_ROOT=/Users/eyenine/Documents/AndroidNDK7171670/Contents/NDK
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
 NDK_VERSION=23
 NDK_VERSION_MAJOR=23
-ANDROID_API=19  # 23 minimum for Google Play Store
+ANDROID_API=21
 ANDROID_PLATFORM=android-${ANDROID_API}
 
 ################################################################################
