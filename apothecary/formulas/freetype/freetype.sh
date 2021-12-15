@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.11.0
+VER=2.11.1
 FVER=211
 
 # tools for git use
@@ -18,6 +18,7 @@ GIT_TAG=VER-2-11
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	echo "Downloading freetype-$VER"
 	wget --quiet --no-check-certificate https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
@@ -361,6 +362,7 @@ function build() {
         source ../../android_configure.sh $ABI cmake
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"
+		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
         #export CFLAGS=""
         export CPPFLAGS=""
@@ -368,7 +370,7 @@ function build() {
        	export LDFLAGS=""
 
         cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-        	-D CMAKE_OSX_SYSROOT:PATH==${SYSROOT} \
+        	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
       		-D CMAKE_C_COMPILER==${CC} \
      	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
      	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
@@ -377,13 +379,15 @@ function build() {
      	 	-D CMAKE_C_COMPILER=${CC} \
      	 	-D CMAKE_CXX_COMPILER=${CXX} \
      	 	-D CMAKE_C_FLAGS=${CFLAGS} \
-     	 	-D CMAKE_CXX_FLAGS=${CPPFLAGS} \
+     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
         	-D ANDROID_ABI=${ABI} \
         	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
         	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
         	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
         	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
         	-D ANDROID_TOOLCHAIN=clang \
+        	-D CMAKE_BUILD_TYPE=Release \
+        	-D FT_REQUIRE_HARFBUZZ=FALSE \
         	-G 'Unix Makefiles' ..
 
         # cmake -G 'Unix Makefiles' .. \
