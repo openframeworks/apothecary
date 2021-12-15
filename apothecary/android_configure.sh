@@ -70,29 +70,6 @@ if [ "$NDK_VERSION_MAJOR" = "22" ]; then
 fi
 
 
-
-if [ "$BUILD_SYSTEM" = "cmake" ]; then
-    export ANDROID_FIX_API="" # defined by default in cmake
-    export MAKE_TARGET=""
-    export MAKE_INCLUDES_CFLAGS=""
-    export MAKE_INCLUDES_CPPFLAGS=""
-    export OPTIMISE=""
-else 
-    export OPTIMISE="-Oz "
-    export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
-    export MAKE_INCLUDES_CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE"
-    export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH}"
-    if [ "$ABI" = "armeabi-v7a" ]; then
-        export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a "
-    elif [ $ABI = "arm64-v8a" ]; then
-        export MAKE_TARGET="-target aarch64-linux-android" 
-    elif [ "$ABI" = "x86-64" ]; then
-        export MAKE_TARGET="-target x86_64-linux-android "
-    elif [ "$ABI" = "x86" ]; then
-        export MAKE_TARGET="-target i686-linux-android -mfpmath=sse  -fno-stack-protector -msse3 -mstackrealign " 
-    fi
-fi
-
 export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 
 export TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/bin
@@ -109,6 +86,29 @@ export CXX=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang++
 export LD=$TOOLCHAIN/bin/ld
 export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
+
+
+if [ "$BUILD_SYSTEM" = "cmake" ]; then
+    export ANDROID_FIX_API="" # defined by default in cmake
+    export MAKE_TARGET=""
+    export MAKE_INCLUDES_CFLAGS=""
+    export MAKE_INCLUDES_CPPFLAGS=""
+    export OPTIMISE=""
+else 
+    export OPTIMISE="-Oz "
+    export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
+    export MAKE_INCLUDES_CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
+    export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -frtti"
+    if [ "$ABI" = "armeabi-v7a" ]; then
+        export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a "
+    elif [ $ABI = "arm64-v8a" ]; then
+        export MAKE_TARGET="-target aarch64-linux-android" 
+    elif [ "$ABI" = "x86-64" ]; then
+        export MAKE_TARGET="-target x86_64-linux-android "
+    elif [ "$ABI" = "x86" ]; then
+        export MAKE_TARGET="-target i686-linux-android -mfpmath=sse  -fno-stack-protector -msse3 -mstackrealign " 
+    fi
+fi
 
 
 

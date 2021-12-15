@@ -298,8 +298,9 @@ function build() {
 
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"
+		export CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
-        #export CFLAGS=""
+        
         export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
