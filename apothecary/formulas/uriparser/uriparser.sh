@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
 
 
 # define the version by sha
-VER=0.8.5
+VER=0.9.5
 
 # tools for git use
 GIT_URL=git://git.code.sf.net/p/uriparser/git
@@ -51,17 +51,36 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
-		source ../../android_configure.sh $ABI
+		source ../../android_configure.sh $ABI cmake
 	    cp $FORMULA_DIR/CMakeLists.txt .
 
 		mkdir -p build_$ABI
 		cd build_$ABI
-		export CMAKE_CFLAGS="$CFLAGS"
+		CFLAGS=""
+        export CMAKE_CFLAGS="$CFLAGS"
+        #export CFLAGS=""
+        export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
+       	export LDFLAGS=""
 		cmake -G 'Unix Makefiles' .. \
 		-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
-		-DANDROID_ABI=$ABI -DCMAKE_BUILD_TYPE=Release -DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" \
-		-DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG" #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
+		-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
+      		-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER=${CXX} \
+     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
+     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
+        	-D ANDROID_ABI=${ABI} \
+        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+        	-D ANDROID_TOOLCHAIN=clang \
+        	-D CMAKE_BUILD_TYPE=Release #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 
