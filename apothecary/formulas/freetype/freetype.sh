@@ -371,7 +371,7 @@ function build() {
 
         cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
         	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-      		-D CMAKE_C_COMPILER==${CC} \
+      		-D CMAKE_C_COMPILER=${CC} \
      	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
      	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
      	 	-D CMAKE_CXX_COMPILER_AR=${AR} \

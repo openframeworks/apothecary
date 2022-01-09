@@ -162,10 +162,10 @@ function build() {
 
         #cd "./build_$ABI"
         export CMAKE_CFLAGS="$CFLAGS -fsigned-char "
-        #export CFLAGS=""
+        export CFLAGS=""
         #export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
-        #export LDFLAGS=""
+        export LDFLAGS=""
         cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             -D CMAKE_OSX_SYSROOT:PATH==${SYSROOT} \
             -D CMAKE_C_COMPILER==${CC} \
