@@ -25,8 +25,8 @@ if [ "$(ls -A ${NDK_ROOT})" ]; then
     ls -A ${NDK_ROOT}
 else
     cd ~/
-    echo "Downloading NDK"
-    wget -q --no-check-certificate https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-x86_64.zip
+    echo "Downloading NDK $NDK_VERSION"
+    wget -q --no-check-certificate https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
     echo "Uncompressing NDK"
     unzip android-ndk-${NDK_VERSION}-linux-x86_64.zip > /dev/null 2>&1
     rm android-ndk-${NDK_VERSION}-linux-x86_64.zip
