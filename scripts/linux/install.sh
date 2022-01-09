@@ -47,7 +47,7 @@ if [ "$OPT" == "gcc4" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo apt-get update -q
-    sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get install gcc-4.9 g++-4.9
     #needed because github actions defaults to gcc 5
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60
@@ -60,22 +60,24 @@ elif [ "$OPT" == "gcc5" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     sudo apt-get update -q
+    sudo apt-get install -y --allow-unauthenticated gcc-5 g++-5
+    
     # sudo apt-get install gdebi
-    wget -nv http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
-    tar xjf gcc5debs.tar.bz2
-    rm gcc5debs.tar.bz2
-    sudo dpkg -i --force-depends cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends gcc-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends gcc-5-base_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends g++-5_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends libstdc++-5-pic_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends libstdc++-5-dev_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends gcc-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
-    sudo dpkg -i --force-depends g++-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
-    rm *.deb
-
+    #wget -nv http://ci.openframeworks.cc/gcc5/gcc5debs.tar.bz2
+    #tar xjf gcc5debs.tar.bz2
+    #rm gcc5debs.tar.bz2
+    #sudo dpkg -i --force-depends cpp-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends gcc-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends gcc-5-base_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends g++-5_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends libstdc++-5-pic_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends libstdc++-5-dev_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends gcc-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
+    #sudo dpkg -i --force-depends g++-5-multilib_5.4.1-2ubuntu1~14.04_amd64.deb
+    #rm *.deb
+	
     sudo apt-get install -f
-    sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get remove -y --purge g++-4.8
     sudo apt-get autoremove
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
@@ -99,11 +101,11 @@ elif [ "$OPT" == "gcc6" ]; then
     # sudo gdebi -n gcc-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
     # sudo gdebi -n g++-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
     # rm *.deb
-	echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
+	#echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
 	sudo apt-get update -q
 	sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
 
-    sudo apt-get install -y gperf coreutils realpath libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     sudo apt-get remove -y --purge g++-4.8
     sudo apt-get autoremove
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
