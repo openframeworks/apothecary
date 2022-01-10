@@ -31,7 +31,7 @@ export TOOLCHAIN=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFO
 
 if [ "$NDK_VERSION_MAJOR" = "23" ]; then
     export SYSROOT="${TOOLCHAIN}/sysroot"
-    echo "NDK_VERfsysrootSION_MAJOR: ${NDK_VERSION_MAJOR}"
+    echo "NDK_VESION_MAJOR: ${NDK_VERSION_MAJOR}"
 fi
 
 echo "NDK_PLATFORM: $ANDROID_PLATFORM"
@@ -39,21 +39,25 @@ echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
 echo "SYSROOT: $SYSROOT"
 
 if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
+    export MACHINE=armv7
     export ANDROID_PREFIX=arm-${ANDROID_TOOLHOST}eabi
     export ANDROID_POSTFIX=${ANDROID_PREFIX}
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
 
 elif [ "$ABI" = "arm64-v8a" ]; then
+    export MACHINE=arm64
     export ANDROID_PREFIX=aarch64-${ANDROID_TOOLHOST}
     export ANDROID_POSTFIX=${ANDROID_PREFIX}
     export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
 
 elif [ "$ABI" = "x86" ]; then
+    export MACHINE=i686
     export ANDROID_PREFIX=x86
     export ANDROID_POSTFIX=i686-${ANDROID_TOOLHOST}
     export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
 
 elif [ "$ABI" = "x86_64" ]; then
+    export MACHINE=x86_64
     export ANDROID_PREFIX=x86_64
     export ANDROID_POSTFIX=x86_64-${ANDROID_TOOLHOST}
     export GCC_TOOLCHAIN=x86_64-${TOOLCHAIN_VERSION}
@@ -113,8 +117,8 @@ fi
 
 
 
-export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 -fno-short-enums $MAKE_INCLUDES_CFLAGS"
-export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} $MAKE_INCLUDES_CPPFLAGS" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
+export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 -fno-short-enums ${MAKE_INCLUDES_CFLAGS}"
+export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
 export CXXFLAGS="-std=c++17"
 #export CPPFLAGS="-v" # verbose output to test issues
 

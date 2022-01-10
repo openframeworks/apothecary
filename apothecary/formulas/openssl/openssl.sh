@@ -5,9 +5,9 @@
 # define the version
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
-VER=1.1.1k
+VER=1.1.1m
 VERDIR=1.1.1
-SHA1=bad9dc4ae6dcc1855085463099b5dacb0ec6130b
+SHA1=39d424c4411e45f1570073d7a71b1830b96007ca
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -266,10 +266,49 @@ function build() {
 		# cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
 	elif [ "$TYPE" == "android" ]; then
-		 source ../../android_configure.sh $ABI
+		 source ../../android_configure.sh $ABI make
 
-		 wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
+		 #wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
 		 # source ./setenv-android.sh
+		echo "NDK_ROOT: $NDK_ROOT"
+
+		export RELEASE=2.6.37
+		export SYSTEM=android
+		export ARCH=arm
+		export CROSS_COMPILE="arm-linux-androideabi-"
+
+
+
+		export ANDROID_SYSROOT="$SYSROOT"
+		#export SYSROOT="$ANDROID_SYSROOT"
+		export NDK_SYSROOT="$ANDROID_SYSROOT"
+		export ANDROID_NDK_SYSROOT="$ANDROID_SYSROOT"
+		#export ANDROID_API="$ANDROID_API"
+
+		# CROSS_COMPILE and ANDROID_DEV are DFW (Don't Fiddle With). Its used by OpenSSL build system.
+		# export CROSS_COMPILE="arm-linux-androideabi-"
+		export ANDROID_DEV="$ANDROID_NDK_ROOT/platforms/$ANDROID_API/$ABI/usr"
+		export HOSTCC=clang
+
+		export ANDROID_TOOLCHAIN="$TOOLCHAIN"
+
+
+		VERBOSE=1
+		if [ ! -z "$VERBOSE" ] && [ "$VERBOSE" != "0" ]; then
+		  echo "ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
+		  echo "ANDROID_ARCH: $ABI"
+		  # echo "ANDROID_EABI: $_ANDROID_EABI"
+		  echo "ANDROID_API: $ANDROID_API"
+		  echo "ANDROID_SYSROOT: $ANDROID_SYSROOT"
+		  echo "ANDROID_TOOLCHAIN: $ANDROID_TOOLCHAIN"
+		  #echo "FIPS_SIG: $FIPS_SIG"
+		  #echo "CROSS_COMPILE: $CROSS_COMPILE"
+		  echo "ANDROID_DEV: $ANDROID_DEV"
+		fi
+
+		#cp $FORMULA_DIR/Setenv-android.sh ./Setenv-android.sh
+		#chmod 755 ./Setenv-android.sh
+		#./setenv-android.sh
 
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 
@@ -280,8 +319,10 @@ function build() {
 		CURRENTPATH=`pwd`
 		mkdir -p BUILD_TO_DIR
 		echo "Build Dir $BUILD_TO_DIR"
+		export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
+		echo "./Config:"
 		./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
-
+		#./Configure android-arm64
 		
 
 		# cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
@@ -295,19 +336,19 @@ function build() {
 		# cp crypto/engine/engine.h include/
 
 		BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
-		export ANDROID_NDK_ROOT=$NDK_ROOT
+		
 		if [ "$ABI" = "armeabi-v7a" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-arm"
-		    PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$HOST_PLATFORM/bin:$PATH
+		    #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$HOST_PLATFORM/bin:$PATH
 		elif [ "$ABI" = "armeabi" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-arm"
-		    PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+		    #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
 		elif [ $ABI = "arm64-v8a" ]; then
 			KERNEL_BITS=64
 		    export CONFIGURE="android-arm64"
-		    PATH=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/aarch64-$HOST_PLATFORM/bin:$PATH
+		    #PATH=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/aarch64-$HOST_PLATFORM/bin:$PATH
 		elif [ "$ABI" = "x86_64" ]; then
 			KERNEL_BITS=32
 		    export CONFIGURE="android-x86_64"
@@ -317,13 +358,16 @@ function build() {
 		fi
 		
 		
-		export PATH="$TOOLCHAIN_PATH:$LIB_SYSROOT/usr/lib:$PATH"
+		
+
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
-		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++ -ldl "
-		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR
-
+		echo "./Configure: $DEEP_TOOLCHAIN_PATH/usr/lib/"
+		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++ -ldl -L$DEEP_TOOLCHAIN_PATH"
+		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR 
+ 
+ 
 		#perl configdata.pm --dump
 		#make
 		 
