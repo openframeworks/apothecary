@@ -66,7 +66,7 @@ function prepare() {
 	if [ "$TYPE" == "tvos" ]; then
 		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
     elif [ "$TYPE" == "osx" ]; then
-        cp $FORMULA_DIR/13-macos-arm.conf Configurations/
+        cp $FORMULA_DIR/13-macos-arm.conf Configurations/  
     fi
 }
 
@@ -292,6 +292,12 @@ function build() {
 
 		export ANDROID_TOOLCHAIN="$TOOLCHAIN"
 
+		# Fix NDK 23 Issue with sysroot for old make
+		cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
+		cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
+		cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
+		cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
+		
 
 		VERBOSE=1
 		if [ ! -z "$VERBOSE" ] && [ "$VERBOSE" != "0" ]; then
@@ -320,8 +326,8 @@ function build() {
 		mkdir -p BUILD_TO_DIR
 		echo "Build Dir $BUILD_TO_DIR"
 		export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
-		echo "./Config:"
-		./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
+		# echo "./Config:"
+		# ./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
 		#./Configure android-arm64
 		
 
@@ -364,17 +370,23 @@ function build() {
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
 		echo "./Configure: $DEEP_TOOLCHAIN_PATH/usr/lib/"
-		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -isysroot${SYSROOT} -stdlib=libc++ -ldl -L$DEEP_TOOLCHAIN_PATH"
-		./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR 
+		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -stdlib=libc++ -ldl -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/"
+		./Configure $CONFIGURE  -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix="$CURRENTPATH/$BUILD_TO_DIR" --openssldir="$CURRENTPATH/$BUILD_TO_DIR"
  
  
 		#perl configdata.pm --dump
 		#make
 		 
 		make clean
-		make depend
+		make AR=$AR depend 
 		echo "Make Depend Complete"
 		make all
+
+
+		rm $SYSROOT/usr/lib/crtbegin_dynamic.o
+		rm $SYSROOT/usr/lib/crtbegin_so.o
+		rm $SYSROOT/usr/lib/crtend_android.o
+		rm $SYSROOT/usr/lib/crtend_so.o
 
 		#ake all
 		

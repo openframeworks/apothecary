@@ -101,8 +101,8 @@ if [ "$BUILD_SYSTEM" = "cmake" ]; then
 else 
     export OPTIMISE="-Oz "
     export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
-    export MAKE_INCLUDES_CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
-    export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ --sysroot=${SYSROOT} -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -frtti"
+    export MAKE_INCLUDES_CFLAGS=" -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
+    export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -frtti"
     if [ "$ABI" = "armeabi-v7a" ]; then
         export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a "
     elif [ $ABI = "arm64-v8a" ]; then
@@ -117,7 +117,7 @@ fi
 
 
 
-export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 -fno-short-enums ${MAKE_INCLUDES_CFLAGS}"
+export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 -fno-short-enums ${MAKE_INCLUDES_CFLAGS}" 
 export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
 export CXXFLAGS="-std=c++17"
 #export CPPFLAGS="-v" # verbose output to test issues
