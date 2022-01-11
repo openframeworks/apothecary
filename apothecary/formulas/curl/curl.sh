@@ -12,8 +12,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_77_0
-VER_D=7.77.0
+VER=7_81_0
+VER_D=7.81.0
 SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
@@ -96,7 +96,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
 
-        source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI make
         # cd tools
         # export api=19
         # ./build-android-curl.sh arm
@@ -133,7 +133,28 @@ function build() {
         export MIN_SDK_VERSION=21 # or any version you want
 
         chmod +x ./build.sh
-        ./build.sh
+        #./build.sh
+
+        export SSL_DIR=$OPENSSL_LIBRARIES
+
+        ARGUMENTS=" \
+            --with-pic \
+            --disable-shared
+            "
+
+        mkdir -p build/curl
+        cd curl
+        autoreconf -fi
+
+        ./configure --host=$TARGET_HOST \
+            --target=$TARGET_HOST \
+            --prefix="$PWD/build/curl/$ANDROID_ARCH" \
+            --with-openssl=$SSL_DIR $ARGUMENTS
+
+            make -j$CORES
+            make install
+            #make clean
+            
 
 
         # chmod 777 buildconf
@@ -351,7 +372,7 @@ function copy() {
         #mkdir -p $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
-        cp -Rv build_$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
+        cp -Rv build/curl/$ABI/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
 
     if [ "$TYPE" == "osx" ]; then

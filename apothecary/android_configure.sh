@@ -63,7 +63,7 @@ elif [ "$ABI" = "x86_64" ]; then
     export GCC_TOOLCHAIN=x86_64-${TOOLCHAIN_VERSION}
 
 fi
-
+export TARGET_HOST=$ANDROID_POSTFIX
 export TARGET=${ANDROID_POSTFIX}
 if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
     export TARGET=armv7a-${ANDROID_TOOLHOST}eabi #special fix for armv7
