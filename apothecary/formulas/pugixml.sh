@@ -68,6 +68,7 @@ function build() {
 		# Compile the program
 		$CXX -Oz $CPPFLAGS $CXXFLAGS \
 			 -Wall \
+			 -fPIC \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
 			 -o src/pugixml.o $LDFLAGS -v
@@ -132,7 +133,9 @@ function copy() {
 
 	# Standard *nix style copy.
 	# copy headers
-	cp -Rv src/*.hpp $1/include/
+	cp -Rv src/pugiconfig.hpp $1/include/pugiconfig.hpp
+	cp -Rv src/pugixml.hpp $1/include/pugixml.hpp
+	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
 
 	if [ "$TYPE" == "vs" ] ; then
 		if [[ $VS_VER -gt 14 ]]; then
