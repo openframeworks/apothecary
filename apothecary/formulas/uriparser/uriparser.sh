@@ -10,15 +10,15 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
 
 
 # define the version by sha
-VER=0.9.5
+VER=0.9.6
 
 # tools for git use
-GIT_URL=git://git.code.sf.net/p/uriparser/git
+GIT_URL=https://github.com/danoli3/uriparser
 GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate https://github.com/uriparser/uriparser/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
+	wget -nv --no-check-certificate $GIT_URL/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
 	tar -xjf uriparser-$VER.tar.bz2
 	mv uriparser-$VER uriparser
 	rm uriparser*.tar.bz2
@@ -54,34 +54,32 @@ function build() {
 		source ../../android_configure.sh $ABI cmake
 	    cp $FORMULA_DIR/CMakeLists.txt .
 
-		mkdir -p build_$ABI
-		cd build_$ABI
+	    echo "Mkdir build"
+		mkdir -p build
+		echo "Mkdir build/${ABI}"
+		
+		cd build
+		mkdir -p build/${ABI}
+		#echo "cd build/${ABI}"
+		#cp $FORMULA_DIR/CMakeLists.txt .
 		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
-        #export CFLAGS=""
+        export CFLAGS=""
         export CPPFLAGS=""
+        export CXXFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
 		cmake -G 'Unix Makefiles' .. \
-		-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
-		-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-      		-D CMAKE_C_COMPILER=${CC} \
-     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER=${CC} \
-     	 	-D CMAKE_CXX_COMPILER=${CXX} \
-     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
-     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
-        	-D ANDROID_ABI=${ABI} \
-        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-        	-D ANDROID_TOOLCHAIN=clang \
-        	-D CMAKE_BUILD_TYPE=Release #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
-		make -j${PARALLEL_MAKE} VERBOSE=1
+			-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
+			-DCMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
+		    -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+        	-DANDROID_ABI=${ABI} \
+        	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+        	-DANDROID_TOOLCHAIN=clang \
+        	-DCMAKE_BUILD_TYPE=Release #\ 
+ 			
+        	#-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
+		make VERBOSE=1
 		cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
@@ -176,7 +174,7 @@ function copy() {
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		mkdir -p $1/lib/$TYPE/$ABI/
-		cp -Rv build_$ABI/*.a $1/lib/$TYPE/$ABI/
+		cp -Rv build/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
 	fi
 
 	# copy license file
@@ -189,6 +187,11 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+	elif [ "$TYPE" == "android" ]; then
+		rm -f CMakeCache.txt
+		rm -f build/liburiparser.a
+		rm -r  build
+		make clean
 	else
 		make clean
 	fi
