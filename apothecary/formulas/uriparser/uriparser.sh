@@ -18,10 +18,11 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate $GIT_URL/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
-	tar -xjf uriparser-$VER.tar.bz2
-	mv uriparser-$VER uriparser
-	rm uriparser*.tar.bz2
+	#wget -nv --no-check-certificate $GIT_URL/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
+	#tar -xjf uriparser-$VER.tar.bz2
+	#mv uriparser-$VER uriparser
+	#rm uriparser*.tar.bz2
+	git clone $GIT_URL uriparser
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -54,9 +55,14 @@ function build() {
 		source ../../android_configure.sh $ABI cmake
 	    cp $FORMULA_DIR/CMakeLists.txt .
 
+
 	    echo "Mkdir build"
 		mkdir -p build
 		echo "Mkdir build/${ABI}"
+		local BUILD_TO_DIR="build/${ABI}"
+
+
+		#sed -i 'src/UriMemory.c' 's/include <config.h>/' 'src/UriMemory.c'
 		
 		cd build
 		mkdir -p build/${ABI}
@@ -69,6 +75,8 @@ function build() {
         export CXXFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
+       	
+       	
 		cmake -G 'Unix Makefiles' .. \
 			-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
 			-DCMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
@@ -76,10 +84,11 @@ function build() {
         	-DANDROID_ABI=${ABI} \
         	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
         	-DANDROID_TOOLCHAIN=clang \
-        	-DCMAKE_BUILD_TYPE=Release #\ 
+        	-DCMAKE_BUILD_TYPE=Release
  			
         	#-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
 		make VERBOSE=1
+		
 		cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
