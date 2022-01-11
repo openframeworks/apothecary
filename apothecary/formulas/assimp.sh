@@ -155,15 +155,22 @@ function build() {
         # fi 
        
         
+        rm -R build
         
-        mkdir -p "lib/build_$ABI"
+
+        mkdir -p "build"
+        mkdir -p "build/build_$ABI"
+
+
+        cd build
+        rm -f CMakeCache.txt
 
         export CMAKE_CFLAGS="$CFLAGS -fsigned-char "
         export CFLAGS=""
         #export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         export LDFLAGS=""
-        cmake -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             -DCMAKE_C_COMPILER=${CC} \
             -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
@@ -193,7 +200,7 @@ function build() {
             -DANDROID_STL=c++_static \
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
             -DCMAKE_INSTALL_PREFIX=install \
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="lib/build_$ABI" \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
             -G 'Unix Makefiles' .
             # -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             # -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
@@ -263,8 +270,7 @@ function copy() {
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv include/* $1/include
-        cp -Rv lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        rm lib/libassimp.a
+        cp -Rv build/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
         #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
@@ -293,7 +299,9 @@ function clean() {
     elif [ "$TYPE" == "android" ] ; then
         make clean
         make rebuild_cache
-        rm -f lib/libassimp.a
+        rm -f build/*.*
+        rm -f build/
+        rm -f build/libassimp.a
         rm -f CMakeCache.txt
 
     else
