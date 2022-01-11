@@ -155,7 +155,10 @@ function build() {
         # fi 
        
         
-        rm -R build
+        if [ -d "build" ]; then
+            rm -R build
+        fi
+        
         
 
         mkdir -p "build"
