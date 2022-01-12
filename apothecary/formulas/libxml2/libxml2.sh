@@ -53,7 +53,7 @@ function build() {
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
         
-        source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI cmake
         mkdir -p cmake
         cd cmake
         ln -s .. libxml2
