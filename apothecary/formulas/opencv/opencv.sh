@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
-VER=4.0.1
+VER=4.5.5
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -157,6 +157,8 @@ function build() {
       cmake .. -G "Visual Studio $VS_VER"\
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration " \
       -DBUILD_TESTS=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_FFMPEG=OFF \
@@ -196,6 +198,8 @@ function build() {
       cmake .. -G "Visual Studio $VS_VER Win64" \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration " \
       -DBUILD_TESTS=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_FFMPEG=OFF \
@@ -414,17 +418,59 @@ function build() {
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
-    source ../../android_configure.sh $ABI
+    source ../../android_configure.sh $ABI cmake
 
     rm -rf $BUILD_FOLDER
     mkdir $BUILD_FOLDER
     cd $BUILD_FOLDER
 
+
+    if [ "$ABI" = "armeabi-v7a" ]; then
+      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=ON -DANDROID_FORCE_ARM_BUILD=TRUE"
+    elif [ $ABI = "arm64-v8a" ]; then
+      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE"
+    elif [ "$ABI" = "x86-64" ]; then
+      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE" 
+    elif [ "$ABI" = "x86" ]; then
+      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE"
+    fi
+
+    ANDROID_NDK=${NDK_ROOT}
+
+    export ANDROID_NATIVE_API_LEVEL=21
+  
     echo ${ANDROID_NDK}
     pwd
-    cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
-      -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
+    cmake  -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
+      -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
+      -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+      -DCMAKE_C_COMPILER=${CC} \
+      -DANDROID_TOOLCHAIN=clang++ \
+      -DCMAKE_CXX_COMPILER=${CXX} \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration " \
+      ${ARM_MODE} \
+      -D ANDROID_PLATFORM=${ANDROID_PLATFORM} \
+      -DANDROID_ABI=${ABI} \
+      -DANDROID_TOOLCHAIN=clang \
       -DBUILD_ANDROID_PROJECTS=OFF \
+      -D BUILD_ANDROID_EXAMPLES=OFF \
+      -D BUILD_opencv_objdetect=OFF \
+      -D BUILD_opencv_video=OFF \
+      -D BUILD_opencv_videoio=OFF \
+      -D BUILD_opencv_features2d=OFF \
+      -D BUILD_opencv_flann=OFF \
+      -D BUILD_opencv_highgui=ON \
+      -D BUILD_opencv_ml=ON \
+      -D BUILD_opencv_photo=OFF \
+      -D BUILD_opencv_python=OFF \
+      -D BUILD_opencv_shape=OFF \
+      -D BUILD_opencv_stitching=OFF \
+      -D BUILD_opencv_superres=OFF \
+      -D BUILD_opencv_ts=OFF \
+      -D BUILD_opencv_videostab=OFF \
+      -D WITH_MATLAB=OFF \
+      -D WITH_CUDA=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
@@ -432,7 +478,6 @@ function build() {
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
       -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
@@ -458,14 +503,13 @@ function build() {
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
-      -DANDROID_NDK=$NDK_ROOT \
+      -DANDROID_NDK=${NDK_ROOT} \
       -DCMAKE_BUILD_TYPE=Release \
       -DANDROID_ABI=$ABI \
       -DANDROID_STL=c++_static \
-      -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
-      -DANDROID_FORCE_ARM_BUILD=TRUE \
+      -DANDROID_PLATFORM=$ANDROID_PLATFORM \
       -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
-      -DBUILD_PERF_TESTS=OFF
+      -DBUILD_PERF_TESTS=OFF ..
     make -j${PARALLEL_MAKE}
     make install
 
