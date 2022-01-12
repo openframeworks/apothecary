@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" )
 
 
 # define the version by sha
@@ -70,7 +70,7 @@ function build() {
         export CFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         export LDFLAGS=""
-        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-DLIBXML_THREAD_ENABLED -DTRIO_HAVE_CONFIG_H -DWITHOUT_LZMA"  ../cmake/
+        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DLIBXML_THREAD_ENABLED -DTRIO_HAVE_CONFIG_H -DWITHOUT_LZMA  ../cmake/
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
 
