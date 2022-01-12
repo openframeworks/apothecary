@@ -266,7 +266,7 @@ function copy() {
         fi
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
-        cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
+        # cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
         cp -Rv include/* $1/include
