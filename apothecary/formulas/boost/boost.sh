@@ -8,7 +8,6 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "vs" )
 
 # define the version
-
 VERSION=1.66.0
 VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
 TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
@@ -20,13 +19,12 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
+URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
 
-WIN_URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
+WIN_URL=https://dl.bintray.com/boostorg/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
 	mv boost_${VERSION_UNDERSCORES} boost
@@ -49,52 +47,8 @@ function prepare() {
 	if [ "$TYPE" == "osx" ]; then    
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "android" ]; then
-    	
         source ../../android_configure.sh $ABI
-
-        JAABI="`echo ${ABI} | tr -d '_-'`" # Remove all dashes, b2 does not like them
-      	TOOLSET_ARCH=clang-${JAABI}
-
-      	echo "Adding pathname: `dirname $CXX`"
-  # `AndroidBinariesPath` could be used by user-config-*.jam
-  export AndroidBinariesPath=`dirname $CXX`
-  export PATH=$AndroidBinariesPath:$PATH
-
-  export NO_BZIP2=1
-
-       
-        echo "Generating config..."
-user_config=tools/build/src/user-config.jam
-if [ "$ABI" == "armeabi-v7a" ] ; then
-    EXTRA_ARMV7="<compileflags>-mthumb"
-else
-	EXTRA_ARMV7=""
-fi
-rm -f $user_config
-cat <<EOF > $user_config
-import os ;
-using clang : $ABI
-<compileflags>$CFLAGS
-<compileflags>-mthumb
-<compileflags>-fPIC
-<compileflags>-ffunction-sections
-<compileflags>-fdata-sections
-<compileflags>-funwind-tables
-<compileflags>-fstack-protector-strong
-<compileflags>-no-canonical-prefixes
-<compileflags>-Wformat
-<compileflags>-Werror=format-security
-<compileflags>-frtti
-<compileflags>-fexceptions
-<compileflags>-DNDEBUG
-<compileflags>-g
-<compileflags>-Oz
-<archiver>$AR
-<ranlib>$RANLIB
-;
-EOF
-
-		./bootstrap.sh --with-toolset=darwin --with-libraries=filesystem 2>&1 
+		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "emscripten" ]; then
 		./bootstrap.sh --with-libraries=filesystem
 	elif [[ "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
@@ -129,13 +83,12 @@ function build() {
 
 
 	elif [ "$TYPE" == "osx" ]; then
-		./bootstrap.sh -with-toolset=clang
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++17 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
 		# set some initial variables
-		./bootstrap.sh -with-toolset=clang
+
 		local IOS_ARCHS
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -317,30 +270,14 @@ EOF
 	    echo "Finished Build for $TYPE"
 	elif [ "$TYPE" == "emscripten" ]; then
 	    cp $FORMULA_DIR/project-config-emscripten.jam project-config.jam
-	    ./bootstrap.sh -with-toolset=clang
 		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
-	    
-	  JAMARCH="`echo ${ABI} | tr -d '_-'`" # Remove all dashes, b2 does not like them
-      TOOLSET_ARCH=clang-${JAMARCH}
-	   echo "Config $CONFIG"
-        ./b2 -j${PARALLEL_MAKE} \
-        	toolset=${TOOLSET_ARCH}  \
-        	--ignore-site-config         \
-        	--user-config="$BOOST_SRC/build/src/user-config.jam" \
-        	 cxxflags="-std=c++11 $CFLAGS" \
-        	 cflags="$CFLAGS" \
-        	 threading=multi \
-        	 threadapi=pthread \
-        	 target-os=android \
-        	 variant=release \
-        	 --build-dir=build_$ARCH \
-        	 --stage-dir=stage \
-        	 link=static stage
+
+        source ../../android_configure.sh $ABI
+        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
 
 		# Run ranlib on binaries (not called corectly by b2)
-
 		${RANLIB} stage/lib/libboost_filesystem.a
 		${RANLIB} stage/lib/libboost_system.a
 
@@ -388,11 +325,7 @@ function copy() {
 		rsync -ar install_dir/boost/* $1/include/boost/
 		cp stage/lib/*.a $1/lib/$TYPE/
 	elif [ "$TYPE" == "android" ]; then
-		# BCP is missing to build bcp go to build/boost and run:
-		./bootstrap.sh
-		./bjam tools/bcp
-		# run apothecary again
-		dist/bin/bcp filesystem install_dir
+		bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
