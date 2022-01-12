@@ -16,9 +16,9 @@ MIRROR=https://www.openssl.org
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	fi
+	# if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	#     echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	# fi
 
 	local FILENAME=openssl-$VER
 
