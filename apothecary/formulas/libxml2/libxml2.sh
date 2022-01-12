@@ -10,11 +10,11 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" "linux64" "linuxa
 
 
 # define the version by sha
-VER=2.9.10
+VER=2.9.12
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    wget -v https://xmlsoft.org/sources/libxml2-${VER}.tar.gz
+    wget -v http://xmlsoft.org/sources/libxml2-${VER}.tar.gz
     tar xzf libxml2-${VER}.tar.gz
     mv libxml2-${VER} libxml2
     rm libxml2-${VER}.tar.gz
