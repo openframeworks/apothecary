@@ -507,9 +507,8 @@ function build() {
       -DANDROID_NDK=${NDK_ROOT} \
       -DCMAKE_BUILD_TYPE=Release \
       -DANDROID_ABI=$ABI \
-      -DANDROID_STL=c++_static \
+      -DANDROID_STL=c++_shared \
       -DANDROID_PLATFORM=$ANDROID_PLATFORM \
-      -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
       -DBUILD_PERF_TESTS=OFF ..
     make -j${PARALLEL_MAKE}
     make install

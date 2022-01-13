@@ -52,8 +52,9 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
+		echo "Android "
 		source ../../android_configure.sh $ABI cmake
-	    cp $FORMULA_DIR/CMakeLists.txt .
+	    #cp $FORMULA_DIR/CMakeLists.txt .
 
 
 	    echo "Mkdir build"
@@ -72,11 +73,17 @@ function build() {
         export CXXFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
-       	
-       	
-		cmake -G 'Unix Makefiles' .. \
+    
+		cmake \
 			-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
- 			-DCMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
+ 			-DANDROID_ABI=${ABI} \
+ 			-DANDROID_NDK=${NDK_ROOT} \
+ 			-DANDROID_STL=c++_shared \
+ 			-DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+ 			-DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DBUILD_SHARED_LIBS=OFF \
        		-DCMAKE_C_COMPILER=${CC} \
       	 	-DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
       	 	-DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
@@ -92,15 +99,16 @@ function build() {
          	-DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
          	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
          	-DANDROID_TOOLCHAIN=clang++ \
-         	-DCMAKE_BUILD_TYPE=Release 
+         	-DCMAKE_BUILD_TYPE=Release \
+         	-G 'Unix Makefiles' .. 
  		make -j${PARALLEL_MAKE} VERBOSE=1
- 			
-        	#-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
 		make VERBOSE=1
 		
 		cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
+
+		echo "macOS "
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
