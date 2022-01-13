@@ -449,8 +449,8 @@ function build() {
       -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
       -DCMAKE_C_COMPILER=${CC} \
       -DCMAKE_CXX_COMPILER=${CXX} \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Os -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Os -fPIC -Wno-implicit-function-declaration " \
       ${ARM_MODE} \
       -D ANDROID_PLATFORM=${ANDROID_PLATFORM} \
       -DANDROID_ABI=${ABI} \

@@ -13,7 +13,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
 VER=0.9.6
 
 # tools for git use
-GIT_URL=https://github.com/danoli3/uriparser
+GIT_URL=https://github.com/uriparser/uriparser
 GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
@@ -61,9 +61,6 @@ function build() {
 		echo "Mkdir build/${ABI}"
 		local BUILD_TO_DIR="build/${ABI}"
 
-
-		#sed -i 'src/UriMemory.c' 's/include <config.h>/' 'src/UriMemory.c'
-		
 		cd build
 		mkdir -p build/${ABI}
 		#echo "cd build/${ABI}"
@@ -71,20 +68,32 @@ function build() {
 		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
-        export CPPFLAGS=""
-        export CXXFLAGS=""
+        export CPPFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
+        export CXXFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
        	
        	
 		cmake -G 'Unix Makefiles' .. \
 			-DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
-			-DCMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-		    -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-        	-DANDROID_ABI=${ABI} \
-        	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-        	-DANDROID_TOOLCHAIN=clang \
-        	-DCMAKE_BUILD_TYPE=Release
+ 			-DCMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
+       		-DCMAKE_C_COMPILER=${CC} \
+      	 	-DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+      	 	-DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
+      	 	-DCMAKE_CXX_COMPILER_AR=${AR} \
+      	 	-DCMAKE_C_COMPILER_AR=${AR} \
+      	 	-DCMAKE_C_COMPILER=${CC} \
+      	 	-DCMAKE_CXX_COMPILER=${CXX} \
+      	 	-DCMAKE_C_FLAGS=${CFLAGS} \
+      	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
+         	-DANDROID_ABI=${ABI} \
+         	-DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+         	-DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+         	-DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+         	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+         	-DANDROID_TOOLCHAIN=clang++ \
+         	-DCMAKE_BUILD_TYPE=Release 
+ 		make -j${PARALLEL_MAKE} VERBOSE=1
  			
         	#-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS"
 		make VERBOSE=1
