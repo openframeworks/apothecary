@@ -418,6 +418,8 @@ function build() {
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
+    export NDK_ROOT=/Users/one/Library/Android/sdk/ndk/21.4.7075529
+
     source ../../android_configure.sh $ABI cmake
 
     rm -rf $BUILD_FOLDER
@@ -513,15 +515,15 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    source /emsdk/emsdk_env.sh
+    #source /emsdk/emsdk_env.sh
 
     cd ${BUILD_DIR}/${1}
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
     # these can be removed when we move to latest opencv 
-    sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
-    sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
-    sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
+    #sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
+    #sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
+    #sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -532,8 +534,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 " \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 " \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
