@@ -63,7 +63,9 @@ function build() {
 		local BUILD_TO_DIR="build/${ABI}"
 
 		cd build
-		mkdir -p build/${ABI}
+		mkdir -p ${TYPE}
+		cd ${TYPE}
+		mkdir -p ${ABI}
 		#echo "cd build/${ABI}"
 		#cp $FORMULA_DIR/CMakeLists.txt .
 		CFLAGS=""
@@ -100,23 +102,45 @@ function build() {
          	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
          	-DANDROID_TOOLCHAIN=clang++ \
          	-DCMAKE_BUILD_TYPE=Release \
-         	-G 'Unix Makefiles' .. 
+         	-B${ABI} \
+         	-G 'Unix Makefiles' ../..
+        cd ${ABI}
  		make -j${PARALLEL_MAKE} VERBOSE=1
 		make VERBOSE=1
 		
-		cd ..
+		cd ../../..
 
 	elif [ "$TYPE" == "osx" ]; then
 
 		echo "macOS "
-        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
+        export CFLAGS=""
+        export CXXFLAGS="-mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
-		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
+        export LDFLAGS=" "
+	    local BUILD_TO_DIR="build/${TYPE}"
+
+	    mkdir -p build
+		echo "int main(){return 0;}" > tool/uriparse.c
+		cd build
+		mkdir -p ${TYPE}
+		cd ${TYPE}
+
+		cmake \
+ 			-DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DBUILD_SHARED_LIBS=OFF \
+         	-DCMAKE_BUILD_TYPE=Release \
+         	-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+         	-DCMAKE_C_FLAGS=${CFLAGS} \
+         	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
+         	-G 'Unix Makefiles' ../.. 
+
+		#./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         make clean
 		make -j${PARALLEL_MAKE}
-	    make install
+	    # make install
+	    cd ../..
 	elif [ "$TYPE" == "msys2" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
 		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
@@ -126,11 +150,29 @@ function build() {
 	    make install
 	elif [ "$TYPE" == "emscripten" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
-		emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
+		mkdir -p build
+		local BUILD_TO_DIR="build/${TYPE}"
 		echo "int main(){return 0;}" > tool/uriparse.c
+		cd build
+		mkdir -p ${TYPE}
+		cd ${TYPE}
+  		export CFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration "
+        export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
+		cmake \
+ 			-DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DBUILD_SHARED_LIBS=OFF \
+         	-DCMAKE_BUILD_TYPE=Release \
+         	-DCMAKE_C_FLAGS=${CFLAGS} \
+      	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
+         	-G 'Unix Makefiles' ../.. 
+		#emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         emmake make clean
 		emmake make -j${PARALLEL_MAKE}
-	    emmake make install
+	    # emmake make install
+	    cd ..
+	    cd ..
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -187,20 +229,27 @@ function copy() {
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
-	elif [ "$TYPE" == "msys2" ] || [ "$TYPE" == "emscripten" ]; then
+		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/uriparser.a
+	elif [ "$TYPE" == "msys2" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/liburiparser.a
+	elif [ "$TYPE" == "emscripten" ]; then
+		# Standard *nix style copy.
+		# copy headers
+		cp -Rv include/uriparser/* $1/include/uriparser/
+		# copy lib
+		mkdir -p $1/lib/$TYPE
+		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		mkdir -p $1/lib/$TYPE/$ABI/
-		cp -Rv build/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
+		cp -Rv build/$TYPE/$ABI/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
 	fi
 
 	# copy license file
@@ -213,6 +262,11 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+	elif [ "$TYPE" == "emscripten" ]; then
+		rm -f CMakeCache.txt
+		rm -f build/emscripten
+		rm -r build
+		make clean
 	elif [ "$TYPE" == "android" ]; then
 		rm -f CMakeCache.txt
 		rm -f build/liburiparser.a
