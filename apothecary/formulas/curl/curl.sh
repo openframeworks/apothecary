@@ -6,7 +6,9 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
+
+# Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )
@@ -24,11 +26,11 @@ GIT_TAG=$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-    if [ "$TYPE" == "android" ] ; then
+    # if [ "$TYPE" == "android" ] ; then
    
-        git clone https://github.com/robertying/openssl-curl-android.git
+    #     git clone https://github.com/robertying/openssl-curl-android.git
 
-        mv openssl-curl-android curl 
+    #     mv openssl-curl-android curl 
 
        
     #     wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-android-arm64.zip
@@ -40,7 +42,7 @@ function download() {
     #     mv curl_$VER_D curl 
     #     # wget -nv https://curl.haxx.se/download/curl-7.74.0.tar.gz #wget a curl
     #     # https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-ios-arm64.zip
-    else
+    #else
         curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
         tar -xf curl-$VER.tar.gz
         mv curl-$VER_D curl 
@@ -50,7 +52,7 @@ function download() {
         #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
         # fi
         rm curl*.tar.gz
-    fi
+    #fi
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
 
    
@@ -132,28 +134,55 @@ function build() {
         export HOST_TAG=$HOST_PLATFORM # e.g. darwin-x86_64, see https://developer.android.com/ndk/guides/other_build_systems#overview
         export MIN_SDK_VERSION=21 # or any version you want
 
-        chmod +x ./build.sh
+        # chmod +x ./build.sh
         #./build.sh
 
         export SSL_DIR=$OPENSSL_LIBRARIES
+
+        export OUTPUT_DIR=$OPENSSL_LIBRARIES
 
         ARGUMENTS=" \
             --with-pic \
             --disable-shared
             "
 
-        mkdir -p build/curl
-        cd curl
-        autoreconf -fi
+        mkdir -p build
+        mkdir -p build/$TYPE
+        mkdir -p build/$TYPE/$ABI
+        # cd curl
+        # autoreconf -fi
 
-        ./configure --host=$TARGET_HOST \
-            --target=$TARGET_HOST \
-            --prefix="$PWD/build/curl/$ANDROID_ARCH" \
-            --with-openssl=$SSL_DIR $ARGUMENTS
+        export DESTDIR="$BUILD_TO_DIR"
+        export CPPFLAGS="-I${OPENSSL_PATH}/include $CPPFLAGS"
+        export LDFLAGS="-L${OPENSSL_PATH}/lib $LDFLAGS "
+        export LIBS="-l${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -l${OPENSSL_PATH}/lib/${TYPE}/${ABI}//libcrypto.a "
 
-            make -j$CORES
-            make install
-            #make clean
+
+         ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_PATH --target=$HOST \
+            --enable-static \
+            --disable-shared \
+            --disable-verbose \
+            --disable-threaded-resolver \
+            --enable-libgcc \
+            --enable-ipv6 \
+            --without-nghttp2 \
+            --without-libidn2 \
+            --disable-ldap \
+            --disable-ldaps 
+
+        # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
+        make clean
+        make -j${PARALLEL_MAKE}
+        make install
+
+        # ./configure --host=$TARGET_HOST \
+        #     --target=$TARGET_HOST \
+        #     --prefix="$PWD/build/$TYPE/$ABI" \
+        #     --with-openssl=$SSL_DIR $ARGUMENTS
+
+        #     make -j$CORES
+        #     make install
+        #     #make clean
             
 
 
