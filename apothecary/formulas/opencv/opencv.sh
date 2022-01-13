@@ -418,7 +418,9 @@ function build() {
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
-    export NDK_ROOT=/Users/one/Library/Android/sdk/ndk/21.4.7075529
+    #export NDK_ROOT=/Users/one/Library/Android/sdk/ndk/21.4.7075529
+
+    NDK_ROOT=${NDK_OLD_ROOT}
 
     source ../../android_configure.sh $ABI cmake
 
@@ -437,7 +439,7 @@ function build() {
       export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
     fi
 
-    ANDROID_NDK=${NDK_ROOT}
+    ANDROID_NDK=${NDK_OLD_ROOT}
 
     export ANDROID_NATIVE_API_LEVEL=21
   
@@ -631,7 +633,7 @@ function build() {
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF
-    make -j${PARALLEL_MAKE}
+    make 
     make install
   fi
 
