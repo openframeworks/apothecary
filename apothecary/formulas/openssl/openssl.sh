@@ -73,10 +73,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	    return
-	fi
+	
 
 
 	if [ "$TYPE" == "osx" ] ; then
@@ -266,6 +263,13 @@ function build() {
 		# cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
 	elif [ "$TYPE" == "android" ]; then
+
+		if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	    	echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	    	return
+		fi
+
+
 		 source ../../android_configure.sh $ABI make
 
 		 #wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
