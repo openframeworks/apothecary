@@ -428,11 +428,11 @@ function build() {
     if [ "$ABI" = "armeabi-v7a" ]; then
       export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=ON -DANDROID_FORCE_ARM_BUILD=TRUE"
     elif [ $ABI = "arm64-v8a" ]; then
-      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE"
-    elif [ "$ABI" = "x86-64" ]; then
-      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE" 
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
+    elif [ "$ABI" = "x86_64" ]; then
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE" 
     elif [ "$ABI" = "x86" ]; then
-      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=OFF -DANDROID_FORCE_ARM_BUILD=FALSE"
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
     fi
 
     ANDROID_NDK=${NDK_ROOT}
@@ -441,18 +441,17 @@ function build() {
   
     echo ${ANDROID_NDK}
     pwd
-    cmake  -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
+    cmake  \
+      -DANDROID_TOOLCHAIN=clang++ \
       -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
       -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
       -DCMAKE_C_COMPILER=${CC} \
-      -DANDROID_TOOLCHAIN=clang++ \
       -DCMAKE_CXX_COMPILER=${CXX} \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration" \
       -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration " \
       ${ARM_MODE} \
       -D ANDROID_PLATFORM=${ANDROID_PLATFORM} \
       -DANDROID_ABI=${ABI} \
-      -DANDROID_TOOLCHAIN=clang \
       -DBUILD_ANDROID_PROJECTS=OFF \
       -D BUILD_ANDROID_EXAMPLES=OFF \
       -D BUILD_opencv_objdetect=OFF \
@@ -698,6 +697,8 @@ function copy() {
       local BUILD_FOLDER="build_android_arm64"
     elif [ $ABI = x86 ]; then
       local BUILD_FOLDER="build_android_x86"
+    elif [ $ABI = x86_64 ]; then
+      local BUILD_FOLDER="build_android_x86_64"
     fi
 
     cp -r $BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
