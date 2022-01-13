@@ -17,7 +17,7 @@ sudo apt install -y cmake
 cmake --version
 
 NDK_VERSION="r23b"
-NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
+export NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"
 
 # Check if cached NDK directory exists
 if [ "$(ls -A ${NDK_ROOT})" ]; then
