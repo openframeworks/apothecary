@@ -10,11 +10,17 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
-VER=3180 # 3.16.0
+
 
 # tools for git use
+VER_CPP17=3180 # 3.16.0
+GIT_URL_CPP17=https://github.com/danoli3/FreeImage
+GIT_TAG_CPP17=3.18.0_cpp17 #$3.17.0-header-changes
+
+ # 3.17.0
+VER=3170
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.18.0_cpp17 #$3.17.0-header-changes
+GIT_TAG=3.17.0-header-changes
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -24,7 +30,14 @@ function download() {
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-
+	elif [ "$TYPE" == "android" -o "$TYPE" == "ios" ] ; then
+        # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
+        echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
+		echo $GIT_URL
+		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		tar -xzf FreeImage-$GIT_TAG.tar.gz
+		mv FreeImage-$GIT_TAG FreeImage
+		rm FreeImage-$GIT_TAG.tar.gz
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
