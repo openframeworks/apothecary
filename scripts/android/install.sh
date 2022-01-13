@@ -34,9 +34,6 @@ else
     cd -
 fi
 
-echo "NDK_ROOT=${NDK_ROOT}" > ${APOTHECARY_PATH}/paths.make
-
-
 NDK_OLD_VERSION="r21b"
 NDK_OLD_ROOT="$(realpath ~/)/android-ndk-${NDK_OLD_VERSION}/"
 
@@ -55,5 +52,5 @@ else
     cd -
 fi
 
-echo "NDK_OLD_ROOT=${NDK_OLD_ROOT}" > ${APOTHECARY_PATH}/paths.make
+echo "NDK_ROOT=${NDK_ROOT}; NDK_OLD_ROOT=${NDK_OLD_ROOT}" > ${APOTHECARY_PATH}/paths.make
 
