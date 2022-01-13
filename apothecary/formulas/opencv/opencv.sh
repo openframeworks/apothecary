@@ -534,8 +534,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 " \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 " \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
@@ -561,6 +561,23 @@ function build() {
       -DBUILD_opencv_stitching=OFF \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
+      -D BUILD_ANDROID_EXAMPLES=OFF \
+      -D BUILD_opencv_objdetect=OFF \
+      -D BUILD_opencv_video=OFF \
+      -D BUILD_opencv_videoio=OFF \
+      -D BUILD_opencv_features2d=OFF \
+      -D BUILD_opencv_flann=OFF \
+      -D BUILD_opencv_highgui=ON \
+      -D BUILD_opencv_ml=ON \
+      -D BUILD_opencv_photo=OFF \
+      -D BUILD_opencv_python=OFF \
+      -D BUILD_opencv_shape=OFF \
+      -D BUILD_opencv_stitching=OFF \
+      -D BUILD_opencv_superres=OFF \
+      -D BUILD_opencv_ts=OFF \
+      -D BUILD_opencv_videostab=OFF \
+      -D WITH_MATLAB=OFF \
+      -D WITH_CUDA=OFF \
       -DENABLE_SSE=OFF \
       -DENABLE_SSE2=OFF \
       -DENABLE_SSE3=OFF \
