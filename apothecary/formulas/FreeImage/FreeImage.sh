@@ -30,14 +30,14 @@ function download() {
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	elif [ "$TYPE" == "android" -o "$TYPE" == "ios" ] ; then
+	elif [[ "$TYPE" == "android" || "$TYPE" == "ios" ]] ; then
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
+        echo "Downloading from $GIT_URL_CPP17 FreeImage-$GIT_TAG_CPP17 - Version:$VER_CPP17"
 		echo $GIT_URL
-		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
-		tar -xzf FreeImage-$GIT_TAG.tar.gz
-		mv FreeImage-$GIT_TAG FreeImage
-		rm FreeImage-$GIT_TAG.tar.gz
+		wget -nv $GIT_URL_CPP17/archive/$GIT_TAG_CPP17.tar.gz -O FreeImage-$GIT_TAG_CPP17.tar.gz
+		tar -xzf FreeImage-$GIT_TAG_CPP17.tar.gz
+		mv FreeImage-$GIT_TAG_CPP17 FreeImage
+		rm FreeImage-$GIT_TAG_CPP17.tar.gz
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
