@@ -418,8 +418,6 @@ function build() {
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
-    #export NDK_ROOT=/Users/one/Library/Android/sdk/ndk/21.4.7075529
-
     NDK_ROOT=${NDK_OLD_ROOT}
 
     source ../../android_configure.sh $ABI cmake
