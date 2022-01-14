@@ -11,10 +11,19 @@ sudo apt remove --purge --auto-remove cmake
 # from https://apt.kitware.com - to get latest cmake
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
 
-sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
-sudo apt update
-sudo apt install -y cmake
-cmake --version
+# sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main'
+# sudo apt update
+# sudo apt install -y cmake 3.18.1
+# cmake --version
+
+sudo apt install build-essential libssl-dev
+wget https://github.com/Kitware/CMake/releases/download/v3.18.1/cmake-3.18.1.tar.gz
+tar -zxvf cmake-3.18.1.tar.gz
+cd cmake-3.18.1
+./bootstrap
+make 
+sudo make install 
+cd ..
 
 NDK_VERSION="r23b"
 export NDK_ROOT="$(realpath ~/)/android-ndk-${NDK_VERSION}/"

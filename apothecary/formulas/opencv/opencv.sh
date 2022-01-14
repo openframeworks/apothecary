@@ -428,7 +428,7 @@ function build() {
 
 
     if [ "$ABI" = "armeabi-v7a" ]; then
-      export ARM_MODE="-DCMAKE_ANDROID_ARM_MODE=ON -DANDROID_FORCE_ARM_BUILD=TRUE"
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=TRUE"
     elif [ $ABI = "arm64-v8a" ]; then
       export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
     elif [ "$ABI" = "x86_64" ]; then
@@ -453,8 +453,6 @@ function build() {
       -DANDROID_TOOLCHAIN=clang++ \
       -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
       -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Oz -fPIC -Wno-implicit-function-declaration" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Oz -fPIC -Wno-implicit-function-declaration " \
       ${ARM_MODE} \
       -D ANDROID_PLATFORM=${ANDROID_PLATFORM} \
       -DANDROID_ABI=${ABI} \
