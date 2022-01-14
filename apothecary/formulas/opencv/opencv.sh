@@ -418,7 +418,7 @@ function build() {
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
-    NDK_ROOT=${NDK_OLD_ROOT}
+    # NDK_ROOT=${NDK_OLD_ROOT}
 
     source ../../android_configure.sh $ABI cmake
 
@@ -437,20 +437,24 @@ function build() {
       export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
     fi
 
-    ANDROID_NDK=${NDK_OLD_ROOT}
+    # ANDROID_NDK=${NDK_OLD_ROOT}
 
     export ANDROID_NATIVE_API_LEVEL=21
   
     echo ${ANDROID_NDK}
     pwd
+
+      # -DCMAKE_C_COMPILER=${CC} \
+      # -DCMAKE_CXX_COMPILER=${CXX} \
+
+    # export CMAKE_DIR=$ANDROID_SDK/cmake/3.18.1/bin/
+    # ${CMAKE_DIR}/
     cmake  \
       -DANDROID_TOOLCHAIN=clang++ \
       -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
       -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-      -DCMAKE_C_COMPILER=${CC} \
-      -DCMAKE_CXX_COMPILER=${CXX} \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Os -fPIC -Wno-implicit-function-declaration" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Os -fPIC -Wno-implicit-function-declaration " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Oz -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -Oz -fPIC -Wno-implicit-function-declaration " \
       ${ARM_MODE} \
       -D ANDROID_PLATFORM=${ANDROID_PLATFORM} \
       -DANDROID_ABI=${ABI} \

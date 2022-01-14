@@ -34,23 +34,5 @@ else
     cd -
 fi
 
-NDK_OLD_VERSION="r21b"
-NDK_OLD_ROOT="$(realpath ~/)/android-ndk-${NDK_OLD_VERSION}/"
-
-# Check if cached NDK directory exists
-if [ "$(ls -A ${NDK_OLD_ROOT})" ]; then
-    echo "Using cached NDK OLD"
-    ls -A ${NDK_OLD_ROOT}
-else
-    cd ~/
-    echo "Downloading OLD NDK $NDK_VERSION"
-    wget -q --no-check-certificate https://dl.google.com/android/repository/android-ndk-${NDK_OLD_VERSION}-linux-x86_64.zip
-    echo "Uncompressing NDK"
-    unzip android-ndk-${NDK_OLD_VERSION}-linux-x86_64.zip > /dev/null 2>&1
-    rm android-ndk-${NDK_OLD_VERSION}-linux-x86_64.zip
-    echo "OLD NDK installed at $NDK_OLD_ROOT"
-    cd -
-fi
-
-echo "NDK_ROOT=${NDK_ROOT}; NDK_OLD_ROOT=${NDK_OLD_ROOT}" > ${APOTHECARY_PATH}/paths.make
+echo "NDK_ROOT=${NDK_ROOT};" > ${APOTHECARY_PATH}/paths.make
 
