@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+# ios makefile for FreeImage
 # Configuration for  iOS, making static libs
 # this will generate target architecures set via exports in oF Apothecary
 

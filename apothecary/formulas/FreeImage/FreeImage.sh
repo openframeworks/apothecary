@@ -30,8 +30,7 @@ function download() {
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	elif [ "$TYPE" == "android" ] ; then
-	#elif [[ "$TYPE" == "android" || "$TYPE" == "ios" ]] ; then
+	elif [[ "$TYPE" == "android" || "$TYPE" == "ios" ]] ; then
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL_CPP17 FreeImage-$GIT_TAG_CPP17 - Version:$VER_CPP17"
 		echo $GIT_URL
@@ -71,8 +70,13 @@ function prepare() {
 
 		# delete problematic file including a main fucntion
 		# https://github.com/openframeworks/openFrameworks/issues/5980
-		rm -f Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
-		touch Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+
+		perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+
+        #rm Source/LibWebP/src/dsp/dec_neon.c
+
+        perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
+		
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage
 	    cd $BUILD_DIR/FreeImage
@@ -81,6 +85,8 @@ function prepare() {
         #rm Source/LibWebP/src/dsp/dec_neon.c
 
         perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
+
+
 	fi
 }
 
@@ -172,9 +178,9 @@ function build() {
 		    # min iOS version for arm64 is iOS 7
 
 		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
+		    	MIN_IOS_VERSION=9.0 # 7.0 as this is the minimum for these architectures
 		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
+		    	MIN_IOS_VERSION=9.0 # 6.0 to prevent start linking errors
 		    fi
 
             if [ "${TYPE}" == "tvos" ]; then
@@ -401,8 +407,6 @@ function clean() {
 		make clean
 		rm -rf Dist
 		rm -f *.a
-		rm -f builddir/$TYPE
-		rm -f builddir
 		rm -f lib
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    make clean
@@ -416,8 +420,7 @@ function clean() {
 		make clean
 		rm -rf Dist
 		rm -f *.a *.lib
-		rm -f builddir/$TYPE
-		rm -f builddir
+
 		rm -f lib
 	else
 		make clean
