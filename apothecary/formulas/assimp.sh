@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=5.1.5
+VER=5.1.6
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/assimp
@@ -60,20 +60,15 @@ function build() {
 
     rm -f CMakeCache.txt || true
 
-    local IOS_ARCHS
-    if [[ "${TYPE}" == "tvos" ]]; then
-        IOS_ARCHS="x86_64 arm64"
-    elif [[ "$TYPE" == "ios" ]]; then
-        IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-    fi
+   
 
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         if [[ "$TYPE" == "tvos" ]]; then
             export IOS_MIN_SDK_VER=9.0
         fi
-        echo "building $TYPE | $IOS_ARCHS"
+        echo "building $TYPE"
         cd ./port/iOS/
-        ./build.sh --stdlib=libc++ --archs="armv7 armv7s arm64 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
+        ./build.sh --stdlib=libc++ --std=c++17 --archs="armv7 arm64 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
         echo "--------------------"
 
         echo "Completed Assimp for $TYPE"
@@ -162,17 +157,18 @@ function build() {
         
 
         mkdir -p "build"
-        mkdir -p "build/build_$ABI"
+       
 
 
         cd build
+        mkdir -p "build_$ABI"
         rm -f CMakeCache.txt
 
-        export CMAKE_CFLAGS="$CFLAGS -fsigned-char "
         export CFLAGS=""
-        #export CPPFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
+        export CPPFLAGS=""
         export LDFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+        
         cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             -DCMAKE_C_COMPILER=${CC} \
             -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
@@ -180,16 +176,14 @@ function build() {
             -DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
             -DCMAKE_CXX_COMPILER_AR=${AR} \
             -DCMAKE_C_COMPILER_AR=${AR} \
-            -DCMAKE_C_COMPILER=${CC} \
-            -DCMAKE_CXX_COMPILER=${CXX} \
-            -DCMAKE_C_FLAGS=${CFLAGS} \
-            -DCMAKE_CXX_FLAGS=${CPPFLAGS} \
+            -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
+            -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration " \
             -DANDROID_ABI=${ABI} \
             -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_TOOLCHAIN=clang++ \
             -DBUILD_SHARED_LIBS=OFF \
             -DASSIMP_BUILD_STATIC_LIB=1 \
             -DASSIMP_BUILD_TESTS=0 \
@@ -198,6 +192,7 @@ function build() {
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
+            -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DCMAKE_BUILD_TYPE=Release \
             -DANDROID_STL=c++_static \
@@ -205,6 +200,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
             -G 'Unix Makefiles' .
+
             # -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             # -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
             #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
