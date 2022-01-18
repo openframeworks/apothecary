@@ -312,6 +312,7 @@ function build() {
     		STRIP=${STRIP} \
         	-f Makefile.android \
         	libfreeimage.a
+        strip -x libfreeimage.a
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
     elif [ "$TYPE" == "emscripten" ]; then
