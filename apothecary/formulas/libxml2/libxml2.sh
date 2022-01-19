@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "linuxarmv7l" "android" )
 
 
 # define the version by sha
@@ -56,7 +56,7 @@ function build() {
         source ../../android_configure.sh $ABI cmake
         mkdir -p cmake
         cd cmake
-        ln -s .. libxml2
+        # ln -s .. libxml2
 
         cp -fr $FORMULA_DIR/CMakeLists.txt .
         #wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
@@ -70,11 +70,35 @@ function build() {
         export CFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         export LDFLAGS=""
-        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DLIBXML_THREAD_ENABLED -DTRIO_HAVE_CONFIG_H -DWITHOUT_LZMA  ../cmake/
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_TOOLCHAIN=clang++ \
+            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -stdlib=libc++ -std=c++17 -Wno-implicit-function-declaration -msse2 -msimd128" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -stdlib=libc++ -std=c17 -Wno-implicit-function-declaration -msse2 -msimd128 " \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DLIBXML2_WITH_LZMA=NO \
+            -DBUILD_SHARED_LIBS=NO \
+            -DLIBXML2_WITH_FTP=NO \
+            -DLIBXML2_WITH_HTTP=NO \
+            -DLIBXML2_WITH_HTML=NO \
+            -DLIBXML2_WITH_ICONV=NO \
+            -DLIBXML2_WITH_LEGACY=NO \
+            -DLIBXML2_WITH_MODULES=NO \
+            -DLIBXML_THREAD_ENABLED=NO \
+            -DLIBXML2_WITH_OUTPUT=YES \
+            -DLIBXML2_WITH_PYTHON=NO \
+            -DLIBXML2_WITH_DEBUG=NO \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_TESTS=NO \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBXML2_WITH_THREAD_ALLOC=NO \
+            -G 'Unix Makefiles' 
+
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
 
-        unlink cmake/libxml2
+        # unlink cmake/libxml2
 
         #source ../../android_configure.sh $ABI
         #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD

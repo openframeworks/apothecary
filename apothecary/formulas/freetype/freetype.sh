@@ -360,6 +360,8 @@ function build() {
 
 
         source ../../android_configure.sh $ABI cmake
+        rm -rf "build_${ABI}/"
+        rm -rf "build_${ABI}/CMakeCache.txt"
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"
 		CFLAGS=""

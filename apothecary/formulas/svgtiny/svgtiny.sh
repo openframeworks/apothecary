@@ -103,7 +103,7 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
-        source ../../android_configure.sh $ABI
+        source ../../android_configure.sh $ABI make
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
