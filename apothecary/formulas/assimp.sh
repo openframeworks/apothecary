@@ -178,7 +178,6 @@ function build() {
             -DCMAKE_C_COMPILER_AR=${AR} \
             -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
             -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration " \
-            -DANDROID_ABI=${ABI} \
             -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
@@ -195,7 +194,9 @@ function build() {
             -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DCMAKE_BUILD_TYPE=Release \
-            -DANDROID_STL=c++_static \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+            -DANDROID_PLATFORM=$ANDROID_PLATFORM \
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
@@ -267,6 +268,7 @@ function copy() {
         cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
+        strip -x build/lib/libassimp.a
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv include/* $1/include
         cp -Rv build/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
