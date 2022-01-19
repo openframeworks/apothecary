@@ -624,6 +624,8 @@ function doCommand() {
 				doCommand $shouldSource $cmd "${formula%.*}" # remove extension
 			done
 
+			echoInfo " ----- Apothecary Core Build Sucessfully completed for $TYPE -----"
+
 		# process all addons in the addons dir
 		elif [ "$1" == "addons" ] ; then
 			local addon

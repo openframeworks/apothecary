@@ -268,7 +268,6 @@ function copy() {
         cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
-        strip -x build/lib/libassimp.a
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv include/* $1/include
         cp -Rv build/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a

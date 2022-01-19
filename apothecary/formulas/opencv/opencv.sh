@@ -536,6 +536,9 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
+      -DANDROID_ARM_NEON=TRUE \
+      -DENABLE_NEON=ON \
+      -DENABLE_VFPV3=ON \
       -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
       -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
       -DBUILD_SHARED_LIBS=OFF \
