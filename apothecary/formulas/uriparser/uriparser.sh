@@ -6,7 +6,8 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "msys2" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "android" "msys2" "emscripten" ) 
+	# ios" "tvos" 
 
 
 # define the version by sha
@@ -174,22 +175,47 @@ function build() {
 	    cd ..
 	    cd ..
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+		mkdir -p build
+		# cd build
+
+		mkdir -p "build/${TYPE}"
+		# cd ${TYPE}
+
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="armv7 arm64 x86_64 " #armv7s
         fi
 
 		for IOS_ARCH in ${IOS_ARCHS}; do
-            echo
-            echo
-            echo "Compiling for $IOS_ARCH"
-    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
+			source ../../ios_configure.sh $TYPE $IOS_ARCH
+            # mkdir -p ${IOS_ARCH}
+			# cd ${IOS_ARCH}
+   #          echo "Compiling for $IOS_ARCH"
+    	    
             local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$IOS_ARCH
             ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared --host=$HOST --target=$HOST
             make clean
             make -j${PARALLEL_MAKE}
             make install
+     #        cmake \
+	 			# -DURIPARSER_BUILD_TESTS=OFF \
+	 			# -DURIPARSER_BUILD_DOCS=OFF \
+	 			# -DURIPARSER_BUILD_TOOLS=ON \
+	 			# -DBUILD_SHARED_LIBS=OFF \
+	    #      	-DCMAKE_BUILD_TYPE=Release \
+	 			# -DBUILD_SHARED_LIBS=OFF \
+	    #    		-DCMAKE_C_COMPILER=${CC} \
+	    #   	 	-DCMAKE_CXX_COMPILER=${CXX} \
+	    #   	 	-DCMAKE_OSX_SYSROOT=${SYSROOT} \
+	    #   	 	-DCMAKE_SYSTEM_NAME="${TYPE}" \
+	    #   	 	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+	    #   	 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE=ON \
+	    #   	 	-DCMAKE_C_FLAGS="" \
+	    #   	 	-DCMAKE_CXX_FLAGS="" \
+	    #      	-G 'Unix Makefiles' ../..
+	    #      	cmake --build . --config Release
+	         # cd ..
         done
 
         cp -r build/$TYPE/arm64/* build/$TYPE/

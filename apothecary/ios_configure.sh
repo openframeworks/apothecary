@@ -97,9 +97,12 @@ export CXX="$(xcrun -find -sdk ${SDK} clang++)"
 #export CPP="$(xcrun -find -sdk ${SDK} clang)"
 export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
+export CFLAGS_CMAKE="-arch ${IOS_ARCH} "
+export CPPFLAGS_CMAKE="-arch ${IOS_ARCH}  "
 export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export CPPFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
         export CPPFLAGS="$CPPFLAGS -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+        export CPPFLAGS_CMAKE="${CPPFLAGS_CMAKE}  -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi
