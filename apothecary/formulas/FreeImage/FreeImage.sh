@@ -223,7 +223,7 @@ function build() {
 			EXTRA_FLAGS="$EXTRA_LINK_FLAGS $BITCODE -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
 
 		    export CC="$CC $EXTRA_FLAGS"
-			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS "
+			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS -std=c17 -Wno-implicit-function-declaration"
 			export CXXFLAGS="$EXTRA_FLAGS -std=c++17 -stdlib=libc++"
 			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION"
 			export LDFLAGS_PHONE=$LDFLAGS
