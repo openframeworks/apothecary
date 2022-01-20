@@ -411,9 +411,9 @@ function build() {
 function copy() {
 	#echoWarning "TODO: copy $TYPE lib"
 
-	if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	    echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	fi
+	# if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+	#     echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+	# fi
 
 	# # headers
 	# if [ -d $1/include/ ]; then
