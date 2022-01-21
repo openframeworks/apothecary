@@ -11,9 +11,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android")
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-FORMULA_DEPENDS=( 
-    # "openssl" 
-    )
+FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
 VER=7_81_0
@@ -31,6 +29,7 @@ function download() {
     curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
     tar -xf curl-$VER.tar.gz
     mv curl-$VER_D curl 
+    local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
     # if [ "$CHECKSHA" != "$SHA1" ] ; then
     # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
     # else
@@ -38,7 +37,7 @@ function download() {
     # fi
     rm curl*.tar.gz
     
-    local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
+    
 	
 }
 
@@ -106,7 +105,7 @@ function build() {
         export CFLAGS=""
         export CPPFLAGS="-D__ANDROID_API__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS"
         # export LIBS="-L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a " # this dont work annoying
-        export LDFLAGS=" ${LIBS} -stdlib=libc++ -ldl -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
+        export LDFLAGS=" ${LIBS} -stdlib=libc++ -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
 
         cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
         cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
