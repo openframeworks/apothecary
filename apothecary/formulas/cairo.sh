@@ -14,7 +14,9 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
+FORMULA_DEPENDS=( 
+	# "pkg-config" "zlib" "libpng" "pixman" "freetype" 
+	)
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
@@ -126,20 +128,24 @@ function build() {
         ROOT=${PWD}/..
 
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        SYSROOT="-isysroot${SDK_PATH}"
+        
         export SDK=macosx
         export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
+        export MACOSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
 
         export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
 
         FREETYPE_LIB_PATH="-L${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE} -lfreetype"
+
+        export PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" 
+		export PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" 
+        export FREETYPE_LIBS="${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE}/freetype.a" 
+		export LDFLAGS="-arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot ${SDK_PATH}" 
+		export CFLAGS="-Oz -arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot ${SDK_PATH}" 
+
+		 export CC="clang"
         
-        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-                    FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
-					LDFLAGS="-arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}" \
-					CFLAGS="-Oz -arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}" \
-					--prefix=$BUILD_ROOT_DIR \
+        ./configure --prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-full-testing \
 					--disable-dependency-tracking \
