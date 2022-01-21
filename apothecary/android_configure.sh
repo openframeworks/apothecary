@@ -85,13 +85,13 @@ export TOOLCHAIN_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/
 export TOOLCHAIN_LOCAL_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/local/include
 export PATH=${PATH}:${TOOLCHAIN_PATH}
 # Configure and build.
-export AR=$TOOLCHAIN/bin/${TARGET}-ar
+export AR=$TOOLCHAIN/bin/llvm-ar
 export CC=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang
 export CXX=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang++
-export AS=$TOOLCHAIN/bin/${TARGET}-as
-export LD=$TOOLCHAIN/bin/${TARGET}-ld
-export RANLIB=$TOOLCHAIN/bin/${TARGET}-ranlib
-export STRIP=$TOOLCHAIN/bin/${TARGET}-strip
+export AS=$TOOLCHAIN/bin/llvm-as
+export LD=$TOOLCHAIN/bin/llvm-ld
+export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
+export STRIP=$TOOLCHAIN/bin/llvm-strip
 
 
 if [ "$BUILD_SYSTEM" = "cmake" ]; then

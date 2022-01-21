@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos")
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android")
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
@@ -28,38 +28,17 @@ GIT_TAG=$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-    # if [ "$TYPE" == "android" ] ; then
-   
-    #     git clone https://github.com/robertying/openssl-curl-android.git
-
-    #     mv openssl-curl-android curl 
-
-       
-    #     wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-android-arm64.zip
-    #     unzip curl_7.68.0-android-arm64
-    #     mv curl_7.68.0-android-arm64 curl 
-
-    #     wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-android-arm64.zip
-    #     unzip curl_7.68.0-android-arm64
-    #     mv curl_$VER_D curl 
-    #     # wget -nv https://curl.haxx.se/download/curl-7.74.0.tar.gz #wget a curl
-    #     # https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/curl_7.68.0-ios-arm64.zip
-    #else
-        curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
-        tar -xf curl-$VER.tar.gz
-        mv curl-$VER_D curl 
-        # if [ "$CHECKSHA" != "$SHA1" ] ; then
-        # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-        # else
-        #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-        # fi
-        rm curl*.tar.gz
-    #fi
+    curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
+    tar -xf curl-$VER.tar.gz
+    mv curl-$VER_D curl 
+    # if [ "$CHECKSHA" != "$SHA1" ] ; then
+    # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    # else
+    #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    # fi
+    rm curl*.tar.gz
+    
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
-
-   
-
-	
 	
 }
 
@@ -98,10 +77,6 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 
         source ../../android_configure.sh $ABI make
-        # cd tools
-        # export api=19
-        # ./build-android-curl.sh arm
-        # ./build-android-curl.sh arm
 
         export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH/openssl
         local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
@@ -117,50 +92,42 @@ function build() {
             export HOST=x86_64-linux-android
         fi
 
-        git submodule update --init --recursive
-        
-
-        export NDK=$ANDROID_PLATFORM # e.g. $HOME/Library/Android/sdk/ndk/22.1.7171670
-        export HOST_TAG=$HOST_PLATFORM # e.g. darwin-x86_64, see https://developer.android.com/ndk/guides/other_build_systems#overview
-        export MIN_SDK_VERSION=21 # or any version you want
-
-        # chmod +x ./build.sh
-        #./build.sh
-
+        export NDK=$ANDROID_PLATFORM 
+        export HOST_TAG=$HOST_PLATFORM
+        export MIN_SDK_VERSION=21 
         export SSL_DIR=$OPENSSL_LIBRARIES
 
         export OUTPUT_DIR=$OPENSSL_LIBRARIES
-
-
         mkdir -p build
         mkdir -p build/$TYPE
         mkdir -p build/$TYPE/$ABI
-        # cd curl
-        # autoreconf -fi
-
         export DESTDIR="$BUILD_TO_DIR"
 
         export CFLAGS=""
-        export CPPFLAGS="-D__ANDROID_API__=${ANDROID_API}"
-        export LIBS="-l${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -l${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a "
-        export LDFLAGS="-L${OPENSSL_PATH}/lib ${LDFLAGS}"
+        export CPPFLAGS="-D__ANDROID_API__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS"
+        # export LIBS="-L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a " # this dont work annoying
+        export LDFLAGS=" ${LIBS} -stdlib=libc++ -ldl -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
 
+        cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
+        cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
+        cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
+        cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
        
 
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"
 
          ./configure \
-            --prefix=$BUILD_TO_DIR \
+            --prefix=build/$TYPE/$ABI/ \
             --host=$HOST \
             --with-openssl=$OPENSSL_PATH \
-            --target=$HOST \
             --with-pic \
             --enable-static \
             --disable-shared \
             --disable-verbose \
             --disable-threaded-resolver \
-            --enable-libgcc \
             --enable-ipv6 \
             --without-nghttp2 \
             --without-libidn2 \
@@ -172,92 +139,13 @@ function build() {
         make -j${PARALLEL_MAKE}
         make install
 
-        # ./configure --host=$TARGET_HOST \
-        #     --target=$TARGET_HOST \
-        #     --prefix="$PWD/build/$TYPE/$ABI" \
-        #     --with-openssl=$SSL_DIR $ARGUMENTS
+        rm $SYSROOT/usr/lib/crtbegin_dynamic.o
+        rm $SYSROOT/usr/lib/crtbegin_so.o
+        rm $SYSROOT/usr/lib/crtend_android.o
+        rm $SYSROOT/usr/lib/crtend_so.o
 
-        #     make -j$CORES
-        #     make install
-        #     #make clean
-            
-
-
-        # chmod 777 buildconf
-        # ./buildconf
-        # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-
-        # # CURL_ARGS="--with-ssl --with-zlib --disable-ftp --disable-gopher 
-        # #     --disable-file --disable-imap --disable-ldap --disable-ldaps 
-        # #     --disable-pop3 --disable-proxy --disable-rtsp --disable-smtp 
-        # #     --disable-telnet --disable-tftp --without-gnutls --without-libidn 
-        # #     --without-librtmp --disable-dict"
-
-        
-        # export PATH="$OPENSSL_LIBRARIES:$PATH"
-
-        # #mkdir -p $OPENSSL_DIR/lib
-        # #cp -Rv $OPENSSL_LIBRARIES/* $OPENSSL_DIR/lib/
-        # #sed -i "/ac_cpp=/s/\$CPPFLAGS/\$CPPFLAGS -O2/" configure
-
-        # # export PKG_CONFIG_PATH=$OPENSSL_ABS_PATH/lib/pkgconfig
-        # # export LD_LIBRARY_PATH=$OPENSSL_ABS_PATH/lib/
-
-        # export DESTDIR="$BUILD_TO_DIR"
-        # export CPPFLAGS="-I${OPENSSL_PATH}/include $CPPFLAGS"
-        # export LDFLAGS="-L${OPENSSL_PATH}/lib $LDFLAGS "
-        # export LIBS="-l${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -l${OPENSSL_PATH}/lib/${TYPE}/${ABI}//libcrypto.a "
-
-        # ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_PATH --target=$HOST \
-        #     --enable-static \
-        #     --disable-shared \
-        #     --disable-verbose \
-        #     --disable-threaded-resolver \
-        #     --enable-libgcc \
-        #     --enable-ipv6 \
-        #     --without-nghttp2 \
-        #     --without-libidn2 \
-        #     --disable-ldap \
-        #     --disable-ldaps 
-
-        # # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
-        # make clean
-        # make -j${PARALLEL_MAKE}
-        # make install
-        
-
-        # ///
-
-        
-        
-        # perl -pi -e 's/HAVE_GLIBC_STRERROR_R/#HAVE_GLIBC_STRERROR_R/g' CMakeLists.txt
-        # perl -pi -e 's/HAVE_POSIX_STRERROR_R/#HAVE_POSIX_STRERROR_R/g' CMakeLists.txt
-
-        # mkdir -p build_$ABI
-        # cd build_$ABI
-
-        # OPENSSL_OPTS="-DTHREADS_HAVE_PTHREAD_ARG=0 -DENABLE_THREADED_RESOLVER=0 -CMAKE_SHARED_LINKER_FLAGS -DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/lib/android/$ABI/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/lib/android/$ABI/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/lib/android/$ABI/libssl.a"
-
-        # cmake -C "$FORMULA_DIR/tryrun.cmake" -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DHAVE_POSIX_STRERROR_R=1 -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DCURL_STATICLIB=ON $OPENSSL_OPTS ..
-        # # mkdir -p build_$ABI
-
-        # # ./configure \
-        # #     --with-darwinssl \
-        # #     --prefix="$build_$ABI" \
-        # #     --enable-static \
-        # #     --without-nghttp2 \
-        # #     --without-libidn2 \
-        # #     --disable-shared \
-        # #     --disable-pthreads \
-        # #     --disable-ldap \
-        # #     --disable-ldaps \
-        # #     --host=x86_64-apple-darwin
-        # # make clean
-        # #make -j${PARALLEL_MAKE} libcurl VERBOSE=1
-        # #make install
-        # make -j${PARALLEL_MAKE} libcurl VERBOSE=1
-        # cd ..
+        rm ${OPENSSL_PATH}/lib/libssl.a
+        rm ${OPENSSL_PATH}/lib/libcrypto.a
 
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
@@ -420,9 +308,9 @@ function copy() {
 
 	# Standard *nix style copy.
 	# copy headers
-	cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 
 	if [ "$TYPE" == "vs" ] ; then
+        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v "build/Win32/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
@@ -431,41 +319,16 @@ function copy() {
 			cp -v "build/Win64/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		# copy lib
 		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
 	elif [ "$TYPE" == "android" ] ; then
         #mkdir -p $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
+        cp -Rv build/$TYPE/$ABI/include/curl/* $1/include/curl/
 		# copy lib
         cp -Rv build/curl/$ABI/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
-
-  #   if [ "$TYPE" == "osx" ]; then
-  #       cp build/$TYPE/x86/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-  #       cp build/$TYPE/x64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-  #   elif [ "$TYPE" == "ios" ]; then
-  #       cp build/$TYPE/i386/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-  #       cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-  #   elif [ "$TYPE" == "tvos" ]; then
-  #       cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-  #   elif [ "$TYPE" == "vs" ]; then
-		# if [ $ARCH == 32 ] ; then
-  #           cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-  #       else
-  #           cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h
-  #       fi
-  #   elif [ "$TYPE" == "android" ]; then
-		# cp build_$ABI/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
-  #   fi
-
-# cat > $1/include/curl/curlbuild.h << EOF
-# /* The size of long, as computed by sizeof. */
-# #if defined(__LP64__) || defined(_WIN64)
-# #include "curl/curlbuild64.h"
-# #else
-# #include "curl/curlbuild32.h"
-# #endif
-# EOF
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
