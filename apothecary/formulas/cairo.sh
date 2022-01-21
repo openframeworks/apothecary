@@ -14,33 +14,22 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( 
-	# "pkg-config" "zlib" "libpng" "pixman" "freetype" 
-	)
+FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.17.4
-
-SHA1=68712ae1039b114347be3b7200bc1c901d47a636
+VER=1.14.12
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate http://cairographics.org/snapshots/cairo-$VER.tar.xz
-	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
-	if [ "$CHECKSHA" != "$SHA1" ] ; then
-    	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    else
-        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    fi
+	wget -nv --no-check-certificate http://cairographics.org/releases/cairo-$VER.tar.xz
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz
@@ -126,27 +115,17 @@ function build() {
 
         # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
         ROOT=${PWD}/..
-
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        FREETYPE_LIB_PATH="-L$ROOT/freetype/build/osx/lib -lfreetype"
         
-        export SDK=macosx
-        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
-        export MACOSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
-
-        export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
-
-        FREETYPE_LIB_PATH="-L${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE} -lfreetype"
-
-        export PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" 
-		export PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" 
-        export FREETYPE_LIBS="${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE}/freetype.a" 
-		export LDFLAGS="-arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot ${SDK_PATH}" 
-		export CFLAGS="-Oz -arch arm64 -arch x86_64 -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot ${SDK_PATH}" 
-
-		 export CC="clang"
-        
-        ./configure --prefix=$BUILD_ROOT_DIR \
+        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
+                    FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
+					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					CFLAGS="-Os -arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
+					--disable-gtk-doc-html \
+					--disable-gtk-doc-pdf \
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
@@ -154,8 +133,7 @@ function build() {
                     --disable-shared \
                     --disable-quartz-font \
                     --disable-quartz \
-                    --disable-quartz-image \
-                    --host=x86_64-apple-darwin
+                    --disable-quartz-image
                             
 		make -j${PARALLEL_MAKE}
 		make install
