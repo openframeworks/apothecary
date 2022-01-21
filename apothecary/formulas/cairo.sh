@@ -75,6 +75,10 @@ function prepare() {
 			./autogen.sh
 		fi
 
+
+		echo "clear BUILD_ROOT_DIR"
+		rm -rf $BUILD_ROOT_DIR
+
 		# manually prepare dependencies
 		apothecaryDependencies prepare
 
