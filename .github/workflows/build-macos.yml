@@ -40,6 +40,6 @@ jobs:
       - name: build
         run: ./scripts/build.sh
         env:
-            DEVELOPER_DIR: "/Applications/Xcode_12.4.app/Contents/Developer"
-            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+            DEVELOPER_DIR: "/Applications/Xcode_12.4.app/Contents/Developer" #https://github.com/actions/virtual-environments/blob/main/images/macos/macos-10.15-Readme.md
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }} 
 
