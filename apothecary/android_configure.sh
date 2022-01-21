@@ -19,6 +19,8 @@ else
     export HOST_PLATFORM=linux-x86_64
     export ANDROID_TOOLHOST="linux-android"
 fi
+
+export HOST_TAG=$HOST_PLATFORM
 export LIBSPATH=android/$ABI
 export NDK_PLATFORM=$ANDROID_PLATFORM
 export TOOLCHAIN_VERSION=4.9
@@ -83,13 +85,13 @@ export TOOLCHAIN_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/
 export TOOLCHAIN_LOCAL_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/local/include
 export PATH=${PATH}:${TOOLCHAIN_PATH}
 # Configure and build.
-export AR=$TOOLCHAIN/bin/llvm-ar
+export AR=$TOOLCHAIN/bin/${TARGET}-ar
 export CC=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang
-export AS=$CC
 export CXX=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang++
-export LD=$TOOLCHAIN/bin/ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
+export AS=$TOOLCHAIN/bin/${TARGET}-as
+export LD=$TOOLCHAIN/bin/${TARGET}-ld
+export RANLIB=$TOOLCHAIN/bin/${TARGET}-ranlib
+export STRIP=$TOOLCHAIN/bin/${TARGET}-strip
 
 
 if [ "$BUILD_SYSTEM" = "cmake" ]; then

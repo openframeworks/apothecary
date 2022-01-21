@@ -639,6 +639,11 @@ function doCommand() {
 		elif [ "$1" == "depends" ] ; then
 			local depend
 			for depends in $( ls -1 $FORMULAS_DIR/$DEPENDS_SUBDIR) ; do
+				OUTPUT_DEPEND=$(realpath ${LIBS_DIR}/)/${depends}/${TYPE}
+				echo "Making Dependencies to ${OUTPUT_DEPEND}"
+				# if [ -f "$LIBS_DIR/${depends}/$TYPE/$ABI/lib.a" ]; then
+				#      echo "Build Already exists at $LIBS_DIR/${depends}/$TYPE/ skipping"
+				# fi
 				doCommand $shouldSource $cmd "${depend%.*}" # remove extension
 			done
 
@@ -1297,6 +1302,8 @@ if [[ "$TYPE" == "android" ]] ; then
 	elif [ "$ARCH" == "arm64" ]; then
 	    ABI=arm64-v8a
 	fi
+else 
+	ABI=""
 fi
 
 CROSSCOMPILING=0
