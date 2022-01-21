@@ -120,7 +120,7 @@ function build() {
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"
 
          ./configure \
-            --prefix=build/$TYPE/$ABI/ \
+            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI/ \
             --host=$HOST \
             --with-openssl=$OPENSSL_PATH \
             --with-pic \
@@ -137,7 +137,7 @@ function build() {
         # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make clean
         make -j${PARALLEL_MAKE}
-        make install
+        # make install
 
         rm $SYSROOT/usr/lib/crtbegin_dynamic.o
         rm $SYSROOT/usr/lib/crtbegin_so.o
@@ -154,7 +154,7 @@ function build() {
         local SDK_PATH_XCODE_X86=SDK_PATH;
         if [ -n "${GITHUB_ACTIONS-}" ]; then
             if [ "$GITHUB_ACTIONS" = true ]; then
-                SDK_PATH_XCODE_X86="/Applications/Xcode_13.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+                SDK_PATH_XCODE_X86="/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
                 EXTRA_SYSROOT="-isysroot${SDK_PATH_XCODE_X86}"
             fi
         else 

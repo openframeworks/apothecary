@@ -6,8 +6,8 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "android" "msys2" "emscripten" ) 
-	# ios" "tvos" 
+FORMULA_TYPES=( "osx"  "android"  "emscripten" ) 
+	# ios" "tvos" "vs" "msys2" # need to convert to cmake
 
 
 # define the version by sha
