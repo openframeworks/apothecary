@@ -320,7 +320,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv build/$TYPE/$ABI/include/curl/* $1/include/curl/
 		# copy lib
-        cp -Rv build/curl/$TYPE/$ABI/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
+        cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
 
 	# copy license file
