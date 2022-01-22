@@ -11,7 +11,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android")
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" )
+FORMULA_DEPENDS=( "openssl" "pkg-config")
 
 # define the version by sha
 VER=7_81_0
@@ -100,10 +100,10 @@ function build() {
         mkdir -p build
         mkdir -p build/$TYPE
         mkdir -p build/$TYPE/$ABI
-        export DESTDIR="$BUILD_TO_DIR"
+        # export DESTDIR="$BUILD_TO_DIR"
 
         export CFLAGS=""
-        export CPPFLAGS="-D__ANDROID_API__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS"
+        export CPPFLAGS="-D__ANDROID_MIN_SDK_VERSION__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS"
         # export LIBS="-L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a " # this dont work annoying
         export LDFLAGS=" ${LIBS} -stdlib=libc++ -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
 
@@ -119,7 +119,6 @@ function build() {
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"
 
          ./configure \
-            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI/ \
             --host=$HOST \
             --with-openssl=$OPENSSL_PATH \
             --with-pic \
@@ -131,12 +130,12 @@ function build() {
             --without-nghttp2 \
             --without-libidn2 \
             --disable-ldap \
-            --disable-ldaps 
+            --disable-ldaps \
+            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI \
 
         # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
-        make clean
         make -j${PARALLEL_MAKE}
-        # make install
+        make install
 
         rm $SYSROOT/usr/lib/crtbegin_dynamic.o
         rm $SYSROOT/usr/lib/crtbegin_so.o
@@ -197,7 +196,6 @@ function build() {
             --disable-ldaps \
             --host=x86_64-apple-darwin \
             --target=x86_64-apple-darwin
-        make clean
         make -j${PARALLEL_MAKE}
         make install
 
@@ -219,7 +217,6 @@ function build() {
             --disable-ldaps \
             --target=arm-apple-darwin \
             --host=arm-apple-darwin
-        make clean
 	    make -j${PARALLEL_MAKE}
         make install
 
