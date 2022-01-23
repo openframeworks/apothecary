@@ -13,13 +13,14 @@ VER=2.11.1
 FVER=211
 
 # tools for git use
-GIT_URL=http://git.savannah.gnu.org/r/freetype/freetype2.git
+GIT_URL=https://git.savannah.gnu.org/r/freetype/freetype2.git
 GIT_TAG=VER-2-11
+URL=https://download.savannah.gnu.org/releases/freetype
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	echo "Downloading freetype-$VER"
-	wget --quiet --no-check-certificate https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
+	wget --quiet --no-check-certificate $URL/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype

@@ -4,19 +4,33 @@
 # http://pixman.org/
 
 # define the version
-VER=0.32.4
+VER=0.40.0
+SHA1=d7baa6377b6f48e29db011c669788bb1268d08ad
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pixman.git
 GIT_TAG=pixman-$VER
+URL=https://cairographics.org/releases
+
+
 
 FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate http://cairographics.org/releases/pixman-$VER.tar.gz
+	wget -nv --no-check-certificate ${URL}/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
 	mv pixman-$VER pixman
+
+	local CHECKSHA=$(shasum pixman-$VER.tar.gz | awk '{print $1}')
+	if [ "$CHECKSHA" != "$SHA1" ] ; then
+    	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    	exit
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
+
+
 	rm pixman-$VER.tar.gz
 }
 
