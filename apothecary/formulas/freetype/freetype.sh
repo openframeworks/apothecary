@@ -63,7 +63,7 @@ function build() {
         
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
-		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --with-harfbuzz=no --enable-static=yes --enable-shared=no \
+		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --without-brotli --with-harfbuzz=no --enable-static=yes --enable-shared=no \
 			CFLAGS="$FAT_CFLAGS -fPIC -pipe -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden -isysroot${SDK_PATH}"
 		make clean
 		make -j${PARALLEL_MAKE}
@@ -249,7 +249,7 @@ function build() {
 			echo "Please stand by..."
 
 			echo "Configuring..."
-			./configure --without-bzip2 --prefix=$IOS_PREFIX --host=$IOS_HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no \
+			./configure --without-bzip2 --prefix=$IOS_PREFIX --host=$IOS_HOST --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no \
 			CC="$CC" \
 			CFLAGS="$CFLAGS" \
 			CXXFLAGS="$CXXFLAGS" \
@@ -391,6 +391,7 @@ function build() {
         	-D ANDROID_TOOLCHAIN=clang \
         	-D CMAKE_BUILD_TYPE=Release \
         	-D FT_REQUIRE_HARFBUZZ=FALSE \
+        	-D FT_REQUIRE_BROTLI=FALSE \
         	-G 'Unix Makefiles' ..
 
         # cmake -G 'Unix Makefiles' .. \
@@ -405,11 +406,11 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ]; then
 	    #patch -p0 -u < $FORMULA_DIR/emscripten.patch
 	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE
-	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
+	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
 	    make clean
 	    make -j${PARALLEL_MAKE}
 	    cp $BUILD_DIR/freetype/objs/apinames .
-	    emconfigure ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
+	    emconfigure ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
 	    emmake make clean
 	    cp apinames $BUILD_DIR/freetype/objs/
 	    emmake make -j${PARALLEL_MAKE}
