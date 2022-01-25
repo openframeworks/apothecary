@@ -38,7 +38,7 @@ function download() {
 		rm $FILENAME.tar.gz.sha1f
 	else
 		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
-		if [ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ] ;  then
+		if [[ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ]] ;  then
 			echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
         	exit
         else
