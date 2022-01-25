@@ -99,6 +99,7 @@ echo "This script is run from \"$thisDir\""
 	
 fi
 
+BUILD_MACHINE_ARCH=`uname -m`
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=

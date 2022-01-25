@@ -35,21 +35,12 @@ function download() {
 		tar -xf $FILENAME.tar.gz
 		mv $FILENAME openssl
 		rm $FILENAME.tar.gz
-		rm $FILENAME.tar.gz.sha1
-
-	# elif [ "$TYPE" == "android" ] ; then
-	# 	wget -nv https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/openssl_1.1.1d-android-arm64.zip
-	# 	tar -xf openssl_1.1.1d-android-arm64.zip
-	# 	#wget -nv https://www.openssl.org/source/openssl-1.1.1i.tar.gz
-
-	# 	#https://github.com/leenjewel/openssl_for_ios_and_android/releases/download/ci-release-5843a396/openssl_1.1.1d-ios-arm64.zip
-		
-	# fi
-
+		rm $FILENAME.tar.gz.sha1f
 	else
 		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
 		if [ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ] ;  then
 			echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        	exit
         else
         	tar -xf $FILENAME.tar.gz
 			echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
@@ -75,6 +66,8 @@ function build() {
 
 	
 
+	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
+		
 
 	if [ "$TYPE" == "osx" ] ; then
   
@@ -123,6 +116,7 @@ function build() {
 		-output $BUILD_TO_DIR/lib/libssl.a
 
 	elif [ "$TYPE" == "vs" ] ; then
+
 		if [ $ARCH == 32 ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
 		elif [ $ARCH == 64 ] ; then
@@ -155,17 +149,31 @@ function build() {
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
 		rm -rf $BUILD_TO_DIR
   
+		# # make sure backed up if multiplatform compiling apothecary 
+  		cp "apps/speed.c" "apps/speed.c.orig"
+		cp "apps/drbgtest.c" "apps/drbgtest.c.orig"
+		cp "apps/ocsp.c" "apps/ocsp.c.orig"
+		cp "apps/async_posix.c" "apps/async_posix.c.orig"
+
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
-			# # make sure backed up
-			# cp "Configure" "Configure.orig"
-			# cp "apps/speed.c" "apps/speed.c.orig"
-        
+
             ## Fix for tvOS fork undef 9.0
             if [ "${TYPE}" == "tvos" ]; then
-                # Patch apps/speed.c to not use fork() since it's not available on tvOS
+
+                # Patch apps/speed.c to not use fork()
                 sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
+                sed -i -- 's/fork()/-1/' "./test/drbgtest.c"
+				sed -i -- 's/!defined(OPENSSL_NO_POSIX_IO)/defined(HAVE_FORK)/' "./apps/ocsp.c"
+				sed -i -- 's/fork()/-1/' "./apps/ocsp.c"
+				sed -i -- 's/!defined(OPENSSL_NO_ASYNC)/defined(HAVE_FORK)/' "./crypto/async/arch/async_posix.h"
+				# Patch Configure to build for tvOS, not iOS
+				sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
+                echo "tvos patched files for fork() issue and tvOS changes"
+                EXTRA_FLAGS="-DNO_FORK"
+            else
+            	EXTRA_FLAGS=""
             fi
             
             if [ "${IOS_ARCH}" == "x86_64" ]; then
@@ -178,41 +186,54 @@ function build() {
 
 			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
 			source ../../ios_configure.sh $TYPE $IOS_ARCH
-			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
-			# 	cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
-			# 	sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
-			# fi
+		
+
+			BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
+		
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH}"
+			FLAGS="no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH} "
 
 			rm -f libcrypto.a
 			rm -f libssl.a
+
+			chmod u+x ./Configure
+
 			if [ "${IOS_ARCH}" == "i386" ]; then
 				KERNEL_BITS=32
-				./Configure darwin-i386-cc $FLAGS
-			elif [ "${IOS_ARCH}" == "x86_64" ]; then
+				./Configure darwin-i386-cc $FLAGS 
+				echo "Configure darwin-i386-cc $FLAGS"
+			elif [ "${IOS_ARCH}" == "x86_64" ] && [ "${TYPE}" == "ios" ]; then
 				KERNEL_BITS=64
-				./Configure darwin64-x86_64-cc $FLAGS
-			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "ios" ]; then
+				./Configure darwin64-x86_64-cc $FLAGS 
+				echo "Configure darwin-x86_64-cc $FLAGS"
+			elif [ "${IOS_ARCH}" == "x86_64" ] && [ "${TYPE}" == "tvos" ]; then
+				KERNEL_BITS=64
+				./Configure iphoneos-cross $FLAGS 
+				echo "Configure tvos-sim-cross-x86_64 $FLAGS"
+			elif [ "${IOS_ARCH}" == "armv7" ] && v[ "${TYPE}" == "ios" ]; then
 				KERNEL_BITS=32
 				./Configure ios-cross $FLAGS
+				echo "Configure  ios-cross $FLAGS"
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "tvos" ]; then
 				KERNEL_BITS=64
-				./Configure tvos64-cross-arm64 $FLAGS
+				./Configure iphoneos-cross $FLAGS 
+				echo "Configure  ios64-cross for tvOS arm64 $FLAGS"
+				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "ios" ]; then
 				KERNEL_BITS=64
 				./Configure ios64-cross $FLAGS
+				echo "Configure  ios64-cross for iOS arm64 $FLAGS"
+			else 
+				KERNEL_BITS=64
+				./Configure ios64-cross $FLAGS
+				echo "Configure  ios64-cross for other $FLAGS"
 			fi
+
+			
+			
 			make clean
 
-			# For openssl 1.1.0
-			# if [ "$TYPE" == "ios" ]; then
-			#    CFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-			#    CXXFLAG="-D_REENTRANT -arch ${IOS_ARCH}  -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-			# fi
-
-			#sed -ie "s!^CFLAGS=\(.*\)!CFLAGS=$CFLAGS \1!" Makefile
 			sed -ie "s!^CFLAG=\(.*\)!CFLAG=\1 $CFLAGS !" Makefile
 			sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
 			sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
@@ -223,18 +244,22 @@ function build() {
 			make -j1
 			make -j1 install_sw
 
-
-			# reset source file back.
-			# if  [ "$SDK" == "iphoneos" ] || [ "$SDK" == "appletvos" ]; then
-			# 	cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-			# fi
-			# cp "apps/speed.c.orig" "apps/speed.c"
+			export CC=""
+			export CXX=""
+			export CFLAGS=""
+			export LDFLAGS=""
+			export CPPFLAGS=""
 
 		done
 
 		unset CC CFLAG CFLAGS
 		unset PLATFORM CROSS_TOP CROSS_SDK BUILD_TOOLS
 		unset IOS_DEVROOT IOS_SDKROOT
+
+		cp "apps/speed.c.orig" "apps/speed.c"
+		cp "apps/drbgtest.c.orig" "apps/drbgtest.c"
+		cp "apps/ocsp.c.orig" "apps/ocsp.c"
+		cp "apps/async_posix.c.orig" "apps/async_posix.c"
 
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
