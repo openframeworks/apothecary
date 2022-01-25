@@ -139,7 +139,7 @@ function build() {
 			IOS_ARCHS="x86_64 arm64"
             IOS_OS="appletvos"
 		elif [ "$TYPE" == "ios" ]; then
-			IOS_ARCHS="x86_64 arm64 armv7" #armv7s
+			IOS_ARCHS="arm64 x86_64 armv7" #armv7s
 		fi
 
 		unset LANG
@@ -161,6 +161,9 @@ function build() {
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
 
+			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
+			source ../../ios_configure.sh $TYPE $IOS_ARCH
+
             ## Fix for tvOS fork undef 9.0
             if [ "${TYPE}" == "tvos" ]; then
 
@@ -172,11 +175,15 @@ function build() {
 				sed -i -- 's/!defined(OPENSSL_NO_ASYNC)/defined(HAVE_FORK)/' "./crypto/async/arch/async_posix.h"
 				# Patch Configure to build for tvOS, not iOS
 				sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
+
+				
                 echo "tvos patched files for fork() issue and tvOS changes"
                 EXTRA_FLAGS="-DNO_FORK"
             else
             	EXTRA_FLAGS=""
             fi
+
+            sed -ie "s!CNF_CFLAGS=\(.*\)!CNF_CFLAGS=$CFLAGS !" "./Configure" 
             
             if [ "${IOS_ARCH}" == "x86_64" ]; then
                 CUR_OS=$SIM_OS
@@ -186,15 +193,14 @@ function build() {
             
             local SDK_PATH=$(xcrun --sdk $CUR_OS --show-sdk-path)
 
-			mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-			source ../../ios_configure.sh $TYPE $IOS_ARCH
+			
 		
 
 			BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
 		
 
 			echo "Configuring ${IOS_ARCH}"
-			FLAGS="no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH} "
+			FLAGS="no-asm no-async no-shared no-dso no-hw no-engine -w --openssldir=$CURRENTPATH/build/$TYPE/$IOS_ARCH --prefix=$CURRENTPATH/build/$TYPE/$IOS_ARCH -isysroot${SDK_PATH} "
 
 			rm -f libcrypto.a
 			rm -f libssl.a
@@ -213,15 +219,15 @@ function build() {
 				KERNEL_BITS=64
 				./Configure iphoneos-cross $FLAGS 
 				echo "Configure tvos-sim-cross-x86_64 $FLAGS"
-			elif [ "${IOS_ARCH}" == "armv7" ] && v[ "${TYPE}" == "ios" ]; then
+			elif [ "${IOS_ARCH}" == "armv7" ] && [ "${TYPE}" == "ios" ]; then
 				KERNEL_BITS=32
-				./Configure ios-cross $FLAGS
+				./Configure iphoneos-cross $FLAGS
 				echo "Configure  ios-cross $FLAGS"
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "tvos" ]; then
 				KERNEL_BITS=64
 				./Configure iphoneos-cross $FLAGS 
 				echo "Configure  ios64-cross for tvOS arm64 $FLAGS"
-				sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
+				# sed -ie "s!static volatile sig_atomic_t intr_signal;!static volatile intr_signal;!" "crypto/ui/ui_openssl.c"
 			elif [ "${IOS_ARCH}" == "arm64" ] && [ "${TYPE}" == "ios" ]; then
 				KERNEL_BITS=64
 				./Configure ios64-cross $FLAGS
@@ -232,7 +238,7 @@ function build() {
 				echo "Configure  ios64-cross for other $FLAGS"
 			fi
 
-			
+			find . -type f -name '*.o' -exec rm {} +
 			
 			make clean
 
