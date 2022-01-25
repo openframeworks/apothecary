@@ -151,9 +151,11 @@ function build() {
   
 		# # make sure backed up if multiplatform compiling apothecary 
   		cp "apps/speed.c" "apps/speed.c.orig"
-		cp "apps/drbgtest.c" "apps/drbgtest.c.orig"
+		cp "test/drbgtest.c" "test/drbgtest.c.orig"
 		cp "apps/ocsp.c" "apps/ocsp.c.orig"
-		cp "apps/async_posix.c" "apps/async_posix.c.orig"
+		cp "crypto/async/arch/async_posix.c" "crypto/async/arch/async_posix.c.orig"
+		cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
+		
 
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
@@ -257,9 +259,10 @@ function build() {
 		unset IOS_DEVROOT IOS_SDKROOT
 
 		cp "apps/speed.c.orig" "apps/speed.c"
-		cp "apps/drbgtest.c.orig" "apps/drbgtest.c"
+		cp "test/drbgtest.c.orig" "test/drbgtest.c"
 		cp "apps/ocsp.c.orig" "apps/ocsp.c"
-		cp "apps/async_posix.c.orig" "apps/async_posix.c"
+		cp "crypto/async/arch/async_posix.c.orig" "crypto/async/arch/async_posix.c"
+		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 
 
 		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
