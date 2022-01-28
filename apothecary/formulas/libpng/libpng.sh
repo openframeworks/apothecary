@@ -5,20 +5,30 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.25
+VER=1.6.37
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
+URL=https://prdownloads.sourceforge.net/libpng
+SHA=
+WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1637.zip
 
 FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate http://prdownloads.sourceforge.net/libpng/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
-	tar -xf libpng-$VER.tar.gz
-	mv libpng-$VER libpng
-	rm libpng-$VER.tar.gz
+	if [ "$TYPE" == "vs" ] ; then
+		wget -nv --no-check-certificate ${WINDOWS_URL}?download -O libpng-$VER.tar.zip
+		unzip libpng-$VER.tar.zip
+		mv libpng-$VER libpng
+		rm libpng-$VER.zip
+	else 
+		wget -nv --no-check-certificate ${URL}/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
+		tar -xf libpng-$VER.tar.gz
+		mv libpng-$VER libpng
+		rm libpng-$VER.tar.gz
+	fi
 }
 
 # prepare the build environment, executed inside the lib src dir
