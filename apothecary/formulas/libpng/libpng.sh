@@ -91,15 +91,14 @@ function build() {
 		cd build
 
 		if [ $ARCH == 32 ] ; then
-			cmake .. -G "Visual Studio 16 2019 Win32"
-			ls
+			cmake .. -G "Visual Studio $VS_VER Win32"
 			cmake --build . --config Release
-			# vs-build vstudio.sln Build "Release Library|x86"
 		elif [ $ARCH == 64 ] ; then
-			cmake .. -G "Visual Studio 16 2019 Win64"
-			ls
+			cmake .. -G "Visual Studio $VS_VER Win64"
 			cmake --build . --config Release
-			# vs-build vstudio.sln Build "Release Library|x64"
+		elif [ $ARCH == "ARM" ] ; then
+			cmake .. -G "Visual Studio $VS_VER ARM"
+			cmake --build . --config Release
 		fi
 
 		cd ..

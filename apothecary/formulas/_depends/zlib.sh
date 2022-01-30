@@ -7,19 +7,18 @@
 VER=1.2.11
 
 # tools for git use
-GIT_URL=https://github.com/kiyolee/zlib-win-build/archive/refs/tags/
-#https://github.com/madler/zlib.git
+GIT_URL=https://github.com/madler/zlib.git
 GIT_TAG=v$VER
-VS_VER=build-VS2019
+VS_VER="16 2019"
 
 FORMULA_TYPES=( "vs")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate ${GIT_URL}/v$VER-p3.tar.gz -O zlib-$VER-p3.tar.gz
-	tar -xf zlib-$VER-p3.tar.gz
-	mv zlib-win-build-1.2.11-p3 zlib
-	rm zlib-$VER-p3.tar.gz
+	wget -nv --no-check-certificate ${GIT_URL}/v$VER.tar.gz -O zlib-$VER.tar.gz
+	tar -xf zlib-$VER.tar.gz
+	mv zlib-$VER zlib
+	rm zlib-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -33,11 +32,14 @@ function build() {
 		unset TMP
 		unset TEMP
 		if [ $ARCH == 32 ] ; then
-			cmake . -G "Visual Studio $VS_VER"
-			vs-build "${VS_VER}/zlib.sln" Build "Release|Win32"
+			cmake . -G "Visual Studio $VS_VER Win32"
+			cmake --build . --config Release
 		elif [ $ARCH == 64 ] ; then
 			cmake . -G "Visual Studio $VS_VER Win64"
-			vs-build "${VS_VER}/zlib.sln" Build "Release|x64"
+			cmake --build . --config Release
+		elif [ $ARCH == "ARM" ] ; then
+			cmake . -G "Visual Studio $VS_VER ARM"
+			cmake --build . --config Release
 		fi
 	fi
 }
