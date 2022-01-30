@@ -16,6 +16,9 @@ WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1637.zip
 
 FORMULA_TYPES=( "osx" "vs" )
 
+FORMULA_DEPENDS=( "zlib" )
+
+
 # download the source code and unpack it into LIB_NAME
 function download() {
 	if [ "$TYPE" == "vs" ] ; then
@@ -33,6 +36,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+
+	apothecaryDepend prepare zlib
+	apothecaryDepend build zlib
+	apothecaryDepend copy zlib
+
 	# generate the configure script if it's not there
 	if [ ! -f configure ] ; then
 		./autogen.sh
@@ -44,7 +52,13 @@ function prepare() {
 		fi
 		#CURRENTPATH=`pwd`
 		cp -vr $FORMULA_DIR/vs2015 projects/
+		# ls ../zlib
+		# ls ../zlib/Release
+		# cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	fi
+
+
+	
 }
 
 # executed inside the lib src dir
@@ -52,13 +66,17 @@ function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+
+        ROOT=${PWD}/..
+		export INCLUDE="$ROOT/zlib"
+		export INCLUDE="$INCLUDE;$ROOT/libpng"
         
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
 
-		./configure LDFLAGS="${FAT_LDFLAGS} " \
-				CFLAGS="-O3 ${FAT_LDFLAGS}" \
+		./configure LDFLAGS="${FAT_LDFLAGS} -flto" \
+				CFLAGS="-O3 ${FAT_LDFLAGS} " \
 				--prefix=$BUILD_ROOT_DIR \
 				--disable-dependency-tracking \
                 --disable-arm-neon \
@@ -68,15 +86,17 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		cd projects/vs2015
+		cd projects/vstudio
 
-		vs-upgrade libpng.sln
+		vs-upgrade vstudio.sln
 
 		if [ $ARCH == 32 ] ; then
-			vs-build libpng.sln Build "LIB Release|x86"
+			vs-build vstudio.sln Build "Release Library|x86"
 		elif [ $ARCH == 64 ] ; then
-			vs-build libpng.sln Build "LIB Release|x64"
+			vs-build vstudio.sln Build "Release Library|x64"
 		fi
+
+		cd ../../
 	fi
 
 

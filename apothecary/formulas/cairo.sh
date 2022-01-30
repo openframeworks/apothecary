@@ -14,7 +14,7 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
+FORMULA_DEPENDS=( ) # "pkg-config" "zlib" "libpng" "pixman" "freetype" 
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
