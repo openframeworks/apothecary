@@ -89,6 +89,9 @@ function prepare() {
 		# Build and copy all dependencies in preparation
 		apothecaryDepend build pkg-config
 		apothecaryDepend copy pkg-config
+		apothecaryDepend prepare zlib
+		apothecaryDepend build zlib
+		apothecaryDepend copy zlib
 		apothecaryDepend build libpng
 		apothecaryDepend copy libpng
 		apothecaryDepend build pixman
