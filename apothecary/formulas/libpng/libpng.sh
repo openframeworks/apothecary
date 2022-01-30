@@ -86,17 +86,36 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		cd projects/vstudio
 
-		vs-upgrade vstudio.sln
+		mkdir build
+		cd build
 
 		if [ $ARCH == 32 ] ; then
-			vs-build vstudio.sln Build "Release Library|x86"
+			cmake .. -G "Visual Studio 16 2019 Win32"
+			ls
+			cmake --build . --config Release
+			# vs-build vstudio.sln Build "Release Library|x86"
 		elif [ $ARCH == 64 ] ; then
-			vs-build vstudio.sln Build "Release Library|x64"
+			cmake .. -G "Visual Studio 16 2019 Win64"
+			ls
+			cmake --build . --config Release
+			# vs-build vstudio.sln Build "Release Library|x64"
 		fi
 
-		cd ../../
+		cd ..
+		
+		# PNG_BUILD_ZLIB
+		# ZLIB_ROOT
+		# cd projects/vstudio
+
+		# vs-upgrade vstudio.sln
+
+		# if [ $ARCH == 32 ] ; then
+		# 	vs-build vstudio.sln Build "Release Library|x86"
+		# elif [ $ARCH == 64 ] ; then
+		# 	vs-build vstudio.sln Build "Release Library|x64"
+		# fi
+		# cd ../../
 	fi
 
 
