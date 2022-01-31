@@ -7,7 +7,7 @@
 VER=1.2.11
 
 # tools for git use
-GIT_URL=https://github.com/madler/zlib/releases/tag
+GIT_URL=https://github.com/madler/zlib/archive/refs/tags
 GIT_TAG=v$VER
 VS_VER="16 2019"
 
