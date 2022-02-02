@@ -37,15 +37,18 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 
-	apothecaryDepend prepare zlib
-	apothecaryDepend build zlib
-	apothecaryDepend copy zlib
+	
 
 	# generate the configure script if it's not there
 	if [ ! -f configure ] ; then
 		./autogen.sh
 	fi
 	if [ "$TYPE" == "vs" ] ; then
+
+		apothecaryDepend prepare zlib
+		apothecaryDepend build zlib
+		apothecaryDepend copy zlib
+
 		#need to download this for the vs solution to build
 		if [ ! -e ../zlib ] ; then
 			echoError "libpng needs zlib, please update that formula first"
@@ -68,15 +71,15 @@ function build() {
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
         ROOT=${PWD}/..
-		export INCLUDE="$ROOT/zlib"
-		export INCLUDE="$INCLUDE;$ROOT/libpng"
-        
+		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
+		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/libz.a"
+    	    
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
 
-		./configure LDFLAGS="${FAT_LDFLAGS} -flto" \
-				CFLAGS="-O3 ${FAT_LDFLAGS} " \
+		./configure LDFLAGS="${FAT_LDFLAGS} -flto ${INCLUDE_ZLIB_LIBS}" \
+				CFLAGS="-O3 ${FAT_LDFLAGS} ${INCLUDE_ZLIB}" \
 				--prefix=$BUILD_ROOT_DIR \
 				--disable-dependency-tracking \
                 --disable-arm-neon \
@@ -132,7 +135,7 @@ function copy() {
 			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/x64/
 		fi
 	else
-		make install
+		echo "no copy osx"
 	fi
 }
 

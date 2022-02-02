@@ -9,9 +9,9 @@ VER=1.2.11
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/archive/refs/tags
 GIT_TAG=v$VER
-VS_VER="16 2019"
+VS_VER="15 2017"
 
-FORMULA_TYPES=( "vs")
+FORMULA_TYPES=( "vs" , "osx")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -39,15 +39,33 @@ function build() {
 			cmake --build . --config Release
 		elif [ $ARCH == "ARM" ] ; then
 			cmake . -G "Visual Studio $VS_VER ARM"
-			cmake --build . --config Release
+			cmake --build . --config Release 
 		fi
+	elif [ "$TYPE" == "osx" ] ; then
+		mkdir -p build
+		cd build
+
+		local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        SYSROOT="-isysroot ${SDK_PATH}"
+        export SDK=macosx
+        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
+        export ARCHS="-arch arm64 -arch x86_64"
+
+		export CFLAGS="-O2 ${ARCHS} -fomit-frame-pointer -fno-stack-protector -pipe"
+
+		cmake .. \
+		    -G "Unix Makefiles" \
+		    -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON \
+		# cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G "Unix Makefiles" 
+		make
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "osx" ] ; then
-		return
+		echo "no install"
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			PLATFORM="Win32"

@@ -167,6 +167,7 @@ function build() {
 		$BUILD_ROOT_DIR/bin/pkg-config pixman-1 --libs
 		$BUILD_ROOT_DIR/bin/pkg-config libpng --libs
 		$BUILD_ROOT_DIR/bin/pkg-config freetype2 --libs
+		$BUILD_ROOT_DIR/bin/pkg-config zlib --libs
 
 		echo "autogen"
 
@@ -176,6 +177,8 @@ function build() {
         
 		echo "configure"
         ./configure \
+        			PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
 					--disable-full-testing \
