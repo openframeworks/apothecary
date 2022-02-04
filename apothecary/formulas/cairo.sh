@@ -53,7 +53,7 @@ function prepare() {
 	echoInfo " Current PATH set to: $PATH"
 	echo
 
-	#apothecaryDependencies download
+	apothecaryDependencies download
 
 	if [ "$TYPE" == "vs" ] ; then
 
@@ -82,20 +82,20 @@ function prepare() {
 	else
 		# generate the configure script if it's not there
 		
-
-		# manually prepare dependencies
-		apothecaryDependencies prepare
-
 		# Build and copy all dependencies in preparation
+		apothecaryDepend prepare pkg-config
 		apothecaryDepend build pkg-config
 		apothecaryDepend copy pkg-config
 		apothecaryDepend prepare zlib
 		apothecaryDepend build zlib
 		apothecaryDepend copy zlib
+		apothecaryDepend prepare libpng
 		apothecaryDepend build libpng
 		apothecaryDepend copy libpng
+		apothecaryDepend download pixman
 		apothecaryDepend build pixman
 		apothecaryDepend copy pixman
+		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
 	fi
@@ -150,24 +150,26 @@ function build() {
         chmod -R 755 $BUILD_ROOT_DIR/lib/pkgconfig/
 
         echo "PATH :$PATH"
-
         export PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config"
 		export PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig"
         export FREETYPE_CFLAGS="-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2"
         export FREETYPE_LIBS="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
+        export png_REQUIRES="libpng16"
+        export png_CFLAGS="-I$BUILD_ROOT_DIR/include/"
+        export png_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpng -L$BUILD_ROOT_DIR/lib/ -lpng16"
         export FREETYPE_MIN_RELEASE=2.11.1
         export FREETYPE_MIN_VERSION=2.11.1
         export pixman_CFLAGS="-I$BUILD_ROOT_DIR/include/pixman-1"
         export pixman_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpixman-1"
 		export LDFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}"
 		export CFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}" 
-		# export FREETYPE_MIN_VERSION=
 		export MACOSX_DEPLOYMENT_TARGET=$OSX_MIN_SDK_VER
-
-		$BUILD_ROOT_DIR/bin/pkg-config pixman-1 --libs
-		$BUILD_ROOT_DIR/bin/pkg-config libpng --libs
-		$BUILD_ROOT_DIR/bin/pkg-config freetype2 --libs
-		$BUILD_ROOT_DIR/bin/pkg-config zlib --libs
+		# export FREETYPE_MIN_VERSION=
+	
+		# $BUILD_ROOT_DIR/bin/pkg-config pixman-1 --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config libpng --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config freetype2 --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config zlib --libs
 
 		echo "autogen"
 
