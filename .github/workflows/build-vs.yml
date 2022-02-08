@@ -14,11 +14,8 @@ jobs:
     runs-on: windows-2016
     strategy:
       matrix:
-		  bundle: [1,2,3,4]
-        include:
-          - platform: x64
-            bits: 64
-    env: 
+		bundle: [1,2,3,4]
+    env:
       $ARCH: 64
       $TARGET: "vs"
 	  $MSYS2_PATH: "c:\msys64"
