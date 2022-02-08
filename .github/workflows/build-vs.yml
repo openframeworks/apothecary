@@ -15,18 +15,21 @@ jobs:
     strategy:
       matrix:
         bundle: [1]
+	defaults:
+	  run:
+		shell: msys2 {0}
     steps:
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2
       - name: Clone repository
         uses: actions/checkout@v2
-      - name: Install MSYS2
-        run: choco install -y msys2
       - name: Install StrawberryPerl
         run: choco install -y strawberryperl
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: C:\tools\msys64\usr\bin\bash -lc "scripts/build.sh"
+        run: scripts/build.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
