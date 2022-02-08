@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-2016
     strategy:
       matrix:
-        bundle: [2]
+        bundle: [1]
     defaults:
       run:
         shell: msys2 {0}
@@ -43,3 +43,5 @@ jobs:
           TARGET: "vs"
           ARCH: 64
           VS_VER: 15
+          #VS_PATH: "/C/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/"
+          #VS_BIN_PATH: "/C/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/VC/Tools/MSVC/*/bin/HostX64/x64"
