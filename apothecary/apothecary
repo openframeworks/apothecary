@@ -353,11 +353,11 @@ if [ "$TYPE" = "vs" ]; then
 
     if [ -z ${VS_BASE_PATH+x} ]; then
 		if [ "${VS_VER}" = "15" ]; then
-			VS_BASE_PATH="//c/Program\ Files\ (x86)/Microsoft\ Visual\ Studio/2017/$VS_TYPE/"
+			VS_BASE_PATH="/c/Program\ Files\ (x86)/Microsoft\ Visual\ Studio/2017/$VS_TYPE"
         elif [ "${VS_VER}" = "16" ]; then
-			VS_BASE_PATH="//c/Program\ Files/Microsoft\ Visual\ Studio/2019/$VS_TYPE/"
+			VS_BASE_PATH="/c/Program\ Files\ (x86)/Microsoft\ Visual\ Studio/2019/$VS_TYPE"
         elif [ "${VS_VER}" = "17" ]; then
-			VS_BASE_PATH="//c/Program\ Files/Microsoft\ Visual\ Studio/2022/$VS_TYPE/"
+			VS_BASE_PATH="/c/Program\ Files/Microsoft\ Visual\ Studio/2022/$VS_TYPE"
 		fi
 	fi
 	export VS_BASE_PATH; 
