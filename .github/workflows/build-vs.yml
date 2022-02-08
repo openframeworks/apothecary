@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        bundle: [1,2,3,4]
+        bundle: [1]
     env:
       ARCH: 64
       TARGET: "vs"
