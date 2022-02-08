@@ -1,0 +1,27 @@
+name: build-emscripten
+
+on:
+  push:
+    paths-ignore:
+    - '**/README.md'
+  pull_request:
+    paths-ignore:
+    - '**/README.md'
+jobs:
+
+  build-emscripten:
+      runs-on: ubuntu-18.04
+      env:
+       TARGET: "emscripten"
+      steps:
+      - uses: actions/checkout@v2
+      - name: Docker Step
+        run:  "docker run -di --name emscripten -v $PWD:/src emscripten/emsdk:1.40.0 bash"
+      - name: Scripts Calc Formula
+        run: ./scripts/calculate_formulas.sh
+      - name: Scripts Install
+        run: ./scripts/$TARGET/install.sh
+      - name: build
+        run: ./scripts/build.sh
+        env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
