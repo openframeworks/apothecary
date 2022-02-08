@@ -23,8 +23,8 @@ jobs:
         uses: msys2/setup-msys2@v2
       - name: Clone repository
         uses: actions/checkout@v2
-      - name: Install StrawberryPerl
-        run: choco install -y strawberryperl
+      #- name: Install StrawberryPerl
+      #  run: choco install -y strawberryperl
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
