@@ -14,11 +14,11 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-		bundle: [1,2,3,4]
+        bundle: [1,2,3,4]
     env:
       ARCH: 64
       TARGET: "vs"
-	  MSYS2_PATH: "c:\msys64"
+      MSYS2_PATH: "c:\msys64"
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
