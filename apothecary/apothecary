@@ -318,8 +318,6 @@ while getopts t:a:b:d:s:j:hgvfpe opt ; do
 		   A_VERBOSE=1 ;;
 		e) # use visual enterprise
 		   VS_TYPE=Enterprise ;;
-		y) # set the architecture
-		   VS_YEAR=$OPTARG ;;
         f) # force download
            FORCE_DOWNLOAD=1 ;;
 		p) # Dont build dependencies
@@ -365,7 +363,7 @@ if [ "$TYPE" = "vs" ]; then
 
 	export VS_BASE_PATH; 
 	export VS_VARS_PATH; 
-	
+
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
         VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/Host$PLATFORM/$PLATFORM"
