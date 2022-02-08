@@ -27,8 +27,6 @@ jobs:
       #  run: choco install -y strawberryperl
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Symlink
-        run: ln -s "/c/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise" "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community"
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
