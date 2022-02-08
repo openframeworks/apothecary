@@ -30,6 +30,7 @@ jobs:
             gperf
             git
             libxml2
+            mingw-w64-x86_64-gcc
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
@@ -40,5 +41,3 @@ jobs:
           TARGET: "msys2"
           ARCH: 64
           MSYSTEM: MINGW64
-          CC: gcc
-          CXX: g++
