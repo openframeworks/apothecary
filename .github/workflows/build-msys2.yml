@@ -30,8 +30,6 @@ jobs:
             gperf
             git
             libxml2
-      - name: Add Msys64 to PATH
-        run: echo "::add-path::/c/msys64/mingw64/bin:/c/msys64/usr/bin"
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
@@ -42,3 +40,5 @@ jobs:
           TARGET: "msys2"
           ARCH: 64
           MSYSTEM: MINGW64
+          CC: gcc
+          CXX: g++
