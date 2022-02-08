@@ -26,7 +26,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: C:\tools\msys64\usr\bin\bash -lc "scripts/build.sh
+        run: C:\tools\msys64\usr\bin\bash -lc "scripts/build.sh"
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
