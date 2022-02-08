@@ -11,14 +11,14 @@ on:
 jobs:
 
   build-vs2017:
-    runs-on: windows-2016
+    runs-on: windows-latest
     strategy:
       matrix:
 		bundle: [1,2,3,4]
     env:
-      $ARCH: 64
-      $TARGET: "vs"
-	  $MSYS2_PATH: "c:\msys64"
+      ARCH: 64
+      TARGET: "vs"
+	  MSYS2_PATH: "c:\msys64"
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
