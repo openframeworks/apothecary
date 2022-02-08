@@ -15,9 +15,9 @@ jobs:
     strategy:
       matrix:
         bundle: [1]
-	defaults:
-	  run:
-		shell: msys2 {0}
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
       - name: Setup msys2
         uses: msys2/setup-msys2@v2
