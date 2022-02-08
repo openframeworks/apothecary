@@ -949,12 +949,12 @@ function with_vs_env(){
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 		if [ $ARCH == 32 ] ; then
 			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\$VS_TYPE\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\\$VS_TYPE\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
 		elif [ $ARCH == 64 ] ; then
 			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\$VS_TYPE\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\\$VS_TYPE\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
 		fi
