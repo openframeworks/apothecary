@@ -952,7 +952,7 @@ function with_vs_env(){
 
 		VS_TMP_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat")
 		echo "" > with_env.bat # cleanup temporary bat file
-		echo "call $VS_TMP_PATH" >> with_env.bat
+		echo "call \"$VS_TMP_PATH\"" >> with_env.bat
 		echo $@ >> with_env.bat
 		cmd.exe //C "call with_env.bat"
 	else
