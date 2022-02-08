@@ -12,9 +12,6 @@ jobs:
 
   build-msys2:
     runs-on: windows-2016
-    strategy:
-      matrix:
-        bundle: [1]
     defaults:
       run:
         shell: msys2 {0}
