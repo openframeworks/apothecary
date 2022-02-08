@@ -11,25 +11,23 @@ on:
 jobs:
 
   build-vs2017:
-    runs-on: windows-latest
+    runs-on: windows-2016
     strategy:
       matrix:
         bundle: [1]
-    env:
-      ARCH: 64
-      TARGET: "vs"
-      MSYS2_PATH: "c:/msys64"
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
-      - name: Install dependencies
-        shell: msys2 {0}
-        run:
-          ./scripts/vs/install.sh
+      - name: Install MSYS2
+        run: choco install -y msys2
+      - name: Install StrawberryPerl
+        run: choco install -y strawberryperl
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: ${(env.MSYS2_PATH}}\usr\bin\bash -lc "scripts/build.sh
+        run: C:\tools\msys64\usr\bin\bash -lc "scripts/build.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
+          TARGET: "vs"
+          ARCH: 64
