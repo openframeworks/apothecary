@@ -1,0 +1,48 @@
+name: build-vs
+
+on:
+  push:
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    paths-ignore:
+    - '**/*.md'
+    
+jobs:
+
+  build-vs2017:
+    runs-on: windows-2016
+    strategy:
+      matrix:
+		  bundle: [1,2,3,4]
+        include:
+          - platform: x64
+            bits: 64
+    env: 
+      $ARCH: 64
+      $TARGET: "vs"
+	  $MSYS2_PATH: "c:\msys64"
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            git
+            unzip
+            dos2unix
+            gperf
+            rsync
+            wget
+      - name: Install dependencies
+        shell: msys2 {0}
+        run:
+          ./scripts/vs/install.sh
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.0.2
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: ${(env.MSYS2_PATH}}\usr\bin\bash -lc "scripts/build.sh
+		env:
+          BUNDLE: ${{ matrix.bundle }}
