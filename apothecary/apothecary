@@ -160,6 +160,8 @@ USE_GIT=
 # -x changes to visual studio express
 VS_BUILD_TOOL=devenv
 
+VS_TYPE=Community
+
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
 
@@ -200,7 +202,7 @@ options:
 
   -f    force download even if build folder already exists
 
-  -x    use visual studio express tools
+  -e    use visual studio enterprise instead of community 
 
   -p 	dont build dependencies
 
@@ -314,8 +316,10 @@ while getopts t:a:b:d:s:j:hgvxfp opt ; do
 		   echo "$HELP" ; exit 0 ;;
 		v) # verbose mode = true
 		   A_VERBOSE=1 ;;
-		x) # use visual express tools
-		   VS_BUILD_TOOL=WDExpress ;;
+		e) # use visual enterprise
+		   VS_TYPE=Enterprise ;;
+		y) # set the architecture
+		   VS_YEAR=$OPTARG ;;
         f) # force download
            FORCE_DOWNLOAD=1 ;;
 		p) # Dont build dependencies
@@ -353,11 +357,11 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
             VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
         elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/" | tail -1)
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
         elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/" | tail -1)
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
+			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/" | tail -1)
+            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
         fi
 
 		export PATH=$VS_BIN_PATH:$PATH
@@ -945,12 +949,12 @@ function with_vs_env(){
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 		if [ $ARCH == 32 ] ; then
 			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\${VS_TYPE}\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
 		elif [ $ARCH == 64 ] ; then
 			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
+			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\${VS_TYPE}\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
 			echo $@ >> with_env.bat
 			cmd.exe //C "call with_env.bat"
 		fi
@@ -978,7 +982,7 @@ function vs-build() {
 		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs install path: ${VS_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
@@ -1028,7 +1032,7 @@ function vs-upgrade() {
 		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_IDE_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.Community -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_IDE_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs ide install path: ${VS_IDE_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		DEVENV_PATH="${VS_IDE_INSTALL_PATH}\Common7\IDE\devenv.exe"
