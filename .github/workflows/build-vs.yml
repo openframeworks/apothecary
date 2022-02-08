@@ -36,8 +36,6 @@ jobs:
         shell: msys2 {0}
         run:
           ./scripts/vs/install.sh
-        env:
-          MSYS2_PATH: ${(env.MSYS2_PATH}
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build
