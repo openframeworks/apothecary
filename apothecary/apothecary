@@ -351,18 +351,20 @@ if [ "$TYPE" = "vs" ]; then
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
     fi
 
-    if [ -z ${VS_BIN_PATH+x} ]; then
-        if [ "${PLATFORM}_${VS_VER}" = "x86_14" ]; then
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN"
-        elif [ "${PLATFORM}_${VS_VER}" = "x64_14" ]; then
-            VS_BIN_PATH="/c/Program Files (x86)/MSBuild/14.0/bin/amd64:/c/Program Files (x86)/Microsoft Visual Studio 14.0/VC/BIN/amd64"
-        elif [ "${PLATFORM}_${VS_VER}" = "x86_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/" | tail -1)
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX86/x86"
-        elif [ "${PLATFORM}_${VS_VER}" = "x64_15" ]; then
-			VS_VER_DIR=$(ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/" | tail -1)
-            VS_BIN_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/VC/Tools/MSVC/$VS_VER_DIR/bin/HostX64/x64"
-        fi
+    if [ -z ${VS_BASE_PATH+x} ]; then
+		if [ "${VS_VER}" = "15" ]; then
+			VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE/"
+        elif [ "${VS_VER}" = "16" ]; then
+			VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2019/$VS_TYPE/"
+        elif [ "${VS_VER}" = "17" ]; then
+			VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2022/$VS_TYPE/"
+		fi
+	fi
+	export VS_BASE_PATH; 
+
+    if [ -z ${VS_BIN_PATH+x} ]; then	            
+		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
+        VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/Host$PLATFORM/$PLATFORM"
 
 		export PATH=$VS_BIN_PATH:$PATH
 
@@ -947,17 +949,11 @@ function with_vs_env(){
 	if [ $VS_VER -gt 14 ] ; then
 		# we want to make sure that the build command is called with the correct environment variables set up 
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
-		if [ $ARCH == 32 ] ; then
-			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\\$VS_TYPE\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env.bat
-			echo $@ >> with_env.bat
-			cmd.exe //C "call with_env.bat"
-		elif [ $ARCH == 64 ] ; then
-			echo "" > with_env.bat # cleanup temporary bat file
-			echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\\$VS_TYPE\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env.bat
-			echo $@ >> with_env.bat
-			cmd.exe //C "call with_env.bat"
-		fi
+
+		echo "" > with_env.bat # cleanup temporary bat file
+		echo "call \"$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat\"" >> with_env.bat
+		echo $@ >> with_env.bat
+		cmd.exe //C "call with_env.bat"
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
@@ -979,7 +975,11 @@ function vs-build() {
 		echo "-- Searching for vs-build"
 		# vswhere is a utility to find the most recent vs compiler toolchain. it is
 		# assumed to be installed at a fixed location
-		VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		if [ $VS_VER -gt 15 ] ; then
+			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		else
+			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		fi
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
 		VS_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`

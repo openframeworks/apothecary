@@ -167,16 +167,13 @@ function build() {
         if [[ $VS_VER -gt 14 ]]; then
 
                 if [ $ARCH == 32 ] ; then
-                    # cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
-                    # cmd.exe //c "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
-
                     echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\"" >>  with_env_poco.bat
+                    echo "call \"$VS_BASE_PATH/VC/Auxiliary/Build/vcvars32.bat\"" >>  with_env_poco.bat
                     echo "buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests" >>  with_env_poco.bat
                     cmd.exe //C "call with_env_poco.bat"
 
                     echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat\"" >> with_env_poco.bat
+                    echo "call \"$VS_BASE_PATH/VC/Auxiliary/Build/vcvars32.bat\"" >>  with_env_poco.bat
                     echo "buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests" >> with_env_poco.bat
                     cmd.exe //C "call with_env_poco.bat"
 
@@ -184,13 +181,13 @@ function build() {
                 elif [ $ARCH == 64 ] ; then
 
                     echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\"" >>  with_env_poco.bat
+                    echo "call \"$VS_BASE_PATH/VC/Auxiliary/Build/vcvars64.bat\"" >>  with_env_poco.bat
                     echo "buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests" >>  with_env_poco.bat
                     cmd.exe //C "call with_env_poco.bat"
 
 
                     echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat\"" >> with_env_poco.bat
+                    echo "call \"$VS_BASE_PATH/VC/Auxiliary/Build/vcvars64.bat\"" >>  with_env_poco.bat
                     echo "buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests" >> with_env_poco.bat
                     cmd.exe //C "call with_env_poco.bat"
 
