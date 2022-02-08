@@ -1,0 +1,47 @@
+name: build-msys2
+
+on:
+  push:
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    paths-ignore:
+    - '**/*.md'
+    
+jobs:
+
+  build-msys2:
+    runs-on: windows-2016
+    strategy:
+      matrix:
+        bundle: [1]
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            base-devel
+            unzip
+            dos2unix
+            gperf
+            git
+            libxml2
+      - name: Clone repository
+        uses: actions/checkout@v2
+      #- name: Install StrawberryPerl
+      #  run: choco install -y strawberryperl
+      #- name: Setup MSBuild
+      #  uses: microsoft/setup-msbuild@v1.0.2
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "msys2"
+          ARCH: 64
+          MSYSTEM: MINGW64
+          #MSYS2_PATH:c:\msys64
