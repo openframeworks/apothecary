@@ -18,7 +18,7 @@ jobs:
     env:
       ARCH: 64
       TARGET: "vs"
-      MSYS2_PATH: "c:\msys64"
+      MSYS2_PATH: "c:/msys64"
     steps:
       - name: Clone repository
         uses: actions/checkout@v2
@@ -41,5 +41,5 @@ jobs:
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: ${(env.MSYS2_PATH}}\usr\bin\bash -lc "scripts/build.sh
-		env:
+        env:
           BUNDLE: ${{ matrix.bundle }}
