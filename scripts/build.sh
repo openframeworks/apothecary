@@ -207,7 +207,7 @@ function build(){
 
     echo Build $formula_name
 
-    local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER -e "
+    local ARGS="-f  -e -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
     if [ "$ARCH" != "" ] ; then
         ARGS="$ARGS -a$ARCH"
     fi

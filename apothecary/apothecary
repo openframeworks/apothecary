@@ -296,7 +296,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:hgvxfp opt ; do
+while getopts t:a:b:d:s:j:hgvfpe opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   TYPE="$OPTARG" ;;
