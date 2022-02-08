@@ -359,9 +359,13 @@ if [ "$TYPE" = "vs" ]; then
         elif [ "${VS_VER}" = "17" ]; then
 			VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
 		fi
-	fi
-	export VS_BASE_PATH; 
+	fi	
+	
+	VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat")
 
+	export VS_BASE_PATH; 
+	export VS_VARS_PATH; 
+	
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
         VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/Host$PLATFORM/$PLATFORM"
@@ -950,9 +954,8 @@ function with_vs_env(){
 		# we want to make sure that the build command is called with the correct environment variables set up 
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 
-		VS_TMP_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat")
 		echo "" > with_env.bat # cleanup temporary bat file
-		echo "call \"$VS_TMP_PATH\"" >> with_env.bat
+		echo "call \"$VS_VARS_PATH\"" >> with_env.bat
 		echo $@ >> with_env.bat
 		cmd.exe //C "call with_env.bat"
 	else
