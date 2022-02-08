@@ -155,9 +155,9 @@ function build() {
         export FREETYPE_CFLAGS="-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2"
         export FREETYPE_LIBS="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
         export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/libz.a"
+		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
         export png_REQUIRES="libpng16"
-        export png_CFLAGS="-I$BUILD_ROOT_DIR/include/ $INCLUDE_ZLIB"
+        export png_CFLAGS="-I$BUILD_ROOT_DIR/include/ -I$BUILD_ROOT_DIR/include/libpng16 $INCLUDE_ZLIB"
         export png_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpng -L$BUILD_ROOT_DIR/lib/ -lpng16 $INCLUDE_ZLIB_LIBS"
         export FREETYPE_MIN_RELEASE=2.11.1
         export FREETYPE_MIN_VERSION=2.11.1

@@ -72,7 +72,7 @@ function build() {
 
         ROOT=${PWD}/..
 		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/libz.a"
+		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
     	    
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
