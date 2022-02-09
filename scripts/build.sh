@@ -208,6 +208,10 @@ function build(){
     echo Build $formula_name
 
     local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
+	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
+		ARGS="-e $ARGS"
+	fi
+    
     if [ "$ARCH" != "" ] ; then
         ARGS="$ARGS -a$ARCH"
     fi
