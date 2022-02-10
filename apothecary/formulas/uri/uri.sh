@@ -241,7 +241,16 @@ function build() {
 	    source ../../android_configure.sh $ABI
 		mkdir -p build_arm
 		cd build_arm
-		cmake .. -DCMAKE_CXX_FLAGS="-I$$CFLAGS" -DCMAKE_BUILD_TYPE=Release 
+		cmake .. \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_CXX_FLAGS="-I$$CFLAGS" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared 
 		make -j${PARALLEL_MAKE}
 		cd ..
 		

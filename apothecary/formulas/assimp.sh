@@ -182,6 +182,11 @@ function build() {
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DANDROID_TOOLCHAIN=clang++ \
             -DBUILD_SHARED_LIBS=OFF \
             -DASSIMP_BUILD_STATIC_LIB=1 \

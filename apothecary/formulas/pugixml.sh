@@ -69,9 +69,10 @@ function build() {
 		$CXX -Oz $CPPFLAGS $CXXFLAGS \
 			 -Wall \
 			 -fPIC \
+			 -std=c++17 \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o src/pugixml.o $LDFLAGS -v
+			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"

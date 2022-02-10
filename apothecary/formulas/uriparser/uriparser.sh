@@ -103,6 +103,11 @@ function build() {
          	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
          	-DANDROID_TOOLCHAIN=clang++ \
          	-DCMAKE_BUILD_TYPE=Release \
+         	-DCMAKE_SYSROOT=$SYSROOT \
+        	-DCMAKE_C_STANDARD=17 \
+        	-DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
          	-B${ABI} \
          	-G 'Unix Makefiles' ../..
         cd ${ABI}

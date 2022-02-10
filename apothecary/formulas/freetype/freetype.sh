@@ -392,6 +392,14 @@ function build() {
         	-D CMAKE_BUILD_TYPE=Release \
         	-D FT_REQUIRE_HARFBUZZ=FALSE \
         	-D FT_REQUIRE_BROTLI=FALSE \
+        	-DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+        	-DCMAKE_C_STANDARD=17 \
+        	-DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
         	-G 'Unix Makefiles' ..
 
         # cmake -G 'Unix Makefiles' .. \

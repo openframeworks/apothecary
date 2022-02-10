@@ -74,9 +74,17 @@ function build() {
             -DANDROID_ABI=$ABI \
             -DANDROID_TOOLCHAIN=clang++ \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -stdlib=libc++ -std=c++17 -Wno-implicit-function-declaration -msse2 -msimd128" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -stdlib=libc++ -std=c17 -Wno-implicit-function-declaration -msse2 -msimd128 " \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti -msse2" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti -msse2  " \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_LZMA=NO \
             -DBUILD_SHARED_LIBS=NO \
             -DLIBXML2_WITH_FTP=NO \

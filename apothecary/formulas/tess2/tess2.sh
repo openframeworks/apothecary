@@ -321,6 +321,14 @@ function build() {
         	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
         	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
         	-D ANDROID_TOOLCHAIN=clang \
+        	-DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+        	-DCMAKE_C_STANDARD=17 \
+        	-DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
         	-G 'Unix Makefiles' ..
         	#=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
         	
