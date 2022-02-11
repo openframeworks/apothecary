@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" "msys2" )
 #FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=5.0.0
+VER=5.2.0
 
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
@@ -23,8 +23,8 @@ GIT_TAG=master
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	#curl -O http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	wget -nv --no-check-certificate http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-${VER}.tar.gz
+	#curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
+	wget -nv --no-check-certificate http:s//www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-${VER}.tar.gz
 	tar -xf rtaudio-${VER}.tar.gz
 	mv rtaudio-${VER} rtAudio
 	rm rtaudio-${VER}.tar.gz
