@@ -20,11 +20,12 @@ VER=5.2.0
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
 GIT_TAG=master
+URL=https://www.music.mcgill.ca/~gary/rtaudio/release/
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	wget -nv --no-check-certificate http:s//www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-${VER}.tar.gz
+	wget -nv --no-check-certificate ${URL}/rtaudio-${VER}.tar.gz
 	tar -xf rtaudio-${VER}.tar.gz
 	mv rtaudio-${VER} rtAudio
 	rm rtaudio-${VER}.tar.gz
