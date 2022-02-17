@@ -49,24 +49,41 @@ function build() {
 	# https://www.music.mcgill.ca/~gary/rtaudio/compiling.html
 
 	if [ "$TYPE" == "osx" ] ; then
-        rm -f librtaudio.a
-        rm -f librtaudio-x86_64
+  #       rm -f librtaudio.a
+  #       rm -f librtaudio-x86_64
 
-		# Compile the program
-		/usr/bin/g++ -O2 \
-					 -Wall \
-					 -fPIC \
-					 -stdlib=libc++ \
-					 -arch arm64 -arch x86_64 \
-					 -Iinclude \
-					 -DHAVE_GETTIMEOFDAY \
-					 -D__MACOSX_CORE__ \
-					 -mmacosx-version-min=${OSX_MIN_SDK_VER} \
-					 -c RtAudio.cpp \
-					 -o RtAudio.o
+		# # Compile the program
+		# /usr/bin/g++ -O2 \
+		# 			 -Wall \
+		# 			 -fPIC \
+		# 			 -stdlib=libc++ \
+		# 			 -arch arm64 -arch x86_64 \
+		# 			 -Iinclude \
+		# 			 -DHAVE_GETTIMEOFDAY \
+		# 			 -D__MACOSX_CORE__ \
+		# 			 -mmacosx-version-min=${OSX_MIN_SDK_VER} \
+		# 			 -c RtAudio.cpp \
+		# 			 -o RtAudio.o
 
-		/usr/bin/ar ruv librtaudio.a RtAudio.o
-		/usr/bin/ranlib librtaudio.a
+		# /usr/bin/ar ruv librtaudio.a RtAudio.o
+		# /usr/bin/ranlib librtaudio.a
+
+		mkdir -p build
+		cd build
+		export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		export LDFLAGS="-arch arm64 -arch x86_64"
+    
+		cmake .. -G "Unix Makefiles" \
+			-DCMAKE_CXX_STANDARD=11 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_EXTENSION=OFF \
+			-DCMAKE_CXX_FLAGS="-fPIC ${CFLAGS}" \
+			-DCMAKE_C_FLAGS="-fPIC ${CFLAGS}" \
+			-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+			-DRTAUDIO_API_ASIO=OFF \
+			-DBUILD_TESTING=OFF
+		make
+		cd ..
 
 		#/usr/bin/g++ -O2 \
 		#			 -Wall \
@@ -145,7 +162,7 @@ function copy() {
 		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
 
 	else
-		cp -v librtaudio.a $1/lib/$TYPE/rtaudio.a
+		cp -v build/librtaudio.a $1/lib/$TYPE/rtaudio.a
 	fi
 
 	# copy license file
