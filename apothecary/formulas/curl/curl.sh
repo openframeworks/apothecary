@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android")
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
@@ -102,8 +102,8 @@ function build() {
         mkdir -p build/$TYPE/$ABI
         # export DESTDIR="$BUILD_TO_DIR"
 
-        export CFLAGS="-fPIC std=c17"
-        export CPPFLAGS="-D__ANDROID_MIN_SDK_VERSION__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS -fPIC std=c++17"
+        export CFLAGS="-std=c17"
+        export CXXFLAGS="-D__ANDROID_MIN_SDK_VERSION__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS -std=c++17"
         # export LIBS="-L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a " # this dont work annoying
         export LDFLAGS=" ${LIBS} -shared -stdlib=libc++ -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
 
@@ -114,6 +114,8 @@ function build() {
 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
+
+        echo "OPENSSL_PATH: $OPENSSL_PATH"
        
 
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"

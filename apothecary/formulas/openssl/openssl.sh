@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 
 VER=1.1.1m
 VERDIR=1.1.1
@@ -408,7 +408,7 @@ function build() {
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
 		echo "./Configure: $DEEP_TOOLCHAIN_PATH/usr/lib/"
-		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -stdlib=libc++ -ldl -shared -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/"
+		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -std=c17 -ldl -shared -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/"
 		./Configure $CONFIGURE  -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix="$CURRENTPATH/$BUILD_TO_DIR" --openssldir="$CURRENTPATH/$BUILD_TO_DIR"
  
  
@@ -420,6 +420,8 @@ function build() {
 		echo "Make Depend Complete"
 		make all
 
+		mkdir -p build/$TYPE/$ABI
+		cp -rv *.a build/$TYPE/$ABI
 
 		rm $SYSROOT/usr/lib/crtbegin_dynamic.o
 		rm $SYSROOT/usr/lib/crtbegin_so.o
@@ -515,7 +517,7 @@ function copy() {
 			rm -r $1/lib/$TYPE/$ABI
 		fi
 		mkdir -p $1/lib/$TYPE/$ABI
-		cp -rv *.a $1/lib/$TYPE/$ABI/
+		cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
 		# cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
 		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 
