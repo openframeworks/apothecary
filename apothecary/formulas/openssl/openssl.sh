@@ -27,7 +27,7 @@ function download() {
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		https://www.openssl.org/source/openssl-1.1.1m.tar.gz.sha1
+		# https://www.openssl.org/source/openssl-1.1.1m.tar.gz.sha1
 		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
