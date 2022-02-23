@@ -27,6 +27,7 @@ function download() {
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
+		https://www.openssl.org/source/openssl-1.1.1m.tar.gz.sha1
 		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
@@ -35,7 +36,7 @@ function download() {
 		tar -xf $FILENAME.tar.gz
 		mv $FILENAME openssl
 		rm $FILENAME.tar.gz
-		rm $FILENAME.tar.gz.sha1f
+		rm $FILENAME.tar.gz.sha1
 	else
 		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
 		if [[ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ]] ;  then
