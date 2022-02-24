@@ -33,7 +33,7 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	
+	# nothing here
 }
 
 # executed inside the lib src dir
