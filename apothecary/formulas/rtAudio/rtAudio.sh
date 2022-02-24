@@ -31,10 +31,10 @@ function download() {
 	rm rtaudio-${VER}.tar.gz
 }
 
-# prepare the build environment, executed inside the lib src dir
-function prepare() {
-	# nothing here
-}
+# # prepare the build environment, executed inside the lib src dir
+# function prepare() {
+# 	# nothing here
+# }
 
 # executed inside the lib src dir
 function build() {
