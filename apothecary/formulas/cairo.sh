@@ -28,6 +28,7 @@ SHA1=68712ae1039b114347be3b7200bc1c901d47a636
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
+URL=https://www.cairographics.org/snapshots/
 
 
 # download the source code and unpack it into LIB_NAME
