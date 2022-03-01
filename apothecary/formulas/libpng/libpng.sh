@@ -16,7 +16,7 @@ WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1637.zip
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( "zlib" )
+FORMULA_DEPENDS=( "zlib" ) 
 
 
 # download the source code and unpack it into LIB_NAME
@@ -43,11 +43,15 @@ function prepare() {
 	if [ ! -f configure ] ; then
 		./autogen.sh
 	fi
+
+	apothecaryDepend download zlib
+	apothecaryDepend prepare zlib
+	apothecaryDepend build zlib
+	apothecaryDepend copy zlib
+
 	if [ "$TYPE" == "vs" ] ; then
 
-		apothecaryDepend prepare zlib
-		apothecaryDepend build zlib
-		apothecaryDepend copy zlib
+		
 
 		#need to download this for the vs solution to build
 		if [ ! -e ../zlib ] ; then
@@ -73,7 +77,10 @@ function build() {
         ROOT=${PWD}/..
 		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
 		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
+
+		mkdir -p build
     	    
+    	export OUTPUT_BUILD_DIR=$(realpath ${PWD}/build)
 		# these flags are used to create a fat arm/64 binary with libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
@@ -83,9 +90,10 @@ function build() {
 				--prefix=$BUILD_ROOT_DIR \
 				--disable-dependency-tracking \
                 --disable-arm-neon \
+                --enable-static \
                 --disable-shared
 		make clean
-		make
+		make install
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
@@ -135,7 +143,14 @@ function copy() {
 			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/x64/
 		fi
 	else
-		echo "no copy osx"
+		mkdir -p $1/include
+		mkdir -p $1/lib/$TYPE
+		cp -v ${BUILD_ROOT_DIR}/lib/libpng.a $1/lib/$TYPE/libpng.a
+		cp -v ${BUILD_ROOT_DIR}/lib/libpng16.a $1/lib/$TYPE/libpng16.a
+		# copy license file
+		rm -rf $1/license # remove any older files if exists
+		mkdir -p $1/license
+		cp -v LICENSE $1/license/
 	fi
 }
 

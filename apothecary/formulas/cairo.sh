@@ -14,7 +14,7 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( ) # "pkg-config" "zlib" "libpng" "pixman" "freetype" 
+FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype"  )
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
@@ -33,7 +33,7 @@ URL=https://www.cairographics.org/snapshots/
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate http://cairographics.org/snapshots/cairo-$VER.tar.xz
+	wget -nv --no-check-certificate https://cairographics.org/snapshots/cairo-$VER.tar.xz
 	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	if [ "$CHECKSHA" != "$SHA1" ] ; then
     	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
@@ -84,18 +84,22 @@ function prepare() {
 		# generate the configure script if it's not there
 		
 		# Build and copy all dependencies in preparation
+		apothecaryDepend download pkg-config
 		apothecaryDepend prepare pkg-config
 		apothecaryDepend build pkg-config
 		apothecaryDepend copy pkg-config
+		apothecaryDepend download zlib
 		apothecaryDepend prepare zlib
 		apothecaryDepend build zlib
 		apothecaryDepend copy zlib
+		apothecaryDepend download libpng
 		apothecaryDepend prepare libpng
 		apothecaryDepend build libpng
 		apothecaryDepend copy libpng
 		apothecaryDepend download pixman
 		apothecaryDepend build pixman
 		apothecaryDepend copy pixman
+		apothecaryDepend download freetype
 		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype

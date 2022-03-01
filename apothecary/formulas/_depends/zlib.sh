@@ -51,7 +51,7 @@ function build() {
         export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
         export ARCHS="-arch arm64 -arch x86_64"
 
-		export CFLAGS="-O2 ${ARCHS} -fomit-frame-pointer -fno-stack-protector -pipe"
+		export CFLAGS="-O2 ${ARCHS} -fomit-frame-pointer -fno-stack-protector -pipe -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
 
 		cmake .. \
 		    -G "Unix Makefiles" \
