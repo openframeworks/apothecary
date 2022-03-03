@@ -155,6 +155,9 @@ function copy() {
 
 
 	elif [ "$TYPE" == "msys2" ] ; then
+		cd build
+		ls
+		cd ../
 		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
 
 	elif [ "$TYPE" == "osx" ] ; then
