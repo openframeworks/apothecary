@@ -158,7 +158,7 @@ function copy() {
 		cd build
 		ls
 		cd ../
-		cp -v build/librtaudio_static.a $1/lib/$TYPE/librtaudio.a
+		cp -v build/librtaudio.dll.a $1/lib/$TYPE/librtaudio.dll.a
 
 	elif [ "$TYPE" == "osx" ] ; then
 		cp -v build/librtaudio.a $1/lib/$TYPE/rtaudio.a
