@@ -372,7 +372,7 @@ function build() {
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF \  | tee ${LOG}
+      -DBUILD_TESTS=OFF  | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
     fi
