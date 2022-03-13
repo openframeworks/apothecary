@@ -195,6 +195,9 @@ function build() {
     echo "Log:" >> "${LOG}" 2>&1
     set +e
 
+    export PYTHON_VERSION_STRING=3.9.10
+    export PYTHON_EXECUTABLE=C:/hostedtoolcache/windows/Python/3.9.10/x64/python.exe
+
     if [ $ARCH == 32 ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
@@ -221,7 +224,11 @@ function build() {
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
+      -DBUILD_opencv_python3=ON \
+      -DBUILD_NEW_PYTHON_SUPPORT=ON \
+      -DHAVE_opencv_python3=ON \
+      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
+      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
@@ -311,7 +318,11 @@ function build() {
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
+      -DBUILD_opencv_python3=ON \
+      -DBUILD_NEW_PYTHON_SUPPORT=ON \
+      -DHAVE_opencv_python3=ON \
+      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
+      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
