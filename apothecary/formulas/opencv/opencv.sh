@@ -148,7 +148,7 @@ function build() {
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=OFF \
+      -DBUILD_ZLIB=ON \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
@@ -490,7 +490,7 @@ function build() {
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=OFF \
+      -DBUILD_ZLIB=ON \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
@@ -778,7 +778,7 @@ function build() {
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
       -DWITH_ITT=OFF \
-      -DBUILD_ZLIB=OFF \
+      -DBUILD_ZLIB=ON \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
