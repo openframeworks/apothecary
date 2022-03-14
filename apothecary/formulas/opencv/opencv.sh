@@ -204,8 +204,8 @@ function build() {
       cmake .. -G "Visual Studio $VS_VER"\
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
       -DBUILD_TESTS=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_FFMPEG=OFF \
@@ -300,8 +300,8 @@ function build() {
       cmake .. -G "Visual Studio $VS_VER Win64" \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
       -DBUILD_TESTS=OFF \
       -DWITH_CUDA=OFF \
       -DWITH_FFMPEG=OFF \
