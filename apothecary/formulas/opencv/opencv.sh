@@ -226,6 +226,7 @@ function build() {
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
       -DBUILD_NEW_PYTHON_SUPPORT=OFF \
+      -DHAVE_opencv_python2=OFF \
       -DHAVE_opencv_python3=OFF \
       -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
       -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
@@ -289,7 +290,8 @@ function build() {
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF   | tee ${LOG}
+      -DBUILD_TESTS=OFF  
+      # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|Win32"
       vs-build "OpenCV.sln" Build "Debug|Win32"
     elif [ $ARCH == 64 ] ; then
@@ -321,6 +323,7 @@ function build() {
       -DBUILD_opencv_python3=OFF \
       -DBUILD_NEW_PYTHON_SUPPORT=OFF \
       -DHAVE_opencv_python3=OFF \
+      -DHAVE_opencv_python2=OFF \
       -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
       -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
       -DBUILD_opencv_apps=OFF \
@@ -383,11 +386,10 @@ function build() {
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF  | tee ${LOG}
+      -DBUILD_TESTS=OFF
+       # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
-
-      tail -700 D:/a/apothecary/apothecary/apothecary/build/opencv/build_vs_64/CMakeFiles/CMakeOutput.log
     fi
 
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
