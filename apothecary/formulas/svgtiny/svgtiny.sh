@@ -84,7 +84,25 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $VS_VER -eq 14 ]; then
+		if [ $VS_VER -eq 17 ]; then
+			cd vs2022
+			if [ $ARCH == 32 ] ; then
+				vs-build svgtiny.sln Build "Release|x86"
+			elif [ $ARCH == 64 ] ; then
+				vs-build svgtiny.sln Build "Release|x64"
+			elif [ $ARCH == "ARM64" ] ; then
+				vs-build svgtiny.sln Build "Release|ARM64"
+			fi
+		elif [ $VS_VER -eq 16 ]; then
+			cd vs2019
+			if [ $ARCH == 32 ] ; then
+				vs-build svgtiny.sln Build "Release|x86"
+			elif [ $ARCH == 64 ] ; then
+				vs-build svgtiny.sln Build "Release|x64"
+			elif [ $ARCH == "ARM64" ] ; then
+				vs-build svgtiny.sln Build "Release|ARM64"
+			fi
+		elif [ $VS_VER -eq 14 ]; then
 			cd vs2015
 			if [ $ARCH == 32 ] ; then
 				vs-build svgtiny.sln Build "Release|x86"

@@ -341,10 +341,10 @@ done
 shift $(expr $OPTIND - 1)
 
 
-# used when building for vs - set to 15 if not set explicitly
+# used when building for vs - set to 16 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
-	    echo "VS_VER was not set - setting to 15"
+	    echo "VS_VER was not set - setting to 16"
 	    VS_VER=16
     else 
 	    echo "VS_VER is set to '$VS_VER'"
@@ -1009,6 +1009,10 @@ function vs-build() {
 		# assumed to be installed at a fixed location
 		if [ $VS_VER -gt 15 ] ; then
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		elif [ $VS_VER -gt 16 ] ; then
+			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		elif [ $VS_VER -gt 17 ] ; then
+			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		else
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		fi
@@ -1025,6 +1029,8 @@ function vs-build() {
 			DEFAULT_BUILD="Release|Win32"
 		elif [ $ARCH == 64 ] ; then
 			DEFAULT_BUILD="Release|x64"
+		elif [ $ARCH == "ARM64" ] ; then
+			DEFAULT_BUILD="Release|ARM64"
 		fi
 
 		# Cut part before '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_CONFIGURATION

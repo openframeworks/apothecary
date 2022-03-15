@@ -107,8 +107,8 @@ function build() {
 		elif [ $ARCH == 64 ] ; then
 			cmake .. -G "Visual Studio $VS_VER Win64"
 			cmake --build . --config Release
-		elif [ $ARCH == "ARM" ] ; then
-			cmake .. -G "Visual Studio $VS_VER ARM"
+		elif [ $ARCH == "ARM64" ] ; then
+			cmake .. -G "Visual Studio $VS_VER ARM64"
 			cmake --build . --config Release
 		fi
 

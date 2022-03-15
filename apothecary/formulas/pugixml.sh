@@ -139,7 +139,33 @@ function copy() {
 	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [[ $VS_VER -gt 14 ]]; then
+		if [[ $VS_VER -gt 17 ]]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2022/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2022/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2022/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2022/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			elif [ $ARCH == "ARM64" ] ; then
+				mkdir -p $1/lib/$TYPE/ARM64
+				# TODO
+			fi
+		elif [[ $VS_VER -gt 16 ]]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2019/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2019/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2019/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2019/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			elif [ $ARCH == "ARM64" ] ; then
+				mkdir -p $1/lib/$TYPE/ARM64
+				# TODO
+			fi
+		elif [[ $VS_VER -gt 14 ]]; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
@@ -149,7 +175,8 @@ function copy() {
 				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
 			fi
-		else
+		
+		elif [[ $VS_VER -gt 13 ]]; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
