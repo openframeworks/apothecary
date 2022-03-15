@@ -195,6 +195,8 @@ function build() {
     echo "Log:" >> "${LOG}" 2>&1
     set +e
 
+    python3 -mpip install numpy
+
     export PYTHON_VERSION_STRING=3.9.10
     export PYTHON_EXECUTABLE=C:/hostedtoolcache/windows/Python/3.9.10/x64/python.exe
 
