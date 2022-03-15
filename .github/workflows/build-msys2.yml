@@ -11,7 +11,7 @@ on:
 jobs:
 
   build-msys2:
-    runs-on: windows-2019
+    runs-on: windows-2016
     defaults:
       run:
         shell: msys2 {0}
@@ -20,6 +20,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          python-version: 3.8
           install: >-
             base-devel
             unzip
