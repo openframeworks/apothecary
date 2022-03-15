@@ -101,15 +101,28 @@ function build() {
 		mkdir build
 		cd build
 
-		if [ $ARCH == 32 ] ; then
-			cmake .. -G "Visual Studio $VS_VER Win32"
-			cmake --build . --config Release
-		elif [ $ARCH == 64 ] ; then
-			cmake .. -G "Visual Studio $VS_VER Win64"
-			cmake --build . --config Release
-		elif [ $ARCH == "ARM64" ] ; then
-			cmake .. -G "Visual Studio $VS_VER ARM64"
-			cmake --build . --config Release
+		if [ $VS_VER -gt 15 ] ; then
+			if [ $ARCH == 32 ] ; then
+				cmake .. -G "Visual Studio $VS_VER Win32"
+				cmake --build . --config Release
+			elif [ $ARCH == 64 ] ; then
+				cmake .. -G "Visual Studio $VS_VER Win64"
+				cmake --build . --config Release
+			elif [ $ARCH == "ARM" ] ; then
+				cmake .. -G "Visual Studio $VS_VER ARM"
+				cmake --build . --config Release
+			fi
+		else
+			if [ $ARCH == 32 ] ; then
+				cmake .. -G "Visual Studio $VS_VER -A Win32"
+				cmake --build . --config Release
+			elif [ $ARCH == 64 ] ; then
+				cmake .. -G "Visual Studio $VS_VER -A Win64"
+				cmake --build . --config Release
+			elif [ $ARCH == "ARM" ] ; then
+				cmake .. -G "Visual Studio $VS_VER -A ARM"
+				cmake --build . --config Release
+			fi
 		fi
 
 		cd ..

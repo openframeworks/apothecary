@@ -65,14 +65,16 @@ function build() {
 				vs-build libusb_2019.sln Build "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2019.sln Build "Release|x64"
+			elif [ $ARCH == "ARM" ] ; then
+				vs-build libusb_2019.sln Build "Release|ARM"
 			fi
 		elif [ $VS_VER -eq 17 ]; then
 			if [ $ARCH == 32 ] ; then
 				vs-build libusb_2022.sln Build "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2022.sln Build "Release|x64"
-			elif [ $ARCH == "ARM64" ] ; then
-				vs-build libusb_2022.sln Build "Release|ARM64"
+			elif [ $ARCH == "ARM" ] ; then
+				vs-build libusb_2022.sln Build "Release|ARM"
 			fi
 		else
 			echo "VS version $VS_VER not supported yet"
