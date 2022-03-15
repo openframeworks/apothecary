@@ -10,7 +10,7 @@ on:
     
 jobs:
 
-  build-vs2017:
+  build-vs2019:
     runs-on: windows-2019
     strategy:
       matrix:
@@ -46,5 +46,5 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
           ARCH: 64
-          VS_VER: 15
+          VS_VER: 16
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
