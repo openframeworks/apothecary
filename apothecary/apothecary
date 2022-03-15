@@ -345,7 +345,7 @@ shift $(expr $OPTIND - 1)
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 15"
-	    VS_VER=15
+	    VS_VER=16
     else 
 	    echo "VS_VER is set to '$VS_VER'"
     fi
