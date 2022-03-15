@@ -196,9 +196,15 @@ function build() {
     set +e
 
     python3 -m ensurepip --upgrade
-    python3 -mpip install numpy
-
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    # python3 -m pip install numpy
+    python3 get-pip.py
+    python3 -m pip help
+    python3 -m pip install --upgrade pip
+
+    python3 -VV
+    python3 -m pip install numpy
+
 
     export PYTHON_VERSION_STRING=3.9.10
     export PYTHON_EXECUTABLE=C:/hostedtoolcache/windows/Python/3.9.10/x64/python.exe
