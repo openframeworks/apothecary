@@ -11,7 +11,7 @@ on:
 jobs:
 
   build-vs2017:
-    runs-on: windows-latest
+    runs-on: windows-2019
     strategy:
       matrix:
         bundle: [1,2,3,4]
