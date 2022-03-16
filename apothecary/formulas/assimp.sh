@@ -117,7 +117,7 @@ function build() {
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
-        if [ $VS_VER -gt 15 ] ; then
+        if [ $VS_VER == 15 ] ; then
             if [ $ARCH == 32 ] ; then
                 mkdir -p build_vs_32
                 cd build_vs_32
