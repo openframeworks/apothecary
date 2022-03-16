@@ -401,7 +401,7 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
-    else elif [ $ARCH == "ARM" ] ; then
+    elif [ $ARCH == "ARM" ] ; then
       mkdir -p build_vs_arm
       cd build_vs_arm
       cmake .. -G "Visual Studio $VS_VER -A ARM" \
