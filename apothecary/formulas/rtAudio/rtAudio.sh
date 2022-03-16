@@ -125,7 +125,7 @@ function build() {
 			elif [ $ARCH == 64 ] ; then
 				mkdir -p build_vs_64
 				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER -A Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				cmake .. -G "Visual Studio $VS_VER " -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
 				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
 			elif [ $ARCH == "ARM" ] ; then
@@ -134,6 +134,12 @@ function build() {
 				cmake .. -G "Visual Studio $VS_VER -A ARM" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 				vs-build "rtaudio_static.vcxproj" Build "Release|ARM"
 				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM"
+			elif [ $ARCH == "ARM64" ] ; then
+				mkdir -p build_vs_arm64
+				cd build_vs_arm64
+				cmake .. -G "Visual Studio $VS_VER -A ARM64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|ARM64"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM64"
 			fi
 		fi
 

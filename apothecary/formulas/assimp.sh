@@ -141,7 +141,7 @@ function build() {
             elif [ $ARCH == 64 ] ; then
                 mkdir -p build_vs_64
                 cd build_vs_64
-                generatorName+=' -A Win64'
+                generatorName+=' '
                 echo "generatorName $generatorName"
                 cmake .. -G "$generatorName" $buildOpts
                 vs-build "Assimp.sln" build "Release|x64"
@@ -152,6 +152,13 @@ function build() {
                 echo "generatorName $generatorName"
                 cmake .. -G "$generatorName" $buildOpts
                 vs-build "Assimp.sln" build "Release|ARM"
+            elif [ $ARCH == "ARM64" ] ; then
+                mkdir -p build_vs_arm64
+                cd build_vs_arm64
+                generatorName+=' -A ARM64'
+                echo "generatorName $generatorName"
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|ARM64"
             fi
         fi
         cd ..

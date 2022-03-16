@@ -308,7 +308,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER -A Win64" \
+      cmake .. -G "Visual Studio $VS_VER " \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
@@ -401,7 +401,105 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
-    elif [ $ARCH == "ARM" ] ; then
+    elif [ $ARCH == "ARM64" ] ; then
+      mkdir -p build_vs_arm64
+      cd build_vs_arm64
+      cmake .. -G "Visual Studio $VS_VER -A ARM64" \
+      -DBUILD_PNG=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
+      -DBUILD_TESTS=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_WIN32UI=OFF \
+      -DBUILD_PACKAGE=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_JPEG=OFF \
+      -DBUILD_WITH_DEBUG_INFO=OFF \
+      -DWITH_CUFFT=OFF \
+      -DBUILD_TIFF=OFF \
+      -DBUILD_JPEG=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DBUILD_WITH_STATIC_CRT=OFF \
+      -DBUILD_opencv_java=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
+      -DBUILD_NEW_PYTHON_SUPPORT=OFF \
+      -DHAVE_opencv_python3=OFF \
+      -DHAVE_opencv_python2=OFF \
+      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
+      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
+      -DBUILD_opencv_apps=OFF \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_imgcodecs=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_JASPER=OFF \
+      -DBUILD_DOCS=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_EIGEN=OFF \
+      -DBUILD_OPENEXR=OFF \
+      -DWITH_DSHOW=OFF \
+      -DWITH_VFW=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_PVAPI=OFF\
+      -DWITH_TIFF=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_OPENGL=OFF \
+      -DWITH_OPENVX=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
+      -DWITH_JPEG=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_CUFFT=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_IMAGEIO=OFF \
+      -DWITH_IPP=OFF \
+      -DWITH_IPP_A=OFF \
+      -DWITH_OPENNI=OFF \
+      -DWITH_OPENNI2=OFF \
+      -DWITH_QT=OFF \
+      -DWITH_QUICKTIME=OFF \
+      -DWITH_V4L=OFF \
+      -DWITH_LIBV4L=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_OPENCLCLAMDBLAS=OFF \
+      -DWITH_OPENCLCLAMDFFT=OFF \
+      -DWITH_OPENCL_SVM=OFF \
+      -DWITH_LAPACK=OFF \
+      -DBUILD_ZLIB=ON \
+      -DWITH_WEBP=OFF \
+      -DWITH_VTK=OFF \
+      -DWITH_PVAPI=OFF \
+      -DWITH_EIGEN=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DBUILD_TESTS=OFF
+       # | tee ${LOG}
+      vs-build "OpenCV.sln" Build "Release|ARM64"
+      vs-build "OpenCV.sln" Build "Debug|ARM64"
+    fi
+
+elif [ $ARCH == "ARM" ] ; then
       mkdir -p build_vs_arm
       cd build_vs_arm
       cmake .. -G "Visual Studio $VS_VER -A ARM" \
@@ -495,10 +593,9 @@ function build() {
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF
        # | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|x64"
-      vs-build "OpenCV.sln" Build "Debug|x64"
+      vs-build "OpenCV.sln" Build "Release|ARM"
+      vs-build "OpenCV.sln" Build "Debug|ARM"
     fi
-
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
