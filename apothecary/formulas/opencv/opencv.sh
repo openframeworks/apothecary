@@ -497,9 +497,7 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|ARM64"
       vs-build "OpenCV.sln" Build "Debug|ARM64"
-    fi
-
-elif [ $ARCH == "ARM" ] ; then
+  elif [ $ARCH == "ARM" ] ; then
       mkdir -p build_vs_arm
       cd build_vs_arm
       cmake .. -G "Visual Studio $VS_VER -A ARM" \
@@ -595,7 +593,6 @@ elif [ $ARCH == "ARM" ] ; then
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|ARM"
       vs-build "OpenCV.sln" Build "Debug|ARM"
-    fi
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
@@ -706,6 +703,7 @@ elif [ $ARCH == "ARM" ] ; then
       -DBUILD_TESTS=OFF \
       -DWITH_ITT=${WITH_ITT} \
       -DBUILD_PERF_TESTS=OFF
+    fi
 
 
       echo "--------------------"
