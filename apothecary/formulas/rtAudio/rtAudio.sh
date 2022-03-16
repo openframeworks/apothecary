@@ -101,18 +101,40 @@ function build() {
 		unset TMP
 		unset TEMP
 		local API="--with-wasapi --with-ds" # asio as well?
-		if [ $ARCH == 32 ] ; then
-			mkdir -p build_vs_32
-			cd build_vs_32
-			cmake .. -G "Visual Studio $VS_VER"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-			vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
-			vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p build_vs_64
-			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-			vs-build "rtaudio_static.vcxproj" Build "Release|x64"
-			vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
+		if [ $VS_VER -gt 15 ] ; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+				cmake .. -G "Visual Studio $VS_VER"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+				cmake .. -G "Visual Studio $VS_VER Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
+			fi
+		else
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+				cmake .. -G "Visual Studio $VS_VER"  -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+				cmake .. -G "Visual Studio $VS_VER -A Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
+			elif [ $ARCH == "ARM" ] ; then
+				mkdir -p build_vs_arm
+				cd build_vs_arm
+				cmake .. -G "Visual Studio $VS_VER -A ARM" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+				vs-build "rtaudio_static.vcxproj" Build "Release|ARM"
+				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM"
+			fi
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then

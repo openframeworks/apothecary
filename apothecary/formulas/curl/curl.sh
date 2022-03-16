@@ -69,8 +69,10 @@ function build() {
 
         if [ $ARCH == 32 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-        else
+        elif [ $ARCH == 64 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+        elif [ $ARCH == "ARM" ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|ARM"
         fi
 
 	elif [ "$TYPE" == "android" ]; then

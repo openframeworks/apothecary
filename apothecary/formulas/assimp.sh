@@ -117,17 +117,39 @@ function build() {
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
-        if [ $ARCH == 32 ] ; then
-            mkdir -p build_vs_32
-            cd build_vs_32
-            cmake .. -G "$generatorName" $buildOpts
-            vs-build "Assimp.sln" build "Release|Win32"
-        elif [ $ARCH == 64 ] ; then
-            mkdir -p build_vs_64
-            cd build_vs_64
-            generatorName+=' Win64'
-            cmake .. -G "$generatorName" $buildOpts
-            vs-build "Assimp.sln" build "Release|x64"
+        if [ $VS_VER -gt 15 ] ; then
+            if [ $ARCH == 32 ] ; then
+                mkdir -p build_vs_32
+                cd build_vs_32
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|Win32"
+            elif [ $ARCH == 64 ] ; then
+                mkdir -p build_vs_64
+                cd build_vs_64
+                generatorName+=' Win64'
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|x64"
+            fi
+        else
+            if [ $ARCH == 32 ] ; then
+                mkdir -p build_vs_32
+                cd build_vs_32
+                generatorName+=' -A Win32'
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|Win32"
+            elif [ $ARCH == 64 ] ; then
+                mkdir -p build_vs_64
+                cd build_vs_64
+                generatorName+=' -A Win64'
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|x64"
+            elif [ $ARCH == "ARM" ] ; then
+                mkdir -p build_vs_arm
+                cd build_vs_arm
+                generatorName+=' -A ARM'
+                cmake .. -G "$generatorName" $buildOpts
+                vs-build "Assimp.sln" build "Release|ARM"
+            fi
         fi
         cd ..
         #cleanup to not fail if the other platform is called

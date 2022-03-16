@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libdom\bindings\xml\libxml_xmlparser.c" />
+    <ClCompile Include="..\libdom\src\core\attr.c" />
+    <ClCompile Include="..\libdom\src\core\cdatasection.c" />
+    <ClCompile Include="..\libdom\src\core\characterdata.c" />
+    <ClCompile Include="..\libdom\src\core\comment.c" />
+    <ClCompile Include="..\libdom\src\core\document.c" />
+    <ClCompile Include="..\libdom\src\core\document_type.c" />
+    <ClCompile Include="..\libdom\src\core\doc_fragment.c" />
+    <ClCompile Include="..\libdom\src\core\element.c" />
+    <ClCompile Include="..\libdom\src\core\entity_ref.c" />
+    <ClCompile Include="..\libdom\src\core\implementation.c" />
+    <ClCompile Include="..\libdom\src\core\namednodemap.c" />
+    <ClCompile Include="..\libdom\src\core\node.c" />
+    <ClCompile Include="..\libdom\src\core\nodelist.c" />
+    <ClCompile Include="..\libdom\src\core\pi.c" />
+    <ClCompile Include="..\libdom\src\core\string.c" />
+    <ClCompile Include="..\libdom\src\core\text.c" />
+    <ClCompile Include="..\libdom\src\core\typeinfo.c" />
+    <ClCompile Include="..\libdom\src\events\custom_event.c" />
+    <ClCompile Include="..\libdom\src\events\dispatch.c" />
+    <ClCompile Include="..\libdom\src\events\document_event.c" />
+    <ClCompile Include="..\libdom\src\events\event.c" />
+    <ClCompile Include="..\libdom\src\events\event_listener.c" />
+    <ClCompile Include="..\libdom\src\events\event_target.c" />
+    <ClCompile Include="..\libdom\src\events\keyboard_event.c" />
+    <ClCompile Include="..\libdom\src\events\mouse_event.c" />
+    <ClCompile Include="..\libdom\src\events\mouse_multi_wheel_event.c" />
+    <ClCompile Include="..\libdom\src\events\mouse_wheel_event.c" />
+    <ClCompile Include="..\libdom\src\events\mutation_event.c" />
+    <ClCompile Include="..\libdom\src\events\mutation_name_event.c" />
+    <ClCompile Include="..\libdom\src\events\text_event.c" />
+    <ClCompile Include="..\libdom\src\events\ui_event.c" />
+    <ClCompile Include="..\libdom\src\html\html_anchor_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_applet_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_area_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_basefont_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_base_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_body_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_br_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_button_element.c" />
+    <ClCompile Include="..\libdom/src/html/html_canvas_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_collection.c" />
+    <ClCompile Include="..\libdom\src\html\html_directory_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_div_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_dlist_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_document.c" />
+    <ClCompile Include="..\libdom\src\html\html_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_fieldset_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_font_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_form_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_frameset_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_frame_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_heading_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_head_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_hr_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_html_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_iframe_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_image_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_input_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_isindex_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_label_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_legend_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_link_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_li_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_map_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_menu_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_meta_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_mod_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_object_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_olist_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_options_collection.c" />
+    <ClCompile Include="..\libdom\src\html\html_option_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_opt_group_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_paragraph_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_param_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_pre_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_quote_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_script_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_select_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_style_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_tablecaption_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_tablecell_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_tablecol_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_tablerow_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_tablesection_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_table_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_text_area_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_title_element.c" />
+    <ClCompile Include="..\libdom\src\html\html_ulist_element.c" />
+    <ClCompile Include="..\libdom\src\utils\character_valid.c" />
+    <ClCompile Include="..\libdom\src\utils\hashtable.c" />
+    <ClCompile Include="..\libdom\src\utils\namespace.c" />
+    <ClCompile Include="..\libdom\src\utils\validate.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codec.c" />
+    <ClCompile Include="..\libparserutils\src\charset\aliases.c" />
+    <ClCompile Include="..\libparserutils\src\input\filter.c" />
+    <ClCompile Include="..\libparserutils\src\input\inputstream.c" />
+    <ClCompile Include="..\libparserutils/src/utils/buffer.c" />
+    <ClCompile Include="..\libparserutils/src/utils/errors.c" />
+    <ClCompile Include="..\libparserutils/src/utils/stack.c" />
+    <ClCompile Include="..\libparserutils/src/utils/vector.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codecs\codec_8859.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codecs\codec_ascii.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codecs\codec_ext8.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codecs\codec_utf16.c" />
+    <ClCompile Include="..\libparserutils\src\charset\codecs\codec_utf8.c" />
+    <ClCompile Include="..\libparserutils\src\charset\encodings\utf16.c" />
+    <ClCompile Include="..\libparserutils\src\charset\encodings\utf8.c" />
+    <ClCompile Include="..\libwapcaplet\src\libwapcaplet.c" />
+    <ClCompile Include="..\src\svgtiny.c" />
+    <ClCompile Include="..\src\svgtiny_gradient.c" />
+    <ClCompile Include="..\src\svgtiny_list.c" />
+    <ClCompile Include="..\src\autogenerated_colors.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libdom\src\core\attr.h" />
+    <ClInclude Include="..\libdom\src\core\cdatasection.h" />
+    <ClInclude Include="..\libdom\src\core\characterdata.h" />
+    <ClInclude Include="..\libdom\src\core\comment.h" />
+    <ClInclude Include="..\libdom\src\core\document.h" />
+    <ClInclude Include="..\libdom\src\core\document_type.h" />
+    <ClInclude Include="..\libdom\src\core\doc_fragment.h" />
+    <ClInclude Include="..\libdom\src\core\element.h" />
+    <ClInclude Include="..\libdom\src\core\entity_ref.h" />
+    <ClInclude Include="..\libdom\src\core\namednodemap.h" />
+    <ClInclude Include="..\libdom\src\core\node.h" />
+    <ClInclude Include="..\libdom\src\core\nodelist.h" />
+    <ClInclude Include="..\libdom\src\core\pi.h" />
+    <ClInclude Include="..\libdom\src\core\string.h" />
+    <ClInclude Include="..\libdom\src\core\text.h" />
+    <ClInclude Include="..\libdom\src\events\custom_event.h" />
+    <ClInclude Include="..\libdom\src\events\dispatch.h" />
+    <ClInclude Include="..\libdom\src\events\document_event.h" />
+    <ClInclude Include="..\libdom\src\events\event.h" />
+    <ClInclude Include="..\libdom\src\events\event_listener.h" />
+    <ClInclude Include="..\libdom\src\events\event_target.h" />
+    <ClInclude Include="..\libdom\src\events\keyboard_event.h" />
+    <ClInclude Include="..\libdom\src\events\mouse_event.h" />
+    <ClInclude Include="..\libdom\src\events\mouse_multi_wheel_event.h" />
+    <ClInclude Include="..\libdom\src\events\mouse_wheel_event.h" />
+    <ClInclude Include="..\libdom\src\events\mutation_event.h" />
+    <ClInclude Include="..\libdom\src\events\mutation_name_event.h" />
+    <ClInclude Include="..\libdom\src\events\text_event.h" />
+    <ClInclude Include="..\libdom\src\events\ui_event.h" />
+    <ClInclude Include="..\libdom\src\html\html_anchor_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_applet_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_area_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_basefont_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_base_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_body_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_br_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_button_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_canvas_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_collection.h" />
+    <ClInclude Include="..\libdom\src\html\html_directory_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_div_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_dlist_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_document.h" />
+    <ClInclude Include="..\libdom\src\html\html_document_strings.h" />
+    <ClInclude Include="..\libdom\src\html\html_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_fieldset_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_font_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_form_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_frameset_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_frame_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_heading_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_head_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_hr_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_html_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_iframe_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_image_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_input_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_isindex_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_label_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_legend_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_link_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_li_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_map_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_menu_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_meta_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_mod_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_object_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_olist_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_options_collection.h" />
+    <ClInclude Include="..\libdom\src\html\html_option_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_opt_group_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_paragraph_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_param_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_pre_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_quote_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_script_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_select_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_style_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_tablecaption_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_tablecell_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_tablecol_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_tablerow_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_tablesection_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_table_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_text_area_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_title_element.h" />
+    <ClInclude Include="..\libdom\src\html\html_ulist_element.h" />
+    <ClInclude Include="..\libdom\src\utils\character_valid.h" />
+    <ClInclude Include="..\libdom\src\utils\hashtable.h" />
+    <ClInclude Include="..\libdom\src\utils\list.h" />
+    <ClInclude Include="..\libdom\src\utils\namespace.h" />
+    <ClInclude Include="..\libdom\src\utils\utils.h" />
+    <ClInclude Include="..\libdom\src\utils\validate.h" />
+    <ClInclude Include="..\libparserutils\src\charset\aliases.h" />
+    <ClInclude Include="..\libparserutils\src\charset\codecs\8859_tables.h" />
+    <ClInclude Include="..\libparserutils\src\charset\codecs\codec_impl.h" />
+    <ClInclude Include="..\libparserutils\src\charset\codecs\ext8_tables.h" />
+    <ClInclude Include="..\libparserutils\src\charset\encodings\utf8impl.h" />
+    <ClInclude Include="..\libparserutils\src\input\filter.h" />
+    <ClInclude Include="..\libparserutils\src\utils\endian.h" />
+    <ClInclude Include="..\libparserutils\src\utils\utils.h" />
+    <ClInclude Include="..\src\svgtiny_internal.h" />
+    <ClInclude Include="..\src\svgtiny_strings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\libdom\src\core\Makefile" />
+    <None Include="..\libdom\src\events\Makefile" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D69B1E1A-2ED8-44FB-AAC1-9CE1FCED4E3C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>vs2015</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>svgtiny</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)..\src;$(ProjectDir)..\include;$(ProjectDir)..\libdom\include;$(ProjectDir)..\libdom\bindings;$(ProjectDir)..\libdom\src;$(ProjectDir)..\libparserutils\include;$(ProjectDir)..\libparserutils\src;$(ProjectDir)..\libwapcaplet\include;$(ProjectDir)..\..\libxml2\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITHOUT_ICONV_FILTER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

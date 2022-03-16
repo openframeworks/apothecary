@@ -44,15 +44,31 @@ function build() {
 		cd build_vs$ARCH
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_$ARCH/lib
-		if [ $ARCH == 32 ] ; then
-			cmake .. -G "Visual Studio $VS_VER"  
-			vs-build "ALL_BUILD.vcxproj"
-			vs-build "ALL_BUILD.vcxproj" Build "Debug"
-		elif [ $ARCH == 64 ] ; then
-			cmake .. -G "Visual Studio $VS_VER Win64"  
-			vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
-			vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
-		fi
+        if [ $VS_VER -gt 15 ] ; then
+    		if [ $ARCH == 32 ] ; then
+    			cmake .. -G "Visual Studio $VS_VER"  
+    			vs-build "ALL_BUILD.vcxproj"
+    			vs-build "ALL_BUILD.vcxproj" Build "Debug"
+    		elif [ $ARCH == 64 ] ; then
+    			cmake .. -G "Visual Studio $VS_VER Win64"  
+    			vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
+    			vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
+    		fi
+        else
+            if [ $ARCH == 32 ] ; then
+                cmake .. -G "Visual Studio $VS_VER"  
+                vs-build "ALL_BUILD.vcxproj"
+                vs-build "ALL_BUILD.vcxproj" Build "Debug"
+            elif [ $ARCH == 64 ] ; then
+                cmake .. -G "Visual Studio $VS_VER -A Win64"  
+                vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
+                vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
+            elif [ $ARCH == "ARM" ] ; then
+                cmake .. -G "Visual Studio $VS_VER -A ARM"  
+                vs-build "ALL_BUILD.vcxproj" Build "Release|ARM"
+                vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM"
+            fi
+        fi
 	
 	elif [ "$TYPE" == "osx" ]; then
 	    git apply $FORMULA_DIR/uri-remove-tests.patch

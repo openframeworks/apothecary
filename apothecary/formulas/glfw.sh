@@ -33,16 +33,35 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $ARCH == 32 ] ; then
-			mkdir -p build_vs_32
-			cd build_vs_32
-			cmake .. -G "Visual Studio $VS_VER"
-			vs-build "GLFW.sln"
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p build_vs_64
-			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64"
-			vs-build "GLFW.sln" Build "Release|x64"
+		if [ $VS_VER -gt 15 ] ; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+				cmake .. -G "Visual Studio $VS_VER"
+				vs-build "GLFW.sln"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+				cmake .. -G "Visual Studio $VS_VER Win64"
+				vs-build "GLFW.sln" Build "Release|x64"
+			fi
+		else 
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+				cmake .. -G "Visual Studio $VS_VER"
+				vs-build "GLFW.sln"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+				cmake .. -G "Visual Studio $VS_VER -A Win64"
+				vs-build "GLFW.sln" Build "Release|x64"
+			elif [ $ARCH == "ARM" ] ; then
+				mkdir -p build_vs_arm
+				cd build_vs_arm
+				cmake .. -G "Visual Studio $VS_VER -A ARM"
+				vs-build "GLFW.sln" Build "Release|ARM"
+			fi
 		fi
 	else
         if [ $CROSSCOMPILING -eq 1 ]; then

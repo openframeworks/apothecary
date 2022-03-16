@@ -52,7 +52,7 @@ function build() {
 					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
-		else
+		elif [[ $VS_VER -gt 13 ]]; then
 			if [ $ARCH == 32 ] ; then
 					vs-build "pugixml_vs2015.vcxproj" build "Release"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug"
@@ -60,6 +60,18 @@ function build() {
 					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
 			fi
+		else 
+			if [ $ARCH == 32 ] ; then
+					vs-build "pugixml_vs2019.vcxproj" build "Release|Win32"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|Win32"
+			elif [ $ARCH == 64 ] ; then
+					vs-build "pugixml_vs2019.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|x64"
+			else
+					vs-build "pugixml_vs2019.vcxproj" build "Release|ARM"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|ARM"
+			fi
+
 		fi
 
 	elif [ "$TYPE" == "android" ]; then

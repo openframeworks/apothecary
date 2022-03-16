@@ -365,10 +365,14 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
 			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
-		else
+		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
 			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+		elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
+			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v Dist/*.h $1/include

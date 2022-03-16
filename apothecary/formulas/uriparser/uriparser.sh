@@ -46,10 +46,16 @@ function build() {
 			vs-upgrade uriparser.sln
 		fi
 
+		if [[ $VS_VER -gt 16 ]]; then
+			vs-upgrade uriparser.sln
+		fi
+
 		if [ $ARCH == 32 ] ; then
 			vs-build uriparser.sln Build "Release|Win32"
 		elif [ $ARCH == 64 ] ; then
 			vs-build uriparser.sln Build "Release|x64"
+		elif [ $ARCH == "ARM" ] ; then
+			vs-build uriparser.sln Build "Release|ARM"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then

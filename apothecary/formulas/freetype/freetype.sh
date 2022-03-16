@@ -101,6 +101,8 @@ function build() {
 			vs-build freetype.sln Build "Release|Win32"
 		elif [ "$ARCH" == "64" ] ; then
 			vs-build freetype.sln Build "Release|x64"
+		elif [ "$ARCH" == "ARM" ] ; then
+			vs-build freetype.sln Build "Release|ARM"
 		fi
 		cd ../../../
 

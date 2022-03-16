@@ -41,6 +41,9 @@ function build() {
 		elif [ $ARCH == 64 ] ; then
 			vs-build "videoInput.sln" Build "Release|x64"
 			vs-build "videoInput.sln" Build "Debug|x64"
+		elif [ $ARCH == "ARM" ] ; then
+			vs-build "videoInput.sln" Build "Release|ARM"
+			vs-build "videoInput.sln" Build "Debug|ARM"
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd msys2
