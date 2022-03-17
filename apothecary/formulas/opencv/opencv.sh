@@ -593,6 +593,7 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|ARM"
       vs-build "OpenCV.sln" Build "Debug|ARM"
+    fi
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
