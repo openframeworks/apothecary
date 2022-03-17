@@ -56,19 +56,19 @@ function build() {
     		fi
         else
             if [ $ARCH == 32 ] ; then
-                cmake .. -G "Visual Studio $VS_VER"  
+                cmake .. -G "Visual Studio $VS_VER" -A Win32  
                 vs-build "ALL_BUILD.vcxproj"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug"
             elif [ $ARCH == 64 ] ; then
-                cmake .. -G "Visual Studio $VS_VER "  
+                cmake .. -G "Visual Studio $VS_VER " -A x64  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
             elif [ $ARCH == "ARM" ] ; then
-                cmake .. -G "Visual Studio $VS_VER -A ARM"  
+                cmake .. -G "Visual Studio $VS_VER" -A ARM  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|ARM"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM"
             elif [ $ARCH == "ARM64" ] ; then
-                cmake .. -G "Visual Studio $VS_VER -A ARM64"  
+                cmake .. -G "Visual Studio $VS_VER" -A ARM64  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|ARM64"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM64"
             fi

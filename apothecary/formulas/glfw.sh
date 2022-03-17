@@ -59,12 +59,12 @@ function build() {
 			elif [ $ARCH == "ARM" ] ; then
 				mkdir -p build_vs_arm
 				cd build_vs_arm
-				cmake .. -G "Visual Studio $VS_VER -A ARM"
+				cmake .. -G "Visual Studio $VS_VER" -A ARM
 				vs-build "GLFW.sln" Build "Release|ARM"
 			elif [ $ARCH == "ARM64" ] ; then
 				mkdir -p build_vs_arm64
 				cd build_vs_arm64
-				cmake .. -G "Visual Studio $VS_VER -A ARM64"
+				cmake .. -G "Visual Studio $VS_VER" -A ARM64
 				vs-build "GLFW.sln" Build "Release|ARM64"
 			fi
 		fi

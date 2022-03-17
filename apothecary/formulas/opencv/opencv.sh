@@ -212,7 +212,7 @@ function build() {
     if [ $ARCH == 32 ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
-      cmake .. -G "Visual Studio $VS_VER"\
+      cmake .. -G "Visual Studio $VS_VER" -A Win32 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
@@ -308,7 +308,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER " \
+      cmake .. -G "Visual Studio $VS_VER " -A x64\
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
@@ -404,7 +404,7 @@ function build() {
     elif [ $ARCH == "ARM64" ] ; then
       mkdir -p build_vs_arm64
       cd build_vs_arm64
-      cmake .. -G "Visual Studio $VS_VER -A ARM64" \
+      cmake .. -G "Visual Studio $VS_VER" -A ARM64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
@@ -500,7 +500,7 @@ function build() {
   elif [ $ARCH == "ARM" ] ; then
       mkdir -p build_vs_arm
       cd build_vs_arm
-      cmake .. -G "Visual Studio $VS_VER -A ARM" \
+      cmake .. -G "Visual Studio $VS_VER" -A ARM \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \

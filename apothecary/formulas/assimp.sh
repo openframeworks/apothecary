@@ -134,30 +134,30 @@ function build() {
             if [ $ARCH == 32 ] ; then
                 mkdir -p build_vs_32
                 cd build_vs_32
-                generatorName+=' -A Win32'
+                generatorName+=''
                 echo "generatorName $generatorName"
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName" -A Win32 $buildOpts
                 vs-build "Assimp.sln" build "Release|Win32"
             elif [ $ARCH == 64 ] ; then
                 mkdir -p build_vs_64
                 cd build_vs_64
                 generatorName+=''
                 echo "generatorName $generatorName"
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName"  -A x64 $buildOpts
                 vs-build "Assimp.sln" build "Release|x64"
             elif [ $ARCH == "ARM" ] ; then
                 mkdir -p build_vs_arm
                 cd build_vs_arm
-                generatorName+=' -A ARM'
+                generatorName+=' '
                 echo "generatorName $generatorName"
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName" -A ARM $buildOpts
                 vs-build "Assimp.sln" build "Release|ARM"
             elif [ $ARCH == "ARM64" ] ; then
                 mkdir -p build_vs_arm64
                 cd build_vs_arm64
-                generatorName+=' -A ARM64'
+                generatorName+=''
                 echo "generatorName $generatorName"
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName" -A ARM64 $buildOpts
                 vs-build "Assimp.sln" build "Release|ARM64"
             fi
         fi
