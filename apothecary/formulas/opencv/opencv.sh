@@ -703,7 +703,6 @@ function build() {
       -DBUILD_TESTS=OFF \
       -DWITH_ITT=${WITH_ITT} \
       -DBUILD_PERF_TESTS=OFF
-    fi
 
 
       echo "--------------------"
