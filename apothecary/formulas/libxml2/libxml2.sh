@@ -10,14 +10,15 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "li
 
 
 # define the version by sha
-VER=2.9.12
+VER=2.9.13
+URL=https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${VER}/libxml2-v${VER}.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    wget -v http://xmlsoft.org/sources/libxml2-${VER}.tar.gz
-    tar xzf libxml2-${VER}.tar.gz
-    mv libxml2-${VER} libxml2
-    rm libxml2-${VER}.tar.gz
+    wget -v ${URL}
+    tar xzf libxml2-v${VER}.tar.gz
+    mv libxml2-v${VER} libxml2
+    rm libxml2-v${VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
