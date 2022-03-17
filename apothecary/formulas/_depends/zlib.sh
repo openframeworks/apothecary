@@ -9,7 +9,6 @@ VER=1.2.11
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/archive/refs/tags
 GIT_TAG=v$VER
-VS_VER="16 2019"
 
 FORMULA_TYPES=( "vs" , "osx")
 
@@ -47,7 +46,7 @@ function build() {
 				cmake . -G "Visual Studio $VS_VER" -A Win32
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
-				cmake . -G "Visual Studio $VS_VER " -A x64
+				cmake . -G "Visual Studio $VS_VER" -A x64
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
 				cmake . -G "Visual Studio $VS_VER" -A ARM
