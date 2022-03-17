@@ -35,6 +35,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+     ./autogen.sh
     if [ "$TYPE" == "vs" ] ; then
         unset TMP
         unset TEMP
