@@ -31,7 +31,7 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $VS_VER -gt 15 ] ; then
+		if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
 				cmake . -G "Visual Studio $VS_VER Win32"
 				cmake --build . --config Release
