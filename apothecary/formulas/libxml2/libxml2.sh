@@ -11,7 +11,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "emscripten" "linux64" "linuxarmv6l" "li
 
 # define the version by sha
 VER=2.9.13
-URL=https://gitlab.gnome.org/GNOME/libxml2/-/archive/v${VER}/libxml2-v${VER}.tar.gz
+URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}/libxml2-v${VER}.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
