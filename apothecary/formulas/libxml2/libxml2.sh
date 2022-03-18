@@ -16,9 +16,9 @@ URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
 # download the source code and unpack it into LIB_NAME
 function download() {
     wget -v ${URL}
-    tar xzf v${VER}.tar.gz
-    mv v${VER} libxml2
-    rm v${VER}.tar.gz
+    tar xzf libxml2-${VER}.tar.gz
+    mv libxml2-${VER} libxml2
+    rm libxml2-${VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
