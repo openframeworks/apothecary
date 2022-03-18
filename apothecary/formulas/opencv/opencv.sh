@@ -202,8 +202,8 @@ function build() {
     python3 -m pip help
     python3 -m pip install --upgrade pip
 
-    python3 -VV
-    python3 -m pip install numpy
+    # python3 -VV
+    # python3 -m pip install numpy
 
 
     export PYTHON_VERSION_STRING=3.9.10
@@ -308,7 +308,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER " -A x64\
+      cmake .. -G "Visual Studio $VS_VER " -A x64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
