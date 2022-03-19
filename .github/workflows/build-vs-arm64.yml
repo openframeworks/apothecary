@@ -45,6 +45,6 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
-          ARCH: 64
+          ARCH: ARM64
           VS_VER: 16
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
