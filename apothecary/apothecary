@@ -1040,6 +1040,8 @@ function vs-build() {
 				DEFAULT_BUILD="Release|x64"
 			elif [ $ARCH == "ARM" ] ; then
 				DEFAULT_BUILD="Release|ARM"
+			elif [ $ARCH == "ARM64" ] ; then
+				DEFAULT_BUILD="Release|ARM64"
 			fi
 		fi
 
