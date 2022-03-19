@@ -7,10 +7,10 @@
 # uses CMake
 
 # define the version
-VER=5.2.2
+VER=5.1.6
 
 # tools for git use
-GIT_URL=https://github.com/assimp/assimp
+GIT_URL=https://github.com/danoli3/assimp
 GIT_TAG=
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
@@ -114,18 +114,7 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_BUILD_ASSIMP_TOOLS=0
             -DASSIMP_BUILD_X3D_IMPORTER=0
-            -DCMAKE_C_STANDARD=17 
-            -DCMAKE_CXX_STANDARD=17 
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON
-            -DCMAKE_CXX_EXTENSIONS=OFF
-            -DASSIMP_BUILD_STATIC_LIB=1
-            -DASSIMP_BUILD_TESTS=0
-            -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_STL_IMPORTER=0
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DCMAKE_SYSROOT=$SYSROOT"
+            -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
         if [ $VS_VER == 15 ] ; then
@@ -154,14 +143,14 @@ function build() {
                 cd build_vs_64
                 generatorName+=''
                 echo "generatorName $generatorName  -A x64"
-                cmake .. -G "$generatorName" -A x64 $buildOpts
+                cmake .. -G "$generatorName"  -A x64 $buildOpts
                 vs-build "Assimp.sln" build "Release|x64"
             elif [ $ARCH == "ARM" ] ; then
                 mkdir -p build_vs_arm
                 cd build_vs_arm
                 generatorName+=' '
                 echo "generatorName $generatorName -A ARM"
-                cmake .. -G "$generatorName " -A ARM $buildOpts
+                cmake .. -G "$generatorName" -A ARM $buildOpts
                 vs-build "Assimp.sln" build "Release|ARM"
             elif [ $ARCH == "ARM64" ] ; then
                 mkdir -p build_vs_arm64
@@ -239,6 +228,7 @@ function build() {
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
+            -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DCMAKE_BUILD_TYPE=Release \
             -DANDROID_ABI=$ABI \
