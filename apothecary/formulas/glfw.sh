@@ -33,7 +33,7 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $VS_VER -gt 15 ] ; then
+		if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
 				cd build_vs_32

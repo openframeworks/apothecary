@@ -44,7 +44,7 @@ function build() {
 		unset TEMP
 		cd scripts
 
-		if [[ $VS_VER -gt 14 ]]; then
+		if [[ $VS_VER == 14 ]]; then
 			if [ $ARCH == 32 ] ; then
 					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
@@ -52,7 +52,7 @@ function build() {
 					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
-		elif [[ $VS_VER -gt 13 ]]; then
+		elif [[ $VS_VER == 13 ]]; then
 			if [ $ARCH == 32 ] ; then
 					vs-build "pugixml_vs2015.vcxproj" build "Release"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug"

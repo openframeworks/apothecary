@@ -79,7 +79,7 @@ function build() {
 		unset TMP
 		unset TEMP
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
-	    if [ $VS_VER -gt 15 ] ; then
+	    if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
 				cd build_vs_32
