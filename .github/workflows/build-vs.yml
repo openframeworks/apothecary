@@ -38,7 +38,7 @@ jobs:
       #- name: Install StrawberryPerl
       #  run: choco install -y strawberryperl
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1.1
+        uses: microsoft/setup-msbuild@v1.1
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
