@@ -21,7 +21,7 @@ installPackages(){
         echo "$UBUNTU_VERSION doesn\'t need ppa"
     fi
     sudo apt-get update -q
-    sudo apt-get -y install multistrap unzip coreutils gperf
+    sudo apt-get -y install multistrap unzip coreutils gperf build-essential
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
     if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION"=="14.04" ]; then
         sudo sed -i s/\$forceyes//g /usr/sbin/multistrap

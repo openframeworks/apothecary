@@ -21,7 +21,7 @@ createArchImg(){
     #sudo ./arch-bootstrap.sh archlinux
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
-    sudo apt-get install -y coreutils gperf
+    sudo apt-get install -y coreutils gperf build-essential
 	cd $HOME
 	wget -v http://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
 	mkdir archlinux
