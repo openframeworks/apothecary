@@ -137,28 +137,32 @@ function build() {
                 generatorName+=''
                 echo "generatorName $generatorName -A Win32"
                 cmake .. -G "$generatorName" -A Win32 $buildOpts
-                vs-build "Assimp.sln" build "Release|Win32"
+                cmake --build . --config release
+                # vs-build "Assimp.sln" build "Release|Win32"
             elif [ $ARCH == 64 ] ; then
                 mkdir -p build_vs_64
                 cd build_vs_64
                 generatorName+=''
                 echo "generatorName $generatorName  -A x64"
                 cmake .. -G "$generatorName"  -A x64 $buildOpts
-                vs-build "Assimp.sln" build "Release|x64"
+                cmake --build . --config release
+                # vs-build "Assimp.sln" build "Release|x64"
             elif [ $ARCH == "ARM" ] ; then
                 mkdir -p build_vs_arm
                 cd build_vs_arm
                 generatorName+=' '
                 echo "generatorName $generatorName -A ARM"
                 cmake .. -G "$generatorName" -A ARM $buildOpts
-                vs-build "Assimp.sln" build "Release|ARM"
+                cmake --build . --config release
+                # vs-build "Assimp.sln" build "Release|ARM"
             elif [ $ARCH == "ARM64" ] ; then
                 mkdir -p build_vs_arm64
                 cd build_vs_arm64
                 generatorName+=''
                 echo "generatorName $generatorName -A ARM64"
                 cmake .. -G "$generatorName" -A ARM64 $buildOpts
-                vs-build "Assimp.sln" build "Release|ARM64"
+                cmake --build . --config release
+                #vs-build "Assimp.sln" build "Release|ARM64"
             fi
         fi
         cd ..
