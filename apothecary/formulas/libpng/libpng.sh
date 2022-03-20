@@ -59,9 +59,9 @@ function prepare() {
 		fi
 		#CURRENTPATH=`pwd`
 		cp -vr $FORMULA_DIR/vs2015 projects/
-		# ls ../zlib
-		# ls ../zlib/Release
-		# cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+		ls ../zlib
+		ls ../zlib/Release
+		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	fi
 
 
@@ -101,32 +101,40 @@ function build() {
 		mkdir build
 		cd build
 
+		ROOT=${PWD}/..
+		# export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
+		# export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
+
+
+		export ZLIB_ROOT=../zlib
+		mkdir -p build
+
 		if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win32"
+				cmake .. -G "Visual Studio $VS_VER Win32" -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win64"
+				cmake .. -G "Visual Studio $VS_VER Win64" -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
-				cmake .. -G "Visual Studio $VS_VER ARM"
+				cmake .. -G "Visual Studio $VS_VER ARM" -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
-				cmake .. -G "Visual Studio $VS_VER ARM64"
+				cmake .. -G "Visual Studio $VS_VER ARM64" -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A Win32
+				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A x64
+				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A ARM
+				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64
+				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT}
 				cmake --build . --config Release
 			fi
 		fi
