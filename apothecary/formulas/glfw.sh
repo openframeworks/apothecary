@@ -49,12 +49,12 @@ function build() {
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
 				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER"
+				cmake .. -G "Visual Studio $VS_VER" -A Win32
 				vs-build "GLFW.sln"
 			elif [ $ARCH == 64 ] ; then
 				mkdir -p build_vs_64
 				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER "
+				cmake .. -G "Visual Studio $VS_VER" -A x64
 				vs-build "GLFW.sln" Build "Release|x64"
 			elif [ $ARCH == "ARM" ] ; then
 				mkdir -p build_vs_arm
