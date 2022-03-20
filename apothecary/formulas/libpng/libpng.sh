@@ -59,9 +59,9 @@ function prepare() {
 		fi
 		#CURRENTPATH=`pwd`
 		cp -vr $FORMULA_DIR/vs2015 projects/
-		ls ../zlib
-		ls ../zlib/Release
-		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+		# ls ../zlib
+		# ls ../zlib/Release
+		# cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	fi
 
 
