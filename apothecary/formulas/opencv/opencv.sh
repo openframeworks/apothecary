@@ -209,9 +209,13 @@ function build() {
     export PYTHON_VERSION_STRING=3.9.10
     export PYTHON_EXECUTABLE=C:/hostedtoolcache/windows/Python/3.9.10/x64/python.exe
 
+
+
     if [ $ARCH == 32 ] ; then
       mkdir -p build_vs_32
       cd build_vs_32
+      echo "Visual Studio $VS_VER -A Win32 "
+
       cmake .. -G "Visual Studio $VS_VER" -A Win32 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
@@ -303,12 +307,19 @@ function build() {
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF  
       # | tee ${LOG}
+      echo "CMAKE Successful"
+      echo "--------------------"
+      echo "Running make clean"
+
+      make clean 2>&1 | tee -a ${LOG}
+      echo "Make Clean Successful"
       vs-build "OpenCV.sln" Build "Release|Win32"
       vs-build "OpenCV.sln" Build "Debug|Win32"
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER " -A x64 \
+      echo "Visual Studio $VS_VER -A x64 "
+      cmake .. -G "Visual Studio $VS_VER" -A x64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
@@ -404,6 +415,8 @@ function build() {
     elif [ $ARCH == "ARM64" ] ; then
       mkdir -p build_vs_arm64
       cd build_vs_arm64
+      echo "Visual Studio $VS_VER -A ARM64 "
+
       cmake .. -G "Visual Studio $VS_VER" -A ARM64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
@@ -500,6 +513,7 @@ function build() {
   elif [ $ARCH == "ARM" ] ; then
       mkdir -p build_vs_arm
       cd build_vs_arm
+      echo "Visual Studio $VS_VER -A ARM "
       cmake .. -G "Visual Studio $VS_VER" -A ARM \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
