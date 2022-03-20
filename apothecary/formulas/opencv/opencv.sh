@@ -197,10 +197,11 @@ function build() {
 
     python3 -m ensurepip --upgrade
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-    # python3 -m pip install numpy
+    
     python3 get-pip.py
     python3 -m pip help
     python3 -m pip install --upgrade pip
+    python3 -m pip install numpy
 
     # python3 -VV
     # python3 -m pip install numpy
