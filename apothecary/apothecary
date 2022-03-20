@@ -357,6 +357,10 @@ if [ "$TYPE" = "vs" ]; then
             PLATFORM=x86
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
+        elif [ $ARCH == "ARM64" ]; then
+            PLATFORM=ARM64
+        elif [ $ARCH == "ARM" ]; then
+            PLATFORM=ARM
         fi
 
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
