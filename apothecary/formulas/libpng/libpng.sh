@@ -102,11 +102,10 @@ function build() {
 		cd build
 
 		ROOT=${PWD}/..
-		# export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		# export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
+		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
+		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
 
-
-		export ZLIB_ROOT=../zlib
+		
 		mkdir -p build
 
 		if [ $VS_VER == 15 ] ; then
@@ -125,15 +124,19 @@ function build() {
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
+				export ZLIB_ROOT=../cairo/lib/vs/x32/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
+				export ZLIB_ROOT=../cairo/lib/vs/x64/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
+				export ZLIB_ROOT=../cairo/lib/vs/arm/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
+				export ZLIB_ROOT=../cairo/lib/vs/arm64/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			fi
