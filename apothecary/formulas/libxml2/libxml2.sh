@@ -4,9 +4,9 @@
 # XML parser
 # http://xmlsoft.org/index.html
 #
-# uses an automake build system
+# uses an automake build system # required for svg 
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "android" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "android" "emscripten")
 
 
 # define the version by sha
@@ -27,6 +27,7 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
+
     if [ "$TYPE" == "vs" ]; then
         cp -fr $FORMULA_DIR/vs2015/*.h include/libxml/
         cp -r $FORMULA_DIR/vs2015/* win32/VC10/
@@ -43,10 +44,20 @@ function build() {
 
         vs-upgrade libxml2.vcxproj
 
-        if [ $ARCH == 32 ] ; then
-            vs-build libxml2.vcxproj Build "Release|Win32"
+        if [ $VS_VER == 15 ] ; then
+            if [ $ARCH == 32 ] ; then
+                vs-build libxml2.vcxproj Build "Release|Win32"
+            else
+                vs-build libxml2.vcxproj Build "Release|x64"
+            fi
         else
-            vs-build libxml2.vcxproj Build "Release|x64"
+            if [ $ARCH == 32 ] ; then
+                vs-build libxml2.vcxproj Build "Release|Win32"
+            elif [ $ARCH == 64 ] ; then
+                vs-build libxml2.vcxproj Build "Release|x64"
+            elif [ $ARCH == "ARM64" ] ; then
+                vs-build libxml2.vcxproj Build "Release|ARM64"
+            fi
         fi
 
     elif [ "$TYPE" == "android" ]; then
