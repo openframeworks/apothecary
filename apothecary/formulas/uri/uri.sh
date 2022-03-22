@@ -312,6 +312,14 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs64/src/Release/network-uri.lib $1/lib/$TYPE/x64/
 			cp -v build_vs64/src/Debug/network-uri.lib $1/lib/$TYPE/x64/network-uri_debug.lib
+        elif [ $ARCH == "ARM64" ] ; then
+            mkdir -p $1/lib/$TYPE/ARM64
+            cp -v build_vs_arm64/src/Release/network-uri.lib $1/lib/$TYPE/ARM64/
+            cp -v build_vs_arm64/src/Debug/network-uri.lib $1/lib/$TYPE/ARM64/network-uri_debug.lib
+        elif [ $ARCH == "ARM" ] ; then
+            mkdir -p $1/lib/$TYPE/ARM
+            cp -v build_vs_arm/src/Release/network-uri.lib $1/lib/$TYPE/ARM/
+            cp -v build_vs_arm/src/Debug/network-uri.lib $1/lib/$TYPE/ARM/network-uri_debug.lib
 		fi
 		
 	elif [ "$TYPE" == "osx" ]; then

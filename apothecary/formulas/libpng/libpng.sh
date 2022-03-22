@@ -125,16 +125,16 @@ function build() {
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
 				cmake --build . --config Release
 			fi
 		fi
@@ -165,9 +165,12 @@ function copy() {
 		if [ "$ARCH" == 32 ]; then
 			mkdir -p $1/../cairo/lib/vs/Win32/
 			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib $1/../cairo/lib/vs/Win32/
-		else
+		elif [ "$ARCH" == 64 ]; then
 			mkdir -p $1/../cairo/lib/vs/x64/
 			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/x64/
+		elif [ "$ARCH" == "ARM64" ]; then
+			mkdir -p $1/../cairo/lib/vs/ARM64/
+			cp ../libpng/projects/vs2015/ARM64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/ARM64/
 		fi
 	else
 		mkdir -p $1/include

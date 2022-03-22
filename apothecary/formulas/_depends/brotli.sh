@@ -68,8 +68,12 @@ function copy() {
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			PLATFORM="Win32"
-		else
+		elif [ $ARCH == 64 ] ; then
 			PLATFORM="x64"
+		elif [ $ARCH == "ARM64" ] ; then
+			PLATFORM="ARM64"
+		elif [ $ARCH == "ARM" ] ; then
+			PLATFORM="ARM"
 		fi
 		# mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
 		# cp -v Release/zlibstatic.lib $1/../cairo/lib/$TYPE/$PLATFORM/zlib.lib

@@ -57,6 +57,8 @@ function build() {
                 vs-build libxml2.vcxproj Build "Release|x64"
             elif [ $ARCH == "ARM64" ] ; then
                 vs-build libxml2.vcxproj Build "Release|ARM64"
+            elif [ $ARCH == "ARM" ] ; then
+                vs-build libxml2.vcxproj Build "Release|ARM"
             fi
         fi
 
@@ -229,6 +231,12 @@ function copy() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
+         elif [ $ARCH == "ARM64" ] ; then
+            mkdir -p $1/lib/$TYPE/ARM64
+            cp -v "win32/VC10/ARM64/Release/libxml2.lib" $1/lib/$TYPE/ARM64/
+        elif [ $ARCH == "ARM" ] ; then
+            mkdir -p $1/lib/$TYPE/ARM
+            cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
         fi
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         # copy lib

@@ -179,6 +179,14 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
 			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib
+		elif [ $ARCH == "ARM64" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM64
+			cp -v build_vs_arm64/Release/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudio.lib
+			cp -v build_vs_arm64/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudioD.lib
+		elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v build_vs_arm/Release/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudio.lib
+			cp -v build_vs_arm/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudioD.lib
 		fi
 
 

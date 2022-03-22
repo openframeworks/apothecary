@@ -121,6 +121,12 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
+		elif [ $ARCH == "ARM64" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM64
+			cp -v build_vs_arm64/src/Release/glfw3.lib $1/lib/$TYPE/ARM64/glfw3.lib
+		elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v build_vs_arm/src/Release/glfw3.lib $1/lib/$TYPE/ARM/glfw3.lib
 		fi
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
