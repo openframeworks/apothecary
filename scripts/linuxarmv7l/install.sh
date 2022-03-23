@@ -23,6 +23,7 @@ createArchImg(){
     sudo apt-get update -q
     sudo apt-get install -y coreutils gperf 
     sudo apt-get install -y multistrap unzip build-essential libc6-dev
+    sudo apt-get install -y autoconf automake pkgconf rsync
 	cd $HOME
 	wget -v http://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
 	mkdir archlinux
