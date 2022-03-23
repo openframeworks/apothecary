@@ -8,6 +8,7 @@ docker exec -i emscripten apt install -y ccache
 docker exec -i emscripten apt install -y build-essential
 docker exec -i emscripten apt install -y autoconf
 docker exec -i emscripten apt install -y automake
+docker exec -i emscripten apt install -y pkgconf
 docker exec -i emscripten apt install -y libtool
 docker exec -i emscripten sh -c "echo \$PATH"
 
