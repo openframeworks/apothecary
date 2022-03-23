@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "a
 
 
 # define the version by sha
-VER=2.9.13
+VER=2.9.12
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
 
 # download the source code and unpack it into LIB_NAME
@@ -146,7 +146,7 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-        emconfigure ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         emmake make clean
         emmake make -j${PARALLEL_MAKE}
 
