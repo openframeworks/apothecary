@@ -36,8 +36,9 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-     ./autogen.sh
+     
     if [ "$TYPE" == "vs" ] ; then
+        ./autogen.sh
         unset TMP
         unset TEMP
         cd win32/VC10
@@ -63,6 +64,7 @@ function build() {
         fi
 
     elif [ "$TYPE" == "android" ]; then
+        ./autogen.sh
         cp $FORMULA_DIR/config.h .
 
         find . -name "test*.c" | xargs rm
@@ -135,6 +137,7 @@ function build() {
         #make clean
         #make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "osx" ]; then
+        ./autogen.sh
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
@@ -152,6 +155,7 @@ function build() {
 
 
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
+        ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
