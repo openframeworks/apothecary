@@ -178,19 +178,53 @@ function build() {
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
-        make clean
-        #echo "int main(){ return 0; }" > xmllint.c
-        #echo "int main(){ return 0; }" > xmlcatalog.c
-        #echo "int main(){ return 0; }" > testSchemas.c
-        #echo "int main(){ return 0; }" > testRelax.c
-        #echo "int main(){ return 0; }" > testSAX.c
-        #echo "int main(){ return 0; }" > testHTML.c
-        #echo "int main(){ return 0; }" > testXPath.c
-        #echo "int main(){ return 0; }" > testURI.c
-        #echo "int main(){ return 0; }" > testThreads.c
-        #echo "int main(){ return 0; }" > testC14N.c
-        make -j${PARALLEL_MAKE}
+
+        mkdir -p build_$ABI
+        cd build_$ABI
+
+        cmake .. \
+            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=NO \
+            -DBUILD_SHARED_LIBS=NO \
+            -DLIBXML2_WITH_FTP=NO \
+            -DLIBXML2_WITH_HTTP=NO \
+            -DLIBXML2_WITH_HTML=NO \
+            -DLIBXML2_WITH_ICONV=NO \
+            -DLIBXML2_WITH_LEGACY=NO \
+            -DLIBXML2_WITH_MODULES=NO \
+            -DLIBXML_THREAD_ENABLED=NO \
+            -DLIBXML2_WITH_OUTPUT=YES \
+            -DLIBXML2_WITH_PYTHON=NO \
+            -DLIBXML2_WITH_DEBUG=NO \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_TESTS=NO \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBXML2_WITH_THREAD_ALLOC=NO \
+            -G 'Unix Makefiles' 
+            make -j${PARALLEL_MAKE} VERBOSE=1
+
+        cd ..
+
+        # ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
+        # make clean
+        # #echo "int main(){ return 0; }" > xmllint.c
+        # #echo "int main(){ return 0; }" > xmlcatalog.c
+        # #echo "int main(){ return 0; }" > testSchemas.c
+        # #echo "int main(){ return 0; }" > testRelax.c
+        # #echo "int main(){ return 0; }" > testSAX.c
+        # #echo "int main(){ return 0; }" > testHTML.c
+        # #echo "int main(){ return 0; }" > testXPath.c
+        # #echo "int main(){ return 0; }" > testURI.c
+        # #echo "int main(){ return 0; }" > testThreads.c
+        # #echo "int main(){ return 0; }" > testC14N.c
+        # make -j${PARALLEL_MAKE}
 
 
     elif [ "$TYPE" == "osx" ]; then
