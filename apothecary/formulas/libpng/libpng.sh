@@ -58,7 +58,7 @@ function prepare() {
 			echoError "libpng needs zlib, please update that formula first"
 		fi
 		#CURRENTPATH=`pwd`
-		cp -vr $FORMULA_DIR/vs2015 projects/
+		#cp -vr $FORMULA_DIR/vs2015 projects/
 		# ls ../zlib
 		# ls ../zlib/Release
 		# cp ../zlib/Release/zlib.lib ../zlib/zlib.lib

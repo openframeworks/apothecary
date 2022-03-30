@@ -164,6 +164,7 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        ./autogen.sh
         emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         emmake make clean
         emmake make -j${PARALLEL_MAKE}
@@ -228,9 +229,10 @@ function build() {
 
 
     elif [ "$TYPE" == "osx" ]; then
+
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-
+        ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
@@ -247,6 +249,7 @@ function build() {
             echo "Compiling for $IOS_ARCH"
             source ../../ios_configure.sh $TYPE $IOS_ARCH
             local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
+            ./autogen.sh
             ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
             make clean
             make -j${PARALLEL_MAKE}
