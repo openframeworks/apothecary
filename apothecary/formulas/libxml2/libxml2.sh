@@ -80,15 +80,7 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=NO'
 
         cmake .. -G "Visual Studio 16 2019" ${DEFS} -A ${PLATFORM}
-        if [ $ARCH == 32 ] ; then
-            vs-build libxml2.vcxproj Build "Release|Win32"
-        elif [ $ARCH == 64 ] ; then
-            vs-build libxml2.vcxproj Build "Release|x64"
-        elif [ $ARCH == "ARM64" ] ; then
-            vs-build libxml2.vcxproj Build "Release|ARM64"
-        elif [ $ARCH == "ARM" ] ; then
-            vs-build libxml2.vcxproj Build "Release|ARM"
-        fi
+        cmake --build . --config Release
 
         cd ..
             
@@ -100,14 +92,14 @@ function build() {
         find . -name "run*.c" | xargs rm
         
         source ../../android_configure.sh $ABI cmake
-        mkdir -p cmake
-        cd cmake
-        # ln -s .. libxml2
+        # mkdir -p cmake
+        # cd cmake
+        # # ln -s .. libxml2
 
-        cp -fr $FORMULA_DIR/CMakeLists.txt .
-        #wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
-        perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
-        cd ..
+        # cp -fr $FORMULA_DIR/CMakeLists.txt .
+        # #wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
+        # perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
+        # cd ..
 
         mkdir -p build_$ABI
         cd build_$ABI
