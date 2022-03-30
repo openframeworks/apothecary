@@ -4,7 +4,7 @@
 # http://zlib.net/
 
 # define the version
-VER=1.2.11
+VER=1.2.12
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/archive/refs/tags
