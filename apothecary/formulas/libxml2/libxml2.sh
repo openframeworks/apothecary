@@ -38,31 +38,60 @@ function prepare() {
 function build() {
      
     if [ "$TYPE" == "vs" ] ; then
-        ./autogen.sh
-        unset TMP
-        unset TEMP
-        cd win32/VC10
 
-        vs-upgrade libxml2.vcxproj
-
-        if [ $VS_VER == 15 ] ; then
-            if [ $ARCH == 32 ] ; then
-                vs-build libxml2.vcxproj Build "Release|Win32"
-            else
-                vs-build libxml2.vcxproj Build "Release|x64"
-            fi
-        else
-            if [ $ARCH == 32 ] ; then
-                vs-build libxml2.vcxproj Build "Release|Win32"
-            elif [ $ARCH == 64 ] ; then
-                vs-build libxml2.vcxproj Build "Release|x64"
-            elif [ $ARCH == "ARM64" ] ; then
-                vs-build libxml2.vcxproj Build "Release|ARM64"
-            elif [ $ARCH == "ARM" ] ; then
-                vs-build libxml2.vcxproj Build "Release|ARM"
-            fi
+        if [ $ARCH == 32 ] ; then
+            PLATFORM="Win32"
+        elif [ $ARCH == 64 ] ; then
+            PLATFORM="x64"
+        elif [ $ARCH == "ARM64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "ARM" ] ; then
+            PLATFORM="ARM"
         fi
 
+        mkdir -p build_$PLATFORM
+        cd build_$PLATFORM
+
+
+        DEFS='-DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=NO \
+            -DBUILD_SHARED_LIBS=NO \
+            -DLIBXML2_WITH_FTP=NO \
+            -DLIBXML2_WITH_HTTP=NO \
+            -DLIBXML2_WITH_HTML=NO \
+            -DLIBXML2_WITH_ICONV=NO \
+            -DLIBXML2_WITH_LEGACY=NO \
+            -DLIBXML2_WITH_MODULES=NO \
+            -DLIBXML_THREAD_ENABLED=NO \
+            -DLIBXML2_WITH_OUTPUT=YES \
+            -DLIBXML2_WITH_PYTHON=NO \
+            -DLIBXML2_WITH_DEBUG=NO \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_TESTS=NO \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBXML2_WITH_THREAD_ALLOC=NO'
+
+        cmake .. -G "Visual Studio 16 2019" ${DEFS} -A ${PLATFORM}
+        if [ $ARCH == 32 ] ; then
+            vs-build libxml2.vcxproj Build "Release|Win32"
+        elif [ $ARCH == 64 ] ; then
+            vs-build libxml2.vcxproj Build "Release|x64"
+        elif [ $ARCH == "ARM64" ] ; then
+            vs-build libxml2.vcxproj Build "Release|ARM64"
+        elif [ $ARCH == "ARM" ] ; then
+            vs-build libxml2.vcxproj Build "Release|ARM"
+        fi
+
+        cd ..
+            
     elif [ "$TYPE" == "android" ]; then
         ./autogen.sh
         cp $FORMULA_DIR/config.h .
@@ -122,20 +151,6 @@ function build() {
 
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
-
-        # unlink cmake/libxml2
-
-        #source ../../android_configure.sh $ABI
-        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        #wget http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-        #if [ "$ARCH" == "armv7" ]; then
-        #    HOST=armv7a-linux-android
-        #elif [ "$ARCH" == "x86" ]; then
-        #    HOST=x86-linux-android
-        #fi
-        #./configure --host=$HOST --without-lzma --without-zlib --disable-shared --enable-static --with-sysroot=$SYSROOT --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        #make clean
-        #make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "osx" ]; then
         ./autogen.sh
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
