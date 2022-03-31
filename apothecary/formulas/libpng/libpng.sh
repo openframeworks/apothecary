@@ -110,34 +110,34 @@ function build() {
 
 		if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win32" -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER Win32" -DZLIB_ROOT=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win64" -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER Win64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
-				cmake .. -G "Visual Studio $VS_VER ARM" -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER ARM" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
-				cmake .. -G "Visual Studio $VS_VER ARM64" -DZLIB_ROOT=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER ARM64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/x32/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == 64 ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/x64/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM" ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/arm/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			elif [ $ARCH == "ARM64" ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/arm64/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT}
+				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			fi
 		fi

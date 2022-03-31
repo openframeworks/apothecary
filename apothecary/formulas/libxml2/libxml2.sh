@@ -177,8 +177,8 @@ function build() {
 
         cmake .. \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -Wno-implicit-function-declaration " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -Wno-implicit-function-declaration " \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
