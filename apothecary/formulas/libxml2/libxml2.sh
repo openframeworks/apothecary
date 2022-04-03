@@ -171,6 +171,17 @@ function build() {
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
 
+        echo "int main(){ return 0; }" > xmllint.c
+        echo "int main(){ return 0; }" > xmlcatalog.c
+        echo "int main(){ return 0; }" > testSchemas.c
+        echo "int main(){ return 0; }" > testRelax.c
+        echo "int main(){ return 0; }" > testSAX.c
+        echo "int main(){ return 0; }" > testHTML.c
+        echo "int main(){ return 0; }" > testXPath.c
+        echo "int main(){ return 0; }" > testURI.c
+        echo "int main(){ return 0; }" > testThreads.c
+        echo "int main(){ return 0; }" > testC14N.c
+
         mkdir -p build_$ABI
         cd build_$ABI
 
@@ -178,6 +189,8 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17  " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 " \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -200,22 +213,14 @@ function build() {
             -DLIBXML2_WITH_SCHEMATRON=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -G 'Unix Makefiles' 
+
             make -j${PARALLEL_MAKE} VERBOSE=1
 
         cd ..
 
         # ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         # make clean
-        # #echo "int main(){ return 0; }" > xmllint.c
-        # #echo "int main(){ return 0; }" > xmlcatalog.c
-        # #echo "int main(){ return 0; }" > testSchemas.c
-        # #echo "int main(){ return 0; }" > testRelax.c
-        # #echo "int main(){ return 0; }" > testSAX.c
-        # #echo "int main(){ return 0; }" > testHTML.c
-        # #echo "int main(){ return 0; }" > testXPath.c
-        # #echo "int main(){ return 0; }" > testURI.c
-        # #echo "int main(){ return 0; }" > testThreads.c
-        # #echo "int main(){ return 0; }" > testC14N.c
+       
         # make -j${PARALLEL_MAKE}
 
 

@@ -51,7 +51,7 @@ function build() {
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
                 
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-
+		./autogen.sh
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
@@ -64,9 +64,21 @@ function build() {
 		make clean
 		make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
-		sed -i s/-MD/-MT/ Makefile.win32.common
-		cd pixman
+		# sed -i s/-MD/-MT/ Makefile.win32.common
+		# cd pixman
+		if [ $ARCH == 32 ] ; then
+            PLATFORM="Win32"
+        elif [ $ARCH == 64 ] ; then
+            PLATFORM="x64"
+        elif [ $ARCH == "ARM64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "ARM" ] ; then
+            PLATFORM="ARM"
+        fi
+		./autogen.sh
 		with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
+
+
 	fi
 }
 
@@ -74,10 +86,14 @@ function build() {
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
-			PLATFORM="Win32"
-		else
-			PLATFORM="x64"
-		fi
+            PLATFORM="Win32"
+        elif [ $ARCH == 64 ] ; then
+            PLATFORM="x64"
+        elif [ $ARCH == "ARM64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "ARM" ] ; then
+            PLATFORM="ARM"
+        fi
 		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
 		cp -v pixman/release/pixman-1.lib $1/../cairo/lib/$TYPE/$PLATFORM/
 	else # osx
