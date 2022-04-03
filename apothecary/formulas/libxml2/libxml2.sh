@@ -53,9 +53,7 @@ function build() {
         cd build_$PLATFORM
 
 
-        DEFS='-DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_SYSROOT=$SYSROOT \
-            -DCMAKE_C_STANDARD=17 \
+        DEFS='-DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -73,7 +71,7 @@ function build() {
             -DLIBXML2_WITH_OUTPUT=OFF \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
@@ -136,10 +134,10 @@ function build() {
             -DLIBXML2_WITH_OUTPUT=OFF \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_TESTS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DLIBXML2_WITH_THREAD_ALLOC=NO \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -G 'Unix Makefiles' 
 
         make -j${PARALLEL_MAKE} VERBOSE=1
@@ -177,8 +175,6 @@ function build() {
         cd build_$ABI
 
         cmake .. \
-            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_SYSROOT=$SYSROOT \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -197,7 +193,7 @@ function build() {
             -DLIBXML2_WITH_OUTPUT=OFF \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
@@ -235,34 +231,75 @@ function build() {
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
+
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
-        for IOS_ARCH in ${IOS_ARCHS}; do
-            echo
-            echo
-            echo "Compiling for $IOS_ARCH"
-            source ../../ios_configure.sh $TYPE $IOS_ARCH
-            local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
-            ./autogen.sh
-            ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-            make clean
-            make -j${PARALLEL_MAKE}
-            make install
-        done
 
-        cp -r build/$TYPE/arm64/* build/$TYPE/
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        mkdir -p install
 
-        if [ "$TYPE" == "ios" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-                         build/$TYPE/armv7/lib/libxml2.a \
-                         build/$TYPE/arm64/lib/libxml2.a \
-                        -output build/$TYPE/lib/libxml2.a
-        elif [ "$TYPE" == "tvos" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-                         build/$TYPE/arm64/lib/libxml2.a \
-                        -output build/$TYPE/lib/libxml2.a
-        fi
+        cmake .. \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_MIN_SDK_VER} \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_UNICODE=ON \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DLIBXML2_WITH_ZLIB=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=OFF \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_DOCB=OFF \
+            -DLIBXML2_WITH_SCHEMATRON=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR=
+            -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DSDK_VERSION=$IOS_MIN_SDK_VER
+            # make -j${PARALLEL_MAKE} VERBOSE=1
+             cmake --build . --config Release
+             # cmake --install . --config Release
+
+        cd ..
+
+        # for IOS_ARCH in ${IOS_ARCHS}; do
+        #     echo
+        #     echo
+        #     echo "Compiling for $IOS_ARCH"
+        #     source ../../ios_configure.sh $TYPE $IOS_ARCH
+        #     local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
+        #     ./autogen.sh
+        #     ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        #     make clean
+        #     make -j${PARALLEL_MAKE}
+        #     make install
+        # done
+
+        # cp -r build/$TYPE/arm64/* build/$TYPE/
+
+        # if [ "$TYPE" == "ios" ]; then
+        #     lipo -create build/$TYPE/x86_64/lib/libxml2.a \
+        #                  build/$TYPE/armv7/lib/libxml2.a \
+        #                  build/$TYPE/arm64/lib/libxml2.a \
+        #                 -output build/$TYPE/lib/libxml2.a
+        # elif [ "$TYPE" == "tvos" ]; then
+        #     lipo -create build/$TYPE/x86_64/lib/libxml2.a \
+        #                  build/$TYPE/arm64/lib/libxml2.a \
+        #                 -output build/$TYPE/lib/libxml2.a
+        # fi
     fi
 }
 
