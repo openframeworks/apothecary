@@ -189,8 +189,8 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17  " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 " \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
