@@ -68,7 +68,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
@@ -131,7 +131,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
@@ -203,7 +203,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
@@ -263,7 +263,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
