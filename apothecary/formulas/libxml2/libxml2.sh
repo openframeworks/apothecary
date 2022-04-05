@@ -70,6 +70,7 @@ function build() {
             -DLIBXML_THREAD_ENABLED=OFF \
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
@@ -135,6 +136,7 @@ function build() {
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
@@ -208,6 +210,7 @@ function build() {
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
@@ -269,6 +272,7 @@ function build() {
             -DLIBXML2_WITH_DEBUG=OFF \
             -DLIBXML2_WITH_THREADS=OFF \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
