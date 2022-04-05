@@ -182,10 +182,10 @@ function build() {
         echo "int main(){ return 0; }" > testThreads.c
         echo "int main(){ return 0; }" > testC14N.c
 
-        mkdir -p build_$TYPE
-        cd build_$TYPE
+        # mkdir -p build_$TYPE
+        # cd build_$TYPE
 
-        cmake .. \
+        cmake  \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -212,6 +212,7 @@ function build() {
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
             -G 'Unix Makefiles' 
 
             make -j${PARALLEL_MAKE} VERBOSE=1
@@ -266,13 +267,13 @@ function build() {
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_THREADS=OFF \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_LIBDIR=
+            -DCMAKE_INSTALL_LIBDIR="" \
             -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DSDK_VERSION=$IOS_MIN_SDK_VER
             # make -j${PARALLEL_MAKE} VERBOSE=1
              cmake --build . --config Release
