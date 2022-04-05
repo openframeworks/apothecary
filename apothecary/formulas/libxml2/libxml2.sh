@@ -318,19 +318,35 @@ function copy() {
     cp -Rv include/libxml/* $1/include/libxml/
 
     if [ "$TYPE" == "vs" ] ; then
+
         if [ $ARCH == 32 ] ; then
-            mkdir -p $1/lib/$TYPE/Win32
-            cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/Win32/
+            PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
-            mkdir -p $1/lib/$TYPE/x64
-            cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
-         elif [ $ARCH == "ARM64" ] ; then
-            mkdir -p $1/lib/$TYPE/ARM64
-            cp -v "win32/VC10/ARM64/Release/libxml2.lib" $1/lib/$TYPE/ARM64/
+            PLATFORM="x64"
+        elif [ $ARCH == "ARM64" ] ; then
+            PLATFORM="ARM64"
         elif [ $ARCH == "ARM" ] ; then
-            mkdir -p $1/lib/$TYPE/ARM
-            cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
+            PLATFORM="ARM"
         fi
+
+        
+        cp -Rv build_$ABI/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
+
+        # if [ $ARCH == 32 ] ; then
+        #     mkdir -p $1/lib/$TYPE/Win32
+        #     cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/Win32/
+        # elif [ $ARCH == 64 ] ; then
+        #     mkdir -p $1/lib/$TYPE/x64
+        #     cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
+        #  elif [ $ARCH == "ARM64" ] ; then
+        #     mkdir -p $1/lib/$TYPE/ARM64
+        #     cp -v "win32/VC10/ARM64/Release/libxml2.lib" $1/lib/$TYPE/ARM64/
+        # elif [ $ARCH == "ARM" ] ; then
+        #     mkdir -p $1/lib/$TYPE/ARM
+        #     cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
+        # fi
+
+
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         # copy lib
         cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
@@ -338,6 +354,10 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
         # copy lib
         cp -Rv build_$ABI/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+        mkdir -p $1/lib/$TYPE
+        # copy lib
+        cp -Rv build_$TYPE/libxml2.a $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
