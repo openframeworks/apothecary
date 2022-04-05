@@ -358,7 +358,7 @@ function copy() {
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
-        cp -Rv build_$TYPE/libxml2.a $1/lib/$TYPE/libxml2.a
+        cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
