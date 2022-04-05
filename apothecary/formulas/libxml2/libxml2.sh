@@ -100,8 +100,8 @@ function build() {
         # perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
         # cd ..
 
-        mkdir -p build_$ABI
-        cd build_$ABI
+        mkdir -p build_$TYPE_$ABI
+        cd build_$TYPE_$ABI
         
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
@@ -182,8 +182,8 @@ function build() {
         echo "int main(){ return 0; }" > testThreads.c
         echo "int main(){ return 0; }" > testC14N.c
 
-        mkdir -p build_$ABI
-        cd build_$ABI
+        mkdir -p build_$TYPE
+        cd build_$TYPE
 
         cmake .. \
             -DCMAKE_C_STANDARD=17 \
@@ -353,7 +353,7 @@ function copy() {
     elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
         # copy lib
-        cp -Rv build_$ABI/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+        cp -Rv build_$TYPE_$ABI/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib

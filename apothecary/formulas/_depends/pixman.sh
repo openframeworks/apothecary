@@ -51,7 +51,6 @@ function build() {
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
                 
 		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-		./autogen.sh
 		./configure LDFLAGS="${FAT_LDFLAGS} " \
 				CFLAGS="-O3 ${FAT_LDFLAGS}" \
 				--prefix=$BUILD_ROOT_DIR \
@@ -75,7 +74,6 @@ function build() {
         elif [ $ARCH == "ARM" ] ; then
             PLATFORM="ARM"
         fi
-		./autogen.sh
 		with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
 
 
