@@ -179,7 +179,7 @@ function build() {
         CURRENTPATH=`pwd`
 
         export CFLAGS="-I${CURRENTPATH}/include"
-        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS=""
 
         echo "int main(){ return 0; }" > xmllint.c
         echo "int main(){ return 0; }" > xmlcatalog.c
