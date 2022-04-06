@@ -27,8 +27,6 @@ jobs:
             gperf
             git
             libxml2
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
             python3
       - name: Clone repository
         uses: actions/checkout@v2
