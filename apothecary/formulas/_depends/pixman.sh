@@ -40,6 +40,8 @@ function prepare() {
 		if [ ! -f configure ] ; then
 			./autogen.sh
 		fi
+	else
+		cp -vr $FORMULA_DIR/pixman ./
 	fi
 }
 
@@ -65,6 +67,18 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
 		# cd pixman
+		# if [ $ARCH == 32 ] ; then
+  #           PLATFORM="Win32"
+  #       elif [ $ARCH == 64 ] ; then
+  #           PLATFORM="x64"
+  #       elif [ $ARCH == "ARM64" ] ; then
+  #           PLATFORM="ARM64"
+  #       elif [ $ARCH == "ARM" ] ; then
+  #           PLATFORM="ARM"
+  #       fi
+		# with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
+		# make -j${PARALLEL_MAKE} VERBOSE=1
+
 		if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
@@ -74,7 +88,26 @@ function build() {
         elif [ $ARCH == "ARM" ] ; then
             PLATFORM="ARM"
         fi
-		with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
+
+		mkdir -p build_$TYPE
+		cd build_$TYPE
+
+        cmake  .. \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${CFLAGS}" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
+            -A ${PLATFORM} \
+            -G "Visual Studio 16 2019"
+            cmake --build . --config Release
+            
+
+        cd ..
 
 
 	fi
