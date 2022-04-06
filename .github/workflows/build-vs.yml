@@ -36,6 +36,7 @@ jobs:
             mingw-w64-x86_64-gcc-libs
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-gdb
+            mingw-w64-x86_64-llvm
             mingw-w64-x86_64-make
       - name: Clone repository
         uses: actions/checkout@v2
