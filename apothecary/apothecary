@@ -355,13 +355,16 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
-            CROSS_TOOL=""
+            CROSS_TOOL="amd64_x86"
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
+            CROSS_TOOL="amd64"
         elif [ $ARCH == "ARM64" ]; then
             PLATFORM=x64
+            CROSS_TOOL="amd64_arm64"
         elif [ $ARCH == "ARM" ]; then
             PLATFORM=x64
+            CROSS_TOOL="amd64_arm"
         fi
 
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
@@ -380,10 +383,10 @@ if [ "$TYPE" = "vs" ]; then
 	
 	if [ $ARCH == "ARM64" ] || [ $ARCH == "ARM" ] ; then
            
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat ${CROSS_TOOL}")
 
 	else 
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat ${CROSS_TOOL}")
 
 	fi
 
