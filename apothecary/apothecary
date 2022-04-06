@@ -353,7 +353,7 @@ if [ "$TYPE" = "vs" ]; then
     VS_64_BIT_ENV='VC\vcvarsall'
 
 
-    iif [ -z ${PLATFORM+x}]; then
+    if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
             CROSS_TOOL="amd64_x86"
