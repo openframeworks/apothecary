@@ -101,8 +101,8 @@ function build() {
         # perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
         # cd ..
 
-        mkdir -p build_$TYPE_$ABI
-        cd build_$TYPE_$ABI
+        mkdir -p build_${TYPE}_${ABI}
+        cd build_${TYPE}_${ABI}
         
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
@@ -245,8 +245,8 @@ function build() {
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
-        mkdir -p build_$TYPE
-        cd build_$TYPE
+        mkdir -p build_${TYPE}
+        cd build_${TYPE}
         mkdir -p install
 
         cmake .. \
@@ -335,7 +335,7 @@ function copy() {
         fi
 
         
-        cp -Rv build_$ABI/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
+        cp -Rv build_${ABI}_configure/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
 
         # if [ $ARCH == 32 ] ; then
         #     mkdir -p $1/lib/$TYPE/Win32
@@ -358,7 +358,7 @@ function copy() {
     elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
         # copy lib
-        cp -Rv build_$TYPE_$ABI/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+        cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
