@@ -355,6 +355,7 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
+            CROSS_TOOL=""
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
         elif [ $ARCH == "ARM64" ]; then
@@ -366,6 +367,7 @@ if [ "$TYPE" = "vs" ]; then
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
     fi
 
+    # https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170
     if [ -z ${VS_BASE_PATH+x} ]; then
 		if [ "${VS_VER}" = "15" ]; then
 			VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
@@ -376,7 +378,16 @@ if [ "$TYPE" = "vs" ]; then
 		fi
 	fi	
 	
-	VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat")
+	if [ $ARCH == "ARM64" ] || [ $ARCH == "ARM" ] ; then
+           
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+
+	else 
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+
+	fi
+
+
 
 	export VS_BASE_PATH; 
 	export VS_VARS_PATH; 
