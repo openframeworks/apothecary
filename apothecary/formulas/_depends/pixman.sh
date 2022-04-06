@@ -41,7 +41,7 @@ function prepare() {
 			./autogen.sh
 		fi
 	else
-		cp -vr $FORMULA_DIR/pixman ./
+		cp -vr $FORMULA_DIR/_depends/pixman ./
 	fi
 }
 
