@@ -173,6 +173,14 @@ function build() {
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
 
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
+        CURRENTPATH=`pwd`
+
+        export CFLAGS="-I${CURRENTPATH}/include"
+        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+
         echo "int main(){ return 0; }" > xmllint.c
         echo "int main(){ return 0; }" > xmlcatalog.c
         echo "int main(){ return 0; }" > testSchemas.c
@@ -184,15 +192,15 @@ function build() {
         echo "int main(){ return 0; }" > testThreads.c
         echo "int main(){ return 0; }" > testC14N.c
 
-        # mkdir -p build_$TYPE
-        # cd build_$TYPE
+        mkdir -p build_$TYPE
+        cd build_$TYPE
 
-        cmake  \
+        cmake  .. \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${CFLAGS}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -232,6 +240,9 @@ function build() {
 
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
@@ -248,6 +259,9 @@ function build() {
         mkdir -p build_${TYPE}
         cd build_${TYPE}
         mkdir -p install
+
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
 
         cmake .. \
             -DBUILD_SHARED_LIBS=OFF \
