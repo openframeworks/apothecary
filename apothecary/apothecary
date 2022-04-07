@@ -98,9 +98,9 @@ echo "This script is run from \"$thisDir\""
 
 fi
 
-if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ] && [[ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]]; then
+# if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ] && [[ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]]; then
 
-fi
+# fi
 
 BUILD_MACHINE_ARCH=`uname -m`
 
