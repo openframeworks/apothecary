@@ -140,6 +140,7 @@ function build() {
             -DLIBXML2_WITH_TESTS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+
             -G 'Unix Makefiles' 
 
         make -j${PARALLEL_MAKE} VERBOSE=1
@@ -291,7 +292,8 @@ function build() {
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_LIBDIR="" \
+            -DCMAKE_INSTALL_PREFIX=install \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
             -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DSDK_VERSION=$IOS_MIN_SDK_VER
             # make -j${PARALLEL_MAKE} VERBOSE=1
              cmake --build . --config Release
