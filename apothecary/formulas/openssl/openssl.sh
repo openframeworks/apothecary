@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
+FORMULA_TYPES=( "osx"  "ios" "tvos" ) # "vs"
 
 VER=1.1.1n
 VERDIR=1.1.1
@@ -28,7 +28,7 @@ function download() {
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		# https://www.openssl.org/source/openssl-1.1.1m.tar.gz.sha1
+		# https://www.openssl.org/source/openssl-1.1.1n.tar.gz.sha1
 		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	if [ "$TYPE" == "vs" ] ; then
@@ -119,14 +119,32 @@ function build() {
 
 	elif [ "$TYPE" == "vs" ] ; then
 
+		# if [ $ARCH == 32 ] ; then
+		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
+		# elif [ $ARCH == 64 ] ; then
+		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
+		# elif [ $ARCH == "ARM" ] ; then
+		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
+		# fi
+		# with_vs_env "nmake"
+
 		if [ $ARCH == 32 ] ; then
-			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
+			CROSS_PREFIX=i686-w64-mingw32
+			CROSS_TARGET=mingw
 		elif [ $ARCH == 64 ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
 		elif [ $ARCH == "ARM" ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
 		fi
-		with_vs_env "nmake"
+
+
+		mkdir build-windows-${TYPE}
+        cd build-windows-${TYPE}
+
+        cmake ../ -DBUILD_OPENSSL=ON -DOPENSSL_BUILD_VERSION=$OPENSSL_BUILD_VERSION -DOPENSSL_BUILD_HASH=$OPENSSL_BUILD_HASH -DOPENSSL_INSTALL_MAN=ON -DCROSS=ON -DCROSS_PREFIX=${CROSS_PREFIX} -DCROSS_TARGET=${CROSS_TARGET}
+        make
+
+        cd ..
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
@@ -441,6 +459,10 @@ function build() {
 		# make DESTDIR="inst" install 
 
 	else
+
+		# cd build-linux-x86_64
+  #       - cmake ../ -DBUILD_OPENSSL=ON -DOPENSSL_BUILD_VERSION=$OPENSSL_BUILD_VERSION -DOPENSSL_BUILD_HASH=$OPENSSL_BUILD_HASH -DOPENSSL_INSTALL_MAN=ON -DOPENSSL_ENABLE_TESTS=ON
+  #       - chmod -R 777 .  
 
 		echoWarning "TODO: build $TYPE lib"
 
