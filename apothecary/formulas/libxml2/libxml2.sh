@@ -251,13 +251,15 @@ function build() {
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
+            PLATFORM=TVOSCOMBINED
 
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
+            PLATFORM=OS64COMBINED
         fi
 
-        mkdir -p build_${TYPE}_${ABI}
-        cd build_${TYPE}_${ABI}
+        mkdir -p build_${TYPE}
+        cd build_${TYPE}
         mkdir -p install
 
         find . -name "test*.c" | xargs rm
@@ -295,7 +297,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
-            -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DSDK_VERSION=$IOS_MIN_SDK_VER
+            -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=${PLATFORM} -DSDK_VERSION=$IOS_MIN_SDK_VER
             # make -j${PARALLEL_MAKE} VERBOSE=1
             cmake --build . --config Release
             # cmake --install . --config Release
@@ -370,7 +372,7 @@ function copy() {
 
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         # copy lib
-        cp -Rv ./build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/xml2.a
+        cp -Rv ./build_${TYPE}/libxml2.a $1/lib/$TYPE/xml2.a
     elif [ "$TYPE" == "osx" ]; then
         # copy lib
         cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
