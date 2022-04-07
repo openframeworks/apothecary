@@ -140,7 +140,6 @@ function build() {
             -DLIBXML2_WITH_TESTS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-
             -G 'Unix Makefiles' 
 
         make -j${PARALLEL_MAKE} VERBOSE=1
@@ -257,8 +256,8 @@ function build() {
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
-        mkdir -p build_${TYPE}
-        cd build_${TYPE}
+        mkdir -p build_${TYPE}_${ABI}
+        cd build_${TYPE}_${ABI}
         mkdir -p install
 
         find . -name "test*.c" | xargs rm
@@ -271,6 +270,8 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -285,7 +286,7 @@ function build() {
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
@@ -296,8 +297,8 @@ function build() {
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
             -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=OS64COMBINED -DSDK_VERSION=$IOS_MIN_SDK_VER
             # make -j${PARALLEL_MAKE} VERBOSE=1
-             cmake --build . --config Release
-             # cmake --install . --config Release
+            cmake --build . --config Release
+            # cmake --install . --config Release
 
         cd ..
 
@@ -367,8 +368,10 @@ function copy() {
         #     cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
         # fi
 
-
-    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+    elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        # copy lib
+        cp -Rv ./build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/xml2.a
+    elif [ "$TYPE" == "osx" ]; then
         # copy lib
         cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
     elif [ "$TYPE" == "android" ] ; then
