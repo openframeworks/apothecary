@@ -96,7 +96,10 @@ fi
 thisDir=$( dirname "`realpath "$0"`" )
 echo "This script is run from \"$thisDir\""
 
-	
+fi
+
+if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ] && [[ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]]; then
+
 fi
 
 BUILD_MACHINE_ARCH=`uname -m`
@@ -1357,18 +1360,19 @@ CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
     if [[ $(uname -m) != armv* ]]; then
         CROSSCOMPILING=1
-        if [ -z $TOOLCHAIN_PREFIX ]; then
+        if [[ -z ${TOOLCHAIN_PREFIX+z} ]];  then
             export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
         fi
-        if [ -z $SYSROOT ]; then
-            echoError Trying to cross compile but SYSROOT environment variable is not set
-            echoError Should be set to root of target OS image
+
+        if [[  -z ${SYSROOT+z} ]]; then
+            echoError "Trying to cross compile but SYSROOT environment variable is not set"
+            echoError "Should be set to root of target OS image"
             exit 1
         fi
-        if [ -z $TOOLCHAIN_ROOT ]; then
-            echoWarning Trying to cross compile but TOOLCHAIN_ROOT not set
-            echoWarning Trying to continue in case PATH is set to correct toolchain
-            echoWarning If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain
+        if [[  -z ${TOOLCHAIN_ROOT+z} ]];  then
+            echoWarning "Trying to cross compile but TOOLCHAIN_ROOT not set"
+            echoWarning "Trying to continue in case PATH is set to correct toolchain"
+            echoWarning "If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain"
         fi
     fi
 fi

@@ -224,6 +224,7 @@ function build() {
             -DLIBXML2_WITH_SCHEMATRON=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
+            -DCMAKE_INSTALL_PREFIX=install \
             -G 'Unix Makefiles' 
 
             make -j${PARALLEL_MAKE} VERBOSE=1
@@ -297,6 +298,8 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$TYPE" \
+            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
+            -DCMAKE_INSTALL_PREFIX=install \
             -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=${PLATFORM} -DSDK_VERSION=$IOS_MIN_SDK_VER
             # make -j${PARALLEL_MAKE} VERBOSE=1
             cmake --build . --config Release
