@@ -1,24 +1,23 @@
 #!/usr/bin/env bash
 #
 # utf8cpp
-# http://utfcpp.sourceforge.net/
+# 
 #
 
 # define the version
-VER=2.3.4
-VER_=2_3_4
+VER=3.2.1
+VER_=3_2_1
 
 # tools for git use
-GIT_URL=
+GIT_URL=https://github.com/nemtrif/utfcpp
 GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv http://downloads.sourceforge.net/project/utfcpp/utf8cpp_2x/Release%20${VER}/utf8_v${VER_}.zip
-	mkdir utf8
-	cd utf8
-	unzip ../utf8_v${VER_}.zip
-    rm ../utf8_v${VER_}.zip
+	wget -nv ${GIT_URL}/archive/refs/tags/v${VER}.zip 
+	unzip v${VER}.zip 
+	mv utfcpp-${VER} utf8
+    rm v${VER}.zip
 }
 
 # prepare the build environment, executed inside the lib src dir
