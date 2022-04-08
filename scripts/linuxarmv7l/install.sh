@@ -13,23 +13,19 @@ trapError() {
 }
 
 createArchImg(){
-    #sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libasound2-dev
-
-    #sudo apt-get -y update
-    #sudo apt-get -f -y --force-yes dist-upgrade
-    #sudo apt-get install -y libgssapi-krb5-2 libkrb5-3 libidn11
-    #sudo ./arch-bootstrap.sh archlinux
+    
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
+    sudo apt-get -y install gcc-arm-linux-gnueabihf
     sudo apt-get install -y coreutils gperf 
     sudo apt-get install -y multistrap unzip build-essential libc6-dev
     sudo apt-get install -y autoconf automake pkgconf rsync
 	cd $HOME
+
+
 	wget -v http://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
 	mkdir archlinux
-	
 
-    #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 	junest -- <<EOF
         tar xzf ~/ArchLinuxARM-rpi-armv7-latest.tar.gz -C ~/archlinux/ 2> /dev/null
         sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g ~/archlinux/etc/pacman.conf
@@ -37,19 +33,6 @@ createArchImg(){
 		pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
 EOF
 	touch $HOME/archlinux/timestamp
-}
-
-downloadToolchain(){
-    #wget http://archlinuxarm.org/builder/xtools/x-tools7h.tar.xz
-    #tar xf x-tools7h.tar.xz
-    #rm x-tools7h.tar.xz
-    if [ "$(ls -A ~/rpi2_toolchain)" ]; then
-        echo "Using cached RPI2 toolchain"
-    else
-        wget -q http://ci.openframeworks.cc/rpi2_toolchain.tar.bz2
-        tar xjf rpi2_toolchain.tar.bz2 -C ~/
-        rm rpi2_toolchain.tar.bz2
-    fi
 }
 
 downloadFirmware(){
@@ -103,14 +86,10 @@ if [[ $(uname -m) != armv* ]]; then
 	cd $ROOT
 	installJunest
 	createArchImg
-	downloadToolchain
 	downloadFirmware
 
 	cd $HOME/archlinux/usr/lib
 	relativeSoftLinks "../.." "..\/.."
-	#cd $ROOT/archlinux/usr/lib/arm-unknown-linux-gnueabihf
-	#relativeSoftLinks  "../../.." "..\/..\/.."
-	#cd $ROOT/raspbian/usr/lib/gcc/arm-unknown-linux-gnueabihf/5.3
-	#relativeSoftLinks  "../../../.." "..\/..\/..\/.."
+
 	
 fi

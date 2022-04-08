@@ -21,6 +21,7 @@ installPackages(){
         echo "$UBUNTU_VERSION doesn\'t need ppa"
     fi
     sudo apt-get update -q
+    sudo apt-get -y install gcc-arm-linux-gnueabihf
     sudo apt-get -y install multistrap unzip coreutils gperf build-essential
     sudo apt-get install -y autoconf automake pkgconf rsync
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
@@ -36,11 +37,6 @@ createRaspbianImg(){
     multistrap -a armhf -d raspbian -f multistrap.conf
 }
 
-downloadToolchain(){
-    wget -nv http://ci.openframeworks.cc/rpi_toolchain_gcc6.tar.bz2
-    tar xjf rpi_toolchain_gcc6.tar.bz2
-    rm rpi_toolchain_gcc6.tar.bz2
-}
 
 downloadFirmware(){
     wget -nv https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
@@ -74,19 +70,7 @@ if [[ $(uname -m) != armv* ]]; then
 	cd $ROOT
 	installPackages
 	createRaspbianImg
-	downloadToolchain
 	downloadFirmware
 
-	cd $ROOT/raspbian/usr/lib
-	relativeSoftLinks
-	cd $ROOT/raspbian/usr/lib/arm-linux-gnueabihf
-	relativeSoftLinks
-	cd $ROOT/raspbian/usr/lib/gcc/arm-linux-gnueabihf/4.9
-
-	cd $ROOT/rpi_toolchain/arm-linux-gnueabihf/lib
-	#sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" libc.so
-	for f in *.so; do
-	    sed -i "s|/home/arturo/Code/openFrameworks/apothecary/scripts/linuxarm/rpi_toolchain/arm-linux-gnueabihf/lib|$ROOT/rpi_toolchain/arm-linux-gnueabihf/lib|g" $f
-	done
 	
 fi
