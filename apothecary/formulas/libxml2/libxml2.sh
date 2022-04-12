@@ -199,6 +199,7 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CC="../../../${TYPE}/rpi_toolchain/bin/arm-linux-gnueabihf-gcc" \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${CFLAGS}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
