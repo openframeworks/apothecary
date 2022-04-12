@@ -33,6 +33,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/arch_configure.cmake)
 #config
 include(${CMAKE_SOURCE_DIR}/cmake/config_configure.cmake)
 
+include_directories(/opt/local/include)
 include_directories(
     ${CMAKE_BINARY_DIR}/pixman
     ${CMAKE_SOURCE_DIR}/pixman
