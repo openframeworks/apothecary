@@ -195,14 +195,21 @@ function build() {
         mkdir -p build_$TYPE
         cd build_$TYPE
 
+        export TOOLS="../../../${TYPE}/rpi_toolchain"
+
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CC="../../../${TYPE}/rpi_toolchain/bin/arm-linux-gnueabihf-gcc" \
+            -DCMAKE_SYSTEM_NAME="Linux" \
+            -DCMAKE_SYSTEM_PROCESSOR="arm" \
+            -DCMAKE_SYSROOT="/home/devel/rasp-pi-rootfs" \
+            -DCMAKE_STAGING_PREFIX="/home/devel/stage" \
+            -DCMAKE_C_COMPILER="${TOOLS}/bin/arm-linux-gnueabihf-gcc" \
+            -DCMAKE_CXX_COMPILER="${TOOLS}/bin/arm-linux-gnueabihf-g++" \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${CFLAGS}" \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=ON \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
             -DLIBXML2_WITH_ZLIB=OFF \
