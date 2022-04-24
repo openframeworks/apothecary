@@ -294,6 +294,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML_ICU_ENABLED=OFF \
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
