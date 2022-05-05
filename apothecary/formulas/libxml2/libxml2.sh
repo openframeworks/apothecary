@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "a
 
 
 # define the version by sha
-VER=2.9.12
+VER=2.9.14
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
 
 # download the source code and unpack it into LIB_NAME
