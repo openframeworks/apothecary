@@ -181,6 +181,12 @@ function build() {
         export CFLAGS="-I${CURRENTPATH}/include"
         export LDFLAGS=""
 
+        export TOOLS="../../../../scripts/${TYPE}/rpi_toolchain"
+        export TOOLS_PATH=$(realpath ${TOOLS})
+       
+
+        export PATH="$${TOOLS}/bin/:$PATH"
+
         echo "int main(){ return 0; }" > xmllint.c
         echo "int main(){ return 0; }" > xmlcatalog.c
         echo "int main(){ return 0; }" > testSchemas.c
@@ -195,7 +201,7 @@ function build() {
         mkdir -p build_$TYPE
         cd build_$TYPE
 
-        export TOOLS="../../../../scripts/${TYPE}/rpi_toolchain"
+        
 
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
@@ -205,8 +211,8 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR="arm" \
             -DCMAKE_SYSROOT="/home/devel/rasp-pi-rootfs" \
             -DCMAKE_STAGING_PREFIX="/home/devel/stage" \
-            -DCMAKE_C_COMPILER="${TOOLS}/bin/arm-linux-gnueabihf-gcc" \
-            -DCMAKE_CXX_COMPILER="${TOOLS}/bin/arm-linux-gnueabihf-g++" \
+            -DCMAKE_C_COMPILER="${TOOLS_PATH}/bin/arm-linux-gnueabihf-gcc" \
+            -DCMAKE_CXX_COMPILER="${TOOLS_PATH}/bin/arm-linux-gnueabihf-g++" \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=ON \
