@@ -181,7 +181,7 @@ function build() {
         export CFLAGS="-I${CURRENTPATH}/include"
         export LDFLAGS=""
 
-        export TOOLS="../../../../scripts/${TYPE}/rpi_toolchain"
+        export TOOLS="../../../scripts/${TYPE}/rpi_toolchain"
         export TOOLS_PATH=$(realpath ${TOOLS})
        
 
