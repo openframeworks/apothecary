@@ -41,7 +41,9 @@ function prepare() {
 			./autogen.sh
 		fi
 	else
-		cp -vr $FORMULA_DIR/_depends/pixman/ ./
+		CURRENTPATH=`pwd`
+		export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
+		cp -vr $FORMULA_DIR/_depends/pixman/ ${CURRENTPATH_DIR}/
 	fi
 }
 
