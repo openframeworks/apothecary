@@ -136,6 +136,7 @@ function build() {
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
+	    undef LIBXML_ICU_ENABLED
 
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then

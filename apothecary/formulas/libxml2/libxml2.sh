@@ -19,6 +19,12 @@ function download() {
     tar xzf v${VER}.tar.gz
     mv libxml2-${VER} libxml2
     rm v${VER}.tar.gz
+
+
+    # wget -v https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
+    # tar xzf release-71-1.tar.gz
+    # mv icu-release-71-1 icu
+    # rm release-71-1.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -76,8 +82,7 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF \
-            -DCMAKE_BUILD_TYPE=Release'
+            -DLIBXML2_WITH_SCHEMATRON=OFF'
 
         cmake .. -G "Visual Studio 16 2019" ${DEFS} -A ${PLATFORM}
         cmake --build . --config Release
@@ -138,7 +143,6 @@ function build() {
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -G 'Unix Makefiles' 
 
@@ -146,6 +150,9 @@ function build() {
         cd ..
     elif [ "$TYPE" == "osx" ]; then
         ./autogen.sh
+
+         sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
@@ -157,6 +164,9 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        
+        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+
         ./autogen.sh
         emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         emmake make clean
@@ -172,6 +182,8 @@ function build() {
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
+        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+
 
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
@@ -227,6 +239,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML_ICU_ENABLED=OFF \
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
@@ -236,7 +249,6 @@ function build() {
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
             -DCMAKE_INSTALL_PREFIX=install \
             -G 'Unix Makefiles' 
@@ -253,10 +265,14 @@ function build() {
 
     elif [ "$TYPE" == "osx" ]; then
 
+
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
+
+         sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+
 
         ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
@@ -273,12 +289,21 @@ function build() {
             PLATFORM=OS64COMBINED
         fi
 
+
+        CURRENTPATH=`pwd`
+        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+
+        
+
         mkdir -p build_${TYPE}
         cd build_${TYPE}
         mkdir -p install
 
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
+
+        
+
 
         cmake .. \
             -DBUILD_SHARED_LIBS=OFF \
@@ -290,7 +315,7 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DLIBXML2_WITH_UNICODE=ON \
+            -DLIBXML2_WITH_UNICODE=OFF \
             -DLIBXML2_WITH_LZMA=OFF \
             -DLIBXML2_WITH_ZLIB=OFF \
             -DLIBXML2_WITH_FTP=OFF \
@@ -300,7 +325,6 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML_ICU_ENABLED=OFF \
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
@@ -308,9 +332,9 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML_ICU_ENABLED=ON \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$TYPE" \
             -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
