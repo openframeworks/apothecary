@@ -21,10 +21,10 @@ function download() {
     rm v${VER}.tar.gz
 
 
-    # wget -v https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
-    # tar xzf release-71-1.tar.gz
-    # mv icu-release-71-1 icu
-    # rm release-71-1.tar.gz
+    wget -v https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
+    tar xzf release-71-1.tar.gz
+    mv icu-release-71-1 icu
+    rm release-71-1.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -150,9 +150,6 @@ function build() {
         cd ..
     elif [ "$TYPE" == "osx" ]; then
         ./autogen.sh
-
-         sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
-
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
@@ -164,9 +161,6 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-        
-        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
-
         ./autogen.sh
         emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         emmake make clean
@@ -182,8 +176,6 @@ function build() {
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
-
 
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
@@ -239,7 +231,7 @@ function build() {
             -DLIBXML2_WITH_LEGACY=OFF \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML_ICU_ENABLED=OFF \
+            -DLIBXML_ICU_ENABLED=ON \
             -DLIBXML2_WITH_OUTPUT=ON \
             -DLIBXML2_WITH_PYTHON=OFF \
             -DLIBXML2_WITH_DEBUG=OFF \
@@ -271,9 +263,6 @@ function build() {
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
 
-         sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
-
-
         ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
@@ -291,7 +280,7 @@ function build() {
 
 
         CURRENTPATH=`pwd`
-        sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
+        # sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
 
         
 
