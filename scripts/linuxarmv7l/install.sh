@@ -22,14 +22,13 @@ createArchImg(){
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
     sudo apt-get install -y coreutils gperf
-	cd $HOME
+    mkdir ~/archlinux
+    cd ~/archlinux
 	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
-	mkdir archlinux
 	
-
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 	junest -- <<EOF
-        tar xzf ~/ArchLinuxARM-rpi-armv7-latest.tar.gz -C ~/archlinux/ 2> /dev/null
+        tar xzf ~/ArchLinuxARM-rpi-armv7-latest.tar.gz 2> /dev/null
         sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g ~/archlinux/etc/pacman.conf
 		pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -Syu
 		pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -S make pkg-config gcc raspberrypi-firmware
@@ -104,8 +103,8 @@ if [[ $(uname -m) != armv* ]]; then
 	downloadToolchain
 	downloadFirmware
 
-	cd $HOME/archlinux/usr/lib
-	relativeSoftLinks "../.." "..\/.."
+	#cd $HOME/archlinux/usr/lib
+	#relativeSoftLinks "../.." "..\/.."
 	#cd $ROOT/archlinux/usr/lib/arm-unknown-linux-gnueabihf
 	#relativeSoftLinks  "../../.." "..\/..\/.."
 	#cd $ROOT/raspbian/usr/lib/gcc/arm-unknown-linux-gnueabihf/5.3
