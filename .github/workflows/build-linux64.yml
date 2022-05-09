@@ -37,7 +37,7 @@ jobs:
         gzip: false
         allow_override: true
         files: >
-          out/openFrameworksLibs_master_linux64gcc6.tar.bz2
+          out/openFrameworksLibs*
       if: github.repository == 'ofTheo/apothecary' && github.event_name == 'push'
           
     
