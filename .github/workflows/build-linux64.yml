@@ -39,8 +39,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: nightly
           name: nightly builds
-          gzip: no
-          allow_override: yes
+          gzip: false
+          allow_override: true
           files: >
             /home/runner/work/apothecary/apothecary/*
           
