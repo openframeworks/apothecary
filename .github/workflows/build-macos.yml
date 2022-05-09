@@ -42,4 +42,14 @@ jobs:
         env:
             DEVELOPER_DIR: "/Applications/Xcode_12.2.app/Contents/Developer"
             GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-
+      - name: publish
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          name: nightly builds
+          gzip: false
+          allow_override: true
+          files: >
+            out/openFrameworksLibs*
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
