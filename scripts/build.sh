@@ -315,9 +315,6 @@ else
         tar cjf $TARBALL $LIBS
     fi
     
-echo "Listing files in $OUTPUT_FOLDER"
-ls -la $OUTPUT_FOLDER
-
     if [ "$GITHUB_ACTIONS" = true ]; then
         echo Unencrypting key for github actions
         openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
