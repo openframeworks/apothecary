@@ -267,7 +267,7 @@ if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "ci-release" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "master" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
     # exit here on PR's
     echo "On Master Branch and not a PR";
 else
@@ -301,11 +301,11 @@ if [ ! -z ${APPVEYOR+x} ]; then
 else
     
     CUR_BRANCH="master";
-    #if [ "$GITHUB_ACTIONS" = true ]; then
-    #    CUR_BRANCH="${GITHUB_REF##*/}"
-    #elif [ "$TRAVIS" = true ]; then
-    #    CUR_BRANCH="$TRAVIS_BRANCH"
-    #fi
+    if [ "$GITHUB_ACTIONS" = true ]; then
+        CUR_BRANCH="${GITHUB_REF##*/}"
+    elif [ "$TRAVIS" = true ]; then
+        CUR_BRANCH="$TRAVIS_BRANCH"
+    fi
     
 	TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
     if [ "$TARGET" == "emscripten" ]; then

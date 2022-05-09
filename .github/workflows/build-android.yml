@@ -1,4 +1,4 @@
-name: build-linux64
+name: build-android
 
 on:
   push:
@@ -9,18 +9,20 @@ on:
     - '**/README.md'
 jobs:
 
-  build-linux64:
+  build-android:
     runs-on: ubuntu-18.04
     strategy:
         matrix:
           cfg:
-          - {target: linux, opt: gcc6}
+          - {target: android, arch: armv7}
+          - {target: android, arch: arm64}
+          - {target: android, arch: x86}
     env:
      TARGET: ${{matrix.cfg.target}}
-     OPT: ${{matrix.cfg.opt}}
+     ARCH: ${{matrix.cfg.arch}}
     steps:
     - uses: actions/checkout@v2
-    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
+    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
       run: ./scripts/$TARGET/install.sh
@@ -39,5 +41,3 @@ jobs:
         files: >
           out/openFrameworksLibs*
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
-          
-    
