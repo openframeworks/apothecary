@@ -32,7 +32,8 @@ jobs:
   deploy:
     runs-on: ubuntu-18.04
     needs: build-linux64
-    if: ${{ github.head_ref || github.ref_name }} == 'ci-releases-test'
+    permissions: write-all
+    if: ${{ github.head_ref || github.ref_name }} == 'master'
     steps:
       - uses: meeDamian/github-release@2.0
         with:
