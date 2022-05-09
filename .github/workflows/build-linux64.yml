@@ -28,8 +28,8 @@ jobs:
       run: ./scripts/build.sh
       env:
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    - name: Publish
-      uses: johnwbyrd/update-release@v1
+    - name: Update Release
+      uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: nightly
