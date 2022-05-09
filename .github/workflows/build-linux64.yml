@@ -29,3 +29,19 @@ jobs:
       env:
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
+  deploy:
+    runs-on: ubuntu-18.04
+    needs: build-linux64
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          name: nightly builds
+          gzip: no
+          allow_override: yes
+          files: >
+            /home/runner/work/apothecary/apothecary/*
+          
+    
