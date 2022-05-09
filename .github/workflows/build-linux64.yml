@@ -34,6 +34,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: nightly
         release: nightly
+        prerelease: false
         files: out/openFrameworksLibs_master_linux64gcc6.tar.bz2
       if: github.repository == 'ofTheo/apothecary' && github.event_name == 'push'
           
