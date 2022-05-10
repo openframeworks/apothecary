@@ -130,7 +130,7 @@ function build() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p build_vs_64
             cd build_vs_64
-            if[ $VS_VER > 15 ];
+            if[ $VS_VER -gt 15 ]; then
                 generatorName+=' -A Win64'
             else
                 generatorName+=' Win64'
