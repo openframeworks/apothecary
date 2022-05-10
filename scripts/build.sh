@@ -298,19 +298,26 @@ fi
 #        CUR_BRANCH="$TRAVIS_BRANCH"
 #    fi
     
+    echo "about to make tarball"
+
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+    echo "TARBALL will be $TARBALL"
+
     if [ "$TARGET" == "msys2" ]; then
         TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
         7z a $TARBALL $LIBS
-    else if ["$TARGET" == "vs" ]; then
+    else if [ "$TARGET" == "vs" ]; then
         TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
         7z a $TARBALL $LIBS
     else if [ "$TARGET" == "emscripten" ]; then
-	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+        run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
         docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
     else
+        echo "compressing linux and others "
         tar cjf $TARBALL $LIBS
     fi
+
+        echo " done "
 
 #the code below was for uploading to OF CI - not needed now
 exit 0
