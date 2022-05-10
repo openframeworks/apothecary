@@ -359,7 +359,7 @@ if [ "$TYPE" = "vs" ]; then
       VS_YEAR=2019
     elif [ "${VS_VER}" = "17" ]; then
 			VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
-      VS_YEAR=2019
+      VS_YEAR=2022
 		fi
 	fi	
 	
