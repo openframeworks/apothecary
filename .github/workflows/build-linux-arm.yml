@@ -34,7 +34,7 @@ jobs:
             release: nightly
             prerelease: false
             files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
-          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master
+          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
   build-linux-arm7:
         runs-on: ubuntu-18.04
