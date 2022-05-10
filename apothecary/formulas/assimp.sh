@@ -130,7 +130,11 @@ function build() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p build_vs_64
             cd build_vs_64
-            generatorName+=' Win64'
+            if[ $VS_VER > 15 ];
+                generatorName+=' -A Win64'
+            else
+                generatorName+=' Win64'
+            fi
             cmake .. -G "$generatorName" $buildOpts
             vs-build "Assimp.sln" build "Release|x64"
         fi
