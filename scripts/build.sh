@@ -298,11 +298,7 @@ CUR_BRANCH="master";
 #        CUR_BRANCH="$TRAVIS_BRANCH"
 #    fi
 
-echo "about to make tarball"
-
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-echo "TARBALL will be $TARBALL"
-
 if [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
     7z a $TARBALL $LIBS
@@ -313,11 +309,11 @@ elif [ "$TARGET" == "emscripten" ]; then
     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
 else
-    echo "compressing linux and others "
     tar cjf $TARBALL $LIBS
 fi
 
-echo " done "
+echo "TARBALL to upload $TARBALL"
+echo "done "
     
 #    if [ "$GITHUB_ACTIONS" = true ]; then
 #        echo Unencrypting key for github actions
