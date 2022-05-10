@@ -131,7 +131,7 @@ function build() {
             mkdir -p build_vs_64
             cd build_vs_64
             if [[ $VS_VER -gt 15 ]] ; then
-                generatorName+=' -A Win64'
+                generatorName+=' -A x64'
             else
                 generatorName+=' Win64'
             fi
