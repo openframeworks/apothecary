@@ -130,9 +130,7 @@ function build() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p build_vs_64
             cd build_vs_64
-            if [[ $VS_VER -gt 15 ]] ; then
-                #generatorName+=' -A x64'
-            else
+            if [[ $VS_VER -lt 15 ]] ; then
                 generatorName+=' Win64'
             fi
             cmake .. -G "$generatorName" $buildOpts
