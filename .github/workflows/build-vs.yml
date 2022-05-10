@@ -10,7 +10,7 @@ on:
     
 jobs:
 
-  build-vs2017:
+  build-vs2019:
     runs-on: windows-2019
     strategy:
       matrix:

@@ -121,7 +121,7 @@ function build() {
             -DASSIMP_BUILD_X3D_IMPORTER=0
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
-        generatorName+=$VS_VER
+        generatorName+=$VS_VER+" "+$VS_YEAR
         if [ $ARCH == 32 ] ; then
             mkdir -p build_vs_32
             cd build_vs_32
