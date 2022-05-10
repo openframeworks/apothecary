@@ -291,33 +291,33 @@ else
     LIBS=$(ls $OUTPUT_FOLDER)
 fi
     
-    CUR_BRANCH="master";
+CUR_BRANCH="master";
 #    if [ "$GITHUB_ACTIONS" = true ]; then
 #        CUR_BRANCH="${GITHUB_REF##*/}"
 #    elif [ "$TRAVIS" = true ]; then
 #        CUR_BRANCH="$TRAVIS_BRANCH"
 #    fi
-    
-    echo "about to make tarball"
 
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-    echo "TARBALL will be $TARBALL"
+echo "about to make tarball"
 
-    if [ "$TARGET" == "msys2" ]; then
-        TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
-        7z a $TARBALL $LIBS
-    else if [ "$TARGET" == "vs" ]; then
-        TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
-        7z a $TARBALL $LIBS
-    else if [ "$TARGET" == "emscripten" ]; then
-        run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-        docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
-    else
-        echo "compressing linux and others "
-        tar cjf $TARBALL $LIBS
-    fi
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+echo "TARBALL will be $TARBALL"
 
-    echo " done "
+if [ "$TARGET" == "msys2" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
+    7z a $TARBALL $LIBS
+elif [ "$TARGET" == "vs" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+    7z a $TARBALL $LIBS
+elif [ "$TARGET" == "emscripten" ]; then
+    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
+else
+    echo "compressing linux and others "
+    tar cjf $TARBALL $LIBS
+fi
+
+echo " done "
     
 #    if [ "$GITHUB_ACTIONS" = true ]; then
 #        echo Unencrypting key for github actions
