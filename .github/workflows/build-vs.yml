@@ -11,7 +11,7 @@ on:
 jobs:
 
   build-vs2017:
-    runs-on: windows-2016
+    runs-on: windows-2019
     strategy:
       matrix:
         bundle: [1,2,3,4]
@@ -34,7 +34,7 @@ jobs:
       #- name: Install StrawberryPerl
       #  run: choco install -y strawberryperl
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1.1
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
@@ -42,7 +42,7 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
           ARCH: 64
-          VS_VER: 15
+          VS_VER: 16
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release
         uses: johnwbyrd/update-release@v1.0.0
