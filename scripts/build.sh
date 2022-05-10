@@ -317,24 +317,20 @@ fi
         tar cjf $TARBALL $LIBS
     fi
 
-        echo " done "
-
-#the code below was for uploading to OF CI - not needed now
-exit 0
+    echo " done "
     
-    if [ "$GITHUB_ACTIONS" = true ]; then
-        echo Unencrypting key for github actions
-        openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
-        mkdir -p ~/.ssh
-    else
-        echo Unencrypting key for travis
-        openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
-    fi
- 
-	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
-	chmod 600 $LOCAL_ROOT/scripts/id_rsa
-	echo Uploading libraries
-	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm $LOCAL_ROOT/scripts/id_rsa
-fi
+#    if [ "$GITHUB_ACTIONS" = true ]; then
+#        echo Unencrypting key for github actions
+#        openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
+#        mkdir -p ~/.ssh
+#    else
+#        echo Unencrypting key for travis
+#        openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+#    fi
+#
+#	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
+#	chmod 600 $LOCAL_ROOT/scripts/id_rsa
+#	echo Uploading libraries
+#	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+#	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+#	rm $LOCAL_ROOT/scripts/id_rsa
