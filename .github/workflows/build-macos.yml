@@ -50,6 +50,4 @@ jobs:
           release: nightly
           prerelease: false
           files: out/openFrameworksLibs_master_${{matrix.cfg.target}}${{matrix.cfg.job}}.tar.bz2
-        if: github.repository == 'ofTheo/apothecary' && github.event_name == 'push'
-            
-    
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'

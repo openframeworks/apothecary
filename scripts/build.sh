@@ -290,15 +290,6 @@ else
     cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
 fi
-
-if [ ! -z ${APPVEYOR+x} ]; then
-    if [ "$TARGET" == "msys2" ]; then
-        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}_mingw${ARCH}.zip
-    else 
-        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
-    fi
-	7z a $TARBALL $LIBS
-else
     
     CUR_BRANCH="master";
 #    if [ "$GITHUB_ACTIONS" = true ]; then
@@ -307,15 +298,21 @@ else
 #        CUR_BRANCH="$TRAVIS_BRANCH"
 #    fi
     
-	TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-    if [ "$TARGET" == "emscripten" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+    if [ "$TARGET" == "msys2" ]; then
+        TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
+        7z a $TARBALL $LIBS
+    else if ["$TARGET" == "vs" ]; then
+        TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+        7z a $TARBALL $LIBS
+    else if [ "$TARGET" == "emscripten" ]; then
 	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
         docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
     else
         tar cjf $TARBALL $LIBS
     fi
-    
-#the code below was for uploading to OF CI - not needed now 
+
+#the code below was for uploading to OF CI - not needed now
 exit 0
     
     if [ "$GITHUB_ACTIONS" = true ]; then
