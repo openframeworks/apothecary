@@ -50,4 +50,3 @@ jobs:
           files: out/openFrameworksLibs_master_msys2_mingw64.zip
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
-          

@@ -39,4 +39,3 @@ jobs:
         prerelease: false
         files: out/openFrameworksLibs_master_android${{matrix.cfg.arch}}.tar.bz2
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
-

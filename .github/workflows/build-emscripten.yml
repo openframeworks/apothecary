@@ -35,4 +35,3 @@ jobs:
           files: out/openFrameworksLibs_master_emscripten.tar.bz2
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
-          
