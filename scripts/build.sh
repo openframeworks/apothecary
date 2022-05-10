@@ -290,44 +290,43 @@ else
     cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
 fi
-
-if [ ! -z ${APPVEYOR+x} ]; then
-    if [ "$TARGET" == "msys2" ]; then
-        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}_mingw${ARCH}.zip
-    else 
-        TARBALL=${ROOT}/openFrameworksLibs_${APPVEYOR_REPO_BRANCH}_${TARGET}${VS_NAME}_${ARCH}_${BUNDLE}.zip
-    fi
-	7z a $TARBALL $LIBS
-else
     
-    CUR_BRANCH="master";
-    if [ "$GITHUB_ACTIONS" = true ]; then
-        CUR_BRANCH="${GITHUB_REF##*/}"
-    elif [ "$TRAVIS" = true ]; then
-        CUR_BRANCH="$TRAVIS_BRANCH"
-    fi
-    
-	TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
-    if [ "$TARGET" == "emscripten" ]; then
-	    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-        docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
-    else
-        tar cjf $TARBALL $LIBS
-    fi
-    
-    if [ "$GITHUB_ACTIONS" = true ]; then
-        echo Unencrypting key for github actions
-        openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
-        mkdir -p ~/.ssh
-    else
-        echo Unencrypting key for travis
-        openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
-    fi
- 
-	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
-	chmod 600 $LOCAL_ROOT/scripts/id_rsa
-	echo Uploading libraries
-	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
-	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
-	rm $LOCAL_ROOT/scripts/id_rsa
+CUR_BRANCH="master";
+if [ "$GITHUB_ACTIONS" = true ]; then
+    CUR_BRANCH="${GITHUB_REF##*/}"
+elif [ "$TRAVIS" = true ]; then
+    CUR_BRANCH="$TRAVIS_BRANCH"
 fi
+
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+if [ "$TARGET" == "msys2" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
+    7z a $TARBALL $LIBS
+elif [ "$TARGET" == "vs" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+    7z a $TARBALL $LIBS
+elif [ "$TARGET" == "emscripten" ]; then
+    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
+else
+    tar cjf $TARBALL $LIBS
+fi
+
+echo "Packaged libs to upload $TARBALL"
+echo "done "
+    
+#    if [ "$GITHUB_ACTIONS" = true ]; then
+#        echo Unencrypting key for github actions
+#        openssl aes-256-cbc -salt -md md5 -a -d -in $LOCAL_ROOT/scripts/githubactions-id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -pass env:GA_CI_SECRET
+#        mkdir -p ~/.ssh
+#    else
+#        echo Unencrypting key for travis
+#        openssl aes-256-cbc -K $encrypted_aa785955a938_key -iv $encrypted_aa785955a938_iv -in $LOCAL_ROOT/scripts/id_rsa.enc -out $LOCAL_ROOT/scripts/id_rsa -d
+#    fi
+#
+#	cp $LOCAL_ROOT/scripts/ssh_config ~/.ssh/config
+#	chmod 600 $LOCAL_ROOT/scripts/id_rsa
+#	echo Uploading libraries
+#	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
+#	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
+#	rm $LOCAL_ROOT/scripts/id_rsa

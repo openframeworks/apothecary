@@ -30,14 +30,12 @@ jobs:
       run: ./scripts/build.sh
       env:
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    - name: publish
-      uses: meeDamian/github-release@2.0
+    - name: Update Release
+      uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: nightly
-        name: nightly builds
-        gzip: false
-        allow_override: true
-        files: >
-          out/openFrameworksLibs*
+        release: nightly
+        prerelease: false
+        files: out/openFrameworksLibs_master_android${{matrix.cfg.arch}}.tar.bz2
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
