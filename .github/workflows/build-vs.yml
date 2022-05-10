@@ -29,6 +29,7 @@ jobs:
             dos2unix
             gperf
             git
+            python3
       - name: Clone repository
         uses: actions/checkout@v2
       #- name: Install StrawberryPerl
