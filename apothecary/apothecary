@@ -985,13 +985,13 @@ function vs-build() {
 
 		# assumed to be installed at a fixed location
  		if [ $VS_VER == 15 ] ; then
- 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 			VSWHERE_EXE='"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe"'
  		elif [ $VS_VER == 16 ] ; then
- 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 			VSWHERE_EXE='"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe"'
  		elif [ $VS_VER -gt 17 ] ; then
- 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 			VSWHERE_EXE='"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe"'
  		else
- 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 			VSWHERE_EXE='"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe"'
 		fi
 
 
