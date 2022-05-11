@@ -184,7 +184,7 @@ if "%BUILD_TOOL%"=="msbuild" (
 
   set ACTIONSW=/t:
   set CONFIGSW=/p:Configuration=
-  set EXTRASW=/m
+  set EXTRASW=/m /p:IncludePath="%OPENSSL_INCLUDE%"
   if "%USEENV%"=="env"   set USEENVP=/p:UseEnv=true
   if "%USEENV%"=="noenv" set USEENVP=/p:UseEnv=false
 
