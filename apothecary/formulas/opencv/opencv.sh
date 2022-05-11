@@ -227,8 +227,8 @@ function build() {
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
       -DWITH_PVAPI=OFF  | tee ${LOG}
-      vs-build "OpenCV.sln" //t:Build //p:Configuration=Release
-      vs-build "OpenCV.sln" //t:Build //p:Configuration=Debug
+      vs-build "OpenCV.sln"
+      #vs-build "OpenCV.sln" Build "Debug|x64"
     fi
 
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then

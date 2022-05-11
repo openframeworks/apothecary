@@ -961,7 +961,6 @@ function with_vs_env(){
 
 		echo "" > with_env.bat # cleanup temporary bat file
 		echo "call \"$VS_VARS_PATH\" x64 && msbuild $@" >> with_env.bat
-    cat with_env.bat
 		cmd.exe //C "call with_env.bat"
 	else
 		#statements
