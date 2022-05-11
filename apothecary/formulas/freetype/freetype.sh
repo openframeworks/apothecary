@@ -103,6 +103,8 @@ function build() {
 			vs-build freetype.sln Build "Release|x64"
 		elif [ "$ARCH" == "ARM" ] ; then
 			vs-build freetype.sln Build "Release|ARM"
+		elif [ "$ARCH" == "ARM64" ] ; then
+			vs-build freetype.sln Build "Release|ARM64"
 		fi
 		cd ../../../
 
@@ -209,9 +211,9 @@ function build() {
 			export BUILD_TOOLS="${DEVELOPER}"
 
 			if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-	    		MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
+	    		MIN_IOS_VERSION=13.0 # 7.0 as this is the minimum for these architectures
+		    elif [ "${IOS_ARCH}" == "armv7" ] || ["${IOS_ARCH}" == "i386" ]; then
+		    	MIN_IOS_VERSION=10.0 
 		    fi
 
 	        if [ "${TYPE}" == "tvos" ]; then
@@ -227,9 +229,9 @@ function build() {
 	        fi
 
 	        BITCODE=""
-	        if [[ "$TYPE" == "tvos" ]]; then
+	        if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
 	            BITCODE=-fembed-bitcode;
-	            MIN_IOS_VERSION=9.0
+	            MIN_IOS_VERSION=13.0
 	        fi
 
 			export EXTRA_LINK_FLAGS="-std=$CSTANDARD $BITCODE -DNDEBUG -stdlib=$STDLIB $MIN_TYPE$MIN_IOS_VERSION -Os -fPIC -Wno-trigraphs -fpascal-strings -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden"
