@@ -103,23 +103,23 @@ if "%TESTS%"=="" (set TESTS=notests)
 if not defined VCINSTALLDIR (
   if %VS_VERSION%==vs140 (
     if %PLATFORM%==x64 (
-      call "%VS140COMNTOOLS%%VS_VARSALL%" x86_amd64
+      call "%VS140COMNTOOLS%%VS_VARSALL%" x86_amd64 8.1
     ) else (
-      call "%VS140COMNTOOLS%%VS_VARSALL%" x86
+      call "%VS140COMNTOOLS%%VS_VARSALL%" x86 8.1
     )
   ) else (
     if %VS_VERSION%==vs150 (
       if %PLATFORM%==x64 (
-        call "%VS150COMNTOOLS%%VS_VARSALL%" x86_amd64
+        call "%VS150COMNTOOLS%%VS_VARSALL%" x86_amd64 8.1
       ) else (
-        call "%VS150COMNTOOLS%%VS_VARSALL%" x86
+        call "%VS150COMNTOOLS%%VS_VARSALL%" x86 8.1
       )
     ) else (
       if %VS_VERSION%==vs160 (
         if %PLATFORM%==x64 (
-          call "%VS160COMNTOOLS%%VS_VARSALL%" x86_amd64
+          call "%VS160COMNTOOLS%%VS_VARSALL%" x86_amd64 8.1
         ) else (
-          call "%VS160COMNTOOLS%%VS_VARSALL%" x86
+          call "%VS160COMNTOOLS%%VS_VARSALL%" x86 8.1
         )
       )
     )
