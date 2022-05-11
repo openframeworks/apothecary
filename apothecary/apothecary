@@ -987,7 +987,7 @@ function vs-build() {
 
 		#echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_INSTALL_PATH=`cmd vswhere.exe -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_INSTALL_PATH=`cmd "vswhere.exe" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs install path: ${VS_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
