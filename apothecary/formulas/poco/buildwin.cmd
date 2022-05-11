@@ -184,6 +184,7 @@ if "%BUILD_TOOL%"=="msbuild" (
 
   set ACTIONSW=/t:
   set CONFIGSW=/p:Configuration=
+  set EXTRASW=/m /p:IncludePath="%OPENSSL_INCLUDE%"
   if "%USEENV%"=="env"   set USEENVP=/p:UseEnv=true
   if "%USEENV%"=="noenv" set USEENVP=/p:UseEnv=false
 
@@ -300,8 +301,6 @@ set RELEASE_STATIC_MT=1
 set RELEASE_STATIC_MD=1
 set RELEASE_SHARED=1)))))
 
-set EXTRASW=/m /p:IncludePath="%OPENSSL_INCLUDE%"
-
 echo.
 echo.
 echo ########################################################################
@@ -321,8 +320,6 @@ if %DEBUG_STATIC_MT%==1   (echo debug_static_mt)
 if %DEBUG_STATIC_MD%==1   (echo debug_static_md)
 if %RELEASE_STATIC_MT%==1 (echo release_static_mt)
 if %RELEASE_STATIC_MD%==1 (echo release_static_md)
-
-echo EXTRAS IS %EXTRASW%
 
 rem build for up to 4 levels deep
 for /f %%G in ('findstr /R "." components') do (

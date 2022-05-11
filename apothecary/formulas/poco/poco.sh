@@ -90,6 +90,8 @@ function prepare() {
     elif [ "$TYPE" == "vs" ] ; then
         #change the build win cmd file for vs2015 compatibility
         CURRENTPATH=`pwd`
+        
+        #doing this for VS 2019 as we have to pass in the SSL path and so it requires a modified buildwin.cmd
         rm buildwin.cmd
         cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
 

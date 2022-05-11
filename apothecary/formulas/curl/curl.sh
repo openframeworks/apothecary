@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_59_0
+VER=7_81_0
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -41,7 +41,7 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		local OF_LIBS_OPENSSL_ABS_PATH=$(realpath ../openssl)
+		local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
@@ -53,8 +53,10 @@ function build() {
 
         if [ $ARCH == 32 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-        else
+        elif [ $ARCH == 64 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+        elif [ $ARCH == "ARM" ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|ARM"
         fi
 
 	elif [ "$TYPE" == "android" ]; then
