@@ -350,7 +350,7 @@ if [ "$TYPE" = "vs" ]; then
     fi
     
     VS_YEAR=2019
-    VS_BAT="vcvarsall.bat"
+    VS_BAT="vcvarsall.bat $PLATFORM"
     if [ -z ${VS_BASE_PATH+x} ]; then
         if [ "${VS_VER}" = "15" ]; then
             VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
