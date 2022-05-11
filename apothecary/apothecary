@@ -1021,7 +1021,7 @@ function vs-build() {
 		echo "-- Build platform: $BUILD_PLATFORM"
 		echo "-- Build configuration: $BUILD_CONFIGURATION"
 
-		BUILD_EXEC="\"${MSBUILD_PATH}\" \"$1\" //t:${2:-Build} //p:Platform=\"$BUILD_PLATFORM\" //p:Configuration=\"$BUILD_CONFIGURATION\""
+		BUILD_EXEC="\"MSBuild.exe\" \"$1\" //t:${2:-Build} //p:Platform=\"$BUILD_PLATFORM\" //p:Configuration=\"$BUILD_CONFIGURATION\""
 		echo "-- Build parameters: $BUILD_EXEC"
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
