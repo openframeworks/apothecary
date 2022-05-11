@@ -90,8 +90,8 @@ function prepare() {
     elif [ "$TYPE" == "vs" ] ; then
         #change the build win cmd file for vs2015 compatibility
         CURRENTPATH=`pwd`
-        # rm buildwin.cmd
-        # cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
+        rm buildwin.cmd
+        cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
 
 
         # Patch the components to exclude those that we aren't using.
