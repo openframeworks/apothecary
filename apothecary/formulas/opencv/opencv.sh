@@ -227,6 +227,7 @@ function build() {
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
       -DWITH_PVAPI=OFF  | tee ${LOG}
+      ls -la
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
     fi
