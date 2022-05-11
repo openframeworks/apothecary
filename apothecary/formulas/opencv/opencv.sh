@@ -193,7 +193,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" \
+      cmake .. -G "Visual Studio $VS_VER $VS_YEAR -A x64" \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DBUILD_TESTS=OFF \
@@ -227,7 +227,6 @@ function build() {
       -DWITH_PNG=OFF \
       -DWITH_OPENCL=OFF \
       -DWITH_PVAPI=OFF  | tee ${LOG}
-      ls -la
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
     fi
