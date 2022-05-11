@@ -960,7 +960,7 @@ function with_vs_env(){
 		echo "" > with_env.bat # cleanup temporary bat file
 		echo "call \"$VS_VARS_PATH\"" >> with_env.bat
 		echo $@ >> with_env.bat
-		cmd.exe //C "call with_env.bat"
+		cmd.exe //C 
 	else
 		#statements
 		if [ $ARCH == 32 ] ; then
