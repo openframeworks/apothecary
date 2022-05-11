@@ -984,10 +984,20 @@ function vs-build() {
 		# assumed to be installed at a fixed location
 
 		# assumed to be installed at a fixed location
+ 		if [ $VS_VER == 15 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		elif [ $VS_VER == 16 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		elif [ $VS_VER -gt 17 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		else
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+		fi
 
-		#echo "-- Found vswhere: ${VSWHERE_EXE}"
+
+		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
-		VS_INSTALL_PATH=`cmd "vswhere.exe" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
+		VS_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
 		echo "-- Found vs install path: ${VS_INSTALL_PATH}"
 		# msbuild is the tool used to build visual studio solutions
 		MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
@@ -1015,9 +1025,8 @@ function vs-build() {
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
-        #with_vs_env "$BUILD_EXEC"
-    cmd.exe \/c "call MSBuild.exe"
-    
+        with_vs_env "$BUILD_EXEC"
+
 	else
 		#statements
         BUILD_EXEC="$VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
