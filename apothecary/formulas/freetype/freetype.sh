@@ -111,9 +111,9 @@ function build() {
 	elif [ "$TYPE" == "msys2" ] ; then
 		# configure with arch
 		if [ $ARCH ==  32 ] ; then
-			./configure CFLAGS="-arch i386"
+			./configure CFLAGS="-arch i386" --without-bzip2 --without-brotli --with-harfbuzz=no
 		elif [ $ARCH == 64 ] ; then
-			./configure CFLAGS="-arch x86_64"
+			./configure CFLAGS="-arch x86_64" --without-bzip2 --without-brotli --with-harfbuzz=no
 		fi
 
 		make clean;
@@ -168,9 +168,6 @@ function build() {
 
 		local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
 		MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-	    # min iOS version for arm64 is iOS 7
-
-
 		local IOS_CC=$TOOLCHAIN/usr/bin/cc
 		local IOS_HOST="arm-apple-darwin"
 		local IOS_PREFIX="/usr/local/iphone"
@@ -183,9 +180,6 @@ function build() {
 		export AS=$TOOLCHAIN/usr/bin/as
 		export NM=$TOOLCHAIN/usr/bin/nm
 		export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-
-
-
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
@@ -350,19 +344,6 @@ function build() {
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
 
 	elif [ "$TYPE" == "android" ] ; then
-	    #local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
-	    #source ../../android_configure.sh $ABI
-	    #if [ "$ARCH" == "armv7" ]; then
-        #    HOST=armv7a-linux-android
-        #elif [ "$ARCH" == "x86" ]; then
-        #    HOST=x86-linux-android
-        #fi
-#
-	    #./configure --prefix=$BUILD_TO_DIR --host $HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no
-	    #make clean
-	    #make -j${PARALLEL_MAKE}
-	    #make install
-
 
         source ../../android_configure.sh $ABI cmake
         rm -rf "build_${ABI}/"
@@ -406,11 +387,6 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
         	-G 'Unix Makefiles' ..
 
-        # cmake -G 'Unix Makefiles' .. \
-        # 	-DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
-        # 	-DANDROID_ABI="${ABI}" \
-        # 	-DANDROID_NATIVE_API_LEVEL="${ANDROID_API}" -DANDROID_TOOLCHAIN=clang -DCMAKE_C_FLAGS="-Oz -DDEBUG $CFLAGS" #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
-        	
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 
