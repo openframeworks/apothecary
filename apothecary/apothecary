@@ -1015,8 +1015,9 @@ function vs-build() {
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might
 		# have some quotes inside the command.
-        with_vs_env "$BUILD_EXEC"
-
+        #with_vs_env "$BUILD_EXEC"
+    cmd.exe \/c "call MSBuild.exe"
+    
 	else
 		#statements
         BUILD_EXEC="$VS_BUILD_TOOL $1 /${2:-Build} \"${3:-Release}\""
