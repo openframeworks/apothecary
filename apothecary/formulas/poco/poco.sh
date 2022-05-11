@@ -8,7 +8,7 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.10.1-release
+VER=1.11.1-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
@@ -181,7 +181,7 @@ function build() {
                 elif [ $ARCH == 64 ] ; then
 
                     echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"$VS_VARS_PATH\" x64 10.0.10240.0" >>  with_env_poco.bat
+                    echo "call \"$VS_VARS_PATH\" x64" >>  with_env_poco.bat
                     echo "buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests" >>  with_env_poco.bat
                     cat with_env_poco.bat
                     cmd.exe //C "call with_env_poco.bat"
