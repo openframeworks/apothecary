@@ -5,7 +5,7 @@
 #
 # uses a own build system
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" "emscripten" "vs" )
 
 # define the version
 VERSION=1.66.0

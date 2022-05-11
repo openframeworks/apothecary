@@ -43,7 +43,7 @@ function prepare() {
 	else
 		CURRENTPATH=`pwd`
 		export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
-		cp -vr $FORMULA_DIR/_depends/pixman/ ${CURRENTPATH_DIR}/
+		cp -vr $FORMULA_DIR/_depends/pixman/ ./${CURRENTPATH_DIR}/
 	fi
 }
 
