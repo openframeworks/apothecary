@@ -90,6 +90,10 @@ if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
     MIN_IOS_VERSION=13.0
     BITCODE=-fembed-bitcode
 fi
+if [[ "${IOS_ARCH}" == "armv7" ]]; then #maximum for armv7
+    MIN_IOS_VERSION=10.0
+    BITCODE=-fembed-bitcode 
+fi
 
 
 export CC="$(xcrun -find -sdk ${SDK} clang)"

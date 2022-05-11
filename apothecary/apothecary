@@ -81,7 +81,7 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     # $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
     IOS_SDK_VER=13.0
-    IOS_MIN_SDK_VER=13.0
+    IOS_MIN_SDK_VER=10.0
 
 if ! which realpath >&/dev/null; then
   if ! which brew >&/dev/null; then
