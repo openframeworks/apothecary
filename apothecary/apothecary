@@ -350,7 +350,7 @@ if [ "$TYPE" = "vs" ]; then
     fi
     
     VS_YEAR=2019
-    VS_BAT="vcvarsall.bat $PLATFORM"
+    VS_BAT="vcvarsall.bat"
     if [ -z ${VS_BASE_PATH+x} ]; then
         if [ "${VS_VER}" = "15" ]; then
             VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
@@ -955,7 +955,16 @@ function gitclone() {
 }
 
 function with_vs_env(){
-	if [ $VS_VER -gt 14 ] ; then
+	
+    #2019 and onwards we need to pass the platform as the arg
+    if [ $VS_VER -gt 15 ] ; then
+		# we want to make sure that the build command is called with the correct environment variables set up
+		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
+
+		echo "" > with_env.bat # cleanup temporary bat file
+		echo "call \"$VS_VARS_PATH\" $PLATFORM && $@" >> with_env.bat
+		cmd.exe //C "call with_env.bat"
+    elif [ $VS_VER == 15 ] ; then
 		# we want to make sure that the build command is called with the correct environment variables set up 
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 
