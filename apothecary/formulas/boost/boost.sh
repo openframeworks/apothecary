@@ -24,6 +24,7 @@ URL=https://github.com/boostorg/boost/archive/boost-$VERSION.tar.gz
 function download() {
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
+  ls -la
 	mv $UNCOMPRESSED_NAME boost
 	rm ${TARBALL}
 
