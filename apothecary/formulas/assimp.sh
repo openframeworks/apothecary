@@ -200,10 +200,10 @@ function build() {
         mkdir -p "build_$ABI"
         rm -f CMakeCache.txt
 
-        export CFLAGS=""
-        export CPPFLAGS=""
-        export LDFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
+        CFLAGS=""
+        CPPFLAGS=""
+        LDFLAGS=""
+        CMAKE_LDFLAGS=""
         
         cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             -DCMAKE_C_COMPILER=${CC} \
@@ -216,7 +216,6 @@ function build() {
             -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration " \
             -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DCMAKE_C_STANDARD=17 \

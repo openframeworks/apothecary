@@ -193,7 +193,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" \
+      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DBUILD_TESTS=OFF \

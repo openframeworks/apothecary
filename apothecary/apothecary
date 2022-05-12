@@ -960,7 +960,7 @@ function with_vs_env(){
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 
 		echo "" > with_env.bat # cleanup temporary bat file
-		echo "call \"$VS_VARS_PATH\" x64 && $@" >> with_env.bat
+		echo "call \"$VS_VARS_PATH\" $PLATFORM && $@" >> with_env.bat
 		cmd.exe //C "call with_env.bat"
 	else
 		#statements
