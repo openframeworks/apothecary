@@ -9,7 +9,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
 VERSION=1.66.0
-UNCOMPRESSED_NAME=boost-boost-$VERSION
+UNCOMPRESSED_NAME=boost-$VERSION
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
@@ -18,7 +18,7 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://github.com/boostorg/boost/archive/refs/tags/boost-$VERSION.tar.gz
+URL=https://github.com/boostorg/boost/archive/boost-$VERSION.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
