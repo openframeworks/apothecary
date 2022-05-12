@@ -290,15 +290,15 @@ function copy() {
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
             # copy .lib and .dll artifacts
-            cp -v build_vs_32/code/Release/*.lib $1/lib/$TYPE/Win32
-            cp -v build_vs_32/code/Release/*.dll $1/lib/$TYPE/Win32
+            cp -v build_vs_32/lib/Release/*.lib $1/lib/$TYPE/Win32
+            cp -v build_vs_32/lib/Release/*.dll $1/lib/$TYPE/Win32
             # copy header files
             cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             # copy .lib and .dll artifacts
-            cp -v build_vs_64/code/Release/*.lib $1/lib/$TYPE/x64
-            cp -v build_vs_64/code/Release/*.dll $1/lib/$TYPE/x64
+            cp -v build_vs_64/lib/Release/*.lib $1/lib/$TYPE/x64
+            cp -v build_vs_64/lib/Release/*.dll $1/lib/$TYPE/x64
             # copy header files
             cp -v -r build_vs_64/include/* $1/include
         fi
