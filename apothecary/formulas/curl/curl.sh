@@ -47,12 +47,15 @@ function build() {
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 	
         cd projects
+        
+        #hardcoded to vc14 ( VS 2017 ) as there is now VS 2019 project file option 
   		cmd //c "generate.bat vc14"
 		cd Windows/VC14/lib
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
 
+        # /p:PlatformToolset=v142 is a sort of hack to retarget solution to VS 2019 when the sln doesn't support the platform
         if [ $ARCH == 32 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
         elif [ $ARCH == 64 ] ; then
