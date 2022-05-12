@@ -625,6 +625,12 @@ function build() {
 
       cd build
 
+      BITCODE=""
+      if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+          BITCODE=-fembed-bitcode;
+          MIN_IOS_VERSION=13.0
+      fi
+
       WITH_ITT=ON
       if [[ "${IOS_ARCH}" == "arm64" ]]; then
         WITH_ITT=OFF

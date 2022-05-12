@@ -217,9 +217,9 @@ function build() {
             fi
 
             BITCODE=""
-            if [[ "$TYPE" == "tvos" ]]; then
+            if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
                 BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=9.0
+                MIN_IOS_VERSION=13.0
             fi
 
 

@@ -256,6 +256,8 @@ function build() {
  			AR=$AR \
 	        NM=$NM \
 			LDFLAGS="$LDFLAGS" >> "${LOG}" 2>&1
+			echo "Cleaning up from Make"
+		    make clean >> "${LOG}" 2>&1
 			echo "Making..."
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 			if [ $? != 0 ];
