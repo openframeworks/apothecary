@@ -46,11 +46,19 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
     if [ "$BUNDLE" == "1" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
+            "rtAudio"
+            "tess2"
+            "uriparser"
+
             "pixman"
             "pkg-config"
             "zlib"
             "libpng"
             "freetype"
+            
+            # # Formulas with depenencies in the end
+            "uri"
+            "cairo"
 
             # All formulas
             "boost"
@@ -66,13 +74,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "pugixml"
             "utf8"
             "videoInput"
-            "rtAudio"
-            "tess2"
-            "uriparser"
 
-            # # Formulas with depenencies in the end
-            "cairo"
-            "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
