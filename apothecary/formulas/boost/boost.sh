@@ -9,25 +9,22 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
 VERSION=1.66.0
-VERSION_UNDERSCORES="$(echo "$VERSION" | sed 's/\./_/g')"
-TARBALL="boost_${VERSION_UNDERSCORES}.tar.gz"
+UNCOMPRESSED_NAME=boost-boost-$VERSION
+TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
-
 
 BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
-
-WIN_URL=https://boostorg.jfrog.io/artifactory/main/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
+URL=https://github.com/boostorg/boost/archive/refs/tags/boost-$VERSION.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
-	mv boost_${VERSION_UNDERSCORES} boost
+	mv UNCOMPRESSED_NAME boost
 	rm ${TARBALL}
 
 	if [ "$VERSION" == "1.58.0" ]; then
