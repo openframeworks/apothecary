@@ -9,8 +9,8 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
 VERSION=1.66.0
-UNCOMPRESSED_NAME=boost-$VERSION
-TARBALL=$UNCOMPRESSED_NAME.tar.gz
+UNCOMPRESSED_NAME=boost-boost-$VERSION
+TARBALL=boost-$VERSION.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
 
@@ -24,7 +24,7 @@ URL=https://github.com/boostorg/boost/archive/boost-$VERSION.tar.gz
 function download() {
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
-  ls -la
+  
 	mv $UNCOMPRESSED_NAME boost
 	rm ${TARBALL}
 
