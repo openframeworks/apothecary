@@ -46,21 +46,20 @@ function build() {
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 	
-  	#PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc14.10"
-		cd winbuild
-    PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "nmake /f Makefile.vc mode=static"
-    
-#		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
-#		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
-#		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
-#
-#        if [ $ARCH == 32 ] ; then
-#            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
-#        elif [ $ARCH == 64 ] ; then
-#            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
-#        elif [ $ARCH == "ARM" ] ; then
-#            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|ARM"
-#        fi
+        cd projects
+  		cmd //c "generate.bat vc14"
+		cd Windows/VC14/lib
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
+		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
+
+        if [ $ARCH == 32 ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
+        elif [ $ARCH == 64 ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
+        elif [ $ARCH == "ARM" ] ; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|ARM"
+        fi
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
@@ -217,10 +216,14 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
-		elif [ $ARCH == 64 ] ; then
+			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+		
+        elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
+			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib    
+        elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/ARM/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
