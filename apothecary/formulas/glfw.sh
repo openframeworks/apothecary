@@ -41,7 +41,7 @@ function build() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64"
+			cmake .. -G "Visual Studio $VS_VER $VS_YEAR x64"
 			vs-build "GLFW.sln" Build "Release|x64"
 		fi
 	else
