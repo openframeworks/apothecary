@@ -9,8 +9,8 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
 VERSION=1.66.0
-UNCOMPRESSED_NAME=boost-boost-$VERSION
-TARBALL=boost-$VERSION.tar.gz
+UNCOMPRESSED_NAME=boost_1_66_0
+TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
 
@@ -18,7 +18,7 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://github.com/boostorg/boost/archive/boost-$VERSION.tar.gz
+URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
 
 # download the source code and unpack it into LIB_NAME
 function download() {
