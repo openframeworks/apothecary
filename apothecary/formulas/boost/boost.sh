@@ -24,7 +24,7 @@ URL=https://github.com/boostorg/boost/archive/boost-$VERSION.tar.gz
 function download() {
 	wget -nv ${URL}
 	tar xzf ${TARBALL}
-	mv UNCOMPRESSED_NAME boost
+	mv $UNCOMPRESSED_NAME boost
 	rm ${TARBALL}
 
 	if [ "$VERSION" == "1.58.0" ]; then
