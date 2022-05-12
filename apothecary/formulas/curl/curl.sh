@@ -66,7 +66,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        local OPENSSL_DIR=$BUILD_DIR/openssl/build/
+        local OPENSSL_DIR=$BUILD_DIR/openssl/
 	    source ../../android_configure.sh $ABI
 
 	    if [ "$ARCH" == "armv7" ]; then
