@@ -12,7 +12,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_81_0
+VER=7_59_0
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -27,9 +27,12 @@ function download() {
 }
 
 # prepare the build environment, executed inside the lib src dir
-#function prepare() {
-#
-#}
+function prepare() {
+	if [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        # apply https://github.com/curl/curl/commit/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4
+		patch -p0 -u < $FORMULA_DIR/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4.patch
+	fi
+}
 
 # executed inside the lib src dir
 function build() {
