@@ -481,7 +481,6 @@ function copy() {
             cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64/Debug
-            ls -la
             cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
 
             mkdir -p $1/lib/$TYPE/x64/Release
