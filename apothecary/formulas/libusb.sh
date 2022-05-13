@@ -60,6 +60,11 @@ function build() {
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2017.sln Build "Release|x64"
 			fi
+		elif [ $VS_VER -eq 16 ]; then
+			if [ $ARCH == 64 ] ; then
+                # hack to retarget solution to VS 2019 
+				vs-build libusb_2017.sln "Build /p:PlatformToolset=v142" "Release|x64"
+			fi
 		else
 			echo "VS version $VS_VER not supported yet"
 			exit 1

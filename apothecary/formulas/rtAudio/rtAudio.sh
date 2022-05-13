@@ -96,7 +96,7 @@ function build() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
+			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 			vs-build "rtaudio_static.vcxproj" Build "Release|x64"
 			vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
 		fi

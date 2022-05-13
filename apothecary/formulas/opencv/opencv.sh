@@ -193,7 +193,7 @@ function build() {
     elif [ $ARCH == 64 ] ; then
       mkdir -p build_vs_64
       cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER Win64" \
+      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 \
       -DBUILD_PNG=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DBUILD_TESTS=OFF \
@@ -473,7 +473,7 @@ function build() {
     cd ${BUILD_DIR}/${1}
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
-    # these can be removed when we move to latest opencv 
+    # these can be removed when we move to latest opencv
     sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
     sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
     sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py

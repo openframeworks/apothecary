@@ -87,7 +87,7 @@ function build() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p build_vs_64
 			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 			vs-build "tess2.sln" Build "Release|x64"
 		fi
 

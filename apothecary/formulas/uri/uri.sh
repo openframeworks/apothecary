@@ -49,7 +49,7 @@ function build() {
 			vs-build "ALL_BUILD.vcxproj"
 			vs-build "ALL_BUILD.vcxproj" Build "Debug"
 		elif [ $ARCH == 64 ] ; then
-			cmake .. -G "Visual Studio $VS_VER Win64"  
+			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64
 			vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
 			vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
 		fi

@@ -11,7 +11,7 @@ on:
 jobs:
 
   build-msys2:
-    runs-on: windows-2016
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
@@ -29,6 +29,7 @@ jobs:
             libxml2
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
+            python3
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
