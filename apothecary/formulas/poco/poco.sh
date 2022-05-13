@@ -407,17 +407,21 @@ function build() {
         local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 
         source ../../android_configure.sh $ABI
+        
+        local OLDCXXFLAGS=$CXXFLAGS
+        export CXXFLAGS="$CXXFLAGS -std=c++11"
+        
         #export CXX=clang++
         ./configure $BUILD_OPTS \
                     --include-path=$OPENSSL_INCLUDE \
                     --library-path=$OPENSSL_LIBS/$ABI \
-                    --cflags="-std=c++11" \
                     --config=Android
         make clean ANDROID_ABI=$ABI
         make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
         rm -f lib/Android/$ABI/*d.a
 
         export PATH=$OLD_PATH
+        export CXXFLAGS=$OLDCXXFLAGS
 
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
         ./configure $BUILD_OPTS
