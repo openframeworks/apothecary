@@ -408,8 +408,7 @@ function build() {
 
         source ../../android_configure.sh $ABI
         
-        local OLDCXXFLAGS=$CXXFLAGS
-        export CXXFLAGS="$CXXFLAGS -std=c++11"
+        CXXFLAGS="-std=c++11"
         
         #export CXX=clang++
         ./configure $BUILD_OPTS \
@@ -419,9 +418,10 @@ function build() {
         make clean ANDROID_ABI=$ABI
         make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
         rm -f lib/Android/$ABI/*d.a
+        
+        CXXFLAGS = ""
 
         export PATH=$OLD_PATH
-        export CXXFLAGS=$OLDCXXFLAGS
 
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
         ./configure $BUILD_OPTS
