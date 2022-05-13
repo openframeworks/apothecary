@@ -408,9 +408,8 @@ function build() {
 
         source ../../android_configure.sh $ABI
         
-        CXXFLAGS="-std=c++11"
-        
-        #export CXX=clang++
+        CXXFLAGS="-std=c++11 -stdlib=libc++"
+        CXX="clang++"
         ./configure $BUILD_OPTS \
                     --include-path=$OPENSSL_INCLUDE \
                     --library-path=$OPENSSL_LIBS/$ABI \
