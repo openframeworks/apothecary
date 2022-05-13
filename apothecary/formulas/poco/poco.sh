@@ -411,6 +411,7 @@ function build() {
         ./configure $BUILD_OPTS \
                     --include-path=$OPENSSL_INCLUDE \
                     --library-path=$OPENSSL_LIBS/$ABI \
+                    --cflags="-std=c++11"
                     --config=Android
         make clean ANDROID_ABI=$ABI
         make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
