@@ -15,13 +15,13 @@ jobs:
     strategy:
       matrix:
           include: [
-            { msystem: MINGW32 },
-            { msystem: MINGW64 },
-            { msystem: UCRT64 },
-            { msystem: CLANG32 },
-            { msystem: CLANG64 }
+            { flavor: mingw32 },
+            { flavor: mingw64 },
+            { flavor: ucrt64 },
+            { flavor: clang32 },
+            { flavor: clang64 }
           ]
-    name: ${{ matrix.msystem }}
+    name: ${{ matrix.flavor }}
     runs-on: windows-2022
     defaults:
       run:
@@ -31,7 +31,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
-          msystem: ${{ matrix.msystem }}
+          msystem: ${{ matrix.flavor }}
           install: >-
             base-devel
             unzip
@@ -40,9 +40,9 @@ jobs:
             git
             libxml2
             python3
-      - name: Install additional msys2 packages
-        run: |
-          pacman -S --noconfirm ${MINGW_PACKAGE_PREFIX}-gcc ${MINGW_PACKAGE_PREFIX}-cmake
+          pacboy: >-
+            gcc:p
+            cmake:p
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
@@ -59,6 +59,6 @@ jobs:
           tag: nightly
           release: nightly
           prerelease: false
-          files: out/openFrameworksLibs_master_msys2_mingw64.zip
+          files: out/openFrameworksLibs_master_msys2_${{ matrix.flavor }}.zip
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
