@@ -11,7 +11,18 @@ on:
 jobs:
 
   build-msys2:
-    runs-on: windows-2019
+    
+    strategy:
+      matrix:
+          include: [
+            { msystem: MINGW32 },
+            { msystem: MINGW64 },
+            { msystem: UCRT64 },
+            { msystem: CLANG32 },
+            { msystem: CLANG64 }
+          ]
+    name: ${{ matrix.msystem }}
+    runs-on: windows-2022
     defaults:
       run:
         shell: msys2 {0}
@@ -20,6 +31,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          msystem: ${{ matrix.msystem }}
           install: >-
             base-devel
             unzip
@@ -27,9 +39,10 @@ jobs:
             gperf
             git
             libxml2
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
             python3
+      - name: Install additional msys2 packages
+        run: |
+          pacman -S --noconfirm ${MINGW_PACKAGE_PREFIX}-gcc ${MINGW_PACKAGE_PREFIX}-cmake
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
@@ -38,8 +51,6 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "msys2"
-          ARCH: 64
-          MSYSTEM: MINGW64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release
         uses: johnwbyrd/update-release@v1.0.0
