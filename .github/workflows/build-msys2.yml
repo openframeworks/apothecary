@@ -14,13 +14,14 @@ jobs:
     
     strategy:
       matrix:
-          include: [
-            { flavor: mingw32 },
-            { flavor: mingw64 },
-            { flavor: ucrt64 },
-            { flavor: clang32 },
-            { flavor: clang64 }
-          ]
+        flavor:
+          - mingw32 # Obsolete : kept for backward compatibility
+          - mingw64
+          - ucrt64
+          #- clang32
+          - clang64
+          #- clangarm64
+
     name: ${{ matrix.flavor }}
     runs-on: windows-2022
     defaults:
@@ -31,6 +32,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          release : true
           msystem: ${{ matrix.flavor }}
           install: >-
             base-devel
@@ -49,7 +51,6 @@ jobs:
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
         env:
-          BUNDLE: ${{ matrix.bundle }}
           TARGET: "msys2"
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release
