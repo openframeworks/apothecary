@@ -15,15 +15,12 @@ jobs:
     strategy:
       matrix:
         flavor:
-          - mingw32 # Obsolete : kept for backward compatibility
           - mingw64
           - ucrt64
-          #- clang32
           - clang64
           #- clangarm64
-
     name: ${{ matrix.flavor }}
-    runs-on: windows-2022
+    runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
