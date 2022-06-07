@@ -9,16 +9,18 @@
 FORMULA_TYPES=( "osx" "vs" )
 
 # define the version by branch  
-VER=2018-cmake-fix
-
+# VER=2018-cmake-fix
 # tools for git use
-GIT_URL=https://github.com/ofTheo/glfw/
+# GIT_URL=https://github.com/ofTheo/glfw/
+GIT_URL=https://github.com/glfw/glfw/
+# VER=master
+VER=3.3.7
 GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 	 echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
-     git clone --branch ${GIT_BRANCH} ${GIT_URL}
+     git clone --branch ${GIT_BRANCH} ${GIT_URL} --depth 1
 }
 
 # prepare the build environment, executed inside the lib src dir
