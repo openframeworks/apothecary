@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" "msys2" )
+FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
 
 # define the version by sha
 VER=1.11.4
@@ -18,9 +18,8 @@ GIT_TAG=$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
 	wget -nv http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
-    tar xzf pugixml-$VER.tar.gz
-    mv pugixml-$VER pugixml
-    rm pugixml-$VER.tar.gz
+	mkdir pugixml
+	tar xzf pugixml-$VER.tar.gz --directory pugixml --strip-components=1
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -94,14 +93,6 @@ function build() {
 			 -c src/pugixml.cpp \
 			 -o src/pugixml.o
         libtool src/pugixml.o -o libpugixml.a
-        ranlib libpugixml.a
-	elif [ "$TYPE" == "msys2" ]; then
-		g++ -O2 \
-			 -Wall \
-			 -Iinclude \
-			 -c src/pugixml.cpp \
-			 -o src/pugixml.o
-        ar ruv libpugixml.a src/pugixml.o
         ranlib libpugixml.a
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
@@ -199,7 +190,7 @@ function copy() {
 				cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
 			fi
 		fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "msys2" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
 	elif [ "$TYPE" == "android" ] ; then

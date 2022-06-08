@@ -55,24 +55,35 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
+
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
         local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+
+
+		local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
 
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
-		PATH=$OPENSSL_LIBRARIES:$PATH cmd //c "projects\\generate.bat vc$VS_VER"
-		cd projects/Windows/VC$VS_VER/lib
+	
+        cd projects
+        
+        #hardcoded to vc14 ( VS 2017 ) as there is now VS 2019 project file option 
+  		cmd //c "generate.bat vc14"
+		cd Windows/VC14/lib
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
 		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
 
+        # /p:PlatformToolset=v142 is a sort of hack to retarget solution to VS 2019 when the sln doesn't support the platform
         if [ $ARCH == 32 ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|Win32"
+
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
         elif [ $ARCH == 64 ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|x64"
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
         elif [ $ARCH == "ARM" ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln Build "LIB Release - LIB OpenSSL|ARM"
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|ARM"
+
         fi
 
 	elif [ "$TYPE" == "android" ]; then
@@ -310,10 +321,14 @@ function copy() {
         cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
-		elif [ $ARCH == 64 ] ; then
+			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
+		
+        elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC$VS_VER/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib
+			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib    
+        elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/ARM/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         cp -Rv build/$TYPE/include/curl/* $1/include/curl/

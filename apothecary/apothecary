@@ -376,31 +376,40 @@ if [ "$TYPE" = "vs" ]; then
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
     fi
 
-    # https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170
+    
+    VS_YEAR=2019
+    VS_BAT="vcvarsall.bat"
+
     if [ -z ${VS_BASE_PATH+x} ]; then
-		if [ "${VS_VER}" = "15" ]; then
-			VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
+        if [ "${VS_VER}" = "15" ]; then
+            VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
+            VS_YEAR=2017
+            VS_BAT="vcvars$ARCH.bat"
         elif [ "${VS_VER}" = "16" ]; then
-			VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2019/$VS_TYPE"
+            VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2019/$VS_TYPE"
+            VS_YEAR=2019
         elif [ "${VS_VER}" = "17" ]; then
-			VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
-		fi
-	fi	
+          VS_BASE_PATH="/c/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
+          VS_YEAR=2022
+        fi
+    fi
 	
+
 
 	if [ $ARCH == "ARM64" ] || [ $ARCH == "ARM" ] ; then
            
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars${VS_HOST}_${CROSS_TOOL}.bat")
 
 	else 
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars$ARCH.bat")
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 
 	fi
 
 
 
 	export VS_BASE_PATH; 
-	export VS_VARS_PATH; 
+	export VS_VARS_PATH;
+  export VS_YEAR;
 
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
@@ -1003,13 +1012,21 @@ function gitclone() {
 }
 
 function with_vs_env(){
-	if [ $VS_VER -gt 14 ] ; then
+	
+    #2019 and onwards we need to pass the platform as the arg
+    if [ $VS_VER -gt 15 ] ; then
+		# we want to make sure that the build command is called with the correct environment variables set up
+		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
+
+		echo "" > with_env.bat # cleanup temporary bat file
+		echo "call \"$VS_VARS_PATH\" $PLATFORM && $@" >> with_env.bat
+		cmd.exe //C "call with_env.bat"
+    elif [ $VS_VER == 15 ] ; then
 		# we want to make sure that the build command is called with the correct environment variables set up 
 		# we achieve this by piping all commands into a .bat file and then calling this temporary .bat file.
 
 		echo "" > with_env.bat # cleanup temporary bat file
-		echo "call \"$VS_VARS_PATH\"" >> with_env.bat
-		echo $@ >> with_env.bat
+		echo "call \"$VS_VARS_PATH\" && $@" >> with_env.bat
 		cmd.exe //C "call with_env.bat"
 	else
 		#statements
@@ -1040,7 +1057,10 @@ function vs-build() {
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		else
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+
 		fi
+
+
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools
 		VS_INSTALL_PATH=`cmd //c "${VSWHERE_EXE}" -latest -products Microsoft.VisualStudio.Product.${VS_TYPE} -requires Microsoft.VisualStudio.Component.VC.CoreIde -property installationPath`
@@ -1080,7 +1100,7 @@ function vs-build() {
 		echo "-- Build platform: $BUILD_PLATFORM"
 		echo "-- Build configuration: $BUILD_CONFIGURATION"
 
-		BUILD_EXEC="\"${MSBUILD_PATH}\" \"$1\" /t:${2:-Build} /p:Platform=\"$BUILD_PLATFORM\" /p:Configuration=\"$BUILD_CONFIGURATION\""
+		BUILD_EXEC="\"MSBuild.exe\" \"$1\" /t:${2:-Build} /p:Platform=\"$BUILD_PLATFORM\" /p:Configuration=\"$BUILD_CONFIGURATION\""
 		echo "-- Build parameters: $BUILD_EXEC"
 
 		# we need to add some extra outer quotes, since cmd.exe will only remove the outermost quotes and we might

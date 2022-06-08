@@ -79,40 +79,42 @@ function build() {
 		unset TMP
 		unset TEMP
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
+
 	    if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
 				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln"
 			elif [ $ARCH == 64 ] ; then
 				mkdir -p build_vs_64
 				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|x64"
 			fi
 		else
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
 				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A Win32 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln"
 			elif [ $ARCH == 64 ] ; then
 				mkdir -p build_vs_64
 				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|x64"
 			elif [ $ARCH == "ARM" ] ; then
 				mkdir -p build_vs_arm
 				cd build_vs_arm
-				cmake .. -G "Visual Studio $VS_VER" -A ARM -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|ARM"
 			elif [ $ARCH == "ARM64" ] ; then
 				mkdir -p build_vs_arm64
 				cd build_vs_arm64
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|ARM64"
 			fi
+
 		fi
 
 

@@ -44,6 +44,7 @@ function build() {
 		cd build_vs$ARCH
 		export BOOST_INCLUDEDIR=${BUILD_DIR}/boost/
 		export BOOST_LIBRARYDIR=${BUILD_DIR}/boost/stage_$ARCH/lib
+
         if [ $VS_VER == 15 ] ; then
     		if [ $ARCH == 32 ] ; then
     			cmake .. -G "Visual Studio $VS_VER"  
@@ -73,6 +74,7 @@ function build() {
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM64"
             fi
         fi
+
 	
 	elif [ "$TYPE" == "osx" ]; then
 	    git apply $FORMULA_DIR/uri-remove-tests.patch

@@ -117,6 +117,7 @@ function build() {
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
+
         if [ $VS_VER == 15 ] ; then
             if [ $ARCH == 32 ] ; then
                 mkdir -p build_vs_32
@@ -164,6 +165,7 @@ function build() {
                 cmake --build . --config release
                 #vs-build "Assimp.sln" build "Release|ARM64"
             fi
+
         fi
         cd ..
         #cleanup to not fail if the other platform is called

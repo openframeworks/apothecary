@@ -8,7 +8,7 @@
 # into the openFrameworks library directory.
 
 
-FORMULA_TYPES=( "msys2" "osx" "vs" "linux" "linux64" )
+FORMULA_TYPES=( "osx" "vs" "linux" "linux64" )
 
 # define the version
 VER=44459
@@ -19,9 +19,7 @@ GIT_TAG=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	if [ "$TYPE" == "msys2" ] && [ "$ARCH" == "64" ]; then
-        PKG=fmod_${TYPE}${ARCH}.tar.bz2
-	elif [ "$TYPE" == "vs" ]; then
+	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
 	else
 		PKG=fmod_${TYPE}.tar.bz2

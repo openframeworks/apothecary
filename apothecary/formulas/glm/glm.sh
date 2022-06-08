@@ -5,6 +5,8 @@
 # https://github.com/g-truc/glm
 #
 
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "vs" "ios" "tvos" "android" "emscripten" )
+
 # tools for git use
 GIT_URL=https://github.com/g-truc/glm
 GIT_TAG=0.9.9.8

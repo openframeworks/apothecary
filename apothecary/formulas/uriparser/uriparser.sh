@@ -6,8 +6,9 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx"  "android"  "emscripten" ) 
-	# ios" "tvos" "vs" "msys2" # need to convert to cmake
+
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
+
 
 
 # define the version by sha
@@ -150,14 +151,7 @@ function build() {
 		#./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         make clean
 		make -j${PARALLEL_MAKE}
-	    # make install
-	    cd ../..
-	elif [ "$TYPE" == "msys2" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
-		./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
-		echo "int main(){return 0;}" > tool/uriparse.c
-        make clean
-		make -j${PARALLEL_MAKE}
+
 	    make install
 	elif [ "$TYPE" == "emscripten" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
@@ -265,8 +259,9 @@ function copy() {
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/uriparser.a
-	elif [ "$TYPE" == "msys2" ]; then
+
+		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
+	elif [ "$TYPE" == "emscripten" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/

@@ -11,7 +11,16 @@ on:
 jobs:
 
   build-msys2:
-    runs-on: windows-2019
+    
+    strategy:
+      matrix:
+        flavor:
+          - mingw64
+          - ucrt64
+          - clang64
+          #- clangarm64
+    name: ${{ matrix.flavor }}
+    runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
@@ -20,6 +29,8 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
+          release : true
+          msystem: ${{ matrix.flavor }}
           install: >-
             base-devel
             unzip
@@ -30,6 +41,10 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
             python3
+            python3
+          pacboy: >-
+            gcc:p
+            cmake:p
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
@@ -37,10 +52,7 @@ jobs:
         run: 
           scripts/build.sh
         env:
-          BUNDLE: ${{ matrix.bundle }}
           TARGET: "msys2"
-          ARCH: 64
-          MSYSTEM: MINGW64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release
         uses: johnwbyrd/update-release@v1.0.0
@@ -49,6 +61,6 @@ jobs:
           tag: nightly
           release: nightly
           prerelease: false
-          files: out/openFrameworksLibs_master_msys2_mingw64.zip
+          files: out/openFrameworksLibs_master_msys2_${{ matrix.flavor }}.zip
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 

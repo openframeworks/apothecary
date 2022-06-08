@@ -5,6 +5,8 @@
 # https://github.com/nlohmann/json
 #
 
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "vs" "ios" "tvos" "android" "emscripten" )
+
 # define the version
 VER=3.10.5
 

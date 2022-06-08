@@ -6,7 +6,7 @@
 #
 # uses an autotools build system
 
-FORMULA_TYPES=( "osx" "vs" "msys2" )
+FORMULA_TYPES=( "osx" "vs" )
 
 #FORMULA_DEPENDS=( "pkg-config" )
 
@@ -101,6 +101,7 @@ function build() {
 		unset TMP
 		unset TEMP
 		local API="--with-wasapi --with-ds" # asio as well?
+
 		if [ $VS_VER == 15 ] ; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p build_vs_32
@@ -141,6 +142,7 @@ function build() {
 				vs-build "rtaudio_static.vcxproj" Build "Release|ARM64"
 				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM64"
 			fi
+
 		fi
 
 	elif [ "$TYPE" == "msys2" ] ; then
