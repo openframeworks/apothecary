@@ -3,7 +3,7 @@
 #if [ "${TYPE}" == "tvos" ]; then
 #    IOS_ARCHS="x86_64 arm64"
 #elif [ "$TYPE" == "ios" ]; then
-#    IOS_ARCHS="i386 x86_64 armv7 arm64" #armv7s
+#    IOS_ARCHS="i386 x86_64 armv7 arm64 " #armv7s
 #fi
 TYPE=$1
 IOS_ARCH=$2
@@ -28,6 +28,12 @@ if [ "${TYPE}" == "tvos" ]; then
         export CSDK=$COS
         export ISSIM=FALSE
         export MIN_TYPE=-mtvos-version-min=
+    elif [ "${IOS_ARCH}" == "arm64-simulator" ]; then
+        export HOST=aarch64-apple-darwin
+        export SDK=$SIM
+        export CSDK=$CSIM
+        export ISSIM=TRUE
+        export MIN_TYPE=-mtvos-simulator-version-min=
     else
         echo tvos arch $IOS_ARCH not supported by ios_configure.sh
         exit
@@ -61,6 +67,12 @@ elif [ "$TYPE" == "ios" ]; then
         export CSDK=$COS
         export ISSIM=FALSE
         export MIN_TYPE=-miphoneos-version-min=
+    elif [ "${IOS_ARCH}" == "arm64-simulator" ]; then
+        export HOST=aarch64-apple-darwin
+        export SDK=$SIM
+        export CSDK=$CSIM
+        export ISSIM=TRUE
+        export MIN_TYPE=-mios-simulator-version-min=
     else
         echo ios arch $IOS_ARCH not supported by ios_configure.sh
         exit
@@ -73,19 +85,28 @@ export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-BITCODE=""
-if [[ "$TYPE" == "tvos" ]]; then
-    MIN_IOS_VERSION=9.0
+BITCODE="-fembed-bitcode"
+if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+    MIN_IOS_VERSION=13.0
     BITCODE=-fembed-bitcode
 fi
+if [[ "${IOS_ARCH}" == "armv7" ]]; then #maximum for armv7
+    MIN_IOS_VERSION=10.0
+    BITCODE=-fembed-bitcode 
+fi
+
 
 export CC="$(xcrun -find -sdk ${SDK} clang)"
 export CXX="$(xcrun -find -sdk ${SDK} clang++)"
 #export CPP="$(xcrun -find -sdk ${SDK} clang)"
 export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
-export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Os -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CFLAGS_CMAKE="-arch ${IOS_ARCH} "
+export CPPFLAGS_CMAKE="-arch ${IOS_ARCH}  "
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CPPFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
-        export CPPFLAGS="-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+        export CPPFLAGS="$CPPFLAGS -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+        export CPPFLAGS_CMAKE="${CPPFLAGS_CMAKE}  -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi

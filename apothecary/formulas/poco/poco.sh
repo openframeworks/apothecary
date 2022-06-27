@@ -395,28 +395,13 @@ function build() {
         echo "Completed."
 
     elif [ "$TYPE" == "android" ] ; then
-        local OLD_PATH=$PATH
+        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+        OPENSSL_OPTS="-DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libssl.a"
 
-        export PATH=$BUILD_DIR/Toolchains/Android/$ARCH/bin:$OLD_PATH
-
-        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-
-        # get the absolute path to the included openssl libs
-        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
-        local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
-        local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/
-
-        source ../../android_configure.sh $ABI
-        #export CXX=clang++
-        ./configure $BUILD_OPTS \
-                    --include-path=$OPENSSL_INCLUDE \
-                    --library-path=$OPENSSL_LIBS/$ABI \
-                    --config=Android
-        make clean ANDROID_ABI=$ABI
-        make -j${PARALLEL_MAKE} ANDROID_ABI=$ABI
-        rm -f lib/Android/$ABI/*d.a
-
-        export PATH=$OLD_PATH
+        mkdir -p build_$ABI
+        cd build_$ABI
+        cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" $BUILD_OPTS -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS_RELEASE="-g0 -O3" -DCMAKE_CXX_FLAGS_RELEASE="-g0 -O3" -DCMAKE_BUILD_TYPE=RELEASE $OPENSSL_OPTS ..
+        make -j${PARALLEL_MAKE} VERBOSE=1
 
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
         ./configure $BUILD_OPTS
@@ -463,72 +448,69 @@ function copy() {
   rm -rf $1/lib/$TYPE
   mkdir -p $1/lib/$TYPE
 
-    # libs
-    if [ "$TYPE" == "osx" ] ; then
-        for lib in install/$TYPE/lib/*.a; do
-            dstlib=$(basename $lib | sed "s/lib\(.*\)/\1/")
-            cp -v $lib $1/lib/$TYPE/$dstlib
-        done
-    elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        cp -v lib/$TYPE/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
-            mkdir -p $1/lib/$TYPE/Win32/Debug
-            cp -v lib/*mdd.lib $1/lib/$TYPE/Win32/Debug/
+	# libs
+	if [ "$TYPE" == "osx" ] ; then
+		for lib in install/$TYPE/lib/*.a; do
+			dstlib=$(basename $lib | sed "s/lib\(.*\)/\1/")
+			cp -v $lib $1/lib/$TYPE/$dstlib
+		done
+	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+		cp -v lib/$TYPE/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "vs" ] ; then
+		if [ $ARCH == 32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32/Debug
+			cp -v lib/*mdd.lib $1/lib/$TYPE/Win32/Debug/
 
-            mkdir -p $1/lib/$TYPE/Win32/Release
-            cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
-        elif [ $ARCH == 64 ] ; then
-            mkdir -p $1/lib/$TYPE/x64/Debug
-            cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
+			mkdir -p $1/lib/$TYPE/Win32/Release
+			cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
+		elif [ $ARCH == 64 ] ; then
+			mkdir -p $1/lib/$TYPE/x64/Debug
+			cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
 
-            mkdir -p $1/lib/$TYPE/x64/Release
-            cp -v lib64/*md.lib $1/lib/$TYPE/x64/Release
-        fi
+			mkdir -p $1/lib/$TYPE/x64/Release
+			cp -v lib64/*md.lib $1/lib/$TYPE/x64/Release
+		fi
 
-    elif [ "$TYPE" == "msys2" ] ; then
-        cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
-        #cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "linux" ] ; then
-        cp -v lib/Linux/$(uname -m)/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "linux64" ] ; then
-        cp -v lib/Linux/x86_64/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "linuxarmv6l" ] ; then
-        cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "linuxarmv7l" ] ; then
-        cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
-    elif [ "$TYPE" == "android" ] ; then
-        rm -rf $1/lib/$TYPE/$ABI
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -v lib/Android/$ABI/*.a $1/lib/$TYPE/$ABI
-    else
-        echoWarning "TODO: copy $TYPE lib"
-    fi
+	elif [ "$TYPE" == "msys2" ] ; then
+		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
+		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "linux" ] ; then
+		cp -v lib/Linux/$(uname -m)/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "linux64" ] ; then
+		cp -v lib/Linux/x86_64/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "linuxarmv6l" ] ; then
+		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "linuxarmv7l" ] ; then
+		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
+	elif [ "$TYPE" == "android" ] ; then
+		rm -rf $1/lib/$TYPE/$ABI
+		mkdir -p $1/lib/$TYPE/$ABI
+		cp -v build_$ABI/lib/*.a $1/lib/$TYPE/$ABI
+	else
+		echoWarning "TODO: copy $TYPE lib"
+	fi
 
-    # copy license file
-    echo "remove license"
-    rm -rf $1/license # remove any older files if exists
-    echo "create license dir"
-    mkdir -p $1/license
-    echo "copy license"
-    cp -v LICENSE $1/license/
+	# copy license file
+	echo "remove license"
+	rm -rf $1/license # remove any older files if exists
+	echo "create license dir"
+	mkdir -p $1/license
+	echo "copy license"
+	cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
 
-    if [ "$TYPE" == "vs" ] ; then
-        cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
-        cmd //c buildwin.cmd ${VS_VER}0 clean static_md both x64 nosamples notests
-        #vs-clean "Poco.sln"
-    elif [ "$TYPE" == "android" ] ; then
-        export PATH=$PATH:$ANDROID_TOOLCHAIN_ANDROIDEABI/bin:$ANDROID_TOOLCHAIN_X86/bin
-        make clean ANDROID_ABI=armeabi
-        make clean ANDROID_ABI=armeabi-v7a
-        make clean ANDROID_ABI=x86
-        unset PATH
-    else
-        make clean
-    fi
+	if [ "$TYPE" == "vs" ] ; then
+		cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
+		cmd //c buildwin.cmd ${VS_VER}0 clean static_md both x64 nosamples notests
+		#vs-clean "Poco.sln"
+	elif [ "$TYPE" == "android" ] ; then
+		cd build_$ABI
+		make clean
+	else
+		make clean
+	fi
 }
 

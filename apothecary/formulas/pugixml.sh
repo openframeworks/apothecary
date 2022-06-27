@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
 
 # define the version by sha
-VER=1.9
+VER=1.11.4
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -43,7 +43,7 @@ function build() {
 		unset TEMP
 		cd scripts
 
-		if [[ $VS_VER -gt 14 ]]; then
+		if [[ $VS_VER == 14 ]]; then
 			if [ $ARCH == 32 ] ; then
 					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
@@ -51,7 +51,7 @@ function build() {
 					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
 					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
 			fi
-		else
+		elif [[ $VS_VER == 13 ]]; then
 			if [ $ARCH == 32 ] ; then
 					vs-build "pugixml_vs2015.vcxproj" build "Release"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug"
@@ -59,17 +59,31 @@ function build() {
 					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
 					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
 			fi
+		else 
+			if [ $ARCH == 32 ] ; then
+					vs-build "pugixml_vs2019.vcxproj" build "Release|Win32"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|Win32"
+			elif [ $ARCH == 64 ] ; then
+					vs-build "pugixml_vs2019.vcxproj" build "Release|x64"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|x64"
+			else
+					vs-build "pugixml_vs2019.vcxproj" build "Release|ARM"
+					vs-build "pugixml_vs2019.vcxproj" build "Debug|ARM"
+			fi
+
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
-        source ../../android_configure.sh $ABI
-        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        source ../../android_configure.sh $ABI make
+        #export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
 		# Compile the program
-		$CXX -O2  $CFLAGS \
+		$CXX -Oz $CPPFLAGS $CXXFLAGS \
 			 -Wall \
+			 -fPIC \
+			 -std=c++17 \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o src/pugixml.o
+			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -123,10 +137,38 @@ function copy() {
 
 	# Standard *nix style copy.
 	# copy headers
-	cp -Rv src/*.hpp $1/include/
+	cp -Rv src/pugiconfig.hpp $1/include/pugiconfig.hpp
+	cp -Rv src/pugixml.hpp $1/include/pugixml.hpp
+	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [[ $VS_VER -gt 14 ]]; then
+		if [[ $VS_VER -gt 17 ]]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2022/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2022/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2022/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2022/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			elif [ $ARCH == "ARM" ] ; then
+				mkdir -p $1/lib/$TYPE/ARM
+				# TODO
+			fi
+		elif [[ $VS_VER -gt 16 ]]; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p $1/lib/$TYPE/Win32
+				cp -v "scripts/vs2019/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
+				cp -v "scripts/vs2019/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p $1/lib/$TYPE/x64
+				cp -v "scripts/vs2019/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
+				cp -v "scripts/vs2019/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
+			elif [ $ARCH == "ARM" ] ; then
+				mkdir -p $1/lib/$TYPE/ARM
+				# TODO
+			fi
+		elif [[ $VS_VER -gt 14 ]]; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
@@ -136,7 +178,8 @@ function copy() {
 				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
 			fi
-		else
+		
+		elif [[ $VS_VER -gt 13 ]]; then
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib

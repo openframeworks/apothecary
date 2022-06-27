@@ -5,6 +5,11 @@ docker exec -i emscripten apt install -y coreutils libboost-tools-dev
 docker exec -i emscripten apt install -y rsync
 docker exec -i emscripten apt install -y gperf
 docker exec -i emscripten apt install -y ccache
+docker exec -i emscripten apt install -y build-essential
+docker exec -i emscripten apt install -y autoconf
+docker exec -i emscripten apt install -y automake
+docker exec -i emscripten apt install -y pkgconf
+docker exec -i emscripten apt install -y libtool multistrap unzip
 docker exec -i emscripten sh -c "echo \$PATH"
 
 # DOCKER_HOME=$(docker exec -i emscripten 'echo $HOME')

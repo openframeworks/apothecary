@@ -22,6 +22,10 @@ extern "C" {
  * OpenSSL was configured with the following options:
  */
 
+#ifndef NO_FORK
+# define NO_FORK
+#endif
+
 #ifndef OPENSSL_SYS_MACOSX
 # define OPENSSL_SYS_MACOSX 1
 #endif

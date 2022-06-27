@@ -30,6 +30,13 @@ jobs:
             gperf
             git
             python3
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-gcc-libs
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gdb
+            mingw-w64-x86_64-make
       - name: Clone repository
         uses: actions/checkout@v2
       #- name: Install StrawberryPerl

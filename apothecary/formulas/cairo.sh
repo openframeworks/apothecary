@@ -14,22 +14,33 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype" )
+FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype"  )
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
 FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=1.14.12
+VER=1.17.4
+
+SHA1=68712ae1039b114347be3b7200bc1c901d47a636
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
+URL=https://www.cairographics.org/snapshots/
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate http://cairographics.org/releases/cairo-$VER.tar.xz
+	wget -nv --no-check-certificate https://cairographics.org/snapshots/cairo-$VER.tar.xz
+	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
+	if [ "$CHECKSHA" != "$SHA1" ] ; then
+    	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    	exit
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
 	tar -xf cairo-$VER.tar.xz
 	mv cairo-$VER cairo
 	rm cairo-$VER.tar.xz
@@ -63,28 +74,35 @@ function prepare() {
 		echo "copying from $PWD"
 		if [ "$ARCH" == 32 ]; then
 			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
-		else
+		elif [ "$ARCH" == 64 ]; then
 			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib ../libpng/libpng.lib
+		elif [ "$ARCH" == "ARM" ]; then
+			cp ../libpng/projects/vs2015/ARM/LIB\ Release/libpng.lib ../libpng/libpng.lib
 		fi
 		ls ../zlib
 		ls ../zlib/Release
 		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	else
 		# generate the configure script if it's not there
-		if [ ! -f configure ] ; then
-			./autogen.sh
-		fi
-
-		# manually prepare dependencies
-		apothecaryDependencies prepare
-
+		
 		# Build and copy all dependencies in preparation
+		apothecaryDepend download pkg-config
+		apothecaryDepend prepare pkg-config
 		apothecaryDepend build pkg-config
 		apothecaryDepend copy pkg-config
+		apothecaryDepend download zlib
+		apothecaryDepend prepare zlib
+		apothecaryDepend build zlib
+		apothecaryDepend copy zlib
+		apothecaryDepend download libpng
+		apothecaryDepend prepare libpng
 		apothecaryDepend build libpng
 		apothecaryDepend copy libpng
+		apothecaryDepend download pixman
 		apothecaryDepend build pixman
 		apothecaryDepend copy pixman
+		apothecaryDepend download freetype
+		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
 	fi
@@ -115,17 +133,65 @@ function build() {
 
         # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
         ROOT=${PWD}/..
-        FREETYPE_LIB_PATH="-L$ROOT/freetype/build/osx/lib -lfreetype"
+
+        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        SYSROOT="-isysroot ${SDK_PATH}"
+        export SDK=macosx
+        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
+        export ARCHS="-arch arm64 -arch x86_64"
+
+        export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
+
+        # cp -v ${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE}/freetype.a ${BUILD_ROOT_DIR}/lib/freetype.a # this works! 
+        # cp -Rv ${OF_LIBS_ABS_PATH}/freetype/include/* ${BUILD_ROOT_DIR}/include/ # this works! 
+
+        cp ${OF_LIBS_ABS_PATH}/freetype/lib/osx/freetype.a ${OF_LIBS_ABS_PATH}/freetype/lib/osx/libfreetype.a
+
+        FREETYPE_LIB_PATH="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
+
+        echo "FreeType location: $FREETYPE_LIB_PATH"
+        echo "PKG_CONFIG location: $BUILD_ROOT_DIR/bin/pkg-config"
+
+        export PATH="$PATH;$BUILD_ROOT_DIR;$BUILD_ROOT_DIR/lib;$BUILD_ROOT_DIR/lib/pkgconfig;$BUILD_ROOT_DIR/bin/;${OF_LIBS_ABS_PATH}/freetype/lib/osx"
+
+        chmod -R 755 $BUILD_ROOT_DIR/lib/pkgconfig/
+
+        echo "PATH :$PATH"
+        export PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config"
+		export PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig"
+        export FREETYPE_CFLAGS="-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2"
+        export FREETYPE_LIBS="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
+        export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
+		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
+        export png_REQUIRES="libpng16"
+        export png_CFLAGS="-I$BUILD_ROOT_DIR/include/ -I$BUILD_ROOT_DIR/include/libpng16 $INCLUDE_ZLIB"
+        export png_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpng -L$BUILD_ROOT_DIR/lib/ -lpng16 $INCLUDE_ZLIB_LIBS"
+        export FREETYPE_MIN_RELEASE=2.11.1
+        export FREETYPE_MIN_VERSION=2.11.1
+        export pixman_CFLAGS="-I$BUILD_ROOT_DIR/include/pixman-1"
+        export pixman_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpixman-1"
+		export LDFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}"
+		export CFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}" 
+		export MACOSX_DEPLOYMENT_TARGET=$OSX_MIN_SDK_VER
+		# export FREETYPE_MIN_VERSION=
+	
+		# $BUILD_ROOT_DIR/bin/pkg-config pixman-1 --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config libpng --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config freetype2 --libs
+		# $BUILD_ROOT_DIR/bin/pkg-config zlib --libs
+
+		echo "autogen"
+
+		if [ ! -f configure ] ; then
+			./autogen.sh
+		fi
         
-        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+		echo "configure"
+        ./configure \
+        			PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-                    FREETYPE_LIBS="$FREETYPE_LIB_PATH" \
-					LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-					CFLAGS="-Os -arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
 					--prefix=$BUILD_ROOT_DIR \
 					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
 					--disable-full-testing \
 					--disable-dependency-tracking \
 					--disable-xlib \
@@ -135,8 +201,11 @@ function build() {
                     --disable-quartz \
                     --disable-quartz-image
                             
+        echo "make"
 		make -j${PARALLEL_MAKE}
 		make install
+
+		rm ${OF_LIBS_ABS_PATH}/freetype/lib/osx/libfreetype.a
 	else
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \

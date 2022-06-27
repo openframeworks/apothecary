@@ -35,16 +35,43 @@ function build() {
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $ARCH == 32 ] ; then
-			mkdir -p build_vs_32
-			cd build_vs_32
-			cmake .. -G "Visual Studio $VS_VER"
-			vs-build "GLFW.sln"
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p build_vs_64
-			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64
-			vs-build "GLFW.sln" Build "Release|x64"
+
+		if [ $VS_VER == 15 ] ; then
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+				cmake .. -G "Visual Studio $VS_VER"
+				vs-build "GLFW.sln"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+				cmake .. -G "Visual Studio $VS_VER Win64"
+				vs-build "GLFW.sln" Build "Release|x64"
+			fi
+		else 
+			if [ $ARCH == 32 ] ; then
+				mkdir -p build_vs_32
+				cd build_vs_32
+#         cmake .. -G "Visual Studio $VS_VER"
+				cmake .. -G "Visual Studio $VS_VER" -A Win32
+				vs-build "GLFW.sln"
+			elif [ $ARCH == 64 ] ; then
+				mkdir -p build_vs_64
+				cd build_vs_64
+# 				cmake .. -G "Visual Studio $VS_VER" -A x64
+        cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64
+				vs-build "GLFW.sln" Build "Release|x64"
+			elif [ $ARCH == "ARM" ] ; then
+				mkdir -p build_vs_arm
+				cd build_vs_arm
+				cmake .. -G "Visual Studio $VS_VER" -A ARM
+				vs-build "GLFW.sln" Build "Release|ARM"
+			elif [ $ARCH == "ARM64" ] ; then
+				mkdir -p build_vs_arm64
+				cd build_vs_arm64
+				cmake .. -G "Visual Studio $VS_VER" -A ARM64
+				vs-build "GLFW.sln" Build "Release|ARM64"
+			fi
 		fi
 	else
         if [ $CROSSCOMPILING -eq 1 ]; then
@@ -99,6 +126,12 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
+		elif [ $ARCH == "ARM64" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM64
+			cp -v build_vs_arm64/src/Release/glfw3.lib $1/lib/$TYPE/ARM64/glfw3.lib
+		elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v build_vs_arm/src/Release/glfw3.lib $1/lib/$TYPE/ARM/glfw3.lib
 		fi
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
