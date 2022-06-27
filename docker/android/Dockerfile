@@ -5,9 +5,10 @@ ENV TRAVIS_BUILD_DIR /root
 ENV TARGET=android
 
 # Install more recent version of cmake 
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.22.1/cmake-3.22.1.tar.gz
-RUN tar xf cmake-3.22.1.tar.gz
-RUN cd cmake-3.22.1; ./configure; make -j12; make install
+# Version 3.9.2 taken from https://docs.travis-ci.com/user/build-environment-updates/2017-12-12/
+RUN wget http://www.cmake.org/files/v3.9/cmake-3.9.2.tar.gz
+RUN tar xf cmake-3.9.2.tar.gz
+RUN cd cmake-3.9.2; ./configure; make -j12; make install
 RUN cmake --version
 
 RUN sudo apt-get update -q

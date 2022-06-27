@@ -10,15 +10,9 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
-
+VER=3180 # 3.16.0
 
 # tools for git use
-VER_CPP17=3180 # 3.16.0
-GIT_URL_CPP17=https://github.com/danoli3/FreeImage
-GIT_TAG_CPP17=3.18.0_cpp17 #$3.17.0-header-changes
-
- # 3.17.0
-VER=3170
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.17.0-header-changes
 
@@ -30,17 +24,10 @@ function download() {
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-	elif [[ "$TYPE" == "android" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL_CPP17 FreeImage-$GIT_TAG_CPP17 - Version:$VER_CPP17"
-		echo $GIT_URL
-		wget -nv $GIT_URL_CPP17/archive/$GIT_TAG_CPP17.tar.gz -O FreeImage-$GIT_TAG_CPP17.tar.gz
-		tar -xzf FreeImage-$GIT_TAG_CPP17.tar.gz
-		mv FreeImage-$GIT_TAG_CPP17 FreeImage
-		rm FreeImage-$GIT_TAG_CPP17.tar.gz
+
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL FreeImage-$GIT_TAG"
+        echo "Downloading from $GIT_URL for OSX/iOS"
 		echo $GIT_URL
 		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
@@ -57,8 +44,8 @@ function prepare() {
 		cp -rf $FORMULA_DIR/Makefile.osx Makefile.osx
 
 		# set SDK using apothecary settings
-		perl -pi -e tmp "s|MACOSX_SDK =.*|MACOSX_SDK = $OSX_SDK_VER|" Makefile.osx
-		perl -pi -e tmp "s|MACOSX_MIN_SDK =.*|MACOSX_MIN_SDK = $OSX_MIN_SDK_VER|" Makefile.osx
+		sed -i tmp "s|MACOSX_SDK =.*|MACOSX_SDK = $OSX_SDK_VER|" Makefile.osx
+		sed -i tmp "s|MACOSX_MIN_SDK =.*|MACOSX_MIN_SDK = $OSX_MIN_SDK_VER|" Makefile.osx
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
@@ -70,23 +57,42 @@ function prepare() {
 
 		# delete problematic file including a main fucntion
 		# https://github.com/openframeworks/openFrameworks/issues/5980
-
-		perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
-
-        #rm Source/LibWebP/src/dsp/dec_neon.c
-
-        perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
-		
+		rm -f Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+		touch Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
 	elif [ "$TYPE" == "android" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage
-	    cd $BUILD_DIR/FreeImage
-	    perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
+	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
+	    cd $BUILD_DIR/FreeImage_patched
+	    sed -i "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
+	    #include <stdint.h>
+        #include <asm/byteorder.h>
+		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+        inline void swab(const void *from, void*to, size_t n)
+        {
+            size_t i;
+            if (n < 0)
+                return;
+            for (i = 0; i < (n/2)*2; i += 2)
+                *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
+        }
+ENDDELIM
+
+        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
+        echo "#include \"swab.h\"" > Source/LibRawLite/internal/dcraw_common_patched.cpp;
+        cat Source/LibRawLite/internal/dcraw_common.cpp >> Source/LibRawLite/internal/dcraw_common_patched.cpp
+        cat Source/LibRawLite/internal/dcraw_common_patched.cpp > Source/LibRawLite/internal/dcraw_common.cpp
+        rm Source/LibRawLite/internal/dcraw_common_patched.cpp
+
+        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
+        echo "#include \"swab.h\"" > Source/LibRawLite/src/libraw_cxx_patched.cpp
+        cat Source/LibRawLite/src/libraw_cxx.cpp >> Source/LibRawLite/src/libraw_cxx_patched.cpp
+        cat Source/LibRawLite/src/libraw_cxx_patched.cpp > Source/LibRawLite/src/libraw_cxx.cpp
+        rm Source/LibRawLite/src/libraw_cxx_patched.cpp
 
         #rm Source/LibWebP/src/dsp/dec_neon.c
 
-        perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
-
-
+        sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 	fi
 }
 
@@ -109,7 +115,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64"
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
 
         local STDLIB="libc++"
@@ -178,9 +184,9 @@ function build() {
 		    # min iOS version for arm64 is iOS 7
 
 		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-		    	MIN_IOS_VERSION=9.0 # 7.0 as this is the minimum for these architectures
+		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
 		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=9.0 # 6.0 to prevent start linking errors
+		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
 		    fi
 
             if [ "${TYPE}" == "tvos" ]; then
@@ -196,9 +202,9 @@ function build() {
             fi
 
             BITCODE=""
-            if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+            if [[ "$TYPE" == "tvos" ]]; then
                 BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=13.0
+                MIN_IOS_VERSION=9.0
             fi
 
 			export TARGET_NAME="$CURRENTPATH/libfreeimage-$IOS_ARCH.a"
@@ -219,13 +225,13 @@ function build() {
 		  	export EXTRA_PLATFORM_CFLAGS="$EXTRA_PLATFORM_CFLAGS"
 			export EXTRA_PLATFORM_LDFLAGS="$EXTRA_PLATFORM_LDFLAGS -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -Wl,-dead_strip -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/ $MIN_TYPE$MIN_IOS_VERSION "
 
-		   	EXTRA_LINK_FLAGS="-arch $IOS_ARCH $BITCODE -fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Oz -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
+		   	EXTRA_LINK_FLAGS="-arch $IOS_ARCH $BITCODE -fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Os -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
 			EXTRA_FLAGS="$EXTRA_LINK_FLAGS $BITCODE -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
 
 		    export CC="$CC $EXTRA_FLAGS"
-			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS -std=c17 -Wno-implicit-function-declaration"
-			export CXXFLAGS="$EXTRA_FLAGS -std=c++17 -stdlib=libc++"
-			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION"
+			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS"
+			export CXXFLAGS="$EXTRA_FLAGS -std=c++11 -stdlib=libc++"
+			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION -std=c++11 -stdlib=libc++"
 			export LDFLAGS_PHONE=$LDFLAGS
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
@@ -294,26 +300,21 @@ function build() {
 		unset TOOLCHAIN
 
 	elif [ "$TYPE" == "android" ] ; then
-        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE/$ABI
-        source ../../android_configure.sh $ABI cmake
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
+        cd $BUILD_DIR/FreeImage_patched
+
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
+        source ../../android_configure.sh $ABI
+
+		if [ "$ARCH" == "arm64" ] ; then
+			CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
+		fi
         
-
-        export EXTRA_LINK_FLAGS="-fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
-		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c17"
-		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c++17"
-		export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
-
-        make clean -f Makefile.android
-        make -j${PARALLEL_MAKE} \
-        	CC=${CC} \
-        	AR=${AR} \
-        	CXX=${CXX} \
-    		RANLIB=${RANLIB} \
-    		LD=${LD} \
-    		STRIP=${STRIP} \
-        	-f Makefile.android \
-        	libfreeimage.a
-      
+		# export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        export CC="$CC $CFLAGS $LDFLAGS"
+        export CXX="$CXX $CFLAGS $LDFLAGS"
+        make clean -f Makefile.gnu
+        make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
     elif [ "$TYPE" == "emscripten" ]; then
@@ -365,14 +366,10 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
 			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
-		elif [ $ARCH == 64 ] ; then
+		else
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
 			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
-		elif [ $ARCH == "ARM" ] ; then
-			mkdir -p $1/lib/$TYPE/ARM
-			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
-			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v Dist/*.h $1/include
@@ -413,6 +410,8 @@ function clean() {
 		make clean
 		rm -rf Dist
 		rm -f *.a
+		rm -f builddir/$TYPE
+		rm -f builddir
 		rm -f lib
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    make clean
@@ -426,7 +425,8 @@ function clean() {
 		make clean
 		rm -rf Dist
 		rm -f *.a *.lib
-
+		rm -f builddir/$TYPE
+		rm -f builddir
 		rm -f lib
 	else
 		make clean

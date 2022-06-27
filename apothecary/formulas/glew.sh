@@ -58,10 +58,8 @@ function build() {
 		vs-upgrade "glew.sln"
 		if [ "$ARCH" == "32" ]; then
 			vs-build "glew_static.vcxproj" Build "Release|Win32"
-		elif [ "$ARCH" == "64" ]; then
+		else
 			vs-build "glew_static.vcxproj" Build "Release|x64"
-		elif [ "$ARCH" == "ARM" ]; then
-			vs-build "glew_static.vcxproj" Build "Release|ARM"
 		fi
 		cd ../../
 	elif [ "$TYPE" == "msys2" ] ; then

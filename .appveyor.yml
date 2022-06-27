@@ -18,129 +18,64 @@ environment:
     ARCH: 64
     VS_NAME:
     MSYSTEM: MINGW64
-   # VisualStudio 2019 64 bit Building
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x64
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 64
-    VS_NAME: 2019
-    BUNDLE: 1
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x64
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 64
-    VS_NAME: 2019
-    BUNDLE: 2
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x64
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 64
-    VS_NAME: 2019
-    BUNDLE: 3
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x64
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 64
-    VS_NAME: 2019
-    BUNDLE: 4
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x64
-    TARGET: vs
-    VS_VER: 16
-    ARCH: ARM64
-    VS_NAME: 2019
-    BUNDLE: 5
-  # VisualStudio 2019 32 bit Building
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x86
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 32
-    VS_NAME: 2019
-    BUNDLE: 1
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x86
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 32
-    VS_NAME: 2019
-    BUNDLE: 2
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x86
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 32
-    VS_NAME: 2019
-    BUNDLE: 3
-  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    platform: x86
-    TARGET: vs
-    VS_VER: 16
-    ARCH: 32
-    VS_NAME: 2019
-    BUNDLE: 4
   # VisualStudio 2017 64 bit Building
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x64
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 64
-  #   VS_NAME: 2017
-  #   BUNDLE: 1
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x64
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 64
-  #   VS_NAME: 2017
-  #   BUNDLE: 2
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x64
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 64
-  #   VS_NAME: 2017
-  #   BUNDLE: 3
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x64
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 64
-  #   VS_NAME: 2017
-  #   BUNDLE: 4
-  # # VisualStudio 2017 32 bit Building
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x86
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 32
-  #   VS_NAME: 2017
-  #   BUNDLE: 1
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x86
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 32
-  #   VS_NAME: 2017
-  #   BUNDLE: 2
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x86
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 32
-  #   VS_NAME: 2017
-  #   BUNDLE: 3
-  # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-  #   platform: x86
-  #   TARGET: vs
-  #   VS_VER: 15
-  #   ARCH: 32
-  #   VS_NAME: 2017
-  #   BUNDLE: 4
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 64
+    VS_NAME: 2017
+    BUNDLE: 1
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 64
+    VS_NAME: 2017
+    BUNDLE: 2
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 64
+    VS_NAME: 2017
+    BUNDLE: 3
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x64
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 64
+    VS_NAME: 2017
+    BUNDLE: 4
+  # VisualStudio 2017 32 bit Building
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 32
+    VS_NAME: 2017
+    BUNDLE: 1
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 32
+    VS_NAME: 2017
+    BUNDLE: 2
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 32
+    VS_NAME: 2017
+    BUNDLE: 3
+  - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    platform: x86
+    TARGET: vs
+    VS_VER: 15
+    ARCH: 32
+    VS_NAME: 2017
+    BUNDLE: 4
   # VisualStudio 2015 32 bit Building
   # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
   #   platform: x86

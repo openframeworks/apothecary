@@ -6,62 +6,42 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
-
-# Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" )
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" "pkg-config")
+FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=7_81_0
-VER_D=7.81.0
-SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
+VER=7_59_0
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
 GIT_TAG=$VER
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
-
-    curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
-    tar -xf curl-$VER.tar.gz
-    mv curl-$VER_D curl 
-    local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
-    # if [ "$CHECKSHA" != "$SHA1" ] ; then
-    # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    # else
-    #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    # fi
-    rm curl*.tar.gz
-    
-    
-	
+	curl -Lk https://github.com/curl/curl/archive/curl-$VER.tar.gz -o curl-$VER.tar.gz
+	tar -xf curl-$VER.tar.gz
+	mv curl-curl-$VER curl
+	rm curl*.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    echo "prepare"
+	if [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        # apply https://github.com/curl/curl/commit/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4
+		patch -p0 -u < $FORMULA_DIR/b7b2809a212a69f1ce59a25ba86b4f1d8a17ebc4.patch
+	fi
 }
 
 # executed inside the lib src dir
 function build() {
+	local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
 
-
-    export OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
-	
 	if [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-
-		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
-
-
 		local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
-
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
@@ -77,161 +57,82 @@ function build() {
 
         # /p:PlatformToolset=v142 is a sort of hack to retarget solution to VS 2019 when the sln doesn't support the platform
         if [ $ARCH == 32 ] ; then
-
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
         elif [ $ARCH == 64 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
         elif [ $ARCH == "ARM" ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|ARM"
-
         fi
 
 	elif [ "$TYPE" == "android" ]; then
+	    local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
+        local OPENSSL_DIR=$BUILD_DIR/openssl/
+	    source ../../android_configure.sh $ABI
 
-        source ../../android_configure.sh $ABI make
-
-        export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH/openssl
-        local BUILD_TO_DIR=$BUILD_DIR/curl/build/$TYPE/$ABI
-        export OPENSSL_LIBRARIES=$OPENSSL_PATH/lib/$TYPE/$ABI
-
-        if [ "$ARCH" == "armv7" ]; then
+	    if [ "$ARCH" == "armv7" ]; then
             export HOST=armv7a-linux-android
         elif [ "$ARCH" == "arm64" ]; then
             export HOST=aarch64-linux-android
         elif [ "$ARCH" == "x86" ]; then
             export HOST=x86-linux-android
-        elif [ "$ARCH" == "x86_64" ]; then
-            export HOST=x86_64-linux-android
         fi
-
-        export NDK=$ANDROID_PLATFORM 
-        export HOST_TAG=$HOST_PLATFORM
-        export MIN_SDK_VERSION=21 
-        export SSL_DIR=$OPENSSL_LIBRARIES
-
-        export OUTPUT_DIR=$OPENSSL_LIBRARIES
-        mkdir -p build
-        mkdir -p build/$TYPE
-        mkdir -p build/$TYPE/$ABI
-        # export DESTDIR="$BUILD_TO_DIR"
-
-        export CFLAGS="-std=c17"
-        export CXXFLAGS="-D__ANDROID_MIN_SDK_VERSION__=${ANDROID_API} $MAKE_INCLUDES_CFLAGS -std=c++17"
-        # export LIBS="-L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a -L${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a " # this dont work annoying
-        export LDFLAGS=" ${LIBS} -shared -stdlib=libc++ -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/ "
-
-        cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
-        cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
-        cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
-        cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
-
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-
-        echo "OPENSSL_PATH: $OPENSSL_PATH"
-       
-
-        PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"
-
-         ./configure \
-            --host=$HOST \
-            --with-openssl=$OPENSSL_PATH \
-            --with-pic \
+        ./buildconf
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+	    ./configure --prefix=$BUILD_TO_DIR --host=$HOST --with-ssl=$OPENSSL_DIR --target=$HOST \
             --enable-static \
             --disable-shared \
             --disable-verbose \
-            --disable-threaded-resolver \
-            --enable-ipv6 \
-            --without-nghttp2 \
-            --without-libidn2 \
-            --disable-ldap \
-            --disable-ldaps \
-            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI \
+            --enable-threaded-resolver \
+            --enable-libgcc \
+            --enable-ipv6
 
-        # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
-        make -j${PARALLEL_MAKE}
-        make install
-
-        rm $SYSROOT/usr/lib/crtbegin_dynamic.o
-        rm $SYSROOT/usr/lib/crtbegin_so.o
-        rm $SYSROOT/usr/lib/crtend_android.o
-        rm $SYSROOT/usr/lib/crtend_so.o
-
-        rm ${OPENSSL_PATH}/lib/libssl.a
-        rm ${OPENSSL_PATH}/lib/libcrypto.a
-
+        sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
+        make clean
+	    make -j${PARALLEL_MAKE}
+	    make install
 	elif [ "$TYPE" == "osx" ]; then
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        #./buildconf
+        ./buildconf
+        
         local SDK_PATH_XCODE_X86=SDK_PATH;
-        if [ -n "${GITHUB_ACTIONS-}" ]; then
-            if [ "$GITHUB_ACTIONS" = true ]; then
-                SDK_PATH_XCODE_X86="/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-                EXTRA_SYSROOT="-isysroot${SDK_PATH_XCODE_X86}"
-            fi
-        else 
-            EXTRA_SYSROOT="-isysroot${SDK_PATH}"
+        if [ "$GITHUB_ACTIONS" = true ]; then
+            # this is because Xcode 11.4 and newer links curl with a symbol which isn't present on 10.14 and older
+            # in the future we will need to remove this, but this will provide legacy compatiblity while Github Actions has Xcode 11
+            # note: Xcode 11.3.1 should be okay too.
+            SDK_PATH_XCODE_X86="/Applications/Xcode_11.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
         fi
-
-
-
-        # export OPENSSL_MAIN=${OF_LIBS_OPENSSL_ABS_PATH}/openssl
-        # export OPENSSL_PATH=${OPENSSL_MAIN}/lib/$TYPE/
-
-
-        export ARCH=x86_64
-        export SDK=macosx
-        export DEPLOYMENT_TARGET=10.8
-
-
-
-        export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-        export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-
-        # PATH="${PATH};${OPENSSL_MAIN}/lib/${TYPE}"
-
-        # --with-openssl=$OPENSSL_MAIN \
+        
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
         ./configure \
+            --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
-            --with-secure-transport \
             --enable-static \
             --without-nghttp2 \
             --without-libidn2 \
             --disable-shared \
             --disable-ldap \
             --disable-ldaps \
-            --without-libidn2 \
-            --enable-static \
-            --disable-shared \
-            --disable-verbose \
-            --disable-threaded-resolver \
-            --enable-ipv6 \
-            --disable-ldap \
-            --disable-ldaps \
-            --host=x86_64-apple-darwin \
-            --target=x86_64-apple-darwin
+            --host=x86_64-apple-darwin
+        make clean
         make -j${PARALLEL_MAKE}
         make install
 
-        export ARCH=arm64
-
-        export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-        export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-
+        export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
 		./configure \
+            --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
-            --with-secure-transport \
             --enable-static \
             --without-nghttp2 \
             --without-libidn2 \
             --disable-shared \
-            --disable-threaded-resolver \
-            --enable-ipv6 \
             --disable-ldap \
             --disable-ldaps \
-            --target=arm-apple-darwin \
             --host=arm-apple-darwin
+        make clean
 	    make -j${PARALLEL_MAKE}
         make install
 
@@ -242,7 +143,7 @@ function build() {
                     -output build/osx/lib/libcurl.a
 	    make install
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        # ./buildconf
+        ./buildconf
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
@@ -253,19 +154,16 @@ function build() {
             echo
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            export ARCH=$IOS_ARCH
-            export SDK=iphoneos
-            export DEPLOYMENT_TARGET=11.0
             ./configure \
-                --with-secure-transport \
+                --with-darwinssl \
                 --prefix=$BUILD_DIR/curl/build/$TYPE/${IOS_ARCH} \
                 --enable-static \
                 --disable-shared \
                 --disable-ntlm-wb \
-                --enable-ipv6 \
                 --host=$HOST \
                 --target=$HOST \
-                --enable-threaded-resolver 
+                --enable-threaded-resolver \
+                --enable-ipv6
             #make clean
             
             # solution from this issue: https://github.com/curl/curl/issues/3189
@@ -300,7 +198,7 @@ function build() {
         ./buildconf
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-		./configure --with-openssl=$OPENSSL_DIR --enable-static --disable-shared
+		./configure --with-ssl=$OPENSSL_DIR --enable-static --disable-shared
         make clean
 	    make -j${PARALLEL_MAKE}
 	fi
@@ -316,9 +214,9 @@ function copy() {
 
 	# Standard *nix style copy.
 	# copy headers
+	cp -Rv include/curl/* $1/include/curl/
 
 	if [ "$TYPE" == "vs" ] ; then
-        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
@@ -331,16 +229,40 @@ function copy() {
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/ARM/libcurl.lib
 		fi
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		# copy lib
 		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
 	elif [ "$TYPE" == "android" ] ; then
-        #mkdir -p $1/lib/$TYPE/$ABI
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build/$TYPE/$ABI/include/curl/* $1/include/curl/
+	    mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
-        cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
+		cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
 	fi
+
+    # if [ "$TYPE" == "osx" ]; then
+    #     cp build/$TYPE/x86/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     cp build/$TYPE/x64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "ios" ]; then
+    #     cp build/$TYPE/i386/include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "tvos" ]; then
+    #     cp build/$TYPE/x86_64/include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    # elif [ "$TYPE" == "vs" ]; then
+		# if [ $ARCH == 32 ] ; then
+    #         cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    #     else
+    #         cp include/curl/curlbuild.h $1/include/curl/curlbuild64.h
+    #     fi
+    # elif [ "$TYPE" == "android" ]; then
+		# 		cp include/curl/curlbuild.h $1/include/curl/curlbuild32.h
+    # fi
+
+# cat > $1/include/curl/curlbuild.h << EOF
+# /* The size of long, as computed by sizeof. */
+# #if defined(__LP64__) || defined(_WIN64)
+# #include "curl/curlbuild64.h"
+# #else
+# #include "curl/curlbuild32.h"
+# #endif
+# EOF
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists

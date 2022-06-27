@@ -9,7 +9,7 @@ import feature ;
 # file.
 if ! gcc in [ feature.values <toolset> ]
 {
-    using clang : arm : %{NDK_ROOT}/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ ;
+    using clang : arm : %{NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ ;
 }
 
 project : default-build <toolset>clang ;

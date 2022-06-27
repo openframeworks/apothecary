@@ -4,24 +4,18 @@
 # http://www.freedesktop.org/wiki/Software/pkg-config/
 
 # define the version
-VER=0.29.2
+VER=0.28
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pkg-config.git
 GIT_TAG=pkg-config-$VER
-URL="https://pkgconfig.freedesktop.org/releases"
 
 FORMULA_TYPES=( "osx" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	curl -LO ${URL}/pkg-config-$VER.tar.gz
+	curl -LO http://pkgconfig.freedesktop.org/releases/pkg-config-$VER.tar.gz
 	tar -xf pkg-config-$VER.tar.gz
-	# if [ "$CHECKSHA" != "$SHA1" ] ; then
- #    echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
- #    else
- #        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
- #    fi
 	mv pkg-config-$VER pkg-config
 	rm pkg-config-$VER.tar.gz
 }
@@ -37,7 +31,6 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	echo "build pkg-config"
 	# setting empty flags so it ignores an existing pkg-config install
 	# PKG-CONFIG does not need the typical architecture flags because
 	# it is a tool and does not contribute static lib objects to the core
@@ -55,8 +48,6 @@ function copy() {
 	fi
 
 	make install
-
-	echo "copy/install pkg-config"
 }
 
 # executed inside the lib src dir

@@ -9,18 +9,16 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.11.1
-FVER=211
+VER=2.7
+FVER=27
 
 # tools for git use
-GIT_URL=https://git.savannah.gnu.org/r/freetype/freetype2.git
-GIT_TAG=VER-2-11
-URL=https://download.savannah.gnu.org/releases/freetype
+GIT_URL=http://git.savannah.gnu.org/r/freetype/freetype2.git
+GIT_TAG=VER-2-7
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	echo "Downloading freetype-$VER"
-	wget --quiet --no-check-certificate $URL/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
+	wget --quiet --no-check-certificate https://download.savannah.gnu.org/releases/freetype/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
@@ -63,7 +61,7 @@ function build() {
         
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
-		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --without-brotli --with-harfbuzz=no --enable-static=yes --enable-shared=no \
+		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --with-harfbuzz=no --enable-static=yes --enable-shared=no \
 			CFLAGS="$FAT_CFLAGS -fPIC -pipe -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden -isysroot${SDK_PATH}"
 		make clean
 		make -j${PARALLEL_MAKE}
@@ -101,19 +99,15 @@ function build() {
 			vs-build freetype.sln Build "Release|Win32"
 		elif [ "$ARCH" == "64" ] ; then
 			vs-build freetype.sln Build "Release|x64"
-		elif [ "$ARCH" == "ARM" ] ; then
-			vs-build freetype.sln Build "Release|ARM"
-		elif [ "$ARCH" == "ARM64" ] ; then
-			vs-build freetype.sln Build "Release|ARM64"
 		fi
 		cd ../../../
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# configure with arch
 		if [ $ARCH ==  32 ] ; then
-			./configure CFLAGS="-arch i386" --without-bzip2 --without-brotli --with-harfbuzz=no
+			./configure CFLAGS="-arch i386"
 		elif [ $ARCH == 64 ] ; then
-			./configure CFLAGS="-arch x86_64" --without-bzip2 --without-brotli --with-harfbuzz=no
+			./configure CFLAGS="-arch x86_64"
 		fi
 
 		make clean;
@@ -168,6 +162,9 @@ function build() {
 
 		local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
 		MIN_IOS_VERSION=$IOS_MIN_SDK_VER
+	    # min iOS version for arm64 is iOS 7
+
+
 		local IOS_CC=$TOOLCHAIN/usr/bin/cc
 		local IOS_HOST="arm-apple-darwin"
 		local IOS_PREFIX="/usr/local/iphone"
@@ -180,6 +177,9 @@ function build() {
 		export AS=$TOOLCHAIN/usr/bin/as
 		export NM=$TOOLCHAIN/usr/bin/nm
 		export RANLIB=$TOOLCHAIN/usr/bin/ranlib
+
+
+
 		# loop through architectures! yay for loops!
 		for IOS_ARCH in ${IOS_ARCHS}
 		do
@@ -205,9 +205,9 @@ function build() {
 			export BUILD_TOOLS="${DEVELOPER}"
 
 			if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-	    		MIN_IOS_VERSION=13.0 # 7.0 as this is the minimum for these architectures
-		    elif [ "${IOS_ARCH}" == "armv7" ] || ["${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=10.0 
+	    		MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
+		    elif [ "${IOS_ARCH}" == "i386" ]; then
+		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
 		    fi
 
 	        if [ "${TYPE}" == "tvos" ]; then
@@ -223,9 +223,9 @@ function build() {
 	        fi
 
 	        BITCODE=""
-	        if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+	        if [[ "$TYPE" == "tvos" ]]; then
 	            BITCODE=-fembed-bitcode;
-	            MIN_IOS_VERSION=13.0
+	            MIN_IOS_VERSION=9.0
 	        fi
 
 			export EXTRA_LINK_FLAGS="-std=$CSTANDARD $BITCODE -DNDEBUG -stdlib=$STDLIB $MIN_TYPE$MIN_IOS_VERSION -Os -fPIC -Wno-trigraphs -fpascal-strings -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden"
@@ -247,7 +247,7 @@ function build() {
 			echo "Please stand by..."
 
 			echo "Configuring..."
-			./configure --without-bzip2 --prefix=$IOS_PREFIX --host=$IOS_HOST --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no \
+			./configure --without-bzip2 --prefix=$IOS_PREFIX --host=$IOS_HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no \
 			CC="$CC" \
 			CFLAGS="$CFLAGS" \
 			CXXFLAGS="$CXXFLAGS" \
@@ -256,8 +256,6 @@ function build() {
  			AR=$AR \
 	        NM=$NM \
 			LDFLAGS="$LDFLAGS" >> "${LOG}" 2>&1
-			echo "Cleaning up from Make"
-		    make clean >> "${LOG}" 2>&1
 			echo "Making..."
 			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
 			if [ $? != 0 ];
@@ -346,61 +344,27 @@ function build() {
 		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
 
 	elif [ "$TYPE" == "android" ] ; then
-
-        source ../../android_configure.sh $ABI cmake
-        rm -rf "build_${ABI}/"
-        rm -rf "build_${ABI}/CMakeCache.txt"
-		mkdir -p "build_$ABI"
-		cd "./build_$ABI"
-		CFLAGS=""
-        export CMAKE_CFLAGS="$CFLAGS"
-        #export CFLAGS=""
-        export CPPFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-       	export LDFLAGS=""
-
-        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-        	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-      		-D CMAKE_C_COMPILER=${CC} \
-     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER=${CC} \
-     	 	-D CMAKE_CXX_COMPILER=${CXX} \
-     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
-     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
-        	-D ANDROID_ABI=${ABI} \
-        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-        	-D ANDROID_TOOLCHAIN=clang \
-        	-D CMAKE_BUILD_TYPE=Release \
-        	-D FT_REQUIRE_HARFBUZZ=FALSE \
-        	-D FT_REQUIRE_BROTLI=FALSE \
-        	-DCMAKE_SYSROOT=$SYSROOT \
-            -DANDROID_NDK=$NDK_ROOT \
-            -DANDROID_ABI=$ABI \
-            -DANDROID_STL=c++_shared \
-        	-DCMAKE_C_STANDARD=17 \
-        	-DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-        	-G 'Unix Makefiles' ..
-
-		make -j${PARALLEL_MAKE} VERBOSE=1
-		cd ..
-
-
+	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/$ABI
+	    source ../../android_configure.sh $ABI
+	    if [ "$ARCH" == "armv7" ]; then
+            HOST=armv7a-linux-android
+		elif [ "$ARCH" == "arm64" ]; then
+            HOST=aarch64-linux-android
+        elif [ "$ARCH" == "x86" ]; then
+            HOST=x86-linux-android
+        fi
+	    ./configure --prefix=$BUILD_TO_DIR --host $HOST --with-harfbuzz=no --enable-static=yes --enable-shared=no
+	    make clean
+	    make -j${PARALLEL_MAKE}
+	    make install
 	elif [ "$TYPE" == "emscripten" ]; then
 	    #patch -p0 -u < $FORMULA_DIR/emscripten.patch
 	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE
-	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
+	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
 	    make clean
 	    make -j${PARALLEL_MAKE}
 	    cp $BUILD_DIR/freetype/objs/apinames .
-	    emconfigure ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
+	    emconfigure ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
 	    emmake make clean
 	    cp apinames $BUILD_DIR/freetype/objs/
 	    emmake make -j${PARALLEL_MAKE}
@@ -449,8 +413,7 @@ function copy() {
 	elif [ "$TYPE" == "android" ] ; then
 	    rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
-
+	    cp -v build/$TYPE/$ABI/lib/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 		cp -v build/$TYPE/lib/libfreetype.bc $1/lib/$TYPE/libfreetype.bc
 	fi
@@ -458,7 +421,7 @@ function copy() {
 	# copy license files
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	#cp -v docs/LICENSE.TXT $1/license/
+	cp -v docs/LICENSE.TXT $1/license/
 	cp -v docs/FTL.TXT $1/license/
 	cp -v docs/GPLv2.TXT $1/license/
 }
@@ -469,10 +432,8 @@ function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		vs-clean "freetype.sln"
 	elif [ "$TYPE" == "android" ] ; then
-		rm -f CMakeCache.txt *.a *.o
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+		make clean
+		rm -f build/$TYPE
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		make clean
 		rm -f *.a *.lib

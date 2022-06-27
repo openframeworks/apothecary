@@ -84,29 +84,7 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		unset TMP
 		unset TEMP
-		if [ $VS_VER -eq 17 ]; then
-			cd vs2022
-			if [ $ARCH == 32 ] ; then
-				vs-build svgtiny.sln Build "Release|x86"
-			elif [ $ARCH == 64 ] ; then
-				vs-build svgtiny.sln Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
-				vs-build svgtiny.sln Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
-				vs-build svgtiny.sln Build "Release|ARM64"
-			fi
-		elif [ $VS_VER -eq 16 ]; then
-			cd vs2019
-			if [ $ARCH == 32 ] ; then
-				vs-build svgtiny.sln Build "Release|x86"
-			elif [ $ARCH == 64 ] ; then
-				vs-build svgtiny.sln Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
-				vs-build svgtiny.sln Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
-				vs-build svgtiny.sln Build "Release|ARM64"
-			fi
-		elif [ $VS_VER -eq 14 ]; then
+		if [ $VS_VER -eq 14 ]; then
 			cd vs2015
 			if [ $ARCH == 32 ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
@@ -125,7 +103,7 @@ function build() {
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
-        source ../../android_configure.sh $ABI make
+        source ../../android_configure.sh $ABI
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
         make clean
 	    make -j${PARALLEL_MAKE}
@@ -149,7 +127,6 @@ function build() {
             echo "Compiling for $IOS_ARCH"
     	    source ../../ios_configure.sh $TYPE $IOS_ARCH
             export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-            export CPPFLAGS=" -I$LIBS_DIR/libxml2/include" #fix linking issues
             make clean
 	        make -j${PARALLEL_MAKE}
             mv libsvgtiny.a libsvgtiny_$IOS_ARCH.a

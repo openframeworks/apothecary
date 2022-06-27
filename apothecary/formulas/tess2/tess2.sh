@@ -79,42 +79,16 @@ function build() {
 		unset TMP
 		unset TEMP
 	    cp -v $FORMULA_DIR/CMakeLists.txt .
-
-	    if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p build_vs_32
-				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln"
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p build_vs_64
-				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR Win64" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln" Build "Release|x64"
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				mkdir -p build_vs_32
-				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A Win32 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln"
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p build_vs_64
-				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln" Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
-				mkdir -p build_vs_arm
-				cd build_vs_arm
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln" Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
-				mkdir -p build_vs_arm64
-				cd build_vs_arm64
-				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
-				vs-build "tess2.sln" Build "Release|ARM64"
-			fi
-
+		if [ $ARCH == 32 ] ; then
+			mkdir -p build_vs_32
+			cd build_vs_32
+			cmake .. -G "Visual Studio $VS_VER" -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+			vs-build "tess2.sln"
+		elif [ $ARCH == 64 ] ; then
+			mkdir -p build_vs_64
+			cd build_vs_64
+			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+			vs-build "tess2.sln" Build "Release|x64"
 		fi
 
 
@@ -219,9 +193,9 @@ function build() {
             fi
 
             BITCODE=""
-            if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+            if [[ "$TYPE" == "tvos" ]]; then
                 BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=13.0
+                MIN_IOS_VERSION=9.0
             fi
 
 
@@ -229,7 +203,7 @@ function build() {
 
 			export CPPFLAGS=$CFLAGS
 			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS "
-			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++17 -stdlib=libc++"
+			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++11 -stdlib=libc++"
 			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS"
 
 			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
@@ -316,72 +290,16 @@ function build() {
 		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
 
 	elif [ "$TYPE" == "android" ] ; then
- 
-        # setup android paths / variables
-	    source ../../android_configure.sh $ABI cmake
-        
-		cp -v $FORMULA_DIR/CMakeLists.txt .
-
-		mkdir -p "build_$ABI"
-		cd "./build_$ABI"
-		export CFLAGS=""
-        export CMAKE_CFLAGS="$CFLAGS"
-        
-        export CPPFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-       	export LDFLAGS=""
-        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-        	-D CMAKE_OSX_SYSROOT:PATH==${SYSROOT} \
-      		-D CMAKE_C_COMPILER==${CC} \
-     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER_AR=${AR} \
-     	 	-D CMAKE_C_COMPILER=${CC} \
-     	 	-D CMAKE_CXX_COMPILER=${CXX} \
-     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
-     	 	-D CMAKE_CXX_FLAGS=${CPPFLAGS} \
-        	-D ANDROID_ABI=${ABI} \
-        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-        	-D ANDROID_TOOLCHAIN=clang \
-        	-DCMAKE_SYSROOT=$SYSROOT \
-            -DANDROID_NDK=$NDK_ROOT \
-            -DANDROID_ABI=$ABI \
-            -DANDROID_STL=c++_shared \
-        	-DCMAKE_C_STANDARD=17 \
-        	-DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-        	-G 'Unix Makefiles' ..
-        	#=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
-        	
-		make -j${PARALLEL_MAKE} VERBOSE=1
-		cd ..
-
-
-	    # mkdir -p Build
-	    # cd Build
-	    # cp -v $FORMULA_DIR/Makefile .
-	    # cp -v $FORMULA_DIR/tess2.make .
-	   
-	   	# RELEASE=release
-
-
-     #    make -j${PARALLEL_MAKE} \
-     #    	CC=${CC} \
-     #    	AR=${AR} \
-     #    	CXX=${CXX} \
-    	# 	RANLIB=${RANLIB} \
-    	# 	LD=${LD} \
-    	# 	STRIP=${STRIP} \
-    	# 	config=release tess2  
-
-	    # cd ..
-	    # mkdir -p build/android/$ABI
-	    # mv Build/libtess2.a build/android/$ABI
+	    source ../../android_configure.sh $ABI
+		CFLAGS="$CFLAGS -DANDROID"
+	    mkdir -p Build
+	    cd Build
+	    cp -v $FORMULA_DIR/Makefile .
+	    cp -v $FORMULA_DIR/tess2.make .
+	    make config=release tess2
+	    cd ..
+	    mkdir -p build/android/$ABI
+	    mv Build/libtess2.a build/android/$ABI
 	elif [ "$TYPE" == "emscripten" ] ; then
     	cp -v $FORMULA_DIR/CMakeLists.txt .
     	mkdir -p build
@@ -448,8 +366,7 @@ function copy() {
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
-		#cp -v build/$TYPE/$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a #make
-		cp -v build_$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
+		cp -v build/$TYPE/$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
 	else
 		cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
 	fi
@@ -463,16 +380,11 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
-	cd ../tess2_patched
-
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f CMakeCache.txt *.lib
 
 	elif [ "$TYPE" == "android" ] ; then
-		rm -f CMakeCache.txt *.a *.o
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+		echoWarning "TODO: clean android"
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		make clean
 		rm -f CMakeCache.txt *.a *.lib

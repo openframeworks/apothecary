@@ -65,6 +65,17 @@ LIBS_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
+function getrealpath() { if command -v realpath 2>/dev/null; then
+  echo realpath $1;
+else
+	[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+fi;
+ }
+
+realpath() {
+[[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
 ### Xcode/ios specific settings
 
 # xcode Developer root
@@ -80,35 +91,15 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
     # used when building for ios, the sdks you have installed are found in:
     # $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
-    IOS_SDK_VER=13.0
-    IOS_MIN_SDK_VER=10.0
+    IOS_SDK_VER=9.1
+    IOS_MIN_SDK_VER=7.0
 
-if ! which realpath >&/dev/null; then
-  if ! which brew >&/dev/null; then
-    msg="ERROR: This script requires brew. See https://brew.sh for installation instructions."
-    echo "$(tput setaf 1)$msg$(tput sgr0)" >&2
-    exit 1
-  fi
-  echo "Installing coreutils/realpath"
-  brew install coreutils >&/dev/null
-fi
-
-thisDir=$( dirname "`realpath "$0"`" )
-echo "This script is run from \"$thisDir\""
 
 fi
-
-# if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ] && [[ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]]; then
-
-# fi
-
-BUILD_MACHINE_ARCH=`uname -m`
 
 # paths to android SDK, etc
 ANDROID_NDK_ROOT=
 ANDROID_SDK_ROOT=
-NDK_VERSION=24
-NDK_VERSION_MAJOR=24
 ANDROID_API=21
 ANDROID_PLATFORM=android-${ANDROID_API}
 
@@ -224,12 +215,6 @@ examples:
   # update only glew
   apothecary update glew
 
-  # update core android for arm64 
-  apothecary -tandroid -a arm64 update core
-
-  # update core ios for arm64 
-  apothecary -tios -a arm64 update core
-
   # remove all downloaded core lib src dirs from the build cache
   apothecary remove core
 
@@ -240,10 +225,10 @@ examples:
   apothecary remove-all glew
 
   # update freetype for ios
-  apothecary -tios freetype
+  apothecary -t ios freetype
 
   # update assimp for 64bit OSX (maybe in the future ...)
-  apothecary -tosx -a 64 assimp
+  apothecary -t osx -a 64 assimp
 
   # update assimp in the ofxAssimpModelLoader addonFormula
   apothecary update ofxAssimpModelLoader
@@ -341,45 +326,31 @@ while getopts t:a:b:d:s:j:hgvfpe opt ; do
 			echo "$HELP" ; exit 0 ;;
 	esac
 done
-shift $(expr $OPTIND - 1)
+shift $(( $OPTIND - 1))
 
-
-# used when building for vs - set to 16 if not set explicitly
+# used when building for vs - set to 15 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
-    if [ -z ${VS_VER+x} ]; then 
-	    echo "VS_VER was not set - setting to 16"
-	    VS_VER=16
-    else 
+    if [ -z ${VS_VER+x} ]; then
+	    echo "VS_VER was not set - setting to 15"
+	    VS_VER=15
+    else
 	    echo "VS_VER is set to '$VS_VER'"
     fi
 
     VS_64_BIT_ENV='VC\vcvarsall'
 
-
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
-            CROSS_TOOL="amd64_x86"
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
-            CROSS_TOOL="amd64"
-        elif [ $ARCH == "ARM64" ]; then
-            PLATFORM=x64
-            VS_HOST=amd64
-            CROSS_TOOL="arm64"
-        elif [ $ARCH == "ARM" ]; then
-            PLATFORM=x64
-            VS_HOST=amd64
-            CROSS_TOOL="arm"
         fi
 
         echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
     fi
-
     
     VS_YEAR=2019
     VS_BAT="vcvarsall.bat"
-
     if [ -z ${VS_BASE_PATH+x} ]; then
         if [ "${VS_VER}" = "15" ]; then
             VS_BASE_PATH="/c/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
@@ -394,18 +365,7 @@ if [ "$TYPE" = "vs" ]; then
         fi
     fi
 	
-
-
-	if [ $ARCH == "ARM64" ] || [ $ARCH == "ARM" ] ; then
-           
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars${VS_HOST}_${CROSS_TOOL}.bat")
-
-	else 
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
-
-	fi
-
-
+	VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 
 	export VS_BASE_PATH; 
 	export VS_VARS_PATH;
@@ -497,8 +457,6 @@ function installAndroidToolchain() {
 	    ANDROID_HOST="linux-x86_64"
 	elif [ "${HOST}" == "osx" ]; then
 	    ANDROID_HOST="Darwin"
-	elif [ "${HOST}" == "windows" ]; then
-	    ANDROID_HOST="windows-x86_64"
 	else
 	    echoError "Building for android only supported on linux and osx by now"
 	    exit 1
@@ -526,14 +484,6 @@ function installAndroidToolchain() {
 			./make_standalone_toolchain.py \
 				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
 				--arch=x86 \
-				--api $ANDROID_API \
-				--stl=libc++
-		fi
-	elif [ "$ARCH" == "x86_64" ]; then
-		if [ ! -d "$BUILD_DIR/Toolchains/Android/x86_64" ]; then
-			./make_standalone_toolchain.py \
-				--install-dir=$BUILD_DIR/Toolchains/Android/$ARCH \
-				--arch=x86_64 \
 				--api $ANDROID_API \
 				--stl=libc++
 		fi
@@ -667,8 +617,6 @@ function doCommand() {
 				doCommand $shouldSource $cmd "${formula%.*}" # remove extension
 			done
 
-			echoInfo " ----- Apothecary Core Build Sucessfully completed for $TYPE -----"
-
 		# process all addons in the addons dir
 		elif [ "$1" == "addons" ] ; then
 			local addon
@@ -682,11 +630,6 @@ function doCommand() {
 		elif [ "$1" == "depends" ] ; then
 			local depend
 			for depends in $( ls -1 $FORMULAS_DIR/$DEPENDS_SUBDIR) ; do
-				OUTPUT_DEPEND=$(realpath ${LIBS_DIR}/)/${depends}/${TYPE}
-				echo "Making Dependencies to ${OUTPUT_DEPEND}"
-				# if [ -f "$LIBS_DIR/${depends}/$TYPE/$ABI/lib.a" ]; then
-				#      echo "Build Already exists at $LIBS_DIR/${depends}/$TYPE/ skipping"
-				# fi
 				doCommand $shouldSource $cmd "${depend%.*}" # remove extension
 			done
 
@@ -1049,15 +992,16 @@ function vs-build() {
 		echo "-- Searching for vs-build"
 		# vswhere is a utility to find the most recent vs compiler toolchain. it is
 		# assumed to be installed at a fixed location
-		if [ $VS_VER == 15 ] ; then
-			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
-		elif [ $VS_VER == 16 ] ; then
-			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
-		elif [ $VS_VER -gt 17 ] ; then
-			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
-		else
-			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 
+		# assumed to be installed at a fixed location
+ 		if [ $VS_VER == 15 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		elif [ $VS_VER == 16 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		elif [ $VS_VER -gt 17 ] ; then
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles%\Microsoft Visual Studio\Installer\vswhere.exe"`
+ 		else
+ 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		fi
 
 
@@ -1070,24 +1014,10 @@ function vs-build() {
 		echo "-- Found MSBuild path: ${MSBUILD_PATH}"
 
 		# define fallback build selection if vs-build was not called with enough parameters.
-		if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				DEFAULT_BUILD="Release|Win32"
-			elif [ $ARCH == 64 ] ; then
-				DEFAULT_BUILD="Release|x64"
-			elif [ $ARCH == "ARM64" ] ; then
-				DEFAULT_BUILD="Release|ARM"
-			fi
-		else # 2019/2022
-			if [ $ARCH == 32 ] ; then
-				DEFAULT_BUILD="Release|Win32"
-			elif [ $ARCH == 64 ] ; then
-				DEFAULT_BUILD="Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
-				DEFAULT_BUILD="Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
-				DEFAULT_BUILD="Release|ARM64"
-			fi
+		if [ $ARCH == 32 ] ; then
+			DEFAULT_BUILD="Release|Win32"
+		elif [ $ARCH == 64 ] ; then
+			DEFAULT_BUILD="Release|x64"
 		fi
 
 		# Cut part before '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_CONFIGURATION
@@ -1315,10 +1245,10 @@ fi
 echoVerbose "Build type: $TYPE"
 
 # check if we have a valid arch
-# if [ $ARCH != 32 -a $ARCH != 64 $ARCH != ARM64 -a $ARCH != armv7 -a $ARCH != x86 -a $ARCH != arm64 -a $ARCH != x86_64 ] ; then
-# 	echoError " Invalid architecture: $ARCH"
-# 	exit 1
-# fi
+if [ $ARCH != 32 -a $ARCH != 64 -a $ARCH != armv7 -a $ARCH != arm64 -a $ARCH != x86 ] ; then
+	echoError " Invalid architecture: $ARCH"
+	exit 1
+fi
 echoVerbose "Architecture: $ARCH"
 
 echoVerbose "Build dir: $BUILD_DIR"
@@ -1362,37 +1292,32 @@ if [[ "$TYPE" == "android" ]] ; then
 		echoError "projects/android/paths.make in OF folder"
 		exit 1
 	fi
-
 	if [ "$ARCH" == "armv7" ]; then
-	    ABI=armeabi-v7a
-	elif [ "$ARCH" == "x86" ]; then
-	    ABI=x86
-	elif [ "$ARCH" == "x86_64" ]; then
-	    ABI=x86_64
+		echo setting arch to armv7
+		ABI=armeabi-v7a
 	elif [ "$ARCH" == "arm64" ]; then
-	    ABI=arm64-v8a
+		ABI=arm64-v8a
+	elif [ "$ARCH" == "x86" ]; then
+		ABI=x86
 	fi
-else 
-	ABI=""
 fi
 
 CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
     if [[ $(uname -m) != armv* ]]; then
         CROSSCOMPILING=1
-        if [[ -z ${TOOLCHAIN_PREFIX+z} ]];  then
+        if [ -z $TOOLCHAIN_PREFIX ]; then
             export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
         fi
-
-        if [[  -z ${SYSROOT+z} ]]; then
-            echoError "Trying to cross compile but SYSROOT environment variable is not set"
-            echoError "Should be set to root of target OS image"
+        if [ -z $SYSROOT ]; then
+            echoError Trying to cross compile but SYSROOT environment variable is not set
+            echoError Should be set to root of target OS image
             exit 1
         fi
-        if [[  -z ${TOOLCHAIN_ROOT+z} ]];  then
-            echoWarning "Trying to cross compile but TOOLCHAIN_ROOT not set"
-            echoWarning "Trying to continue in case PATH is set to correct toolchain"
-            echoWarning "If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain"
+        if [ -z $TOOLCHAIN_ROOT ]; then
+            echoWarning Trying to cross compile but TOOLCHAIN_ROOT not set
+            echoWarning Trying to continue in case PATH is set to correct toolchain
+            echoWarning If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain
         fi
     fi
 fi

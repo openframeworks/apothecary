@@ -42,7 +42,7 @@ else
 endif
 
 # libdom
-CFLAGS := $(CFLAGS) -Ilibdom/include -Ilibdom/src -Ilibdom/bindings -Ilibwapcaplet/include -Ilibparserutils/include -Ilibparserutils/src
+CFLAGS := $(CFLAGS) -Ilibdom/include -Ilibdom/src -Ilibdom/bindings -Ilibwapcaplet/include -Ilibparserutils/include -Ilibparserutils/src -Ilibxml2/include
 LDFLAGS := -ldom -lwapcaplet -lexpat -lm
 
 #include $(NSBUILD)/Makefile.top
