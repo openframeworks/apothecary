@@ -300,7 +300,7 @@ fi
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 if [ "$TARGET" == "msys2" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_mingw${ARCH}.zip
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
 elif [ "$TARGET" == "vs" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
