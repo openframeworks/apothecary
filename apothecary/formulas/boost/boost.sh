@@ -12,6 +12,7 @@ VERSION=1.66.0
 UNCOMPRESSED_NAME=boost_1_66_0
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
+
 # need to maybe migrate to github https://github.com/boostorg/boost
 
 BOOST_LIBS="filesystem system"
@@ -22,9 +23,9 @@ EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 OFFICIAL_DOWNLOAD_HOST=https://boostorg.jfrog.io/artifactory/main
 
-# URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/boost_$VERSION_UNDERSCORES.tar.gz
+# URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.tar.gz
 
-WIN_URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/boost_$VERSION_UNDERSCORES.zip
+WIN_URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.zip
 
 URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
 
