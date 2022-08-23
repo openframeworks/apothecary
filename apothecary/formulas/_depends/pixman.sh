@@ -49,6 +49,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+	mkdir -p pixman
 	if [ "$TYPE" == "osx" ] ; then
 		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
 		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
@@ -63,6 +64,7 @@ function build() {
 				--disable-shared \
                 --disable-mmx
 		# only build & install lib, ignore demos/tests
+
 		cd pixman
 		make clean
 		make -j${PARALLEL_MAKE}

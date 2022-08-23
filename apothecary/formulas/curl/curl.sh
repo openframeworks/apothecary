@@ -230,8 +230,7 @@ function build() {
             --enable-ipv6 \
             --disable-ldap \
             --disable-ldaps \
-            --target=arm-apple-darwin \
-            --host=arm-apple-darwin
+            --target=arm-apple-darwin
 	    make -j${PARALLEL_MAKE}
         make install
 
