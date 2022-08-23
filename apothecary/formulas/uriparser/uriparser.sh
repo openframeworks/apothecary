@@ -266,12 +266,6 @@ function copy() {
 		# copy headers
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
-		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/liburiparser.a
-	elif [ "$TYPE" == "emscripten" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/uriparser/* $1/include/uriparser/
-		# copy lib
 		mkdir -p $1/lib/$TYPE
 		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
