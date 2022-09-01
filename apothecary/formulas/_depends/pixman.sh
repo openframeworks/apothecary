@@ -39,7 +39,7 @@ function download() {
 function prepare() {
 	if [ "$TYPE" != "vs" ] ; then
 		if [ ! -f configure ] ; then
-			./autogen.sh
+			# ./autogen.sh
 		fi
 	else
 		CURRENTPATH=`pwd`
