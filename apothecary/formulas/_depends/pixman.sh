@@ -38,9 +38,9 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	if [ "$TYPE" != "vs" ] ; then
-		if [ ! -f configure ] ; then
+		#if [ ! -f configure ] ; then
 			# ./autogen.sh
-		fi
+		#fi
 	else
 		CURRENTPATH=`pwd`
 		export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
