@@ -14,7 +14,7 @@ FORMULA_TYPES=( "osx" "vs" )
 # GIT_URL=https://github.com/ofTheo/glfw/
 GIT_URL=https://github.com/glfw/glfw/
 # VER=master
-VER=3.3.7
+VER=3.3.8
 GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
