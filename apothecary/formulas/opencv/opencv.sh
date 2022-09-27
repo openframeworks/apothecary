@@ -474,9 +474,9 @@ function build() {
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
     # these can be removed when we move to latest opencv
-    sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
-    sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
-    sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
+    # sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
+    # sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
+    # sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
