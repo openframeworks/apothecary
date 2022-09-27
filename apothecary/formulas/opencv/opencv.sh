@@ -567,8 +567,8 @@ function build() {
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF
-    make -j${PARALLEL_MAKE}
-    make install
+    emmake make # -j${PARALLEL_MAKE}
+    emmake make install
   fi
 
 }
