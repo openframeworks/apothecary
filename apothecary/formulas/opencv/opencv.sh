@@ -9,7 +9,9 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
-VER=4.5.5
+
+VER=4.6.0
+
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -25,10 +27,10 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
-  tar -xf opencv-$VER.tar.gz
+  curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
+  unzip opencv-$VER.zip
   mv opencv-$VER $1
-  rm opencv*.tar.gz
+  rm opencv*.zip
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -914,8 +916,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
-      -DCMAKE_CXX_FLAGS=" -fvisibility-inlines-hidden -stdlib=libc++ -O3 -Wno-implicit-function-declaration -msse2 -msimd128 -experimental-wasm-simd" \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
