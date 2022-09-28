@@ -41,6 +41,7 @@ function prepare() {
 		#if [ ! -f configure ] ; then
 			# ./autogen.sh
 		#fi
+		echo "vs"
 	else
 		CURRENTPATH=`pwd`
 		export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
