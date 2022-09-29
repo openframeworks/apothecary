@@ -221,33 +221,30 @@ function copy() {
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
             # copy .lib and .dll artifacts
-            cp -v build_vs_32/code/Release/*.lib $1/lib/$TYPE/Win32
-            cp -v build_vs_32/code/Release/*.dll $1/lib/$TYPE/Win32
+            cp -v build_vs_32/lib/Release/*.lib $1/lib/$TYPE/Win32
+            cp -v build_vs_32/lib/Release/*.dll $1/lib/$TYPE/Win32
             # copy header files
             cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             # copy .lib and .dll artifacts
-            cp -v build_vs_64/code/Release/*.lib $1/lib/$TYPE/x64
-            cp -v build_vs_64/code/Release/*.dll $1/lib/$TYPE/x64
+            cp -v build_vs_64/lib/Release/*.lib $1/lib/$TYPE/x64
+            cp -v build_vs_64/lib/Release/*.dll $1/lib/$TYPE/x64
             # copy header files
             cp -v -r build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
-        cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_android/include/* $1/include
-        cp -Rv build_android/code/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        cp -Rv build_android/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a
+        cp -Rv build_android/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
-        cp -Rv build_emscripten/code/libassimp.a $1/lib/$TYPE/libassimp.a
-        cp -Rv build_emscripten/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
+        cp -Rv ../lib/libassimp.a $1/lib/$TYPE/libassimp.a
     fi
 
     # copy license files
