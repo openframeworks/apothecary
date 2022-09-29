@@ -132,8 +132,10 @@ function build() {
 				
 				sed abs
 				
+				#stuff to remove when we upgrade android
 				#android complains about abs being ambigious - pfffft
 				sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
+				sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
 
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
@@ -142,7 +144,6 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_NO_OBJ_IMPORTER=1
                 -DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -160,7 +161,6 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
-								-DASSIMP_BUILD_NO_OBJ_IMPORTER=1
 								-DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -177,7 +177,6 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_NO_OBJ_IMPORTER=1
 								-DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
