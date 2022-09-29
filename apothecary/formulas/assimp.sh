@@ -142,6 +142,7 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_NO_OBJ_IMPORTER=0
                 -DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -159,6 +160,7 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
+								-DASSIMP_BUILD_NO_OBJ_IMPORTER=0
 								-DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -175,6 +177,7 @@ function build() {
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
                 -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_NO_OBJ_IMPORTER=0
 								-DASSIMP_BUILD_ZLIB=1
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
