@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=4.0.1
+VER=5.2.5
 
 # tools for git use
 GIT_URL=
@@ -25,20 +25,6 @@ function download() {
     mv "assimp-$VER" assimp
     rm "v$VER.zip"
 
-    # fix an issue with static libs being disabled - see issue https://github.com/assimp/assimp/issues/271
-    # this could be fixed fairly soon - so see if its needed for future releases.
-
-    if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        echo "iOS"
-    elif [ "$TYPE" == "vs" ] ; then
-        #ADDED EXCEPTION, FIX DOESN'T WORK IN VS
-        echo "VS"
-    else
-        echo "$TYPE"
-
-        sed -i -e 's/SET ( ASSIMP_BUILD_STATIC_LIB OFF/SET ( ASSIMP_BUILD_STATIC_LIB ON/g' assimp/CMakeLists.txt
-        sed -i -e 's/option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )/option ( BUILD_SHARED_LIBS "Build a shared version of the library" OFF )/g' assimp/CMakeLists.txt
-    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -85,12 +71,8 @@ function build() {
         # these may need to be updated for a new release
         local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
-            -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=0
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
 
         # mkdir -p build_osx
@@ -110,15 +92,11 @@ function build() {
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
 
-        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1
+        local buildOpts="
+            -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=1
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_BUILD_ASSIMP_TOOLS=0
-            -DASSIMP_BUILD_X3D_IMPORTER=0
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
@@ -157,10 +135,8 @@ function build() {
             export HOST=armv7a-linux-android
             local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
                 -DASSIMP_BUILD_3MF_IMPORTER=0
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -175,10 +151,8 @@ function build() {
             export HOST=aarch64-linux-android
             local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
                 -DASSIMP_BUILD_3MF_IMPORTER=0
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -192,10 +166,8 @@ function build() {
             export HOST=x86-linux-android
             local buildOpts="
                 -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_STATIC_LIB=1
                 -DASSIMP_BUILD_TESTS=0
                 -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_ENABLE_BOOST_WORKAROUND=1
                 -DASSIMP_BUILD_3MF_IMPORTER=0
                 -DANDROID_NDK=$NDK_ROOT
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
@@ -222,12 +194,8 @@ function build() {
         # these may need to be updated for a new release
         local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
-            -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=0
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
         mkdir -p build_emscripten
         cd build_emscripten
