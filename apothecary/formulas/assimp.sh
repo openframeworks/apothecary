@@ -129,7 +129,11 @@ function build() {
     elif [ "$TYPE" == "android" ] ; then
 
         source ../../android_configure.sh $ABI
-
+				
+				sed abs
+				
+				#android complains about abs being ambigious - pfffft
+				sed -i -e 's/abs(/fabs(/g' include/assimp/Hash.h
 
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
