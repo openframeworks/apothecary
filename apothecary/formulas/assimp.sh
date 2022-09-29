@@ -242,7 +242,7 @@ function copy() {
         cp -Rv build_android/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
-        cp -Rv lib/libassimp.a $1/lib/$TYPE/libassimp.a
+        cp -Rv build_emscripten/lib/libassimp.a $1/lib/$TYPE/libassimp.a
     fi
 
     # copy license files

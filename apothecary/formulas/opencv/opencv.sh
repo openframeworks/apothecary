@@ -100,7 +100,7 @@ function build() {
       -DWITH_OPENEXR=OFF \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
-      -DWITH_LAPACK=OFF \
+      -DWITH_LAPACK=ON \
       -DWITH_WEBP=OFF \
       -DWITH_GPHOTO2=OFF \
       -DWITH_VTK=OFF \
