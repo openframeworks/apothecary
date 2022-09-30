@@ -129,13 +129,11 @@ function build() {
     elif [ "$TYPE" == "android" ] ; then
 
         source ../../android_configure.sh $ABI
-				
-				sed abs
-				
-				#stuff to remove when we upgrade android
-				#android complains about abs being ambigious - pfffft
-				sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
-				sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
+								
+        #stuff to remove when we upgrade android
+        #android complains about abs being ambigious - pfffft
+        sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
+        sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
 
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
