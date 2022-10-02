@@ -45,7 +45,7 @@ function prepare() {
 		cp -r $FORMULA_DIR/vs2017 ./
 	else
 		# Apply patch for 'N_ELEMENTS() implicit declaration' for OSX and Emscripten
-		if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ]|| [ "$TYPE" == "tvos" ] || [ "$TYPE" == "emscripten" ] ; then
+		if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ]|| [ "$TYPE" == "tvos" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ] ; then
 			cd libparserutils
 			patch -up1 < $FORMULA_DIR/libparseutils.patch
 			cd ..
