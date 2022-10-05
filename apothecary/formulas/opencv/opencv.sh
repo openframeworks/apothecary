@@ -455,6 +455,7 @@ function build() {
       -DWITH_V4L=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
+      -DWITH_ITT=OFF \
       -DBUILD_TESTS=OFF \
       -DANDROID_NDK=$NDK_ROOT \
       -DCMAKE_BUILD_TYPE=Release \
