@@ -98,8 +98,6 @@ function build() {
 			else
 				vs-build svgtiny.sln Build "Release|x64"
 			fi
-		else
-			echo "VS Version not supported yet"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
@@ -176,8 +174,6 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2017/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
-		else
-			echo "VS Version not supported yet"
 		fi
 
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
