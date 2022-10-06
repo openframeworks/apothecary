@@ -94,9 +94,9 @@ function build() {
 		else
 			cd vs2017
 			if [ $ARCH == 32 ] ; then
-				vs-build svgtiny.sln Build "Release|x86"
+				vs-build svgtiny.sln "Build /p:PlatformToolset=v142" "Release|x86"
 			else
-				vs-build svgtiny.sln Build "Release|x64"
+				vs-build svgtiny.sln "Build /p:PlatformToolset=v142" "Release|x64"
 			fi
 		fi
 
