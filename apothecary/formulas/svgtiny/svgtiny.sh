@@ -91,7 +91,7 @@ function build() {
 			else
 				vs-build svgtiny.sln Build "Release|x64"
 			fi
-		elif [ $VS_VER -eq 15 ]; then
+		else
 			cd vs2017
 			if [ $ARCH == 32 ] ; then
 				vs-build svgtiny.sln Build "Release|x86"
@@ -168,7 +168,7 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
-		elif [ $VS_VER -eq 15 ]; then
+		else
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "vs2017/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
