@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=5.1.6
+VER=5.2.5
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/assimp
@@ -25,20 +25,6 @@ function download() {
     mv "assimp-$VER" assimp
     rm "v$VER.zip"
 
-    # fix an issue with static libs being disabled - see issue https://github.com/assimp/assimp/issues/271
-    # this could be fixed fairly soon - so see if its needed for future releases.
-
-    if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        echo "iOS"
-    elif [ "$TYPE" == "vs" ] ; then
-        #ADDED EXCEPTION, FIX DOESN'T WORK IN VS
-        echo "VS"
-    else
-        echo "$TYPE"
-
-        sed -i -e 's/SET ( ASSIMP_BUILD_STATIC_LIB OFF/SET ( ASSIMP_BUILD_STATIC_LIB ON/g' assimp/CMakeLists.txt
-        sed -i -e 's/option ( BUILD_SHARED_LIBS "Build a shared version of the library" ON )/option ( BUILD_SHARED_LIBS "Build a shared version of the library" OFF )/g' assimp/CMakeLists.txt
-    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -80,12 +66,8 @@ function build() {
         # these may need to be updated for a new release
         local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
-            -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=0
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
 
         # mkdir -p build_osx
@@ -105,15 +87,11 @@ function build() {
         echo "building $TYPE | $ARCH | $VS_VER"
         echo "--------------------"
 
-        local buildOpts="-DASSIMP_BUILD_STATIC_LIB=1
+        local buildOpts="
+            -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=1
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_BUILD_ASSIMP_TOOLS=0
-            -DASSIMP_BUILD_X3D_IMPORTER=0
             -DLIBRARY_SUFFIX=${ARCH}"
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
@@ -181,15 +159,60 @@ function build() {
 
         source ../../android_configure.sh $ABI cmake
 
-        # -- Enabled formats: AMF 3DS AC ASE ASSBIN ASSXML B3D BVH COLLADA DXF CSM HMP IRRMESH IRR LWO LWS MD2 MD3 MD5 MDC MDL NFF NDO OFF OBJ OGRE OPENGEX PLY MS3D COB BLEND IFC XGL FBX Q3D Q3BSP RAW SIB SMD TERRAGEN 3D X X3D GLTF 3MF MMD
+								
+        #stuff to remove when we upgrade android
+        #android complains about abs being ambigious - pfffft
+        sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
+        sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
 
-        # if ["$ABI" == "arm64-v8a"  ] || "$ABI" == "armeabi-v7a" ]; then
-        #     $buildOpts = "${buildOpts} -DANDROID_FORCE_ARM_BUILD=TRUE"
-        # fi 
-       
-        
-        if [ -d "build" ]; then
-            rm -R build
+        if [ "$ABI" == "armeabi-v7a" ]; then
+            export HOST=armv7a-linux-android
+            local buildOpts="
+                -DBUILD_SHARED_LIBS=OFF
+                -DASSIMP_BUILD_TESTS=0
+                -DASSIMP_BUILD_SAMPLES=0
+                -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_ZLIB=1
+                -DANDROID_NDK=$NDK_ROOT
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+                -DCMAKE_BUILD_TYPE=Release
+                -DANDROID_ABI=$ABI
+                -DANDROID_STL=c++_static
+                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+                -DANDROID_FORCE_ARM_BUILD=TRUE
+                -DCMAKE_INSTALL_PREFIX=install"
+
+        elif [ "$ABI" == "arm64-v8a" ]; then
+            export HOST=aarch64-linux-android
+            local buildOpts="
+                -DBUILD_SHARED_LIBS=OFF
+                -DASSIMP_BUILD_TESTS=0
+                -DASSIMP_BUILD_SAMPLES=0
+                -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_ZLIB=1
+                -DANDROID_NDK=$NDK_ROOT
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+                -DCMAKE_BUILD_TYPE=Release
+                -DANDROID_ABI=$ABI
+                -DANDROID_STL=c++_static
+                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+                -DANDROID_FORCE_ARM_BUILD=TRUE
+                -DCMAKE_INSTALL_PREFIX=install"
+        elif [ "$ABI" == "x86" ]; then
+            export HOST=x86-linux-android
+            local buildOpts="
+                -DBUILD_SHARED_LIBS=OFF
+                -DASSIMP_BUILD_TESTS=0
+                -DASSIMP_BUILD_SAMPLES=0
+                -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_ZLIB=1
+                -DANDROID_NDK=$NDK_ROOT
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+                -DCMAKE_BUILD_TYPE=Release
+                -DANDROID_ABI=$ABI
+                -DANDROID_STL=c++_static
+                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+                -DCMAKE_INSTALL_PREFIX=install"
         fi
         
         
@@ -208,6 +231,7 @@ function build() {
         export CMAKE_LDFLAGS="$LDFLAGS"
         
         cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+            $buildOpts \
             -DCMAKE_C_COMPILER=${CC} \
             -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
@@ -260,12 +284,8 @@ function build() {
         # these may need to be updated for a new release
         local buildOpts="
             -DBUILD_SHARED_LIBS=OFF
-            -DASSIMP_BUILD_STATIC_LIB=1
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1
-            -DASSIMP_BUILD_STL_IMPORTER=0
-            -DASSIMP_BUILD_BLEND_IMPORTER=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
         mkdir -p build_emscripten
         cd build_emscripten
@@ -292,33 +312,29 @@ function copy() {
         if [ $ARCH == 32 ] ; then
             mkdir -p $1/lib/$TYPE/Win32
             # copy .lib and .dll artifacts
-            cp -v build_vs_32/code/Release/*.lib $1/lib/$TYPE/Win32
-            cp -v build_vs_32/code/Release/*.dll $1/lib/$TYPE/Win32
+            cp -v build_vs_32/lib/Release/*.lib $1/lib/$TYPE/Win32
             # copy header files
             cp -v -r build_vs_32/include/* $1/include
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             # copy .lib and .dll artifacts
-            cp -v build_vs_64/code/Release/*.lib $1/lib/$TYPE/x64
-            cp -v build_vs_64/code/Release/*.dll $1/lib/$TYPE/x64
+            cp -v build_vs_64/lib/Release/*.lib $1/lib/$TYPE/x64
             # copy header files
             cp -v -r build_vs_64/include/* $1/include
         fi
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
-        # cp -Rv lib/libIrrXML.a $1/lib/$TYPE/libIrrXML.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv include/* $1/include
-        cp -Rv build/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build_$ABI/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
         #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/lib/libassimp.a $1/lib/$TYPE/libassimp.a
-        cp -Rv build_emscripten/contrib/zlib/libzlibstatic.a $1/lib/$TYPE/libzlibstatic.a
     fi
 
     # copy license files

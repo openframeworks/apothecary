@@ -53,6 +53,9 @@ function build() {
             PLATFORM="ARM64"
         elif [ $ARCH == "ARM" ] ; then
             PLATFORM="ARM"
+            vs-build libxml2.vcxproj Build "Release|Win32"
+        else
+            vs-build libxml2.vcxproj "Build /p:PlatformToolset=v142" "Release|x64"
         fi
 
         mkdir -p build_$PLATFORM

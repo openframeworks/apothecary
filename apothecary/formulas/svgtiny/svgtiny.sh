@@ -45,7 +45,7 @@ function prepare() {
 		cp -r $FORMULA_DIR/vs2017 ./
 	else
 		# Apply patch for 'N_ELEMENTS() implicit declaration' for OSX and Emscripten
-		if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ]|| [ "$TYPE" == "tvos" ] || [ "$TYPE" == "emscripten" ] ; then
+		if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ]|| [ "$TYPE" == "tvos" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ] ; then
 			cd libparserutils
 			patch -up1 < $FORMULA_DIR/libparseutils.patch
 			cd ..
@@ -113,15 +113,13 @@ function build() {
 			else
 				vs-build svgtiny.sln Build "Release|x64"
 			fi
-		elif [ $VS_VER -eq 15 ]; then
+		else
 			cd vs2017
 			if [ $ARCH == 32 ] ; then
-				vs-build svgtiny.sln Build "Release|x86"
+				vs-build svgtiny.sln "Build /p:PlatformToolset=v142" "Release|x86"
 			else
-				vs-build svgtiny.sln Build "Release|x64"
+				vs-build svgtiny.sln "Build /p:PlatformToolset=v142" "Release|x64"
 			fi
-		else
-			echo "VS Version not supported yet"
 		fi
 
 	elif [ "$TYPE" == "android" ]; then
@@ -191,7 +189,7 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2015/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
-		elif [ $VS_VER -eq 15 ]; then
+		else
 			if [ $ARCH == 32 ] ; then
 				mkdir -p $1/lib/$TYPE/Win32
 				cp -v "vs2017/Release/svgtiny.lib" $1/lib/$TYPE/Win32/svgtiny.lib
@@ -199,8 +197,6 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "vs2017/x64/Release/svgtiny.lib" $1/lib/$TYPE/x64/svgtiny.lib
 			fi
-		else
-			echo "VS Version not supported yet"
 		fi
 
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
