@@ -333,6 +333,7 @@ function build() {
         cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
         echo "#include <wchar.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
         cat $BUILD_DIR/FreeImage/Source/LibJXR/jxrgluelib/JXRGlueJxr.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+        sed -i "s/CXXFLAGS ?=/CXXFLAGS ?= -std=c++11/g" $BUILD_DIR/FreeImagePatched/Makefile.gnu
         cd $BUILD_DIR/FreeImagePatched
         emmake make clean -f Makefile.gnu
         emmake make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
