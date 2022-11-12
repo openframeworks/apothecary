@@ -15,19 +15,27 @@ VER=3180 # 3.16.0
 # tools for git use
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.17.0-header-changes
+# only use new branch for emscripten
+# until the other ones are tested
+GIT_TAG_LE=3.18.0_cpp17
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-
 	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
 		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
-
+	elif [ "$TYPE" == "emscripten" ] ; then
+        echo "Downloading from $GIT_URL ($GIT_TAG_LE) for $TYPE"
+		echo $GIT_URL
+		wget -nv $GIT_URL/archive/$GIT_TAG_LE.tar.gz -O FreeImage-$GIT_TAG_LE.tar.gz
+		tar -xzf FreeImage-$GIT_TAG_LE.tar.gz
+		mv FreeImage-$GIT_TAG_LE FreeImage
+		rm FreeImage-$GIT_TAG_LE.tar.gz
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL for OSX/iOS"
+        echo "Downloading from $GIT_URL ($GIT_TAG) for $TYPE"
 		echo $GIT_URL
 		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
@@ -327,7 +335,6 @@ function build() {
         cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
         echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
         cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
-        echo "" > $BUILD_DIR/FreeImagePatched/Source/LibRawLite/src/swab.h
         echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
         echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
         cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
