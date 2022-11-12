@@ -72,7 +72,7 @@ function build() {
             export CFLAGS=-I$SYSROOT/usr/include
         fi
         
-        export CFLAGS="-I$LIBS_DIR/libxml2/include $(pkg-config libxml-2.0 --cflags)"
+        export CFLAGS="$(pkg-config libxml-2.0 --cflags || echo \"-I$LIBS_DIR/libxml2/include\")"
         
         make clean
 	    make -j${PARALLEL_MAKE}
