@@ -72,7 +72,11 @@ function build() {
             export CFLAGS=-I$SYSROOT/usr/include
         fi
         
-        export CFLAGS="$(pkg-config libxml-2.0 --cflags) -I$LIBS_DIR/libxml2/include"
+        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
+        
+        if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] ; then
+            export CFLAGS="-I$LIBS_DIR/libxml2/include"
+        fi
         
         make clean
 	    make -j${PARALLEL_MAKE}

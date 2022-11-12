@@ -20,7 +20,7 @@ jobs:
           - clang64
           #- clangarm64
     name: ${{ matrix.flavor }}
-    runs-on: windows-latest
+    runs-on: windows-2019
     defaults:
       run:
         shell: msys2 {0}
