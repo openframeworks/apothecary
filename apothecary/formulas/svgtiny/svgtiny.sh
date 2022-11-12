@@ -73,9 +73,6 @@ function build() {
         fi
         
         export CFLAGS="-I$LIBS_DIR/libxml2/include"
-
-        #incase we need pkg-config
-        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         
         make clean
 	    make -j${PARALLEL_MAKE}
