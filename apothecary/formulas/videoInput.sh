@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "vs" "msys2" )
 
 # define the version
-VER=stable
+VER=master
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/videoInput.git
