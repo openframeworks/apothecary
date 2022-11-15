@@ -22,7 +22,6 @@ local LIB_FOLDER64="$LIB_FOLDER-64"
 local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
 local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
   wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
@@ -468,7 +467,16 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    source /emsdk/emsdk_env.sh
+    # check if emsdk is sourced and EMSDK is set
+    if [ -z ${EMSDK+x} ]; then
+        # if not, try docker path
+        if [ -f /emsdk/emsdk_env.sh ]; then
+            source /emsdk/emsdk_env.sh
+	else
+            echo "no EMSDK found, please install from https://emscripten.org"
+            exit 1
+        fi
+    fi
 
     cd ${BUILD_DIR}/${1}
     
@@ -487,8 +495,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
