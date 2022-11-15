@@ -369,7 +369,7 @@ function build() {
 	    cp apinames $BUILD_DIR/freetype/objs/
 	    emmake make -j${PARALLEL_MAKE}
 	    emmake make install
-	    emcc objs/*.o -o build/$TYPE/lib/libfreetype.bc
+	    emcc -r objs/*.o -o build/$TYPE/lib/libfreetype.bc
 		echo "-----------"
 		echo "$BUILD_DIR"
 
