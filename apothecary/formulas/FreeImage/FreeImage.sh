@@ -27,7 +27,7 @@ function download() {
 
 	else
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL for OSX/iOS"
+        echo "Downloading from $GIT_URL for OSX/iOS/tvOS/android/emscripten"
 		echo $GIT_URL
 		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
