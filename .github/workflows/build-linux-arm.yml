@@ -10,14 +10,14 @@ on:
 jobs:
 
   build-linux-arm6:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
         env:
          TARGET: "linuxarmv6l"
          SYSROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/raspbian"
          TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/rpi_toolchain"
          TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v3
         - name: Scripts Calc Formula
           run: ./scripts/calculate_formulas.sh
         - name: Scripts Install

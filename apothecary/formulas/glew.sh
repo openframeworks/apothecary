@@ -20,10 +20,13 @@ GIT_TAG=glew-$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#echo ${VS_VER}0
-	curl -LO http://downloads.sourceforge.net/project/glew/glew/$VER/glew-$VER.tgz
-	tar -xf glew-$VER.tgz
-	mv glew-$VER glew
-	rm glew-$VER.tgz
+
+	git clone --branch ${GIT_TAG} ${GIT_URL} --depth 1 glew
+
+	# curl -LO http://downloads.sourceforge.net/project/glew/glew/$VER/glew-$VER.tgz
+	# tar -xf glew-$VER.tgz
+	# mv glew-$VER glew
+	# rm glew-$VER.tgz
 }
 
 # prepare the build environment, executed inside the lib src dir

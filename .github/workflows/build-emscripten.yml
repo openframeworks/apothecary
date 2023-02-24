@@ -10,11 +10,11 @@ on:
 jobs:
 
   build-emscripten:
-      runs-on: ubuntu-18.04
+      runs-on: ubuntu-latest
       env:
        TARGET: "emscripten"
       steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Docker Step
         run:  "docker run -di --name emscripten -v $PWD:/src emscripten/emsdk:3.1.21 bash"
       - name: Scripts Calc Formula
