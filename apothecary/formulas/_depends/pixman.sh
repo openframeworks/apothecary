@@ -4,11 +4,15 @@
 # http://pixman.org/
 
 # define the version
-VER=0.32.4
+# VER=0.32.4
 
 # tools for git use
-GIT_URL=http://anongit.freedesktop.org/git/pixman.git
+#GIT_URL=http://anongit.freedesktop.org/git/pixman.git
+
+VER=0.42.2
+GIT_URL=https://github.com/freedesktop/pixman.git
 GIT_TAG=pixman-$VER
+
 
 FORMULA_TYPES=( "osx" "vs" )
 
