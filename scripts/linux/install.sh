@@ -84,7 +84,7 @@ elif [ "$OPT" == "gcc5" ]; then
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
     g++ -v
 elif [ "$OPT" == "gcc6" ]; then
-    sudo add-apt-repository -y ppa:dns/gnu
+    sudo add-apt-repository -y -r ppa:dns/gnu
     #sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     # sudo apt-get update -q
     # sudo apt-get install gdebi
@@ -110,6 +110,16 @@ elif [ "$OPT" == "gcc6" ]; then
     sudo apt-get autoremove
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+    g++ -v
+elif [ "$OPT" == "gcc11" ]; then
+    sudo add-apt-repository -y -r ppa:dns/gnu
+	sudo apt-get update -q
+	sudo apt-get install -y --allow-unauthenticated gcc-11 g++-11
+
+    sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
+    sudo apt-get autoremove
+    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
+    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
     g++ -v
 else
 	echo "GCC version not specified on OPT env var, set one of gcc4, gcc5 or gcc6"

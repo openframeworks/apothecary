@@ -21,7 +21,7 @@ jobs:
      TARGET: ${{matrix.cfg.target}}
      ARCH: ${{matrix.cfg.arch}}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
