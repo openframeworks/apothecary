@@ -84,7 +84,7 @@ elif [ "$OPT" == "gcc5" ]; then
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
     g++ -v
 elif [ "$OPT" == "gcc6" ]; then
-    sudo add-apt-repository -y ppa:dns/gnu
+    sudo add-apt-repository -y -r ppa:dns/gnu
     #sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     # sudo apt-get update -q
     # sudo apt-get install gdebi
