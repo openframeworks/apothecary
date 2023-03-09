@@ -207,7 +207,7 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0"
         mkdir -p build_emscripten
         cd build_emscripten
-        emcmake cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG -s USE_PTHREADS=1" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -s USE_PTHREADS=1" ..
+        emcmake cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread" ..
         emmake make assimp -j${PARALLEL_MAKE}
         cd ..
     fi
