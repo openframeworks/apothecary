@@ -1,695 +1,437 @@
 #!/usr/bin/env bash
 #
-# OpenCV
-# library of programming functions mainly aimed at real-time computer vision
-# http://opencv.org
+# Free Image
+# cross platform image io
+# http://freeimage.sourceforge.net
 #
-# uses a CMake build system
+# Makefile build system,
+# some Makefiles are out of date so patching/modification may be required
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
-VER=4.0.1
+VER=3180 # 3.16.0
 
 # tools for git use
-GIT_URL=https://github.com/opencv/opencv.git
-GIT_TAG=$VER
-
-# these paths don't really matter - they are set correctly further down
-local LIB_FOLDER="$BUILD_ROOT_DIR/opencv"
-local LIB_FOLDER32="$LIB_FOLDER-32"
-local LIB_FOLDER64="$LIB_FOLDER-64"
-local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
-local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
+GIT_URL=https://github.com/danoli3/FreeImage
+GIT_TAG=3.17.0-header-changes
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
-  tar -xf opencv-$VER.tar.gz
-  mv opencv-$VER $1
-  rm opencv*.tar.gz
+
+	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+		# For win32, we simply download the pre-compiled binaries.
+		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
+		unzip -qo FreeImage"$VER"Win32Win64.zip
+		rm FreeImage"$VER"Win32Win64.zip
+
+	else
+        # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
+        echo "Downloading from $GIT_URL for OSX/iOS/tvOS/android/emscripten"
+		echo $GIT_URL
+		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		tar -xzf FreeImage-$GIT_TAG.tar.gz
+		mv FreeImage-$GIT_TAG FreeImage
+		rm FreeImage-$GIT_TAG.tar.gz
+	fi
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-  : # noop
+
+	if [ "$TYPE" == "osx" ] ; then
+
+		cp -rf $FORMULA_DIR/Makefile.osx Makefile.osx
+
+		# set SDK using apothecary settings
+		sed -i tmp "s|MACOSX_SDK =.*|MACOSX_SDK = $OSX_SDK_VER|" Makefile.osx
+		sed -i tmp "s|MACOSX_MIN_SDK =.*|MACOSX_MIN_SDK = $OSX_MIN_SDK_VER|" Makefile.osx
+
+	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
+
+		mkdir -p Dist/$TYPE
+		mkdir -p builddir/$TYPE
+
+		# copy across new Makefile for iOS.
+		cp -v $FORMULA_DIR/Makefile.ios Makefile.ios
+
+		# delete problematic file including a main fucntion
+		# https://github.com/openframeworks/openFrameworks/issues/5980
+		rm -f Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+		touch Source/OpenEXR/IlmImf/b44ExpLogTable.cpp
+	elif [ "$TYPE" == "android" ]; then
+	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched
+	    cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImage_patched
+	    cd $BUILD_DIR/FreeImage_patched
+	    sed -i "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
+	    cat > Source/LibRawLite/src/swab.h << ENDDELIM
+	    #include <stdint.h>
+        #include <asm/byteorder.h>
+		#define ___swab(x)  ({ __u16 __x = (x);   ((__u16)(   (((__u16)(__x) & (__u16)0x00ffU) << 8) | (((__u16)(__x) & (__u16)0xff00U) >> 8) ));  })
+        inline void swab(const void *from, void*to, size_t n)
+        {
+            size_t i;
+            if (n < 0)
+                return;
+            for (i = 0; i < (n/2)*2; i += 2)
+                *((uint16_t*)to+i) = ___swab(*((uint16_t*)from+i));
+        }
+ENDDELIM
+
+        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/internal/dcraw_common.cpp
+        echo "#include \"swab.h\"" > Source/LibRawLite/internal/dcraw_common_patched.cpp;
+        cat Source/LibRawLite/internal/dcraw_common.cpp >> Source/LibRawLite/internal/dcraw_common_patched.cpp
+        cat Source/LibRawLite/internal/dcraw_common_patched.cpp > Source/LibRawLite/internal/dcraw_common.cpp
+        rm Source/LibRawLite/internal/dcraw_common_patched.cpp
+
+        sed -i "s/#include \"swab.h\"//g" Source/LibRawLite/src/libraw_cxx.cpp
+        echo "#include \"swab.h\"" > Source/LibRawLite/src/libraw_cxx_patched.cpp
+        cat Source/LibRawLite/src/libraw_cxx.cpp >> Source/LibRawLite/src/libraw_cxx_patched.cpp
+        cat Source/LibRawLite/src/libraw_cxx_patched.cpp > Source/LibRawLite/src/libraw_cxx.cpp
+        rm Source/LibRawLite/src/libraw_cxx_patched.cpp
+
+        #rm Source/LibWebP/src/dsp/dec_neon.c
+
+        sed -i "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
+	fi
 }
 
 # executed inside the lib src dir
 function build() {
-  rm -f CMakeCache.txt
 
-  LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
-  mkdir -p $LIB_FOLDER
+	if [ "$TYPE" == "osx" ] ; then
+		make -j${PARALLEL_MAKE} -f Makefile.osx
 
-  if [ "$TYPE" == "osx" ] ; then
-    LOG="$LIB_FOLDER/opencv2-${VER}.log"
-    
-    # fix for arm64 builds for 4.0.1 which the ittnotify_config.h doesn't detect correctly.
-    # this can prob be removed in later opencv versions
-    sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
-    
-    echo "Logging to $LOG"
-    cd build
-    rm -f CMakeCache.txt
-    echo "Log:" >> "${LOG}" 2>&1
-    set +e
-    cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
-      -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
-      -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_CARBON=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_LAPACK=OFF \
-      -DWITH_WEBP=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_TBB=OFF \
-      -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
-    echo "CMAKE Successful"
-    echo "--------------------"
-    echo "Running make clean"
+		strip -x Dist/libfreeimage.a
 
-    make clean 2>&1 | tee -a ${LOG}
-    echo "Make Clean Successful"
+	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
-    echo "--------------------"
-    echo "Running make"
-    make -j${PARALLEL_MAKE} 2>&1 | tee -a ${LOG}
-    echo "Make  Successful"
+		# Notes:
+        # --- for 3.1+ Must use "-DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT" to compile LibJXR
+		export TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
+		export TARGET_IOS
 
-    echo "--------------------"
-    echo "Running make install"
-    make install 2>&1 | tee -a ${LOG}
-    echo "Make install Successful"
+        local IOS_ARCHS
+        if [ "${TYPE}" == "tvos" ]; then
+            IOS_ARCHS="x86_64 arm64"
+        elif [ "$TYPE" == "ios" ]; then
+            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
+        fi
 
-    echo "--------------------"
-    # we don't do this anymore as it results in duplicate symbol issues
-    # echo "Joining all libs in one"
-    # outputlist="$LIB_FOLDER/lib/lib*.a $LIB_FOLDER/lib/opencv4/3rdparty/*.a"
-    # libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
-    # echo "Joining all libs in one Successful"
+        local STDLIB="libc++"
+        local CURRENTPATH=`pwd`
 
-  elif [ "$TYPE" == "vs" ] ; then
-    unset TMP
-    unset TEMP
-
-    rm -f CMakeCache.txt
-    #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
-    mkdir -p $LIB_FOLDER
-    LOG="$LIB_FOLDER/opencv2-${VER}.log"
-    echo "Logging to $LOG"
-    echo "Log:" >> "${LOG}" 2>&1
-    set +e
-
-    if [ $ARCH == 32 ] ; then
-      mkdir -p build_vs_32
-      cd build_vs_32
-      cmake .. -G "Visual Studio $VS_VER"\
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|Win32"
-      vs-build "OpenCV.sln" Build "Debug|Win32"
-    elif [ $ARCH == 64 ] ; then
-      mkdir -p build_vs_64
-      cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|x64"
-      vs-build "OpenCV.sln" Build "Debug|x64"
-    fi
-
-  elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-    local IOS_ARCHS
-    if [[ "${TYPE}" == "tvos" ]]; then
-        IOS_ARCHS="x86_64 arm64"
-    elif [[ "$TYPE" == "ios" ]]; then
-        IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-    fi
-    CURRENTPATH=`pwd`
-
-      # loop through architectures! yay for loops!
-    for IOS_ARCH in ${IOS_ARCHS}
-    do
-      source ${APOTHECARY_DIR}/ios_configure.sh $TYPE $IOS_ARCH
-
-      cd build
-
-      WITH_ITT=ON
-      if [[ "${IOS_ARCH}" == "arm64" ]]; then
-        WITH_ITT=OFF
-      fi
-
-      cmake .. -DCMAKE_INSTALL_PREFIX="$CURRENTPATH/build/$TYPE/$IOS_ARCH" \
-      -DIOS=1 \
-      -DAPPLE=1 \
-      -DUNIX=1 \
-      -DCMAKE_CXX_COMPILER=$CXX \
-      -DCMAKE_CC_COMPILER=$CC \
-      -DIPHONESIMULATOR=$ISSIM \
-      -DCMAKE_CXX_COMPILER_WORKS="TRUE" \
-      -DCMAKE_C_COMPILER_WORKS="TRUE" \
-      -DSDKVER="${SDKVERSION}" \
-      -DCMAKE_IOS_DEVELOPER_ROOT="${CROSS_TOP}" \
-      -DDEVROOT="${CROSS_TOP}" \
-      -DSDKROOT="${CROSS_SDK}" \
-      -DCMAKE_OSX_SYSROOT="${SYSROOT}" \
-      -DCMAKE_OSX_ARCHITECTURES="${IOS_ARCH}" \
-      -DCMAKE_XCODE_EFFECTIVE_PLATFORMS="-$PLATFORM" \
-      -DGLFW_BUILD_UNIVERSAL=ON \
-      -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -Wno-implicit-function-declaration -isysroot ${SYSROOT} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION" \
-      -DCMAKE_C_FLAGS="-stdlib=libc++ -fvisibility=hidden $BITCODE -fPIC -Wno-implicit-function-declaration -isysroot ${SYSROOT} -DNDEBUG -Os $MIN_TYPE$MIN_IOS_VERSION"  \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_CUDA_STUBS=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_gapi=OFF \
-      -DBUILD_opencv_ml=OFF \
-      -DBUILD_opencv_shape=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_superres=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=OFF \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_ITT=${WITH_ITT} \
-      -DBUILD_PERF_TESTS=OFF
+        SDKVERSION=""
+        if [ "${TYPE}" == "tvos" ]; then
+            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
+        elif [ "$TYPE" == "ios" ]; then
+            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
+        fi
 
 
-      echo "--------------------"
-      echo "Running make clean for ${IOS_ARCH}"
-      make clean
+        DEVELOPER=$XCODE_DEV_ROOT
+		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
+		VERSION=$VER
 
-      echo "--------------------"
-      echo "Running make for ${IOS_ARCH}"
-      make -j${PARALLEL_MAKE}
+        # Validate environment
+        case $XCODE_DEV_ROOT in
+            *\ * )
+                echo "Your Xcode path contains whitespaces, which is not supported."
+                exit 1
+                ;;
+        esac
+        case $CURRENTPATH in
+            *\ * )
+                echo "Your path contains whitespaces, which is not supported by 'make install'."
+                exit 1
+                ;;
+        esac
 
-      echo "--------------------"
-      echo "Running make install for ${IOS_ARCH}"
-      make install
+        mkdir -p "builddir/$TYPE"
 
-      rm -f CMakeCache.txt
-      cd ..
-    done
+        # loop through architectures! yay for loops!
+        for IOS_ARCH in ${IOS_ARCHS}
+        do
 
-    mkdir -p lib/$TYPE
-    echo "--------------------"
-    echo "Creating Fat Libs"
-    cd "build/$TYPE"
-    # link into universal lib, strip "lib" from filename
-    local lib
-    rm -rf arm64/lib/pkgconfig
+        	unset ARCH IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
+            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
+            unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
 
-    for lib in arm64/lib/*.a; do
-      baselib=$(basename $lib)
-      local renamedLib=$(echo $baselib | sed 's|lib||')
-      if [ ! -e $renamedLib ] ; then
-        echo "renamed $renamedLib";
+            export ARCH=$IOS_ARCH
+
+            local EXTRA_PLATFORM_CFLAGS=""
+			export EXTRA_PLATFORM_LDFLAGS=""
+			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
+			then
+                if [ "${TYPE}" == "tvos" ]; then
+                    PLATFORM="AppleTVSimulator"
+                elif [ "$TYPE" == "ios" ]; then
+                    PLATFORM="iPhoneSimulator"
+                fi
+			else
+                if [ "${TYPE}" == "tvos" ]; then
+                    PLATFORM="AppleTVOS"
+                elif [ "$TYPE" == "ios" ]; then
+                    PLATFORM="iPhoneOS"
+                fi
+			fi
+
+			export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
+			export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
+			export BUILD_TOOLS="${DEVELOPER}"
+
+			MIN_IOS_VERSION=$IOS_MIN_SDK_VER
+		    # min iOS version for arm64 is iOS 7
+
+		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
+		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
+		    elif [ "${IOS_ARCH}" == "i386" ]; then
+		    	MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
+		    fi
+
+            if [ "${TYPE}" == "tvos" ]; then
+    		    MIN_TYPE=-mtvos-version-min=
+    		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
+    		    	MIN_TYPE=-mtvos-simulator-version-min=
+    		    fi
+            elif [ "$TYPE" == "ios" ]; then
+                MIN_TYPE=-miphoneos-version-min=
+                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
+                    MIN_TYPE=-mios-simulator-version-min=
+                fi
+            fi
+
+            BITCODE=""
+            if [[ "$TYPE" == "tvos" ]]; then
+                BITCODE=-fembed-bitcode;
+                MIN_IOS_VERSION=9.0
+            fi
+
+			export TARGET_NAME="$CURRENTPATH/libfreeimage-$IOS_ARCH.a"
+			export HEADER="Source/FreeImage.h"
+
+			export CC=$TOOLCHAIN/usr/bin/clang
+			export CPP=$TOOLCHAIN/usr/bin/clang++
+			export CXX=$TOOLCHAIN/usr/bin/clang++
+			export CXXCPP=$TOOLCHAIN/usr/bin/clang++
+
+			export LD=$TOOLCHAIN/usr/bin/ld
+			export AR=$TOOLCHAIN/usr/bin/ar
+			export AS=$TOOLCHAIN/usr/bin/as
+			export NM=$TOOLCHAIN/usr/bin/nm
+			export RANLIB=$TOOLCHAIN/usr/bin/ranlib
+			export LIBTOOL=$TOOLCHAIN/usr/bin/libtool
+
+		  	export EXTRA_PLATFORM_CFLAGS="$EXTRA_PLATFORM_CFLAGS"
+			export EXTRA_PLATFORM_LDFLAGS="$EXTRA_PLATFORM_LDFLAGS -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -Wl,-dead_strip -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/ $MIN_TYPE$MIN_IOS_VERSION "
+
+		   	EXTRA_LINK_FLAGS="-arch $IOS_ARCH $BITCODE -fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Os -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
+			EXTRA_FLAGS="$EXTRA_LINK_FLAGS $BITCODE -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
+
+		    export CC="$CC $EXTRA_FLAGS"
+			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS"
+			export CXXFLAGS="$EXTRA_FLAGS -std=c++11 -stdlib=libc++"
+			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION -std=c++11 -stdlib=libc++"
+			export LDFLAGS_PHONE=$LDFLAGS
+
+			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
+			echo "-----------------"
+			echo "Building FreeImage-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
+			set +e
+
+			echo "Running make for ${IOS_ARCH}"
+			echo "Please stand by..."
+
+			# run makefile
+			make -j${PARALLEL_MAKE} -f Makefile.ios
+
+     		echo "Completed Build for $IOS_ARCH of FreeImage"
+
+     		mv -v libfreeimage-$IOS_ARCH.a Dist/$TYPE/libfreeimage-$IOS_ARCH.a
+
+     		cp Source/FreeImage.h Dist
+
+            unset ARCH IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
+            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
+            unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
+
+		done
+
+		echo "Completed Build for $TYPE"
+
+        echo "-----------------"
+		echo `pwd`
+		echo "Finished for all architectures."
+		mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
+		LOG="$CURRENTPATH/builddir/$TYPE/build-freeimage-${VER}-lipo.log"
+
+		cd Dist/$TYPE/
+		# link into universal lib
+		echo "Running lipo to create fat lib"
+		echo "Please stand by..."
         if [[ "${TYPE}" == "tvos" ]] ; then
-          lipo -c arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+            lipo -create libfreeimage-arm64.a \
+                    libfreeimage-x86_64.a \
+                    -output freeimage.a
         elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/lib/$baselib arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
+		    #			libfreeimage-armv7s.a \
+		    lipo -create libfreeimage-armv7.a \
+					libfreeimage-arm64.a \
+					libfreeimage-x86_64.a \
+					-output freeimage.a
         fi
-      fi
-    done
 
-    cd ../../
-    echo "--------------------"
-    echo "Copying includes"
-    cp -R "build/$TYPE/x86_64/include/" "lib/include/"
+		lipo -info freeimage.a
 
-    echo "--------------------"
-    echo "Stripping any lingering symbols"
-
-    cd lib/$TYPE
-    for TOBESTRIPPED in $( ls -1) ; do
-      strip -x $TOBESTRIPPED
-    done
-
-    cd ../../
-
-  # end if iOS
-
-  elif [ "$TYPE" == "android" ]; then
-    export ANDROID_NDK=${NDK_ROOT}
-
-    if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
-      local BUILD_FOLDER="build_android_arm"
-      local BUILD_SCRIPT="cmake_android_arm.sh"
-    elif [ "$ABI" = "arm64-v8a" ]; then
-      local BUILD_FOLDER="build_android_arm64"
-      local BUILD_SCRIPT="cmake_android_arm64.sh"
-    elif [ "$ABI" = "x86" ]; then
-      local BUILD_FOLDER="build_android_x86"
-      local BUILD_SCRIPT="cmake_android_x86.sh"
-    fi
-
-    source ../../android_configure.sh $ABI
-
-    rm -rf $BUILD_FOLDER
-    mkdir $BUILD_FOLDER
-    cd $BUILD_FOLDER
-
-    echo ${ANDROID_NDK}
-    pwd
-    cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
-      -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
-      -DBUILD_ANDROID_PROJECTS=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_JPEG=OFF \
-      -DBUILD_PNG=OFF \
-      -DHAVE_opencv_androidcamera=OFF \
-      -DWITH_CAROTENE=OFF \
-      -DWITH_CPUFEATURES=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_TESTS=OFF \
-      -DANDROID_NDK=$NDK_ROOT \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DANDROID_ABI=$ABI \
-      -DANDROID_STL=c++_static \
-      -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
-      -DANDROID_FORCE_ARM_BUILD=TRUE \
-      -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
-      -DBUILD_PERF_TESTS=OFF
-    make -j${PARALLEL_MAKE}
-    make install
-
-  elif [ "$TYPE" == "emscripten" ]; then
-    # check if emsdk is sourced and EMSDK is set
-    if [ -z ${EMSDK+x} ]; then
-        # if not, try docker path
-        if [ -f /emsdk/emsdk_env.sh ]; then
-            source /emsdk/emsdk_env.sh
-	else
-            echo "no EMSDK found, please install from https://emscripten.org"
-            exit 1
+        if [[ "$TYPE" == "ios" ]]; then
+    		echo "--------------------"
+    		echo "Stripping any lingering symbols"
+    		echo "Please stand by..."
+    		# validate all stripped debug:
+    		strip -x freeimage.a
         fi
-    fi
+		cd ../../
 
-    cd ${BUILD_DIR}/${1}
-    
-    # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
-    # these can be removed when we move to latest opencv
-    sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
-    sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
-    sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
+		echo "--------------------"
+		echo "Build Successful for FreeImage $TYPE $VER"
 
-    mkdir -p build_${TYPE}
-    cd build_${TYPE}
-    
-    emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_opencv_js=ON \
-      -DCPU_BASELINE='' \
-      -DCPU_DISPATCH='' \
-      -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-pthread -I${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-pthread -I${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_EXAMPLES=OFF \
-      -DBUILD_FAT_JAVA_LIB=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_CUDA_STUBS=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_gapi=OFF \
-      -DBUILD_opencv_ml=OFF \
-      -DBUILD_opencv_shape=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_superres=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DENABLE_SSE=OFF \
-      -DENABLE_SSE2=OFF \
-      -DENABLE_SSE3=OFF \
-      -DENABLE_SSE41=OFF \
-      -DENABLE_SSE42=OFF \
-      -DENABLE_SSSE3=OFF \
-      -DENABLE_AVX=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_TBB=OFF \
-      -DWITH_PTHREADS_PF=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DWITH_ITT=OFF \
-      -DBUILD_ZLIB=OFF \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF
-    make -j${PARALLEL_MAKE}
-    make install
-  fi
+		# include copied in the makefile to libs/$TYPE/include
+		unset TARGET_IOS
+		unset TOOLCHAIN
 
+	elif [ "$TYPE" == "android" ] ; then
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
+        cd $BUILD_DIR/FreeImage_patched
+
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage_patched/build/$TYPE/$ABI
+        source ../../android_configure.sh $ABI
+
+		if [ "$ARCH" == "arm64" ] ; then
+			CFLAGS="$CFLAGS -DPNG_ARM_NEON_OPT=0"
+		fi
+        
+		# export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        export CC="$CC $CFLAGS $LDFLAGS"
+        export CXX="$CXX $CFLAGS $LDFLAGS"
+        make clean -f Makefile.gnu
+        make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
+        mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
+        mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
+    elif [ "$TYPE" == "emscripten" ]; then
+        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
+        rm -rf $BUILD_DIR/FreeImagePatched
+        cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImagePatched
+        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
+        cat $BUILD_DIR/FreeImage/Source/ZLib/gzlib.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
+        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
+        cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
+        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
+        cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
+        echo "" > $BUILD_DIR/FreeImagePatched/Source/LibRawLite/src/swab.h
+        echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        echo "#include <wchar.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+        cat $BUILD_DIR/FreeImage/Source/LibJXR/jxrgluelib/JXRGlueJxr.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+        sed -i "s/CXXFLAGS ?=/CXXFLAGS ?= -std=c++11 -pthread/g" "$BUILD_DIR/FreeImagePatched/Makefile.gnu"
+        cd $BUILD_DIR/FreeImagePatched
+        emmake make clean -f Makefile.gnu
+        emmake make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
+        mkdir -p $BUILD_DIR/FreeImage/Dist/
+        mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/
+        cd $BUILD_DIR/FreeImage
+        #rm -rf $BUILD_DIR/FreeImagePatched
+	fi
 }
-
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 
-  # prepare headers directory if needed
-  mkdir -p $1/include
+	# headers
+	if [ -d $1/include ]; then
+	    rm -rf $1/include
+	fi
+	mkdir -p $1/include
 
-  # prepare libs directory if needed
-  mkdir -p $1/lib/$TYPE
+	# lib
+	if [ "$TYPE" == "osx" ] ; then
+	    cp -v Dist/*.h $1/include
+		mkdir -p $1/lib/$TYPE
+		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
+	elif [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+		mkdir -p $1/include #/Win32
+		#mkdir -p $1/include/x64
+	    cp -v Dist/x32/*.h $1/include #/Win32/
+		#cp -v Dist/x64/*.h $1/include/x64/
+		if [ $ARCH == 32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32
+			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
+			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+		else
+			mkdir -p $1/lib/$TYPE/x64
+			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
+			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+		fi
+	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+        cp -v Dist/*.h $1/include
+        if [ -d $1/lib/$TYPE/ ]; then
+            rm -r $1/lib/$TYPE/
+        fi
+       	mkdir -p $1/lib/$TYPE
+		cp -v Dist/$TYPE/freeimage.a $1/lib/$TYPE/freeimage.a
 
-  if [ "$TYPE" == "osx" ] ; then
-    # Standard *nix style copy.
-    # copy headers
+	elif [ "$TYPE" == "android" ] ; then
+        cp Source/FreeImage.h $1/include
+        if [ -d $1/lib/$TYPE/$ABI ]; then
+            rm -r $1/lib/$TYPE/$ABI
+        fi
+        mkdir -p $1/lib/$TYPE/$ABI
+        cp -rv Dist/$ABI/*.a $1/lib/$TYPE/$ABI/
+    elif [ "$TYPE" == "emscripten" ]; then
+        cp Source/FreeImage.h $1/include
+        if [ -d $1/lib/$TYPE/ ]; then
+            rm -r $1/lib/$TYPE/
+        fi
+        mkdir -p $1/lib/$TYPE
+        cp -rv Dist/libfreeimage.a $1/lib/$TYPE/
+	fi
 
-    LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
-
-    cp -R $LIB_FOLDER/include/ $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-
-    # copy lib
-    cp -R $LIB_FOLDER/lib/lib*.a $1/lib/$TYPE/
-    cp -R $LIB_FOLDER/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
-
-  elif [ "$TYPE" == "vs" ] ; then
-    if [ $ARCH == 32 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/x64"
-    fi
-    mkdir -p "$DEPLOY_PATH/Release"
-    mkdir -p "$DEPLOY_PATH/Debug"
-    # now make sure the target directories are clean.
-    rm -Rf "${DEPLOY_PATH}/Release/*"
-    rm -Rf "${DEPLOY_PATH}/Debug/*"
-    #copy the cv libs
-    cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-    #copy the zlib
-    cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-
-    cp -R include/opencv2 $1/include/
-    cp -R build_vs_${ARCH}/opencv2/* $1/include/opencv2/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-
-    #copy the ippicv includes and lib
-    IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win/icv
-    IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
-      IPPICV_PLATFORM="ia32"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      IPPICV_PLATFORM="intel64"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-    fi
-    mkdir -p ${IPPICV_DST}/include
-    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-    mkdir -p ${IPPICV_DEPLOY}
-    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
-
-  elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-    # Standard *nix style copy.
-    # copy headers
-
-    LIB_FOLDER="$BUILD_ROOT_DIR/$TYPE/FAT/opencv"
-
-    cp -Rv lib/include/ $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    mkdir -p $1/lib/$TYPE
-    cp -v lib/$TYPE/*.a $1/lib/$TYPE
-  elif [ "$TYPE" == "android" ]; then
-    if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
-      local BUILD_FOLDER="build_android_arm"
-    elif [ $ABI = arm64-v8a ]; then
-      local BUILD_FOLDER="build_android_arm64"
-    elif [ $ABI = x86 ]; then
-      local BUILD_FOLDER="build_android_x86"
-    fi
-
-    cp -r $BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-
-    mkdir -p $1/lib/$TYPE/$ABI/
-    cp -r $BUILD_FOLDER/install/sdk/native/staticlibs/$ABI/*.a $1/lib/$TYPE/$ABI/
-    cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/$ABI/
-
-  elif [ "$TYPE" == "emscripten" ]; then
-    cp -r build_emscripten/install/include/* $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
-  fi
-
-  # copy license file
-  rm -rf $1/license # remove any older files if exists
-  mkdir -p $1/license
-  cp -v LICENSE $1/license/
-
+    # copy license files
+    rm -rf $1/license # remove any older files if exists
+    mkdir -p $1/license
+    cp -v license-fi.txt $1/license/
+    cp -v license-gplv2.txt $1/license/
+    cp -v license-gplv3.txt $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-  if [ "$TYPE" == "osx" ] ; then
-    make clean;
-  elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-    make clean;
-  fi
+
+	if [ "$TYPE" == "android" ] ; then
+		make clean
+		rm -rf Dist
+		rm -f *.a
+		rm -f builddir/$TYPE
+		rm -f builddir
+		rm -f lib
+	elif [ "$TYPE" == "emscripten" ] ; then
+	    make clean
+	    rm -rf Dist
+		rm -f *.a
+		rm -f builddir/$TYPE
+		rm -f builddir
+		rm -f lib
+	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+		# clean up compiled libraries
+		make clean
+		rm -rf Dist
+		rm -f *.a *.lib
+		rm -f builddir/$TYPE
+		rm -f builddir
+		rm -f lib
+	else
+		make clean
+		# run dedicated clean script
+		clean.sh
+	fi
 }
