@@ -268,7 +268,7 @@ EOF
 	    echo "Finished Build for $TYPE"
 	elif [ "$TYPE" == "emscripten" ]; then
 	    cp $FORMULA_DIR/project-config-emscripten.jam project-config.jam
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=single variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=multi threadapi=pthread variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
 
