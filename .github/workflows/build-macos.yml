@@ -34,7 +34,7 @@ jobs:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
