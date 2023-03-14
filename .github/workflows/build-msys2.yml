@@ -7,11 +7,13 @@ on:
   pull_request:
     paths-ignore:
     - '**/*.md'
-    
-jobs:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
   build-msys2:
-    
     strategy:
       matrix:
         flavor:
