@@ -8,8 +8,8 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
-VERSION=1.66.0
-UNCOMPRESSED_NAME=boost_1_66_0
+VERSION=1.81.0
+UNCOMPRESSED_NAME=boost-${VERSION}
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
@@ -18,8 +18,8 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
-URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
-
+#URL=https://boostorg.jfrog.io/artifactory/main/release/${VERSION}/source/${TARBALL}
+URL=https://github.com/boostorg/boost/releases/download/boost-${VERSION}/${TARBALL}
 # download the source code and unpack it into LIB_NAME
 function download() {
 	wget -nv ${URL}
@@ -308,8 +308,9 @@ function copy() {
 	elif [ "$TYPE" == "osx" ]; then
 		dist/bin/bcp filesystem install_dir
 		rsync -ar install_dir/boost/* $1/include/boost/
-		cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
-		cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
+		cp stage/lib/*.a $1/lib/$TYPE/
+		# cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
+		# cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
 	elif  [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		bcp filesystem install_dir
 		OUTPUT_DIR_LIB=`pwd`/lib/boost/ios/
