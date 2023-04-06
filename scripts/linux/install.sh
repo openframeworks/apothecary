@@ -105,8 +105,11 @@ elif [ "$OPT" == "gcc6" ]; then
     
     #sudo add-apt-repository -y ppa:dns/gnu
     
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+    sudo apt-get update
+
     sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted"
-    sudo apt-get update -o Acquire::Retries=3 -q
+    sudo apt-get update
     
     sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
     sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
