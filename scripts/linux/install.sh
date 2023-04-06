@@ -108,9 +108,6 @@ elif [ "$OPT" == "gcc6" ]; then
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt-get update -o Acquire::Retries=3 -q
     
-    sudo update-alternatives --remove-all gcc
-    sudo update-alternatives --remove-all g++
-
     sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
     sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
     
