@@ -84,26 +84,6 @@ elif [ "$OPT" == "gcc5" ]; then
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
     g++ -v
 elif [ "$OPT" == "gcc6" ]; then
-    #sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    # sudo apt-get update -q
-    # sudo apt-get install gdebi
-    # wget http://ci.openframeworks.cc/gcc5/gcc6debs.tar.bz2
-    # tar xjf gcc6debs.tar.bz2
-    # rm gcc6debs.tar.bz2
-	# sudo cp *.deb /var/cache/apt/archives/
-    # sudo gdebi -n gcc-6-base_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n cpp-6_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n g++-6_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n libstdc++-6-pic_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n libstdc++-6-dev_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n gcc-6_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n gcc-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
-    # sudo gdebi -n g++-6-multilib_6.2.0-3ubuntu11~14.04_amd64.deb
-    # rm *.deb
-	#echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
-        
-    
-    #sudo add-apt-repository -y ppa:dns/gnu
     
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
     sudo apt-get update
