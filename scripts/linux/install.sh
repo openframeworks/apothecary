@@ -105,10 +105,10 @@ elif [ "$OPT" == "gcc6" ]; then
     
     #sudo add-apt-repository -y ppa:dns/gnu
     
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
-    sudo apt-get update
+    #sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+    #sudo apt-get update
 
-    sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted"
+    sudo add-apt-repository -y "deb http://cz.archive.ubuntu.com/ubuntu bionic main universe"
     sudo apt-get update
     
     sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
@@ -120,7 +120,7 @@ elif [ "$OPT" == "gcc6" ]; then
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
     
-    sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu/ bionic main restricted"
+    sudo add-apt-repository -r "deb http://cz.archive.ubuntu.com/ubuntu bionic main universe"
 
     g++ -v
 else
