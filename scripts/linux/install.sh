@@ -105,8 +105,8 @@ elif [ "$OPT" == "gcc6" ]; then
     
     #sudo add-apt-repository -y ppa:dns/gnu
     
-    #sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
-    #sudo apt-get update
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+    sudo apt-get update
 
     sudo add-apt-repository -y "deb http://cz.archive.ubuntu.com/ubuntu bionic main universe"
     sudo apt-get update
