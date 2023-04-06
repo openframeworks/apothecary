@@ -1,0 +1,65 @@
+name: build-linux-arm
+
+on:
+  push:
+    paths-ignore:
+    - '**/README.md'
+  pull_request:
+    paths-ignore:
+    - '**/README.md'
+jobs:
+
+  build-linux-arm6:
+        runs-on: ubuntu-latest
+        env:
+         TARGET: "linuxarmv6l"
+         SYSROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/raspbian"
+         TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/rpi_toolchain"
+         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+        steps:
+        - uses: actions/checkout@v2
+        - name: Scripts Calc Formula
+          run: ./scripts/calculate_formulas.sh
+        - name: Scripts Install
+          run: ./scripts/$TARGET/install.sh
+        - name: build
+          run: ./scripts/build.sh
+          env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+        - name: Update Release
+          uses: johnwbyrd/update-release@v1.0.0
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            tag: nightly
+            release: nightly
+            prerelease: false
+            files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
+          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+#  build-linux-arm7:
+#        runs-on: ubuntu-latest
+#        environment: CI
+#        env:
+#         TARGET: "linuxarmv7l"
+#         SYSROOT: "/home/runner/archlinux"
+#         TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
+#         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+#        steps:
+#        - uses: actions/checkout@v2
+#        - name: Scripts Calc Formula
+#          run: ./scripts/calculate_formulas.sh
+#        - name: Scripts Install
+#          run: ./scripts/$TARGET/install.sh
+#        - name: build
+#          run: ./scripts/build.sh
+#          env:
+#            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+#        - name: Update Release
+#          uses: johnwbyrd/update-release@v1.0.0
+#          with:
+#            token: ${{ secrets.GITHUB_TOKEN }}
+#            tag: nightly
+#            release: nightly
+#            prerelease: false
+#            files: out/openFrameworksLibs_master_linuxarmv7l.tar.bz2
+#          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
