@@ -15,7 +15,7 @@ jobs:
         matrix:
             cfg:
 #            - {target: osx, job: 1, cc: "clang", cxx: "clang++"}
-            - {target: osx, job: 2, cc: "clang", cxx: "clang++"}
+#            - {target: osx, job: 2, cc: "clang", cxx: "clang++"}
 #            - {target: osx, job: 3, cc: "clang", cxx: "clang++"}
 #            - {target: osx, job: 4, cc: "clang", cxx: "clang++"}
 #            - {target: ios, job: 1}

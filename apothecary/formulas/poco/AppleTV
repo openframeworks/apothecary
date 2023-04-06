@@ -71,7 +71,7 @@ CFLAGS64        =
 CXXFLAGS        = $(OSFLAGS) -std=c++14 -stdlib=libc++ -Wall -Wno-sign-compare 
 CXXFLAGS32      =
 CXXFLAGS64      = 
-LINKFLAGS       = $(OSFLAGS) -stdlib=libc++
+LINKFLAGS       = $(OSFLAGS) -std=c++14 -stdlib=libc++
 LINKFLAGS32     =
 LINKFLAGS64     =
 STATICOPT_CC    =
