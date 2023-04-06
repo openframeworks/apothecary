@@ -103,16 +103,25 @@ elif [ "$OPT" == "gcc6" ]; then
 	#echo deb http://ci.openframeworks.cc/gcc_repo trusty main | sudo tee /etc/apt/sources.list.d/of_gcc_repo.list
         
     
-    sudo add-apt-repository -y ppa:dns/gnu
-
+    #sudo add-apt-repository -y ppa:dns/gnu
+    
+    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
     sudo apt-get update -o Acquire::Retries=3 -q
-    sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
+    
+    sudo update-alternatives --remove-all gcc
+    sudo update-alternatives --remove-all g++
 
+    sudo apt-get install -y --allow-unauthenticated gcc-6 g++-6
     sudo apt-get install -y gperf coreutils libxrandr-dev libxinerama-dev libx11-dev libxcursor-dev libxi-dev
-    sudo apt-get remove -y --purge g++-4.8
+    
+    #sudo apt-get remove -y --purge g++-4.8
+
     sudo apt-get autoremove
     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+    
+    sudo add-apt-repository -r ppa:ubuntu-toolchain-r/test
+
     g++ -v
 else
 	echo "GCC version not specified on OPT env var, set one of gcc4, gcc5 or gcc6"
