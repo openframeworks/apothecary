@@ -284,7 +284,7 @@ function build() {
             then
                 if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
-                    BUILD_POCO_CONFIG="AppleTVSimulator"
+                    #BUILD_POCO_CONFIG="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneSimulator"
                     BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_SIMULATOR
@@ -292,7 +292,7 @@ function build() {
             else
                 if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
-                    BUILD_POCO_CONFIG="AppleTV"
+                    #BUILD_POCO_CONFIG="AppleTV"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneOS"
                     BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_IPHONE
