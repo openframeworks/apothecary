@@ -314,7 +314,7 @@ function build() {
             BITCODE=""
             NOFORK=""
             if [[ "$TYPE" == "tvos" ]]; then
-                BITCODE=-fembed-bitcode;
+                #BITCODE=-fembed-bitcode;
                 MIN_IOS_VERSION=9.0
                 NOFORK="-DPOCO_NO_FORK_EXEC"
             fi
