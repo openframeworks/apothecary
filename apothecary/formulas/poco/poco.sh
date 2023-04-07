@@ -244,8 +244,8 @@ function build() {
         echo "Note: For Poco, make sure to call it with lowercase poco name: ./apothecary -t ios update poco"
         echo "----------"
 
-        local BUILD_POCO_CONFIG_IPHONE=iPhone-clang-libc++
-        local BUILD_POCO_CONFIG_SIMULATOR=iPhoneSimulator-clang-libc++
+#        local BUILD_POCO_CONFIG_IPHONE=iPhone-clang-libc++
+#        local BUILD_POCO_CONFIG_SIMULATOR=iPhoneSimulator-clang-libc++
 
         # Locate the path of the openssl libs distributed with openFrameworks.
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
@@ -284,18 +284,18 @@ function build() {
             then
                 if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVSimulator"
-                    #BUILD_POCO_CONFIG="AppleTVSimulator"
+#                    BUILD_POCO_CONFIG="AppleTVSimulator"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneSimulator"
-                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_SIMULATOR
+#                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_SIMULATOR
                 fi
             else
                 if [ "${TYPE}" == "tvos" ]; then
                     PLATFORM="AppleTVOS"
-                    #BUILD_POCO_CONFIG="AppleTV"
+#                    BUILD_POCO_CONFIG="AppleTV"
                 elif [ "$TYPE" == "ios" ]; then
                     PLATFORM="iPhoneOS"
-                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_IPHONE
+#                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_IPHONE
                 fi
             fi
 
@@ -337,7 +337,7 @@ function build() {
             echo "--------------------"
       
             echo "Configuring for ${IOS_ARCH} ..."
-            ./configure $BUILD_OPTS --config=$BUILD_POCO_CONFIG
+            ./configure $BUILD_OPTS #--config=$BUILD_POCO_CONFIG
 
             echo "--------------------"
             echo "Running make for ${IOS_ARCH}"
