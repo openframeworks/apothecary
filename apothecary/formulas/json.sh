@@ -8,7 +8,7 @@
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=3.6.1
+VER=3.11.2
 
 # tools for git use
 GIT_URL=
