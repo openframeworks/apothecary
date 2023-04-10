@@ -75,11 +75,18 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
-        FORMULAS=(
-            "openssl"
-            "poco"
-            "curl"
-        )
+        if [ "$TARGET" == "tvos" ]; then
+            FORMULAS=(
+                "openssl"
+                "curl"
+            )
+        else
+            FORMULAS=(
+                "openssl"
+                "poco"
+                "curl"
+            )
+        fi
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
             "assimp"
