@@ -928,8 +928,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
+      -DCMAKE_C_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
+      -DCMAKE_CXX_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \

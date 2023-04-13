@@ -386,7 +386,7 @@ function build() {
     	cp -v $FORMULA_DIR/CMakeLists.txt .
     	mkdir -p build
     	cd build
-    	emcmake cmake .. -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
+    	emcmake cmake .. -DCMAKE_CXX_FLAGS="-DNDEBUG -pthread" -DCMAKE_C_FLAGS="-DNDEBUG -pthread"
     	emmake make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p build
