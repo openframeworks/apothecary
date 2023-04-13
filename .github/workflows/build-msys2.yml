@@ -35,22 +35,18 @@ jobs:
             base-devel
             unzip
             dos2unix
-            gperf
             git
-            libxml2
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-cmake
-            python3
-            python3
           pacboy: >-
             gcc:p
             cmake:p
+            gperf:p
+            libxml2:p
+            python3:p
       - name: Clone repository
         uses: actions/checkout@v2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: 
-          scripts/build.sh
+        run: scripts/build.sh
         env:
           TARGET: "msys2"
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}

@@ -144,6 +144,8 @@ function build() {
                 #vs-build "Assimp.sln" build "Release|ARM64"
             fi
 
+            vs-build "Assimp.sln" build "Release|x64"
+            vs-build "Assimp.sln" build "Debug|x64"
         fi
         cd ..
         #cleanup to not fail if the other platform is called
@@ -318,7 +320,8 @@ function copy() {
         elif [ $ARCH == 64 ] ; then
             mkdir -p $1/lib/$TYPE/x64
             # copy .lib and .dll artifacts
-            cp -v build_vs_64/lib/Release/*.lib $1/lib/$TYPE/x64
+            cp -vr build_vs_64/lib/Release $1/lib/$TYPE/x64
+            cp -vr build_vs_64/lib/Debug $1/lib/$TYPE/x64
             # copy header files
             cp -v -r build_vs_64/include/* $1/include
         fi
