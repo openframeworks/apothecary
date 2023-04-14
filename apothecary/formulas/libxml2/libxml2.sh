@@ -10,8 +10,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "a
 
 
 # define the version by sha
-URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
 VER=2.10.4
+URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
