@@ -37,15 +37,15 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" != "vs" ] ; then
-		#if [ ! -f configure ] ; then
-			# ./autogen.sh
-		#fi
-	else
-		# CURRENTPATH=`pwd`
-		# export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
-		# cp -vr $FORMULA_DIR/_depends/pixman/ ./${CURRENTPATH_DIR}/
-	fi
+	# if [ "$TYPE" != "vs" ] ; then
+	# 	#if [ ! -f configure ] ; then
+	# 		# ./autogen.sh
+	# 	#fi
+	# else
+	# 	# CURRENTPATH=`pwd`
+	# 	# export CURRENTPATH_DIR=$(realpath ${CURRENTPATH})
+	# 	# cp -vr $FORMULA_DIR/_depends/pixman/ ./${CURRENTPATH_DIR}/
+	# fi
 }
 
 # executed inside the lib src dir
