@@ -7,10 +7,10 @@
 # uses CMake
 
 # define the version
-VER=5.2.5
+VER=5.2.7
 
 # tools for git use
-GIT_URL=https://github.com/assimp/assimp
+GIT_URL=https://github.com/danoli3/assimp
 GIT_TAG=
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
