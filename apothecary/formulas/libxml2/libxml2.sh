@@ -10,8 +10,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "a
 
 
 # define the version by sha
-VER=2.9.14
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
+VER=2.10.4
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -33,7 +33,6 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
-
     if [ "$TYPE" == "vs" ]; then
         cp -fr $FORMULA_DIR/vs2015/*.h include/libxml/
         cp -r $FORMULA_DIR/vs2015/* win32/VC10/
@@ -42,7 +41,6 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-     
     if [ "$TYPE" == "vs" ] ; then
 
         if [ $ARCH == 32 ] ; then
@@ -179,88 +177,22 @@ function build() {
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
-
-        CURRENTPATH=`pwd`
-
-        export CFLAGS="-I${CURRENTPATH}/include"
-        export LDFLAGS=""
-
-        export TOOLS="../../../scripts/${TYPE}/rpi_toolchain"
-        export TOOLS_PATH=$(realpath ${TOOLS})
-       
-
-        export PATH="$${TOOLS}/bin/:$PATH"
-
-        echo "int main(){ return 0; }" > xmllint.c
-        echo "int main(){ return 0; }" > xmlcatalog.c
-        echo "int main(){ return 0; }" > testSchemas.c
-        echo "int main(){ return 0; }" > testRelax.c
-        echo "int main(){ return 0; }" > testSAX.c
-        echo "int main(){ return 0; }" > testHTML.c
-        echo "int main(){ return 0; }" > testXPath.c
-        echo "int main(){ return 0; }" > testURI.c
-        echo "int main(){ return 0; }" > testThreads.c
-        echo "int main(){ return 0; }" > testC14N.c
-
-        mkdir -p build_$TYPE
-        cd build_$TYPE
-
-        
-
-        cmake  .. \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_SYSTEM_NAME="Linux" \
-            -DCMAKE_SYSTEM_PROCESSOR="arm" \
-            -DCMAKE_SYSROOT="/home/devel/rasp-pi-rootfs" \
-            -DCMAKE_STAGING_PREFIX="/home/devel/stage" \
-            -DCMAKE_C_COMPILER="${TOOLS_PATH}/bin/arm-linux-gnueabihf-gcc" \
-            -DCMAKE_CXX_COMPILER="${TOOLS_PATH}/bin/arm-linux-gnueabihf-g++" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_CXX_EXTENSIONS=ON \
-            -DLIBXML2_WITH_UNICODE=OFF \
-            -DLIBXML2_WITH_LZMA=OFF \
-            -DLIBXML2_WITH_ZLIB=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DLIBXML2_WITH_FTP=OFF \
-            -DLIBXML2_WITH_HTTP=OFF \
-            -DLIBXML2_WITH_HTML=OFF \
-            -DLIBXML2_WITH_ICONV=OFF \
-            -DLIBXML2_WITH_LEGACY=OFF \
-            -DLIBXML2_WITH_MODULES=OFF \
-            -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML_ICU_ENABLED=ON \
-            -DLIBXML2_WITH_OUTPUT=ON \
-            -DLIBXML2_WITH_PYTHON=OFF \
-            -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=ON \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -DLIBXML2_WITH_PROGRAMS=OFF \
-            -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_DOCB=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF \
-            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -G 'Unix Makefiles' 
-
-            make -j${PARALLEL_MAKE} VERBOSE=1
-
-        cd ..
-
-        # ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
-        # make clean
-       
-        # make -j${PARALLEL_MAKE}
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
+        make clean
+        #echo "int main(){ return 0; }" > xmllint.c
+        #echo "int main(){ return 0; }" > xmlcatalog.c
+        #echo "int main(){ return 0; }" > testSchemas.c
+        #echo "int main(){ return 0; }" > testRelax.c
+        #echo "int main(){ return 0; }" > testSAX.c
+        #echo "int main(){ return 0; }" > testHTML.c
+        #echo "int main(){ return 0; }" > testXPath.c
+        #echo "int main(){ return 0; }" > testURI.c
+        #echo "int main(){ return 0; }" > testThreads.c
+        #echo "int main(){ return 0; }" > testC14N.c
+        make -j${PARALLEL_MAKE}
 
 
     elif [ "$TYPE" == "osx" ]; then
-
-
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         find . -name "test*.c" | xargs rm
@@ -274,95 +206,33 @@ function build() {
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
-            PLATFORM=TVOSCOMBINED
-
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-            PLATFORM=OS64COMBINED
         fi
+        for IOS_ARCH in ${IOS_ARCHS}; do
+            echo
+            echo
+            echo "Compiling for $IOS_ARCH"
+            source ../../ios_configure.sh $TYPE $IOS_ARCH
+            local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
+            ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+            make clean
+            make -j${PARALLEL_MAKE}
+            make install
+        done
 
+        cp -r build/$TYPE/arm64/* build/$TYPE/
 
-        CURRENTPATH=`pwd`
-        # sed -i '' -e 's~#include <unicode/ucnv.h>~#undef LIBXML_ICU_ENABLED~' include/libxml/encoding.h
-
-        
-
-        mkdir -p build_${TYPE}
-        cd build_${TYPE}
-        mkdir -p install
-
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
-
-        
-
-
-        cmake .. \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_MIN_SDK_VER} \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DLIBXML2_WITH_UNICODE=OFF \
-            -DLIBXML2_WITH_LZMA=OFF \
-            -DLIBXML2_WITH_ZLIB=OFF \
-            -DLIBXML2_WITH_FTP=OFF \
-            -DLIBXML2_WITH_HTTP=OFF \
-            -DLIBXML2_WITH_HTML=OFF \
-            -DLIBXML2_WITH_ICONV=OFF \
-            -DLIBXML2_WITH_LEGACY=OFF \
-            -DLIBXML2_WITH_MODULES=OFF \
-            -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=ON \
-            -DLIBXML2_WITH_PYTHON=OFF \
-            -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=ON \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -DLIBXML2_WITH_PROGRAMS=OFF \
-            -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML_ICU_ENABLED=ON \
-            -DLIBXML2_WITH_DOCB=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$TYPE" \
-            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -G Xcode -DCMAKE_TOOLCHAIN_FILE=../../../ios.toolchain.cmake -DPLATFORM=${PLATFORM} -DSDK_VERSION=$IOS_MIN_SDK_VER
-            # make -j${PARALLEL_MAKE} VERBOSE=1
-            cmake --build . --config Release
-            # cmake --install . --config Release
-
-        cd ..
-
-        # for IOS_ARCH in ${IOS_ARCHS}; do
-        #     echo
-        #     echo
-        #     echo "Compiling for $IOS_ARCH"
-        #     source ../../ios_configure.sh $TYPE $IOS_ARCH
-        #     local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
-        #     ./autogen.sh
-        #     ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        #     make clean
-        #     make -j${PARALLEL_MAKE}
-        #     make install
-        # done
-
-        # cp -r build/$TYPE/arm64/* build/$TYPE/
-
-        # if [ "$TYPE" == "ios" ]; then
-        #     lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-        #                  build/$TYPE/armv7/lib/libxml2.a \
-        #                  build/$TYPE/arm64/lib/libxml2.a \
-        #                 -output build/$TYPE/lib/libxml2.a
-        # elif [ "$TYPE" == "tvos" ]; then
-        #     lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-        #                  build/$TYPE/arm64/lib/libxml2.a \
-        #                 -output build/$TYPE/lib/libxml2.a
-        # fi
+        if [ "$TYPE" == "ios" ]; then
+            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
+                         build/$TYPE/armv7/lib/libxml2.a \
+                         build/$TYPE/arm64/lib/libxml2.a \
+                        -output build/$TYPE/lib/libxml2.a
+        elif [ "$TYPE" == "tvos" ]; then
+            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
+                         build/$TYPE/arm64/lib/libxml2.a \
+                        -output build/$TYPE/lib/libxml2.a
+        fi
     fi
 }
 
@@ -376,7 +246,6 @@ function copy() {
     cp -Rv include/libxml/* $1/include/libxml/
 
     if [ "$TYPE" == "vs" ] ; then
-
         if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
@@ -386,7 +255,6 @@ function copy() {
         elif [ $ARCH == "ARM" ] ; then
             PLATFORM="ARM"
         fi
-
         
         cp -Rv build_${ABI}_configure/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
 
