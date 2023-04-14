@@ -18,10 +18,10 @@ FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	mkdir -p pixman
+	
 	wget -nv --no-check-certificate ${URL}/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
-	mv pixman-$VER pixman
+	mv "pixman-$VER" pixman
 
 	local CHECKSHA=$(shasum pixman-$VER.tar.gz | awk '{print $1}')
 	if [ "$CHECKSHA" != "$SHA1" ] ; then
