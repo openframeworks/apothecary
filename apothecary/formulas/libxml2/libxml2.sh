@@ -8,6 +8,8 @@
 
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "android" "emscripten")
 
+FORMULA_DEPENDS=( "automake")
+
 
 # define the version by sha
 VER=2.10.4
