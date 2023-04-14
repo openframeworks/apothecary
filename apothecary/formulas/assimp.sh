@@ -10,7 +10,7 @@
 VER=5.2.5
 
 # tools for git use
-GIT_URL=https://github.com/danoli3/assimp
+GIT_URL=https://github.com/assimp/assimp
 GIT_TAG=
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
@@ -20,7 +20,9 @@ function download() {
 
     echo "Downloading Assimp $VER"
     # stable release from GitHub
-    curl -LO "$GIT_URL/archive/v$VER.zip"
+    echo "From $GIT_URL/archive/refs/tags/v$VER.zip"
+    curl -LO "$GIT_URL/archive/refs/tags/v$VER.zip"
+
     unzip -oq "v$VER.zip"
     mv "assimp-$VER" assimp
     rm "v$VER.zip"
