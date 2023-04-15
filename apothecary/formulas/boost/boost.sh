@@ -84,8 +84,8 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	if [ "$TYPE" == "vs" ]; then
+		./b2 --debug-configuration
 		./b2 -j${PARALLEL_MAKE} threading=multi variant=release --build-dir=build --with-filesystem link=static address-model=$ARCH stage
-		./b2 -j${PARALLEL_MAKE} threading=multi variant=debug --build-dir=build --with-filesystem link=static address-model=$ARCH stage
 		mv stage stage_$ARCH
 
 		cd tools/bcp
