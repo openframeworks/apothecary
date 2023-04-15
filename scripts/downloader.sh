@@ -2,9 +2,14 @@
 
 printDownloaderHelp(){
 cat << EOF
-    Usage: download.sh [URL] [OPTIONS]
+    
+    Usage: 
+    ."$SCRIPT_DIR/downloader.sh"
+    downloader [URL] [OPTIONS]
 
-    Example: download.sh http://ci.openframeworks.cc/libs/file.zip -s
+    Example: downloader http://ci.openframeworks.cc/libs/file.zip -s
+
+    This script fixes downloads to use wget or curl depending if have package
 
     Options:
     -s, --silent                Silent download progress

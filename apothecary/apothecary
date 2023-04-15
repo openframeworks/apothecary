@@ -65,6 +65,8 @@ LIBS_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
+DOWNLOADER_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/downloader.sh")"
+
 ### Xcode/ios specific settings
 
 # xcode Developer root

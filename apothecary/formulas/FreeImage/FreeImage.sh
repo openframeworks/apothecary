@@ -25,16 +25,22 @@ GIT_TAG=3.17.0-header-changes
 # download the source code and unpack it into LIB_NAME
 function download() {
 
+	echo " $APOTHECARY_DIR"
+
+	
+	. "$DOWNLOADER_SCRIPT"
+	downloader --help
+
 	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
 		# For win32, we simply download the pre-compiled binaries.
-		wget -nv http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
+		downloader http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
 		unzip -qo FreeImage"$VER"Win32Win64.zip
 		rm FreeImage"$VER"Win32Win64.zip
 	elif [[ "$TYPE" == "android" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL_CPP17 FreeImage-$GIT_TAG_CPP17 - Version:$VER_CPP17"
 		echo $GIT_URL
-		wget -nv $GIT_URL_CPP17/archive/$GIT_TAG_CPP17.tar.gz -O FreeImage-$GIT_TAG_CPP17.tar.gz
+		downloader $GIT_URL_CPP17/archive/$GIT_TAG_CPP17.tar.gz -O FreeImage-$GIT_TAG_CPP17.tar.gz
 		tar -xzf FreeImage-$GIT_TAG_CPP17.tar.gz
 		mv FreeImage-$GIT_TAG_CPP17 FreeImage
 		rm FreeImage-$GIT_TAG_CPP17.tar.gz
@@ -42,7 +48,7 @@ function download() {
         # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
         echo "Downloading from $GIT_URL for OSX/iOS/tvOS/android/emscripten"
 		echo $GIT_URL
-		wget -nv $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		downloader $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
 		mv FreeImage-$GIT_TAG FreeImage
 		rm FreeImage-$GIT_TAG.tar.gz
