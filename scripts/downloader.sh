@@ -19,6 +19,8 @@ EOF
 
 downloader() { 
 
+    echo "Downloading... $1"
+
 	if [ -z "$1" ]
 	then printDownloaderHelp; fi
 
@@ -28,7 +30,7 @@ downloader() {
         fi
         if [[ "${SILENTARGS}" == "-s" ]]; then
 		if command -v curl 2>/dev/null; then 
-    			curl -LO --retry 20 -O -s $@; 
+    			curl -LO --retry 20 -O -sS $@; 
     		else 
         		wget -q $@ 2> /dev/null; fi;
 	else

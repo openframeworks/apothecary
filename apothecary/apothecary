@@ -350,9 +350,13 @@ shift $(expr $OPTIND - 1)
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 16"
-	    VS_VER=16
+	    VS_VER=16 #17 
+	    VS_VER_GEN="$VS_VER 2019" #2022
+	    #VS_VER=17 
+	    #VS_VER_GEN="$VS_VER 2022"
     else 
 	    echo "VS_VER is set to '$VS_VER'"
+	    VS_VER_GEN="$VS_VER 2019"
     fi
 
     VS_64_BIT_ENV='VC\vcvarsall'
@@ -381,6 +385,7 @@ if [ "$TYPE" = "vs" ]; then
     
     VS_YEAR=2019
     VS_BAT="vcvarsall.bat"
+
 
     if [ -z ${VS_BASE_PATH+x} ]; then
         if [ "${VS_VER}" = "15" ]; then
@@ -1059,11 +1064,7 @@ function vs-build() {
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
 		else
 			VSWHERE_EXE=`cmd.exe //c "echo %ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"`
-
 		fi
-
-		
-
 
 		echo "-- Found vswhere: ${VSWHERE_EXE}"
 		# vswhere allows us to query the install dir of the ms build tools

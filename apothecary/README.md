@@ -29,6 +29,7 @@ Windows Requires:
 VS Build Tools - https://visualstudio.microsoft.com/downloads/?q=build+tools
 CMake - https://cmake.org/download/
 Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io).
+Python via https://www.microsoft.com/store/productId/9NRWMJP3717K
 
 
 Quick Start

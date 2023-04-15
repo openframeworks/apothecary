@@ -11,16 +11,10 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 
 # define the version
 
-
-# tools for git use
-VER_CPP17=3180 # 3.16.0
-GIT_URL_CPP17=https://github.com/danoli3/FreeImage
-GIT_TAG_CPP17=3.18.0_cpp17 #$3.17.0-header-changes
-
- # 3.17.0
-VER=3170
+ # 3.18.0
+VER=3182
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.17.0-header-changes
+GIT_TAG=3.18.2
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -28,31 +22,17 @@ function download() {
 	echo " $APOTHECARY_DIR"
 
 	
-	. "$DOWNLOADER_SCRIPT"
-	downloader --help
+		. "$DOWNLOADER_SCRIPT"
 
-	if [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+	
+		URL="$GIT_URL/archive/refs/tags/$GIT_TAG.tar.gz"
 		# For win32, we simply download the pre-compiled binaries.
-		downloader http://downloads.sourceforge.net/freeimage/FreeImage"$VER"Win32Win64.zip
-		unzip -qo FreeImage"$VER"Win32Win64.zip
-		rm FreeImage"$VER"Win32Win64.zip
-	elif [[ "$TYPE" == "android" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL_CPP17 FreeImage-$GIT_TAG_CPP17 - Version:$VER_CPP17"
-		echo $GIT_URL
-		downloader $GIT_URL_CPP17/archive/$GIT_TAG_CPP17.tar.gz -O FreeImage-$GIT_TAG_CPP17.tar.gz
-		tar -xzf FreeImage-$GIT_TAG_CPP17.tar.gz
-		mv FreeImage-$GIT_TAG_CPP17 FreeImage
-		rm FreeImage-$GIT_TAG_CPP17.tar.gz
-	else
-        # Fixed issues for OSX / iOS for FreeImage compiling in git repo.
-        echo "Downloading from $GIT_URL for OSX/iOS/tvOS/android/emscripten"
-		echo $GIT_URL
-		downloader $GIT_URL/archive/$GIT_TAG.tar.gz -O FreeImage-$GIT_TAG.tar.gz
+		curl -sSL -o FreeImage-$GIT_TAG.tar.gz $URL
+
 		tar -xzf FreeImage-$GIT_TAG.tar.gz
 		mv FreeImage-$GIT_TAG FreeImage
 		rm FreeImage-$GIT_TAG.tar.gz
-	fi
+	
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -92,7 +72,8 @@ function prepare() {
 
         perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 
-
+	elif [ "$TYPE" == "vs" ]; then
+		echo "vs"
 	fi
 }
 
@@ -322,9 +303,62 @@ function build() {
       
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
+    elif [ "$TYPE" == "vs" ]; then
+        export CFLAGS="-pthread"
+		export CXXFLAGS="-pthread"
+
+		echo "building $TYPE | $ARCH | $VS_VER"
+        echo "--------------------"
+        local generatorName="Visual Studio "
+        generatorName+=$VS_VER
+
+        local buildOpts="
+            -DBUILD_SHARED_LIBS=OFF
+            -DLIBRARY_SUFFIX=${ARCH}"
+
+		mkdir -p build_vs$ARCH
+	    cd build_vs$ARCH
+
+        if [ $VS_VER == 15 ] ; then
+            if [ $ARCH == 32 ] ; then                
+                cmake .. -G "$generatorName"   $buildOpts
+                vs-build "FreeImage.sln" build "Release|Win32"
+            elif [ $ARCH == 64 ] ; then
+                generatorName+=' Win64'
+                cmake .. -G "$generatorName"  $buildOpts
+                vs-build "FreeImage.sln" build "Release|x64"
+            fi
+        else		
+			if [ $ARCH == 32 ] ; then	                
+	                generatorName+=''
+	                echo "generatorName $generatorName -A Win32 "
+	                cmake .. -G "$generatorName"  -A Win32 $buildOpts
+	                #cmake --build . --config release
+	                vs-build "FreeImage.sln" build "Release|Win32"
+	        elif [ $ARCH == 64 ] ; then	           
+	            generatorName+=''
+	            echo "generatorName $generatorName  -A x64"
+	            cmake .. -G "$generatorName" -A x64 $buildOpts
+	            #cmake --build . --config release
+	             vs-build "FreeImage.sln" build "Release|x64"
+	        elif [ $ARCH == "ARM" ] ; then	            
+	            generatorName+=' '
+	            echo "generatorName $generatorName -A ARM"
+	            cmake .. -G "$generatorName" -A ARM $buildOpts
+	            #cmake --build . --config release
+	            vs-build "FreeImage.sln" build "Release|ARM"
+	        elif [ $ARCH == "ARM64" ] ; then
+	            
+	            generatorName+=''
+	            echo "generatorName $generatorName -A ARM64"
+	            cmake .. -G "$generatorName" -A ARM64 $buildOpts
+	            #cmake --build . --config release
+	            vs-build "FreeImage.sln" build "Release|ARM64"
+	        fi
+        fi
     elif [ "$TYPE" == "emscripten" ]; then
         export CFLAGS="-pthread"
-	export CXXFLAGS="-pthread"
+		export CXXFLAGS="-pthread"
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
         rm -rf $BUILD_DIR/FreeImagePatched
         cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImagePatched
@@ -334,7 +368,7 @@ function build() {
         cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
         echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
         cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
-        echo "" > $BUILD_DIR/FreeImagePatched/Source/LibRawLite/src/swab.h
+        
         echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
         echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
         cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
@@ -365,7 +399,23 @@ function copy() {
 	    cp -v Dist/*.h $1/include
 		mkdir -p $1/lib/$TYPE
 		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
-	elif [ "$TYPE" == "vs" -o "$TYPE" == "msys2" ] ; then
+	elif [ "$TYPE" == "vs" ] ; then
+		mkdir -p $1/include #/Win32
+		#mkdir -p $1/include/x64
+		if [ $ARCH == 32 ] ; then
+			mkdir -p $1/lib/$TYPE/Win32
+			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
+			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+		elif [ $ARCH == 64 ] ; then
+			mkdir -p $1/lib/$TYPE/x64
+			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
+			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+		elif [ $ARCH == "ARM" ] ; then
+			mkdir -p $1/lib/$TYPE/ARM
+			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
+			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
+		fi
+	elif [ "$TYPE" == "msys2" ] ; then
 		mkdir -p $1/include #/Win32
 		#mkdir -p $1/include/x64
 	    cp -v Dist/x32/*.h $1/include #/Win32/
