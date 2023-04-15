@@ -32,7 +32,9 @@ URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv ${URL}
+
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${URL}
 	tar xzf ${TARBALL}
   
 	mv $UNCOMPRESSED_NAME boost

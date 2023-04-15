@@ -20,6 +20,7 @@ URL=https://download.savannah.gnu.org/releases/freetype
 # download the source code and unpack it into LIB_NAME
 function download() {
 	echo "Downloading freetype-$VER"
+	
 	wget --quiet --no-check-certificate $URL/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
