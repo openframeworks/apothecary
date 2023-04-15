@@ -14,9 +14,10 @@ FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l", "emscripten" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate ${GIT_URL}-$VER.tar.gz -O automake-$VER.tar.gz
+	pwd
+	wget -nv --no-check-certificate ${GIT_URL}-$VER.tar.gz
 	tar -xf automake-$VER.tar.gz
-	mv automake-$VER zlib
+	mv automake-$VER automake
 	rm automake-$VER.tar.gz
 }
 
@@ -27,7 +28,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	if [ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]; then
+	if [[ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]]; then
 
 		./configure --prefix=/usr --docdir=/usr/share/doc/automake-1.16.3
 		make
@@ -37,14 +38,14 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	if [ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]; then
+	if [[ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]]; then
 		echo "copy that"
 	fi
 }
 
 # executed inside the lib src dir
 function clean() {
-	if [ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]; then
+	if [[ "$TYPE" == "linuxarmv6l" || "$TYPE" == "emscripten" ]]; then
 		
 		make uninstall
 		make clean
