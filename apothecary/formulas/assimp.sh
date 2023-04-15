@@ -98,17 +98,19 @@ function build() {
         local generatorName="Visual Studio "
         generatorName+=$VS_VER
 
+       SOURCE_DIR=.
+
         if [ $VS_VER == 15 ] ; then
             if [ $ARCH == 32 ] ; then
                 mkdir -p build_vs_32
                 cd build_vs_32
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName"   $buildOpts
                 vs-build "Assimp.sln" build "Release|Win32"
             elif [ $ARCH == 64 ] ; then
                 mkdir -p build_vs_64
                 cd build_vs_64
                 generatorName+=' Win64'
-                cmake .. -G "$generatorName" $buildOpts
+                cmake .. -G "$generatorName"  $buildOpts
                 vs-build "Assimp.sln" build "Release|x64"
             fi
         else
@@ -116,38 +118,38 @@ function build() {
                 mkdir -p build_vs_32
                 cd build_vs_32
                 generatorName+=''
-                echo "generatorName $generatorName -A Win32"
-                cmake .. -G "$generatorName" -A Win32 $buildOpts
-                cmake --build . --config release
-                # vs-build "Assimp.sln" build "Release|Win32"
+                echo "generatorName $generatorName -A Win32 "
+                cmake .. -G "$generatorName"  -A Win32 $buildOpts
+                #cmake --build . --config release
+                 vs-build "Assimp.sln" build "Release|Win32"
             elif [ $ARCH == 64 ] ; then
                 mkdir -p build_vs_64
                 cd build_vs_64
                 generatorName+=''
                 echo "generatorName $generatorName  -A x64"
-                cmake .. -G "$generatorName"  -A x64 $buildOpts
-                cmake --build . --config release
-                # vs-build "Assimp.sln" build "Release|x64"
+                cmake .. -G "$generatorName" -A x64 $buildOpts
+                #cmake --build . --config release
+                 vs-build "Assimp.sln" build "Release|x64"
             elif [ $ARCH == "ARM" ] ; then
                 mkdir -p build_vs_arm
                 cd build_vs_arm
                 generatorName+=' '
                 echo "generatorName $generatorName -A ARM"
                 cmake .. -G "$generatorName" -A ARM $buildOpts
-                cmake --build . --config release
-                # vs-build "Assimp.sln" build "Release|ARM"
+                #cmake --build . --config release
+                vs-build "Assimp.sln" build "Release|ARM"
             elif [ $ARCH == "ARM64" ] ; then
                 mkdir -p build_vs_arm64
                 cd build_vs_arm64
                 generatorName+=''
                 echo "generatorName $generatorName -A ARM64"
                 cmake .. -G "$generatorName" -A ARM64 $buildOpts
-                cmake --build . --config release
-                #vs-build "Assimp.sln" build "Release|ARM64"
+                #cmake --build . --config release
+                vs-build "Assimp.sln" build "Release|ARM64"
             fi
 
-            vs-build "Assimp.sln" build "Release|x64"
-            vs-build "Assimp.sln" build "Debug|x64"
+            #vs-build "Assimp.sln" build "Release|x64"
+            #vs-build "Assimp.sln" build "Debug|x64"
         fi
         cd ..
         #cleanup to not fail if the other platform is called
