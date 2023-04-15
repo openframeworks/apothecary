@@ -18,8 +18,10 @@ FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	
-	wget -nv --no-check-certificate ${URL}/pixman-$VER.tar.gz
+
+	. "$DOWNLOADER_SCRIPT"
+
+	downloader ${URL}/pixman-$VER.tar.gz
 	tar -xzf pixman-$VER.tar.gz
 	mv "pixman-$VER" pixman
 

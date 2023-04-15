@@ -33,7 +33,10 @@ URL=https://www.cairographics.org/snapshots/
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate https://cairographics.org/snapshots/cairo-$VER.tar.xz
+
+	. "$DOWNLOADER_SCRIPT"
+
+	downloader https://cairographics.org/snapshots/cairo-$VER.tar.xz
 	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	if [ "$CHECKSHA" != "$SHA1" ] ; then
     	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
@@ -51,7 +54,7 @@ function prepare() {
 	# manually download dependencies
 
 	echo
-	echoInfo " Current PATH set to: $PATH"
+	#echoInfo " Current PATH set to: $PATH"
 	echo
 
 	apothecaryDependencies download

@@ -21,13 +21,15 @@ FORMULA_DEPENDS=( "zlib" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	. "$DOWNLOADER_SCRIPT"
+
 	if [ "$TYPE" == "vs" ] ; then
-		wget -nv --no-check-certificate ${WINDOWS_URL}?download -O lpng1637.zip
+		downloader ${WINDOWS_URL}?download -O lpng1637.zip
 		unzip lpng1637.zip
 		mv lpng1637 libpng
 		rm lpng1637.zip
 	else 
-		wget -nv --no-check-certificate ${URL}/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
+		downloader ${URL}/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
 		tar -xf libpng-$VER.tar.gz
 		mv libpng-$VER libpng
 		rm libpng-$VER.tar.gz

@@ -4,17 +4,20 @@
 # http://zlib.net/
 
 # define the version
-VER=1.2.12
+VER=1.2.13
 
 # tools for git use
-GIT_URL=https://github.com/madler/zlib/archive/refs/tags
+GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
+
 GIT_TAG=v$VER
 
 FORMULA_TYPES=( "vs" , "osx")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate ${GIT_URL}/v$VER.tar.gz -O zlib-$VER.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+
+	downloader ${GIT_URL}
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
 	rm zlib-$VER.tar.gz

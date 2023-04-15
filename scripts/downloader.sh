@@ -30,12 +30,12 @@ downloader() {
         fi
         if [[ "${SILENTARGS}" == "-s" ]]; then
 		if command -v curl 2>/dev/null; then 
-    			curl -LO --retry 20 -O -sS $@; 
+    			curl -OL --retry 20 -s -N $@; 
     		else 
         		wget -q $@ 2> /dev/null; fi;
 	else
 		if command -v curl 2>/dev/null; then 
-    			curl -LO --retry 20 -O --progress-bar $@; 
+    			curl -OL --retry 20 --progress-bar -N $@ || echo $?;
     		else 
         		wget $@ 2> /dev/null; fi;
 	fi
