@@ -5,7 +5,7 @@
 #
 # uses a own build system
 
-FORMULA_TYPES=( "osx" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" )
 
 # define the version
 VERSION=1.66.0
@@ -61,6 +61,8 @@ function prepare() {
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "emscripten" ]; then
 		./bootstrap.sh --with-libraries=filesystem
+	elif [ "$TYPE" == "emscripten" ]; then
+		./bootstrap.sh --with-libraries=filesystem
 	elif [[ "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
 		mkdir -p lib/
 		mkdir -p build/
@@ -84,8 +86,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	if [ "$TYPE" == "vs" ]; then
-		./b2 --debug-configuration
-		./b2 -j${PARALLEL_MAKE} threading=multi variant=release --build-dir=build --with-filesystem link=static address-model=$ARCH stage
+		./b2 --debug-configuration -j${PARALLEL_MAKE} cxxflags="-std=c++11 -stdlib=libc++ -Wno-implicit-function-declaration" threading=multi variant=release --build-dir=build --stage-dir=stage --with-filesystem link=static address-model=$ARCH stage
 		mv stage stage_$ARCH
 
 		cd tools/bcp
