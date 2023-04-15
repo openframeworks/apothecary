@@ -379,7 +379,7 @@ if [ "$TYPE" = "vs" ]; then
             CROSS_TOOL="arm"
         fi
 
-        echo "PLATFORM set to '$PLATFORM', ${PLATFORM}_${VS_VER}"
+        echo "PLATFORM set to '$PLATFORM', ${PLATFORM} VisualStudio ${VS_VER}"
     fi
 
     

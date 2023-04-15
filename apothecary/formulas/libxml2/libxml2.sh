@@ -18,14 +18,15 @@ URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    wget -v ${URL}
-    tar xzf v${VER}.tar.gz
+    . "$DOWNLOADER_SCRIPT"
+    downloader ${URL}
+    tar xzhf v${VER}.tar.gz
     mv libxml2-${VER} libxml2
     rm v${VER}.tar.gz
 
 
-    wget -v https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
-    tar xzf release-71-1.tar.gz
+    downloader https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
+    tar xzhf release-71-1.tar.gz
     mv icu-release-71-1 icu
     rm release-71-1.tar.gz
 }
@@ -36,15 +37,14 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
-    if [ "$TYPE" == "vs" ]; then
-        cp -fr $FORMULA_DIR/vs2015/*.h include/libxml/
-        cp -r $FORMULA_DIR/vs2015/* win32/VC10/
-    fi
 }
 
 # executed inside the lib src dir
 function build() {
     if [ "$TYPE" == "vs" ] ; then
+
+        #mkdir -p build_vs$ARCH
+        
 
         if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
@@ -261,7 +261,10 @@ function copy() {
             PLATFORM="ARM"
         fi
         
-        cp -Rv build_${ABI}_configure/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
+        
+        #cp -Rv build_${ABI}_configure/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
+
+        cp -v build_Win32/Release/libxml2s.lib $1/lib/$TYPE/$ABI/libxml2.lib
 
         # if [ $ARCH == 32 ] ; then
         #     mkdir -p $1/lib/$TYPE/Win32
