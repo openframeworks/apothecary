@@ -130,7 +130,7 @@ function build() {
                 cmake .. -G "$generatorName" -A x64 $buildOpts
                 #cmake --build . --config release
                  vs-build "Assimp.sln" build "Release|x64"
-            elif [ $ARCH == "ARM" ] ; then
+            elif [ $ARCH == "arm" ]; then
                 mkdir -p build_vs_arm
                 cd build_vs_arm
                 generatorName+=' '
@@ -138,7 +138,7 @@ function build() {
                 cmake .. -G "$generatorName" -A ARM $buildOpts
                 #cmake --build . --config release
                 vs-build "Assimp.sln" build "Release|ARM"
-            elif [ $ARCH == "ARM64" ] ; then
+            elif [ $ARCH == "arm64" ] ; then
                 mkdir -p build_vs_arm64
                 cd build_vs_arm64
                 generatorName+=''

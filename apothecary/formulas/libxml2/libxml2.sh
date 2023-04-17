@@ -50,9 +50,9 @@ function build() {
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
             PLATFORM="x64"
-        elif [ $ARCH == "ARM64" ] ; then
+        elif [ $ARCH == "arm64" ] ; then
             PLATFORM="ARM64"
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             PLATFORM="ARM"
             vs-build libxml2.vcxproj Build "Release|Win32"
         else
@@ -255,9 +255,9 @@ function copy() {
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
             PLATFORM="x64"
-        elif [ $ARCH == "ARM64" ] ; then
+        elif [ $ARCH == "arm64" ] ; then
             PLATFORM="ARM64"
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             PLATFORM="ARM"
         fi
         
@@ -272,10 +272,10 @@ function copy() {
         # elif [ $ARCH == 64 ] ; then
         #     mkdir -p $1/lib/$TYPE/x64
         #     cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
-        #  elif [ $ARCH == "ARM64" ] ; then
+        #  elif [ $ARCH == "arm64" ] ; then
         #     mkdir -p $1/lib/$TYPE/ARM64
         #     cp -v "win32/VC10/ARM64/Release/libxml2.lib" $1/lib/$TYPE/ARM64/
-        # elif [ $ARCH == "ARM" ] ; then
+        # elif [ $ARCH == "arm" ]; then
         #     mkdir -p $1/lib/$TYPE/ARM
         #     cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
         # fi

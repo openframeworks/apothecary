@@ -61,12 +61,12 @@ function build() {
 # 				cmake .. -G "Visual Studio $VS_VER" -A x64
         cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64
 				vs-build "GLFW.sln" Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				mkdir -p build_vs_arm
 				cd build_vs_arm
 				cmake .. -G "Visual Studio $VS_VER" -A ARM
 				vs-build "GLFW.sln" Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				mkdir -p build_vs_arm64
 				cd build_vs_arm64
 				cmake .. -G "Visual Studio $VS_VER" -A ARM64
@@ -126,10 +126,10 @@ function copy() {
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
-		elif [ $ARCH == "ARM64" ] ; then
+		elif [ $ARCH == "arm64" ] ; then
 			mkdir -p $1/lib/$TYPE/ARM64
 			cp -v build_vs_arm64/src/Release/glfw3.lib $1/lib/$TYPE/ARM64/glfw3.lib
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v build_vs_arm/src/Release/glfw3.lib $1/lib/$TYPE/ARM/glfw3.lib
 		fi

@@ -123,7 +123,7 @@ function build() {
 		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
 		# elif [ $ARCH == 64 ] ; then
 		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
-		# elif [ $ARCH == "ARM" ] ; then
+		# elif [ $ARCH == "arm" ]; then
 		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
 		# fi
 		# with_vs_env "nmake"
@@ -133,7 +133,7 @@ function build() {
 			CROSS_TARGET=mingw
 		elif [ $ARCH == 64 ] ; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
 		fi
 

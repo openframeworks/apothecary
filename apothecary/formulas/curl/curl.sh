@@ -81,7 +81,7 @@ function build() {
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
         elif [ $ARCH == 64 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|ARM"
 
         fi
@@ -325,7 +325,7 @@ function copy() {
         elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib    
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/ARM/libcurl.lib
 		fi

@@ -100,8 +100,8 @@ function build() {
 		unset TMP
 		unset TEMP
 
-		mkdir build
-		cd build
+		mkdir -p build_$ARCH
+		cd build_$ARCH
 
 		ROOT=${PWD}/..
 		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
@@ -117,10 +117,10 @@ function build() {
 			elif [ $ARCH == 64 ] ; then
 				cmake .. -G "Visual Studio $VS_VER Win64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				cmake .. -G "Visual Studio $VS_VER ARM" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				cmake .. -G "Visual Studio $VS_VER ARM64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
 			fi
@@ -129,15 +129,16 @@ function build() {
 				export ZLIB_ROOT=../cairo/lib/vs/x32/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
+
 			elif [ $ARCH == 64 ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/x64/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				export ZLIB_ROOT=../cairo/lib/vs/arm/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				export ZLIB_ROOT=../cairo/lib/vs/arm64/zlib.lib
 				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
 				cmake --build . --config Release
@@ -169,13 +170,16 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		if [ "$ARCH" == 32 ]; then
 			mkdir -p $1/../cairo/lib/vs/Win32/
-			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib $1/../cairo/lib/vs/Win32/
+			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/Win32/libpng.lib
 		elif [ "$ARCH" == 64 ]; then
 			mkdir -p $1/../cairo/lib/vs/x64/
-			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/x64/
-		elif [ "$ARCH" == "ARM64" ]; then
+			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/x64/libpng.lib
+		elif [ "$ARCH" == "arm64" ]; then
 			mkdir -p $1/../cairo/lib/vs/ARM64/
-			cp ../libpng/projects/vs2015/ARM64/LIB\ Release/libpng.lib $1/../cairo/lib/vs/ARM64/
+			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/ARM64/libpng.lib
+		elif [ "$ARCH" == "arm" ] ; then
+			mkdir -p $1/../cairo/lib/vs/ARM/
+			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/ARM/libpng.lib
 		fi
 	else
 		mkdir -p $1/include

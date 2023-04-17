@@ -40,7 +40,7 @@ function build() {
 			elif [ $ARCH == 64 ] ; then
 				cmake . -G "Visual Studio $VS_VER Win64"
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				cmake . -G "Visual Studio $VS_VER ARM"
 				cmake --build . --config Release 
 			fi
@@ -51,10 +51,10 @@ function build() {
 			elif [ $ARCH == 64 ] ; then
 				cmake . -G "Visual Studio $VS_VER" -A x64
 				cmake --build . --config Release
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				cmake . -G "Visual Studio $VS_VER" -A ARM
 				cmake --build . --config Release 
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				cmake . -G "Visual Studio $VS_VER" -A ARM64
 				cmake --build . --config Release 
 			fi
@@ -89,9 +89,9 @@ function copy() {
 			PLATFORM="Win32"
 		elif [ $ARCH == 64 ] ; then
 			PLATFORM="x64"
-		elif [ $ARCH == "ARM64" ] ; then
+		elif [ $ARCH == "arm64" ] ; then
 			PLATFORM="ARM64"
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			PLATFORM="ARM"
 		fi
 		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/

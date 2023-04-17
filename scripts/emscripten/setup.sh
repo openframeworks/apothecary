@@ -7,7 +7,16 @@ if [ -z "${EMSDK+x}" ]; then
 	then
 		echo "Emscripten EMSCRIPTEN_PATH not yet set in environment variables"
 		# Set the EMSCRIPTEN_PATH environment variable to the path where the emscripten SDK is installed  
-		export EMSCRIPTEN_PATH=I:/Repositories/emscripten/emsdk
+		
+		if [ -z "${WSL_DISTRO_NAME+x}" ]
+		then
+			DRIVE=/i/
+		else
+			echo "WSL Distro being used: $WSL_DISTRO_NAME"
+			DRIVE=/mnt/i/
+		fi
+
+		export EMSCRIPTEN_PATH="${DRIVE}Repositories/emscripten/emsdk"
 		echo "Emscripten EMSCRIPTEN_PATH set to $EMSCRIPTEN_PATH" 
 	fi
 	  # Check if the emscripten SDK directory exists

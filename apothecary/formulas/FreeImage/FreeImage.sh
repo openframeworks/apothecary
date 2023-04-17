@@ -333,54 +333,65 @@ function build() {
 	                generatorName+=''
 	                echo "generatorName $generatorName -A Win32 "
 	                cmake .. -G "$generatorName"  -A Win32 $buildOpts
-	                #cmake --build . --config release
-	                vs-build "FreeImage.sln" build "Release|Win32"
+	                cmake --build . --config release
+	                #vs-build "FreeImage.sln" build "Release|Win32"
 	        elif [ $ARCH == 64 ] ; then	           
 	            generatorName+=''
 	            echo "generatorName $generatorName  -A x64"
 	            cmake .. -G "$generatorName" -A x64 $buildOpts
-	            #cmake --build . --config release
-	             vs-build "FreeImage.sln" build "Release|x64"
-	        elif [ $ARCH == "ARM" ] ; then	            
+	            cmake --build . --config release
+	            #vs-build "FreeImage.sln" build "Release|x64"
+	        elif [ $ARCH == "arm" ]; then	            
 	            generatorName+=' '
 	            echo "generatorName $generatorName -A ARM"
 	            cmake .. -G "$generatorName" -A ARM $buildOpts
-	            #cmake --build . --config release
-	            vs-build "FreeImage.sln" build "Release|ARM"
-	        elif [ $ARCH == "ARM64" ] ; then
-	            
+	            cmake --build . --config release
+	            #vs-build "FreeImage.sln" build "Release|ARM"
+	        elif [ $ARCH == "arm64" ] ; then	            
 	            generatorName+=''
 	            echo "generatorName $generatorName -A ARM64"
 	            cmake .. -G "$generatorName" -A ARM64 $buildOpts
-	            #cmake --build . --config release
-	            vs-build "FreeImage.sln" build "Release|ARM64"
+	            cmake --verbose --build . --config release 
+	            #vs-build "FreeImage.sln" build "Release|ARM64"
 	        fi
         fi
+        cd ..
     elif [ "$TYPE" == "emscripten" ]; then
         export CFLAGS="-pthread"
 		export CXXFLAGS="-pthread"
-        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
-        rm -rf $BUILD_DIR/FreeImagePatched
-        cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImagePatched
-        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
-        cat $BUILD_DIR/FreeImage/Source/ZLib/gzlib.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
-        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
-        cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
-        echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
-        cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
+		export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+		echo "$CMAKE_TOOLCHAIN_FILE"
+
+
+		mkdir -p build_$TYPE
+	    cd build_$TYPE
+
+	    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+	    emmake make -j${PARALLEL_MAKE}
+
+        # local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
+        # rm -rf $BUILD_DIR/FreeImagePatched
+        # cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImagePatched
+        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
+        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzlib.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
+        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
+        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
+        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
+        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
         
-        echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        echo "#include <wchar.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
-        cat $BUILD_DIR/FreeImage/Source/LibJXR/jxrgluelib/JXRGlueJxr.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
-        sed -i "s/CXXFLAGS ?=/CXXFLAGS ?= -std=c++11/g" "$BUILD_DIR/FreeImagePatched/Makefile.gnu"
-        cd $BUILD_DIR/FreeImagePatched
-        emmake make clean -f Makefile.gnu
-        emmake make -j${PARALLEL_MAKE} -f Makefile.gnu libfreeimage.a
-        mkdir -p $BUILD_DIR/FreeImage/Dist/
-        mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/
-        cd $BUILD_DIR/FreeImage
+        # echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        # echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        # cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
+        # echo "#include <wchar.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+        # cat $BUILD_DIR/FreeImage/Source/LibJXR/jxrgluelib/JXRGlueJxr.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
+        # sed -i "s/CXXFLAGS ?=/CXXFLAGS ?= -std=c++17/g" "$BUILD_DIR/FreeImagePatched/Makefile.gnu"
+        # cd $BUILD_DIR/FreeImagePatched
+        # which emmake
+        #   #emmake make clean -f Makefile.gnu
+        # emmake Makefile.gnu libfreeimage.a
+        # mkdir -p $BUILD_DIR/FreeImage/Dist/
+        # mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/
+        # cd $BUILD_DIR/FreeImage
         #rm -rf $BUILD_DIR/FreeImagePatched
 	fi
 }
@@ -410,7 +421,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
 			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
 			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
@@ -428,7 +439,7 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
 			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
 			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll

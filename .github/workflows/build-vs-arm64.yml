@@ -11,7 +11,7 @@ on:
 jobs:
 
   build-vs2019:
-    runs-on: windows-2019
+    runs-on: windows-2022
     strategy:
       matrix:
         bundle: [1,2,3,4]
@@ -30,8 +30,13 @@ jobs:
             gperf
             git
             python3
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-clang
             mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-gcc-libs
             mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gdb
+            mingw-w64-x86_64-make
       - name: Clone repository
         uses: actions/checkout@v2
       #- name: Install StrawberryPerl
@@ -44,6 +49,6 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
-          ARCH: ARM64
+          ARCH: arm64
           VS_VER: 16
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}

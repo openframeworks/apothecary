@@ -151,7 +151,7 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "scripts/vs2022/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2022/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				mkdir -p $1/lib/$TYPE/ARM
 				# TODO
 			fi
@@ -164,7 +164,7 @@ function copy() {
 				mkdir -p $1/lib/$TYPE/x64
 				cp -v "scripts/vs2019/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
 				cp -v "scripts/vs2019/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				mkdir -p $1/lib/$TYPE/ARM
 				# TODO
 			fi

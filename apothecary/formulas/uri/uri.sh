@@ -64,11 +64,11 @@ function build() {
                 cmake .. -G "Visual Studio $VS_VER" -A x64  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|x64"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|x64"
-            elif [ $ARCH == "ARM" ] ; then
+            elif [ $ARCH == "arm" ]; then
                 cmake .. -G "Visual Studio $VS_VER" -A ARM  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|ARM"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM"
-            elif [ $ARCH == "ARM64" ] ; then
+            elif [ $ARCH == "arm64" ] ; then
                 cmake .. -G "Visual Studio $VS_VER" -A ARM64  
                 vs-build "ALL_BUILD.vcxproj" Build "Release|ARM64"
                 vs-build "ALL_BUILD.vcxproj" Build "Debug|ARM64"
@@ -314,11 +314,11 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs64/src/Release/network-uri.lib $1/lib/$TYPE/x64/
 			cp -v build_vs64/src/Debug/network-uri.lib $1/lib/$TYPE/x64/network-uri_debug.lib
-        elif [ $ARCH == "ARM64" ] ; then
+        elif [ $ARCH == "arm64" ] ; then
             mkdir -p $1/lib/$TYPE/ARM64
             cp -v build_vs_arm64/src/Release/network-uri.lib $1/lib/$TYPE/ARM64/
             cp -v build_vs_arm64/src/Debug/network-uri.lib $1/lib/$TYPE/ARM64/network-uri_debug.lib
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             mkdir -p $1/lib/$TYPE/ARM
             cp -v build_vs_arm/src/Release/network-uri.lib $1/lib/$TYPE/ARM/
             cp -v build_vs_arm/src/Debug/network-uri.lib $1/lib/$TYPE/ARM/network-uri_debug.lib

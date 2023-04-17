@@ -66,9 +66,9 @@ function build() {
   #           PLATFORM="Win32"
   #       elif [ $ARCH == 64 ] ; then
   #           PLATFORM="x64"
-  #       elif [ $ARCH == "ARM64" ] ; then
+  #       elif [ $ARCH == "arm64" ] ; then
   #           PLATFORM="ARM64"
-  #       elif [ $ARCH == "ARM" ] ; then
+  #       elif [ $ARCH == "arm" ]; then
   #           PLATFORM="ARM"
   #       fi
 		# with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
@@ -78,9 +78,9 @@ function build() {
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
             PLATFORM="x64"
-        elif [ $ARCH == "ARM64" ] ; then
+        elif [ $ARCH == "arm64" ] ; then
             PLATFORM="ARM64"
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             PLATFORM="ARM"
         fi
 
@@ -115,9 +115,9 @@ function copy() {
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
             PLATFORM="x64"
-        elif [ $ARCH == "ARM64" ] ; then
+        elif [ $ARCH == "arm64" ] ; then
             PLATFORM="ARM64"
-        elif [ $ARCH == "ARM" ] ; then
+        elif [ $ARCH == "arm" ]; then
             PLATFORM="ARM"
         fi
 		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/

@@ -66,7 +66,7 @@ function build() {
 				vs-build libusb_2019.sln "Build /p:PlatformToolset=v142" "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2019.sln "Build /p:PlatformToolset=v142" "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ] ; then
 				vs-build libusb_2019.sln "Build /p:PlatformToolset=v142" "Release|ARM"
 			fi
 		elif [ $VS_VER -eq 17 ]; then
@@ -74,7 +74,7 @@ function build() {
 				vs-build libusb_2022.sln Build "Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				vs-build libusb_2022.sln Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				vs-build libusb_2022.sln Build "Release|ARM"
 
 			fi

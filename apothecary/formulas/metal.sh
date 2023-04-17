@@ -80,9 +80,9 @@ function build() {
 				vs-build svgtiny.sln Build "Release|x86"
 			elif [ $ARCH == 64 ] ; then
 				vs-build svgtiny.sln Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				vs-build svgtiny.sln Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				vs-build svgtiny.sln Build "Release|ARM64"
 			fi
 		elif [ $VS_VER -eq 16 ]; then
@@ -91,9 +91,9 @@ function build() {
 				vs-build svgtiny.sln Build "Release|x86"
 			elif [ $ARCH == 64 ] ; then
 				vs-build svgtiny.sln Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				vs-build svgtiny.sln Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				vs-build svgtiny.sln Build "Release|ARM64"
 			fi
 		elif [ $VS_VER -eq 14 ]; then

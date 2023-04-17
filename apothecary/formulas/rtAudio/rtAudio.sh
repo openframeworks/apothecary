@@ -129,13 +129,13 @@ function build() {
 				cmake .. -G "Visual Studio $VS_VER" -A x64 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
 				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				mkdir -p build_vs_arm
 				cd build_vs_arm
 				cmake .. -G "Visual Studio $VS_VER" -A ARM -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
 				vs-build "rtaudio_static.vcxproj" Build "Release|ARM"
 				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				mkdir -p build_vs_arm64
 				cd build_vs_arm64
 				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
@@ -181,11 +181,11 @@ function copy() {
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
 			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib
-		elif [ $ARCH == "ARM64" ] ; then
+		elif [ $ARCH == "arm64" ] ; then
 			mkdir -p $1/lib/$TYPE/ARM64
 			cp -v build_vs_arm64/Release/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudio.lib
 			cp -v build_vs_arm64/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudioD.lib
-		elif [ $ARCH == "ARM" ] ; then
+		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v build_vs_arm/Release/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudio.lib
 			cp -v build_vs_arm/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudioD.lib

@@ -103,12 +103,12 @@ function build() {
 				cd build_vs_64
 				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|x64"
-			elif [ $ARCH == "ARM" ] ; then
+			elif [ $ARCH == "arm" ]; then
 				mkdir -p build_vs_arm
 				cd build_vs_arm
 				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG
 				vs-build "tess2.sln" Build "Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				mkdir -p build_vs_arm64
 				cd build_vs_arm64
 				cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A ARM64 -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG

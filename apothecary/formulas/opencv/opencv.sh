@@ -417,7 +417,7 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|x64"
       vs-build "OpenCV.sln" Build "Debug|x64"
-    elif [ $ARCH == "ARM64" ] ; then
+    elif [ $ARCH == "arm64" ] ; then
       mkdir -p build_vs_arm64
       cd build_vs_arm64
       echo "Visual Studio $VS_VER -A ARM64 "
@@ -515,7 +515,7 @@ function build() {
        # | tee ${LOG}
       vs-build "OpenCV.sln" Build "Release|ARM64"
       vs-build "OpenCV.sln" Build "Debug|ARM64"
-  elif [ $ARCH == "ARM" ] ; then
+  elif [ $ARCH == "arm" ]; then
       mkdir -p build_vs_arm
       cd build_vs_arm
       echo "Visual Studio $VS_VER -A ARM "
