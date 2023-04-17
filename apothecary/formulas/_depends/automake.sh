@@ -1,7 +1,9 @@
 #!/usr/bin/env /bash
 #
-# A Massively Spiffy Yet Delicately Unobtrusive Compression Library
-# http://zlib.net/
+# GNU Automake is a tool for automatically generating Makefile.in files compliant with the GNU Coding Standards. Automake requires the use of GNU Autoconf.
+# https://www.gnu.org/software/automake/
+# requires PERL https://www.perl.org/get.html
+
 
 # define the version
 VER=1.16.4
@@ -15,7 +17,8 @@ FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l", "emscripten" )
 # download the source code and unpack it into LIB_NAME
 function download() {
 	pwd
-	wget -nv --no-check-certificate ${GIT_URL}-$VER.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${GIT_URL}-$VER.tar.gz
 	tar -xf automake-$VER.tar.gz
 	mv automake-$VER automake
 	rm automake-$VER.tar.gz

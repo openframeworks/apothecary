@@ -449,6 +449,12 @@ if [ "$TYPE" = "vs" ]; then
         fi
     fi
 fi
+if [ "$TYPE" = "emscripten" ]; then
+	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
+	#export EMSDK=I:/Repositories/emscripten/emsdk
+	. "$EMSCRIPTEN_SCRIPT"
+fi
+
 
 # get command
 if [ $# -gt 0 ] ; then
