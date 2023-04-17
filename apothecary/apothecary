@@ -408,17 +408,22 @@ if [ "$TYPE" = "vs" ]; then
             VS_YEAR=2017
             VS_BAT="vcvars$ARCH.bat"
         elif [ "${VS_VER}" = "16" ]; then
-            VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/2019/$VS_TYPE"
-            VS_YEAR=2019
+        	if [ $ARCH == "arm64" ]; then
+        		VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
+          		VS_YEAR=2022
+        	else
+            	VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/2019/$VS_TYPE"
+            	VS_YEAR=2019
+        	fi
         elif [ "${VS_VER}" = "17" ]; then
-          VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
-          VS_YEAR=2022
+          	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
+          	VS_YEAR=2022
         fi
     fi
 	
 
 
-	if [ $ARCH == "ARM64" ] || [ $ARCH == "ARM" ] ; then
+	if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] ; then
            
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars${VS_HOST}_${CROSS_TOOL}.bat")
 
@@ -1101,7 +1106,7 @@ function vs-build() {
 				DEFAULT_BUILD="Release|Win32"
 			elif [ $ARCH == 64 ] ; then
 				DEFAULT_BUILD="Release|x64"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				DEFAULT_BUILD="Release|ARM"
 			fi
 		else # 2019/2022
@@ -1111,7 +1116,7 @@ function vs-build() {
 				DEFAULT_BUILD="Release|x64"
 			elif [ $ARCH == "ARM" ] ; then
 				DEFAULT_BUILD="Release|ARM"
-			elif [ $ARCH == "ARM64" ] ; then
+			elif [ $ARCH == "arm64" ] ; then
 				DEFAULT_BUILD="Release|ARM64"
 			fi
 		fi
