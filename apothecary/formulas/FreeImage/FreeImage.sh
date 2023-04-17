@@ -19,11 +19,8 @@ GIT_TAG=3.18.4
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	echo " $APOTHECARY_DIR"
-
-	
+		echo " $APOTHECARY_DIR downloading $GIT_TAG"	
 		. "$DOWNLOADER_SCRIPT"
-
 	
 		URL="$GIT_URL/archive/refs/tags/$GIT_TAG.tar.gz"
 		# For win32, we simply download the pre-compiled binaries.
