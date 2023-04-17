@@ -366,9 +366,11 @@ if [ "$TYPE" = "vs" ]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
             CROSS_TOOL="amd64_x86"
+            VS_HOST=amd64
         elif [ $ARCH == 64 ]; then
             PLATFORM=x64
             CROSS_TOOL="amd64"
+            VS_HOST=amd64
         elif [ $ARCH == "arm64" ]; then
             PLATFORM=x64
             VS_HOST=amd64
