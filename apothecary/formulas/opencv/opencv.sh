@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
-VER=4.0.1
+VER=4.6.0
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -25,10 +25,10 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-  wget --quiet https://github.com/opencv/opencv/archive/$VER.tar.gz -O opencv-$VER.tar.gz
-  tar -xf opencv-$VER.tar.gz
+  curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
+  unzip opencv-$VER.zip
   mv opencv-$VER $1
-  rm opencv*.tar.gz
+  rm opencv*.zip
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -455,6 +455,7 @@ function build() {
       -DWITH_V4L=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
+      -DWITH_ITT=OFF \
       -DBUILD_TESTS=OFF \
       -DANDROID_NDK=$NDK_ROOT \
       -DCMAKE_BUILD_TYPE=Release \
@@ -468,15 +469,25 @@ function build() {
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
-    source /emsdk/emsdk_env.sh
+    # check if emsdk is sourced and EMSDK is set
+    if [ -z ${EMSDK+x} ]; then
+        # if not, try docker path
+        if [ -f /emsdk/emsdk_env.sh ]; then
+            source /emsdk/emsdk_env.sh
+	    else
+            echo "no EMSDK found, please install from https://emscripten.org"
+            echo "and follow instructions to activate it in your shell"
+            exit 1
+        fi
+    fi
 
     cd ${BUILD_DIR}/${1}
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
     # these can be removed when we move to latest opencv
-    sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
-    sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
-    sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
+    # sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
+    # sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
+    # sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
@@ -487,8 +498,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
-      -DCMAKE_CXX_FLAGS="-s USE_PTHREADS=0 -I/emsdk/upstream/emscripten/system/lib/libcxxabi/include/" \
+      -DCMAKE_C_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
+      -DCMAKE_CXX_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \

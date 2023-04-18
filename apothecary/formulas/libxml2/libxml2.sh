@@ -44,7 +44,7 @@ function build() {
         if [ $ARCH == 32 ] ; then
             vs-build libxml2.vcxproj Build "Release|Win32"
         else
-            vs-build libxml2.vcxproj Build "Release|x64"
+            vs-build libxml2.vcxproj "Build /p:PlatformToolset=v142" "Release|x64"
         fi
 
     elif [ "$TYPE" == "android" ]; then
