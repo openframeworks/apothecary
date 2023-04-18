@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" "linuxaarch64")
 
 # define the version
 VER=4.6.0
