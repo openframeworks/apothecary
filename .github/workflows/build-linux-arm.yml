@@ -12,7 +12,7 @@ jobs:
     env:
       TARGET: linuxaarch64
       WORKDIR: "/home/runner/work/apothecary/apothecary"
-      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian/"
+      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
     steps:
       - uses: actions/checkout@v2
       
@@ -20,7 +20,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: $SYSROOT
-          key: raspbian-cache
+          key: raspbian-cache-2
             
       - name: Check if folder exists
         id: folder-check
