@@ -11,7 +11,7 @@ trapError() {
 	exit 1
 }
 
-ROOT=$( cd "$(dirname "$0")" ; pwd -P )
+ROOT=/home/runner/work/apothecary/
 echo $ROOT
 cd $ROOT
 RASP="$ROOT/raspbian"
@@ -41,3 +41,9 @@ ls -la $RASP
 
 echo "GCCPATH IS "
 echo $GCCPATH
+
+echo "calc formular"
+$ROOT/scripts/calculate_formulas.sh
+
+echo "building"
+$ROOT/scripts/build.sh
