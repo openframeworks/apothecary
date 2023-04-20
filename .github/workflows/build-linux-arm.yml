@@ -19,7 +19,7 @@ jobs:
       - name: Cache raspbian folder
         uses: actions/cache@v2
         with:
-          path: $SYSROOT
+          path: /home/runner/work/apothecary/apothecary/raspbian
           key: raspbian-cache-2
             
       - name: Check if folder exists
