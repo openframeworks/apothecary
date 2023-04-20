@@ -38,3 +38,6 @@ export LD="$CXX"
 GCCPATH="$RASP/libexec/gcc/aarch64-linux-gnu/10.3.1"
 export ARFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 export RANLIBFLAGS="--plugin $GCCPATH/liblto_plugin.so"
+
+ls -la $RASP
+cat .profile
