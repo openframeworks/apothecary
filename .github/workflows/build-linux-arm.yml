@@ -12,9 +12,16 @@ jobs:
     env:
       TARGET: linuxaarch64
       WORKDIR: "/home/runner/work/apothecary/apothecary"
-      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
+      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian/*"
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: $SYSROOT
+          key: raspbian-123
+      
       - name: Check if folder exists
         id: folder-check
         run: >
@@ -24,6 +31,7 @@ jobs:
           else
             echo "::set-output name=folder-exists::false"
           fi
+          
       - name: Download and extract tar file
         if: steps.folder-check.outputs.folder-exists == 'false'
         run: >
@@ -33,29 +41,25 @@ jobs:
           tar xf cross-gcc-10.3.0-pi_64.tar.gz &&
           rm cross-gcc-10.3.0-pi_64.tar.gz &&
           mv cross-pi-gcc-10.3.0-64 raspbian
+          
       - name: Cache extracted folder
         if: steps.folder-check.outputs.folder-exists == 'false'
         uses: actions/cache@v2
         with:
           path: $SYSROOT
           key: raspbian-123
+          
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
-
-#        - name: build
-#          run: ./scripts/build.sh
-#          env:
-#            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-#        - name: Update Release
-#          uses: johnwbyrd/update-release@v1.0.0
-#          with:
-#            token: ${{ secrets.GITHUB_TOKEN }}
-#            tag: nightly
-#            release: nightly
-#            prerelease: false
-#            files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
-#          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
-
+      - name: Update Release
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          release: nightly
+          prerelease: false
+          files: out/openFrameworksLibs_master_linuxaarch64.tar.bz2
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
 #  build-linux-arm6:
 #        runs-on: ubuntu-latest
