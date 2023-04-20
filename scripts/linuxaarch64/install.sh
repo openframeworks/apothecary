@@ -11,7 +11,7 @@ trapError() {
 	exit 1
 }
 
-ROOT=/home/runner/work/apothecary/
+ROOT=/home/runner/work/apothecary
 echo $ROOT
 cd $ROOT
 RASP="$ROOT/raspbian"
@@ -37,12 +37,16 @@ GCCPATH="$RASP/libexec/gcc/aarch64-linux-gnu/10.3.1"
 export ARFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 export RANLIBFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 
+echo "ROOT dir "
+ls -la $ROOT
+
+echo "RASP dir "
 ls -la $RASP
 
 echo "GCCPATH IS "
 echo $GCCPATH
 
-echo "calc formular"
+echo "calculate formulas"
 $ROOT/scripts/calculate_formulas.sh
 
 echo "building"
