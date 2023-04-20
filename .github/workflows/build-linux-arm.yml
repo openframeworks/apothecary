@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET: linuxaarch64
+      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
     steps:
       - uses: actions/checkout@v2
       - name: Check if folder exists
