@@ -14,7 +14,6 @@ trapError() {
 ROOT=$( cd "$(dirname "$0")" ; pwd -P )
 echo $ROOT
 cd $ROOT
-mkdir raspbian
 RASP="$ROOT/raspbian"
 
  wget  https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Bullseye/GCC%2010.3.0/cross-gcc-10.3.0-pi_64.tar.gz --no-check-certificate
@@ -23,9 +22,8 @@ tar xf cross-gcc-10.3.0-pi_64.tar.gz
 rm cross-gcc-10.3.0-pi_64.tar.gz
 mv cross-pi-gcc-10.3.0-64 raspbian
 
-echo 'export PATH=$RASP/bin:$PATH' >> .profile
-echo 'export LD_LIBRARY_PATH=$RASP/lib:$LD_LIBRARY_PATH' >> .profile
-source .profile
+PATH=$RASP/bin:$PATH
+LD_LIBRARY_PATH=$RASP/lib:$LD_LIBRARY_PATH
 
 export AR="aarch64-linux-gnu-gcc-ar"
 export CC="aarch64-linux-gnu-gcc"
@@ -40,4 +38,6 @@ export ARFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 export RANLIBFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 
 ls -la $RASP
-cat .profile
+
+echo "GCCPATH IS "
+echo $GCCPATH
