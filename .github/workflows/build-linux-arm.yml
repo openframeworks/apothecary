@@ -16,12 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Restore cache
+      - name: Cache raspbian folder
         uses: actions/cache@v2
         with:
           path: $SYSROOT
-          key: raspbian
-      
+          key: raspbian-cache
+            
       - name: Check if folder exists
         id: folder-check
         run: >
@@ -41,14 +41,7 @@ jobs:
           tar xf cross-gcc-10.3.0-pi_64.tar.gz &&
           rm cross-gcc-10.3.0-pi_64.tar.gz &&
           mv cross-pi-gcc-10.3.0-64 raspbian
-          
-      - name: Cache extracted folder
-        if: steps.folder-check.outputs.folder-exists == 'false'
-        uses: actions/cache@v2
-        with:
-          path: $SYSROOT
-          key: raspbian
-          
+                    
       - name: Scripts Install
         run: ./scripts/$TARGET/install.sh
       - name: Update Release
