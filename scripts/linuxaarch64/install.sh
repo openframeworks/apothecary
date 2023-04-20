@@ -11,6 +11,9 @@ trapError() {
 	exit 1
 }
 
+sudo apt-get install -y aptitude
+sudo aptitude install -y gperf
+
 ROOT=/home/runner/work/apothecary/apothecary
 echo $ROOT
 cd $ROOT
