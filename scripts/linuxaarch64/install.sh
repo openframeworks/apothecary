@@ -11,7 +11,7 @@ trapError() {
 	exit 1
 }
 
-ROOT=/home/runner/work/apothecary
+ROOT=/home/runner/work/apothecary/apothecary
 echo $ROOT
 cd $ROOT
 RASP="$ROOT/raspbian"
