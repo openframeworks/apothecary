@@ -34,14 +34,14 @@ GCCPATH="$RASP/libexec/gcc/aarch64-linux-gnu/10.3.1"
 export ARFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 export RANLIBFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 
-echo "ROOT dir "
-ls -la $ROOT
-
-echo "RASP dir "
-ls -la $RASP
-
-echo "GCCPATH IS "
-echo $GCCPATH
+#echo "ROOT dir "
+#ls -la $ROOT
+#
+#echo "RASP dir "
+#ls -la $RASP
+#
+#echo "GCCPATH IS "
+#echo $GCCPATH
 
 echo "calculate formulas"
 $ROOT/scripts/calculate_formulas.sh

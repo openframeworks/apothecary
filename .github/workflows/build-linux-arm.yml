@@ -43,7 +43,7 @@ jobs:
           mv cross-pi-gcc-10.3.0-64 raspbian
                     
       - name: Scripts Install
-        run: ./scripts/$TARGET/install.sh
+        run: ./scripts/$TARGET/install_and_build.sh
       - name: Update Release
         uses: johnwbyrd/update-release@v1.0.0
         with:
