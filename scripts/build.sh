@@ -81,6 +81,7 @@ echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
 echo "Apothecary path: $APOTHECARY_PATH"
+echo "Output folder is: $OUTPUT_FOLDER"
 
 
 isRunning(){

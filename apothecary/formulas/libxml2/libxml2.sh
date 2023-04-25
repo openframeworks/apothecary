@@ -4,9 +4,10 @@
 # XML parser
 # http://xmlsoft.org/index.html
 #
-# uses an automake build system # required for svg 
+# uses an automake build system
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "linux64" "linuxarmv6l" "linuxarmv7l" "android" "emscripten")
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten")
+# uses an automake build system # required for svg
 
 FORMULA_DEPENDS=( "automake")
 

@@ -15,7 +15,7 @@ Windows MSYS2         | [![Build status](https://github.com/openframeworks/apoth
 Windows Visual Studio | [![Build status](https://github.com/openframeworks/apothecary/workflows/build-vs/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 Android         | [![Build-android](https://github.com/openframeworks/apothecary/workflows/build-android/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 Linux         | [![build-linux64](https://github.com/openframeworks/apothecary/workflows/build-linux64/badge.svg)](https://github.com/openframeworks/apothecary/actions)
-Linux armv6v/armv7        | [![build-linux-arm](https://github.com/openframeworks/apothecary/workflows/build-linux-arm/badge.svg)](https://github.com/openframeworks/apothecary/actions)
+Linux armv6v/aarch64        | [![build-linux-arm](https://github.com/openframeworks/apothecary/workflows/build-linux-arm/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 Emscripten        | [![build-emscripten](https://github.com/openframeworks/apothecary/workflows/build-emscripten/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 macOS / iOS / tvOS        | [![build-macos](https://github.com/openframeworks/apothecary/workflows/build-macos/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 
