@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=5.2.7
+VER=5.2.9
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/assimp
@@ -280,7 +280,11 @@ function build() {
             #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
             
         
+        make clean
         make -j${PARALLEL_MAKE} VERBOSE=1
+        mv "lib/libassimp.a" "build_$ABI/libassimp.a"
+
+        cd ..
         
 
 
@@ -336,8 +340,8 @@ function copy() {
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv include/* $1/include
-        cp -Rv build_$ABI/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build/include/* $1/include
+        cp -Rv build/build_$ABI/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
         #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
@@ -363,16 +367,16 @@ function clean() {
         echo "Assimp VS | $TYPE | $ARCH cleaned"
 
     elif [ "$TYPE" == "android" ] ; then
-        make clean
-        make rebuild_cache
-        rm -f build/*.*
-        rm -f build/
-        rm -f build/libassimp.a
-        rm -f CMakeCache.txt
+        if [ -d "build" ]; then
+            cd build
+            make clean
+            cd ..
+        fi
+        rm -f CMakeCache.txt  2> /dev/null
 
     else
         make clean
         make rebuild_cache
-        rm -f CMakeCache.txt
+        rm -f CMakeCache.txt 2> /dev/null
     fi
 }

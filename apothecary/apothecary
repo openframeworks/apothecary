@@ -1402,6 +1402,8 @@ if [[ "$TYPE" == "android" ]] ; then
 	    ABI=x86_64
 	elif [ "$ARCH" == "arm64" ]; then
 	    ABI=arm64-v8a
+	else
+		echoError "Targeting android, ARCH not set! Please use -a arm64"
 	fi
 else 
 	ABI=""
