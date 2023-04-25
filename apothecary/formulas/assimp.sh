@@ -163,6 +163,9 @@ function build() {
 
     elif [ "$TYPE" == "android" ] ; then
 
+        ANDROID_API=24 # sorry
+        ANDROID_PLATFORM=android-${ANDROID_API}
+
         source ../../android_configure.sh $ABI cmake
 
 								
@@ -239,16 +242,21 @@ function build() {
         cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             $buildOpts \
             -DCMAKE_C_COMPILER=${CC} \
-            -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+            -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
+            -DANDROID_STL=c++_shared \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
             -DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
             -DCMAKE_CXX_COMPILER_AR=${AR} \
             -DCMAKE_C_COMPILER_AR=${AR} \
+            -DAI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT=OFF \
             -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
-            -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration " \
+            -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
+            -DCMAKE_EXE_LINKER_FLAGS=" -Wl,--hash-style=both" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--hash-style=both" \
+            -DCMAKE_MODULE_LINKER_FLAGS=" -Wl,--hash-style=both" \
             -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+            -DCMAKE_STATIC_LINKER_FLAGS="${LDFLAGS} ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++_shared.so ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++abi.a  ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libandroid_support.a" \
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DCMAKE_C_STANDARD=17 \

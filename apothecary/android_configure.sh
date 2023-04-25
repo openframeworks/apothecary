@@ -106,7 +106,7 @@ else
     export MAKE_INCLUDES_CFLAGS=" -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
     export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -frtti"
     if [ "$ABI" = "armeabi-v7a" ]; then
-        export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a "
+        export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a"
     elif [ $ABI = "arm64-v8a" ]; then
         export MAKE_TARGET="-target aarch64-linux-android" 
     elif [ "$ABI" = "x86-64" ]; then
@@ -124,7 +124,7 @@ export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}" #-I${
 export CXXFLAGS="-std=c++17"
 #export CPPFLAGS="-v" # verbose output to test issues
 
-export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
+export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libandroid_support.a"
 export LIBS="" #"-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
 #export LDFLAGS="$LDFLAGS $LIBS"
 # -ldl -lm -lc "
@@ -139,7 +139,7 @@ if [ "$ABI" = "armeabi-v7a" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET "
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET  "
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/arm-linux-androideabi"
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8 -Wl,--no-undefined"
+    export LDFLAGS="$LDFLAGS $MAKE_TARGET -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8 -Wl,--no-undefined, --hash-style=both"
 elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET " 
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET"
@@ -149,7 +149,7 @@ elif [ "$ABI" = "x86-64" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET"
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET "
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/x86_64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
+    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined, --hash-style=both"
 elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET"  #march=i686  -target i686-linux-android 
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET" #  -target i686-none-linux-android
