@@ -177,13 +177,16 @@ function build() {
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
-    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" || [ "$TYPE" == "linuxaarch64" ]; then
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-        pwd
-        ls
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
+
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+        
+        ./autogen.sh
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-icolincunv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         make clean
         #echo "int main(){ return 0; }" > xmllint.c
         #echo "int main(){ return 0; }" > xmlcatalog.c
@@ -210,11 +213,16 @@ function build() {
         make -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
             IOS_ARCHS="x86_64 armv7 arm64" #armv7s
         fi
+
         for IOS_ARCH in ${IOS_ARCHS}; do
             echo
             echo
