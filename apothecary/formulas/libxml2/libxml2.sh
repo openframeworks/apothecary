@@ -14,22 +14,39 @@ FORMULA_DEPENDS=( "automake")
 
 # define the version by sha
 VER=2.10.4
-URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}.tar.gz
+URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
 
+ICU_VER=73-1
+DEPEND_URL=https://github.com/unicode-org/icu/archive/refs/tags/release-${ICU_VER}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+
+    if [ "$TYPE" == "vs" ] ; then
+        DOWNLOAD_TYPE="zip"
+    else 
+        DOWNLOAD_TYPE="tar.gz"
+    fi
+
     . "$DOWNLOADER_SCRIPT"
-    downloader ${URL}
-    tar xzhf v${VER}.tar.gz
+    downloader "${URL}.${DOWNLOAD_TYPE}"
+
+    if [ "$TYPE" == "vs" ] ; then
+       unzip  v${VER}.${DOWNLOAD_TYPE}
+       rm v${VER}.${DOWNLOAD_TYPE}
+    else 
+       tar xzhf v${VER}.${DOWNLOAD_TYPE}
+       rm v${VER}.${DOWNLOAD_TYPE}
+    fi
+    
+
     mv libxml2-${VER} libxml2
-    rm v${VER}.tar.gz
+    
 
-
-    downloader https://github.com/unicode-org/icu/archive/refs/tags/release-71-1.tar.gz
-    tar xzhf release-71-1.tar.gz
-    mv icu-release-71-1 icu
-    rm release-71-1.tar.gz
+    downloader ${DEPEND_URL}
+    tar xzhf release-${ICU_VER}.tar.gz
+    mv icu-release-${ICU_VER} icu
+    rm release-${ICU_VER}.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -42,10 +59,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    if [ "$TYPE" == "vs" ] ; then
-
-        #mkdir -p build_vs$ARCH
-        
+    if [ "$TYPE" == "vs" ] ; then   
 
         if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
@@ -54,14 +68,18 @@ function build() {
         elif [ $ARCH == "arm64" ] ; then
             PLATFORM="ARM64"
         elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"
-            vs-build libxml2.vcxproj Build "Release|Win32"
+            PLATFORM="ARM"            
         else
             vs-build libxml2.vcxproj "Build /p:PlatformToolset=v142" "Release|x64"
         fi
 
-        mkdir -p build_$PLATFORM
-        cd build_$PLATFORM
+
+        echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"        
+
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
 
 
         DEFS='-DCMAKE_C_STANDARD=17 \
@@ -89,7 +107,9 @@ function build() {
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF'
 
-        cmake .. -G "Visual Studio 16 2019" ${DEFS} -A ${PLATFORM}
+        cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
         cmake --build . --config Release
 
         cd ..
@@ -254,8 +274,7 @@ function build() {
 function copy() {
     # prepare headers directory if needed
     mkdir -p $1/include/libxml
-
-    # prepare libs directory if needed
+    
     mkdir -p $1/lib/$TYPE
     cp -Rv include/libxml/* $1/include/libxml/
 
@@ -268,26 +287,10 @@ function copy() {
             PLATFORM="ARM64"
         elif [ $ARCH == "arm" ]; then
             PLATFORM="ARM"
-        fi
+        fi        
         
-        
-        #cp -Rv build_${ABI}_configure/libxml2.lib $1/lib/$TYPE/$ABI/libxml2.lib
-
-        cp -v build_Win32/Release/libxml2s.lib $1/lib/$TYPE/$ABI/libxml2.lib
-
-        # if [ $ARCH == 32 ] ; then
-        #     mkdir -p $1/lib/$TYPE/Win32
-        #     cp -v "win32/VC10/Release/libxml2.lib" $1/lib/$TYPE/Win32/
-        # elif [ $ARCH == 64 ] ; then
-        #     mkdir -p $1/lib/$TYPE/x64
-        #     cp -v "win32/VC10/x64/Release/libxml2.lib" $1/lib/$TYPE/x64/
-        #  elif [ $ARCH == "arm64" ] ; then
-        #     mkdir -p $1/lib/$TYPE/ARM64
-        #     cp -v "win32/VC10/ARM64/Release/libxml2.lib" $1/lib/$TYPE/ARM64/
-        # elif [ $ARCH == "arm" ]; then
-        #     mkdir -p $1/lib/$TYPE/ARM
-        #     cp -v "win32/VC10/ARM/Release/libxml2.lib" $1/lib/$TYPE/ARM/
-        # fi
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
 
     elif [ "$TYPE" == "tvos" ]; then
         # copy lib

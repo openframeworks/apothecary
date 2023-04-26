@@ -32,9 +32,13 @@ function download() {
     else
         echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     fi
-
-
 	rm pixman-$VER.tar.gz
+
+	echo "copying cmake files to dir"
+	cp -v $FORMULA_DIR/_depends/pixman/CMakeLists.txt pixman/CMakeLists.txt
+	cp -v $FORMULA_DIR/_depends/pixman/pixman/CMakeLists.txt pixman/pixman/CMakeLists.txt
+	mkdir -p pixman/cmake
+	cp -vr $FORMULA_DIR/_depends/pixman/cmake/ pixman/
 }
 
 
@@ -61,19 +65,7 @@ function build() {
 		make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
-		# cd pixman
-		# if [ $ARCH == 32 ] ; then
-  #           PLATFORM="Win32"
-  #       elif [ $ARCH == 64 ] ; then
-  #           PLATFORM="x64"
-  #       elif [ $ARCH == "arm64" ] ; then
-  #           PLATFORM="ARM64"
-  #       elif [ $ARCH == "arm" ]; then
-  #           PLATFORM="ARM"
-  #       fi
-		# with_vs_env "make -f Makefile.win32 CFG=release MMX=off"
-		# make -j${PARALLEL_MAKE} VERBOSE=1
-
+		
 		if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
@@ -84,8 +76,12 @@ function build() {
             PLATFORM="ARM"
         fi
 
-		mkdir -p build_$TYPE
-		cd build_$TYPE
+        echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+
+		mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
 
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
@@ -96,11 +92,10 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_LIBDIR="build_$TYPE" \
-            -A ${PLATFORM} \
-            -G "Visual Studio 16 2019"
-            cmake --build . --config Release
-            
+            -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+            cmake --build . --config Release          
 
         cd ..
 
@@ -121,7 +116,8 @@ function copy() {
             PLATFORM="ARM"
         fi
 		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
-		cp -v pixman/release/pixman-1.lib $1/../cairo/lib/$TYPE/$PLATFORM/
+		pwd
+		cp -v "build_${TYPE}_${ARCH}/pixman/release/pixman-1_static.lib" $1/../cairo/lib/$TYPE/$PLATFORM/pixman-1.lib
 	else # osx
 		# lib
 		cd pixman

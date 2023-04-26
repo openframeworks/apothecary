@@ -350,10 +350,7 @@ shift $(expr $OPTIND - 1)
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 16"
-	    VS_VER=16 #17 
-	    VS_VER_GEN="$VS_VER 2019" #2022
-	    #VS_VER=17 
-	    #VS_VER_GEN="$VS_VER 2022"
+	    VS_VER=16 #17 	    
     else 
 	    echo "VS_VER is set to '$VS_VER'"
 	    VS_VER_GEN="$VS_VER 2019"
@@ -384,13 +381,21 @@ if [ "$TYPE" = "vs" ]; then
         	PLATFORM=x64
             CROSS_TOOL="amd64"
             VS_HOST=amd64
-        fi
-
-        echo "PLATFORM set to ${PLATFORM} VisualStudio ${VS_VER} - ${CROSS_TOOL} - ${VS_HOST}"
+        fi        
     fi
 
+    if [ $ARCH == "arm64" ]; then
+    	VS_YEAR=2022
+    	VS_VER=17
+    	VS_VER_GEN="$VS_VER $VS_YEAR"
+    else
+    	VS_YEAR=2019
+    	VS_VER=16
+    	VS_VER_GEN="$VS_VER $VS_YEAR"
+	fi    
+
+	echo "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
     
-    VS_YEAR=2019
     VS_BAT="vcvarsall.bat"
 
     if [ -z "${WSL_DISTRO_NAME+x}" ]
@@ -408,7 +413,6 @@ if [ "$TYPE" = "vs" ]; then
             VS_YEAR=2017
             VS_BAT="vcvars$ARCH.bat"
         elif [ "${VS_VER}" = "16" ]; then
-
         	VS_YEAR_PATH=2019
         	if [ -d "${DRIVE}/Program Files (x86)/Microsoft Visual Studio/$VS_YEAR_PATH/$VS_TYPE" ]; then
 			  VS_YEAR_PATH=2019
