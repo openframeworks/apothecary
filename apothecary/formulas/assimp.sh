@@ -222,6 +222,21 @@ function build() {
                 -DANDROID_STL=c++_static
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DCMAKE_INSTALL_PREFIX=install"
+        elif [ "$ABI" == "x86_64" ]; then
+            export HOST=x86_64-linux-android
+            local buildOpts="
+                -DBUILD_SHARED_LIBS=OFF
+                -DASSIMP_BUILD_TESTS=0
+                -DASSIMP_BUILD_SAMPLES=0
+                -DASSIMP_BUILD_3MF_IMPORTER=0
+                -DASSIMP_BUILD_ZLIB=1
+                -DANDROID_NDK=$NDK_ROOT
+                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
+                -DCMAKE_BUILD_TYPE=Release
+                -DANDROID_ABI=$ABI
+                -DANDROID_STL=c++_static
+                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
+                -DCMAKE_INSTALL_PREFIX=install"
         fi
         
         find ./ -name "*.o" -type f -delete
