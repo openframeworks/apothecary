@@ -407,16 +407,16 @@ function copy() {
 		#mkdir -p $1/include/x64
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
-			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
 		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
-			cp -v build_vs$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
-			#cp -v build_vs$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
 		mkdir -p $1/include #/Win32
