@@ -7,6 +7,12 @@
 # Function to save build information to a text file
 function save {
 
+    if [ -z "$2" ]; then
+        echo "Save function not implemented - Param error"
+        return 1
+    fi
+
+
     # Check if the save file exists
     #SAVE_FILE="$SCRIPT_DIR/build_status.txt"
     LOCAL_SAVE_FILE="$6"
