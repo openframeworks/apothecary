@@ -124,7 +124,7 @@ export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}" #-I${
 export CXXFLAGS="-std=c++17"
 #export CPPFLAGS="-v" # verbose output to test issues
 
-export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libandroid_support.a"
+export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
 export LIBS="" #"-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
 #export LDFLAGS="$LDFLAGS $LIBS"
 # -ldl -lm -lc "

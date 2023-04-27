@@ -279,7 +279,7 @@ function build() {
 
 	elif [ "$TYPE" == "android" ] ; then
         
-        source ../../android_configure.sh $ABI cmake
+        source ../../android_configure.sh $ABI make
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE/$ABI
         
 

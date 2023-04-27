@@ -256,7 +256,7 @@ function build() {
             -DCMAKE_MODULE_LINKER_FLAGS=" -Wl,--hash-style=both" \
             -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_STATIC_LINKER_FLAGS="${LDFLAGS} ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++_shared.so ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++abi.a  ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libandroid_support.a" \
+            -DCMAKE_STATIC_LINKER_FLAGS="${LDFLAGS} ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++_shared.so ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++abi.a " \
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DCMAKE_C_STANDARD=17 \
