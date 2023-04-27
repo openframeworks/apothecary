@@ -11,6 +11,21 @@ declare -a HOSTS
 declare -a SDKS
 declare -a MIN_TYPES
 
+HOST_ARCH=$(uname -m)
+
+if [[ "$HOST_ARCH" == "arm64" ]]; then
+  echo "Running on M1 (ARM) processor"
+  M1_PROCESS=1
+   if [ "${IOS_ARCH}" == "x86_64" ]; then
+    IOS_ARCH="arm64-simulator"
+   fi
+else
+  M1_PROCESS=0
+  echo "Running on Intel (x86) processor"
+fi
+
+
+
 if [ "${TYPE}" == "tvos" ]; then
     SIM=appletvsimulator
     OS=appletvos
