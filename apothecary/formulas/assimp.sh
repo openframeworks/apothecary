@@ -288,7 +288,7 @@ function build() {
         
         make clean
         make -j${PARALLEL_MAKE} VERBOSE=1
-        mv "lib/libassimp.a" "build_$ABI/libassimp.a"
+       
 
         cd ..
         
