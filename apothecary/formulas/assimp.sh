@@ -386,3 +386,17 @@ function clean() {
         rm -f CMakeCache.txt 2> /dev/null
     fi
 }
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    save ${TYPE} "assimp" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "assimp" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
+}

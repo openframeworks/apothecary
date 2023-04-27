@@ -514,3 +514,17 @@ function clean() {
 	fi
 }
 
+function save() {
+    . "$SAVE_SCRIPT" 
+    save ${TYPE} "poco" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "poco" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
+}
+

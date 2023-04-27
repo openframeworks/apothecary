@@ -484,3 +484,17 @@ function clean() {
 		rm -f CMakeCache.txt *.a *.lib
 	fi
 }
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    save ${TYPE} "tess2" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "tess2" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
+}

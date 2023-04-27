@@ -220,3 +220,17 @@ function clean() {
 	# manually clean dependencies
 	#apothecaryDependencies clean
 }
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    save ${TYPE} "rtaudio" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "rtaudio" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
+}

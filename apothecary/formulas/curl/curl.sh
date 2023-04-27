@@ -355,3 +355,17 @@ function clean() {
 		make clean
 	fi
 }
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    save ${TYPE} "curl" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "curl" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
+}

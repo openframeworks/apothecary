@@ -330,7 +330,7 @@ function load() {
     . "$LOAD_SCRIPT"
     echo "load file ${SAVE_FILE}"
 
-    if load ${TYPE} "libxml2" ${ARCH} ${VER} "${SAVE_FILE}"; then
+    if loadsave ${TYPE} "libxml2" ${ARCH} ${VER} "${SAVE_FILE}"; then
       echo "The entry exists and doesn't need to be rebuilt."
       return 0;
     else

@@ -5,7 +5,12 @@
 # load "ios" "freeimage" "arm64" "true" "v9.1.0" "v9.1.0"
 
 
-function load() {
+function loadsave() {
+
+  if [ -z "$2" ]; then
+    echo "Load function not implemented - Param error"
+    return 1
+  fi
 
   echo "load file: $SAVE_FILE 0:$0 1:$1 2:$2 3:$3 4:$4 5:$5 "
   local LOCAL_SAVE_FILE="$5"
