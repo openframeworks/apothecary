@@ -305,17 +305,23 @@ function build() {
         export CFLAGS="-pthread"
 		export CXXFLAGS="-pthread"
 
-		echo "building $TYPE | $ARCH | $VS_VER"
+		if [ $ARCH == 32 ] ; then
+            PLATFORM="Win32"
+        elif [ $ARCH == 64 ] ; then
+            PLATFORM="x64"
+        elif [ $ARCH == "arm64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "arm" ]; then
+            PLATFORM="ARM"            
+        fi
+
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        local generatorName="Visual Studio "
-        generatorName+=$VS_VER_GEN
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+		mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
 
-        local buildOpts="
-            -DBUILD_SHARED_LIBS=OFF
-            -DLIBRARY_SUFFIX=${ARCH}"
-
-		mkdir -p build_vs$ARCH
-	    cd build_vs$ARCH
+        DEFS="-DLIBRARY_SUFFIX=${ARCH}"
 
         if [ $VS_VER == 15 ] ; then
             if [ $ARCH == 32 ] ; then                
@@ -327,33 +333,19 @@ function build() {
                 vs-build "FreeImage.sln" build "Release|x64"
             fi
         else		
-			if [ $ARCH == 32 ] ; then	                
-	                generatorName+=''
-	                echo "generatorName $generatorName -A Win32 "
-	                cmake .. -G "$generatorName" -A Win32 $buildOpts
-	                cmake --build . --config release
-	                #vs-build "FreeImage.sln" build "Release|Win32"
-	        elif [ $ARCH == 64 ] ; then	           
-	            generatorName+=''
-	            echo "generatorName $generatorName -A x64"
-	            cmake .. -G "$generatorName" -A x64 $buildOpts
-	            cmake --build . --config release
-	            #vs-build "FreeImage.sln" build "Release|x64"
-	        elif [ $ARCH == "arm" ]; then	            
-	            generatorName+=' '
-	            echo "generatorName $generatorName -A ARM"
-	            cmake .. -G "Visual Studio 16 2019" -A ARM $buildOpts
-	            #cmake .. -G "$generatorName" -A ARM $buildOpts
-	            cmake --build . --config release
-	            #vs-build "FreeImage.sln" build "Release|ARM"
-	        elif [ $ARCH == "arm64" ] ; then	            
-	            generatorName+=''
-	            echo "generatorName $generatorName -A ARM64"
-	            cmake .. -G "Visual Studio 16 2019" -A ARM64 $buildOpts
-	            #cmake .. -G "$generatorName" -A ARM64 $buildOpts
-	            cmake --verbose --build . --config release 
-	            #vs-build "FreeImage.sln" build "Release|ARM64"
-	        fi
+			cmake  .. ${DEFS} \
+			-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
+			-A "${PLATFORM}" \
+			-G "${GENERATOR_NAME}"
+            cmake --build . --config Release 
         fi
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
