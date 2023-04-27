@@ -22,29 +22,20 @@ DEPEND_URL=https://github.com/unicode-org/icu/archive/refs/tags/release-${ICU_VE
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-    if [ "$TYPE" == "vs" ] ; then
         DOWNLOAD_TYPE="zip"
-    else 
-        DOWNLOAD_TYPE="tar.gz"
-    fi
-
     . "$DOWNLOADER_SCRIPT"
     downloader "${URL}.${DOWNLOAD_TYPE}"
 
-    if [ "$TYPE" == "vs" ] ; then
        unzip  v${VER}.${DOWNLOAD_TYPE}
        rm v${VER}.${DOWNLOAD_TYPE}
-    else 
-       tar xzhf v${VER}.${DOWNLOAD_TYPE}
-       rm v${VER}.${DOWNLOAD_TYPE}
-    fi
+   
     
 
     mv libxml2-${VER} libxml2
     
 
     downloader ${DEPEND_URL}
-    tar xzhf release-${ICU_VER}.tar.gz
+    tar zhf release-${ICU_VER}.tar.gz
     mv icu-release-${ICU_VER} icu
     rm release-${ICU_VER}.tar.gz
 }
