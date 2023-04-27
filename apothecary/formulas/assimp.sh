@@ -171,8 +171,8 @@ function build() {
 								
         #stuff to remove when we upgrade android
         #android complains about abs being ambigious - pfffft
-        sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
-        sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
+        #sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
+        #sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
 
         if [ "$ABI" == "armeabi-v7a" ]; then
             export HOST=armv7a-linux-android
@@ -224,22 +224,20 @@ function build() {
                 -DCMAKE_INSTALL_PREFIX=install"
         fi
         
+        find ./ -name "*.o" -type f -delete
         
+        mkdir -p "build_${TYPE}_${ABI}"
+        cd "build_${TYPE}_${ABI}"
 
-        mkdir -p "build"
-       
-
-
-        cd build
-        mkdir -p "build_$ABI"
         rm -f CMakeCache.txt
+
 
         export CFLAGS=""
         export CPPFLAGS=""
         export LDFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         
-        cmake .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        cmake -S .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             $buildOpts \
             -DCMAKE_C_COMPILER=${CC} \
             -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
@@ -348,8 +346,8 @@ function copy() {
         cp -Rv include/* $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build/include/* $1/include
-        cp -Rv build/build_$ABI/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        cp -Rv build_${TYPE}_${ABI}/include/* $1/include
+        cp -Rv build_${TYPE}_${ABI}/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
         #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
@@ -376,7 +374,7 @@ function clean() {
 
     elif [ "$TYPE" == "android" ] ; then
         if [ -d "build" ]; then
-            cd build
+            cd  "build_${TYPE}_${ABI}"
             make clean
             cd ..
         fi
