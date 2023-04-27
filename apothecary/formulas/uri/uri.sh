@@ -126,11 +126,10 @@ function build() {
         for IOS_ARCH in ${IOS_ARCHS}
         do
             mkdir -p "$CURRENTPATH/_build"
-            unset ARCH IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
+            unset IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
             unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL 
             unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM
 
-            export ARCH=$IOS_ARCH
             
             local EXTRA_PLATFORM_CFLAGS=""
             export EXTRA_PLATFORM_LDFLAGS=""
