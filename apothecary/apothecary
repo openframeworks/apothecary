@@ -66,6 +66,9 @@ LIBS_DIR=""
 PARALLEL_MAKE=1
 
 DOWNLOADER_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/downloader.sh")"
+SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
+LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
+SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 
 ### Xcode/ios specific settings
 
@@ -823,8 +826,16 @@ function updateFormula() {
 	# fi
 	downloadFormula $1
 	prepareFormula $1
-	buildFormula $1
-	copyFormula $1
+
+	if load $1; then
+	   echo "Skipping build as already done for this target "
+	else
+        echo "The entry doesn't exist or needs to be rebuilt."
+        buildFormula $1
+	    copyFormula $1
+
+	    save $1
+    fi
 
 	echo
 	echoSuccess " Finished \"$1\""
@@ -1218,6 +1229,15 @@ function clean() {
 	echoWarning " Clean function not implemented"
 }
 
+function save() {
+	echoWarning " Save function not implemented"
+}
+
+function load() {
+	echoWarning " Load function not implemented"
+	return 1
+}
+
 # do a command on a given dependency in a separate apothecary run
 # $1 = command
 # $2 = dependency name
@@ -1415,11 +1435,14 @@ if [[ "$TYPE" == "android" ]] ; then
 	elif [ "$ARCH" == "arm64" ]; then
 	    ABI=arm64-v8a
 	else
+		ABI=""
 		echoError "Targeting android, ARCH not set! Please use -a arm64"
 	fi
 else 
 	ABI=""
 fi
+
+
 
 CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
