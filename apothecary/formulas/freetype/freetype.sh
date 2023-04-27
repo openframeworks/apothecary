@@ -489,7 +489,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "freetype" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "freetype" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

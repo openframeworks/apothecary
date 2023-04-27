@@ -221,7 +221,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "pugixml" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "pugixml" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

@@ -516,7 +516,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "poco" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "poco" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

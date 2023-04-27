@@ -5,7 +5,7 @@
 # save "ios" "freeimage" "arm64" "true" "v9.1.0" "v9.1.0"
 
 # Function to save build information to a text file
-function save {
+function savestatus {
 
     if [ -z "$2" ]; then
         echo "Save function not implemented - Param error"

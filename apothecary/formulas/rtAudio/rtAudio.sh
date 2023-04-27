@@ -223,7 +223,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "rtaudio" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "rtaudio" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

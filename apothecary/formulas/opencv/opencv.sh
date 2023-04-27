@@ -1147,7 +1147,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "opencv" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "opencv" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

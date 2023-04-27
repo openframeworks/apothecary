@@ -358,7 +358,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "curl" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "curl" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

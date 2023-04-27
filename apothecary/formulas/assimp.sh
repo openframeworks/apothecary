@@ -389,7 +389,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "assimp" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "assimp" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

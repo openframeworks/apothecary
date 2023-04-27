@@ -230,7 +230,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "svgtiny" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "svgtiny" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

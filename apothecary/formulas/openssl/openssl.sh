@@ -600,7 +600,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "openssl" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "openssl" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

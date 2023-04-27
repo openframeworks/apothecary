@@ -323,7 +323,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "libxml2" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "libxml2" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

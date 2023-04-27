@@ -364,7 +364,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "uri" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "uri" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

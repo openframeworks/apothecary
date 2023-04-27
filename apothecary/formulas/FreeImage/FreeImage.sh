@@ -507,7 +507,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "freeimage" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "freeimage" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

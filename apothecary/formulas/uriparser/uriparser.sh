@@ -309,7 +309,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "uriparser" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "uriparser" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

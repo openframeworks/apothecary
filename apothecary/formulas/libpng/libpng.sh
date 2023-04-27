@@ -207,7 +207,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "libpng" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "libpng" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

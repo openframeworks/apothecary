@@ -56,7 +56,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "json" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "json" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

@@ -487,7 +487,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "tess2" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "tess2" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {

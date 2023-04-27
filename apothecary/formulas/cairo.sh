@@ -287,7 +287,7 @@ function clean() {
 
 function save() {
     . "$SAVE_SCRIPT" 
-    save ${TYPE} "cairo" ${ARCH} ${VER} true "${SAVE_FILE}"
+    savestatus ${TYPE} "cairo" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {
