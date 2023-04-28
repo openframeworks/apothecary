@@ -35,7 +35,7 @@ function download() {
     
 
     downloader ${DEPEND_URL}
-    tar zhf release-${ICU_VER}.tar.gz
+    tar xzf release-${ICU_VER}.tar.gz
     mv icu-release-${ICU_VER} icu
     rm release-${ICU_VER}.tar.gz
 }
