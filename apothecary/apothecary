@@ -374,15 +374,15 @@ if [ "$TYPE" = "vs" ]; then
         elif [ $ARCH == "arm64" ]; then
             PLATFORM=x64
             VS_HOST=amd64
-            CROSS_TOOL="arm64"
+            CROSS_TOOL="all"
         elif [ $ARCH == "arm" ]; then
             PLATFORM=x64
             VS_HOST=amd64
-            CROSS_TOOL="arm"
+            CROSS_TOOL="all"
         else
         	echo "ARCH not set $ARCH"
         	PLATFORM=x64
-            CROSS_TOOL="amd64"
+            CROSS_TOOL="all"
             VS_HOST=amd64
         fi        
     fi
@@ -440,7 +440,7 @@ if [ "$TYPE" = "vs" ]; then
 
 	if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] ; then
            
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvars${VS_HOST}_${CROSS_TOOL}.bat")
+		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
 
 	else 
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")

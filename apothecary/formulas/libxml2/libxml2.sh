@@ -318,6 +318,7 @@ function copy() {
 function clean() {
     if [ "$TYPE" == "vs" ] ; then
         rm -f *.lib
+        rm -f *.o
     else
         make clean
     fi

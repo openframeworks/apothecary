@@ -85,73 +85,30 @@ function build() {
 
         unset TMP
         unset TEMP
-        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run?
-        echo "building $TYPE | $ARCH | $VS_VER"
+        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
+        echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"        
 
-        local buildOpts="
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+
+        DEFS="-DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF 
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DLIBRARY_SUFFIX=${ARCH}"
-        local generatorName="Visual Studio "
-        generatorName+=$VS_VER
+            -DASSIMP_BUILD_3MF_IMPORTER=0"
 
-       SOURCE_DIR=.
+        cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Release
 
-        if [ $VS_VER == 15 ] ; then
-            if [ $ARCH == 32 ] ; then
-                mkdir -p build_vs_32
-                cd build_vs_32
-                cmake .. -G "$generatorName"   $buildOpts
-                vs-build "Assimp.sln" build "Release|Win32"
-            elif [ $ARCH == 64 ] ; then
-                mkdir -p build_vs_64
-                cd build_vs_64
-                generatorName+=' Win64'
-                cmake .. -G "$generatorName"  $buildOpts
-                vs-build "Assimp.sln" build "Release|x64"
-            fi
-        else
-            if [ $ARCH == 32 ] ; then
-                mkdir -p build_vs_32
-                cd build_vs_32
-                generatorName+=''
-                echo "generatorName $generatorName -A Win32 "
-                cmake .. -G "$generatorName"  -A Win32 $buildOpts
-                #cmake --build . --config release
-                 vs-build "Assimp.sln" build "Release|Win32"
-            elif [ $ARCH == 64 ] ; then
-                mkdir -p build_vs_64
-                cd build_vs_64
-                generatorName+=''
-                echo "generatorName $generatorName  -A x64"
-                cmake .. -G "$generatorName" -A x64 $buildOpts
-                #cmake --build . --config release
-                 vs-build "Assimp.sln" build "Release|x64"
-            elif [ $ARCH == "arm" ]; then
-                mkdir -p build_vs_arm
-                cd build_vs_arm
-                generatorName+=' '
-                echo "generatorName $generatorName -A ARM"
-                cmake .. -G "$generatorName" -A ARM $buildOpts
-                #cmake --build . --config release
-                vs-build "Assimp.sln" build "Release|ARM"
-            elif [ $ARCH == "arm64" ] ; then
-                mkdir -p build_vs_arm64
-                cd build_vs_arm64
-                generatorName+=''
-                echo "generatorName $generatorName -A ARM64"
-                cmake .. -G "$generatorName" -A ARM64 $buildOpts
-                #cmake --build . --config release
-                vs-build "Assimp.sln" build "Release|ARM64"
-            fi
-
-            #vs-build "Assimp.sln" build "Release|x64"
-            #vs-build "Assimp.sln" build "Debug|x64"
-        fi
-        cd ..
+        cd ..      
+       
         #cleanup to not fail if the other platform is called
         rm -f CMakeCache.txt
         echo "--------------------"
@@ -340,20 +297,22 @@ function copy() {
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ] ; then
+        
+
         if [ $ARCH == 32 ] ; then
-            mkdir -p $1/lib/$TYPE/Win32
-            # copy .lib and .dll artifacts
-            cp -v build_vs_32/lib/Release/*.lib $1/lib/$TYPE/Win32
-            # copy header files
-            cp -v -r build_vs_32/include/* $1/include
+            PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
-            mkdir -p $1/lib/$TYPE/x64
-            # copy .lib and .dll artifacts
-            cp -vr build_vs_64/lib/Release $1/lib/$TYPE/x64
-            cp -vr build_vs_64/lib/Debug $1/lib/$TYPE/x64
-            # copy header files
-            cp -v -r build_vs_64/include/* $1/include
-        fi
+            PLATFORM="x64"
+        elif [ $ARCH == "arm64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "arm" ]; then
+            PLATFORM="ARM"
+        fi        
+        cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/assimp.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib       
+
+
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then

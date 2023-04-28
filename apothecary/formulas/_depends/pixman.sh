@@ -65,7 +65,7 @@ function build() {
 		make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
-		
+
 		if [ $ARCH == 32 ] ; then
             PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
@@ -79,7 +79,6 @@ function build() {
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
 
