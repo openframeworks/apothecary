@@ -17,7 +17,9 @@ VER=2.10.4
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
 
 ICU_VER=73-1
-DEPEND_URL=https://github.com/unicode-org/icu/archive/refs/tags/release-${ICU_VER}
+
+DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER}-src.zip
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -26,8 +28,8 @@ function download() {
     . "$DOWNLOADER_SCRIPT"
     downloader "${URL}.${DOWNLOAD_TYPE}"
 
-       unzip  v${VER}.${DOWNLOAD_TYPE}
-       rm v${VER}.${DOWNLOAD_TYPE}
+    unzip  v${VER}.${DOWNLOAD_TYPE}
+    rm v${VER}.${DOWNLOAD_TYPE}
    
     
 
@@ -35,9 +37,9 @@ function download() {
     
 
     downloader ${DEPEND_URL}
-    tar xzf release-${ICU_VER}.tar.gz
-    mv icu-release-${ICU_VER} icu
-    rm release-${ICU_VER}.tar.gz
+    unzip icu4c-${ICU_VER}-src.zip
+    mv icu4c-${ICU_VER}-src.zip icu
+    rm icu4c-${ICU_VER}-src.zip
 }
 
 # prepare the build environment, executed inside the lib src dir
