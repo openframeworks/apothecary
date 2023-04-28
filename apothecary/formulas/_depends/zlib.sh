@@ -30,35 +30,31 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+
 	if [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				cmake . -G "Visual Studio $VS_VER Win32"
-				cmake --build . --config Release
-			elif [ $ARCH == 64 ] ; then
-				cmake . -G "Visual Studio $VS_VER Win64"
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				cmake . -G "Visual Studio $VS_VER ARM"
-				cmake --build . --config Release 
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A Win32
-				cmake --build . --config Release
-			elif [ $ARCH == 64 ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A x64
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				cmake . -G "Visual Studio $VS_VER" -A ARM
-				cmake --build . --config Release 
-			elif [ $ARCH == "arm64" ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A ARM64
-				cmake --build . --config Release 
-			fi
-		fi
+
+		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echoVerbose "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include  "
+
+        cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Release
+
+        cd ..
+		
+	
 	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p build
 		cd build
@@ -85,17 +81,9 @@ function copy() {
 	if [ "$TYPE" == "osx" ] ; then
 		echo "no install"
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			PLATFORM="Win32"
-		elif [ $ARCH == 64 ] ; then
-			PLATFORM="x64"
-		elif [ $ARCH == "arm64" ] ; then
-			PLATFORM="ARM64"
-		elif [ $ARCH == "arm" ]; then
-			PLATFORM="ARM"
-		fi
-		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
-		cp -v Release/zlibstatic.lib $1/../cairo/lib/$TYPE/$PLATFORM/zlib.lib
+		
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/zlibstatic.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
 	else
 		make install
 	fi
@@ -109,4 +97,22 @@ function clean() {
 		make uninstall
 		make clean
 	fi
+}
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "zlib" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    echo "load file ${SAVE_FILE}"
+
+    if loadsave ${TYPE} "zlib" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      echo "The entry exists and doesn't need to be rebuilt."
+      return 0;
+    else
+      echo "The entry doesn't exist or needs to be rebuilt."
+      return 1;
+    fi
 }

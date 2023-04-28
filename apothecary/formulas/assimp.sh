@@ -93,7 +93,9 @@ function build() {
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
 
-        DEFS="-DCMAKE_C_STANDARD=17 \
+        DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF 
@@ -296,23 +298,10 @@ function copy() {
 
     # libs
     mkdir -p $1/lib/$TYPE
-    if [ "$TYPE" == "vs" ] ; then
-        
-
-        if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"
-        fi        
+    if [ "$TYPE" == "vs" ] ; then            
         cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/assimp.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib       
-
-
+        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc143-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib  
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then

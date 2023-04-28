@@ -64,3 +64,21 @@ function clean() {
 	make uninstall
 	make clean
 }
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "pkg-config" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    echo "load file ${SAVE_FILE}"
+
+    if loadsave ${TYPE} "pkg-config" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      echo "The entry exists and doesn't need to be rebuilt."
+      return 0;
+    else
+      echo "The entry doesn't exist or needs to be rebuilt."
+      return 1;
+    fi
+}

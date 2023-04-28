@@ -448,7 +448,6 @@ if [ "$TYPE" = "vs" ]; then
 	fi
 
 
-
 	export VS_BASE_PATH; 
 	export VS_VARS_PATH;
     export VS_YEAR;
@@ -483,6 +482,16 @@ if [ "$TYPE" = "vs" ]; then
             export PATH="/c/Program Files/CMake/bin/:$PATH"
         fi
     fi
+
+    if [ $ARCH == 32 ] ; then
+        PLATFORM="Win32"
+    elif [ $ARCH == 64 ] ; then
+        PLATFORM="x64"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="ARM64"
+    elif [ $ARCH == "arm" ]; then
+        PLATFORM="ARM"
+    fi 
 fi
 if [ "$TYPE" = "emscripten" ]; then
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
@@ -828,9 +837,9 @@ function updateFormula() {
 	prepareFormula $1
 
 	if load $1; then
-	   echo "Skipping build as already done for this target "
+	   echoInfo "Skipping build as already done for this target "
 	else
-        echo "The entry doesn't exist or needs to be rebuilt."
+        echoVerbose "The entry doesn't exist or needs to be rebuilt."
         buildFormula $1
 	    copyFormula $1
 
@@ -936,8 +945,15 @@ function buildFormula() {
 
 	# dependencies
 	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
-		apothecaryDependencies build
-		apothecaryDependencies copy
+
+		if apothecaryDependencies load $1; then
+        	echoInfo "Skipping build apothecaryDependency as already done for this target "
+    	else
+    		echoVerbose "apothecaryDependency The entry doesn't exist or needs to be rebuilt."       
+			apothecaryDependencies build
+			apothecaryDependencies copy
+			apothecaryDependencies save
+		fi
 	fi
 
 	build $1

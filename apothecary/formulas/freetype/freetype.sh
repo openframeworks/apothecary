@@ -9,12 +9,12 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.11.1
-FVER=211
+VER=2.13.0
+FVER=213
 
 # tools for git use
 GIT_URL=https://git.savannah.gnu.org/r/freetype/freetype2.git
-GIT_TAG=VER-2-11
+GIT_TAG=VER-2-13
 URL=https://download.savannah.gnu.org/releases/freetype
 
 # download the source code and unpack it into LIB_NAME
@@ -91,24 +91,32 @@ function build() {
 		echo "$BUILD_DIR"
 
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset tmp
-		unset TEMP
-		unset temp
-		cd builds/windows/vc2010 #this upgrades without issue to vs2015
+		
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"   
 
-		vs-upgrade freetype.sln
+        rm -rf "build_${TYPE}_${ARCH}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS="
+        	-DCMAKE_BUILD_TYPE=Release \
+        	-DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DFT_DISABLE_ZLIB=TRUE \
+            -DFT_DISABLE_BZIP2=TRUE \
+            -DFT_DISABLE_PNG=TRUE \
+            -DFT_DISABLE_HARFBUZZ=TRUE \
+            -DFT_DISABLE_BROTLI=TRUE "
 
-		if [ "$ARCH" ==  "32" ] ; then
-			vs-build freetype.sln Build "Release|Win32"
-		elif [ "$ARCH" == "64" ] ; then
-			vs-build freetype.sln Build "Release|x64"
-		elif [ "$ARCH" == "arm" ] ; then
-			vs-build freetype.sln Build "Release|ARM"
-		elif [ "$ARCH" == "arm64" ] ; then
-			vs-build freetype.sln Build "Release|ARM64"
-		fi
-		cd ../../../
+         cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Release
+
+        cd ..
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# configure with arch
@@ -438,13 +446,8 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH ==  32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v objs/vc2010/Win32/freetype$FVER.lib $1/lib/$TYPE/Win32/libfreetype.lib
-		else
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v objs/vc2010/x64/freetype$FVER.lib $1/lib/$TYPE/x64/libfreetype.lib
-		fi
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/freetype.lib" $1/lib/$TYPE/$PLATFORM/libfreetype.lib  
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
 		echoWarning "TODO: copy msys2 lib"

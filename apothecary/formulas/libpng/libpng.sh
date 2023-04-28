@@ -100,65 +100,35 @@ function build() {
 		unset TMP
 		unset TEMP
 
-		mkdir -p build_$ARCH
-		cd build_$ARCH
+		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+    echoVerbose "--------------------"
+    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+    mkdir -p "build_${TYPE}_${ARCH}"
+    cd "build_${TYPE}_${ARCH}"
+  
+		export ZLIB_ROOT=zlib/lib/$TYPE/$PLATFORM/zlib.lib
+    DEFS="
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+        -DCMAKE_CXX_EXTENSIONS=OFF \
+        -DZLIB_ROOT=${ZLIB_ROOT} \
+        -DZLIB_LIBRARY=${ZLIB_ROOT} \
+        -DPNG_TESTS=OFF \
+        -DPNG_SHARED=OFF \
+        -DPNG_STATIC=ON";
 
 		ROOT=${PWD}/..
-		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
-
 		
-		mkdir -p build
 
-		if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win32" -DZLIB_ROOT=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			elif [ $ARCH == 64 ] ; then
-				cmake .. -G "Visual Studio $VS_VER Win64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				cmake .. -G "Visual Studio $VS_VER ARM" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			elif [ $ARCH == "arm64" ] ; then
-				cmake .. -G "Visual Studio $VS_VER ARM64" -DZLIB_ROOT=${ZLIB_ROOT}  -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				export ZLIB_ROOT=../cairo/lib/vs/x32/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
+		cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+    cmake --build . --config Release
 
-			elif [ $ARCH == 64 ] ; then
-				export ZLIB_ROOT=../cairo/lib/vs/x64/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A x64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				export ZLIB_ROOT=../cairo/lib/vs/arm/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A ARM -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			elif [ $ARCH == "arm64" ] ; then
-				export ZLIB_ROOT=../cairo/lib/vs/arm64/zlib.lib
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DZLIB_ROOT=${ZLIB_ROOT} -DZLIB_LIBRARY=${ZLIB_ROOT} -DPNG_TESTS=OFF -DPNG_SHARED=OFF -DPNG_STATIC=ON
-				cmake --build . --config Release
-			fi
-		fi
-
-		cd ..
+    cd ..		
 		
-		# PNG_BUILD_ZLIB
-		# ZLIB_ROOT
-		# cd projects/vstudio
-
-		# vs-upgrade vstudio.sln
-
-		# if [ $ARCH == 32 ] ; then
-		# 	vs-build vstudio.sln Build "Release Library|x86"
-		# elif [ $ARCH == 64 ] ; then
-		# 	vs-build vstudio.sln Build "Release Library|x64"
-		# fi
-		# cd ../../
 	fi
 
 
@@ -168,19 +138,9 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		if [ "$ARCH" == 32 ]; then
-			mkdir -p $1/../cairo/lib/vs/Win32/
-			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/Win32/libpng.lib
-		elif [ "$ARCH" == 64 ]; then
-			mkdir -p $1/../cairo/lib/vs/x64/
-			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/x64/libpng.lib
-		elif [ "$ARCH" == "arm64" ]; then
-			mkdir -p $1/../cairo/lib/vs/ARM64/
-			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/ARM64/libpng.lib
-		elif [ "$ARCH" == "arm" ] ; then
-			mkdir -p $1/../cairo/lib/vs/ARM/
-			cp build_$ARCH/Release/libpng16_static.lib $1/../cairo/lib/vs/ARM/libpng.lib
-		fi
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		echo "libpng copy"
+    cp -v "build_${TYPE}_${ARCH}/Release/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib     		
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE

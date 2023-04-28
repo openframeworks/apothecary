@@ -52,30 +52,15 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    if [ "$TYPE" == "vs" ] ; then   
-
-        if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"            
-        else
-            vs-build libxml2.vcxproj "Build /p:PlatformToolset=v142" "Release|x64"
-        fi
-
-
-        echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-        echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"        
-
+    if [ "$TYPE" == "vs" ] ; then 
+        echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echoVerbose "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-
-
-        DEFS='-DCMAKE_C_STANDARD=17 \
+        DEFS='
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -271,16 +256,7 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     cp -Rv include/libxml/* $1/include/libxml/
 
-    if [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"
-        fi        
+    if [ "$TYPE" == "vs" ] ; then              
         
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
