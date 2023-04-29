@@ -42,8 +42,12 @@ function loadsave() {
   local datetime=$(echo "$entry" | cut -d "|" -f 6)
 
   # Check if the entry needs to be rebuilt
-  local now=$(date +%s)
-  local saved=$(date -d "$datetime" +%s)
+  local now=$(date -u +%s)
+  if [[ $(uname) == "Darwin" ]]; then
+    local saved=$(date -ju -f "%Y-%m-%d %H:%M:%S" "$datetime" +%s)
+  else
+    local saved=$(date -u -d "$datetime" +%s)
+  fi
   local diff=$(( (now - saved) / (60 * 60 * 24) ))
 
   if [[ "$built" == "false" || "$diff" -ge 90 ]]; then
