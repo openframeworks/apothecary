@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# GLFW
+# curl
 # creating windows with OpenGL contexts and managing input and events
-# http://www.glfw.org
+# https://github.com/curl/curl/
 #
 # uses a CMake build system
 
@@ -14,8 +14,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 FORMULA_DEPENDS=( "openssl" "pkg-config")
 
 # define the version by sha
-VER=7_81_0
-VER_D=7.81.0
+VER=8_0_1
+VER_D=8.0.1
 SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
@@ -245,7 +245,7 @@ function build() {
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
         elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
+            IOS_ARCHS="arm64" #armv7s
         fi
 		for IOS_ARCH in ${IOS_ARCHS}; do
             echo
