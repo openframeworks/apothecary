@@ -11,7 +11,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" "pkg-config")
+FORMULA_DEPENDS=( "openssl" "pkg-config" "zlib")
 
 # define the version by sha
 VER=8_0_1
@@ -77,12 +77,11 @@ function build() {
 
         # /p:PlatformToolset=v142 is a sort of hack to retarget solution to VS 2019 when the sln doesn't support the platform
         if [ $ARCH == 32 ] ; then
-
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
         elif [ $ARCH == 64 ] ; then
             PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
-        elif [ $ARCH == "arm" ]; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|ARM"
+        elif [ $ARCH == "arm64" ]; then
+            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v143" "LIB Release - LIB OpenSSL|ARM64"
 
         fi
 

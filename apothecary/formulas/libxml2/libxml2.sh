@@ -39,7 +39,6 @@ function download() {
 
     downloader ${DEPEND_URL}
     unzip icu4c-${ICU_VER_U}-src.zip
-    mv icu4c-${ICU_VER_U}-src icu
     rm icu4c-${ICU_VER_U}-src.zip
 }
 
