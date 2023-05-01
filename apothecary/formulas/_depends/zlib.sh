@@ -45,13 +45,19 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
             -DBUILD_SHARED_LIBS=ON \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include  "
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
 
+         
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
-            -G "${GENERATOR_NAME}"
-        cmake --build . --config Release
-
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_INSTALL_PREFIX=/install \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON 
+        cmake --build . --config Release --target install
+ 
         cd ..
 		
 	

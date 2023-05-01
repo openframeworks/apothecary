@@ -104,30 +104,42 @@ function build() {
     echoVerbose "--------------------"
     GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
     mkdir -p "build_${TYPE}_${ARCH}"
-    cd "build_${TYPE}_${ARCH}"
-  
-		export ZLIB_ROOT=zlib/lib/$TYPE/$PLATFORM/zlib.lib
-    DEFS="
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_C_STANDARD=17 \
-        -DCMAKE_CXX_STANDARD=17 \
-        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-        -DCMAKE_CXX_EXTENSIONS=OFF \
-        -DZLIB_ROOT=${ZLIB_ROOT} \
-        -DZLIB_LIBRARY=${ZLIB_ROOT} \
-        -DPNG_TESTS=OFF \
-        -DPNG_SHARED=OFF \
-        -DPNG_STATIC=ON";
+cd "build_${TYPE}_${ARCH}"
+export ZLIB_ROOT=zlib/lib/$TYPE/$PLATFORM/zlib.lib
+ROOT=${PWD}/..
+DEFS="
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_STANDARD=17 \
+    -DCMAKE_CXX_STANDARD=17 \
+    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+    -DCMAKE_CXX_EXTENSIONS=OFF \
+    -DZLIB_ROOT=${ZLIB_ROOT} \
+    -DZLIB_LIBRARY=${ZLIB_ROOT} \
+    -DPNG_TESTS=OFF \
+    -DPNG_SHARED=OFF \
+    -DPNG_STATIC=ON \
+    -DBUILD_SHARED_LIBS=ON \
+    -DCMAKE_INSTALL_PREFIX=Release \
+    -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+    -DCMAKE_INSTALL_INCLUDEDIR=include \
+    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
+    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=${ROOT}/temp \
+    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=${ROOT}/intermediate"
 
-		ROOT=${PWD}/..
-		
 
-		cmake .. ${DEFS} \
-            -A "${PLATFORM}" \
-            -G "${GENERATOR_NAME}"
-    cmake --build . --config Release
 
-    cd ..		
+cmake .. ${DEFS} \
+    -A "${PLATFORM}" \
+    -G "${GENERATOR_NAME}" \
+    -D CMAKE_VERBOSE_MAKEFILE=ON \
+    -D BUILD_SHARED_LIBS=ON 
+
+cmake --build . --config Release --target install
+
+cd ..
+	
 		
 	fi
 
