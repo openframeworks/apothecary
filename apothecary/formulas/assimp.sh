@@ -301,7 +301,7 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then            
         cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc143-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib  
+        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib  
     elif [ "$TYPE" == "osx" ] ; then
         cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
@@ -327,11 +327,7 @@ function copy() {
 function clean() {
 
     if [ "$TYPE" == "vs" ] ; then
-        if [ $ARCH == 32 ] ; then
-            vs-clean "build_vs_32/Assimp.sln";
-        elif [ $ARCH == 64 ] ; then
-            vs-clean "build_vs_64/Assimp.sln";
-        fi
+        rm -f build_${TYPE}_${ARCH}
         rm -f CMakeCache.txt
         echo "Assimp VS | $TYPE | $ARCH cleaned"
 
