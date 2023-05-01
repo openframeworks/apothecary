@@ -34,9 +34,6 @@ function download() {
    
     
 
-    mv libxml2-${VER} libxml2
-    
-
     downloader ${DEPEND_URL}
     unzip icu4c-${ICU_VER_U}-src.zip
     rm icu4c-${ICU_VER_U}-src.zip
