@@ -91,10 +91,15 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
-            cmake --build . --config Release          
+            
+            cmake --build . --config Release --target install     
 
         cd ..
 
