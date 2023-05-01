@@ -74,17 +74,11 @@ function prepare() {
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
 
-		echo "copying from $PWD"
-		if [ "$ARCH" == 32 ]; then
-			cp ../libpng/projects/vs2015/Win32_LIB_Release/libpng.lib ../libpng/libpng.lib
-		elif [ "$ARCH" == 64 ]; then
-			cp ../libpng/projects/vs2015/x64/LIB\ Release/libpng.lib ../libpng/libpng.lib
-		elif [ "$ARCH" == "ARM" ]; then
-			cp ../libpng/projects/vs2015/ARM/LIB\ Release/libpng.lib ../libpng/libpng.lib
-		fi
-		ls ../zlib
-		ls ../zlib/Release
-		cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+		#cp -v libpng/lib/$TYPE/$PLATFORM/libpng.lib ../libpng/libpng.lib     
+
+		#ls ../zlib
+		#ls ../zlib/Release
+		#cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	else
 		# generate the configure script if it's not there
 		
@@ -115,22 +109,34 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		ROOT=${PWD}/..
-		export INCLUDE="$ROOT/zlib"
-		export INCLUDE="$INCLUDE;$ROOT/libpng"
-		export INCLUDE="$INCLUDE;$ROOT/pixman/pixman"
-		export INCLUDE="$INCLUDE;$ROOT/cairo/boilerplate"
-		export INCLUDE="$INCLUDE;$ROOT/cairo/src"
-		export LIB="$ROOT/zlib/Release/"
-		export LIB="$LIB;$ROOT/libpng/projects/visualc71/Win32_LIB_Release"
+
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"    
+
+        ROOT=${PWD}/..  
+
+
+        #mkdir -p "build_${TYPE}_${ARCH}"
+        #cd "build_${TYPE}_${ARCH}"		
+
+		CAIRO_HAS_PNG_FUNCTIONS=1
+		
+		export ZLIB_PATH="$ROOT/zlib/build_${TYPE}_${ARCH}/Release/"
+		export LIBPNG_PATH="$ROOT/libpng/build_${TYPE}_${ARCH}/Release"
+		export PIXMAN_PATH="$ROOT/pixman/build_${TYPE}_${ARCH}/Release"
+		
 		sed -i "s/-MD/-MT/" build/Makefile.win32.common
-		sed -i "s/zdll.lib/zlib.lib/" build/Makefile.win32.common
-		# systeminfo
-		# which link
-		# echo "PATH=$PATH"
-		# ls "/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX64/x64"
-		# find "/c/Program Files (x86)/Microsoft Visual Studio/2017/" -iname link.exe
-		# exit 1
+		sed -i.bk 's|$(ZLIB_PATH)/zdll.lib|'"${ZLIB_PATH}"'/zlib.lib|' build/Makefile.win32.common
+		sed -i.bk 's|$(LIBPNG_PATH)/libpng.lib|'"${LIBPNG_PATH}"'/libpng16_static.lib|' build/Makefile.win32.common
+
+		sed -i.bk 's|$(PIXMAN_PATH)/pixman/$(CFG)/pixman-1.lib|'"${PIXMAN_PATH}"'/lib/pixman-1_static.lib|' build/Makefile.win32.common
+
+		sed -i.bk 's|-I$(PIXMAN_PATH)/pixman/|'"-I${PIXMAN_PATH}"'/include/pixman-1|' build/Makefile.win32.common
+
+		export ZLIB_PATH="$ZLIB_PATH/include"
+		export LIBPNG_PATH="$LIBPNG_PATH/include"
+
 		with_vs_env "make -f Makefile.win32 \"CFG=release\""
 	elif [ "$TYPE" == "osx" ] ; then
 
