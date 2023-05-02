@@ -109,12 +109,17 @@ function build() {
             -DFT_DISABLE_BZIP2=TRUE \
             -DFT_DISABLE_PNG=TRUE \
             -DFT_DISABLE_HARFBUZZ=TRUE \
-            -DFT_DISABLE_BROTLI=TRUE "
+            -DFT_DISABLE_BROTLI=TRUE \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release"
 
          cmake .. ${DEFS} \
-            -A "${PLATFORM}" \
-            -G "${GENERATOR_NAME}"
-        cmake --build . --config Release
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON \
+		    -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}" 
+        cmake --build . --config Release --target install   
 
         cd ..
 

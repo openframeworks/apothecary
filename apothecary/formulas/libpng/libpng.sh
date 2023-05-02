@@ -152,7 +152,7 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		echo "libpng copy"
-    cp -v "build_${TYPE}_${ARCH}/Release/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib     		
+    	cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib     		
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE
