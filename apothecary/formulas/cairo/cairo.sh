@@ -73,12 +73,9 @@ function prepare() {
 		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
-
-		#cp -v libpng/lib/$TYPE/$PLATFORM/libpng.lib ../libpng/libpng.lib     
-
-		#ls ../zlib
-		#ls ../zlib/Release
-		#cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
+		echo ""
+	
+		cp -Rv $FORMULA_DIR/ ./
 	else
 		# generate the configure script if it's not there
 		
@@ -108,36 +105,57 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
+	export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
 	if [ "$TYPE" == "vs" ] ; then
 
 		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"    
 
-        ROOT=${PWD}/..  
-
-
-        #mkdir -p "build_${TYPE}_${ARCH}"
-        #cd "build_${TYPE}_${ARCH}"		
+        ROOT=$(realpath ${PWD}/..) 
 
 		CAIRO_HAS_PNG_FUNCTIONS=1
-		
+
+		echoInfo "If any issue with LNK1104: cannot open file 'LIBCMT.lib make sure to install Spectre Mitigated VS C++Libs'"
 		export ZLIB_PATH="$ROOT/zlib/build_${TYPE}_${ARCH}/Release/"
 		export LIBPNG_PATH="$ROOT/libpng/build_${TYPE}_${ARCH}/Release"
-		export PIXMAN_PATH="$ROOT/pixman/build_${TYPE}_${ARCH}/Release"
-		
-		sed -i "s/-MD/-MT/" build/Makefile.win32.common
-		sed -i.bk 's|$(ZLIB_PATH)/zdll.lib|'"${ZLIB_PATH}"'/zlib.lib|' build/Makefile.win32.common
-		sed -i.bk 's|$(LIBPNG_PATH)/libpng.lib|'"${LIBPNG_PATH}"'/libpng16_static.lib|' build/Makefile.win32.common
+		export PIXMAN_PATH="$ROOT/pixman/build_${TYPE}_${ARCH}/Release"		
 
-		sed -i.bk 's|$(PIXMAN_PATH)/pixman/$(CFG)/pixman-1.lib|'"${PIXMAN_PATH}"'/lib/pixman-1_static.lib|' build/Makefile.win32.common
-
-		sed -i.bk 's|-I$(PIXMAN_PATH)/pixman/|'"-I${PIXMAN_PATH}"'/include/pixman-1|' build/Makefile.win32.common
-
-		export ZLIB_PATH="$ZLIB_PATH/include"
-		export LIBPNG_PATH="$LIBPNG_PATH/include"
-
-		with_vs_env "make -f Makefile.win32 \"CFG=release\""
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DPIXMAN_ROOT=${PIXMAN_PATH} \
+            -DPNG_ROOT=${LIBPNG_PATH} \
+            -DZLIB_ROOT=${ZLIB_PATH} \
+            -DPIXMAN_INCLUDE_DIR=${PIXMAN_PATH}/include/pixman-1 \
+            -DPIXMAN_LIBRARIES=${PIXMAN_PATH}/lib/pixman-1_static.lib \
+            -DZLIB_INCLUDE_DIR=${ZLIB_PATH}/include \
+            -DZLIB_LIBRARY=${ZLIB_PATH}/zlib.lib \
+            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_PATH}/include \
+            -DPNG_LIBRARY=${LIBPNG_PATH}/lib/libpng16_static.lib \
+            -DFREETYPE_ROOT={OF_LIBS_ABS_PATH}/freetype \
+            -DFREETYPE_CFLAGS=-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2 \
+        	-DFREETYPE_LIBS=-L${OF_LIBS_ABS_PATH}/freetype/lib/$TYPE/$PLATFORM/libfreetype.lib \
+        	-DBUILD_GTK_DOC=OFF -DBUILD_TESTS=OFF -DBUILD_DEPENDENCY_TRACKING=OFF -DBUILD_XLIB=OFF -DBUILD_QT=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_QUARTZ_FONT=OFF -DBUILD_QUARTZ=OFF -DBUILD_QUARTZ_IMAGE=OFF"
+         
+        cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON 
+        cmake --build . --config Release --target install
+ 
+        cd ..
 	elif [ "$TYPE" == "osx" ] ; then
 
         # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
@@ -236,24 +254,13 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "vs" ] ; then
-		#this copies all header files but we dont need all of them it seems
-		#maybe alter the VS-Cairo build to separate necessary headers
 		# make the path in the libs dir
 		mkdir -p $1/include/cairo
-
 		# copy the cairo headers
-		cp -Rv src/*.h $1/include/cairo
-
-		if [ $ARCH == 32 ] ; then
-			# make the libs path
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v src/release/cairo-static.lib $1/lib/$TYPE/Win32/cairo-static.lib
-		elif [ $ARCH == 64 ] ; then
-			# make the libs path
-			mkdir -p $1/lib/$TYPE/x64
-			echo $PWD
-			cp -v src/release/cairo-static.lib $1/lib/$TYPE/x64/cairo-static.lib
-		fi
+		
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/cairo $1/include/cairo"		
+    	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
 
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
 		# make the path in the libs dir
