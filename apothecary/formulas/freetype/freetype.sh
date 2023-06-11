@@ -385,6 +385,8 @@ function build() {
      	 	-D CMAKE_CXX_COMPILER=${CXX} \
      	 	-D CMAKE_C_FLAGS=${CFLAGS} \
      	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
+     	 	-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
         	-D ANDROID_ABI=${ABI} \
         	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
         	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \

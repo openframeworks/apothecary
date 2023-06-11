@@ -12,9 +12,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 # define the version
 
  # 3.18.0
-VER=3186
+VER=3189
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.18.6
+GIT_TAG=3.18.9
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -283,24 +283,79 @@ function build() {
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE/$ABI
         
 
-        export EXTRA_LINK_FLAGS="-fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
+        export EXTRA_LINK_FLAGS="-fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions 
+        -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB
+         -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
 		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c17"
 		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c++17"
 		export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
 
-        make clean -f Makefile.android
-        make -j${PARALLEL_MAKE} \
-        	CC=${CC} \
-        	AR=${AR} \
-        	CXX=${CXX} \
-    		RANLIB=${RANLIB} \
-    		LD=${LD} \
-    		STRIP=${STRIP} \
-        	-f Makefile.android \
-        	libfreeimage.a
+		source ../../android_configure.sh $ABI cmake
+        rm -rf "build_${ABI}/"
+        rm -rf "build_${ABI}/CMakeCache.txt"
+		mkdir -p "build_$ABI"
+		cd "./build_$ABI"
+		CFLAGS=""
+        export CMAKE_CFLAGS="$CFLAGS"
+        #export CFLAGS=""
+        export CPPFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+       	export LDFLAGS=""
+
+        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
+      		-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
+     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER_AR=${AR} \
+     	 	-D CMAKE_C_COMPILER=${CC} \
+     	 	-D CMAKE_CXX_COMPILER=${CXX} \
+     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
+     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
+        	-D ANDROID_ABI=${ABI} \
+        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
+        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+        	-D ANDROID_TOOLCHAIN=clang \
+        	-D CMAKE_BUILD_TYPE=Release \
+        	-D FT_REQUIRE_HARFBUZZ=FALSE \
+        	-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+        	-DDISABLE_PERF_MEASUREMENT=ON \
+        	-DLIBRAW_LIBRARY_BUILD=ON\
+        	-DOPJ_STATIC=ON \
+        	-DLIBRAW_NODLL=ON \
+        	-DDHAVE_UNISTD_H=OFF \
+        	-DPNG_ARM_NEON_OPT=OFF \
+        	-DNDEBUG=OFF \
+        	-DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+        	-DCMAKE_C_STANDARD=17 \
+        	-DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+        	-G 'Unix Makefiles' ..
+
+		make -j${PARALLEL_MAKE} VERBOSE=1
+		cd ..
+
+        # make clean -f Makefile.android
+        # make -j${PARALLEL_MAKE} \
+        # 	CC=${CC} \
+        # 	AR=${AR} \
+        # 	CXX=${CXX} \
+    	# 	RANLIB=${RANLIB} \
+    	# 	LD=${LD} \
+    	# 	STRIP=${STRIP} \
+        # 	-f Makefile.android \
+        # 	libfreeimage.a
       
-        mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
-        mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
+        # mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
+        # mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
     elif [ "$TYPE" == "vs" ]; then
         export CFLAGS="-pthread"
 		export CXXFLAGS="-pthread"
@@ -446,11 +501,9 @@ function copy() {
 
 	elif [ "$TYPE" == "android" ] ; then
         cp Source/FreeImage.h $1/include
-        if [ -d $1/lib/$TYPE/$ABI ]; then
-            rm -r $1/lib/$TYPE/$ABI
-        fi
+        rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -rv Dist/$ABI/*.a $1/lib/$TYPE/$ABI/
+	    cp -v build_$ABI/libFreeImage.a $1/lib/$TYPE/$ABI/libFreeImage.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp Source/FreeImage.h $1/include
         if [ -d $1/lib/$TYPE/ ]; then
