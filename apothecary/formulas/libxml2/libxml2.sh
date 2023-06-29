@@ -13,7 +13,7 @@ FORMULA_DEPENDS=( "automake")
 
 
 # define the version by sha
-VER=2.10.4
+VER=2.11.4
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
 
 ICU_VER=73-1
@@ -25,7 +25,7 @@ DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VE
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-        DOWNLOAD_TYPE="zip"
+    DOWNLOAD_TYPE="zip"
     . "$DOWNLOADER_SCRIPT"
     downloader "${URL}.${DOWNLOAD_TYPE}"
 

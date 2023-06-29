@@ -12,9 +12,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 # define the version
 
  # 3.18.0
-VER=3189
+VER=31810
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.18.9
+GIT_TAG=3.18.10
 
 # download the source code and unpack it into LIB_NAME
 function download() {
