@@ -413,8 +413,9 @@ function build() {
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
 
-	    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+	    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
 	    emmake make -j${PARALLEL_MAKE}
+		mv build_${TYPE}/libFreeImage.a build_${TYPE}/libfreeimage.a
 
         # local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
         # rm -rf $BUILD_DIR/FreeImagePatched
@@ -510,7 +511,7 @@ function copy() {
             rm -r $1/lib/$TYPE/
         fi
         mkdir -p $1/lib/$TYPE
-        cp -rv Dist/libfreeimage.a $1/lib/$TYPE/
+        cp -rv build_${TYPE}/libfreeimage.a $1/lib/$TYPE/libfreeimage.a
 	fi
 
     # copy license files

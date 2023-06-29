@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=2.13.0
+VER=2.13.1
 FVER=213
 
 # tools for git use
@@ -22,7 +22,7 @@ function download() {
 	echo "Downloading freetype-$VER"
 
 	. "$DOWNLOADER_SCRIPT"
-	downloader $URL/freetype-$VER.tar.gz -O freetype-$VER.tar.gz
+	downloader $URL/freetype-$VER.tar.gz -O -L  freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype
