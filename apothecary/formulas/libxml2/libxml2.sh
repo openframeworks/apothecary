@@ -34,18 +34,18 @@ function download() {
         rm v${VER}.${DOWNLOAD_TYPE}
 
         downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
-        unzip "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+        unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
         rm "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
     else
          DOWNLOAD_TYPE="tar.gz"
         . "$DOWNLOADER_SCRIPT"
         downloader "${URL}.${DOWNLOAD_TYPE}"
-        tar -zxvf v${VER}.${DOWNLOAD_TYPE}
+        tar -zxf v${VER}.${DOWNLOAD_TYPE}
         rm v${VER}.${DOWNLOAD_TYPE}
 
-        downloader "${DEPEND_URL}.tgz"
-        tar -zxvf "icu4c-${ICU_VER_U}-src.tgz"
-        rm "icu4c-${ICU_VER_U}-src.tgz"
+        downloader "${DEPEND_URL}.zip"
+        unzip -qq "icu4c-${ICU_VER_U}-src.zip"
+        rm "icu4c-${ICU_VER_U}-src.zip"
     fi
        
 
