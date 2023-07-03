@@ -16,10 +16,10 @@ FORMULA_DEPENDS=( "automake")
 VER=2.11.4
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
 
-ICU_VER=73-1
-ICU_VER_U=73_1
+ICU_VER=73-2
+ICU_VER_U=73_2
 
-DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src.zip
+DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src.
 
 
 # download the source code and unpack it into LIB_NAME
@@ -32,19 +32,24 @@ function download() {
 
         unzip -qq v${VER}.${DOWNLOAD_TYPE}
         rm v${VER}.${DOWNLOAD_TYPE}
+
+        downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
+        unzip "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+        rm "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
     else
          DOWNLOAD_TYPE="tar.gz"
         . "$DOWNLOADER_SCRIPT"
         downloader "${URL}.${DOWNLOAD_TYPE}"
-
         tar -zxvf v${VER}.${DOWNLOAD_TYPE}
         rm v${VER}.${DOWNLOAD_TYPE}
+
+        downloader "${DEPEND_URL}.tgz"
+        tar -zxvf "icu4c-${ICU_VER_U}-src.tgz"
+        rm "icu4c-${ICU_VER_U}-src.tgz"
     fi
        
 
-    downloader ${DEPEND_URL}
-    unzip icu4c-${ICU_VER_U}-src.zip
-    rm icu4c-${ICU_VER_U}-src.zip
+    
 }
 
 # prepare the build environment, executed inside the lib src dir
