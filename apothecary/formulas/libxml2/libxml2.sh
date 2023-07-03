@@ -19,7 +19,7 @@ URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
 ICU_VER=73-2
 ICU_VER_U=73_2
 
-DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src.
+DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src
 
 
 # download the source code and unpack it into LIB_NAME
