@@ -25,14 +25,22 @@ DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VE
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-    DOWNLOAD_TYPE="zip"
-    . "$DOWNLOADER_SCRIPT"
-    downloader "${URL}.${DOWNLOAD_TYPE}"
+    if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
+        DOWNLOAD_TYPE="zip"
+        . "$DOWNLOADER_SCRIPT"
+        downloader "${URL}.${DOWNLOAD_TYPE}"
 
-    unzip  v${VER}.${DOWNLOAD_TYPE}
-    rm v${VER}.${DOWNLOAD_TYPE}
-   
-    
+        unzip -qq v${VER}.${DOWNLOAD_TYPE}
+        rm v${VER}.${DOWNLOAD_TYPE}
+    else
+         DOWNLOAD_TYPE="tar.gz"
+        . "$DOWNLOADER_SCRIPT"
+        downloader "${URL}.${DOWNLOAD_TYPE}"
+
+        tar -zxvf v${VER}.${DOWNLOAD_TYPE}
+        rm v${VER}.${DOWNLOAD_TYPE}
+    fi
+       
 
     downloader ${DEPEND_URL}
     unzip icu4c-${ICU_VER_U}-src.zip
