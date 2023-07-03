@@ -89,13 +89,15 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_PREFIX=Release \
+		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
-		    -D BUILD_SHARED_LIBS=ON \
+		    -DBUILD_SHARED_LIBS=ON \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
             
@@ -103,25 +105,23 @@ function build() {
 
         cd ..
 
-
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"
-        fi
-		mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
-		pwd
-		cp -v "build_${TYPE}_${ARCH}/pixman/release/pixman-1_static.lib" $1/../cairo/lib/$TYPE/$PLATFORM/pixman-1.lib
+
+	if [ "$TYPE" == "vs" ] ; then		
+
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
+    	cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+
+    	# copy license file
+		rm -rf $1/license # remove any older files if exists
+		mkdir -p $1/license
+		cp -v COPYING $1/license/LICENSE
+
 	else # osx
 		# lib
 		cd pixman
@@ -131,6 +131,7 @@ function copy() {
 		cd ../
 		make install-pkgconfigDATA
 	fi
+
 }
 
 # executed inside the lib src dir

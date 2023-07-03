@@ -75,7 +75,7 @@ function prepare() {
 		apothecaryDepend copy freetype
 		echo ""
 	
-		cp -Rv $FORMULA_DIR/ ./
+		cp -RvT $FORMULA_DIR/ ./
 	else
 		# generate the configure script if it's not there
 		
@@ -114,12 +114,27 @@ function build() {
 
         ROOT=$(realpath ${PWD}/..) 
 
+        LIBS_ROOT=$(realpath $APOTHECARY_DIR/../)
+
 		CAIRO_HAS_PNG_FUNCTIONS=1
 
 		echoInfo "If any issue with LNK1104: cannot open file 'LIBCMT.lib make sure to install Spectre Mitigated VS C++Libs'"
-		export ZLIB_PATH="$ROOT/zlib/build_${TYPE}_${ARCH}/Release/"
-		export LIBPNG_PATH="$ROOT/libpng/build_${TYPE}_${ARCH}/Release"
-		export PIXMAN_PATH="$ROOT/pixman/build_${TYPE}_${ARCH}/Release"		
+		
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+
+		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$ROOT/libpng/$TYPE/$PLATFORM/libpng.lib"	
+
+		PIXMAN_ROOT="$LIBS_ROOT/pixman/"
+		PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
+		PIXMAN_LIBRARY="$ROOT/pixman/$TYPE/$PLATFORM/libpixman-1.lib"
+
+		FREETYPE_ROOT="$LIBS_ROOT/freetype/"
+		FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
+		FREETYPE_LIBRARY="$ROOT/freetype/$TYPE/$PLATFORM/libfreetype.lib"
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -133,18 +148,20 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DPIXMAN_ROOT=${PIXMAN_PATH} \
-            -DPNG_ROOT=${LIBPNG_PATH} \
-            -DZLIB_ROOT=${ZLIB_PATH} \
-            -DPIXMAN_INCLUDE_DIR=${PIXMAN_PATH}/include/pixman-1 \
-            -DPIXMAN_LIBRARIES=${PIXMAN_PATH}/lib/pixman-1_static.lib \
-            -DZLIB_INCLUDE_DIR=${ZLIB_PATH}/include \
-            -DZLIB_LIBRARY=${ZLIB_PATH}/zlib.lib \
-            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_PATH}/include \
-            -DPNG_LIBRARY=${LIBPNG_PATH}/lib/libpng16_static.lib \
-            -DFREETYPE_ROOT={OF_LIBS_ABS_PATH}/freetype \
-            -DFREETYPE_CFLAGS=-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2 \
-        	-DFREETYPE_LIBS=-L${OF_LIBS_ABS_PATH}/freetype/lib/$TYPE/$PLATFORM/libfreetype.lib \
+            -DPIXMAN_ROOT=${PIXMAN_ROOT} \
+            -DPNG_ROOT=${LIBPNG_ROOT} \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DFREETYPE_ROOT=${FREETYPE_ROOT} \
+            -DPIXMAN_INCLUDE_DIR=${PIXMAN_INCLUDE_DIR} \
+            -DPIXMAN_LIBRARY=${PIXMAN_LIBRARY} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DFREETYPE_LIBRARY=${FREETYPE_LIBRARY} \
+            -DFREETYPE_INCLUDE_DIR=${FREETYPE_INCLUDE_DIR} \
+            -DFREETYPE_CFLAGS=-I${FREETYPE_ROOT}/freetype2 \
+        	-DFREETYPE_LIBS=${FREETYPE_LIBRARY} \
         	-DBUILD_GTK_DOC=OFF -DBUILD_TESTS=OFF -DBUILD_DEPENDENCY_TRACKING=OFF -DBUILD_XLIB=OFF -DBUILD_QT=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_QUARTZ_FONT=OFF -DBUILD_QUARTZ=OFF -DBUILD_QUARTZ_IMAGE=OFF"
          
         cmake .. ${DEFS} \

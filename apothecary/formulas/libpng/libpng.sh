@@ -112,7 +112,7 @@ function build() {
 
 		Z_ROOT="$ROOT/zlib/"
 		Z_INCLUDE_DIR="$ROOT/zlib/include"
-		Z_LIBRARY="$ROOT/$TYPE/$PLATFORM/zlib.lib"
+		Z_LIBRARY="$ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
 
 		DEFS="
 		    -DCMAKE_BUILD_TYPE=Release \
@@ -144,31 +144,32 @@ function build() {
 
 	cmake --build . --config Release --target install
 
-	cd ..
-	
+	cd ..	
 		
 	fi
-
-
 
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
+	mkdir -p $1/include
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		echo "libpng copy"
-    	cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib     		
+    	cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
+    	cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE
 		cp -v ${BUILD_ROOT_DIR}/lib/libpng.a $1/lib/$TYPE/libpng.a
-		cp -v ${BUILD_ROOT_DIR}/lib/libpng16.a $1/lib/$TYPE/libpng16.a
-		# copy license file
-		rm -rf $1/license # remove any older files if exists
-		mkdir -p $1/license
-		cp -v LICENSE $1/license/
+		cp -v ${BUILD_ROOT_DIR}/lib/libpng16.a $1/lib/$TYPE/libpng16.a			
 	fi
+
+	# copy license file
+	rm -rf $1/license # remove any older files if exists
+	mkdir -p $1/license
+	cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir

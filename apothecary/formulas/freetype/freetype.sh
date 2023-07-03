@@ -112,7 +112,11 @@ function build() {
             -DFT_DISABLE_BROTLI=TRUE \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_INSTALL_PREFIX=Release"
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DBUILD_SHARED_LIBS=ON \
+		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin"
 
          cmake .. ${DEFS} \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
@@ -447,6 +451,7 @@ function copy() {
 
 	# copy lib
 	mkdir -p $1/lib/$TYPE
+	mkdir -p $1/lib/$TYPE/$PLATFORM/
 
 	if [ "$TYPE" == "osx" ] ; then
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
@@ -454,7 +459,9 @@ function copy() {
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/freetype.lib" $1/lib/$TYPE/$PLATFORM/libfreetype.lib  
+		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/freetype.lib" $1/lib/$TYPE/$PLATFORM/libfreetype.lib
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/freetype.dll" $1/lib/$TYPE/$PLATFORM/freetype.dll
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
 		echoWarning "TODO: copy msys2 lib"
@@ -462,7 +469,6 @@ function copy() {
 	    rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
 	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
-
 	elif [ "$TYPE" == "emscripten" ] ; then
 		cp -v build/$TYPE/lib/libfreetype.bc $1/lib/$TYPE/libfreetype.bc
 	fi
@@ -470,7 +476,7 @@ function copy() {
 	# copy license files
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
-	#cp -v docs/LICENSE.TXT $1/license/
+	cp -v LICENSE.TXT $1/license/LICENSE
 	cp -v docs/FTL.TXT $1/license/
 	cp -v docs/GPLv2.TXT $1/license/
 }
