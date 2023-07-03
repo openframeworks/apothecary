@@ -5,14 +5,15 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.37
+VER=1.6.40
+WIN_VER=1640
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
 URL=https://prdownloads.sourceforge.net/libpng
 SHA=
-WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1637.zip
+WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1640.zip
 
 FORMULA_TYPES=( "osx" "vs" )
 
@@ -24,10 +25,10 @@ function download() {
 	. "$DOWNLOADER_SCRIPT"
 
 	if [ "$TYPE" == "vs" ] ; then
-		downloader ${WINDOWS_URL}?download -O lpng1637.zip
-		unzip lpng1637.zip
-		mv lpng1637 libpng
-		rm lpng1637.zip
+		downloader "${WINDOWS_URL}?download -O lpng${WIN_VER}.zip"
+		unzip "lpng${WIN_VER}.zip"
+		mv "lpng${WIN_VER}" libpng
+		rm "lpng${WIN_VER}.zip"
 	else 
 		downloader ${URL}/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
 		tar -xf libpng-$VER.tar.gz
@@ -73,10 +74,11 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
+	
 	if [ "$TYPE" == "osx" ] ; then
+		ROOT=$(realpath ${PWD}/..)
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
-        ROOT=${PWD}/..
 		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
 		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
 
@@ -97,48 +99,52 @@ function build() {
 		make clean
 		make install
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
+
+		ROOT=$(realpath $APOTHECARY_DIR/../)
+
 
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-    echoVerbose "--------------------"
-    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
-    mkdir -p "build_${TYPE}_${ARCH}"
-cd "build_${TYPE}_${ARCH}"
-export ZLIB_ROOT=zlib/lib/$TYPE/$PLATFORM/zlib.lib
-ROOT=${PWD}/..
-DEFS="
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_STANDARD=17 \
-    -DCMAKE_CXX_STANDARD=17 \
-    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-    -DCMAKE_CXX_EXTENSIONS=OFF \
-    -DZLIB_ROOT=${ZLIB_ROOT} \
-    -DZLIB_LIBRARY=${ZLIB_ROOT} \
-    -DPNG_TESTS=OFF \
-    -DPNG_SHARED=OFF \
-    -DPNG_STATIC=ON \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_INSTALL_PREFIX=Release \
-    -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-    -DCMAKE_INSTALL_INCLUDEDIR=include \
-    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
-    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
-    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
-    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=${ROOT}/temp \
-    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=${ROOT}/intermediate"
+	    echoVerbose "--------------------"
+	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
 
+	    mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
 
+		Z_ROOT="$ROOT/zlib/"
+		Z_INCLUDE_DIR="$ROOT/zlib/include"
+		Z_LIBRARY="$ROOT/$TYPE/$PLATFORM/zlib.lib"
 
-cmake .. ${DEFS} \
-    -A "${PLATFORM}" \
-    -G "${GENERATOR_NAME}" \
-    -D CMAKE_VERBOSE_MAKEFILE=ON \
-    -D BUILD_SHARED_LIBS=ON 
+		DEFS="
+		    -DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_C_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DZLIB_ROOT=${Z_ROOT} \
+		    -DZLIB_LIBRARY=${Z_LIBRARY} \
+		    -DZLIB_INCLUDE=${Z_INCLUDE_DIR} \
+		    -DPNG_TESTS=OFF \
+		    -DPNG_SHARED=OFF \
+		    -DPNG_STATIC=ON \
+		    -DBUILD_SHARED_LIBS=ON \
+		    -DCMAKE_INSTALL_PREFIX=Release \
+		    -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+		    -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
+		    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=${ROOT}/temp \
+		    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=${ROOT}/intermediate"
 
-cmake --build . --config Release --target install
+	cmake .. ${DEFS} \
+	    -A "${PLATFORM}" \
+	    -G "${GENERATOR_NAME}" \
+	    -D CMAKE_VERBOSE_MAKEFILE=ON \
+	    -D BUILD_SHARED_LIBS=ON 
 
-cd ..
+	cmake --build . --config Release --target install
+
+	cd ..
 	
 		
 	fi
