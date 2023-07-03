@@ -843,7 +843,7 @@ function updateFormula() {
 	downloadFormula $1
 	prepareFormula $1
 
-	if USE_SAVE; then
+	if $USE_SAVE; then
 		if load $1; then
 		   echoInfo "Skipping build as already done for this target "
 		else
@@ -958,7 +958,7 @@ function buildFormula() {
 	# dependencies
 	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 
-		if USE_SAVE; then
+		if $USE_SAVE; then
 			if apothecaryDependencies load $1; then
 		    	echoInfo "Skipping build apothecaryDependency as already done for this target "
 			else
