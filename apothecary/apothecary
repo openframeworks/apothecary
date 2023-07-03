@@ -70,6 +70,8 @@ SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
 LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 
+USE_SAVE=0
+
 ### Xcode/ios specific settings
 
 # xcode Developer root
@@ -841,15 +843,20 @@ function updateFormula() {
 	downloadFormula $1
 	prepareFormula $1
 
-	if load $1; then
-	   echoInfo "Skipping build as already done for this target "
-	else
-        echoVerbose "The entry doesn't exist or needs to be rebuilt."
-        buildFormula $1
-	    copyFormula $1
+	if USE_SAVE; then
+		if load $1; then
+		   echoInfo "Skipping build as already done for this target "
+		else
+		    echoVerbose "The entry doesn't exist or needs to be rebuilt."
+		    buildFormula $1
+		    copyFormula $1
 
-	    save $1
-    fi
+		    save $1
+		fi
+	else
+		buildFormula $1
+		copyFormula $1
+	fi
 
 	echo
 	echoSuccess " Finished \"$1\""
@@ -951,13 +958,18 @@ function buildFormula() {
 	# dependencies
 	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
 
-		if apothecaryDependencies load $1; then
-        	echoInfo "Skipping build apothecaryDependency as already done for this target "
-    	else
-    		echoVerbose "apothecaryDependency The entry doesn't exist or needs to be rebuilt."       
+		if USE_SAVE; then
+			if apothecaryDependencies load $1; then
+		    	echoInfo "Skipping build apothecaryDependency as already done for this target "
+			else
+				echoVerbose "apothecaryDependency The entry doesn't exist or needs to be rebuilt."       
+				apothecaryDependencies build
+				apothecaryDependencies copy
+				apothecaryDependencies save
+			fi
+		else
 			apothecaryDependencies build
 			apothecaryDependencies copy
-			apothecaryDependencies save
 		fi
 	fi
 
