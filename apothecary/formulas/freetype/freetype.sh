@@ -22,7 +22,7 @@ function download() {
 	echo "Downloading freetype-$VER"
 
 	. "$DOWNLOADER_SCRIPT"
-	downloader $URL/freetype-$VER.tar.gz -O -retry -L  freetype-$VER.tar.gz
+	downloader $URL/freetype-$VER.tar.gz -O -L freetype-$VER.tar.gz
 	
 	tar -xzf freetype-$VER.tar.gz
 	mv freetype-$VER freetype

@@ -252,7 +252,6 @@ function build() {
                     libfreeimage-x86_64.a \
                     -output freeimage.a
         elif [[ "$TYPE" == "ios" ]]; then
-		    #			libfreeimage-armv7s.a \
 		    lipo -create libfreeimage-armv7.a \
 					libfreeimage-arm64.a \
 					libfreeimage-x86_64.a \
@@ -343,19 +342,6 @@ function build() {
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 
-        # make clean -f Makefile.android
-        # make -j${PARALLEL_MAKE} \
-        # 	CC=${CC} \
-        # 	AR=${AR} \
-        # 	CXX=${CXX} \
-    	# 	RANLIB=${RANLIB} \
-    	# 	LD=${LD} \
-    	# 	STRIP=${STRIP} \
-        # 	-f Makefile.android \
-        # 	libfreeimage.a
-      
-        # mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
-        # mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
     elif [ "$TYPE" == "vs" ]; then
         export CFLAGS="-pthread"
 		export CXXFLAGS="-pthread"
@@ -416,31 +402,6 @@ function build() {
 	    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
 	    emmake make -j${PARALLEL_MAKE}
 		mv build_${TYPE}/libFreeImage.a build_${TYPE}/libfreeimage.a
-
-        # local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
-        # rm -rf $BUILD_DIR/FreeImagePatched
-        # cp -r $BUILD_DIR/FreeImage $BUILD_DIR/FreeImagePatched
-        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
-        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzlib.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzlib.c
-        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
-        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzread.c
-        # echo "#include <unistd.h>" > $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
-        # cat $BUILD_DIR/FreeImage/Source/ZLib/gzread.c >> $BUILD_DIR/FreeImagePatched/Source/ZLib/gzwrite.c
-        
-        # echo "#include <byteswap.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        # echo "#define _byteswap_ulong __bswap_32" >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        # cat $BUILD_DIR/FreeImage/Source/LibJXR/image/decode/segdec.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/image/decode/segdec.c
-        # echo "#include <wchar.h>" > $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
-        # cat $BUILD_DIR/FreeImage/Source/LibJXR/jxrgluelib/JXRGlueJxr.c >> $BUILD_DIR/FreeImagePatched/Source/LibJXR/jxrgluelib/JXRGlueJxr.c
-        # sed -i "s/CXXFLAGS ?=/CXXFLAGS ?= -std=c++17/g" "$BUILD_DIR/FreeImagePatched/Makefile.gnu"
-        # cd $BUILD_DIR/FreeImagePatched
-        # which emmake
-        #   #emmake make clean -f Makefile.gnu
-        # emmake Makefile.gnu libfreeimage.a
-        # mkdir -p $BUILD_DIR/FreeImage/Dist/
-        # mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/
-        # cd $BUILD_DIR/FreeImage
-        #rm -rf $BUILD_DIR/FreeImagePatched
 	fi
 }
 
