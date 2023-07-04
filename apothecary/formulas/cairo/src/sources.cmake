@@ -1,59 +1,75 @@
 set(cairo_headers cairo.h cairo-deprecated.h)
 
 set(cairo_private
-    cairoint.h
-    cairo-analysis-surface-private.h
-    cairo-arc-private.h
-    cairo-array-private.h
-    cairo-atomic-private.h
-    cairo-backend-private.h
-    cairo-box-inline.h
-    cairo-boxes-private.h
-    cairo-cache-private.h
-    cairo-clip-inline.h
-    cairo-clip-private.h
-    cairo-combsort-inline.h
-    cairo-compiler-private.h
-    cairo-compositor-private.h
-    cairo-contour-inline.h
-    cairo-contour-private.h
-    cairo-composite-rectangles-private.h
-    cairo-damage-private.h
-    cairo-default-context-private.h
-    cairo-device-private.h
-    cairo-error-inline.h
-    cairo-error-private.h
-    cairo-fixed-private.h
-    cairo-fixed-type-private.h
-    cairo-freelist-private.h
-    cairo-freelist-type-private.h
-    cairo-freed-pool-private.h
-    cairo-fontconfig-private.h
-    cairo-gstate-private.h
-    cairo-hash-private.h
-    cairo-image-info-private.h
-    cairo-image-surface-inline.h
-    cairo-image-surface-private.h
-    cairo-list-inline.h
-    cairo-list-private.h
-    cairo-line-private.h
-    cairo-line-inline.h
-    cairo-malloc-private.h
-    cairo-mempool-private.h
-    cairo-mutex-impl-private.h
-    cairo-mutex-list-private.h
-    cairo-mutex-private.h
-    cairo-mutex-type-private.h
-    cairo-output-stream-private.h
-    cairo-paginated-private.h
-    cairo-paginated-surface-private.h
-    cairo-path-fixed-private.h
-    cairo-path-private.h
-    cairo-pattern-inline.h
+
+
+    # Internal headers
+  cairoint.h
+  cairo-features.h
+  cairo-features-win32.h
+
+  # Inlined API
+  cairo-box-inline.h
+  cairo-clip-inline.h
+  cairo-combsort-inline.h
+  cairo-contour-inline.h
+  cairo-error-inline.h
+  cairo-image-surface-inline.h
+  cairo-line-inline.h
+  cairo-list-inline.h
+  cairo-pattern-inline.h
+  cairo-recording-surface-inline.h
+  cairo-surface-inline.h
+  cairo-surface-observer-inline.h
+  cairo-surface-snapshot-inline.h
+  cairo-surface-subsurface-inline.h
+
+  # Private headers
+  cairo-analysis-surface-private.h
+  cairo-arc-private.h
+  cairo-array-private.h
+  cairo-atomic-private.h
+  cairo-backend-private.h
+  cairo-boxes-private.h
+  cairo-cache-private.h
+  cairo-clip-private.h
+  cairo-compiler-private.h
+  cairo-composite-rectangles-private.h
+  cairo-compositor-private.h
+  cairo-contour-private.h
+  cairo-damage-private.h
+  cairo-default-context-private.h
+  cairo-deprecated.h
+  cairo-device-private.h
+  cairo-error-private.h
+  cairo-fixed-private.h
+  cairo-fixed-type-private.h
+  cairo-fontconfig-private.h
+  cairo-freed-pool-private.h
+  cairo-freelist-private.h
+  cairo-freelist-type-private.h
+  cairo-ft-private.h
+  cairo-gstate-private.h
+  cairo-hash-private.h
+  cairo-image-info-private.h
+  cairo-image-surface-private.h
+  cairo-line-private.h
+  cairo-list-private.h
+  cairo-malloc-private.h
+  cairo-mempool-private.h
+  cairo-mutex-impl-private.h
+  cairo-mutex-list-private.h
+  cairo-mutex-private.h
+  cairo-mutex-type-private.h
+  cairo-output-stream-private.h
+  cairo-paginated-private.h
+  cairo-paginated-surface-private.h
+  cairo-path-fixed-private.h
+  cairo-path-private.h 
+
     cairo-pattern-private.h
     cairo-pixman-private.h
     cairo-private.h
-    cairo-recording-surface-inline.h
     cairo-recording-surface-private.h
     cairo-reference-count-private.h
     cairo-region-private.h
@@ -63,17 +79,13 @@ set(cairo_private
     cairo-spans-private.h
     cairo-spans-compositor-private.h
     cairo-stroke-dash-private.h
-    cairo-surface-inline.h
     cairo-surface-private.h
     cairo-surface-backend-private.h
     cairo-surface-clipper-private.h
     cairo-surface-fallback-private.h
-    cairo-surface-observer-inline.h
     cairo-surface-observer-private.h
     cairo-surface-offset-private.h
-    cairo-surface-subsurface-inline.h
     cairo-surface-subsurface-private.h
-    cairo-surface-snapshot-inline.h
     cairo-surface-snapshot-private.h
     cairo-surface-wrapper-private.h
     cairo-time-private.h
@@ -82,7 +94,12 @@ set(cairo_private
     cairo-tristrip-private.h
     cairo-user-font-private.h
     cairo-wideint-private.h
-    cairo-wideint-type-private.h 
+    cairo-wideint-type-private.h
+
+    cairo-tag-stack-private.h
+
+    cairo-pdf-surface-private.h
+
 )
 
 set(cairo_sources
@@ -191,6 +208,9 @@ set(cairo_sources
     cairo-user-font.c 
     cairo-version.c 
     cairo-wideint.c 
+    cairo-tag-stack.c
+
+    cairo-pdf-surface.c
 )
 
 set(_cairo_font_subset_private
@@ -216,8 +236,17 @@ set(cairo_egl_sources)
 set(cairo_glx_sources)
 set(cairo_wgl_sources)
 
-set(_cairo_pdf_operators_private cairo-pdf-operators-private.h cairo-pdf-shading-private.h)
-set(_cairo_pdf_operators_sources cairo-pdf-operators.c cairo-pdf-shading.c)
+set(_cairo_pdf_operators_private 
+    cairo-pdf-operators-private.h 
+    cairo-pdf-shading-private.h
+    cairo-tag-attributes-private.h)
+
+set(_cairo_pdf_operators_sources 
+    cairo-pdf-operators.c 
+    cairo-pdf-shading.c 
+    cairo-tag-attributes.c
+    cairo-pdf-interchange.c)
+
 list(APPEND cairo_private ${_cairo_pdf_operators_private})
 list(APPEND cairo_sources ${_cairo_pdf_operators_sources})
 
@@ -231,8 +260,8 @@ set(_cairo_deflate_stream_sources cairo-deflate-stream.c)
 list(APPEND cairo_sources ${_cairo_deflate_stream_sources})
 
 set(cairo_pdf_headers cairo-pdf.h)
-set(cairo_pdf_private cairo-pdf-surface-private.h)
-set(cairo_pdf_sources cairo-pdf-surface.c)
+set(cairo_pdf_private )
+set(cairo_pdf_sources )
 
 set(cairo_svg_headers cairo-svg.h)
 set(cairo_svg_private cairo-svg-surface-private.h)
@@ -290,6 +319,7 @@ set(cairo_xcb_sources
     cairo-xcb-surface-cairo.c
     cairo-xcb-surface-core.c
     cairo-xcb-surface-render.c
+    cairo-xcb-resources.c 
 )
 
 set(cairo_qt_headers cairo-qt.h)
@@ -368,8 +398,7 @@ set(cairo_directfb_sources cairo-directfb-surface.c)
 
 set(cairo_drm_headers cairo-drm.h)
 set(cairo_drm_private 
-        drm/cairo-drm-private.h
-        drm/cairo-drm-ioctl-private.h
+        drm/cairo-drm-private.h       
         drm/cairo-drm-intel-private.h
         drm/cairo-drm-intel-brw-defines.h
         drm/cairo-drm-intel-brw-structs.h
@@ -420,13 +449,9 @@ set(cairo_vg_sources cairo-vg-surface.c)
 set(cairo_cogl_headers cairo-cogl.h)
 set(cairo_cogl_private 
         cairo-cogl-private.h
-        cairo-cogl-gradient-private.h
-        cairo-cogl-context-private.h
-        cairo-cogl-utils-private.h
+        cairo-cogl-gradient-private.h       
 )
 set(cairo_cogl_sources 
         cairo-cogl-surface.c
-        cairo-cogl-gradient.c
-        cairo-cogl-context.c
-        cairo-cogl-utils.c
+        cairo-cogl-gradient.c       
 )

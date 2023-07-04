@@ -115,7 +115,7 @@ function copy() {
 
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
-    	cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+    	cp -RvT "build_${TYPE}_${ARCH}/Release/include/pixman-1" $1/include
 
     	# copy license file
 		rm -rf $1/license # remove any older files if exists

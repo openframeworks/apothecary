@@ -26,7 +26,7 @@ function download() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		downloader "${WINDOWS_URL}?download -O lpng${WIN_VER}.zip"
-		unzip "lpng${WIN_VER}.zip"
+		unzip -q "lpng${WIN_VER}.zip"
 		mv "lpng${WIN_VER}" libpng
 		rm "lpng${WIN_VER}.zip"
 	else 
