@@ -424,18 +424,18 @@ if [ "$TYPE" = "vs" ]; then
 			  VS_YEAR_PATH=2019
 			  VC_VERSION=142
 			else
-			  VS_YEAR_PATH=2022
-			  VC_VERSION=143
+			  VS_YEAR_PATH=2019
+			  VC_VERSION=142
 			fi
 
-        	if [ $ARCH == "arm64" ]; then
-        		VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
-          		VS_YEAR=2022
-          		VC_VERSION=143
-        	else
+        	# if [ $ARCH == "arm64" ]; then
+        	# 	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
+          	# 	VS_YEAR=2019
+          	# 	VC_VERSION=142
+        	# else
             	VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/$VS_YEAR_PATH/$VS_TYPE"
             	VS_YEAR=$VS_YEAR_PATH
-        	fi
+        	# fi
         elif [ "${VS_VER}" = "17" ]; then
           	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
           	VS_YEAR=2022

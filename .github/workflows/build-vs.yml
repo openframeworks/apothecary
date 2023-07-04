@@ -11,10 +11,11 @@ on:
 jobs:
 
   build-vs2019:
-    runs-on: windows-2022
+    runs-on: windows-2019
+    
     strategy:
       matrix:
-        bundle: [1,2,3,4]
+        bundle: [1,2,3]
     defaults:
       run:
         shell: msys2 {0}
