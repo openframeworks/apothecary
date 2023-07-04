@@ -395,12 +395,11 @@ function build() {
 		export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 		echo "$CMAKE_TOOLCHAIN_FILE"
 
-
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+	    $EMSDK/upstream/emscripten/emcmake cmake .. -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR="build_${TYPE}"	    
+	    $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
 
-	    cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
-	    emmake make -j${PARALLEL_MAKE}
 		mv build_${TYPE}/libFreeImage.a build_${TYPE}/libfreeimage.a
 	fi
 }
