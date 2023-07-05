@@ -3,22 +3,6 @@
 if [ -z "${EMSDK+x}" ]; then
 	echo "Emscripten SDK not yet found"
     # Check if EMSCRIPTEN_PATH is empty
-	if [ -z "${EMSCRIPTEN_PATH+x}" ]
-	then
-		echo "Emscripten EMSCRIPTEN_PATH not yet set in environment variables"
-		# Set the EMSCRIPTEN_PATH environment variable to the path where the emscripten SDK is installed  
-		
-		if [ -z "${WSL_DISTRO_NAME+x}" ]
-		then
-			DRIVE=/i/
-		else
-			echo "WSL Distro being used: $WSL_DISTRO_NAME"
-			DRIVE=/mnt/i/
-		fi
-
-		export EMSCRIPTEN_PATH="${DRIVE}Repositories/emscripten/emsdk"
-		echo "Emscripten EMSCRIPTEN_PATH set to $EMSCRIPTEN_PATH" 
-	fi
 	  # Check if the emscripten SDK directory exists
 	  if [ -d "$EMSCRIPTEN_PATH" ]
 	  then
