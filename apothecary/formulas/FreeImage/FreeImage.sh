@@ -12,9 +12,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
 # define the version
 
  # 3.18.0
-VER=31810
+VER=31910
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.18.10
+GIT_TAG=test3.19.0
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -337,6 +337,10 @@ function build() {
         	-DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DNO_BUILD_LIBRAWLITE=ON \
+			-DNO_BUILD_OPENEXR=ON \
+			-DNO_BUILD_WEBP=ON \
+			-DNO_BUILD_JXR=ON \
         	-G 'Unix Makefiles' ..
 
 		make -j${PARALLEL_MAKE} VERBOSE=1
@@ -384,6 +388,10 @@ function build() {
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
+			-DNO_BUILD_LIBRAWLITE=ON \
+			-DNO_BUILD_OPENEXR=ON \
+			-DNO_BUILD_WEBP=ON \
+			-DNO_BUILD_JXR=ON \
 			-A "${PLATFORM}" \
 			-G "${GENERATOR_NAME}"
             cmake --build . --config Release 
@@ -397,7 +405,22 @@ function build() {
 
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
-	    $EMSDK/upstream/emscripten/emcmake cmake .. -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR="build_${TYPE}"	    
+	    $EMSDK/upstream/emscripten/emcmake cmake .. \
+	    	-G 'Unix Makefiles' \
+	    	-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE \
+	    	-DCMAKE_BUILD_TYPE=Release \
+	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+	    	-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+	    	-DNO_BUILD_LIBRAWLITE=ON \
+			-DNO_BUILD_OPENEXR=ON \
+			-DNO_BUILD_WEBP=ON \
+			-DNO_BUILD_JXR=ON \	    
 	    $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
 
 		mv build_${TYPE}/libFreeImage.a build_${TYPE}/libfreeimage.a
