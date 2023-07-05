@@ -12,7 +12,7 @@ VER=1.16.4
 GIT_URL=https://ftp.gnu.org/gnu/automake/automake
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l", "emscripten" )
+FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {

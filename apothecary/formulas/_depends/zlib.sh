@@ -11,7 +11,7 @@ GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" , "osx")
+FORMULA_TYPES=( "vs" , "osx", "emscripten")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -78,6 +78,28 @@ function build() {
 		    -D BUILD_SHARED_LIBS=ON \
 		# cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G "Unix Makefiles" 
 		make
+	elif [ "$TYPE" == "emscripten" ] ; then
+        export CFLAGS="-pthread"
+		export CXXFLAGS="-pthread"
+
+		mkdir -p build_$TYPE
+	    cd build_$TYPE
+	    $EMSDK/upstream/emscripten/emcmake cmake .. \
+	    	-B build \
+	    	-DCMAKE_BUILD_TYPE=Release \
+	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+	    	-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include
+	  	cmake --build build --target install --config Release
+	    cd ..
 	fi
 }
 
@@ -94,6 +116,13 @@ function copy() {
 		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/zlibstatic.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
+	elif [ "$TYPE" == "emscripten" ] ; then
+		mkdir -p $1/include
+		mkdir -p $1/lib
+		cp -Rv "build_${TYPE}/Release/include" $1/
+		mkdir -p $1/lib/$TYPE
+		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/libz.a
+
 	else
 		make install
 	fi

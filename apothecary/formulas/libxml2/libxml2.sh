@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten")
 # uses an automake build system # required for svg
 
-FORMULA_DEPENDS=( "automake")
+FORMULA_DEPENDS=( "zlib")
 
 
 # define the version by sha
@@ -123,14 +123,6 @@ function build() {
         find . -name "run*.c" | xargs rm
         
         source ../../android_configure.sh $ABI cmake
-        # mkdir -p cmake
-        # cd cmake
-        # # ln -s .. libxml2
-
-        # cp -fr $FORMULA_DIR/CMakeLists.txt .
-        # #wget https://raw.githubusercontent.com/martell/libxml2.cmake/master/CmakeLists.txt
-        # perl -pi -e 's|^include_directories\("\$\{XML2_SOURCE_DIR\}/win32/VC10"\)|#include_directories\("\${XML2_SOURCE_DIR}/win32/VC10"\)|g' CMakeLists.txt
-        # cd ..
 
         mkdir -p build_${TYPE}_${ABI}
         cd build_${TYPE}_${ABI}
@@ -179,22 +171,94 @@ function build() {
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
 
 
     elif [ "$TYPE" == "emscripten" ]; then
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
         wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-        ./autogen.sh
-        emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        emmake make clean
-        emmake make -j${PARALLEL_MAKE}
+        
+        export CFLAGS="-pthread"
+        export CXXFLAGS="-pthread"
+        export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+        echo "$CMAKE_TOOLCHAIN_FILE"
+
+        LIBS_ROOT=$(realpath $APOTHECARY_DIR/../)
+
+        CAIRO_HAS_PNG_FUNCTIONS=1
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+#-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE \
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DNO_BUILD_LIBRAWLITE=ON \
+            -DNO_BUILD_OPENEXR=ON \
+            -DNO_BUILD_WEBP=ON \
+            -DNO_BUILD_JXR=ON \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+        cmake --build build --target install --config Release
+
+        #$EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
+        cd ..
+
+        # ./autogen.sh
+        #emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        #emmake make clean
+        #emmake make -j${PARALLEL_MAKE}
 
 
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
         ./autogen.sh
+
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
@@ -303,7 +367,7 @@ function copy() {
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
-        cp -Rv .libs/libxml2.a $1/lib/$TYPE/libxml2.a
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
     fi
 
     # copy license file
