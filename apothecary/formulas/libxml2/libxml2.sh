@@ -364,6 +364,10 @@ function copy() {
         mkdir -p $1/lib/$TYPE
         # copy lib
         cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
+    elif [ "$TYPE" == "emscripten" ] ; then
+        mkdir -p $1/lib/$TYPE/
+        # copy lib
+        cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
