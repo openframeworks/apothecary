@@ -439,36 +439,38 @@ function copy() {
 		mkdir -p $1/lib/$TYPE
 		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
 	elif [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/include 
+		mkdir -p $1/include #/Win32
+		#mkdir -p $1/include/x64
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
-			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
 		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
-			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
+			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
-		mkdir -p $1/include
-	    cp -v Dist/x32/*.h $1/include 
+		mkdir -p $1/include #/Win32
+		#mkdir -p $1/include/x64
+	    cp -v Dist/x32/*.h $1/include #/Win32/
 		#cp -v Dist/x64/*.h $1/include/x64/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v Dist/x32/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
-			cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+			#cp -v Dist/x32/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+			#cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
 		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v Dist/x64/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
-			cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
+			#cp -v Dist/x64/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v Dist/*.h $1/include
