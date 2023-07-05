@@ -320,8 +320,6 @@ function build() {
         	-D ANDROID_TOOLCHAIN=clang \
         	-D CMAKE_BUILD_TYPE=Release \
         	-D FT_REQUIRE_HARFBUZZ=FALSE \
-        	-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
         	-DDISABLE_PERF_MEASUREMENT=ON \
         	-DLIBRAW_LIBRARY_BUILD=ON\
         	-DOPJ_STATIC=ON \
@@ -385,7 +383,7 @@ function build() {
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
+			-DBUILD_SHARED_LIBS=ON \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
 			-DNO_BUILD_LIBRAWLITE=ON \
@@ -420,10 +418,9 @@ function build() {
 	    	-DNO_BUILD_LIBRAWLITE=ON \
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
-			-DNO_BUILD_JXR=ON \	    
+			-DNO_BUILD_JXR=ON   
 	    $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
-
-		mv build_${TYPE}/libFreeImage.a build_${TYPE}/libfreeimage.a
+	    cd ..
 	fi
 }
 
@@ -442,25 +439,23 @@ function copy() {
 		mkdir -p $1/lib/$TYPE
 		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
 	elif [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/include #/Win32
-		#mkdir -p $1/include/x64
+		mkdir -p $1/include 
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/Win32/FreeImage.lib
-			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/Win32/FreeImage.dll
 		elif [ $ARCH == 64 ] ; then
 			mkdir -p $1/lib/$TYPE/x64
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/x64/FreeImage.lib
-			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/x64/FreeImage.dll
 		elif [ $ARCH == "arm" ]; then
 			mkdir -p $1/lib/$TYPE/ARM
 			cp -v build_vs_$ARCH/Release/FreeImage.lib $1/lib/$TYPE/ARM/FreeImage.lib
-			#cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
+			cp -v build_vs_$ARCH/Release/FreeImage.dll $1/lib/$TYPE/ARM/FreeImage.dll
 		fi
 	elif [ "$TYPE" == "msys2" ] ; then
-		mkdir -p $1/include #/Win32
-		#mkdir -p $1/include/x64
-	    cp -v Dist/x32/*.h $1/include #/Win32/
+		mkdir -p $1/include
+	    cp -v Dist/x32/*.h $1/include 
 		#cp -v Dist/x64/*.h $1/include/x64/
 		if [ $ARCH == 32 ] ; then
 			mkdir -p $1/lib/$TYPE/Win32
