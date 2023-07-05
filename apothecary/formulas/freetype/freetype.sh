@@ -451,13 +451,12 @@ function copy() {
 
 	# copy lib
 	mkdir -p $1/lib/$TYPE
-	mkdir -p $1/lib/$TYPE/$PLATFORM/
-
 	if [ "$TYPE" == "osx" ] ; then
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
 		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
 	elif [ "$TYPE" == "vs" ] ; then
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/Release/lib/freetype.lib" $1/lib/$TYPE/$PLATFORM/libfreetype.lib
