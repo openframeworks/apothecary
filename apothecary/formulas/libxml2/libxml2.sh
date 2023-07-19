@@ -71,6 +71,11 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
+    apothecaryDependencies download
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+
 }
 
 # executed inside the lib src dir
@@ -369,7 +374,6 @@ function copy() {
         cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] ; then
         mkdir -p $1/lib/$TYPE/
-        cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         # copy lib
         cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
