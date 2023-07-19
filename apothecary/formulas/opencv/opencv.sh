@@ -925,7 +925,7 @@ function build() {
     emcmake cmake .. \
       -B build \
       -DCMAKE_BUILD_TYPE="Release" \
-      -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+      -DCMAKE_INSTALL_LIBDIR="lib" \
       -DCMAKE_C_STANDARD=17 \
       -DCMAKE_CXX_STANDARD=17 \
       -DCPU_BASELINE='' \
@@ -1134,11 +1134,12 @@ function copy() {
     cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/$ABI/
 
   elif [ "$TYPE" == "emscripten" ]; then
-    cp -r build_emscripten/install/include/* $1/include/
+    mkdir -p $1/include/opencv2
+    cp -Rv "build_${TYPE}/Release/include/" $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+    cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
+    cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
