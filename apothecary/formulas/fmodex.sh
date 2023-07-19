@@ -16,6 +16,7 @@ VER=44459
 # tools for git use
 GIT_URL=
 GIT_TAG=
+URL=http://ci.openframeworks.cc/libs/fmodex
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -29,7 +30,11 @@ function download() {
 	else
 		PKG=fmodex_${TYPE}.tar.bz2
 	fi
-	wget -nv http://ci.openframeworks.cc/libs/fmodex/$PKG
+	wget -nv $PKG
+
+	. "$DOWNLOADER_SCRIPT"
+    downloader "${URL}/${PKG}"
+
 	tar xjf $PKG
 }
 
