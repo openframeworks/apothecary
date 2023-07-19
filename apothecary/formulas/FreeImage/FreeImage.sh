@@ -418,7 +418,7 @@ function build() {
 	    	-DNO_BUILD_LIBRAWLITE=ON \
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
-			-DNO_BUILD_JXR=ON   
+			-DNO_BUILD_JXR=ON 
 	    $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
 	    cd ..
 	fi
@@ -491,7 +491,7 @@ function copy() {
             rm -r $1/lib/$TYPE/
         fi
         mkdir -p $1/lib/$TYPE
-        cp -rv build_${TYPE}/libfreeimage.a $1/lib/$TYPE/libfreeimage.a
+        cp -rv build_${TYPE}/libFreeImage.a $1/lib/$TYPE/libfreeimage.a
 	fi
 
     # copy license files
