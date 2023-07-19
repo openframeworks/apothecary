@@ -110,9 +110,9 @@ function build() {
 	    mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
 
-		Z_ROOT="$ROOT/zlib/"
-		Z_INCLUDE_DIR="$ROOT/zlib/include"
-		Z_LIBRARY="$ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+		Z_ROOT="$LIBS_ROOT/zlib/"
+		Z_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		Z_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
 
 		DEFS="
 		    -DCMAKE_BUILD_TYPE=Release \
@@ -133,8 +133,8 @@ function build() {
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
-		    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=${ROOT}/temp \
-		    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=${ROOT}/intermediate"
+		    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=/temp \
+		    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=/intermediate"
 
 	cmake .. ${DEFS} \
 	    -A "${PLATFORM}" \
