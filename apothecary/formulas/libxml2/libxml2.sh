@@ -345,6 +345,8 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then              
         
         mkdir -p $1/lib/$TYPE/$PLATFORM/
+
+        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
 
     elif [ "$TYPE" == "tvos" ]; then
@@ -358,6 +360,7 @@ function copy() {
         cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
     elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
+        cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         # copy lib
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
@@ -366,6 +369,7 @@ function copy() {
         cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] ; then
         mkdir -p $1/lib/$TYPE/
+        cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         # copy lib
         cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
