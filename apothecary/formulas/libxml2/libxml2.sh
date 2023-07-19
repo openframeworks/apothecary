@@ -374,6 +374,7 @@ function copy() {
         cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "emscripten" ] ; then
         mkdir -p $1/lib/$TYPE/
+         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         # copy lib
         cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
