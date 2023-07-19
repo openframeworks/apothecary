@@ -20,8 +20,8 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype"  )
 # as we set some env vars for osx the depends need to know about
 FORMULA_DEPENDS_MANUAL=1
 
-# define the version
 VER=1.17.8
+# define the version
 
 SHA1=68712ae1039b114347be3b7200bc1c901d47a636
 
@@ -278,7 +278,7 @@ function copy() {
 		# copy the cairo headers		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		#mkdir -p $1/bin/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/cairo $1/include/cairo"		
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include" $1/include
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
 
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
