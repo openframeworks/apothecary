@@ -14,8 +14,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 FORMULA_DEPENDS=( "openssl" "pkg-config" "zlib")
 
 # define the version by sha
-VER=8_0_1
-VER_D=8.0.1
+VER=8_2_0
+VER_D=8.2.0
 SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
@@ -59,31 +59,62 @@ function build() {
 		local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
         local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
 
-
-		local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
-
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 	
-        cd projects
-        
-        #hardcoded to vc14 ( VS 2017 ) as there is now VS 2019 project file option 
-  		cmd //c "generate.bat vc14"
-		cd Windows/VC14/lib
-		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj
-		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.vcxproj.filters
-		sed -i "s/..\\\\..\\\\..\\\\..\\\\..\\\\openssl\\\\inc32/${OPENSSL_WINDOWS_PATH}\\\\include/g" libcurl.sln
-
-        # /p:PlatformToolset=v142 is a sort of hack to retarget solution to VS 2019 when the sln doesn't support the platform
         if [ $ARCH == 32 ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|Win32"
+            PLATFORM="Win32"
         elif [ $ARCH == 64 ] ; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v142" "LIB Release - LIB OpenSSL|x64"
-        elif [ $ARCH == "arm64" ]; then
-            PATH=$OPENSSL_LIBRARIES:$PATH vs-build libcurl.sln "Build /p:PlatformToolset=v143" "LIB Release - LIB OpenSSL|ARM64"
-
+            PLATFORM="x64"
+        elif [ $ARCH == "arm64" ] ; then
+            PLATFORM="ARM64"
+        elif [ $ARCH == "arm" ]; then
+            PLATFORM="ARM"            
         fi
+
+        echo "building curl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"         
+     
+        cmake .. ${DEFS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCURL_STATICLIB=OFF \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+
+            # \
+            # -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
+            # -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
+            # -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib"
+
+        cmake --build . --config Release --target install
 
 	elif [ "$TYPE" == "android" ]; then
 
@@ -316,18 +347,13 @@ function copy() {
 	# copy headers
 
 	if [ "$TYPE" == "vs" ] ; then
-        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v "build/Win32/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/Win32/libcurl.lib
-		
-        elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/x64/libcurl.lib    
-        elif [ $ARCH == "arm" ]; then
-			mkdir -p $1/lib/$TYPE/ARM
-			cp -v "build/Win64/VC14/LIB Release - LIB OpenSSL/libcurl.lib" $1/lib/$TYPE/ARM/libcurl.lib
-		fi
+        mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        mkdir -p $1/bin/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl_imp.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib  
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/libcurl.dll" $1/bin/$TYPE/$PLATFORM/libcurl.dll 
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		# copy lib
