@@ -15,7 +15,8 @@ FVER=213
 # tools for git use
 GIT_URL=https://git.savannah.gnu.org/r/freetype/freetype2.git
 GIT_TAG=VER-2-13
-URL=https://download.savannah.gnu.org/releases/freetype
+URL=http://download.savannah.nongnu.org/releases/freetype
+MIRROR_URL=https://mirror.ossplanet.net/nongnu/freetype
 
 # download the source code and unpack it into LIB_NAME
 function download() {
