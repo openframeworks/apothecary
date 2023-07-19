@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
-VER=4.6.0
+VER=4.8.0
 
 
 # tools for git use
@@ -915,15 +915,19 @@ function build() {
         fi
     fi
 
-    cd ${BUILD_DIR}/${1}
+    # cd ${BUILD_DIR}/${1}
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
     
-    emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
+    emcmake cmake .. \
+      -B build \
       -DCMAKE_BUILD_TYPE="Release" \
+      -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+      -DCMAKE_C_STANDARD=17 \
+      -DCMAKE_CXX_STANDARD=17 \
       -DBUILD_opencv_js=ON \
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
@@ -1023,9 +1027,14 @@ function build() {
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF
-    make 
-    make install
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=Release \
+      -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+      -DCMAKE_INSTALL_INCLUDEDIR=include
+    cmake --build build --target install --config Release
+    # make 
+    # make install
   fi
 
 }
