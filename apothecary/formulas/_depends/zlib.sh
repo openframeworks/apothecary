@@ -121,7 +121,7 @@ function copy() {
 		mkdir -p $1/lib
 		cp -Rv "build_${TYPE}/Release/include" $1/
 		mkdir -p $1/lib/$TYPE
-		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/libz.a
+		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/zlib.a
 
 	else
 		make install

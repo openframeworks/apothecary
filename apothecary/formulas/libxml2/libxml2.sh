@@ -196,7 +196,7 @@ function build() {
         export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
         echo "$CMAKE_TOOLCHAIN_FILE"
 
-        LIBS_ROOT=$(realpath $APOTHECARY_DIR/../)
+        LIBS_ROOT=$(realpath $LIBS_DIR)
 
         CAIRO_HAS_PNG_FUNCTIONS=1
 
