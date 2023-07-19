@@ -27,7 +27,7 @@ function download() {
 		PKG=fmod_${TYPE}.tar.bz2
 	fi
     . "$DOWNLOADER_SCRIPT"
-    downloader "${URL}./${DOWNLOAD_TYPE}"
+    downloader "${URL}/${PKG}"
 	tar xjf $PKG
 }
 
