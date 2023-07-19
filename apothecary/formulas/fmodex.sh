@@ -30,8 +30,6 @@ function download() {
 	else
 		PKG=fmodex_${TYPE}.tar.bz2
 	fi
-	wget -nv $PKG
-
 	. "$DOWNLOADER_SCRIPT"
     downloader "${URL}/${PKG}"
 

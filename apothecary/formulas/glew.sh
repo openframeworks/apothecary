@@ -11,16 +11,17 @@
 FORMULA_TYPES=( "osx" "vs" )
 
 # define the version
-VER=1.11.0
+VER=2.2.0
 
 # tools for git use
 GIT_URL=https://github.com/nigels-com/glew.git
 GIT_TAG=glew-$VER
+URL=https://github.com/nigels-com/glew/releases/download/${GIT_TAG}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	#echo ${VS_VER}0
-	curl -LO http://downloads.sourceforge.net/project/glew/glew/$VER/glew-$VER.tgz
+	. "$DOWNLOADER_SCRIPT"
+	downloader "${URL}/${GIT_TAG}.tgz"
 	tar -xf glew-$VER.tgz
 	mv glew-$VER glew
 	rm glew-$VER.tgz
@@ -51,19 +52,37 @@ function build() {
 		lipo -c libGLEW-arm64.a libGLEW-x86_64.a -o libGLEW.a
 
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		cd build/vc12 #this upgrades without issue to vs2015
-		#vs-clean "glew.sln"
-		vs-upgrade "glew.sln"
-		if [ "$ARCH" == "32" ]; then
-			vs-build "glew_static.vcxproj" Build "Release|Win32"
-		elif [ "$ARCH" == "64" ]; then
-			vs-build "glew_static.vcxproj" Build "Release|x64"
-		elif [ "$ARCH" == "ARM" ]; then
-			vs-build "glew_static.vcxproj" Build "Release|ARM"
-		fi
-		cd ../../
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+		echo "--------------------"
+		GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+		mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
+
+		DEFS="-DLIBRARY_SUFFIX=${ARCH}"
+
+		cmake ../build/cmake ${DEFS} \
+		    -DCMAKE_C_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		    -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+		    -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DBUILD_SHARED_LIBS=ON \
+		    -DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_INSTALL_LIBDIR="lib" \
+		    -DGLEW_X11=ON \
+		    -DGLEW_EGL=OFF \
+		    -DBUILD_UTILS=ON \
+		    -DCMAKE_INSTALL_LIBDIR="lib" \
+		    -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -A "${PLATFORM}" \
+		    -G "${GENERATOR_NAME}" 
+
+		cmake --build . --config Release --target install
+		cd ..
+
 	elif [ "$TYPE" == "msys2" ] ; then
 		make clean
 		make
@@ -76,23 +95,21 @@ function copy() {
 	# headers
 	rm -rf $1/include
 	mkdir -p $1/include
-	cp -Rv include/* $1/include
-
-	rm -rf $1/lib/$TYPE/*
+	
+	
 
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
+		cp -Rv include/* $1/include
 		mkdir -p $1/lib/$TYPE
 		cp -v libGLEW.a $1/lib/$TYPE/glew.a
 
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ "$ARCH" == "32" ]; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v lib/Release/Win32/glew32s.lib $1/lib/$TYPE/Win32
-		else
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v lib/Release/x64/glew32s.lib $1/lib/$TYPE/x64
-		fi
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/		
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		mkdir -p $1/bin/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32.dll
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/glew32.lib" $1/lib/$TYPE/$PLATFORM/glew32.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		# TODO: add cb formula
 		mkdir -p $1/lib/$TYPE
@@ -108,10 +125,9 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
-	if [ "$TYPE" == "vs" ] ; then
-		cd build/vc12
-		vs-clean "glew.sln"
-		cd ../../
+	if [ "$TYPE" == "vs" ] ; then	
+		rm -rf build_${TYPE}_${ARCH}
+		rm -rf $1/lib/$TYPE/*
 	else
 		make clean
 		rm -f *.a *.lib
