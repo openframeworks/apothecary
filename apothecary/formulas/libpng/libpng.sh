@@ -100,7 +100,7 @@ function build() {
 		make install
 	elif [ "$TYPE" == "vs" ] ; then
 
-		ROOT=$(realpath $APOTHECARY_DIR/../)
+		LIBS_ROOT=$(realpath $LIBS_DIR)
 
 
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"

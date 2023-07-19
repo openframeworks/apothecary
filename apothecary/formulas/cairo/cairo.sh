@@ -114,7 +114,8 @@ function build() {
 
         ROOT=$(realpath ${PWD}/..) 
 
-        LIBS_ROOT=$(realpath $APOTHECARY_DIR/../)
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+
 
 		CAIRO_HAS_PNG_FUNCTIONS=1
 
