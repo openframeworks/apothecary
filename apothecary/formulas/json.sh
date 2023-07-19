@@ -16,10 +16,11 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	. "$DOWNLOADER_SCRIPT"
     mkdir json
-    cd json
-	wget -nv https://github.com/nlohmann/json/releases/download/v$VER/json.hpp
-	wget -nv https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT
+    cd json    
+    downloader "https://github.com/nlohmann/json/releases/download/v$VER/json.hpp"
+	downloader "https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT"
 }
 
 # prepare the build environment, executed inside the lib src dir
