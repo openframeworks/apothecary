@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
-VER=4.8.0
+VER=4.7.0
 
 
 # tools for git use
@@ -928,7 +928,6 @@ function build() {
       -DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
       -DCMAKE_C_STANDARD=17 \
       -DCMAKE_CXX_STANDARD=17 \
-      -DBUILD_opencv_js=ON \
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
@@ -942,9 +941,12 @@ function build() {
       -DBUILD_PACKAGE=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
+      -DWITH_QUIRC:BOOL=OFF \
       -DBUILD_CUDA_STUBS=OFF \
+      -DBUILD_opencv_objc_bindings_generator=NO \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_js=ON \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
@@ -964,8 +966,6 @@ function build() {
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_features2d=OFF \
       -DBUILD_opencv_flann=OFF \
-      -DBUILD_opencv_highgui=ON \
-      -DBUILD_opencv_ml=ON \
       -DBUILD_opencv_photo=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_shape=OFF \
@@ -1026,7 +1026,10 @@ function build() {
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
+      -DWASM=ON \
       -DBUILD_TESTS=OFF \
+      -DCV_ENABLE_INTRINSICS=OFF \
+      -DBUILD_WASM_INTRIN_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DCMAKE_INSTALL_PREFIX=Release \
