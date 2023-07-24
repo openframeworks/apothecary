@@ -44,6 +44,18 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echo "prepare"
+
+    apothecaryDependencies download
+
+    if [ "$TYPE" == "vs" ] ; then
+
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib    
+
+        echo "prepared"
+    fi
+
 }
 
 # executed inside the lib src dir
