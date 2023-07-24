@@ -21,8 +21,14 @@ URL=http://ci.openframeworks.cc/libs/fmod
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+
+
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
+		if [ "$ARCH" == "arm64" ]; then
+			mkdir fmodex
+			return;
+		fi
 	else
 		PKG=fmod_${TYPE}.tar.bz2
 	fi
