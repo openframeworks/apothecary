@@ -11,9 +11,9 @@ WIN_VER=1640
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
-URL=https://prdownloads.sourceforge.net/libpng
+URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40
 SHA=
-WINDOWS_URL=https://prdownloads.sourceforge.net/libpng/lpng1640.zip
+WINDOWS_URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40
 
 FORMULA_TYPES=( "osx" "vs" )
 
@@ -25,12 +25,12 @@ function download() {
 	. "$DOWNLOADER_SCRIPT"
 
 	if [ "$TYPE" == "vs" ] ; then
-		downloader "${WINDOWS_URL}?download -O lpng${WIN_VER}.zip"
-		unzip -q "lpng${WIN_VER}.zip"
-		mv "lpng${WIN_VER}" libpng
-		rm "lpng${WIN_VER}.zip"
+		downloader "${URL}.zip"
+		unzip -q "v${VER}.zip"
+		mv "libpng-${VER}" libpng
+		rm "v${VER}.zip"
 	else 
-		downloader ${URL}/libpng-$VER.tar.gz?download -O libpng-$VER.tar.gz
+		downloader "${URL}.tar.gz"
 		tar -xf libpng-$VER.tar.gz
 		mv libpng-$VER libpng
 		rm libpng-$VER.tar.gz
@@ -116,6 +116,7 @@ function build() {
 
 		DEFS="
 		    -DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.31205.252 \
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
