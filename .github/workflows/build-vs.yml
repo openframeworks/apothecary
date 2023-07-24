@@ -41,12 +41,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v2
       #- name: Install StrawberryPerl
-      #  run: choco install -y strawberryperl
-      - name: Install Windows 8.1 SDK
-        shell: powershell
-        run: |
-          Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
-          Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
+      #  run: choco install -y strawberryperl      
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
       - name: Build
