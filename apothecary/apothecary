@@ -355,7 +355,10 @@ shift $(expr $OPTIND - 1)
 if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 16"
-	    VS_VER=16 #17 	    
+	    VS_VER=16 #17 	
+        if [ $VS_VER == "arm64" ]; then
+            VS_VER=17
+        fi 
     else 
 	    echo "VS_VER is set to '$VS_VER'"
 	    VS_VER_GEN="$VS_VER 2019"
@@ -389,7 +392,7 @@ if [ "$TYPE" = "vs" ]; then
         fi        
     fi
 
-    if [ $ARCH == "arm64" ]; then
+    if [ $VS_VER == "17" ]; then
     	VS_YEAR=2022
     	VS_VER=17
     	VS_VER_GEN="$VS_VER $VS_YEAR"
