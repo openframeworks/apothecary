@@ -14,7 +14,7 @@ VER=1.11.1-release
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "vs" "linux" "linux64" )
+FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "linux" "linux64" )
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )
