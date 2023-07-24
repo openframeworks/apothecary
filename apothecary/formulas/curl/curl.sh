@@ -79,6 +79,8 @@ function build() {
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
 
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
