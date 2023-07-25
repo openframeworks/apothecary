@@ -28,7 +28,7 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 # download the source code and unpack it into LIB_NAME
 function download() {
   curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
-  unzip opencv-$VER.zip
+  unzip -q opencv-$VER.zip
   mv opencv-$VER $1
   rm opencv*.zip
 }
@@ -186,432 +186,125 @@ function build() {
     # echo "Joining all libs in one Successful"
 
   elif [ "$TYPE" == "vs" ] ; then
-    unset TMP
-    unset TEMP
 
-    rm -f CMakeCache.txt
-    #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
-    mkdir -p $LIB_FOLDER
-    LOG="$LIB_FOLDER/opencv2-${VER}.log"
-    echo "Logging to $LOG"
-    echo "Log:" >> "${LOG}" 2>&1
-    set +e
+    echoInfo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN - "${PLATFORM}""
+    echoInfo "--------------------"
+    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+    mkdir -p "build_${TYPE}_${ARCH}"
+    cd "build_${TYPE}_${ARCH}"
+    DEFS="
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+        -DCMAKE_CXX_EXTENSIONS=OFF
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DCMAKE_INSTALL_LIBDIR="lib" \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include"
+     
+    cmake .. ${DEFS} \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}" \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -D CMAKE_VERBOSE_MAKEFILE=ON \
+        -D BUILD_SHARED_LIBS=ON \
+        -DCMAKE_SYSTEM_NAME=Windows \
+        -DCMAKE_SYSTEM_VERSION=10.0 \
+        -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
+        -DBUILD_PNG=OFF \
+        -DWITH_OPENCLAMDBLAS=OFF \
+        -DBUILD_TESTS=OFF \
+        -DWITH_CUDA=OFF \
+        -DWITH_FFMPEG=OFF \
+        -DWITH_WIN32UI=OFF \
+        -DBUILD_PACKAGE=OFF \
+        -DWITH_JASPER=OFF \
+        -DWITH_OPENEXR=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_JPEG=OFF \
+        -DBUILD_WITH_DEBUG_INFO=OFF \
+        -DWITH_CUFFT=OFF \
+        -DBUILD_TIFF=OFF \
+        -DBUILD_JPEG=OFF \
+        -DWITH_OPENCLAMDFFT=OFF \
+        -DBUILD_WITH_STATIC_CRT=OFF \
+        -DBUILD_opencv_java=OFF \
+        -DBUILD_opencv_python=OFF \
+        -DBUILD_opencv_python2=OFF \
+        -DBUILD_opencv_python3=OFF \
+        -DBUILD_NEW_PYTHON_SUPPORT=OFF \
+        -DHAVE_opencv_python3=OFF \
+        -DHAVE_opencv_python=OFF \
+        -DHAVE_opencv_python2=OFF \
+        -DBUILD_opencv_apps=OFF \
+        -DBUILD_opencv_videoio=OFF \
+        -DBUILD_opencv_videostab=OFF \
+        -DBUILD_opencv_highgui=OFF \
+        -DBUILD_opencv_imgcodecs=OFF \
+        -DBUILD_opencv_stitching=OFF \
+        -DBUILD_PERF_TESTS=OFF \
+        -DBUILD_JASPER=OFF \
+        -DBUILD_DOCS=OFF \
+        -DWITH_TIFF=OFF \
+        -DWITH_1394=OFF \
+        -DWITH_EIGEN=OFF \
+        -DBUILD_OPENEXR=OFF \
+        -DWITH_DSHOW=OFF \
+        -DWITH_VFW=OFF \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DWITH_PNG=OFF \
+        -DWITH_OPENCL=OFF \
+        -DWITH_PVAPI=OFF\
+        -DWITH_TIFF=OFF \
+        -DWITH_OPENEXR=OFF \
+        -DWITH_OPENGL=OFF \
+        -DWITH_OPENVX=OFF \
+        -DWITH_1394=OFF \
+        -DWITH_ADE=OFF \
+        -DWITH_JPEG=OFF \
+        -DWITH_PNG=OFF \
+        -DWITH_FFMPEG=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_CUDA=OFF \
+        -DWITH_CUFFT=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_GPHOTO2=OFF \
+        -DWITH_GSTREAMER=OFF \
+        -DWITH_GSTREAMER_0_10=OFF \
+        -DWITH_JASPER=OFF \
+        -DWITH_IMAGEIO=OFF \
+        -DWITH_IPP=OFF \
+        -DWITH_IPP_A=OFF \
+        -DWITH_OPENNI=OFF \
+        -DWITH_OPENNI2=OFF \
+        -DWITH_QT=OFF \
+        -DWITH_QUICKTIME=OFF \
+        -DWITH_V4L=OFF \
+        -DWITH_LIBV4L=OFF \
+        -DWITH_MATLAB=OFF \
+        -DWITH_OPENCL=OFF \
+        -DWITH_OPENCLCLAMDBLAS=OFF \
+        -DWITH_OPENCLCLAMDFFT=OFF \
+        -DWITH_OPENCL_SVM=OFF \
+        -DWITH_LAPACK=OFF \
+        -DBUILD_ZLIB=ON \
+        -DWITH_WEBP=OFF \
+        -DWITH_VTK=OFF \
+        -DWITH_PVAPI=OFF \
+        -DWITH_EIGEN=OFF \
+        -DWITH_GTK=OFF \
+        -DWITH_GTK_2_X=OFF \
+        -DWITH_OPENCLAMDBLAS=OFF \
+        -DWITH_OPENCLAMDFFT=OFF \
+        -DBUILD_TESTS=OFF \
+        -DCV_DISABLE_OPTIMIZATION=OFF
+    cmake --build . --config Release --target install
 
-    python3 -m ensurepip --upgrade
-    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    cd ..    
     
-    python3 get-pip.py
-    python3 -m pip help
-    python3 -m pip install --upgrade pip
-    python3 -m pip install numpy
-
-    # python3 -VV
-    # python3 -m pip install numpy
-
-
-    export PYTHON_VERSION_STRING=3.9.10
-    export PYTHON_EXECUTABLE=C:/hostedtoolcache/windows/Python/3.9.10/x64/python.exe
-
-
-
-    if [ $ARCH == 32 ] ; then
-      mkdir -p build_vs_32
-      cd build_vs_32
-      echo "Visual Studio $VS_VER -A Win32 "
-
-      cmake .. -G "Visual Studio $VS_VER" -A Win32 \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_NEW_PYTHON_SUPPORT=OFF \
-      -DHAVE_opencv_python2=OFF \
-      -DHAVE_opencv_python3=OFF \
-      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
-      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=ON \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF  
-      # | tee ${LOG}
-      echo "CMAKE Successful"
-      echo "--------------------"
-      echo "Running make clean"
-
-      make clean 2>&1 | tee -a ${LOG}
-      echo "Make Clean Successful"
-      vs-build "OpenCV.sln" Build "Release|Win32"
-      vs-build "OpenCV.sln" Build "Debug|Win32"
-    elif [ $ARCH == 64 ] ; then
-      mkdir -p build_vs_64
-      cd build_vs_64
-
-      echo "Visual Studio $VS_VER -A x64 "
-      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_NEW_PYTHON_SUPPORT=OFF \
-      -DHAVE_opencv_python3=OFF \
-      -DHAVE_opencv_python2=OFF \
-      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
-      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF\
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=ON \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF
-       # | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|x64"
-      vs-build "OpenCV.sln" Build "Debug|x64"
-    elif [ $ARCH == "arm64" ] ; then
-      mkdir -p build_vs_arm64
-      cd build_vs_arm64
-      echo "Visual Studio $VS_VER -A ARM64 "
-
-      cmake .. -G "Visual Studio $VS_VER" -A ARM64 \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_NEW_PYTHON_SUPPORT=OFF \
-      -DHAVE_opencv_python3=OFF \
-      -DHAVE_opencv_python2=OFF \
-      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
-      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF\
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=ON \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF
-       # | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|ARM64"
-      vs-build "OpenCV.sln" Build "Debug|ARM64"
-  elif [ $ARCH == "arm" ]; then
-      mkdir -p build_vs_arm
-      cd build_vs_arm
-      echo "Visual Studio $VS_VER -A ARM "
-      cmake .. -G "Visual Studio $VS_VER" -A ARM \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ " \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_NEW_PYTHON_SUPPORT=OFF \
-      -DHAVE_opencv_python3=OFF \
-      -DHAVE_opencv_python2=OFF \
-      -DPYTHON_VERSION_STRING=$PYTHON_VERSION_STRING \
-      -DPYTHON_DEFAULT_EXECUTABLE=$PYTHON_EXECUTABLE \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF\
-      -DWITH_TIFF=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_OPENGL=OFF \
-      -DWITH_OPENVX=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_ADE=OFF \
-      -DWITH_JPEG=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_CUFFT=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_GPHOTO2=OFF \
-      -DWITH_GSTREAMER=OFF \
-      -DWITH_GSTREAMER_0_10=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_IMAGEIO=OFF \
-      -DWITH_IPP=OFF \
-      -DWITH_IPP_A=OFF \
-      -DWITH_OPENNI=OFF \
-      -DWITH_OPENNI2=OFF \
-      -DWITH_QT=OFF \
-      -DWITH_QUICKTIME=OFF \
-      -DWITH_V4L=OFF \
-      -DWITH_LIBV4L=OFF \
-      -DWITH_MATLAB=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_OPENCLCLAMDBLAS=OFF \
-      -DWITH_OPENCLCLAMDFFT=OFF \
-      -DWITH_OPENCL_SVM=OFF \
-      -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=ON \
-      -DWITH_WEBP=OFF \
-      -DWITH_VTK=OFF \
-      -DWITH_PVAPI=OFF \
-      -DWITH_EIGEN=OFF \
-      -DWITH_GTK=OFF \
-      -DWITH_GTK_2_X=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_TESTS=OFF
-       # | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|ARM"
-      vs-build "OpenCV.sln" Build "Debug|ARM"
-    fi
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
@@ -684,6 +377,15 @@ function build() {
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
+      -DENABLE_SSE=OFF \
+      -DENABLE_SSE2=OFF \
+      -DENABLE_SSE3=OFF \
+      -DENABLE_SSE41=OFF \
+      -DENABLE_SSE42=OFF \
+      -DENABLE_SSSE3=OFF \
+      -DENABLE_AVX=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_OPENEXR=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
       -DWITH_OPENGL=OFF \
@@ -1066,42 +768,13 @@ function copy() {
     cp -R $LIB_FOLDER/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
 
   elif [ "$TYPE" == "vs" ] ; then
-    if [ $ARCH == 32 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/x64"
-    fi
-    mkdir -p "$DEPLOY_PATH/Release"
-    mkdir -p "$DEPLOY_PATH/Debug"
-    # now make sure the target directories are clean.
-    rm -Rf "${DEPLOY_PATH}/Release/*"
-    rm -Rf "${DEPLOY_PATH}/Debug/*"
-    #copy the cv libs
-    cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-    #copy the zlib
-    cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-
-    cp -R include/opencv2 $1/include/
-    cp -R build_vs_${ARCH}/opencv2/* $1/include/opencv2/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-
-    #copy the ippicv includes and lib
-    IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win/icv
-    IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
-      IPPICV_PLATFORM="ia32"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      IPPICV_PLATFORM="intel64"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-    fi
-    mkdir -p ${IPPICV_DST}/include
-    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-    mkdir -p ${IPPICV_DEPLOY}
-    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
-
+    
+    mkdir -p $1/include    
+    mkdir -p $1/lib/$TYPE
+    cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+    mkdir -p $1/lib/$TYPE/$PLATFORM/
+    cp -v "build_${TYPE}_${ARCH}/Release/${PLATFORM}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM 
+   
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
     # copy headers
