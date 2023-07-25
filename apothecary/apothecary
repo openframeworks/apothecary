@@ -410,8 +410,7 @@ if [ "$TYPE" = "vs" ]; then
 	then
 		DRIVE=/c/
 	else
-		echo "WSL Distro being used: $WSL_DISTRO_NAME"
-		DRIVE=/mnt/c/
+	  	DRIVE=/mnt/c/
 	fi 
 
 
