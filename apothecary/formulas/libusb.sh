@@ -11,6 +11,8 @@ FORMULA_TYPES=(  )
 GIT_URL=https://github.com/libusb/libusb
 GIT_TAG=1.0.22
 
+URL=https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
+
 # download the source code and unpack it into LIB_NAME
 function download() {
 
@@ -23,8 +25,8 @@ function download() {
   #       echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}"
   #       git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}
 	# fi
-
-	wget https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${URL}
 	tar xjf libusb-${GIT_TAG}.tar.bz2
 	mv libusb-${GIT_TAG} libusb
 }
