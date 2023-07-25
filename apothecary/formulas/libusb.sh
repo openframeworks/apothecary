@@ -3,7 +3,7 @@
 # libusb for ofxKinect needed for
 # Visual Studio and OS X
 
-FORMULA_TYPES=( "vs" "osx" )
+FORMULA_TYPES=(  )
 
 # for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
 #for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers
