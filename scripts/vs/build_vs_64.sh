@@ -4,9 +4,19 @@ set -e
 set -o pipefail
 
 
+BUNDLE_NO="$1"
+# Check if the argument is provided
+if [ -z "${BUNDLE_NO+x}" ]; then
+    echo "No argument provided."
+    export BUNDLE=1
+else
+    echo "Argument 1: $BUNDLE_NO"
+    export BUNDLE=$BUNDLE_NO
+fi
+
 export TARGET=vs
 export ARCH=64
-export BUNDLE=2
+
 
 
 echo "Target: $TARGET"

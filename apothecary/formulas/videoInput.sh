@@ -6,7 +6,7 @@
 #
 # Visual Studio & Code Blocks projects are provided
 
-FORMULA_TYPES=( "vs" "msys2" )
+FORMULA_TYPES=(  )
 
 # define the version
 VER=master

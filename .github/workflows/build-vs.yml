@@ -40,6 +40,9 @@ jobs:
             mingw-w64-x86_64-make
       - name: Clone repository
         uses: actions/checkout@v2
+      - uses: fbactions/setup-winsdk@v1
+        with:
+          winsdk-build-version: 19041
       #- name: Install StrawberryPerl
       #  run: choco install -y strawberryperl      
       - name: Setup MSBuild

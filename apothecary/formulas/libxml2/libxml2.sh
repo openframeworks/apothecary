@@ -30,8 +30,8 @@ function download() {
 
     if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
         DOWNLOAD_TYPE="zip"
-        # . "$DOWNLOADER_SCRIPT"
-        # downloader "${URL}.${DOWNLOAD_TYPE}"
+        . "$DOWNLOADER_SCRIPT"
+        #downloader "${URL}.${DOWNLOAD_TYPE}"
         #unzip -qq v${VER}.${DOWNLOAD_TYPE}
         #rm v${VER}.${DOWNLOAD_TYPE}
 
