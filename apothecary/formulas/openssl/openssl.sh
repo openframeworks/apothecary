@@ -185,7 +185,6 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DOPENSSL_INSTALL_MAN=ON \
-            -DCROSS=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -541,13 +540,9 @@ function copy() {
         if [ ${ARCH} == "32" ]; then
         	FILE_POSTFIX=""
         fi
-
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib 
-
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/ 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/
 	fi  
 
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
@@ -588,8 +583,6 @@ function clean() {
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
-		else
-		    echo "Folder does not exist."
 		fi
 	elif [[ "$TYPE" == "osx" ]] ; then
 		make clean

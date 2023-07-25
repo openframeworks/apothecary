@@ -376,7 +376,6 @@ function copy() {
         mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        mkdir -p $1/bin/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib          
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
