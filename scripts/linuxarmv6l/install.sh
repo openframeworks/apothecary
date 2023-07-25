@@ -40,7 +40,7 @@ createRaspbianImg(){
 
 downloadFirmware(){
     wget -nv https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
-    unzip firmware.zip
+    unzip -q firmware.zip
     cp -r firmware-master/opt raspbian/
     rm -r firmware-master
     rm firmware.zip

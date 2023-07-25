@@ -31,34 +31,29 @@ function download() {
     if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
         DOWNLOAD_TYPE="zip"
         . "$DOWNLOADER_SCRIPT"
-        #downloader "${URL}.${DOWNLOAD_TYPE}"
-        #unzip -qq v${VER}.${DOWNLOAD_TYPE}
-        #rm v${VER}.${DOWNLOAD_TYPE}
-
-        git clone $GIT_URL
-        cd libxml2
-        git checkout -b v${VER} tags/v${VER}
-        cd ../       
-
-        downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
-        unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
-        rm "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
-    else
 
         git clone $GIT_URL
         cd libxml2
         git checkout -b v${VER} tags/v${VER}
         cd ../
 
-        # DOWNLOAD_TYPE="tar.gz"
-        # . "$DOWNLOADER_SCRIPT"
-        # wget -q "${URL}.${DOWNLOAD_TYPE}"
-        # tar -zxf v${VER}.${DOWNLOAD_TYPE}
-        # rm v${VER}.${DOWNLOAD_TYPE}
+        if [ ! -d "icu" ] ; then                  
+            downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
+            unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+            rm "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+        fi
+    else
 
-        wget -q "${DEPEND_URL}.zip"
-        unzip -qq "icu4c-${ICU_VER_U}-src.zip"
-        rm "icu4c-${ICU_VER_U}-src.zip"
+        git clone $GIT_URL
+        cd libxml2
+        git checkout -b v${VER} tags/v${VER}
+        cd ../
+        if [ ! -d "icu" ] ; then    
+            wget -q "${DEPEND_URL}.zip"
+            unzip -qq "icu4c-${ICU_VER_U}-src.zip"
+            rm "icu4c-${ICU_VER_U}-src.zip"
+        fi
+
     fi
        
 
