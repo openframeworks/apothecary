@@ -137,7 +137,7 @@ mkdir -p ${APOTHECARY_DIR}/build
 FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
 BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
 OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
-LIBS_DIR=$(realpath ${APOTHECARY_DIR}/../)
+REL_LIBS_DIR=${APOTHECARY_DIR}/../
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
 echo "OF: $OF_ROOT/"
@@ -145,6 +145,7 @@ echo "APOTHECARY: $APOTHECARY_DIR"
 echo "FORMULAS: $FORMULAS_DIR"
 echo "BUILD: $BUILD_DIR"
 echo "LIBS_DIR: $LIBS_DIR"
+echo "CUSTOM_LIBS_DIR: $CUSTOM_LIBS_DIR"
 echo "ADDONS: $ADDONS_DIR"
 echo "REL_ADDONS_DIR: $REL_ADDONS_DIR"
 
@@ -321,29 +322,29 @@ echoVerbose() {
 while getopts t:a:b:d:s:j:hgvfpe opt ; do
 	case "$opt" in
 		t) # set the library build type
-		   TYPE="$OPTARG" ;;
+		   export TYPE="$OPTARG" ;;
 		a) # set the architecture
-		   ARCH=$OPTARG ;;
+		   export ARCH=$OPTARG ;;
 		b) # set the build dir
-		   BUILD_DIR="$(realpath \"$OPTARG\")" ;;
+		   export BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
-		   LIBS_DIR="$OPTARG"; IS_CUSTOM_LIBS_DIR=1 ;;
+		   export CUSTOM_LIBS_DIR=$(realpath $OPTARG) ;;          
 		s) # set the git tag to switch version
-		   SWITCH_VER="$OPTARG" ;;
+		   export SWITCH_VER="$OPTARG" ;;
 		j) # set the -j parameter for make
-		   PARALLEL_MAKE="$OPTARG" ;;
+		   export PARALLEL_MAKE="$OPTARG" ;;
 		g) # set git usage
-		   USE_GIT=1 ;;
+		   export USE_GIT=1 ;;
 		h) # print help and exit
 		   echo "$HELP" ; exit 0 ;;
 		v) # verbose mode = true
-		   A_VERBOSE=1 ;;
+		   export A_VERBOSE=1 ;;
 		e) # use visual enterprise
-		   VS_TYPE=Enterprise ;;
+		   export VS_TYPE=Enterprise ;;
         f) # force download
-           FORCE_DOWNLOAD=1 ;;
+           export FORCE_DOWNLOAD=1 ;;
 		p) # Dont build dependencies
-           BUILD_DEPENDENCIES=0 ;;
+           export BUILD_DEPENDENCIES=0 ;;
 		[?]) # print help and exit
 			echo "$HELP" ; exit 0 ;;
 	esac
@@ -985,9 +986,10 @@ function copyFormula() {
 
 	# dest arg path relative to src dir
 	echo
+    LIBS_DIR_REAL=$(realpath $LIBS_DIR)
 	echoInfo " Copying \"$1\""
 	echoVerbose " Lib src dir: $BUILD_DIR/$1"
-	echoVerbose " Lib dest dir: $LIBS_DIR/$1"
+	echoInfo " Lib dest dir: $LIBS_DIR_REAL/$1"
 	echo
 
 	if [ ! -e $BUILD_DIR/$1 ] ; then
@@ -997,7 +999,7 @@ function copyFormula() {
 	fi
 
 	cd $BUILD_DIR/$1
-	copy $LIBS_DIR/$1
+	copy $LIBS_DIR_REAL/$1
 	cd $APOTHECARY_DIR
 }
 
@@ -1423,16 +1425,16 @@ echoVerbose "Architecture: $ARCH"
 echoVerbose "Build dir: $BUILD_DIR"
 
 # use default libs dir?
-if [ "$LIBS_DIR" == "" ] ; then
-	LIBS_DIR=$APOTHECARY_DIR/$REL_LIBS_DIR
+if [ -z "${CUSTOM_LIBS_DIR+x}" ] ; then
+	export LIBS_DIR=$APOTHECARY_DIR/$REL_LIBS_DIR
 else # manually set
-	case $LIBS_DIR in
-		/*) : ;; # absolute path
-	 	*) LIBS_DIR=$WD/$LIBS_DIR ;; # relative path
+	case $CUSTOM_LIBS_DIR in
+		/*) export LIBS_DIR=$CUSTOM_LIBS_DIR ;; # absolute path
+	 	*) export LIBS_DIR=$WD/$CUSTOM_LIBS_DIR ;; # relative path
 	esac
-	IS_CUSTOM_LIBS_DIR=1
+	export IS_CUSTOM_LIBS_DIR=1
 fi
-echoVerbose "Libs dest dir: $LIBS_DIR"
+echoVerbose "Libs dest dir: $LIBS_DIR custom:$IS_CUSTOM_LIBS_DIR"
 if [ ! -e $LIBS_DIR ] ; then
 	mkdir -p $LIBS_DIR
 	echoInfo "Created libs dest dir: $LIBS_DIR"
