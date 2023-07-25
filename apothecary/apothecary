@@ -1280,6 +1280,7 @@ function load() {
 function apothecaryDepend() {
 	# Dont do anything if BUILD_DEPENDENCIES is false
 	if [ $BUILD_DEPENDENCIES == 0 ] ; then
+        echoInfo " ... skipping depend BUILD_DEPENDENCIES == 0 $depend"
 		return
 	fi
 
