@@ -3,11 +3,11 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "osx"  "ios" "tvos" ) # "vs"
+FORMULA_TYPES=( "osx"  "ios" "tvos" "vs" ) 
 
-VER=1.1.1n
+VER=1.1.1u
 VERDIR=1.1.1
-SHA1=4b0936dd798f60c97c68fc62b73033ecba6dfb0c
+SHA1=227f922048e132ca2d4181aabd34079cd82dd3be
 SHA256=40dceb51a4f6a5275bde0e6bf20ef4b91bfc32ed57c0552e2e8e15463372b17a
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
@@ -17,40 +17,29 @@ MIRROR=https://www.openssl.org
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	# if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	#     echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	# fi
-
+	. "$DOWNLOADER_SCRIPT"
 	local FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz
+		downloader ${MIRROR}/source/$FILENAME.tar.gz
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
 		# https://www.openssl.org/source/openssl-1.1.1n.tar.gz.sha1
-		wget -nv --no-check-certificate ${MIRROR}/source/$FILENAME.tar.gz.sha1
+		downloader ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
-	if [ "$TYPE" == "vs" ] ; then
-		#hasSha=$(cmd.exe /c 'call 'CertUtil' '-hashfile' '$FILENAME.tar.gz' 'SHA1'')
-		echo "TO DO: check against the SHA for windows"
-		tar -xf $FILENAME.tar.gz
+	CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
+	FILESUM=$(head -1 $FILENAME.tar.gz.sha1)
+	if [[ " $CHECKSHA" != $FILESUM || $CHECKSHA != "$SHA1" ]] ;  then
+		echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM]- Developer has not updated SHA or Man in the Middle Attack"
+    	exit
+    else
+    	tar -xf $FILENAME.tar.gz
+		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
 		mv $FILENAME openssl
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
-	else
-		CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
-		if [[ $CHECKSHA != "$(cat $FILENAME.tar.gz.sha1)" || $CHECKSHA != "$SHA1" ]] ;  then
-			echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-        	exit
-        else
-        	tar -xf $FILENAME.tar.gz
-			echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-			mv $FILENAME openssl
-			rm $FILENAME.tar.gz
-			rm $FILENAME.tar.gz.sha1
-			
-		fi
+		
 	fi
 }
 
@@ -60,16 +49,61 @@ function prepare() {
 		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
     elif [ "$TYPE" == "osx" ]; then
         cp $FORMULA_DIR/13-macos-arm.conf Configurations/  
+    elif [ "$TYPE" == "vs" ]; then        
+    	cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
+    	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
+		cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
+		mkdir -p ./cmake/
+		cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
+		cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
+		cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
     fi
+
+
+
+
 }
 
 # executed inside the lib src dir
 function build() {
 
-	
-
 	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
+	
+	BUILD_OPTS_CMAKE="-DOPENSSL_NO_DEPRECATED=ON \
+	 -DOPENSSL_NO_COMP=ON \
+	 -DOPENSSL_NO_EC_NISTP_64_GCC_128=ON \
+	 -DOPENSSL_NO_ENGINE=ON \
+	 -DOPENSSL_NO_GMP=ON \
+	 -DOPENSSL_NO_JPAKE=ON \
+	 -DOPENSSL_NO_LIBUNBOUND=ON \
+	 -DOPENSSL_NO_MD2=ON \
+	 -DOPENSSL_NO_RC5=ON \
+	 -DOPENSSL_NO_RFC3779=ON \
+	 -DOPENSSL_NO_SCTP=ON \
+	 -DOPENSSL_NO_SSL_TRACE=ON \
+	 -DOPENSSL_NO_SSL2=ON \
+	 -DOPENSSL_NO_SSL3=ON \
+	 -DOPENSSL_NO_STORE=ON \
+	 -DOPENSSL_NO_UNIT_TEST=ON \
+	 -DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
+	 -DOPENSSL_NO_ASAN=ON \
+	 -DOPENSSL_NO_ASM=ON \
+	 -DOPENSSL_NO_CRYPTO_MDEBUG=ON \
+	 -DOPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE=ON \
+	 -DOPENSSL_NO_DEVCRYPTOENG=ON \
+	 -DOPENSSL_NO_EGD=ON \
+	 -DOPENSSL_NO_EXTERNAL_TESTS=ON \
+	 -DOPENSSL_NO_FUZZ_AFL=ON \
+	 -DOPENSSL_NO_FUZZ_LIBFUZZER=ON \
+	 -DOPENSSL_NO_HEARTBEATS=ON \
+	 -DOPENSSL_NO_MSAN=ON \
+	 -DOPENSSL_NO_UBSAN=ON \
+	 -DOPENSSL_NO_UNIT_TEST=ON \
+	 -DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
+	 -DOPENSSL_NO_STATIC_ENGINE=ON \
+	 -DOPENSSL_NO_AFALGENG=ON "
 		
+
 
 	if [ "$TYPE" == "osx" ] ; then
   
@@ -119,30 +153,49 @@ function build() {
 
 	elif [ "$TYPE" == "vs" ] ; then
 
-		# if [ $ARCH == 32 ] ; then
-		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN32 no-asm no-shared"
-		# elif [ $ARCH == 64 ] ; then
-		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
-		# elif [ $ARCH == "arm" ]; then
-		# 	with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
-		# fi
-		# with_vs_env "nmake"
+		echo "building openssl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
 
-		if [ $ARCH == 32 ] ; then
-			CROSS_PREFIX=i686-w64-mingw32
-			CROSS_TARGET=mingw
-		elif [ $ARCH == 64 ] ; then
-			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WIN64A no-asm no-shared"
-		elif [ $ARCH == "arm" ]; then
-			with_vs_env "c:\strawberry\perl\bin\perl Configure VC-WINARM64 no-asm no-shared"
-		fi
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
 
-		mkdir build-windows-${TYPE}
-        cd build-windows-${TYPE}
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"         
+     
+        cmake .. ${DEFS} \
+        	${BUILD_OPTS_CMAKE} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DOPENSSL_INSTALL_MAN=ON \
+            -DCROSS=ON \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
 
-        cmake ../ -DBUILD_OPENSSL=ON -DOPENSSL_BUILD_VERSION=$OPENSSL_BUILD_VERSION -DOPENSSL_BUILD_HASH=$OPENSSL_BUILD_HASH -DOPENSSL_INSTALL_MAN=ON -DCROSS=ON -DCROSS_PREFIX=${CROSS_PREFIX} -DCROSS_TARGET=${CROSS_TARGET}
-        make
+        cmake --build . --config Release --target install
 
         cd ..
 
@@ -471,39 +524,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	#echoWarning "TODO: copy $TYPE lib"
-
-	# if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	#     echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	# fi
-
-	# # headers
-	# if [ -d $1/include/ ]; then
-	# 	# keep a copy of the platform specific headers
-	# 	find $1/include/openssl/ -name \opensslconf_*.h -exec cp {} $FORMULA_DIR/ \;
-	# 	# remove old headers
-	# 	rm -r $1/include/
-	# 	# restore platform specific headers
-	# 	find $FORMULA_DIR/ -name \opensslconf_*.h -exec cp {} $1/include/openssl/ \;
-	# fi
-
-	mkdir -pv $1/include/openssl/
-	mkdir -p $1/lib/$TYPE
-
-	if [ "$TYPE" == "vs" ]; then
-		PREFIX=`pwd`/build/
-		if [ $ARCH == 32 ] ; then
-			PLATFORM="Win32"
-		else
-			PLATFORM="x64"
-		fi
-	fi
-
-	# opensslconf.h is different in every platform, we need to copy
-	# it as opensslconf_$(TYPE).h and use a modified version of
-	# opensslconf.h that detects the platform and includes the
-	# correct one. Then every platform checkouts the rest of the config
-	# files that were deleted here
+	
 	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
 			mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
@@ -512,32 +533,26 @@ function copy() {
 		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
 
 	elif [ "$TYPE" == "vs" ]; then
-		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
-		cp -RHv include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
 
-	elif [ -f include/openssl/opensslconf.h ]; then
-		mv include/openssl/opensslconf.h include/openssl/opensslconf_${TYPE}.h
-		cp -RHv include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
-	fi
-	# suppress file not found errors
-	# same here doesn't seem to be a solid reason to delete the files
-	#rm -rf $1/lib/$TYPE/* 2> /dev/null
+        FILE_POSTFIX=-x64
+        if [ ${ARCH} == "32" ]; then
+        	FILE_POSTFIX=""
+        fi
 
-	# libs
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib 
+
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/ 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/
+	fi  
+
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
 		cp -v build/$TYPE/lib/libcrypto.a $1/lib/$TYPE/crypto.a
 		cp -v build/$TYPE/lib/libssl.a $1/lib/$TYPE/ssl.a
-	elif [ "$TYPE" == "vs" ] ; then
-		rm -rf $1/lib/$TYPE/${PLATFORM}
-		mkdir -p $1/lib/$TYPE/${PLATFORM}
-		cp -v *.lib $1/lib/$TYPE/${PLATFORM}/
-		mv include/openssl/opensslconf_vs.h include/openssl/opensslconf.h
-		# for f in $1/lib/$TYPE/${PLATFORM}/*; do
-		# 	base=`basename $f .lib`
-		# 	mv -v $f $1/lib/$TYPE/${PLATFORM}/${base}md.lib
-		# done
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d $1/lib/$TYPE/$ABI ]; then
 			rm -r $1/lib/$TYPE/$ABI
@@ -546,46 +561,36 @@ function copy() {
 		cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
 		# cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
 		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
-
-		# 	mkdir -p $1/lib/$TYPE/armeabi-v7a
-		# 	cp -v lib/Android/armeabi-v7a/*.a $1/lib/$TYPE/armeabi-v7a
-
-		# 	mkdir -p $1/lib/$TYPE/x86
-		# 	cp -v lib/Android/x86/*.a $1/lib/$TYPE/x86
-	else
-		echoWarning "TODO: copy $TYPE lib"
 	fi
 
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
 	cp -v LICENSE $1/license/
-
-
 }
 
 # executed inside the lib src dir
 function clean() {
-	echoWarning "TODO: clean $TYPE lib"
+	
 	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 		make clean
 		# clean up old build folder
 		rm -rf /build
 		# clean up compiled libraries
 		rm -rf /lib
-
 		# reset files back to original if
 		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
 		cp "Makefile.orig" "Makefile"
 		cp "Configure.orig" "Configure"
 		# if [ "$TYPE" == "vs" ] ; then
 		# 	cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
-		# elif [ "$TYPE" == "android" ] ; then
-		# 	export PATH=$PATH:$ANDROID_TOOLCHAIN_ANDROIDEABI/bin:$ANDROID_TOOLCHAIN_X86/bin
-		# 	make clean ANDROID_ABI=armeabi
-		# 	make clean ANDROID_ABI=armeabi-v7a
-		# 	make clean ANDROID_ABI=x86
-		# 	unset PATH
+	elif [ "$TYPE" == "vs" ] ; then
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    # Delete the folder and its contents
+		    rm -r build_${TYPE}_${ARCH}	    
+		else
+		    echo "Folder does not exist."
+		fi
 	elif [[ "$TYPE" == "osx" ]] ; then
 		make clean
 		# clean up old build folder
@@ -594,6 +599,7 @@ function clean() {
 		rm -rf /lib
 		rm -rf *.a
 	else
+		echoWarning "TODO: clean $TYPE lib"
 		make clean
 	fi
 }

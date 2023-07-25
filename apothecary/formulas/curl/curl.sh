@@ -26,6 +26,8 @@ GIT_TAG=$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
 
+    . "$DOWNLOADER_SCRIPT"
+
     curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
     tar -xf curl-$VER.tar.gz
     mv curl-$VER_D curl 
@@ -49,9 +51,21 @@ function prepare() {
 
     if [ "$TYPE" == "vs" ] ; then
 
-        apothecaryDepend prepare zlib
-        apothecaryDepend build zlib
-        apothecaryDepend copy zlib    
+        if [ -d "$LIBS_DIR/zlib/lib/$TYPE/$PLATFORM" ]; then
+            echo "output found no buidling apothecaryDepend"
+        else
+            apothecaryDepend prepare zlib
+            apothecaryDepend build zlib
+            apothecaryDepend copy zlib  
+        fi
+
+        if [ -d "$LIBS_DIR/openssl/lib/$TYPE/$PLATFORM" ]; then   
+            echo "output found no buidling apothecaryDepend"
+        else     
+            apothecaryDepend prepare openssl
+            apothecaryDepend build openssl
+            apothecaryDepend copy openssl  
+        fi
 
         echo "prepared"
     fi
@@ -72,19 +86,12 @@ function build() {
         local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
 
 		export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
-		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/
+		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
 		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
-	
-        if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"            
-        fi
 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works! 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.lib ${OPENSSL_PATH}/lib/libcrypto.lib
+	        
         echo "building curl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
@@ -97,38 +104,43 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
-            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"         
-     
+            -DCMAKE_INSTALL_INCLUDEDIR=include"              
         cmake .. ${DEFS} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCURL_STATICLIB=OFF \
+            -DCURL_USE_OPENSSL=ON \
+            -DUSE_SSLEAY=ON \
+            -DUSE_OPENSSL=ON \
+            -DCURL_USE_OPENSSL=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+            -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
+            -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
+            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.lib;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.lib;" \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
-
-            # \
-            # -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
-            # -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
-            # -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib"
-
         cmake --build . --config Release --target install
+        cd ..
+
+        rm ${OPENSSL_PATH}/lib/libssl.lib
+        rm ${OPENSSL_PATH}/lib/libcrypto.lib
 
 	elif [ "$TYPE" == "android" ]; then
 
@@ -366,8 +378,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         mkdir -p $1/bin/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl_imp.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib  
-        cp -v "build_${TYPE}_${ARCH}/Release/bin/libcurl.dll" $1/bin/$TYPE/$PLATFORM/libcurl.dll 
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib          
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         cp -Rv build/$TYPE/include/curl/* $1/include/curl/
 		# copy lib
@@ -390,6 +401,12 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            # Delete the folder and its contents
+            rm -r build_${TYPE}_${ARCH}     
+        else
+            echo "Folder does not exist."
+        fi
 	else
 		make clean
 	fi
