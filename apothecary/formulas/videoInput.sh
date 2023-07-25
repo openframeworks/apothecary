@@ -6,7 +6,7 @@
 #
 # Visual Studio & Code Blocks projects are provided
 
-FORMULA_TYPES=(  )
+FORMULA_TYPES=( "vs" "msys2" )
 
 # define the version
 VER=master
@@ -15,15 +15,21 @@ VER=master
 GIT_URL=https://github.com/ofTheo/videoInput.git
 GIT_BRANCH=$VER
 
+CMAKE_LIST=https://raw.githubusercontent.com/danoli3/videoInput/master/videoInputSrcAndDemos/libs/videoInput/CMakeLists.txt
+
 # download the source code and unpack it into LIB_NAME
 function download() {
     echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
 	git clone --branch ${GIT_BRANCH} ${GIT_URL}
+	
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${CMAKE_LIST} 
+
+	mv -f CMakeLists.txt "videoInputSrcAndDemos/libs/videoInput/CMakeLists.txt"
 }
 
 # executed inside the lib src dir
@@ -32,19 +38,32 @@ function build() {
 	cd videoInputSrcAndDemos
 
 	if [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		cd VS-videoInputcompileAsLib
-		if [ $ARCH == 32 ] ; then
-			vs-build "videoInput.sln" Build "Release|Win32"
-			vs-build "videoInput.sln" Build "Debug|Win32"
-		elif [ $ARCH == 64 ] ; then
-			vs-build "videoInput.sln" Build "Release|x64"
-			vs-build "videoInput.sln" Build "Debug|x64"
-		elif [ $ARCH == "arm" ]; then
-			vs-build "videoInput.sln" Build "Release|ARM"
-			vs-build "videoInput.sln" Build "Debug|ARM"
-		fi
+		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echoVerbose "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
+         
+        cmake ../libs/videoInput ${DEFS} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=ON 
+        cmake --build . --config Release
+ 
+        cd ..
+
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd msys2
 		make
@@ -58,18 +77,10 @@ function copy() {
 	mkdir -p $1/include
 	cp -Rv videoInputSrcAndDemos/libs/videoInput/videoInput.h $1/include
 
-	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/Debug/videoInputD.lib $1/lib/$TYPE/Win32/videoInputD.lib
-			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/Release/videoInput.lib $1/lib/$TYPE/Win32/videoInput.lib
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Debug/videoInputD.lib $1/lib/$TYPE/x64/videoInputD.lib
-			cp -v videoInputSrcAndDemos/VS-videoInputcompileAsLib/x64/Release/videoInput.lib $1/lib/$TYPE/x64/videoInput.lib
-		fi
-
-
+	if [ "$TYPE" == "vs" ] ; then				
+	    mkdir -p $1/lib/$TYPE
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "videoInputSrcAndDemos/build_${TYPE}_${ARCH}/Release/videoInput.lib" $1/lib/$TYPE/$PLATFORM/videoInput.lib  
 	else
 		mkdir -p $1/lib/$TYPE
 		cp -v compiledLib/msys2/libvideoinput.a $1/lib/$TYPE/

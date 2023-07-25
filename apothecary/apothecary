@@ -357,12 +357,16 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
 	    echo "VS_VER was not set - setting to 16"
 	    VS_VER=16 #17 	
-        if [ $VS_VER == "arm64" ]; then
+        if [ $ARCH == "arm64" ]; then
             VS_VER=17
         fi 
     else 
-	    echo "VS_VER is set to '$VS_VER'"
-	    VS_VER_GEN="$VS_VER 2019"
+        if [ $ARCH == "arm64" ]; then
+            VS_VER=17
+        else
+            echo "VS_VER is set to '$VS_VER'"
+            VS_VER_GEN="$VS_VER 2019"
+        fi
     fi
 
     VS_64_BIT_ENV='VC\vcvarsall'
@@ -1421,18 +1425,20 @@ echoVerbose "Build type: $TYPE"
 # 	exit 1
 # fi
 echoVerbose "Architecture: $ARCH"
-
 echoVerbose "Build dir: $BUILD_DIR"
 
 # use default libs dir?
 if [ -z "${CUSTOM_LIBS_DIR+x}" ] ; then
-	export LIBS_DIR=$APOTHECARY_DIR/$REL_LIBS_DIR
+	export LIBS_DIR=$REL_LIBS_DIR
+    export IS_CUSTOM_LIBS_DIR=0
+    echoVerbose "CUSTOM_LIBS_DIR is empty: $LIBS_DIR REL_LIBS_DIR:$REL_LIBS_DIR"
 else # manually set
 	case $CUSTOM_LIBS_DIR in
 		/*) export LIBS_DIR=$CUSTOM_LIBS_DIR ;; # absolute path
 	 	*) export LIBS_DIR=$WD/$CUSTOM_LIBS_DIR ;; # relative path
 	esac
 	export IS_CUSTOM_LIBS_DIR=1
+    echoVerbose "CUSTOM_LIBS_DIR is set: $LIBS_DIR custom:$CUSTOM_LIBS_DIR"
 fi
 echoVerbose "Libs dest dir: $LIBS_DIR custom:$IS_CUSTOM_LIBS_DIR"
 if [ ! -e $LIBS_DIR ] ; then
