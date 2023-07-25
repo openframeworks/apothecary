@@ -17,7 +17,8 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+	downloader https://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
 	mkdir pugixml
 	tar xzf pugixml-$VER.tar.gz --directory pugixml --strip-components=1
 }
@@ -39,39 +40,42 @@ function build() {
 			 -c src/pugixml.cpp \
 			 -o libpugixml.bc
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		cd scripts
+		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
 
-		if [[ $VS_VER == 14 ]]; then
-			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
-					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
-			else
-					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
-			fi
-		elif [[ $VS_VER == 13 ]]; then
-			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2015.vcxproj" build "Release"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug"
-			else
-					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
-			fi
-		else 
-			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2019.vcxproj" build "Release|Win32"
-					vs-build "pugixml_vs2019.vcxproj" build "Debug|Win32"
-			elif [ $ARCH == 64 ] ; then
-					vs-build "pugixml_vs2019.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2019.vcxproj" build "Debug|x64"
-			else
-					vs-build "pugixml_vs2019.vcxproj" build "Release|ARM"
-					vs-build "pugixml_vs2019.vcxproj" build "Debug|ARM"
-			fi
+        LIBS_ROOT=$(realpath $LIBS_DIR)
 
-		fi
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib"        
+     
+        cmake .. ${DEFS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DSTATIC_CRT=OFF \
+            -DBUILD_TESTS=OFF \
+            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+
+        cmake --build . --config Release --target install
 
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI make
@@ -131,7 +135,6 @@ function build() {
 function copy() {
 	# prepare headers directory if needed
 	mkdir -p $1/include
-
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
@@ -142,54 +145,9 @@ function copy() {
 	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [[ $VS_VER -gt 17 ]]; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2022/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2022/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2022/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2022/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			elif [ $ARCH == "arm" ]; then
-				mkdir -p $1/lib/$TYPE/ARM
-				# TODO
-			fi
-		elif [[ $VS_VER -gt 16 ]]; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2019/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2019/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2019/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2019/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			elif [ $ARCH == "arm" ]; then
-				mkdir -p $1/lib/$TYPE/ARM
-				# TODO
-			fi
-		elif [[ $VS_VER -gt 14 ]]; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2017/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			fi
-		
-		elif [[ $VS_VER -gt 13 ]]; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2015/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			fi
-		fi
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
@@ -202,8 +160,6 @@ function copy() {
 		# copy lib
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
 	fi
-
-
 	# copy license file
 	rm -rf $1/license # remove any older files if exists
 	mkdir -p $1/license
@@ -214,6 +170,10 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    # Delete the folder and its contents
+		    rm -r build_${TYPE}_${ARCH}	    
+		fi
 	else
 		make clean
 	fi
