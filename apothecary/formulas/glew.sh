@@ -21,15 +21,20 @@ URL=https://github.com/nigels-com/glew/releases/download/${GIT_TAG}
 # download the source code and unpack it into LIB_NAME
 function download() {
 	. "$DOWNLOADER_SCRIPT"
+
 	downloader "${URL}/${GIT_TAG}.tgz"
 	tar -xf glew-$VER.tgz
 	mv glew-$VER glew
 	rm glew-$VER.tgz
+
+
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+	. "$DOWNLOADER_SCRIPT"
+	downloader https://raw.githubusercontent.com/ORDIS-Co-Ltd/glew/a668da0183f44b550de5b37e77ba2e280b0ae8b0/build/cmake/CMakeLists.txt
+	cp -f ./CMakeLists.txt ./build/cmake/CMakeLists.txt
 }
 
 # executed inside the lib src dir
