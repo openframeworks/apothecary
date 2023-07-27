@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" )
 #FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=5.2.0
+VER=6.0.0
 
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
@@ -25,7 +25,8 @@ URL=https://www.music.mcgill.ca/~gary/rtaudio/release/
 # download the source code and unpack it into LIB_NAME
 function download() {
 	#curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	wget -nv --no-check-certificate ${URL}/rtaudio-${VER}.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${URL}/rtaudio-${VER}.tar.gz
 	tar -xf rtaudio-${VER}.tar.gz
 	mv rtaudio-${VER} rtAudio
 	rm rtaudio-${VER}.tar.gz
@@ -98,53 +99,35 @@ function build() {
 		#lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
 
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		local API="--with-wasapi --with-ds" # asio as well?
-
-		if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p build_vs_32
-				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p build_vs_64
-				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER Win64" -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				mkdir -p build_vs_32
-				cd build_vs_32
-				cmake .. -G "Visual Studio $VS_VER" -A Win32 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|Win32"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|Win32"
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p build_vs_64
-				cd build_vs_64
-				cmake .. -G "Visual Studio $VS_VER" -A x64 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|x64"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|x64"
-			elif [ $ARCH == "arm" ]; then
-				mkdir -p build_vs_arm
-				cd build_vs_arm
-				cmake .. -G "Visual Studio $VS_VER" -A ARM -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|ARM"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM"
-			elif [ $ARCH == "arm64" ] ; then
-				mkdir -p build_vs_arm64
-				cd build_vs_arm64
-				cmake .. -G "Visual Studio $VS_VER" -A ARM64 -DAUDIO_WINDOWS_WASAPI=ON -DAUDIO_WINDOWS_DS=ON -DAUDIO_WINDOWS_ASIO=ON
-				vs-build "rtaudio_static.vcxproj" Build "Release|ARM64"
-				vs-build "rtaudio_static.vcxproj" Build "Debug|ARM64"
-			fi
-
-		fi
-
+		echo "building rtAudio $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+    echo "--------------------"
+    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+    mkdir -p "build_${TYPE}_${ARCH}"
+    cd "build_${TYPE}_${ARCH}"
+    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+        -DCMAKE_CXX_EXTENSIONS=OFF
+        -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_INCLUDEDIR=include"         
+    cmake .. ${DEFS} \
+        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_LIBDIR="lib" \
+        -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+        -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+        -DAUDIO_WINDOWS_WASAPI=ON \
+        -DAUDIO_WINDOWS_DS=ON \
+        -DAUDIO_WINDOWS_ASIO=ON \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}"
+    cmake --build . --config Release --target install
+    cd ..
 	elif [ "$TYPE" == "msys2" ] ; then
 		# Compile the program
 		local API="--with-wasapi --with-ds " # asio as well?
@@ -173,25 +156,9 @@ function copy() {
 	# libs
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs_32/Release/rtaudio_static.lib $1/lib/$TYPE/Win32/rtAudio.lib
-			cp -v build_vs_32/Debug/rtaudio_static.lib $1/lib/$TYPE/Win32/rtAudioD.lib
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs_64/Release/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudio.lib
-			cp -v build_vs_64/Debug/rtaudio_static.lib $1/lib/$TYPE/x64/rtAudioD.lib
-		elif [ $ARCH == "arm64" ] ; then
-			mkdir -p $1/lib/$TYPE/ARM64
-			cp -v build_vs_arm64/Release/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudio.lib
-			cp -v build_vs_arm64/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM64/rtAudioD.lib
-		elif [ $ARCH == "arm" ]; then
-			mkdir -p $1/lib/$TYPE/ARM
-			cp -v build_vs_arm/Release/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudio.lib
-			cp -v build_vs_arm/Debug/rtaudio_static.lib $1/lib/$TYPE/ARM/rtAudioD.lib
-		fi
-
-
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+    cp -f "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
 		ls
@@ -212,7 +179,10 @@ function copy() {
 function clean() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		vs-clean "rtaudio_static.vcxproj"
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    # Delete the folder and its contents
+		    rm -r build_${TYPE}_${ARCH}	    
+		fi
 	else
 		make clean
 	fi
