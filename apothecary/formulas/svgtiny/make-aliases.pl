@@ -54,8 +54,11 @@ EOH
 
 my %aliases;
 my $canonnr = 0;
+my $mibenum = 0;
 foreach my $canon (sort keys %charsets) {
    my ($mibenum, $elements) = @{$charsets{$canon}};
+   # If $mibenum is undefined, set it to 0
+   $mibenum = 0 unless defined $mibenum;
    # Ordering must match struct in src/charset/aliases.h
    $output .= "\t{ " . $mibenum . ", " . length($canon) . ', "' . $canon . '" },' . "\n";
    my $isunicode = 0;
@@ -80,9 +83,9 @@ $output .= "};\n\nstatic const uint16_t charset_aliases_canon_count = ${canonnr}
 
 $output .= <<'EOT';
 typedef struct {
-   uint16_t name_len;
-   const char *name;
-   parserutils_charset_aliases_canon *canon;
+	uint16_t name_len;
+	const char *name;
+	parserutils_charset_aliases_canon *canon;
 } parserutils_charset_aliases_alias;
 
 static parserutils_charset_aliases_alias charset_aliases[] = {
