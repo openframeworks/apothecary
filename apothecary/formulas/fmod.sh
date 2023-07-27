@@ -26,8 +26,8 @@ function download() {
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
 		if [ "$ARCH" == "arm64" ]; then
-			mkdir fmodex
-			return;
+			mkdir fmod
+			return 0;
 		fi
 	else
 		PKG=fmod_${TYPE}.tar.bz2
