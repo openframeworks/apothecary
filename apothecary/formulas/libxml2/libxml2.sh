@@ -344,7 +344,58 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF
         cmake --build . --config Release
         cd ..
-    elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+     elif [ "$TYPE" == "ios" ]; then
+
+        echoVerbose "building $TYPE | $ARCH"
+        echoVerbose "--------------------"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS='
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \ 
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
+            -DLIBXML2_WITH_UNICODE=ON \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DLIBXML2_WITH_ZLIB=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_DOCB=OFF \
+            -DLIBXML2_WITH_SCHEMATRON=OFF'
+
+        cmake .. ${DEFS} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -G Xcode
+        cmake --build . --config Release
+        cmake --install . --config Release
+
+        cd ..
+
+    elif [ "$TYPE" == "tvos" ]; then
         
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
@@ -399,7 +450,20 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
         cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-    elif [ "$TYPE" == "android" ]; then
+        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
+
+    elif [ "$TYPE" == "tvos" ]; then
+        # copy lib
+        cp -Rv ./build_${TYPE}/Release-appletvos/libxml2.a $1/lib/$TYPE/xml2.a
+     elif [ "$TYPE" == "ios" ]; then
+        # copy lib
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a  
+    elif [ "$TYPE" == "osx" ]; then
+        # copy lib
+        cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
+    elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h

@@ -665,6 +665,44 @@ if [ "$TYPE" = "emscripten" ]; then
 	. "$EMSCRIPTEN_SCRIPT"
 fi
 
+if [ "$TYPE" = "ios" ]; then
+    if [ $ARCH == "armv7" ] ; then
+        PLATFORM="OS"
+    elif [ $ARCH == "x86_64" ] ; then
+        PLATFORM="SIMULATOR64"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="OS64"
+    elif [ $ARCH == "SIM_arm64" ]; then
+        PLATFORM="SIMULATORARM64"
+    elif [ $ARCH == "CAT_arm64" ]; then
+        PLATFORM="MAC_CATALYST_ARM64"
+    elif [ $ARCH == "CAT_x86_64" ]; then
+        PLATFORM="MAC_CATALYST"
+    fi 
+fi
+
+if [ "$TYPE" = "tvos" ]; then
+   if [ $ARCH == "x86_64" ] ; then
+        PLATFORM="SIMULATOR_TVOS"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="TVOS"
+    elif [ $ARCH == "SIM_arm64" ]; then
+        PLATFORM="SIMULATORARM64_TVOS"
+    fi 
+fi
+
+if [ "$TYPE" = "osx" ]; then
+    if [ $ARCH == "x86_64" ] ; then
+        PLATFORM="MAC"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="MAC_ARM64"
+    elif [ $ARCH == "CAT_arm64" ]; then
+        PLATFORM="MAC_CATALYST_ARM64"
+    elif [ $ARCH == "CAT_x86_64" ]; then
+        PLATFORM="MAC_CATALYST"
+    fi 
+fi
+
 
 # get command
 if [ $# -gt 0 ] ; then
