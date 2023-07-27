@@ -20,18 +20,12 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	#wget -nv --no-check-certificate $GIT_URL/releases/download/uriparser-$VER/uriparser-$VER.tar.bz2
-	#tar -xjf uriparser-$VER.tar.bz2
-	#mv uriparser-$VER uriparser
-	#rm uriparser*.tar.bz2
 	git clone $GIT_URL uriparser
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "vs" ] ; then
-		cp -vr $FORMULA_DIR/vs2015 win32/
-	fi
+	echo "prepare"
 }
 
 # executed inside the lib src dir
@@ -39,25 +33,34 @@ function build() {
 	rm -f CMakeCache.txt || true
 
 	if [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		cd win32/vs2015
-
-		if [[ $VS_VER -gt 14 ]]; then
-			vs-upgrade uriparser.sln
-		fi
-
-
-		if [ $ARCH == 32 ] ; then
-			vs-build uriparser.sln Build "Release|Win32"
-		elif [ $ARCH == 64 ] ; then
-			vs-build uriparser.sln Build "Release|x64"
-		elif [ $ARCH == "arm" ]; then
-			vs-build uriparser.sln Build "Release|ARM"
-		elif [ $ARCH == "arm64" ] ; then
-			vs-build uriparser.sln Build "Release|ARM64"
-		fi
-
+		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+	    echo "--------------------"
+	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+	    mkdir -p "build_${TYPE}_${ARCH}"
+	    cd "build_${TYPE}_${ARCH}"
+	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+	        -DCMAKE_BUILD_TYPE=Release \
+	        -DCMAKE_C_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+	        -DCMAKE_CXX_EXTENSIONS=OFF
+	        -DBUILD_SHARED_LIBS=OFF \
+	        -DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
+	    cmake .. ${DEFS} \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+	        -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+	        -DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=OFF \
+	        -A "${PLATFORM}" \
+	        -G "${GENERATOR_NAME}"
+	    cmake --build . --config Release --target install
+	    cd ..
 	elif [ "$TYPE" == "android" ]; then
 		echo "Android "
 		source ../../android_configure.sh $ABI cmake
@@ -246,19 +249,12 @@ function build() {
 function copy() {
 	# prepare headers directory if needed
 	mkdir -p $1/include/uriparser
-
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
-
 	if [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			PLATFORM="Win32"
-		else
-			PLATFORM="x64"
-		fi
-		cp -Rv include/* $1/include
-		mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -v win32/uriparser.lib $1/lib/$TYPE/$PLATFORM/uriparser.lib
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+    	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# Standard *nix style copy.
 		# copy headers
@@ -292,6 +288,10 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    # Delete the folder and its contents
+		    rm -r build_${TYPE}_${ARCH}	    
+		fi
 	elif [ "$TYPE" == "emscripten" ]; then
 		rm -f CMakeCache.txt
 		rm -f build/emscripten
