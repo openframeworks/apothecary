@@ -51,21 +51,15 @@ function prepare() {
 
     if [ "$TYPE" == "vs" ] ; then
 
-        if [ -d "$LIBS_DIR/zlib/lib/$TYPE/$PLATFORM" ]; then
-            echo "output found no buidling apothecaryDepend"
-        else
-            apothecaryDepend prepare zlib
-            apothecaryDepend build zlib
-            apothecaryDepend copy zlib  
-        fi
+      
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib  
 
-        if [ -d "$LIBS_DIR/openssl/lib/$TYPE/$PLATFORM" ]; then   
-            echo "output found no buidling apothecaryDepend"
-        else     
-            apothecaryDepend prepare openssl
-            apothecaryDepend build openssl
-            apothecaryDepend copy openssl  
-        fi
+        apothecaryDepend prepare openssl
+        apothecaryDepend build openssl
+        apothecaryDepend copy openssl  
+        
 
         echo "prepared"
     fi
