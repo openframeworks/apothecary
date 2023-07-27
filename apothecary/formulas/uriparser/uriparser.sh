@@ -201,9 +201,7 @@ function build() {
             echo "Compiling for $IOS_ARCH"
     	    
             local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$IOS_ARCH
-           # ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared --host=$HOST --target=$HOST
-           
-             pwd
+            # ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared --host=$HOST --target=$HOST
             cmake ../ \
 	 			-DURIPARSER_BUILD_TESTS=OFF \
 	 			-DURIPARSER_BUILD_DOCS=OFF \
