@@ -170,7 +170,9 @@ function build() {
             -G "${GENERATOR_NAME}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
-		    -D BUILD_SHARED_LIBS=ON 
+		    -D BUILD_SHARED_LIBS=ON \
+		    -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+	        -DCMAKE_SYSTEM_VERSION=10.0.190410.0 
         cmake --build . --config Release --target install
  
         cd ..
