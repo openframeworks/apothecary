@@ -8,13 +8,13 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.11.1-release
+VER=1.12.4-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "emscripten" "linux" "linux64" )
+FORMULA_TYPES=( )
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )
@@ -88,39 +88,15 @@ function prepare() {
 
 
     elif [ "$TYPE" == "vs" ] ; then
-        #change the build win cmd file for vs2015 compatibility
-        CURRENTPATH=`pwd`
-        
-        #doing this for VS 2019 as we have to pass in the SSL path and so it requires a modified buildwin.cmd
-        rm buildwin.cmd
-        cp -v $FORMULA_DIR/buildwin.cmd $CURRENTPATH
+      
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib  
 
+        apothecaryDepend prepare openssl
+        apothecaryDepend build openssl
+        apothecaryDepend copy openssl  
 
-        # Patch the components to exclude those that we aren't using.
-        cp -v $FORMULA_DIR/components $CURRENTPATH
-
-        # Locate the path of the openssl libs distributed with openFrameworks.
-        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-
-        # get the absolute path to the included openssl libs
-        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $OF_LIBS_OPENSSL; pwd)
-
-        # convert the absolute path from unix to windows
-        #local OPENSSL_DIR=$(echo $OF_LIBS_OPENSSL_ABS_PATH | sed 's/^\///' | sed 's/\//\\/g' | sed 's/^./\0:/')
-
-        # escape windows slashes and a few common escape sequences before passing to sed
-        #local OPENSSL_DIR=$(echo $OPENSSL_DIR | sed 's/\\/\\\\\\/g' | sed 's/\\\U/\\\\U/g' | sed 's/\\\l/\\\\l/g')
-        export OPENSSL_DIR="$(cygpath -w $OF_LIBS_OPENSSL_ABS_PATH)"
-        # export ESCAPED_OPENSSL_DIR="$(echo $OPENSSL_DIR  | sed 's/\\/\\\\/g' | sed 's/\:/\\:/g')"
-        echo $OPENSSL_DIR
-
-        # # replace OPENSSL_DIR=C:\OpenSSL with our OPENSSL_DIR
-        # sed -i.tmp "s|C:\\\OpenSSL|$ESCAPED_OPENSSL_DIR|g" buildwin.cmd
-
-        # # replace OPENSSL_LIB=%OPENSSL_DIR%\lib;%OPENSSL_DIR%\lib\VC with OPENSSL_LIB=%OPENSSL_DIR%\lib\vs
-        # sed -i.tmp "s|%OPENSSL_DIR%\\\lib;.*|%OPENSSL_DIR%\\\lib\\\vs|g" buildwin.cmd
-
-        sed -i.tmp "s|set OPENSSL_DIR=C:\\\OpenSSL||g" buildwin.cmd
     elif [ "$TYPE" == "android" ] ; then
         installAndroidToolchain
         if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/android.patch 2>/dev/null ; then
@@ -163,43 +139,67 @@ function build() {
         make install
         rm -f install/$TYPE/lib/*d.a
     elif [ "$TYPE" == "vs" ] ; then
-        unset TMP
-        unset TEMP
 
-        if [[ $VS_VER -gt 14 ]]; then
+        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+       
+          
+        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
+        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
 
-                if [ $ARCH == 32 ] ; then
-                    echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"$VS_VARS_PATH\"" >>  with_env_poco.bat
-                    echo "buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests" >>  with_env_poco.bat
-                    cmd.exe //C "call with_env_poco.bat"
+        export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
+        export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
+        export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 
-                    echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"$VS_VARS_PATH\"" >>  with_env_poco.bat
-                    echo "buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests" >> with_env_poco.bat
-                    cmd.exe //C "call with_env_poco.bat"
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works! 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.lib ${OPENSSL_PATH}/lib/libcrypto.lib
+            
+        echo "building poco $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
 
+        LIBS_ROOT=$(realpath $LIBS_DIR)
 
-                elif [ $ARCH == 64 ] ; then
-                    
-                    echo "" > with_env_poco.bat # cleanup temporary bat file
-                    echo "call \"$VS_VARS_PATH\" x64" >>  with_env_poco.bat
-                    echo "buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests" >>  with_env_poco.bat
-                    cat with_env_poco.bat
-                    cmd.exe //C "call with_env_poco.bat"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-                fi
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+        cmake .. ${DEFS} \
+            ${BUILD_OPTS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCURL_USE_OPENSSL=ON \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
+            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+            -DOPENSSL_USE_STATIC_LIBS=YES \
+            -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
+            -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
+            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.lib;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.lib;" \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Release --target install
+        cd ..
 
-            else
-
-                if [ $ARCH == 32 ] ; then
-                    cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 upgrade static_md both Win32 nosamples notests"
-                    cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%vsvars32.bat\" && buildwin.cmd ${VS_VER}0 build static_md both Win32 nosamples notests"
-                elif [ $ARCH == 64 ] ; then
-                    cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 upgrade static_md both x64 nosamples notests"
-                    cmd.exe //c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && buildwin.cmd ${VS_VER}0 build static_md both x64 nosamples notests"
-                fi
-        fi
+        rm ${OPENSSL_PATH}/lib/libssl.lib
+        rm ${OPENSSL_PATH}/lib/libcrypto.lib
 
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         set -e
@@ -457,20 +457,14 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		cp -v lib/$TYPE/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32/Debug
-			cp -v lib/*mdd.lib $1/lib/$TYPE/Win32/Debug/
-
-			mkdir -p $1/lib/$TYPE/Win32/Release
-			cp -v lib/*md.lib $1/lib/$TYPE/Win32/Release/
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64/Debug
-			cp -v lib64/*mdd.lib $1/lib/$TYPE/x64/Debug/
-
-			mkdir -p $1/lib/$TYPE/x64/Release
-			cp -v lib64/*md.lib $1/lib/$TYPE/x64/Release
-		fi
-
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
+        # poco needs some dlls 
+        mkdir -p $1/bin/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/bin/$TYPE/$PLATFORM/ 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
 		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
@@ -503,9 +497,11 @@ function copy() {
 function clean() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
-		cmd //c buildwin.cmd ${VS_VER}0 clean static_md both x64 nosamples notests
-		#vs-clean "Poco.sln"
+		rm -f *.lib
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            # Delete the folder and its contents
+            rm -r build_${TYPE}_${ARCH}     
+        fi
 	elif [ "$TYPE" == "android" ] ; then
 		cd build_$ABI
 		make clean

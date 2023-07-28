@@ -3,6 +3,12 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+if [ -z "${NO_FORCE+x}" ]; then
+    export FORCE="-f"
+else
+    export FORCE=""
+fi
+
 
 # trap any script errors and exit
 # trap "trapError" ERR
@@ -208,7 +214,7 @@ function build(){
 
     echo Build $formula_name
 
-    local ARGS="-f -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
+    local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
 	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
 		ARGS="-e $ARGS"
 	fi
@@ -235,8 +241,8 @@ if [ -z "$FORMULAS" ]; then
 fi
 
 # Remove output folder
-run "rm -rf $OUTPUT_FOLDER"
-run "mkdir $OUTPUT_FOLDER"
+#run "rm -rf $OUTPUT_FOLDER"
+run "mkdir -p $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do

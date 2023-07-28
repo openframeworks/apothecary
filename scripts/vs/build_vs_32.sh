@@ -15,6 +15,7 @@ fi
 
 export TARGET=vs
 export ARCH=32
+export NO_FORCE=ON
 
 echo "Target: $TARGET"
 echo "Architecture: $ARCH"

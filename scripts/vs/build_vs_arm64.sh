@@ -15,6 +15,7 @@ fi
 
 export TARGET=vs
 export ARCH=arm64
+export NO_FORCE=ON
 
 echo "Target: $TARGET"
 echo "Architecture: $ARCH"
