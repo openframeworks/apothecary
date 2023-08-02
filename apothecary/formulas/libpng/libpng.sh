@@ -116,8 +116,6 @@ function build() {
 
 		DEFS="
 		    -DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
-		    -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -141,6 +139,7 @@ function build() {
 	cmake .. ${DEFS} \
 	    -A "${PLATFORM}" \
 	    -G "${GENERATOR_NAME}" \
+	    ${CMAKE_WIN_SDK} \
 	    -D CMAKE_VERBOSE_MAKEFILE=ON \
 	    -D BUILD_SHARED_LIBS=ON 
 

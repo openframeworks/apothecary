@@ -67,8 +67,7 @@ function build() {
             -DGLFW_BUILD_TESTS=OFF \
             -DGLFW_BUILD_DOCS=OFF \
             -DGLFW_VULKAN_STATIC=OFF \
-            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
-            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+            ${CMAKE_WIN_SDK} \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 

@@ -390,8 +390,7 @@ function build() {
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
 			-DNO_BUILD_JXR=ON \
-			-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
-            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
+			${CMAKE_WIN_SDK} \
 			-A "${PLATFORM}" \
 			-G "${GENERATOR_NAME}"
             cmake --build . --config Release 

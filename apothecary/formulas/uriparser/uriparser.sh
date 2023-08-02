@@ -33,7 +33,7 @@ function build() {
 	rm -f CMakeCache.txt || true
 
 	if [ "$TYPE" == "vs" ] ; then
-		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
 	    echo "--------------------"
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
@@ -52,8 +52,6 @@ function build() {
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
-	        -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
-	        -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
 	        -DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=OFF \

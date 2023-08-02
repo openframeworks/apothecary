@@ -178,8 +178,6 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DOPENSSL_INSTALL_MAN=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.190410.0 \
-            -DCMAKE_SYSTEM_VERSION=10.0.190410.0 \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 
