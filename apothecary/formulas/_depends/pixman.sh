@@ -66,16 +66,6 @@ function build() {
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
 
-		if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"
-        fi
-
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
@@ -96,7 +86,8 @@ function build() {
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=OFF \
+            ${CMAKE_WIN_SDK} \
 		    -DBUILD_SHARED_LIBS=ON \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"

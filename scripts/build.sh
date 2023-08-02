@@ -74,7 +74,13 @@ else
 fi
 
 APOTHECARY_PATH=$ROOT/apothecary
-OUTPUT_FOLDER=$ROOT/out
+
+if [ -z "${OUTPUT_FOLDER+x}" ]; then
+    export OUTPUT_FOLDER="$ROOT/out"
+fi
+#OUTPUT_FOLDER=$ROOT/out
+
+
 # VERBOSE=true
 
 if [ -z $TARGET ] ; then

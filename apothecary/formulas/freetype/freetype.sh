@@ -120,8 +120,9 @@ function build() {
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin"
 
          cmake .. ${DEFS} \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=OFF \
 		    -D BUILD_SHARED_LIBS=ON \
+		    ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" 
         cmake --build . --config Release --target install   

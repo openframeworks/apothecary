@@ -25,7 +25,7 @@ function download() {
 		mkdir fmodex
 		return;
 	fi
-	if [ "$TYPE" == "vs" ]; then
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
 		PKG=fmodex_${TYPE}${ARCH}.tar.bz2
 		if [ "$ARCH" == "arm64" ]; then
 			mkdir fmodex

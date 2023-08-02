@@ -65,6 +65,7 @@ function build() {
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        ${CMAKE_WIN_SDK} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install

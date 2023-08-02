@@ -25,7 +25,7 @@ function download() {
 
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
-		if [ "$ARCH" == "arm64" ]; then
+		if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
 			mkdir fmod
 			return 0;
 		fi

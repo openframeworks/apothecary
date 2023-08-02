@@ -82,6 +82,7 @@ function build() {
 		    -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
+            ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
 		    -G "${GENERATOR_NAME}" 
 

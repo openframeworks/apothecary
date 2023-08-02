@@ -55,6 +55,7 @@ function build() {
 	        -DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			${CMAKE_WIN_SDK} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install

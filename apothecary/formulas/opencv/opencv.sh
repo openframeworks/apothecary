@@ -209,8 +209,9 @@ function build() {
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}" \
         -DCMAKE_INSTALL_PREFIX=Release \
-        -D CMAKE_VERBOSE_MAKEFILE=ON \
+        -D CMAKE_VERBOSE_MAKEFILE=OFF \
         -D BUILD_SHARED_LIBS=ON \
+        ${CMAKE_WIN_SDK} \
         -DCMAKE_SYSTEM_NAME=Windows \
         -DCMAKE_SYSTEM_VERSION=10.0 \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \

@@ -106,6 +106,7 @@ function build() {
 
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
+            ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release
 

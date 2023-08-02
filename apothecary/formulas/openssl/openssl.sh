@@ -178,6 +178,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DOPENSSL_INSTALL_MAN=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
+            ${CMAKE_WIN_SDK} \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 

@@ -59,6 +59,7 @@ function build() {
             -G "${GENERATOR_NAME}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
+            ${CMAKE_WIN_SDK} \
 		    -D BUILD_SHARED_LIBS=ON 
         cmake --build . --config Release
  
