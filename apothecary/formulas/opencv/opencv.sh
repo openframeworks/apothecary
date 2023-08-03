@@ -774,7 +774,7 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
     mkdir -p $1/lib/$TYPE/$PLATFORM/
-    cp -v "build_${TYPE}_${ARCH}/Release/${PLATFORM}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM 
+    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM 
    
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
