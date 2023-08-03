@@ -15,7 +15,7 @@ jobs:
     
     strategy:
       matrix:
-        bundle: [1,2,3]
+        bundle: [1,2,3,4]
     defaults:
       run:
         shell: msys2 {0}
