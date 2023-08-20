@@ -14,7 +14,7 @@ jobs:
       WORKDIR: "/home/runner/work/apothecary/apothecary"
       SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Cache raspbian folder
         uses: actions/cache@v2
