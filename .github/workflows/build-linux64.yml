@@ -7,14 +7,10 @@ on:
   pull_request:
     paths-ignore:
     - '**/README.md'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-    
 jobs:
+
   build-linux64:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
         matrix:
           cfg:
@@ -23,7 +19,7 @@ jobs:
      TARGET: ${{matrix.cfg.target}}
      OPT: ${{matrix.cfg.opt}}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install

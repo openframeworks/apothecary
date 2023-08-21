@@ -7,12 +7,9 @@ on:
   pull_request:
     paths-ignore:
     - '**/*.md'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    
 jobs:
+
   build-vs2019:
     runs-on: windows-2019
     strategy:
@@ -34,7 +31,7 @@ jobs:
             git
             python3
       - name: Clone repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       #- name: Install StrawberryPerl
       #  run: choco install -y strawberryperl
       - name: Install Windows 8.1 SDK

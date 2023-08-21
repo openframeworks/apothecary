@@ -7,13 +7,11 @@ on:
   pull_request:
     paths-ignore:
     - '**/*.md'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+    
 jobs:
+
   build-msys2:
+    
     strategy:
       matrix:
         flavor:
@@ -45,7 +43,7 @@ jobs:
             libxml2:p
             python3:p
       - name: Clone repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
