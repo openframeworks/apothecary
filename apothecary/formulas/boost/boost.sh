@@ -8,8 +8,13 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
 
 # define the version
+<<<<<<< Updated upstream
 VERSION=1.66.0
 UNCOMPRESSED_NAME=boost_1_66_0
+=======
+VERSION=1.83.0
+UNCOMPRESSED_NAME=boost-${VERSION}
+>>>>>>> Stashed changes
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
 
 # need to maybe migrate to github https://github.com/boostorg/boost
