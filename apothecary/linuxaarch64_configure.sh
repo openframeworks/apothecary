@@ -1,5 +1,5 @@
-export PKG_CONFIG_PATH=$SYSROOT/usr/lib/$TOOLCHAIN_PREFIX/pkgconfig:$SYSROOT/usr/share/pkgconfig:$SYSROOT/usr/lib/pkgconfig
-export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
+export PKG_CONFIG_PATH=$SYSROOT/usr/lib/arm-linux-aarch64/pkgconfig:$SYSROOT/usr/share/pkgconfig:$SYSROOT/usr/lib/pkgconfig
+export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/arm-linux-aarch64-
 export CXX=${CROSS_COMPILE}g++
 export CC=${CROSS_COMPILE}gcc
 export AR=${CROSS_COMPILE}ar
