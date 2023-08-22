@@ -21,6 +21,7 @@ RASP="$ROOT/raspbian"
 
 PATH=$RASP/bin:$PATH
 LD_LIBRARY_PATH=$RASP/lib:$LD_LIBRARY_PATH
+SYSROOT=$RASP
 
 export AR="aarch64-linux-gnu-gcc-ar"
 export CC="aarch64-linux-gnu-gcc"
