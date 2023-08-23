@@ -74,7 +74,7 @@ function build() {
         
         export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
         
-        if [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] ; then
+        if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ] ; then
             export CFLAGS="-I$LIBS_DIR/libxml2/include"
         fi
         
