@@ -13,6 +13,7 @@ jobs:
       TARGET: linuxaarch64
       WORKDIR: "/home/runner/work/apothecary/apothecary"
       SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
+      TOOLCHAIN_PREFIX: "aarch64-linux-gnu"
     steps:
       - uses: actions/checkout@v2
       
