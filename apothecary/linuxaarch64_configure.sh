@@ -29,7 +29,7 @@ export AR=${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ar
 export LD=${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ld
 
 export PATH=/rpi_toolchain/bin/:$PATH
-export LD_LIBRARY_PATH=/rpi_toolchain/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/rpi_toolchain/lib
 
 export CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/c++ -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include"
 
