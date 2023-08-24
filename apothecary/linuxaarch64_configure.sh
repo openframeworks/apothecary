@@ -31,7 +31,7 @@ export LD=${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ld
 export PATH=/rpi_toolchain/bin/:$PATH
 export LD_LIBRARY_PATH=/rpi_toolchain/lib
 
-export CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/c++ -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include -I${TOOLCHAIN_ROOT}/libc/usr/include"
+export CFLAGS="--sysroot=${SYSROOT} -I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include -I$SYSROOT/opt/vc/include -I$SYSROOT/opt/vc/include/IL -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST"
 
 export LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${GCC_PREFIX} -L${SYSROOT}/usr/lib/aarch64-linux-gnu -L${TOOLCHAIN_ROOT}/aarch64-linux-gnu/lib64 -L${TOOLCHAIN_ROOT}/aarch64-linux-gnu/libc/lib64 -L${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION} -L${SYSROOT}/lib/${GCC_PREFIX}"
 
