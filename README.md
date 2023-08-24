@@ -22,10 +22,6 @@ macOS / iOS / tvOS        | [![build-macos](https://github.com/openframeworks/ap
 ## Built Libraries
 Updates on master branch are automatically pushed to [http://ci.openframeworks.cc/libs/ ](http://ci.openframeworks.cc/libs/ ), and downloaded by running the `download_libs.sh` scripts in [openFrameworks if working from git](https://github.com/openframeworks/apothecary/#developers).
 
-## Run locally
-#### Using Docker
-To run the scripts locally, we have created a set of Docker images to replicate the setup on Travis. Read more in [/docker](/docker/README.md). 
-
 #### Running directly
 To build one of the dependencies, you can run a command like this to compile OpenCV on OSX`
 ```

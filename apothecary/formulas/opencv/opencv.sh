@@ -259,6 +259,7 @@ function build() {
         -DWITH_PNG=OFF \
         -DWITH_OPENCL=OFF \
         -DWITH_PVAPI=OFF\
+        -DBUILD_OBJC=OFF \
         -DWITH_TIFF=OFF \
         -DWITH_OPENEXR=OFF \
         -DWITH_OPENGL=OFF \
@@ -322,9 +323,7 @@ function build() {
 
       cd build
 
-      BITCODE=""
       if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
-          BITCODE=-fembed-bitcode;
           MIN_IOS_VERSION=13.0
       fi
 

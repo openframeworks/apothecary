@@ -274,16 +274,6 @@ function build() {
         ./autogen.sh
         ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-icolincunv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         make clean
-        #echo "int main(){ return 0; }" > xmllint.c
-        #echo "int main(){ return 0; }" > xmlcatalog.c
-        #echo "int main(){ return 0; }" > testSchemas.c
-        #echo "int main(){ return 0; }" > testRelax.c
-        #echo "int main(){ return 0; }" > testSAX.c
-        #echo "int main(){ return 0; }" > testHTML.c
-        #echo "int main(){ return 0; }" > testXPath.c
-        #echo "int main(){ return 0; }" > testURI.c
-        #echo "int main(){ return 0; }" > testThreads.c
-        #echo "int main(){ return 0; }" > testC14N.c
         make -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "osx" ]; then
@@ -364,7 +354,7 @@ function copy() {
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         # copy lib
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE
         # copy lib
         cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
