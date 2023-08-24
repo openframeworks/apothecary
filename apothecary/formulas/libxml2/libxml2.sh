@@ -98,7 +98,7 @@ function build() {
         source ../../${TYPE}_configure.sh
 #        export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
 #        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         make clean
         make -j${PARALLEL_MAKE}
 
