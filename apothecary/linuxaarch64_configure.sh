@@ -31,8 +31,10 @@ export LD=${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ld
 export PATH=/rpi_toolchain/bin/:$PATH
 export LD_LIBRARY_PATH=/rpi_toolchain/lib
 
-export CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/c++ -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include"
+export CFLAGS="--sysroot=${SYSROOT} -I${SYSROOT}/usr/include/c++ -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include -I${TOOLCHAIN_ROOT}/libc/usr/include"
 
 export LDFLAGS="--sysroot=${SYSROOT} -L${SYSROOT}/usr/lib/${GCC_PREFIX} -L${SYSROOT}/usr/lib/aarch64-linux-gnu -L${TOOLCHAIN_ROOT}/aarch64-linux-gnu/lib64 -L${TOOLCHAIN_ROOT}/aarch64-linux-gnu/libc/lib64 -L${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION} -L${SYSROOT}/lib/${GCC_PREFIX}"
 
 export HOST=aarch64-linux-gnu
+
+/Users/theo/Downloads/cross-pi-gcc-10.3.0-64 2/aarch64-linux-gnu/libc/usr/include/bits/libc-header-start.h
