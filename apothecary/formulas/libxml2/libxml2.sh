@@ -96,9 +96,7 @@ function build() {
         make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         source ../../${TYPE}_configure.sh
-        export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
-        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --host aarch64-linux-gnu
         make clean
         #echo "int main(){ return 0; }" > xmllint.c
         #echo "int main(){ return 0; }" > xmlcatalog.c
