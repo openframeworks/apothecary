@@ -178,6 +178,7 @@ function build() {
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_DOCS=OFF \
+      -DBUILD_OBJC=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_1394=OFF \
       -DWITH_EIGEN=OFF \
@@ -217,6 +218,7 @@ function build() {
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_JASPER=OFF \
       -DBUILD_DOCS=OFF \
+      -DBUILD_OBJC=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_1394=OFF \
       -DWITH_EIGEN=OFF \

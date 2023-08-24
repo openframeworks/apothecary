@@ -7,53 +7,6 @@ on:
     paths-ignore:
       - "**/README.md"
 jobs:
-  build-linux-aarch64:
-    runs-on: ubuntu-latest
-    env:
-      TARGET: linuxaarch64
-      WORKDIR: "/home/runner/work/apothecary/apothecary"
-      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Cache raspbian folder
-        uses: actions/cache@v2
-        with:
-          path: /home/runner/work/apothecary/apothecary/raspbian
-          key: raspbian-cache-2
-            
-      - name: Check if folder exists
-        id: folder-check
-        run: >
-          if [ -d $SYSROOT ]; then
-            echo "Raspbian folder already exists. Skipping download and extract."
-            echo "::set-output name=folder-exists::true"
-          else
-            echo "::set-output name=folder-exists::false"
-          fi
-          
-      - name: Download and extract tar file
-        if: steps.folder-check.outputs.folder-exists == 'false'
-        run: >
-          cd $WORKDIR &&
-          wget  https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Bullseye/GCC%2010.3.0/cross-gcc-10.3.0-pi_64.tar.gz
-          --no-check-certificate &&
-          tar xf cross-gcc-10.3.0-pi_64.tar.gz &&
-          rm cross-gcc-10.3.0-pi_64.tar.gz &&
-          mv cross-pi-gcc-10.3.0-64 raspbian
-                    
-      - name: Script Install and Build
-        run: ./scripts/$TARGET/install_and_build.sh
-      - name: Update Release
-        uses: johnwbyrd/update-release@v1.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: nightly
-          release: nightly
-          prerelease: false
-          files: out/openFrameworksLibs_master_linuxaarch64.tar.bz2
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
-
   build-linux-arm6:
         runs-on: ubuntu-latest
         env:
@@ -80,6 +33,84 @@ jobs:
             prerelease: false
             files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
           if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+  build-linux-aarch64:
+        runs-on: ubuntu-latest
+        env:
+         TARGET: "linuxaarch64"
+         SYSROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxaarch64/raspbian"
+         TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxaarch64/rpi_toolchain"
+         TOOLCHAIN_PREFIX: "aarch64-linux-gnu"
+        steps:
+        - uses: actions/checkout@v2
+        - name: Scripts Calc Formula
+          run: ./scripts/calculate_formulas.sh
+        - name: Scripts Install
+          run: ./scripts/$TARGET/install.sh
+        - name: build
+          run: ./scripts/build.sh
+          env:
+            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+        - name: Update Release
+          uses: johnwbyrd/update-release@v1.0.0
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            tag: nightly
+            release: nightly
+            prerelease: false
+            files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
+          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+#old
+#  build-linux-aarch64:
+#    runs-on: ubuntu-latest
+#    env:
+#      TARGET: linuxaarch64
+#      WORKDIR: "/home/runner/work/apothecary/apothecary"
+#      SYSROOT: "/home/runner/work/apothecary/apothecary/raspbian"
+#      TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/raspbian"
+#      TOOLCHAIN_PREFIX: "aarch64-linux-gnu"
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - name: Cache raspbian folder
+#        uses: actions/cache@v2
+#        with:
+#          path: /home/runner/work/apothecary/apothecary/raspbian
+#          key: raspbian-cache-2
+#
+#      - name: Check if folder exists
+#        id: folder-check
+#        run: >
+#          if [ -d $SYSROOT ]; then
+#            echo "Raspbian folder already exists. Skipping download and extract."
+#            echo "::set-output name=folder-exists::true"
+#          else
+#            echo "::set-output name=folder-exists::false"
+#          fi
+#
+#      - name: Download and extract tar file
+#        if: steps.folder-check.outputs.folder-exists == 'false'
+#        run: >
+#          cd $WORKDIR &&
+#          wget  https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Bullseye/GCC%2010.3.0/cross-gcc-10.3.0-pi_64.tar.gz
+#          --no-check-certificate &&
+#          tar xf cross-gcc-10.3.0-pi_64.tar.gz &&
+#          rm cross-gcc-10.3.0-pi_64.tar.gz &&
+#          mv cross-pi-gcc-10.3.0-64 raspbian
+#
+#      - name: Script Install and Build
+#        run: ./scripts/$TARGET/install_and_build.sh
+#      - name: Update Release
+#        uses: johnwbyrd/update-release@v1.0.0
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          tag: nightly
+#          release: nightly
+#          prerelease: false
+#          files: out/openFrameworksLibs_master_linuxaarch64.tar.bz2
+#        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+#
 
 #  build-linux-arm7:
 #        runs-on: ubuntu-latest
