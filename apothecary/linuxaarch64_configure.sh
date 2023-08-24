@@ -14,4 +14,4 @@ export ARFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 export RANLIBFLAGS="--plugin $GCCPATH/liblto_plugin.so"
 
 export PATH=$TOOLCHAIN_ROOT/bin/bin:$PATH
-export LD_LIBRARY_PATH=$TOOLCHAIN_ROOT/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$TOOLCHAIN_ROOT/lib
