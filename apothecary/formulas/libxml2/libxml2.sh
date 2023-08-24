@@ -91,12 +91,14 @@ function build() {
 
 
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --host aarch64-linux-gnu
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         source ../../${TYPE}_configure.sh
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --host aarch64-linux-gnu
+        export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
+        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
+        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
         make clean
         make -j${PARALLEL_MAKE}
 
