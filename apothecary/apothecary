@@ -1303,7 +1303,7 @@ if [[ "$TYPE" == "android" ]] ; then
 fi
 
 CROSSCOMPILING=0
-if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv7l" ]; then
     if [[ $(uname -m) != armv* ]]; then
         CROSSCOMPILING=1
         if [ -z $TOOLCHAIN_PREFIX ]; then
