@@ -58,7 +58,7 @@ jobs:
             tag: nightly
             release: nightly
             prerelease: false
-            files: out/openFrameworksLibs_master_linuxarmv6l.tar.bz2
+            files: out/openFrameworksLibs_master_linuxaarch64.tar.bz2
           if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
 #old
