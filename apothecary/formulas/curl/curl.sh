@@ -97,15 +97,9 @@ function build() {
         ./buildconf
         
         local SDK_PATH_XCODE_X86=SDK_PATH;
-        if [ "$GITHUB_ACTIONS" = true ]; then
-            # this is because Xcode 11.4 and newer links curl with a symbol which isn't present on 10.14 and older
-            # in the future we will need to remove this, but this will provide legacy compatiblity while Github Actions has Xcode 11
-            # note: Xcode 11.3.1 should be okay too.
-            SDK_PATH_XCODE_X86="/Applications/Xcode_11.2.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-        fi
         
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH_XCODE_X86}"
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         ./configure \
             --with-darwinssl \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
