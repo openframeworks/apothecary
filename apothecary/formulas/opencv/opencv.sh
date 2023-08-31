@@ -174,6 +174,8 @@ function build() {
       -DBUILD_WITH_STATIC_CRT=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_JASPER=OFF \
@@ -214,6 +216,8 @@ function build() {
       -DBUILD_WITH_STATIC_CRT=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_JASPER=OFF \
