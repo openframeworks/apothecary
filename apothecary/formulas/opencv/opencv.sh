@@ -34,6 +34,12 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
   : # noop
+  
+  #no idea why we are building iOS stuff on Windows - but this might fix it
+  if [ "$TYPE" == "vs" ] ; then
+    rm -rf modules/objc_bindings_generator
+    rm -rf modules/objc
+  fi
 }
 
 # executed inside the lib src dir
@@ -223,6 +229,7 @@ function build() {
       -DBUILD_JASPER=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_OBJC=OFF \
+      -DBUILD_opencv_objc=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_1394=OFF \
       -DWITH_EIGEN=OFF \
