@@ -20,7 +20,7 @@ function download() {
 	downloader ${GIT_URL}
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
-	rm zlib-$VER.tar.gz
+	rm -rf zlib-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -38,29 +38,25 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        DEFS="
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
-            -DBUILD_SHARED_LIBS=ON \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"
-         
-        cmake .. ${DEFS} \
-            -A "${PLATFORM}" \
+     
+        cmake .. \
+        	-A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=ON \
+		    -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    ${CMAKE_WIN_SDK} 
         cmake --build . --config Release --target install
- 
         cd ..
-		
-	
 	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p build
 		cd build
@@ -113,17 +109,15 @@ function copy() {
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
-		
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/zlibstatic.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib
-		cp -Rv "build_${TYPE}/Release/include" $1/
+		cp -Rv "build_${TYPE}/Release/include" $1/include
 		mkdir -p $1/lib/$TYPE
 		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/zlib.a
-
 	else
 		make install
 	fi

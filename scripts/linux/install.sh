@@ -108,5 +108,6 @@ else
 fi
 
 sudo apt-get update && sudo apt-get install -y autoconf libtool automake
+sudo apt-get update && sudo apt-get install -y cmake
 
 sudo apt-get install -y ccache

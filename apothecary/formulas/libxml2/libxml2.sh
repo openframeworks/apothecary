@@ -372,50 +372,46 @@ function copy() {
     # prepare headers directory if needed
     mkdir -p $1/include/libxml
     
-    mkdir -p $1/lib/$TYPE
+    # copy common headers
     cp -Rv include/libxml/* $1/include/libxml/
 
-    if [ "$TYPE" == "vs" ] ; then              
-        
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
+    # create a common lib directory path
+    mkdir -p $1/lib/$TYPE
 
-        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
-
-    elif [ "$TYPE" == "tvos" ]; then
-        # copy lib
-        cp -Rv ./build_${TYPE}/Release-appletvos/libxml2.a $1/lib/$TYPE/xml2.a
-     elif [ "$TYPE" == "ios" ]; then
-        # copy lib
-        cp -Rv ./build_${TYPE}/Release-iphoneos/libxml2.a $1/lib/$TYPE/xml2.a
-    elif [ "$TYPE" == "osx" ]; then
-        # copy lib
-        cp -Rv .libs/libxml2.a $1/lib/$TYPE/xml2.a
-    elif [ "$TYPE" == "android" ] ; then
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-        # copy lib
-        cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
-        mkdir -p $1/lib/$TYPE
-        # copy lib
-        cp -Rv libxml2.a $1/lib/$TYPE/libxml2.a
-    elif [ "$TYPE" == "emscripten" ] ; then
-        mkdir -p $1/lib/$TYPE/
-         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-        # copy lib
-        cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
-    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
-        mkdir -p $1/lib/$TYPE
-        # copy lib
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
-    fi
+    # copy files specific to each build TYPE
+    case "$TYPE" in
+        "vs")
+            mkdir -p $1/lib/$TYPE/$PLATFORM/
+            cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
+            cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+            ;;
+        "android")
+            mkdir -p $1/lib/$TYPE/$ABI
+            cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+            cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+            ;;
+        "emscripten")
+            cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
+            cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+            ;;
+        "osx"|"ios"|"tvos")
+            cp -Rv ./build_${TYPE}/Release-$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
+            ;;
+        "linux64"|"linuxaarch64"|"linuxarmv6l"|"linuxarmv7l"|"msys2")
+            cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
+            ;;
+        *)
+            echo "Unknown build TYPE: $TYPE"
+            exit 1
+            ;;
+    esac
 
     # copy license file
     rm -rf $1/license # remove any older files if exists
     mkdir -p $1/license
     cp -v Copyright $1/license/
 }
+
 
 # executed inside the lib src dir
 function clean() {
