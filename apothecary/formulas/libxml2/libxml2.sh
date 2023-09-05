@@ -203,9 +203,10 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
+        . "$DOWNLOADER_SCRIPT"
 
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        downloader "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
+        downloader "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
         
         export CFLAGS="-pthread"
         export CXXFLAGS="-pthread"
