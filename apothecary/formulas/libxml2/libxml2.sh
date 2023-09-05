@@ -182,6 +182,9 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
@@ -277,6 +280,9 @@ function build() {
                 -DCMAKE_CXX_STANDARD=17 \
                 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
                 -DCMAKE_CXX_EXTENSIONS=OFF \
+                -DCMAKE_INSTALL_PREFIX=Release \
+                -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+                -DCMAKE_INSTALL_INCLUDEDIR=include \
                 -DLIBXML2_WITH_LZMA=OFF \
                 -DBUILD_SHARED_LIBS=OFF \
                 -DLIBXML2_WITH_FTP=OFF \
