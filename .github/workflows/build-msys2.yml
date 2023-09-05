@@ -57,6 +57,6 @@ jobs:
           tag: nightly
           release: nightly
           prerelease: false
-          files: out/openFrameworksLibs_master_msys2_${{ matrix.flavor }}.zip
+          files: out/openFrameworksLibs_msys2_${{ matrix.flavor }}.zip
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 

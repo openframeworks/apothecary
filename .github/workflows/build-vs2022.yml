@@ -1,4 +1,4 @@
-name: build-vs
+name: build-vs2022-arm64
 
 on:
   push:
@@ -10,9 +10,8 @@ on:
     
 jobs:
 
-  build-vs2019:
-    runs-on: windows-2019
-    
+  build-vs2022:
+    runs-on: windows-2022
     strategy:
       matrix:
         bundle: [1,2,3,4]
@@ -40,21 +39,27 @@ jobs:
             mingw-w64-x86_64-make
       - name: Clone repository
         uses: actions/checkout@v2
-      - uses: fbactions/setup-winsdk@v1
-        with:
-          winsdk-build-version: 19041
       #- name: Install StrawberryPerl
-      #  run: choco install -y strawberryperl      
+      #  run: choco install -y strawberryperl
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v1.1
-      - name: Build
+      - name: Build64
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "vs"
           ARCH: 64
-          VS_VER: 16
+          VS_VER: 17
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: BuildARM64
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "vs"
+          ARCH: arm64
+          VS_VER: 17
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release
         uses: johnwbyrd/update-release@v1.0.0
@@ -63,5 +68,5 @@ jobs:
           tag: nightly
           release: nightly
           prerelease: false
-          files: out/openFrameworksLibs_master_vs_64_${{ matrix.bundle }}.zip
+          files: out/openFrameworksLibs_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
