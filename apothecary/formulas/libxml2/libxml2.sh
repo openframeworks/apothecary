@@ -168,7 +168,6 @@ function build() {
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
     elif [ "$TYPE" == "osx" ]; then
-            elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         
@@ -201,7 +200,6 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF
         cmake --build . --config Release
         cd ..
-
     elif [ "$TYPE" == "emscripten" ]; then
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
@@ -221,7 +219,6 @@ function build() {
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
-#-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE \
         mkdir -p build_$TYPE
         cd build_$TYPE
         $EMSDK/upstream/emscripten/emcmake cmake .. \
