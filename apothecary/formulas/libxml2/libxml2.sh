@@ -168,16 +168,39 @@ function build() {
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
     elif [ "$TYPE" == "osx" ]; then
-        ./autogen.sh
+            elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-
+        
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
 
-        make clean
-        make -j${PARALLEL_MAKE}
-
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF
+        cmake --build . --config Release
+        cd ..
 
     elif [ "$TYPE" == "emscripten" ]; then
         find . -name "test*.c" | xargs rm
@@ -245,9 +268,11 @@ function build() {
         cmake --build build --target install --config Release
         cd ..
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
-            ./autogen.sh
+            #./autogen.sh
             find . -name "test*.c" | xargs rm
             find . -name "run*.c" | xargs rm
+            mkdir -p build_$TYPE
+            cd build_$TYPE
             cmake .. \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_C_STANDARD=17 \
@@ -271,6 +296,7 @@ function build() {
                 -DLIBXML2_WITH_TESTS=OFF \
                 -DLIBXML2_WITH_THREAD_ALLOC=OFF
             cmake --build . --config Release
+            cd ..
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
@@ -278,23 +304,32 @@ function build() {
 
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
-        
-        ./autogen.sh
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-icolincunv --without-legacy --without-modules --without-output --without-python --without-schematron --without-threads --host $HOST
-        make clean
-        make -j${PARALLEL_MAKE}
-
-    elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
-
-        ./autogen.sh
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        make clean
-        make -j${PARALLEL_MAKE}
-
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF
+        cmake --build . --config Release
+        cd ..
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         
         find . -name "test*.c" | xargs rm
@@ -312,6 +347,7 @@ function build() {
             echo "Compiling for $IOS_ARCH"
             source ../../ios_configure.sh $TYPE $IOS_ARCH
             local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
+            ./autogen --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
             ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
             make clean
             make -j${PARALLEL_MAKE}
