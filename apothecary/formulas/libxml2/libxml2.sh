@@ -66,10 +66,12 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
-    apothecaryDependencies download
+   
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
+
+     apothecaryDependencies download
 
 }
 
@@ -112,7 +114,7 @@ function build() {
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}"
-        cmake --build . --config Release
+        cmake --build . --config 
 
         cd ..
             
@@ -266,7 +268,7 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-        cmake --build build --target install --config Release
+        cmake --build build --config Release
         cd ..
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
             #./autogen.sh
@@ -316,6 +318,9 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
