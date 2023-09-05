@@ -243,25 +243,34 @@ function build() {
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build build --target install --config Release
-
-        #$EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
-
-        # ./autogen.sh
-        #emconfigure ./configure --without-lzma --without-zlib --disable-shared --without-ftp --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        #emmake make clean
-        #emmake make -j${PARALLEL_MAKE}
-
-
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
-        ./autogen.sh
-
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
-
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-        make clean
-        make -j${PARALLEL_MAKE}
+            ./autogen.sh
+            find . -name "test*.c" | xargs rm
+            find . -name "run*.c" | xargs rm
+            cmake .. \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_C_STANDARD=17 \
+                -DCMAKE_CXX_STANDARD=17 \
+                -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                -DCMAKE_CXX_EXTENSIONS=OFF \
+                -DLIBXML2_WITH_LZMA=OFF \
+                -DBUILD_SHARED_LIBS=OFF \
+                -DLIBXML2_WITH_FTP=OFF \
+                -DLIBXML2_WITH_HTTP=OFF \
+                -DLIBXML2_WITH_HTML=OFF \
+                -DLIBXML2_WITH_ICONV=OFF \
+                -DLIBXML2_WITH_LEGACY=OFF \
+                -DLIBXML2_WITH_MODULES=OFF \
+                -DLIBXML_THREAD_ENABLED=OFF \
+                -DLIBXML2_WITH_OUTPUT=ON \
+                -DLIBXML2_WITH_PYTHON=OFF \
+                -DLIBXML2_WITH_DEBUG=OFF \
+                -DLIBXML2_WITH_THREADS=ON \
+                -DLIBXML2_WITH_PROGRAMS=OFF \
+                -DLIBXML2_WITH_TESTS=OFF \
+                -DLIBXML2_WITH_THREAD_ALLOC=OFF
+            cmake --build . --config Release
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
