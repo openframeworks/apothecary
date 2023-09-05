@@ -83,7 +83,10 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        DEFS='
+        cmake .. \
+            -A "${PLATFORM}" \
+            ${CMAKE_WIN_SDK} \
+            -G "${GENERATOR_NAME}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -108,13 +111,8 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF'
-
-        cmake .. ${DEFS} \
-            -A "${PLATFORM}" \
-            ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}"
-        cmake --build . --config 
+            -DLIBXML2_WITH_SCHEMATRON=OFF
+        cmake --build . --config Release
 
         cd ..
             
