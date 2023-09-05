@@ -175,7 +175,6 @@ function build() {
         find . -name "test*.c" | xargs rm
         find . -name "run*.c" | xargs rm
 
-        ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
         make clean
         make -j${PARALLEL_MAKE}
 
