@@ -404,10 +404,10 @@ function copy() {
             cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
             ;;
         "osx"|"ios"|"tvos")
-            cp -Rv ./build_${TYPE}/Release-$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
+            cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
             ;;
         "linux64"|"linuxaarch64"|"linuxarmv6l"|"linuxarmv7l"|"msys2")
-            cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
+            cp -v "build_${TYPE}/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
             ;;
         *)
             echo "Unknown build TYPE: $TYPE"
