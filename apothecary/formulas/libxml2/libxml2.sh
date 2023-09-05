@@ -40,7 +40,7 @@ function download() {
         if [ ! -d "icu" ] ; then                  
             downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
             unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
-            rm "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+            rm -rf "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
         fi
     else
 
@@ -51,7 +51,7 @@ function download() {
         if [ ! -d "icu" ] ; then    
             wget -q "${DEPEND_URL}.zip"
             unzip -qq "icu4c-${ICU_VER_U}-src.zip"
-            rm "icu4c-${ICU_VER_U}-src.zip"
+            rm -rf "icu4c-${ICU_VER_U}-src.zip"
         fi
 
     fi
