@@ -454,12 +454,12 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_VER+x} ]; then 
            
         if [ $ARCH == "arm64" ]; then
-            echo "VS_VER was not set - setting to 17 arm64"
             VS_VER=17
         else
-            echo "VS_VER was not set - setting to 16"
-            VS_VER=16 #17  
+            VS_VER=17
+            #16 for 2019 
         fi 
+        echo "VS_VER was not set - setting to ${VS_VER}"
     fi
 
 
