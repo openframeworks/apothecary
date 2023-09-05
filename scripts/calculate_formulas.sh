@@ -83,15 +83,15 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
         else
             FORMULAS=(
                 "openssl"
-                "poco"
                 "curl"
+                "poco"
             )
         fi
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
-            "assimp"
             "libxml2"
             "svgtiny"
+            "assimp"
         )
     elif [ "$BUNDLE" == "4" ]; then
         FORMULAS=(

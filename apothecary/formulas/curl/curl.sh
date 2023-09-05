@@ -214,15 +214,7 @@ function build() {
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         #./buildconf
         local SDK_PATH_XCODE_X86=SDK_PATH;
-        if [ -n "${GITHUB_ACTIONS-}" ]; then
-            if [ "$GITHUB_ACTIONS" = true ]; then
-                SDK_PATH_XCODE_X86="/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-                EXTRA_SYSROOT="-isysroot${SDK_PATH_XCODE_X86}"
-            fi
-        else 
-            EXTRA_SYSROOT="-isysroot${SDK_PATH}"
-        fi
-
+        EXTRA_SYSROOT="-isysroot${SDK_PATH}"
 
 
         # export OPENSSL_MAIN=${OF_LIBS_OPENSSL_ABS_PATH}/openssl
@@ -233,10 +225,8 @@ function build() {
         export SDK=macosx
         export DEPLOYMENT_TARGET=10.8
 
-
-
-        export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-        export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
         # PATH="${PATH};${OPENSSL_MAIN}/lib/${TYPE}"
 

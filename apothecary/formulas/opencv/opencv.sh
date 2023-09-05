@@ -36,6 +36,12 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
   : # noop
+  
+  #no idea why we are building iOS stuff on Windows - but this might fix it
+  if [ "$TYPE" == "vs" ] ; then
+    rm -rf modules/objc_bindings_generator
+    rm -rf modules/objc
+  fi
 }
 
 # executed inside the lib src dir
@@ -186,7 +192,6 @@ function build() {
     # echo "Joining all libs in one Successful"
 
   elif [ "$TYPE" == "vs" ] ; then
-
     echoInfo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN - "${PLATFORM}""
     echoInfo "--------------------"
     GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 

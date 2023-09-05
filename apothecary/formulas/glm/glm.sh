@@ -9,7 +9,8 @@ FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch6
 
 # tools for git use
 GIT_URL=https://github.com/g-truc/glm
-GIT_TAG=0.9.9.8
+#GIT_TAG=0.9.9.8
+GIT_TAG=master
 
 # download the source code and unpack it into LIB_NAME
 function download() {
