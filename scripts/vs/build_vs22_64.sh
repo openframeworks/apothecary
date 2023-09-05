@@ -23,6 +23,7 @@ echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
 echo "Apothecary path: $MAIN_PATH"
+echo "VS_VER: $VS_VER"
 
 mkdir -p out
 ls
