@@ -31,9 +31,9 @@ function download() {
 		rm "v${VER}.zip"
 	else 
 		downloader "${URL}.tar.gz"
-		tar -xf libpng-$VER.tar.gz
-		mv libpng-$VER libpng
-		rm libpng-$VER.tar.gz
+		tar -xf "v${VER}.tar.gz"
+		mv "libpng-${VER}" libpng
+		rm "v${VER}.tar.gz"
 	fi
 }
 
