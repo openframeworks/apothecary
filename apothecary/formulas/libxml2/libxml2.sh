@@ -66,12 +66,13 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
-   
+    apothecaryDependencies download
+    
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
 
-     apothecaryDependencies download
+    
 
 }
 
@@ -187,6 +188,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_ZLIB=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
             -DLIBXML2_WITH_HTML=OFF \
@@ -237,6 +239,7 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DLIBXML2_WITH_ZLIB=OFF \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DNO_BUILD_LIBRAWLITE=ON \
@@ -283,6 +286,7 @@ function build() {
                 -DCMAKE_INSTALL_PREFIX=Release \
                 -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
                 -DCMAKE_INSTALL_INCLUDEDIR=include \
+                -DLIBXML2_WITH_ZLIB=OFF \
                 -DLIBXML2_WITH_LZMA=OFF \
                 -DBUILD_SHARED_LIBS=OFF \
                 -DLIBXML2_WITH_FTP=OFF \
@@ -321,6 +325,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_ZLIB=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
             -DLIBXML2_WITH_HTML=OFF \
