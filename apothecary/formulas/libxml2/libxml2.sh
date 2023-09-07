@@ -82,6 +82,9 @@ function build() {
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
+
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
         cmake .. \
@@ -217,6 +220,9 @@ function build() {
         export CXXFLAGS="-pthread"
         export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
         echo "$CMAKE_TOOLCHAIN_FILE"
+
+        find . -name "test*.c" | xargs rm
+        find . -name "run*.c" | xargs rm
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
