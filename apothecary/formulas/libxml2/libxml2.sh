@@ -403,8 +403,8 @@ function copy() {
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "emscripten" ]; then
-        cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
-        cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+        cp -v "build_${TYPE}/Release/libxml2s.a" $1/lib/$TYPE/libxml2.a
+        cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
