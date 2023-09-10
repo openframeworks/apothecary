@@ -155,6 +155,9 @@ function build() {
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         pwd 
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    rm -rf "build_${TYPE}_${ARCH}"
+		fi
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
         pwd

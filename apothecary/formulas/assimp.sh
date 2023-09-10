@@ -279,7 +279,7 @@ function build() {
         mkdir -p build_$TYPE
         cd build_$TYPE
         $EMSDK/upstream/emscripten/emcmake cmake .. \
-            -B build \
+            -B . \
             $buildOpts \
             -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1 " \
             -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1" \
