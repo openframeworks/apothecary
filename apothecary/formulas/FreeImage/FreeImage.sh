@@ -78,203 +78,67 @@ function prepare() {
 function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
-		make -j${PARALLEL_MAKE} -f Makefile.osx
-
-		strip -x Dist/libfreeimage.a
+		echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake  .. \
+			-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=ON \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DNO_BUILD_LIBRAWLITE=ON \
+			-DNO_BUILD_OPENEXR=ON \
+			-DNO_BUILD_WEBP=ON \
+			-DNO_BUILD_JXR=ON \
+			-DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+			-DPLATFORM=$PLATFORM \
+			-DENABLE_BITCODE=OFF \
+			-DENABLE_ARC=OFF \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+			-DENABLE_VISIBILITY=OFF \
+			-G Xcode
+		cmake --build . --config Release --target install
+        cd ..
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
-		# Notes:
-        # --- for 3.1+ Must use "-DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT" to compile LibJXR
-		export TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
-		export TARGET_IOS
-
-        local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64"
-        fi
-
-        local STDLIB="libc++"
-        local CURRENTPATH=`pwd`
-
-        SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [ "$TYPE" == "ios" ]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-
-
-        DEVELOPER=$XCODE_DEV_ROOT
-		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-		VERSION=$VER
-
-        # Validate environment
-        case $XCODE_DEV_ROOT in
-            *\ * )
-                echo "Your Xcode path contains whitespaces, which is not supported."
-                exit 1
-                ;;
-        esac
-        case $CURRENTPATH in
-            *\ * )
-                echo "Your path contains whitespaces, which is not supported by 'make install'."
-                exit 1
-                ;;
-        esac
-
-        mkdir -p "builddir/$TYPE"
-
-        # loop through architectures! yay for loops!
-        for IOS_ARCH in ${IOS_ARCHS}
-        do
-
-        	unset IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
-            unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
-
-            export ARCH=$IOS_ARCH
-
-            local EXTRA_PLATFORM_CFLAGS=""
-			export EXTRA_PLATFORM_LDFLAGS=""
-			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-			then
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVSimulator"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneSimulator"
-                fi
-			else
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVOS"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneOS"
-                fi
-			fi
-
-			export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-			export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-			export BUILD_TOOLS="${DEVELOPER}"
-
-			MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-		    # min iOS version for arm64 is iOS 7
-
-		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-		    	MIN_IOS_VERSION=9.0 # 7.0 as this is the minimum for these architectures
-		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=9.0 # 6.0 to prevent start linking errors
-		    fi
-
-            if [ "${TYPE}" == "tvos" ]; then
-    		    MIN_TYPE=-mtvos-version-min=
-    		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-    		    	MIN_TYPE=-mtvos-simulator-version-min=
-    		    fi
-            elif [ "$TYPE" == "ios" ]; then
-                MIN_TYPE=-miphoneos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mios-simulator-version-min=
-                fi
-            fi
-
-            BITCODE=""
-            if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
-                BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=13.0
-            fi
-
-			export TARGET_NAME="$CURRENTPATH/libfreeimage-$IOS_ARCH.a"
-			export HEADER="Source/FreeImage.h"
-
-			export CC=$TOOLCHAIN/usr/bin/clang
-			export CPP=$TOOLCHAIN/usr/bin/clang++
-			export CXX=$TOOLCHAIN/usr/bin/clang++
-			export CXXCPP=$TOOLCHAIN/usr/bin/clang++
-
-			export LD=$TOOLCHAIN/usr/bin/ld
-			export AR=$TOOLCHAIN/usr/bin/ar
-			export AS=$TOOLCHAIN/usr/bin/as
-			export NM=$TOOLCHAIN/usr/bin/nm
-			export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-			export LIBTOOL=$TOOLCHAIN/usr/bin/libtool
-
-		  	export EXTRA_PLATFORM_CFLAGS="$EXTRA_PLATFORM_CFLAGS"
-			export EXTRA_PLATFORM_LDFLAGS="$EXTRA_PLATFORM_LDFLAGS -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -Wl,-dead_strip -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/ $MIN_TYPE$MIN_IOS_VERSION "
-
-		   	EXTRA_LINK_FLAGS="-arch $IOS_ARCH $BITCODE -fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Oz -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
-			EXTRA_FLAGS="$EXTRA_LINK_FLAGS $BITCODE -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT $MIN_TYPE$MIN_IOS_VERSION -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
-
-		    export CC="$CC $EXTRA_FLAGS"
-			export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS -std=c17 -Wno-implicit-function-declaration"
-			export CXXFLAGS="$EXTRA_FLAGS -std=c++17 -stdlib=libc++"
-			export LDFLAGS="-arch $IOS_ARCH $EXTRA_PLATFORM_LDFLAGS $EXTRA_LINK_FLAGS $MIN_TYPE$MIN_IOS_VERSION"
-			export LDFLAGS_PHONE=$LDFLAGS
-
-			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
-			echo "-----------------"
-			echo "Building FreeImage-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
-			set +e
-
-			echo "Running make for ${IOS_ARCH}"
-			echo "Please stand by..."
-
-			# run makefile
-			make -j${PARALLEL_MAKE} -f Makefile.ios
-
-     		echo "Completed Build for $IOS_ARCH of FreeImage"
-
-     		mv -v libfreeimage-$IOS_ARCH.a Dist/$TYPE/libfreeimage-$IOS_ARCH.a
-
-     		cp Source/FreeImage.h Dist
-
-            unset IOS_DEVROOT IOS_SDKROOT IOS_CC TARGET_NAME HEADER
-            unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS LD AR AS NM RANLIB LIBTOOL
-            unset EXTRA_PLATFORM_CFLAGS EXTRA_PLATFORM_LDFLAGS IOS_PLATFORM NO_LCMS
-
-		done
-
-		echo "Completed Build for $TYPE"
-
-        echo "-----------------"
-		echo `pwd`
-		echo "Finished for all architectures."
-		mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
-		LOG="$CURRENTPATH/builddir/$TYPE/build-freeimage-${VER}-lipo.log"
-
-		cd Dist/$TYPE/
-		# link into universal lib
-		echo "Running lipo to create fat lib"
-		echo "Please stand by..."
-        if [[ "${TYPE}" == "tvos" ]] ; then
-            lipo -create libfreeimage-arm64.a \
-                    libfreeimage-x86_64.a \
-                    -output freeimage.a
-        elif [[ "$TYPE" == "ios" ]]; then
-		    lipo -create libfreeimage-armv7.a \
-					libfreeimage-arm64.a \
-					libfreeimage-x86_64.a \
-					-output freeimage.a
-        fi
-
-		lipo -info freeimage.a
-
-        if [[ "$TYPE" == "ios" ]]; then
-    		echo "--------------------"
-    		echo "Stripping any lingering symbols"
-    		echo "Please stand by..."
-    		# validate all stripped debug:
-    		strip -x freeimage.a
-        fi
-		cd ../../
-
-		echo "--------------------"
-		echo "Build Successful for FreeImage $TYPE $VER"
-
-		# include copied in the makefile to libs/$TYPE/include
-		unset TARGET_IOS
-		unset TOOLCHAIN
+		echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake  .. \
+			-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=ON \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DNO_BUILD_LIBRAWLITE=ON \
+			-DNO_BUILD_OPENEXR=ON \
+			-DNO_BUILD_WEBP=ON \
+			-DNO_BUILD_JXR=ON \
+			-DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+			-DPLATFORM=$PLATFORM \
+			-DENABLE_BITCODE=OFF \
+			-DENABLE_ARC=OFF \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+			-DENABLE_VISIBILITY=OFF \
+			-G Xcode
+		cmake --build . --config Release --target install
+        cd ..
 
 	elif [ "$TYPE" == "android" ] ; then
         
@@ -391,7 +255,10 @@ function build() {
 			-DNO_BUILD_JXR=ON \
 		    -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=. \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. 
 	    cmake --build build --target install --config Release
 	    cd ..
 	fi
@@ -408,9 +275,10 @@ function copy() {
 
 	# lib
 	if [ "$TYPE" == "osx" ] ; then
-	    cp -v Dist/*.h $1/include
-		mkdir -p $1/lib/$TYPE
-		cp -v Dist/libfreeimage.a $1/lib/$TYPE/freeimage.a
+		mkdir -p $1/include
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -v "build_${TYPE}_${PLATFORM}/Release/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include	
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include
 	    mkdir -p $1/lib/$TYPE
@@ -418,13 +286,10 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImage.lib  
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        cp -v Dist/*.h $1/include
-        if [ -d $1/lib/$TYPE/ ]; then
-            rm -r $1/lib/$TYPE/
-        fi
-       	mkdir -p $1/lib/$TYPE
-		cp -v Dist/$TYPE/freeimage.a $1/lib/$TYPE/freeimage.a
-
+        mkdir -p $1/include
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -v "build_${TYPE}_${PLATFORM}/Release/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 	elif [ "$TYPE" == "android" ] ; then
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
