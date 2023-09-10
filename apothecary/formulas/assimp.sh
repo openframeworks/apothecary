@@ -294,10 +294,6 @@ function build() {
         cmake --build build --config Release
         cd ..
 
-
-        emmake make assimp -j${PARALLEL_MAKE}
-        cd ..
-
     fi
 }
 
