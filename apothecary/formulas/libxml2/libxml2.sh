@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten")
 # uses an automake build system # required for svg
 
-FORMULA_DEPENDS=( "zlib")
+FORMULA_DEPENDS=( )
 
 
 # define the version by sha
@@ -31,7 +31,6 @@ function download() {
     if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
         DOWNLOAD_TYPE="zip"
         . "$DOWNLOADER_SCRIPT"
-
         git clone $GIT_URL
         cd libxml2
         git checkout -b v${VER} tags/v${VER}
@@ -40,7 +39,7 @@ function download() {
         if [ ! -d "icu" ] ; then                  
             downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
             unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
-            rm -rf "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
+            rm -f "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
         fi
     else
 
@@ -51,7 +50,7 @@ function download() {
         if [ ! -d "icu" ] ; then    
             wget -q "${DEPEND_URL}.zip"
             unzip -qq "icu4c-${ICU_VER_U}-src.zip"
-            rm -rf "icu4c-${ICU_VER_U}-src.zip"
+            rm -f "icu4c-${ICU_VER_U}-src.zip"
         fi
 
     fi
@@ -82,8 +81,8 @@ function build() {
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -124,8 +123,8 @@ function build() {
         ./autogen.sh
         cp $FORMULA_DIR/config.h .
 
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
         
         source ../../android_configure.sh $ABI cmake
 
@@ -175,8 +174,8 @@ function build() {
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
         
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
 
         mkdir -p build_$TYPE
         cd build_$TYPE
@@ -186,7 +185,6 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -209,8 +207,8 @@ function build() {
         cmake --build . --config Release
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
         . "$DOWNLOADER_SCRIPT"
 
         downloader "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
@@ -221,8 +219,8 @@ function build() {
         export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
         echo "$CMAKE_TOOLCHAIN_FILE"
 
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
@@ -237,7 +235,6 @@ function build() {
             -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=17 \
@@ -279,8 +276,8 @@ function build() {
         cd ..
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
             #./autogen.sh
-            find . -name "test*.c" | xargs rm
-            find . -name "run*.c" | xargs rm
+            find . -name "test*.c" | xargs -r rm
+            find . -name "run*.c" | xargs -r rm
             mkdir -p build_$TYPE
             cd build_$TYPE
             cmake .. \
@@ -289,7 +286,6 @@ function build() {
                 -DCMAKE_CXX_STANDARD=17 \
                 -DCMAKE_CXX_STANDARD_REQUIRED=ON \
                 -DCMAKE_CXX_EXTENSIONS=OFF \
-                -DCMAKE_INSTALL_PREFIX=Release \
                 -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
                 -DCMAKE_INSTALL_INCLUDEDIR=include \
                 -DLIBXML2_WITH_ZLIB=OFF \
@@ -316,8 +312,8 @@ function build() {
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
 
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
         mkdir -p build_$TYPE
         cd build_$TYPE
         cmake .. \
@@ -326,7 +322,6 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -350,8 +345,8 @@ function build() {
         cd ..
     elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         
-        find . -name "test*.c" | xargs rm
-        find . -name "run*.c" | xargs rm
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
 
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -399,35 +394,30 @@ function copy() {
     mkdir -p $1/lib/$TYPE
 
     # copy files specific to each build TYPE
-    case "$TYPE" in
-        "vs")
-            mkdir -p $1/lib/$TYPE/$PLATFORM/
-            cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
-            cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-            ;;
-        "android")
-            mkdir -p $1/lib/$TYPE/$ABI
-            cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-            cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-            ;;
-        "emscripten")
-            cp -v "build_${TYPE}/Release/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
-            cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-            ;;
-        "osx"|"ios"|"tvos")
-            cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
-            ;;
-        "linux64"|"linuxaarch64"|"linuxarmv6l"|"linuxarmv7l"|"msys2")
-            cp -v "build_${TYPE}/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
-            ;;
-        *)
-            echo "Unknown build TYPE: $TYPE"
-            exit 1
-            ;;
-    esac
+    if [ "$TYPE" == "vs" ]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
+        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+    elif [ "$TYPE" == "android" ]; then
+        mkdir -p $1/lib/$TYPE/$ABI
+        cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
+        cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+    elif [ "$TYPE" == "emscripten" ]; then
+        cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
+        cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+        cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+        cp -v "build_${TYPE}/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
+    else
+        echo "Unknown build TYPE: $TYPE"
+        exit 1
+    fi
 
     # copy license file
-    rm -rf $1/license # remove any older files if exists
+    if [ -d "$1/license" ]; then
+        rm -r $1/license
+    fi
     mkdir -p $1/license
     cp -v Copyright $1/license/
 }
