@@ -99,6 +99,8 @@ function prepare() {
 		apothecaryDepend prepare freetype
 		apothecaryDepend build freetype
 		apothecaryDepend copy freetype
+
+		cp -Rv $FORMULA_DIR/ ./
 	fi
 }
 
@@ -175,81 +177,70 @@ function build() {
         cd ..
 	elif [ "$TYPE" == "osx" ] ; then
 
-        # needed for travis FREETYPE_LIBS configure var forces cairo to search this location for freetype 
-        ROOT=${PWD}/..
+	    LIBS_ROOT=$(realpath $LIBS_DIR)
 
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        SYSROOT="-isysroot ${SDK_PATH}"
-        export SDK=macosx
-        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
-        export ARCHS="-arch arm64 -arch x86_64"
 
-        export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
+		CAIRO_HAS_PNG_FUNCTIONS=1
 
-        # cp -v ${OF_LIBS_ABS_PATH}/freetype/lib/${TYPE}/freetype.a ${BUILD_ROOT_DIR}/lib/freetype.a # this works! 
-        # cp -Rv ${OF_LIBS_ABS_PATH}/freetype/include/* ${BUILD_ROOT_DIR}/include/ # this works! 
 
-        cp ${OF_LIBS_ABS_PATH}/freetype/lib/osx/freetype.a ${OF_LIBS_ABS_PATH}/freetype/lib/osx/libfreetype.a
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        FREETYPE_LIB_PATH="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
+		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"	
 
-        echo "FreeType location: $FREETYPE_LIB_PATH"
-        echo "PKG_CONFIG location: $BUILD_ROOT_DIR/bin/pkg-config"
+		PIXMAN_ROOT="$LIBS_ROOT/pixman/"
+		PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
+		PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.lib"
 
-        export PATH="$PATH;$BUILD_ROOT_DIR;$BUILD_ROOT_DIR/lib;$BUILD_ROOT_DIR/lib/pkgconfig;$BUILD_ROOT_DIR/bin/;${OF_LIBS_ABS_PATH}/freetype/lib/osx"
+		FREETYPE_ROOT="$LIBS_ROOT/freetype/"
+		FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
+		FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/libfreetype.lib"
 
-        chmod -R 755 $BUILD_ROOT_DIR/lib/pkgconfig/
+	    mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DPIXMAN_ROOT=${PIXMAN_ROOT} \
+            -DPNG_ROOT=${LIBPNG_ROOT} \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DFREETYPE_ROOT=${FREETYPE_ROOT} \
+            -DPIXMAN_INCLUDE_DIR=${PIXMAN_INCLUDE_DIR} \
+            -DPIXMAN_LIBRARY=${PIXMAN_LIBRARY} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DFREETYPE_LIBRARY=${FREETYPE_LIBRARY} \
+            -DFREETYPE_INCLUDE_DIR=${FREETYPE_INCLUDE_DIR} \
+            -DFREETYPE_CFLAGS=-I${FREETYPE_ROOT}/freetype2 \
+        	-DFREETYPE_LIBS=${FREETYPE_LIBRARY} \
+        	-DBUILD_GTK_DOC=OFF -DBUILD_TESTS=OFF -DBUILD_DEPENDENCY_TRACKING=OFF -DBUILD_XLIB=OFF -DBUILD_QT=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_QUARTZ_FONT=OFF -DBUILD_QUARTZ=OFF -DBUILD_QUARTZ_IMAGE=OFF"
+         
+        cmake .. ${DEFS} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -G Xcode
+        cmake --build . --config Release
+        cmake --install . --config Release
 
-        echo "PATH :$PATH"
-        export PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config"
-		export PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig"
-        export FREETYPE_CFLAGS="-I${OF_LIBS_ABS_PATH}/freetype/include/freetype2"
-        export FREETYPE_LIBS="-L${OF_LIBS_ABS_PATH}/freetype/lib/osx -lfreetype"
-        export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
-        export png_REQUIRES="libpng16"
-        export png_CFLAGS="-I$BUILD_ROOT_DIR/include/ -I$BUILD_ROOT_DIR/include/libpng16 $INCLUDE_ZLIB"
-        export png_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpng -L$BUILD_ROOT_DIR/lib/ -lpng16 $INCLUDE_ZLIB_LIBS"
-        export FREETYPE_MIN_RELEASE=2.11.1
-        export FREETYPE_MIN_VERSION=2.11.1
-        export pixman_CFLAGS="-I$BUILD_ROOT_DIR/include/pixman-1"
-        export pixman_LIBS="-L$BUILD_ROOT_DIR/lib/ -lpixman-1"
-		export LDFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}"
-		export CFLAGS="$ARCHS -m$SDK-version-min=$OSX_MIN_SDK_VER ${SYSROOT}" 
-		export MACOSX_DEPLOYMENT_TARGET=$OSX_MIN_SDK_VER
-		# export FREETYPE_MIN_VERSION=
-	
-		# $BUILD_ROOT_DIR/bin/pkg-config pixman-1 --libs
-		# $BUILD_ROOT_DIR/bin/pkg-config libpng --libs
-		# $BUILD_ROOT_DIR/bin/pkg-config freetype2 --libs
-		# $BUILD_ROOT_DIR/bin/pkg-config zlib --libs
+	    cd ..
 
-		echo "autogen"
 
-		if [ ! -f configure ] ; then
-			./autogen.sh
-		fi
-        
-		echo "configure"
-        ./configure \
-        			PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt \
-                    --disable-shared \
-                    --disable-quartz-font \
-                    --disable-quartz \
-                    --disable-quartz-image
-                            
-        echo "make"
-		make -j${PARALLEL_MAKE}
-		make install
-
-		rm ${OF_LIBS_ABS_PATH}/freetype/lib/osx/libfreetype.a
 	else
 		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
 					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
