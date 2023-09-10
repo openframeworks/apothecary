@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten")
 # uses an automake build system # required for svg
 
-FORMULA_DEPENDS=( )
+FORMULA_DEPENDS=( "zlib" )
 
 
 # define the version by sha
