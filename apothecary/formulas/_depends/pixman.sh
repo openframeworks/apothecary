@@ -46,11 +46,11 @@ function download() {
 function build() {
 	mkdir -p pixman
 	if [ "$TYPE" == "osx" ] ; then
-		echo "building $TYPE | $ARCH"
+		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
       
-		mkdir -p "build_${TYPE}_${ARCH}"
-		cd "build_${TYPE}_${ARCH}"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
 
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
@@ -145,8 +145,8 @@ function copy() {
 	else # osx
 		# lib
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
-    	cp -RvT "build_${TYPE}_${ARCH}/Release/include/pixman-1" $1/include
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
+    	cp -RvT "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
 
     	# copy license file
 		mkdir -p $1/license
