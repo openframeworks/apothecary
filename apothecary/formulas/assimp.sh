@@ -63,7 +63,7 @@ function build() {
     fi
 
     if [ "$TYPE" == "osx" ] ; then
-
+        find ./ -name "*.o" -type f -delete
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
         local buildOpts="
@@ -82,9 +82,7 @@ function build() {
         make assimp -j${PARALLEL_MAKE}
 
     elif [ "$TYPE" == "vs" ] ; then
-
-        unset TMP
-        unset TEMP
+        find ./ -name "*.o" -type f -delete
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
@@ -270,7 +268,7 @@ function build() {
 
 
     elif [ "$TYPE" == "emscripten" ] ; then
-
+        find ./ -name "*.o" -type f -delete
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
         local buildOpts="
