@@ -73,8 +73,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
-	
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 	if [ "$TYPE" == "osx" ] ; then
 		ROOT=$(realpath ${PWD}/..)
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
@@ -99,30 +98,22 @@ function build() {
 		make clean
 		make install
 	elif [ "$TYPE" == "vs" ] ; then
-
-		LIBS_ROOT=$(realpath $LIBS_DIR)
-
-
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-	    echoVerbose "--------------------"
-	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+	  echoVerbose "--------------------"
+	  GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
 
-	    mkdir -p "build_${TYPE}_${ARCH}"
+	  mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
 
-		Z_ROOT="$LIBS_ROOT/zlib/"
-		Z_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		Z_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
 
-		DEFS="
-		    -DCMAKE_BUILD_TYPE=Release \
+		DEFS="-DCMAKE_BUILD_TYPE=Release \
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
-		    -DZLIB_ROOT=${Z_ROOT} \
-		    -DZLIB_LIBRARY=${Z_LIBRARY} \
-		    -DZLIB_INCLUDE=${Z_INCLUDE_DIR} \
 		    -DPNG_TESTS=OFF \
 		    -DPNG_SHARED=OFF \
 		    -DPNG_STATIC=ON \
@@ -132,18 +123,20 @@ function build() {
 		    -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
-		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
-		    -DCMAKE_TEMPORARY_OUTPUT_DIRECTORY=/temp \
-		    -DCMAKE_INTERMEDIATE_OUTPUT_DIRECTORY=/intermediate"
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin"
 
 	cmake .. ${DEFS} \
+			-B . \
 	    -A "${PLATFORM}" \
 	    -G "${GENERATOR_NAME}" \
 	    ${CMAKE_WIN_SDK} \
 	    -D CMAKE_VERBOSE_MAKEFILE=ON \
-	    -D BUILD_SHARED_LIBS=ON 
+	    -D BUILD_SHARED_LIBS=ON \
+	    -DZLIB_ROOT=${ZLIB_ROOT} \
+      -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+      -DZLIB_LIBRARY=${ZLIB_LIBRARY}
 
-	cmake --build . --config Release --target install
+	cmake --build . --config Release 
 
 	cd ..	
 		
