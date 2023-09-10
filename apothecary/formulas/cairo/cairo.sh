@@ -263,19 +263,16 @@ function build() {
 function copy() {
 	mkdir -p $1/include
 	if [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/include/cairo		
+		mkdir -p $1/include/cairo	
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
-		# make the path in the libs dir
-		mkdir -p $1/include/cairo
-
-		# copy the cairo headers
-		cp -Rv $BUILD_ROOT_DIR/include/cairo/* $1/include/cairo
-
-		# make the libs path
-		mkdir -p $1/lib/$TYPE
+		
+		mkdir -p $1/include/cairo	
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
+    	cp -v "build_${TYPE}_${PLATFORM}/Release/libcairo" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
 
 		if [ "$TYPE" == "osx" ] ; then
 			cp -v $BUILD_ROOT_DIR/lib/libcairo-script-interpreter.a $1/lib/$TYPE/cairo-script-interpreter.a
