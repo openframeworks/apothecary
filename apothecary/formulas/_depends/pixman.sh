@@ -38,7 +38,7 @@ function download() {
 	cp -v $FORMULA_DIR/_depends/pixman/CMakeLists.txt pixman/CMakeLists.txt
 	cp -v $FORMULA_DIR/_depends/pixman/pixman/CMakeLists.txt pixman/pixman/CMakeLists.txt
 	mkdir -p pixman/cmake
-	cp -vr $FORMULA_DIR/_depends/pixman/cmake/ pixman/
+	cp -vr $FORMULA_DIR/_depends/pixman/cmake/ pixman/cmake
 }
 
 
@@ -46,23 +46,50 @@ function download() {
 function build() {
 	mkdir -p pixman
 	if [ "$TYPE" == "osx" ] ; then
-		# these flags are used to create a fat 32/64 binary with i386->libstdc++, x86_64->libc++
-		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-                
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-		./configure LDFLAGS="${FAT_LDFLAGS} " \
-				CFLAGS="-O3 ${FAT_LDFLAGS}" \
-				--prefix=$BUILD_ROOT_DIR \
-				--disable-dependency-tracking \
-				--disable-gtk \
-				--disable-shared \
-                --disable-mmx
+		echo "building $TYPE | $ARCH"
+        echo "--------------------"
+      
+		mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
+
+        cmake  .. \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release \
+		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
+            -D CMAKE_VERBOSE_MAKEFILE=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -G Xcode
+        cmake --build . --config Release
+        cmake --install . --config Release   
+
+
+        cd ..
+		# 		CFLAGS="-O3 ${FAT_LDFLAGS}" \
+		# 		--prefix=$BUILD_ROOT_DIR \
+		# 		--disable-dependency-tracking \
+		# 		--disable-gtk \
+		# 		--disable-shared \
+        #         --disable-mmx
 		# only build & install lib, ignore demos/tests
 
-		cd pixman
-		make clean
-		make -j${PARALLEL_MAKE}
+		# cd pixman
+		# make clean
+		# make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
 
@@ -117,12 +144,13 @@ function copy() {
 
 	else # osx
 		# lib
-		cd pixman
-		make install
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
+    	cp -RvT "build_${TYPE}_${ARCH}/Release/include/pixman-1" $1/include
 
-		# pkg-config info
-		cd ../
-		make install-pkgconfigDATA
+    	# copy license file
+		mkdir -p $1/license
+		cp -v COPYING $1/license/LICENSE
 	fi
 
 }
