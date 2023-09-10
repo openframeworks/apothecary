@@ -21,6 +21,7 @@ function download() {
 	downloader https://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
 	mkdir pugixml
 	tar xzf pugixml-$VER.tar.gz --directory pugixml --strip-components=1
+	rm "pugixml-$VER.tar.gz"
 }
 
 # prepare the build environment, executed inside the lib src dir
