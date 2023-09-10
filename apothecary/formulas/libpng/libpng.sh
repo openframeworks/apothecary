@@ -136,7 +136,7 @@ function build() {
       -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
       -DZLIB_LIBRARY=${ZLIB_LIBRARY}
 
-	cmake --build . --config Release 
+	cmake --build . --config Release  --target install
 
 	cd ..	
 		
