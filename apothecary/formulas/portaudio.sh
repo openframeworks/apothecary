@@ -40,7 +40,9 @@ function copy() {
 	cp -Rv include/* $1/include
 
 	# copy license file
-    rm -rf $1/license # remove any older files if exists
+    if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
     mkdir -p $1/license
     cp -v LICENSE.txt $1/license/
 }

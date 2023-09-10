@@ -160,7 +160,9 @@ function copy() {
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
 	fi
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v readme.txt $1/license/
 }

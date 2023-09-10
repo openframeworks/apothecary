@@ -496,7 +496,9 @@ function copy() {
 	fi
 
     # copy license files
-    rm -rf $1/license # remove any older files if exists
+    if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
     mkdir -p $1/license
     cp -v license-fi.txt $1/license/
     cp -v license-gplv2.txt $1/license/

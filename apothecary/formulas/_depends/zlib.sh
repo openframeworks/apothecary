@@ -20,7 +20,7 @@ function download() {
 	downloader ${GIT_URL}
 	tar -xf zlib-$VER.tar.gz
 	mv zlib-$VER zlib
-	rm -rf zlib-$VER.tar.gz
+	rm -f zlib-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -76,9 +76,6 @@ function build() {
 		# cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G "Unix Makefiles" 
 		make
 	elif [ "$TYPE" == "emscripten" ] ; then
-        export CFLAGS="-pthread"
-		export CXXFLAGS="-pthread"
-
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
@@ -123,7 +120,10 @@ function copy() {
 	fi
 
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v LICENSE $1/license/
 }

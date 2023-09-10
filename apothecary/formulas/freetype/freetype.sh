@@ -438,7 +438,9 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
     #remove old include files if they exist
-    rm -rf $1/include
+    if [ -d "$1/include" ]; then
+        rm -rf $1/include
+    fi
 
 	# copy headers
 	mkdir -p $1/include/freetype2/
@@ -475,7 +477,9 @@ function copy() {
 	fi
 
 	# copy license files
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v LICENSE.TXT $1/license/LICENSE
 	cp -v docs/FTL.TXT $1/license/
