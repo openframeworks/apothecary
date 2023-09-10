@@ -278,9 +278,25 @@ function build() {
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
-        mkdir -p build_emscripten
-        cd build_emscripten
-        emcmake cmake -G 'Unix Makefiles' $buildOpts -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread" -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread" ..
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            -B build \
+            $buildOpts \
+            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1 " \
+            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON
+
+        cmake --build build --config Release
+        cd ..
+
+
         emmake make assimp -j${PARALLEL_MAKE}
         cd ..
 
@@ -316,6 +332,8 @@ function copy() {
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -Rv build_emscripten/lib/libassimp.a $1/lib/$TYPE/libassimp.a
+        cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
+        cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     fi
 
     # copy license files
