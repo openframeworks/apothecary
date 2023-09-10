@@ -116,7 +116,6 @@ function build() {
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF
         cmake --build . --config Release
-
         cd ..
             
     elif [ "$TYPE" == "android" ]; then
@@ -245,10 +244,6 @@ function build() {
             -DLIBXML2_WITH_ZLIB=OFF \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            -DNO_BUILD_LIBRAWLITE=ON \
-            -DNO_BUILD_OPENEXR=ON \
-            -DNO_BUILD_WEBP=ON \
-            -DNO_BUILD_JXR=ON \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -304,7 +299,7 @@ function build() {
                 -DLIBXML2_WITH_THREADS=ON \
                 -DLIBXML2_WITH_PROGRAMS=OFF \
                 -DLIBXML2_WITH_TESTS=OFF \
-                -DLIBXML2_WITH_THREAD_ALLOC=OFF
+                -DLIBXML2_WITH_THREAD_ALLOC=OFF 
             cmake --build . --config Release
             cd ..
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
@@ -396,7 +391,7 @@ function copy() {
     # copy files specific to each build TYPE
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
+        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
         cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
