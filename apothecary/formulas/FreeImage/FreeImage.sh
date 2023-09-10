@@ -345,68 +345,36 @@ function build() {
 		cd ..
 
     elif [ "$TYPE" == "vs" ]; then
-        export CFLAGS="-pthread"
-		export CXXFLAGS="-pthread"
-
-		if [ $ARCH == 32 ] ; then
-            PLATFORM="Win32"
-        elif [ $ARCH == 64 ] ; then
-            PLATFORM="x64"
-        elif [ $ARCH == "arm64" ] ; then
-            PLATFORM="ARM64"
-        elif [ $ARCH == "arm" ]; then
-            PLATFORM="ARM"            
-        fi
-
 		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
-
-        DEFS="-DLIBRARY_SUFFIX=${ARCH}"
-
-        if [ $VS_VER == 15 ] ; then
-            if [ $ARCH == 32 ] ; then                
-                cmake .. -G "$generatorName" $buildOpts
-                vs-build "FreeImage.sln" build "Release|Win32"
-            elif [ $ARCH == 64 ] ; then
-                generatorName+=' Win64'
-                cmake .. -G "$generatorName"  $buildOpts
-                vs-build "FreeImage.sln" build "Release|x64"
-            fi
-        else		
-			cmake  .. ${DEFS} \
-			-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=ON \
-			-DCMAKE_BUILD_TYPE=Release \
-			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
-			-DNO_BUILD_LIBRAWLITE=ON \
-			-DNO_BUILD_OPENEXR=ON \
-			-DNO_BUILD_WEBP=ON \
-			-DNO_BUILD_JXR=ON \
-			${CMAKE_WIN_SDK} \
-			-A "${PLATFORM}" \
-			-G "${GENERATOR_NAME}"
-            cmake --build . --config Release 
-        fi
+        DEFS="-DLIBRARY_SUFFIX=${ARCH}"	
+		cmake  .. ${DEFS} \
+		-DCMAKE_C_STANDARD=17 \
+		-DCMAKE_CXX_STANDARD=17 \
+		-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+		-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+		-DCMAKE_CXX_EXTENSIONS=OFF \
+		-DBUILD_SHARED_LIBS=ON \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
+		-DNO_BUILD_LIBRAWLITE=ON \
+		-DNO_BUILD_OPENEXR=ON \
+		-DNO_BUILD_WEBP=ON \
+		-DNO_BUILD_JXR=ON \
+		${CMAKE_WIN_SDK} \
+		-A "${PLATFORM}" \
+		-G "${GENERATOR_NAME}"
+        cmake --build . --config Release 
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
-        export CFLAGS="-pthread"
-		export CXXFLAGS="-pthread"
-		export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
-		echo "$CMAKE_TOOLCHAIN_FILE"
-
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-G 'Unix Makefiles' \
-	    	-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE \
+	    	-B build \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
 	    	-DCMAKE_C_STANDARD=17 \
@@ -419,8 +387,11 @@ function build() {
 	    	-DNO_BUILD_LIBRAWLITE=ON \
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
-			-DNO_BUILD_JXR=ON 
-	    $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE} VERBOSE=1
+			-DNO_BUILD_JXR=ON \
+		    -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include
+	    cmake --build build --target install --config Release
 	    cd ..
 	fi
 }
