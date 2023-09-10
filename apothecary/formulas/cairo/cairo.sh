@@ -116,7 +116,6 @@ function build() {
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
-
 		CAIRO_HAS_PNG_FUNCTIONS=1
 
 		echoInfo "If any issue with LNK1104: cannot open file 'LIBCMT.lib make sure to install Spectre Mitigated VS C++Libs'"
@@ -173,7 +172,6 @@ function build() {
 		    -D BUILD_SHARED_LIBS=ON \
 		    ${CMAKE_WIN_SDK} 
         cmake --build . --config Release --target install
- 
         cd ..
 	elif [ "$TYPE" == "osx" ] ; then
 
@@ -273,16 +271,11 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	mkdir -p $1/include
-
 	if [ "$TYPE" == "vs" ] ; then
-		# make the path in the libs dir
-		mkdir -p $1/include/cairo
-		# copy the cairo headers		
+		mkdir -p $1/include/cairo		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		#mkdir -p $1/bin/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include" $1/include
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
-
 	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
 		# make the path in the libs dir
 		mkdir -p $1/include/cairo
