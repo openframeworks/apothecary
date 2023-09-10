@@ -74,36 +74,10 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
+	
 	if [ "$TYPE" == "osx" ] ; then
-		ROOT=$(realpath ${PWD}/..)
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-
-		export INCLUDE_ZLIB="-I$ROOT/zlib/build/"
-		export INCLUDE_ZLIB_LIBS="-L$ROOT/zlib/build/ -lz"
-
-		mkdir -p build
-    	    
-    	export OUTPUT_BUILD_DIR=$(realpath ${PWD}/build)
-		# these flags are used to create a fat arm/64 binary with libc++
-		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_LDFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-
-		./configure LDFLAGS="${FAT_LDFLAGS} -flto ${INCLUDE_ZLIB_LIBS}" \
-				CFLAGS="-O3 ${FAT_LDFLAGS} ${INCLUDE_ZLIB}" \
-				--prefix=$BUILD_ROOT_DIR \
-				--disable-dependency-tracking \
-                --disable-arm-neon \
-                --enable-static \
-                --disable-shared
-		make clean
-		make install
-	elif [ "$TYPE" == "vs" ] ; then
-		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-	  echoVerbose "--------------------"
-	  GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
-
-	  mkdir -p "build_${TYPE}_${ARCH}"
-		cd "build_${TYPE}_${ARCH}"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
@@ -114,16 +88,58 @@ function build() {
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DZLIB_ROOT=${Z_ROOT} \
+		    -DZLIB_LIBRARY=${Z_LIBRARY} \
+		    -DZLIB_INCLUDE=${Z_INCLUDE_DIR} \
+		    -DPNG_BUILD_ZLIB=ON \
 		    -DPNG_TESTS=OFF \
 		    -DPNG_SHARED=OFF \
 		    -DPNG_STATIC=ON \
 		    -DBUILD_SHARED_LIBS=ON \
-		    -DCMAKE_INSTALL_PREFIX=Release \
-		    -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-		    -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
-		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
-		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin"
+		    -DPNG_HARDWARE_OPTIMIZATIONS=OFF \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include"
+
+			cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+				-G Xcode
+		cmake --build . --config Release --target install
+		cd ..	
+	elif [ "$TYPE" == "vs" ] ; then
+		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+	  echoVerbose "--------------------"
+	  GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+
+	  mkdir -p "build_${TYPE}_${ARCH}"
+		cd "build_${TYPE}_${ARCH}"
+
+		Z_ROOT="$LIBS_ROOT/zlib/"
+		Z_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		Z_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+
+		DEFS="
+				-DCMAKE_BUILD_TYPE=Release \
+				-DCMAKE_C_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DZLIB_ROOT=${Z_ROOT} \
+				-DZLIB_LIBRARY=${Z_LIBRARY} \
+				-DZLIB_INCLUDE=${Z_INCLUDE_DIR} \
+				-DPNG_TESTS=OFF \
+				-DPNG_SHARED=OFF \
+				-DPNG_STATIC=ON \
+				-DBUILD_SHARED_LIBS=ON \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INSTALL_LIBDIR=lib"
 
 	cmake .. ${DEFS} \
 			-B . \
@@ -149,15 +165,16 @@ function copy() {
 	mkdir -p $1/include
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		echo "libpng copy"
-    	cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
-    	cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+		mkdir -p $1/include
+		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
+		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
 
 	else
 		mkdir -p $1/include
-		mkdir -p $1/lib/$TYPE
-		cp -v ${BUILD_ROOT_DIR}/lib/libpng.a $1/lib/$TYPE/libpng.a
-		cp -v ${BUILD_ROOT_DIR}/lib/libpng16.a $1/lib/$TYPE/libpng16.a			
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include	
 	fi
 
 	# copy license file
