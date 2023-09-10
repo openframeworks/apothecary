@@ -77,12 +77,17 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "vs" ] ; then 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -114,7 +119,11 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF
+            -DLIBXML2_WITH_SCHEMATRON=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+
         cmake --build . --config Release
         cd ..
             
@@ -209,22 +218,14 @@ function build() {
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
         . "$DOWNLOADER_SCRIPT"
-
         downloader "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD"
         downloader "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD"
-        
         export CFLAGS="-pthread"
         export CXXFLAGS="-pthread"
         export CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
         echo "$CMAKE_TOOLCHAIN_FILE"
-
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
-
-        LIBS_ROOT=$(realpath $LIBS_DIR)
-
-        CAIRO_HAS_PNG_FUNCTIONS=1
-
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
