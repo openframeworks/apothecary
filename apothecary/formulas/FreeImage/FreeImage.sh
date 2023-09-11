@@ -130,6 +130,9 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+	        -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
@@ -137,7 +140,7 @@ function build() {
 			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 			-DENABLE_VISIBILITY=OFF \
 			-G Xcode
-		cmake --build . --config Release --target install
+		cmake --build . --target install --config Release 
         cd ..
 
 	elif [ "$TYPE" == "android" ] ; then
