@@ -284,7 +284,6 @@ function build() {
             -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1 " \
             -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=17 \
