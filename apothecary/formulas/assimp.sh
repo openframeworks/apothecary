@@ -7,13 +7,15 @@
 # uses CMake
 
 # define the version
-VER=5.2.9
+VER=5.2.10
 
 # tools for git use
 GIT_URL=https://github.com/danoli3/assimp
 GIT_TAG=
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
+
+FORMULA_DEPENDS=( "zlib" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -33,23 +35,18 @@ function download() {
 function prepare() {
     echo "Prepare"
 
-    # if [ "$TYPE" == "ios" ] ; then
-
-    #   # # patch outdated Makefile.osx provided with FreeImage, check if patch was applied first
-    #   # if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/assimp.ios.patch 2>/dev/null ; then
-    #   #   patch -p0 -u < $FORMULA_DIR/assimp.ios.patch
-    #   # fi
-
-    # fi
+    apothecaryDependencies download
+    
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+   
 }
 
 # executed inside the lib src dir
 function build() {
-
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     rm -f CMakeCache.txt || true
-
-   
-
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         if [[ "$TYPE" == "tvos" ]]; then
             export IOS_MIN_SDK_VER=9.0
@@ -86,7 +83,11 @@ function build() {
         #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"        
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.lib"   
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -105,7 +106,12 @@ function build() {
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}"
+            -G "${GENERATOR_NAME}" \
+            -DASSIMP_BUILD_ZLIB=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+
         cmake --build . --config Release
 
         cd ..      
@@ -121,7 +127,7 @@ function build() {
 
     elif [ "$TYPE" == "android" ] ; then
 
-        ANDROID_API=24 # sorry
+        ANDROID_API=24
         ANDROID_PLATFORM=android-${ANDROID_API}
 
         source ../../android_configure.sh $ABI cmake
@@ -253,22 +259,16 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
             -G 'Unix Makefiles' .
-
-            # -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            # -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            #=-DCMAKE_MODULE_LINKER_FLAGS=${LIBS} #-DCMAKE_CXX_FLAGS="-Oz -DDEBUG $CPPFLAGS
-            
-        
         make clean
         make -j${PARALLEL_MAKE} VERBOSE=1
-       
-
         cd ..
-        
-
-
+    
     elif [ "$TYPE" == "emscripten" ] ; then
         find ./ -name "*.o" -type f -delete
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
         local buildOpts="
@@ -289,9 +289,14 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DASSIMP_BUILD_ZLIB=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -Dzlib_BINARY_DIR=${ZLIB_LIBRARY} \
 
-        cmake --build build --config Release
+        cmake --build . --config Release
         cd ..
 
     fi
@@ -322,12 +327,9 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_${TYPE}_${ABI}/include/* $1/include
         cp -Rv build_${TYPE}_${ABI}/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        #cp -Rv build_$ABI/contrib/irrXML/libIrrXML.a $1/lib/$TYPE/$ABI/libIrrXML.a  <-- included in cmake build
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
-        cp -Rv build_emscripten/lib/libassimp.a $1/lib/$TYPE/libassimp.a
-        cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
-        cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+        cp -v "build_${TYPE}/lib/libassimp.a" $1/lib/$TYPE/libassimp.a
     fi
 
     # copy license files

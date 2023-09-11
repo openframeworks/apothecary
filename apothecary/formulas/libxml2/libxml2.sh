@@ -87,7 +87,7 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.lib"
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -102,7 +102,7 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
-            -DLIBXML2_WITH_ZLIB=OFF \
+            -DLIBXML2_WITH_ZLIB=ON \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
