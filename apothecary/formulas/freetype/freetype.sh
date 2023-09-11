@@ -8,8 +8,10 @@
 
 FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
 
+FORMULA_DEPENDS=( "zlib" "libpng" )
+
 # define the version
-VER=2.13.1
+VER=2.13.2
 FVER=213
 
 # tools for git use
@@ -33,11 +35,17 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	mkdir -p lib/$TYPE
+
+	apothecaryDependencies download
+    
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
 }
 
 # executed inside the lib src dir
 function build() {
-
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 	if [ "$TYPE" == "osx" ] ; then
 		local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/
 
@@ -95,7 +103,15 @@ function build() {
 		
 		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"   
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"  
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib" 
+
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib" 
 
         rm -rf "build_${TYPE}_${ARCH}"
         mkdir -p "build_${TYPE}_${ARCH}"
@@ -106,9 +122,9 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DFT_DISABLE_ZLIB=TRUE \
+            -DFT_DISABLE_ZLIB=OFF \
             -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_DISABLE_PNG=TRUE \
+            -DFT_DISABLE_PNG=OFF \
             -DFT_DISABLE_HARFBUZZ=TRUE \
             -DFT_DISABLE_BROTLI=TRUE \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -124,7 +140,15 @@ function build() {
 		    -D BUILD_SHARED_LIBS=ON \
 		    ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
-            -G "${GENERATOR_NAME}" 
+            -G "${GENERATOR_NAME}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DPNG_ROOT=${LIBPNG_ROOT} 
+          
+
         cmake --build . --config Release --target install   
 
         cd ..
@@ -415,23 +439,44 @@ function build() {
 		make -j${PARALLEL_MAKE} VERBOSE=1
 		cd ..
 
-
 	elif [ "$TYPE" == "emscripten" ]; then
-	    #patch -p0 -u < $FORMULA_DIR/emscripten.patch
-	    local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE
-	    ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
-	    make clean
-	    make -j${PARALLEL_MAKE}
-	    cp $BUILD_DIR/freetype/objs/apinames .
-	    emconfigure ./configure --prefix=$BUILD_TO_DIR --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no --with-zlib=no --with-png=no
-	    emmake make clean
-	    cp apinames $BUILD_DIR/freetype/objs/
-	    emmake make -j${PARALLEL_MAKE}
-	    emmake make install
-	    emcc objs/*.o -o build/$TYPE/lib/libfreetype.bc
-		echo "-----------"
-		echo "$BUILD_DIR"
 
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/libpng.a" 
+
+        mkdir -p build_$TYPE
+        cd build_$TYPE
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            -B . \
+            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 " \
+            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DFT_DISABLE_ZLIB=OFF \
+            -DFT_DISABLE_BZIP2=ON \
+            -DFT_DISABLE_PNG=ON \
+            -DFT_DISABLE_HARFBUZZ=ON \
+            -DFT_DISABLE_BROTLI=ON \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DPNG_ROOT=${LIBPNG_ROOT}
+
+        cmake --build . --config Release
+        cd ..
 	fi
 }
 
@@ -473,7 +518,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
 	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
-		cp -v build/$TYPE/lib/libfreetype.bc $1/lib/$TYPE/libfreetype.bc
+		cp -v "build_${TYPE}/libfreetype.a" $1/lib/$TYPE/libfreetype.a
 	fi
 
 	# copy license files
