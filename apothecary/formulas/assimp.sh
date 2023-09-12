@@ -281,19 +281,19 @@ function build() {
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             -B . \
             $buildOpts \
-            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1 " \
-            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -pthread -DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 " \
+            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DASSIMP_BUILD_ZLIB=OFF \
+            -DASSIMP_BUILD_ZLIB=ON \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -Dzlib_BINARY_DIR=${ZLIB_LIBRARY} \
+            -Dzlib_BINARY_DIR=${ZLIB_LIBRARY}
 
         cmake --build . --config Release
         cd ..

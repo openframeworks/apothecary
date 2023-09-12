@@ -91,7 +91,7 @@ function build() {
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include
+            -DCMAKE_INSTALL_INCLUDEDIR=include 
 	  	cmake --build build --target install --config Release
 	    cd ..
 	fi
@@ -102,7 +102,6 @@ function copy() {
 	if [ "$TYPE" == "osx" ] ; then
 		echo "no install"
 	elif [ "$TYPE" == "vs" ] ; then
-
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
@@ -111,7 +110,7 @@ function copy() {
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib
-		cp -Rv "build_${TYPE}/Release/include"* $1/include
+		cp -Rv "build_${TYPE}/Release/include"* $1/include/
 		mkdir -p $1/lib/$TYPE
 		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/zlib.a
 	else
