@@ -453,8 +453,8 @@ function build() {
         cd build_$TYPE
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             -B . \
-            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 " \
-            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -469,7 +469,7 @@ function build() {
             -DFT_DISABLE_HARFBUZZ=ON \
             -DFT_DISABLE_BROTLI=ON \
             -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
