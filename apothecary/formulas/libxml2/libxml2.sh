@@ -403,8 +403,9 @@ function copy() {
         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
-    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+    elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         cp -v "build_${TYPE}/lib/libxml2.a" $1/lib/$TYPE/libxml2.a
+        cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     else
         echo "Unknown build TYPE: $TYPE"
         exit 1
