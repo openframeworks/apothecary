@@ -72,15 +72,34 @@ function build() {
             export LDFLAGS=-L$SYSROOT/usr/lib
             export CFLAGS=-I$SYSROOT/usr/include
         fi
-        
-        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
-        
-        if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ] ; then
-            export CFLAGS="-I$LIBS_DIR/libxml2/include"
-        fi
-        
-        make clean
-	    make -j${PARALLEL_MAKE}
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+        LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
+        LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/libxml2.a"
+	    mkdir -p "build_${TYPE}_${ARCH}"
+	    cd "build_${TYPE}_${ARCH}"
+	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+	        -DCMAKE_BUILD_TYPE=Release \
+	        -DCMAKE_C_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+	        -DCMAKE_CXX_EXTENSIONS=OFF
+	        -DBUILD_SHARED_LIBS=OFF \
+	        -DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
+	    cmake .. ${DEFS} \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+	        -DCMAKE_BUILD_TYPE=Release \
+	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        -DLIBXML2_ROOT=$LIBXML2_ROOT \
+	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
+	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
+	        -A "${PLATFORM}" \
+	        -G "${GENERATOR_NAME}"
+	    cmake --build . --config Release --target install
+	    cd ..
 
 	elif [ "$TYPE" == "vs" ] ; then
 		LIBS_ROOT=$(realpath $LIBS_DIR)
@@ -187,8 +206,9 @@ function copy() {
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ]; then
-		# copy lib
-		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/libsvgtiny.lib
 	fi
 
 
