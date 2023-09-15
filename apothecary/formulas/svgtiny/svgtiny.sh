@@ -73,7 +73,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ] ; then
+    if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] ; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
             export LDFLAGS=-L$SYSROOT/usr/lib
@@ -105,7 +105,6 @@ function build() {
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY 
 	    cmake --build . --config Release --target install
 	    cd ..
-
 	elif [ "$TYPE" == "vs" ] ; then
 		LIBS_ROOT=$(realpath $LIBS_DIR)
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
@@ -140,7 +139,30 @@ function build() {
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
 	    cd ..
-	
+
+	elif [ "$TYPE" == "msys2" ]; then
+
+		if [ $CROSSCOMPILING -eq 1 ]; then
+            source ../../${TYPE}_configure.sh
+            export LDFLAGS=-L$SYSROOT/usr/lib
+            export CFLAGS=-I$SYSROOT/usr/include
+        fi
+		LIBS_ROOT=$(realpath $LIBS_DIR)
+        LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
+        LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.lib"
+
+		echo "building svgtiny $TYPE | $ARCH | MSYS "
+	            
+        export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
+        
+        if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ] ; then
+            export CFLAGS="-I$LIBS_DIR/libxml2/include"
+        fi
+        
+        make clean
+        make -j${PARALLEL_MAKE}
+
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI make
         export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
@@ -210,10 +232,12 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ] || [ "$TYPE" == "msys2" ]; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ]; then
+		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/libsvgtiny.lib
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.a" $1/lib/$TYPE/libsvgtiny.a
+    elif [ "$TYPE" == "msys2" ] ; then
+		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
 	fi
 
 
