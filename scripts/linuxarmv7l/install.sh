@@ -17,7 +17,7 @@ createArchImg(){
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
     sudo apt-get install -y coreutils gperf
-    sudo apt-get update && sudo apt-get install -y autoconf libtool automake
+    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
     mkdir ~/archlinux
     cd ~/archlinux
 	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz

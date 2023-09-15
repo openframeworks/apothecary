@@ -24,7 +24,7 @@ installPackages(){
     sudo apt-get -y install gcc-arm-linux-gnueabihf
     sudo apt-get -y install multistrap unzip coreutils gperf build-essential
     sudo apt-get install -y pkgconf rsync
-    sudo apt-get update && sudo apt-get install -y autoconf libtool automake
+    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
     #workaround for https://bugs.launchpad.net/ubuntu/+source/multistrap/+bug/1313787
     if [ $IS_UBUNTU -eq 0 ] && [ "$UBUNTU_VERSION"=="14.04" ]; then
         sudo sed -i s/\$forceyes//g /usr/sbin/multistrap

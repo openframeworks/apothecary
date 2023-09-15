@@ -107,7 +107,7 @@ else
 	echo "GCC version not specified on OPT env var, set one of gcc4, gcc5 or gcc6"
 fi
 
-sudo apt-get update && sudo apt-get install -y autoconf libtool automake
+sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
 sudo apt-get update && sudo apt-get install -y cmake
 
 # Download the installer script
