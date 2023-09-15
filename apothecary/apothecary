@@ -47,7 +47,7 @@ BUILD_DEPENDENCIES=1
 # build settings
 HOST_OS= # compile os ("osx", "windows", "linux")
 TYPE= # library build type ("osx", "ios", "vs", etc)
-ARCH=32 # library build arch, 32 or 64 bit (not used for some build types)
+ARCH=64 # library build arch, 32 or 64 bit (not used for some build types)
 
 # full path to this script's dir
 APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -642,6 +642,22 @@ if [ "$TYPE" = "vs" ]; then
     #echo "PATH: $PATH"
     #PATH="/c/Program Files/CMake/bin:/c/windows;/c/windows/system32:/c/windows/system32/Wbem:$VS_BIN_PATH:/c/Program Files/Git/cmd:/c/Windows/System32/WindowsPowerShell/v1.0:/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/mingw32/bin:/usr/bin:/"
     #echo "NEW PATH: $PATH"
+fi
+
+if [ "$TYPE" = "msys2" ]; then
+    if [ -z ${PLATFORM+x}]; then
+        if [ $ARCH == "32" ]; then
+            PLATFORM=x86
+        elif [ $ARCH == "64" ]; then
+            PLATFORM=x64
+        elif [ $ARCH == "arm64" ]; then
+            PLATFORM=x64
+        elif [ $ARCH == "arm" ]; then
+            PLATFORM=x64
+        else
+            PLATFORM=x64
+        fi        
+    fi
 fi
 
 if [ "$TYPE" = "emscripten" ]; then
