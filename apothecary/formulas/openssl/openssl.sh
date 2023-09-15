@@ -5,10 +5,10 @@
 # define the version
 FORMULA_TYPES=( "osx"  "ios" "tvos" "vs" ) 
 
-VER=1.1.1v
+VER=1.1.1w
 VERDIR=1.1.1
-SHA1=3ec7b37aefcbcd8d4bd9b2f3687dd77948d46382
-SHA256=d6697e2871e77238460402e9362d47d18382b15ef9f246aba6c7bd780d38a6b0
+SHA1=76fbf3ca4370e12894a408ef75718f32cdab9671
+SHA256=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
