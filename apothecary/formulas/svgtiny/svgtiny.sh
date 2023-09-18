@@ -163,10 +163,43 @@ function build() {
         make -j${PARALLEL_MAKE}
 
 	elif [ "$TYPE" == "android" ]; then
-        source ../../android_configure.sh $ABI make
-        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-        make clean
-	    make -j${PARALLEL_MAKE}
+        source ../../android_configure.sh $ABI cmake
+
+        LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
+        LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$ABI/libxml2.a"
+
+        mkdir -p build_${TYPE}_${ABI}
+        cd build_${TYPE}_${ABI}
+        
+        export CMAKE_CFLAGS="$CFLAGS"
+        export CFLAGS=""
+        export CMAKE_LDFLAGS="$LDFLAGS"
+        export LDFLAGS=""
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_TOOLCHAIN=clang++ \
+            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_NDK=$NDK_ROOT \
+            -DANDROID_ABI=$ABI \
+            -DANDROID_STL=c++_shared \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_ROOT=$LIBXML2_ROOT \
+	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
+	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
+            -G 'Unix Makefiles' 
+
+        make -j${PARALLEL_MAKE} VERBOSE=1
+        cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -247,9 +280,10 @@ function copy() {
 		# copy lib
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/svgtiny.a
 	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/$ABI
-		# copy lib
-		cp -Rv libsvgtiny.a $1/lib/$TYPE/$ABI/libsvgtiny.a
+	    mkdir -p $1/lib/$TYPE/$ABI	    
+		cp -Rv "build_${TYPE}_${ABI}/Release/include/" $1/ 
+        cp -f "build_${TYPE}_${ABI}/Release/lib/libsvgtiny.lib" $1/lib/$TYPE/$ABI/libsvgtiny.lib
+
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
