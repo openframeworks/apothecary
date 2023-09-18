@@ -278,8 +278,6 @@ function clean() {
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
-	else
-		
 	fi
 }
 
