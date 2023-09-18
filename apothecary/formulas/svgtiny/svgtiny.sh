@@ -104,7 +104,7 @@ function build() {
 	        -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY 
-	    cmake --build . --config Release --target install
+	    cmake --build . --config Release
 	    cd ..
 	elif [ "$TYPE" == "vs" ] ; then
 		LIBS_ROOT=$(realpath $LIBS_DIR)
@@ -255,7 +255,7 @@ function copy() {
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.a" $1/lib/$TYPE/libsvgtiny.a
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a
     elif [ "$TYPE" == "msys2" ] ; then
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
 	fi
