@@ -14,7 +14,7 @@ trapError() {
 installPackages(){
     sudo apt-get update -q
     sudo apt-get -y install multistrap unzip coreutils gperf
-    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
+    sudo apt-get update && sudo apt-get install -y autoconf libtool automake
 }
 
 createRaspbianImg(){
