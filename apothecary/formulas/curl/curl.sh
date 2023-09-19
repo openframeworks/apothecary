@@ -95,13 +95,13 @@ function build() {
         #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         ./buildconf
-        
-        local SDK_PATH_XCODE_X86=SDK_PATH;
-        
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+                
+        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
         ./configure \
-            --with-darwinssl \
+            --with-secure-transport \
+			--with-ssl \
+			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
             --enable-static \
             --without-nghttp2 \
@@ -117,7 +117,9 @@ function build() {
         export CFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
         export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
 		./configure \
-            --with-darwinssl \
+            --with-secure-transport \
+            --with-ssl \
+			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
             --enable-static \
             --without-nghttp2 \
