@@ -48,16 +48,16 @@ function prepare() {
 	if [ "$TYPE" == "tvos" ]; then
 		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
     elif [ "$TYPE" == "osx" ]; then
-        cp $FORMULA_DIR/13-macos-arm.conf Configurations/  
-    elif [ "$TYPE" == "vs" ]; then        
-    	cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
+        cp $FORMULA_DIR/13-macos-arm.conf Configurations/  	
+    fi
+
+    cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
     	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
 		cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
 		mkdir -p ./cmake/
 		cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
 		cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
 		cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
-    fi
 
 
 
@@ -68,7 +68,7 @@ function prepare() {
 function build() {
 
 	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
-	
+
 	BUILD_OPTS_CMAKE=" -DOPENSSL_NO_DEPRECATED=ON \
 	-DOPENSSL_NO_COMP=ON \
 	-DOPENSSL_NO_EC_NISTP_64_GCC_128=ON \
@@ -105,49 +105,77 @@ function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
   
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-		rm -rf $BUILD_TO_DIR
-		rm -f libcrypto.a libssl.a
+		# local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		# rm -rf $BUILD_TO_DIR
+		# rm -f libcrypto.a libssl.a
   
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        # local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
 
-		local BUILD_OPTS_ARM="-fPIC -isysroot${SDK_PATH} -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc"
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/arm64
-        KERNEL_BITS=64
+		# local BUILD_OPTS_ARM="-fPIC -isysroot${SDK_PATH} -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared no-asm darwin64-arm64-cc"
+		# local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/arm64
+        # KERNEL_BITS=64
                 
-		rm -f libcrypto.a
-		rm -f libssl.a
-		./Configure $BUILD_OPTS_ARM --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-		sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
-		sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-		make clean
-		make -j1 depend # running make multithreaded is unreliable
-		make -j1
-		make -j1 install_sw
+		# rm -f libcrypto.a
+		# rm -f libssl.a
+		# ./Configure $BUILD_OPTS_ARM --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+		# sed -ie "s!LIBCRYPTO=-L.. -lcrypto!LIBCRYPTO=../libcrypto.a!g" Makefile
+		# sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+		# make clean
+		# make -j1 depend # running make multithreaded is unreliable
+		# make -j1
+		# make -j1 install_sw
   
-        local BUILD_OPTS_X86_64="-fPIC -isysroot${SDK_PATH} -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc"
+        # local BUILD_OPTS_X86_64="-fPIC -isysroot${SDK_PATH} -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER} no-shared darwin64-x86_64-cc"
 
-        rm -f libcrypto.a
-        rm -f libssl.a
-        local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
+        # rm -f libcrypto.a
+        # rm -f libssl.a
+        # local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/x64
         
-        ./Configure $BUILD_OPTS_X86_64 --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
-        sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
-        make clean
-        make -j1 depend
-        make -j1
-        make -j1 install_sw
+        # ./Configure $BUILD_OPTS_X86_64 --openssldir=$BUILD_TO_DIR --prefix=$BUILD_TO_DIR
+        # sed -ie "s!LIBSSL=-L.. -lssl!LIBSSL=../libssl.a!g" Makefile
+        # make clean
+        # make -j1 depend
+        # make -j1
+        # make -j1 install_sw
 
-		local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
-		cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
+		# local BUILD_TO_DIR=$BUILD_DIR/openssl/build/$TYPE/
+		# cp -r $BUILD_TO_DIR/x64/* $BUILD_TO_DIR/
 
-		lipo -create $BUILD_TO_DIR/arm64/lib/libcrypto.a \
-		$BUILD_TO_DIR/x64/lib/libcrypto.a \
-		-output $BUILD_TO_DIR/lib/libcrypto.a
+		# lipo -create $BUILD_TO_DIR/arm64/lib/libcrypto.a \
+		# $BUILD_TO_DIR/x64/lib/libcrypto.a \
+		# -output $BUILD_TO_DIR/lib/libcrypto.a
 
-		lipo -create $BUILD_TO_DIR/arm64/lib/libssl.a \
-		$BUILD_TO_DIR/x64/lib/libssl.a \
-		-output $BUILD_TO_DIR/lib/libssl.a
+		# lipo -create $BUILD_TO_DIR/arm64/lib/libssl.a \
+		# $BUILD_TO_DIR/x64/lib/libssl.a \
+		# -output $BUILD_TO_DIR/lib/libssl.a
+
+
+		echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake  .. \
+			-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            ${BUILD_OPTS_CMAKE} \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+			-DPLATFORM=$PLATFORM \
+			-DENABLE_BITCODE=OFF \
+			-DCMAKE_MACOSX_BUNDLE=OFF \
+			-DENABLE_ARC=OFF \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+			-DENABLE_VISIBILITY=OFF \
+			-G Xcode
+		cmake --build . --config Release --target install
+        cd ..
 
 	elif [ "$TYPE" == "vs" ] ; then
 
@@ -517,11 +545,20 @@ function build() {
 function copy() {
 	
 	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-			mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-		fi
-		cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-		cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+		# if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
+		# 	mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
+		# fi
+		# cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
+		# cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
+
 
 	elif [ "$TYPE" == "vs" ]; then
 		mkdir -p $1/include    
@@ -535,11 +572,6 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib 
-	fi  
-
-	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] || [ "$TYPE" == "osx" ] ; then
-		cp -v build/$TYPE/lib/libcrypto.a $1/lib/$TYPE/crypto.a
-		cp -v build/$TYPE/lib/libssl.a $1/lib/$TYPE/ssl.a
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d $1/lib/$TYPE/$ABI ]; then
 			rm -r $1/lib/$TYPE/$ABI
