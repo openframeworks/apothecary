@@ -92,7 +92,8 @@ function build() {
 	    make -j${PARALLEL_MAKE}
 	    make install
 	elif [ "$TYPE" == "osx" ]; then
-        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        
+        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         ./buildconf
                 
@@ -100,7 +101,7 @@ function build() {
         export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
         ./configure \
             --with-secure-transport \
-			--with-ssl \
+			--with-ssl=$OPENSSL_DIR \
 			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
             --enable-static \
@@ -118,7 +119,7 @@ function build() {
         export LDFLAGS="-arch arm64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
 		./configure \
             --with-secure-transport \
-            --with-ssl \
+            --with-ssl=$OPENSSL_DIR \
 			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
             --enable-static \
