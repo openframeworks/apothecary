@@ -52,13 +52,12 @@ function prepare() {
     fi
 
     cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
-    	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
-		cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
-		mkdir -p ./cmake/
-		cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
-		cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
-		cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
-
+	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
+	cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
+	mkdir -p ./cmake/
+	cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
+	cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
+	cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
 
 
 
