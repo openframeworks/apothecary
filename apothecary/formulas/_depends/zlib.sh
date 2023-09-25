@@ -11,7 +11,7 @@ GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" , "osx", "emscripten")
+FORMULA_TYPES=( "vs" "osx" "emscripten")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -57,23 +57,30 @@ function build() {
         cmake --build . --config Release --target install
         cd ..
 	elif [ "$TYPE" == "osx" ] ; then
-		mkdir -p build
-		cd build
-
-		local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        SYSROOT="-isysroot ${SDK_PATH}"
-        export SDK=macosx
-        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
-        export ARCHS="-arch arm64 -arch x86_64"
-
-		export CFLAGS="-O2 ${ARCHS} -fomit-frame-pointer -fno-stack-protector -pipe -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 		cmake .. \
-		    -G "Unix Makefiles" \
-		    -D CMAKE_VERBOSE_MAKEFILE=ON \
+			-DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=ON \
-		# cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G "Unix Makefiles" 
-		make
+		    -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -D CMAKE_VERBOSE_MAKEFILE=ON
+
+		 cmake --build . --target install --config Release
+		 cd ..
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
@@ -91,7 +98,7 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include 
-	  	cmake --build build --target install --config Release
+	  	cmake --build . --target install --config Release
 	    cd ..
 	fi
 }
@@ -99,7 +106,11 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "osx" ] ; then
-		echo "no install"
+		mkdir -p $1/include    
+	    mkdir -p $1/lib/$TYPE
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/zlibstatic.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE

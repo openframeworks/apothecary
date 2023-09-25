@@ -233,8 +233,7 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
-            -G Xcode
+            -D CMAKE_VERBOSE_MAKEFILE=ON 
         cmake --build . --config Release
         cmake --install . --config Release
 
