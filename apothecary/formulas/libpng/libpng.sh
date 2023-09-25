@@ -106,8 +106,7 @@ function build() {
 				-DPLATFORM=$PLATFORM \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF \
-				-G Xcode
+				-DENABLE_VISIBILITY=OFF 
 		cmake --build . --config Release --target install
 		cd ..	
 	elif [ "$TYPE" == "vs" ] ; then
@@ -166,14 +165,14 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
-		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+		cp -RvT "build_${TYPE}_${ARCH}/Release/include/" $1/include
 
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
 		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include	
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 
 	# copy license file
