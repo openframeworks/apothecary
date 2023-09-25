@@ -310,6 +310,9 @@ function build() {
 
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
+
+        rm -f *.o
+
         mkdir -p build_$TYPE
         cd build_$TYPE
         cmake .. \
@@ -336,6 +339,7 @@ function build() {
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/aarch64-linux-gnu.toolchain.cmake \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF
         cmake --build . --config Release
         cd ..
