@@ -210,28 +210,19 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libcrypto.a
 
 	elif [ "$TYPE" == "osx" ]; then
-        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
+        
+        local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
         #./buildconf
         local SDK_PATH_XCODE_X86=SDK_PATH;
-        EXTRA_SYSROOT="-isysroot${SDK_PATH}"
-
-
-        # export OPENSSL_MAIN=${OF_LIBS_OPENSSL_ABS_PATH}/openssl
-        # export OPENSSL_PATH=${OPENSSL_MAIN}/lib/$TYPE/
-
-
         export ARCH=x86_64
-        export SDK=macosx
         export DEPLOYMENT_TARGET=10.8
-
-        export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-
-        # PATH="${PATH};${OPENSSL_MAIN}/lib/${TYPE}"
-
-        # --with-openssl=$OPENSSL_MAIN \
+        export CFLAGS="-arch $ARCH -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch $ARCH -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
         ./configure \
+            --with-secure-transport \
+			--with-ssl=$OPENSSL_DIR \
+			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/x64 \
             --with-secure-transport \
             --enable-static \
@@ -255,10 +246,13 @@ function build() {
 
         export ARCH=arm64
 
-        export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-        export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
+        export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot${SDK_PATH}"
+        export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER -isysroot${SDK_PATH}"
 
 		./configure \
+            --with-secure-transport \
+            --with-ssl=$OPENSSL_DIR \
+			--without-brotli \
             --prefix=$BUILD_DIR/curl/build/osx/arm64 \
             --with-secure-transport \
             --enable-static \
