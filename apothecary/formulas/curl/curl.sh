@@ -11,11 +11,11 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" "pkg-config" "zlib")
+# FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=8_2_0
-VER_D=8.2.0
+VER=8_3_0
+VER_D=8.3.0
 SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
 
 # tools for git use
@@ -49,9 +49,10 @@ function prepare() {
 
     apothecaryDependencies download
 
-    if [ "$TYPE" == "vs" ] ; then
+    cp -f $FORMULA_DIR/CMakeLists.txt .
 
-      
+    if [ "$TYPE" == "vs" ] || [ "$TYPE" == "osx" ] ; then
+
         apothecaryDepend prepare zlib
         apothecaryDepend build zlib
         apothecaryDepend copy zlib  
@@ -120,6 +121,8 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DUSE_RESOLVE_ON_IPS=OFF \
+            -DENABLE_ARES=ON \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
@@ -207,23 +210,6 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libcrypto.a
 
 	elif [ "$TYPE" == "osx" ]; then
-        #local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
-        # local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        # #./buildconf
-        # local SDK_PATH_XCODE_X86=SDK_PATH;
-        # EXTRA_SYSROOT="-isysroot${SDK_PATH}"
-
-
-        # # export OPENSSL_MAIN=${OF_LIBS_OPENSSL_ABS_PATH}/openssl
-        # # export OPENSSL_PATH=${OPENSSL_MAIN}/lib/$TYPE/
-
-
-        # export ARCH=x86_64
-        # export SDK=macosx
-        # export DEPLOYMENT_TARGET=10.8
-
-        # export CFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        # export LDFLAGS="-arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
 
         OPENSSL_ROOT="$LIBS_ROOT/openssl/"
         OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
@@ -260,66 +246,17 @@ function build() {
             -DOPENSSL_SSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" \
             -DOPENSSL_CRYPTO_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" \
             -DENABLE_UNIX_SOCKETS=ON \
+            -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
             -DHTTP_ONLY=ON \
             -DCMAKE_MACOSX_BUNDLE=OFF \
-            -DUSE_SECURE_TRANSPORT=ON -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DENABLE_LDAP=OFF -DENABLE_LDAPS=OFF -DENABLE_VERBOSE=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_IPV6=ON \
-            -G Xcode
+            -DUSE_SECURE_TRANSPORT=ON -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DENABLE_LDAP=OFF -DENABLE_LDAPS=OFF -DENABLE_VERBOSE=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_IPV6=OFF 
         cmake --build . --config Release --target install
         cd ..
 
         rm ${OPENSSL_PATH}/lib/libssl.a
         rm ${OPENSSL_PATH}/lib/libcrypto.a
 
-        # # --with-openssl=$OPENSSL_MAIN \
-        # ./configure \
-        #     --prefix=$BUILD_DIR/curl/build/osx/x64 \
-        #     --with-secure-transport \
-        #     --enable-static \
-        #     --without-nghttp2 \
-        #     --without-libidn2 \
-        #     --disable-shared \
-        #     --disable-ldap \
-        #     --disable-ldaps \
-        #     --without-libidn2 \
-        #     --enable-static \
-        #     --disable-shared \
-        #     --disable-verbose \
-        #     --disable-threaded-resolver \
-        #     --enable-ipv6 \
-        #     --disable-ldap \
-        #     --disable-ldaps \
-        #     --host=x86_64-apple-darwin \
-        #     --target=x86_64-apple-darwin
-        # make -j${PARALLEL_MAKE}
-        # make install
-
-        # export ARCH=arm64
-
-        # export CFLAGS=" -arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-        # export LDFLAGS="-arch $ARCH -m$SDK-version-min=$OSX_MIN_SDK_VER ${EXTRA_SYSROOT}"
-
-		# ./configure \
-        #     --prefix=$BUILD_DIR/curl/build/osx/arm64 \
-        #     --with-secure-transport \
-        #     --enable-static \
-        #     --without-nghttp2 \
-        #     --without-libidn2 \
-        #     --disable-shared \
-        #     --disable-threaded-resolver \
-        #     --enable-ipv6 \
-        #     --disable-ldap \
-        #     --disable-ldaps \
-        #     --target=arm-apple-darwin
-	    # make -j${PARALLEL_MAKE}
-        # make install
-
-        # cp -r build/osx/x64/* build/osx/
-
-        # lipo -create build/osx/arm64/lib/libcurl.a \
-        #              build/osx/x64/lib/libcurl.a \
-        #             -output build/osx/lib/libcurl.a
-	    # make install
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         # ./buildconf
         if [ "${TYPE}" == "tvos" ]; then
@@ -396,16 +333,17 @@ function copy() {
 	# Standard *nix style copy.
 	# copy headers
 
+    mkdir -p $1/include    
+    mkdir -p $1/lib/$TYPE
+
 	if [ "$TYPE" == "vs" ] ; then
-        mkdir -p $1/include    
-        mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib          
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        cp -Rv build/$TYPE/include/curl/* $1/include/curl/
-		# copy lib
-		cp -Rv build/$TYPE/lib/libcurl.a $1/lib/$TYPE/curl.a
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
 	elif [ "$TYPE" == "android" ] ; then
         #mkdir -p $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
