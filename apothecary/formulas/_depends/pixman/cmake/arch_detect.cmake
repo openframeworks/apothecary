@@ -42,6 +42,12 @@ set(archdetect_c_code "
     #else
         #error cmake_ARCH ppc
     #endif
+#elif defined(__arm64__) || defined(__aarch64__)
+    #if defined(__APPLE__) && defined(__MACH__)
+        #error cmake_ARCH arm64_mac
+    #else
+        #error cmake_ARCH arm64
+    #endif
 #endif
 
 #error cmake_ARCH unknown
@@ -73,10 +79,13 @@ function(target_architecture output_var)
                 set(osx_arch_x86_64 TRUE)
             elseif("${osx_arch}" STREQUAL "ppc64" AND ppc_support)
                 set(osx_arch_ppc64 TRUE)
+            elseif("${osx_arch}" STREQUAL "arm64")  
+                set(osx_arch_arm64 TRUE)            
             else()
                 message(FATAL_ERROR "Invalid OS X arch name: ${osx_arch}")
             endif()
         endforeach()
+
 
         # Now add all the architectures in our normalized order
         if(osx_arch_ppc)

@@ -60,9 +60,11 @@ function build() {
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_CONFIG_NAME=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
@@ -72,24 +74,11 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
-            -G Xcode
-        cmake --build . --config Release
-        cmake --install . --config Release   
-
-
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_STATIC_LIBS=ON 
+        cmake --build .  --config Release --target install
         cd ..
-		# 		CFLAGS="-O3 ${FAT_LDFLAGS}" \
-		# 		--prefix=$BUILD_ROOT_DIR \
-		# 		--disable-dependency-tracking \
-		# 		--disable-gtk \
-		# 		--disable-shared \
-        #         --disable-mmx
-		# only build & install lib, ignore demos/tests
-
-		# cd pixman
-		# make clean
-		# make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "vs" ] ; then
 		# sed -i s/-MD/-MT/ Makefile.win32.common
 
@@ -145,8 +134,8 @@ function copy() {
 	else # osx
 		# lib
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
-    	cp -RvT "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpixman-1.a" $1/lib/$TYPE/$PLATFORM/libpixman-1.a
+    	cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
 
     	# copy license file
 		mkdir -p $1/license
