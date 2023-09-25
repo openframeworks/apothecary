@@ -185,19 +185,19 @@ function build() {
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
 		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
 		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
-		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"	
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"	
 
 		PIXMAN_ROOT="$LIBS_ROOT/pixman/"
 		PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
-		PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.lib"
+		PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.a"
 
 		FREETYPE_ROOT="$LIBS_ROOT/freetype/"
 		FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
-		FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/libfreetype.lib"
+		FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/libfreetype.a"
 
 	    mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
