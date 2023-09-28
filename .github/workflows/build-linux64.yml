@@ -19,6 +19,11 @@ jobs:
      TARGET: ${{matrix.cfg.target}}
      OPT: ${{matrix.cfg.opt}}
     steps:
+    - uses: actions/checkout@v2
+    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
+      run: ./scripts/calculate_formulas.sh
+    - name: Scripts Install
+      run: ./scripts/$TARGET/install.sh
     - name: Determine Release
       id: vars
       shell: bash
@@ -28,11 +33,6 @@ jobs:
         elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
           echo "::set-output name=release::bleeding"
         fi
-    - uses: actions/checkout@v2
-    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
-      run: ./scripts/calculate_formulas.sh
-    - name: Scripts Install
-      run: ./scripts/$TARGET/install.sh
     - name: build
       run: ./scripts/build.sh
       env:

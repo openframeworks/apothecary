@@ -19,17 +19,6 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-    - name: Determine Release
-      id: vars
-      shell: bash
-      run: |
-        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "::set-output name=tag::nightly"
-          echo "::set-output name=release::nightly"
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "::set-output name=tag::bleeding"
-          echo "::set-output name=release::bleeding"
-        fi
     - name: Setup msys2
       uses: msys2/setup-msys2@v2
       with:
@@ -54,6 +43,17 @@ jobs:
     #  run: choco install -y strawberryperl
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
+    - name: Determine Release
+      id: vars
+      shell: bash
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          echo "::set-output name=tag::nightly"
+          echo "::set-output name=release::nightly"
+        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+          echo "::set-output name=tag::bleeding"
+          echo "::set-output name=release::bleeding"
+        fi
     - name: Build64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: scripts/build.sh
