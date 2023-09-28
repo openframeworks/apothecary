@@ -247,7 +247,7 @@ function build() {
         mkdir -p build_$TYPE
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
-        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.lib"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/libxml2.a"
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-B build \
