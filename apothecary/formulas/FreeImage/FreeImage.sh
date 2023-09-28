@@ -91,6 +91,7 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=ON \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_INSTALL_PREFIX=Release \
 			-DNO_BUILD_LIBRAWLITE=ON \
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
@@ -103,8 +104,7 @@ function build() {
 			-DENABLE_BITCODE=OFF \
 			-DENABLE_ARC=OFF \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF \
-			-G Xcode
+			-DENABLE_VISIBILITY=OFF 
 		cmake --build . --config Release --target install
         cd ..
 
@@ -123,6 +123,8 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=ON \
 			-DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_INSTALL_PREFIX=Release \
+		    -DCMAKE_INSTALL_LIBDIR="lib" \
 			-DNO_BUILD_LIBRAWLITE=ON \
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
@@ -138,9 +140,8 @@ function build() {
 			-DENABLE_BITCODE=OFF \
 			-DENABLE_ARC=OFF \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF \
-			-G Xcode
-		cmake --build . --target install --config Release 
+			-DENABLE_VISIBILITY=OFF 
+		cmake --build . --config Release --target install
         cd ..
 
 	elif [ "$TYPE" == "android" ] ; then
@@ -280,7 +281,7 @@ function copy() {
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/Release/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
+		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include	
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include
@@ -291,7 +292,7 @@ function copy() {
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/Release/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
+		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 	elif [ "$TYPE" == "android" ] ; then
         cp Source/FreeImage.h $1/include
@@ -332,12 +333,7 @@ function clean() {
 		rm -f build_emscripten
 		rm -f lib
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		# clean up compiled libraries
-		make clean
-		rm -rf Dist
-		rm -f *.a *.lib
-
-		rm -f lib
+		rm -f CMakeCache.txt *.a *.o
 	else
 		make clean
 		# run dedicated clean script
