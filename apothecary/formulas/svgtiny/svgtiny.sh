@@ -10,7 +10,7 @@
 FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "osx" "vs" "ios" "tvos" "android" "emscripten" "msys2" )
 
 #dependencies
-FORMULA_DEPENDS=( "libxml2" )
+FORMULA_DEPENDS=( "libxml2" "zlib" )
 
 # define the version by sha
 VER=0.1.7
@@ -70,6 +70,11 @@ function prepare() {
 	perl build/make-aliases.pl
 	cd ..
     cp -rf libdom/bindings libdom/include/dom/
+
+    apothecaryDependencies download
+	apothecaryDepend prepare zlib
+	apothecaryDepend build zlib
+	apothecaryDepend copy zlib
 }
 
 # executed inside the lib src dir
@@ -242,7 +247,7 @@ function build() {
         mkdir -p build_$TYPE
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
-        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/libxml2.a"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.lib"
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-B build \
