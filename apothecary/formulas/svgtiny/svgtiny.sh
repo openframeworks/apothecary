@@ -262,7 +262,10 @@ function build() {
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include 
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DLIBXML2_ROOT=$LIBXML2_ROOT \
+	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
+	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY
 	  	cmake --build build --target install --config Release
 	    cd ..
 	fi
