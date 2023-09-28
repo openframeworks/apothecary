@@ -4,7 +4,7 @@
 # http://zlib.net/
 
 # define the version
-VER=1.2.13
+VER=1.3
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
@@ -26,6 +26,9 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	: #noop
+	. "$DOWNLOADER_SCRIPT"
+	downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+
 }
 
 # executed inside the lib src dir
@@ -62,24 +65,23 @@ function build() {
 		cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
-		    -D BUILD_SHARED_LIBS=ON \
+		    -D BUILD_SHARED_LIBS=OFF \
+		    -DSKIP_EXAMPLE=1 \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -D CMAKE_VERBOSE_MAKEFILE=ON
+            -DENABLE_VISIBILITY=OFF 
 
-		 cmake --build . --target install --config Release
+		 cmake --build . --config Release --target install
 		 cd ..
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p build_$TYPE
@@ -98,7 +100,7 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include 
-	  	cmake --build . --target install --config Release
+	  	cmake --build . --target install --config Release 
 	    cd ..
 	fi
 }
@@ -110,7 +112,7 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${PLATFORM}/Release/zlibstatic.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
