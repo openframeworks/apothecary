@@ -291,8 +291,11 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE/$ABI	    
 		cp -Rv "build_${TYPE}_${ABI}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ABI}/Release/lib/libsvgtiny.lib" $1/lib/$TYPE/$ABI/libsvgtiny.lib
-
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "emscripten" ]; then
+	elif [ "$TYPE" == "emscripten" ]; then
+		mkdir -p $1/lib/$TYPE/$
+		cp -Rv "include/" $1/ 
+        cp -f "build_${TYPE}/Release/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a        
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a
