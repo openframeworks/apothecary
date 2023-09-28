@@ -19,6 +19,16 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+      - name: Determine Release
+      id: vars
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          echo "::set-output name=tag::nightly"
+          echo "::set-output name=release::nightly"
+        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+          echo "::set-output name=tag::bleeding"
+          echo "::set-output name=release::bleeding"
+        fi
       - name: Setup msys2
         uses: msys2/setup-msys2@v2
         with:
@@ -65,8 +75,8 @@ jobs:
         uses: johnwbyrd/update-release@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: nightly
-          release: nightly
+          tag: ${{ steps.vars.outputs.tag }}
+          release: ${{ steps.vars.outputs.release }}
           prerelease: false
           files: out/openFrameworksLibs_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
         if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
