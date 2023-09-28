@@ -252,7 +252,6 @@ function build() {
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-B build \
 	    	-DCMAKE_BUILD_TYPE=Release \
-	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
 	    	-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -266,7 +265,7 @@ function build() {
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY
-	  	cmake --build build --target install --config Release
+	  	cmake --build . --target install --config Release
 	    cd ..
 	fi
 }
@@ -294,7 +293,7 @@ function copy() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
-        cp -f "build_${TYPE}/Release/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a        
+        cp -f "build_${TYPE}/Release/build_$TYPE/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a        
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
