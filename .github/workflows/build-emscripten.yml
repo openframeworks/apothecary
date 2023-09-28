@@ -15,15 +15,13 @@ jobs:
        TARGET: "emscripten"
       steps:
       - name: Determine Release
-      id: vars
-      run: |
-        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "::set-output name=tag::nightly"
-          echo "::set-output name=release::nightly"
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "::set-output name=tag::bleeding"
-          echo "::set-output name=release::bleeding"
-        fi
+        id: vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "::set-output name=tag::nightly"
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "::set-output name=tag::bleeding"
+          fi
       - uses: actions/checkout@v2
       - name: Docker Step
         run:  "docker run -di --name emscripten -v $PWD:/src emscripten/emsdk:3.1.42 bash"
@@ -44,5 +42,4 @@ jobs:
           prerelease: false
           files: out/openFrameworksLibs_emscripten.tar.bz2
         if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
-
 

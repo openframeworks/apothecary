@@ -19,64 +19,63 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - name: Determine Release
+    - name: Determine Release
       id: vars
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
           echo "::set-output name=tag::nightly"
-          echo "::set-output name=release::nightly"
         elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
           echo "::set-output name=tag::bleeding"
-          echo "::set-output name=release::bleeding"
         fi
-      - name: Setup msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >-
-            base-devel
-            unzip
-            dos2unix
-            gperf
-            git
-            python3
-            mingw-w64-x86_64-binutils
-            mingw-w64-x86_64-clang
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-gcc-libs
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-gdb
-            mingw-w64-x86_64-make
-      - name: Clone repository
-        uses: actions/checkout@v2
-      #- name: Install StrawberryPerl
-      #  run: choco install -y strawberryperl
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
-      - name: Build64
-        working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: scripts/build.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
-          TARGET: "vs"
-          ARCH: 64
-          VS_VER: 17
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: BuildARM64
-        working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: scripts/build.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
-          TARGET: "vs"
-          ARCH: arm64
-          VS_VER: 17
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Update Release
-        uses: johnwbyrd/update-release@v1.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ steps.vars.outputs.tag }}
-          release: ${{ steps.vars.outputs.release }}
-          prerelease: false
-          files: out/openFrameworksLibs_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
-        if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+    - name: Setup msys2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          unzip
+          dos2unix
+          gperf
+          git
+          python3
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-clang
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-gcc-libs
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-gdb
+          mingw-w64-x86_64-make
+    - name: Clone repository
+      uses: actions/checkout@v2
+    #- name: Install StrawberryPerl
+    #  run: choco install -y strawberryperl
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: scripts/build.sh
+      env:
+        BUNDLE: ${{ matrix.bundle }}
+        TARGET: "vs"
+        ARCH: 64
+        VS_VER: 17
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+    - name: BuildARM64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: scripts/build.sh
+      env:
+        BUNDLE: ${{ matrix.bundle }}
+        TARGET: "vs"
+        ARCH: arm64
+        VS_VER: 17
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+    - name: Update Release
+      uses: johnwbyrd/update-release@v1.0.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ steps.vars.outputs.tag }}
+        release: ${{ steps.vars.outputs.tag }}
+        prerelease: false
+        files: out/openFrameworksLibs_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+
