@@ -21,11 +21,12 @@ jobs:
     steps:
     - name: Determine Release
       id: vars
+      shell: bash
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "::set-output name=tag::nightly"
+          echo "::set-output name=release::nightly"
         elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "::set-output name=tag::bleeding"
+          echo "::set-output name=release::bleeding"
         fi
     - uses: actions/checkout@v2
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
@@ -40,8 +41,8 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.vars.outputs.tag }}
-        release: ${{ steps.vars.outputs.tag }}
+        tag: ${{ steps.vars.outputs.release }}
+        release: ${{ steps.vars.outputs.release }}
         prerelease: false
         files: out/openFrameworksLibs_master_linux64gcc6.tar.bz2
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
