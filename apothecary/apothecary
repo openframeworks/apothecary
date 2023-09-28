@@ -1238,6 +1238,26 @@ function cleanFormula() {
 	cd $APOTHECARY_DIR
 }
 
+function frameworkFormula() {
+    LIBS_DIR_REAL=$(realpath $LIBS_DIR)
+    if [ ! -e "$LIBS_DIR/$1" ] ; then
+        echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
+    else
+        rm -rf $LIBS_DIR_REAL/$1/lib/*.xcframework
+        echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
+        xcframework_flags=""
+
+        # Loop through each .a file built and make framework
+        for file in $(find "$LIBS_DIR_REAL/$1/lib/$TYPE/" -name "*.a"); do
+            echo "file $file"
+            xcframework_flags+=" -library $file -headers $LIBS_DIR_REAL/$1/include"
+        done
+        #echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
+        xcodebuild -create-xcframework $xcframework_flags -output $LIBS_DIR_REAL/$1/lib/$1.xcframework
+
+    fi
+}
+
 # remove a given library from the cache
 function remove() {
 
@@ -1424,6 +1444,10 @@ function copy() {
 }
 function clean() {
 	echoWarning " Clean function not implemented"
+}
+
+function framework() {
+    echoWarning " Framework function not implemented"
 }
 
 function save() {
@@ -1686,6 +1710,9 @@ case "$A_CMD" in
 
 	clean)
 		doCommand 1 cleanFormula $@ ;;
+
+    framework)
+        doCommand 1 frameworkFormula $@ ;;
 
 	remove)
 		if [ ! -e $BUILD_DIR ] ; then
