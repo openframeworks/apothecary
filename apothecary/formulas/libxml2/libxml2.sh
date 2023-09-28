@@ -174,9 +174,9 @@ function build() {
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -G 'Unix Makefiles' 
-
-        make -j${PARALLEL_MAKE} VERBOSE=1
+            -CMAKE_SYSTEM_NAME="${PLATFORM}" \
+            -A "${PLATFORM}" \ 
+        cmake --build . --config Release
         cd ..
     elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
