@@ -58,7 +58,7 @@ jobs:
             release: nightly
             prerelease: false
             files: out/openFrameworksLibs_linuxaarch64.tar.bz2
-          if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+          if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
 
 #old
 #  build-linux-aarch64:

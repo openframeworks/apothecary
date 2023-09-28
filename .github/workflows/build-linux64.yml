@@ -36,6 +36,7 @@ jobs:
         release: nightly
         prerelease: false
         files: out/openFrameworksLibs_master_linux64gcc6.tar.bz2
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+
           
     

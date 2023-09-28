@@ -69,4 +69,4 @@ jobs:
           release: nightly
           prerelease: false
           files: out/openFrameworksLibs_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
