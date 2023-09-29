@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
 
 # define the version by sha
-VER=1.11.4
+VER=1.13
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
