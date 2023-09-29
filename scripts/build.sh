@@ -280,11 +280,11 @@ if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "master" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "master" || "${GITHUB_REF##*/}" == "bleeding" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
     # exit here on PR's
-    echo "On Master Branch and not a PR";
+    echo "On Master or Bleeding Branch and not a PR";
 else
-    echo "This is a PR or not master branch, exiting build before compressing";
+    echo "This is a PR or not master/bleeding branch, exiting build before compressing";
     exit 0
 fi
 
