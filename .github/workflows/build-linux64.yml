@@ -24,6 +24,15 @@ jobs:
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
       run: ./scripts/$TARGET/install.sh
+    - name: Determine Release
+      id: vars
+      shell: bash
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          echo "::set-output name=release::nightly"
+        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+          echo "::set-output name=release::bleeding"
+        fi
     - name: build
       run: ./scripts/build.sh
       env:
@@ -32,10 +41,11 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: nightly
-        release: nightly
+        tag: ${{ steps.vars.outputs.release }}
+        release: ${{ steps.vars.outputs.release }}
         prerelease: false
         files: out/openFrameworksLibs_master_linux64gcc6.tar.bz2
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+
           
     

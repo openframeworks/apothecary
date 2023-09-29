@@ -33,19 +33,47 @@ function build() {
 	rm -f CMakeCache.txt
 
 	if [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		if [ $ARCH == 32 ] ; then
-			mkdir -p build_vs_32
-			cd build_vs_32
-			cmake .. -G "Visual Studio $VS_VER"
-			vs-build "GLFW.sln"
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p build_vs_64
-			cd build_vs_64
-			cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64
-			vs-build "GLFW.sln" Build "Release|x64"
-		fi
+		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"         
+     
+        cmake .. ${DEFS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DGLFW_BUILD_EXAMPLES=OFF \
+            -DGLFW_BUILD_TESTS=OFF \
+            -DGLFW_BUILD_DOCS=OFF \
+            -DGLFW_VULKAN_STATIC=OFF \
+            ${CMAKE_WIN_SDK} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+
+        cmake --build . --config Release --target install
+
+        cd ..
 	else
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
@@ -87,19 +115,14 @@ function build() {
 function copy() {
 	# prepare headers directory if needed
 	mkdir -p $1/include/GLFW
-
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
 	if [ "$TYPE" == "vs" ] ; then
-		cp -Rv include/* $1/include
-		if [ $ARCH == 32 ] ; then
-			mkdir -p $1/lib/$TYPE/Win32
-			cp -v build_vs_32/src/Release/glfw3.lib $1/lib/$TYPE/Win32/glfw3.lib
-		elif [ $ARCH == 64 ] ; then
-			mkdir -p $1/lib/$TYPE/x64
-			cp -v build_vs_64/src/Release/glfw3.lib $1/lib/$TYPE/x64/glfw3.lib
-		fi
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/glfw3.lib" $1/lib/$TYPE/$PLATFORM/glfw3.lib   
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
@@ -109,7 +132,9 @@ function copy() {
 	fi
 
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v LICENSE.md $1/license/
 }
@@ -118,7 +143,25 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            # Delete the folder and its contents
+            rm -r build_${TYPE}_${ARCH}     
+        fi
 	else
 		make clean
 	fi
+}
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "glfw" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "glfw" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
 }

@@ -9,7 +9,9 @@
 FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
-VER=4.6.0
+
+VER=4.7.0
+
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv.git
@@ -26,7 +28,7 @@ local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
 # download the source code and unpack it into LIB_NAME
 function download() {
   curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
-  unzip opencv-$VER.zip
+  unzip -q opencv-$VER.zip
   mv opencv-$VER $1
   rm opencv*.zip
 }
@@ -65,7 +67,7 @@ function build() {
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++11 -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++17 -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
@@ -76,6 +78,8 @@ function build() {
       -DBUILD_PACKAGE=OFF \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_python2=OFF \
+      -DBUILD_opencv_python3=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
@@ -120,6 +124,48 @@ function build() {
       -DWITH_1394=OFF \
       -DWITH_ADE=OFF \
       -DWITH_TBB=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_OPENEXR=OFF \
+      -DWITH_OPENGL=OFF \
+      -DWITH_OPENVX=OFF \
+      -DWITH_1394=OFF \
+      -DWITH_ADE=OFF \
+      -DWITH_JPEG=OFF \
+      -DWITH_PNG=OFF \
+      -DWITH_FFMPEG=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_CUDA=OFF \
+      -DWITH_CUFFT=OFF \
+      -DWITH_GIGEAPI=OFF \
+      -DWITH_GPHOTO2=OFF \
+      -DWITH_GSTREAMER=OFF \
+      -DWITH_GSTREAMER_0_10=OFF \
+      -DWITH_JASPER=OFF \
+      -DWITH_IMAGEIO=OFF \
+      -DWITH_IPP=OFF \
+      -DWITH_IPP_A=OFF \
+      -DWITH_OPENNI=OFF \
+      -DWITH_OPENNI2=OFF \
+      -DWITH_QT=OFF \
+      -DWITH_QUICKTIME=OFF \
+      -DWITH_V4L=OFF \
+      -DWITH_LIBV4L=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_OPENCL=OFF \
+      -DWITH_OPENCLCLAMDBLAS=OFF \
+      -DWITH_OPENCLCLAMDFFT=OFF \
+      -DWITH_OPENCL_SVM=OFF \
+      -DWITH_LAPACK=OFF \
+      -DBUILD_ZLIB=ON \
+      -DWITH_WEBP=OFF \
+      -DWITH_VTK=OFF \
+      -DWITH_PVAPI=OFF \
+      -DWITH_EIGEN=OFF \
+      -DWITH_GTK=OFF \
+      -DWITH_GTK_2_X=OFF \
+      -DWITH_OPENCLAMDBLAS=OFF \
+      -DWITH_OPENCLAMDFFT=OFF \
+      -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
     echo "CMAKE Successful"
     echo "--------------------"
@@ -146,104 +192,126 @@ function build() {
     # echo "Joining all libs in one Successful"
 
   elif [ "$TYPE" == "vs" ] ; then
-    unset TMP
-    unset TEMP
+    echoInfo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN - "${PLATFORM}""
+    echoInfo "--------------------"
+    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+    mkdir -p "build_${TYPE}_${ARCH}"
+    cd "build_${TYPE}_${ARCH}"
+    DEFS="
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD=17 \
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+        -DCMAKE_CXX_EXTENSIONS=OFF
+        -DBUILD_SHARED_LIBS=ON \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DCMAKE_INSTALL_LIBDIR="lib" \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include"
+     
+    cmake .. ${DEFS} \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}" \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -D BUILD_SHARED_LIBS=ON \
+        ${CMAKE_WIN_SDK} \
+        -DCMAKE_SYSTEM_NAME=Windows \
+        -DCMAKE_SYSTEM_VERSION=10.0 \
+        -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
+        -DBUILD_PNG=OFF \
+        -DWITH_OPENCLAMDBLAS=OFF \
+        -DBUILD_TESTS=OFF \
+        -DWITH_CUDA=OFF \
+        -DWITH_FFMPEG=OFF \
+        -DWITH_WIN32UI=OFF \
+        -DBUILD_PACKAGE=OFF \
+        -DWITH_JASPER=OFF \
+        -DWITH_OPENEXR=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_JPEG=OFF \
+        -DBUILD_WITH_DEBUG_INFO=OFF \
+        -DWITH_CUFFT=OFF \
+        -DBUILD_TIFF=OFF \
+        -DBUILD_JPEG=OFF \
+        -DWITH_OPENCLAMDFFT=OFF \
+        -DBUILD_WITH_STATIC_CRT=OFF \
+        -DBUILD_opencv_java=OFF \
+        -DBUILD_opencv_python=OFF \
+        -DBUILD_opencv_python2=OFF \
+        -DBUILD_opencv_python3=OFF \
+        -DBUILD_NEW_PYTHON_SUPPORT=OFF \
+        -DHAVE_opencv_python3=OFF \
+        -DHAVE_opencv_python=OFF \
+        -DHAVE_opencv_python2=OFF \
+        -DBUILD_opencv_apps=OFF \
+        -DBUILD_opencv_videoio=OFF \
+        -DBUILD_opencv_videostab=OFF \
+        -DBUILD_opencv_highgui=OFF \
+        -DBUILD_opencv_imgcodecs=OFF \
+        -DBUILD_opencv_stitching=OFF \
+        -DBUILD_PERF_TESTS=OFF \
+        -DBUILD_JASPER=OFF \
+        -DBUILD_DOCS=OFF \
+        -DWITH_TIFF=OFF \
+        -DWITH_1394=OFF \
+        -DWITH_EIGEN=OFF \
+        -DBUILD_OPENEXR=OFF \
+        -DWITH_DSHOW=OFF \
+        -DWITH_VFW=OFF \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DWITH_PNG=OFF \
+        -DWITH_OPENCL=OFF \
+        -DWITH_PVAPI=OFF\
+        -DBUILD_OBJC=OFF \
+        -DWITH_TIFF=OFF \
+        -DWITH_OPENEXR=OFF \
+        -DWITH_OPENGL=OFF \
+        -DWITH_OPENVX=OFF \
+        -DWITH_1394=OFF \
+        -DWITH_ADE=OFF \
+        -DWITH_JPEG=OFF \
+        -DWITH_PNG=OFF \
+        -DWITH_FFMPEG=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_CUDA=OFF \
+        -DWITH_CUFFT=OFF \
+        -DWITH_GIGEAPI=OFF \
+        -DWITH_GPHOTO2=OFF \
+        -DWITH_GSTREAMER=OFF \
+        -DWITH_GSTREAMER_0_10=OFF \
+        -DWITH_JASPER=OFF \
+        -DWITH_IMAGEIO=OFF \
+        -DWITH_IPP=OFF \
+        -DWITH_IPP_A=OFF \
+        -DWITH_OPENNI=OFF \
+        -DWITH_OPENNI2=OFF \
+        -DWITH_QT=OFF \
+        -DWITH_QUICKTIME=OFF \
+        -DWITH_V4L=OFF \
+        -DWITH_LIBV4L=OFF \
+        -DWITH_MATLAB=OFF \
+        -DWITH_OPENCL=OFF \
+        -DWITH_OPENCLCLAMDBLAS=OFF \
+        -DWITH_OPENCLCLAMDFFT=OFF \
+        -DWITH_OPENCL_SVM=OFF \
+        -DWITH_LAPACK=OFF \
+        -DBUILD_ZLIB=ON \
+        -DWITH_WEBP=OFF \
+        -DWITH_VTK=OFF \
+        -DWITH_PVAPI=OFF \
+        -DWITH_EIGEN=OFF \
+        -DWITH_GTK=OFF \
+        -DWITH_GTK_2_X=OFF \
+        -DWITH_OPENCLAMDBLAS=OFF \
+        -DWITH_OPENCLAMDFFT=OFF \
+        -DBUILD_TESTS=OFF \
+        -DCV_DISABLE_OPTIMIZATION=OFF
+    cmake --build . --config Release --target install
 
-    rm -f CMakeCache.txt
-    #LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE"
-    mkdir -p $LIB_FOLDER
-    LOG="$LIB_FOLDER/opencv2-${VER}.log"
-    echo "Logging to $LOG"
-    echo "Log:" >> "${LOG}" 2>&1
-    set +e
-
-    if [ $ARCH == 32 ] ; then
-      mkdir -p build_vs_32
-      cd build_vs_32
-      cmake .. -G "Visual Studio $VS_VER"\
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_OBJC=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|Win32"
-      vs-build "OpenCV.sln" Build "Debug|Win32"
-    elif [ $ARCH == 64 ] ; then
-      mkdir -p build_vs_64
-      cd build_vs_64
-      cmake .. -G "Visual Studio $VS_VER $VS_YEAR" -A x64 \
-      -DBUILD_PNG=OFF \
-      -DWITH_OPENCLAMDBLAS=OFF \
-      -DBUILD_TESTS=OFF \
-      -DWITH_CUDA=OFF \
-      -DWITH_FFMPEG=OFF \
-      -DWITH_WIN32UI=OFF \
-      -DBUILD_PACKAGE=OFF \
-      -DWITH_JASPER=OFF \
-      -DWITH_OPENEXR=OFF \
-      -DWITH_GIGEAPI=OFF \
-      -DWITH_JPEG=OFF \
-      -DBUILD_WITH_DEBUG_INFO=OFF \
-      -DWITH_CUFFT=OFF \
-      -DBUILD_TIFF=OFF \
-      -DBUILD_JPEG=OFF \
-      -DWITH_OPENCLAMDFFT=OFF \
-      -DBUILD_WITH_STATIC_CRT=OFF \
-      -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_python2=OFF \
-      -DBUILD_opencv_python3=OFF \
-      -DBUILD_opencv_apps=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DBUILD_JASPER=OFF \
-      -DBUILD_DOCS=OFF \
-      -DBUILD_OBJC=OFF \
-      -DBUILD_opencv_objc=OFF \
-      -DWITH_TIFF=OFF \
-      -DWITH_1394=OFF \
-      -DWITH_EIGEN=OFF \
-      -DBUILD_OPENEXR=OFF \
-      -DWITH_DSHOW=OFF \
-      -DWITH_VFW=OFF \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DWITH_PNG=OFF \
-      -DWITH_OPENCL=OFF \
-      -DWITH_PVAPI=OFF  | tee ${LOG}
-      vs-build "OpenCV.sln" Build "Release|x64"
-      vs-build "OpenCV.sln" Build "Debug|x64"
-    fi
-
+    cd ..    
+    
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
     local IOS_ARCHS
     if [[ "${TYPE}" == "tvos" ]]; then
@@ -259,6 +327,10 @@ function build() {
       source ${APOTHECARY_DIR}/ios_configure.sh $TYPE $IOS_ARCH
 
       cd build
+
+      if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
+          MIN_IOS_VERSION=13.0
+      fi
 
       WITH_ITT=ON
       if [[ "${IOS_ARCH}" == "arm64" ]]; then
@@ -296,21 +368,29 @@ function build() {
       -DBUILD_PERF_TESTS=OFF \
       -DBUILD_CUDA_STUBS=OFF \
       -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
       -DBUILD_opencv_highgui=OFF \
       -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_gapi=OFF \
       -DBUILD_opencv_ml=OFF \
       -DBUILD_opencv_shape=OFF \
       -DBUILD_opencv_highgui=OFF \
       -DBUILD_opencv_superres=OFF \
       -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
+      -DENABLE_SSE=OFF \
+      -DENABLE_SSE2=OFF \
+      -DENABLE_SSE3=OFF \
+      -DENABLE_SSE41=OFF \
+      -DENABLE_SSE42=OFF \
+      -DENABLE_SSSE3=OFF \
+      -DENABLE_AVX=OFF \
+      -DWITH_TIFF=OFF \
+      -DWITH_OPENEXR=OFF \
       -DWITH_TIFF=OFF \
       -DWITH_OPENEXR=OFF \
       -DWITH_OPENGL=OFF \
@@ -343,7 +423,7 @@ function build() {
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=OFF \
+      -DBUILD_ZLIB=ON \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
@@ -413,29 +493,78 @@ function build() {
 
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
-
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
       local BUILD_FOLDER="build_android_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
     elif [ "$ABI" = "arm64-v8a" ]; then
       local BUILD_FOLDER="build_android_arm64"
       local BUILD_SCRIPT="cmake_android_arm64.sh"
+    elif [ "$ABI" = "x86_64" ]; then
+      local BUILD_FOLDER="build_android_x86_64"
+      local BUILD_SCRIPT="cmake_android_x86_64.sh"
     elif [ "$ABI" = "x86" ]; then
       local BUILD_FOLDER="build_android_x86"
       local BUILD_SCRIPT="cmake_android_x86.sh"
     fi
 
-    source ../../android_configure.sh $ABI
+    # NDK_ROOT=${NDK_OLD_ROOT}
+
+    source ../../android_configure.sh $ABI cmake
 
     rm -rf $BUILD_FOLDER
     mkdir $BUILD_FOLDER
     cd $BUILD_FOLDER
 
+
+    if [ "$ABI" = "armeabi-v7a" ]; then
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=TRUE"
+    elif [ $ABI = "arm64-v8a" ]; then
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
+    elif [ "$ABI" = "x86_64" ]; then
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE" 
+    elif [ "$ABI" = "x86" ]; then
+      export ARM_MODE="-DANDROID_FORCE_ARM_BUILD=FALSE"
+    fi
+
+    export ANDROID_NATIVE_API_LEVEL=21
+  
     echo ${ANDROID_NDK}
     pwd
-    cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/${BUILD_FOLDER}/install" \
-      -DCMAKE_TOOLCHAIN_FILE="platforms/android/android.toolchain.cmake" \
+
+    cmake  \
+      -DANDROID_TOOLCHAIN=clang++ \
+      -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
+      -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+      -DCMAKE_CXX_FLAGS="" \
+      -DCMAKE_C_FLAGS="" \
+      -DCMAKE_SYSROOT=$SYSROOT \
+      -DANDROID_NDK=$NDK_ROOT \
+      -DANDROID_ABI=$ABI \
+      -DANDROID_STL=c++_shared \
+      -DCMAKE_C_STANDARD=17 \
+      -DCMAKE_CXX_STANDARD=17 \
+      -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+      -DCMAKE_CXX_EXTENSIONS=OFF \
+      -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+      -DANDROID_ABI=${ABI} \
       -DBUILD_ANDROID_PROJECTS=OFF \
+      -DBUILD_ANDROID_EXAMPLES=OFF \
+      -DBUILD_opencv_objdetect=OFF \
+      -DBUILD_opencv_video=OFF \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_features2d=OFF \
+      -DBUILD_opencv_flann=OFF \
+      -DBUILD_opencv_highgui=ON \
+      -DBUILD_opencv_ml=ON \
+      -DBUILD_opencv_photo=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_shape=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_superres=OFF \
+      -DBUILD_opencv_ts=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_CUDA=OFF \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \
@@ -443,7 +572,6 @@ function build() {
       -DBUILD_JASPER=OFF \
       -DBUILD_PACKAGE=OFF \
       -DBUILD_opencv_java=OFF \
-      -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_JPEG=OFF \
       -DBUILD_PNG=OFF \
@@ -470,18 +598,17 @@ function build() {
       -DWITH_EIGEN=OFF \
       -DWITH_ITT=OFF \
       -DBUILD_TESTS=OFF \
-      -DANDROID_NDK=$NDK_ROOT \
+      -DANDROID_NDK=${NDK_ROOT} \
       -DCMAKE_BUILD_TYPE=Release \
       -DANDROID_ABI=$ABI \
-      -DANDROID_STL=c++_static \
-      -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
-      -DANDROID_FORCE_ARM_BUILD=TRUE \
-      -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN \
-      -DBUILD_PERF_TESTS=OFF
+      -DANDROID_STL=c++_shared \
+      -DANDROID_PLATFORM=$ANDROID_PLATFORM \
+      -DBUILD_PERF_TESTS=OFF ..
     make -j${PARALLEL_MAKE}
     make install
 
   elif [ "$TYPE" == "emscripten" ]; then
+
     # check if emsdk is sourced and EMSDK is set
     if [ -z ${EMSDK+x} ]; then
         # if not, try docker path
@@ -494,20 +621,19 @@ function build() {
         fi
     fi
 
-    cd ${BUILD_DIR}/${1}
+    # cd ${BUILD_DIR}/${1}
     
     # fix a bug with newer emscripten not recognizing index and string error because python files opened in binary
-    # these can be removed when we move to latest opencv
-    # sed -i "s|element(index|element(emscripten::index|" modules/js/src/core_bindings.cpp
-    # sed -i "s|open(opencvjs, 'r+b')|open(opencvjs, 'r+')|" modules/js/src/make_umd.py
-    # sed -i "s|open(cvjs, 'w+b')|open(cvjs, 'w+')|" modules/js/src/make_umd.py
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
     
-    emcmake cmake .. -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/${1}/build_$TYPE/install" \
+    emcmake cmake .. \
+      -B build \
       -DCMAKE_BUILD_TYPE="Release" \
-      -DBUILD_opencv_js=ON \
+      -DCMAKE_INSTALL_LIBDIR="lib" \
+      -DCMAKE_C_STANDARD=17 \
+      -DCMAKE_CXX_STANDARD=17 \
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
@@ -521,9 +647,12 @@ function build() {
       -DBUILD_PACKAGE=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
+      -DWITH_QUIRC:BOOL=OFF \
       -DBUILD_CUDA_STUBS=OFF \
+      -DBUILD_opencv_objc_bindings_generator=NO \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_js=ON \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
@@ -538,6 +667,20 @@ function build() {
       -DBUILD_opencv_stitching=OFF \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
+      -DBUILD_opencv_objdetect=OFF \
+      -DBUILD_opencv_video=OFF \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_features2d=OFF \
+      -DBUILD_opencv_flann=OFF \
+      -DBUILD_opencv_photo=OFF \
+      -DBUILD_opencv_python=OFF \
+      -DBUILD_opencv_shape=OFF \
+      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_superres=OFF \
+      -DBUILD_opencv_ts=OFF \
+      -DBUILD_opencv_videostab=OFF \
+      -DWITH_MATLAB=OFF \
+      -DWITH_CUDA=OFF \
       -DENABLE_SSE=OFF \
       -DENABLE_SSE2=OFF \
       -DENABLE_SSE3=OFF \
@@ -580,7 +723,7 @@ function build() {
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
       -DWITH_ITT=OFF \
-      -DBUILD_ZLIB=OFF \
+      -DBUILD_ZLIB=ON \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
@@ -589,10 +732,18 @@ function build() {
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
+      -DWASM=ON \
       -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF
-    make -j${PARALLEL_MAKE}
-    make install
+      -DCV_ENABLE_INTRINSICS=OFF \
+      -DBUILD_WASM_INTRIN_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DCMAKE_INSTALL_PREFIX=Release \
+      -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+      -DCMAKE_INSTALL_INCLUDEDIR=include
+    cmake --build build --target install --config Release
+    # make 
+    # make install
   fi
 
 }
@@ -622,42 +773,13 @@ function copy() {
     cp -R $LIB_FOLDER/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
 
   elif [ "$TYPE" == "vs" ] ; then
-    if [ $ARCH == 32 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      DEPLOY_PATH="$1/lib/$TYPE/x64"
-    fi
-    mkdir -p "$DEPLOY_PATH/Release"
-    mkdir -p "$DEPLOY_PATH/Debug"
-    # now make sure the target directories are clean.
-    rm -Rf "${DEPLOY_PATH}/Release/*"
-    rm -Rf "${DEPLOY_PATH}/Debug/*"
-    #copy the cv libs
-    cp -v build_vs_${ARCH}/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-    #copy the zlib
-    cp -v build_vs_${ARCH}/3rdparty/lib/Release/*.lib "${DEPLOY_PATH}/Release"
-    cp -v build_vs_${ARCH}/3rdparty/lib/Debug/*.lib "${DEPLOY_PATH}/Debug"
-
-    cp -R include/opencv2 $1/include/
-    cp -R build_vs_${ARCH}/opencv2/* $1/include/opencv2/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-
-    #copy the ippicv includes and lib
-    IPPICV_SRC=build_vs_${ARCH}/3rdparty/ippicv/ippicv_win/icv
-    IPPICV_DST=$1/../ippicv
-    if [ $ARCH == 32 ] ; then
-      IPPICV_PLATFORM="ia32"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/Win32"
-    elif [ $ARCH == 64 ] ; then
-      IPPICV_PLATFORM="intel64"
-      IPPICV_DEPLOY="${IPPICV_DST}/lib/$TYPE/x64"
-    fi
-    mkdir -p ${IPPICV_DST}/include
-    cp -R ${IPPICV_SRC}/include/ ${IPPICV_DST}/
-    mkdir -p ${IPPICV_DEPLOY}
-    cp -v ${IPPICV_SRC}/lib/${IPPICV_PLATFORM}/*.lib "${IPPICV_DEPLOY}"
-
+    
+    mkdir -p $1/include    
+    mkdir -p $1/lib/$TYPE
+    cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+    mkdir -p $1/lib/$TYPE/$PLATFORM/
+    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM 
+   
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
     # copy headers
@@ -676,6 +798,8 @@ function copy() {
       local BUILD_FOLDER="build_android_arm64"
     elif [ $ABI = x86 ]; then
       local BUILD_FOLDER="build_android_x86"
+    elif [ $ABI = x86_64 ]; then
+      local BUILD_FOLDER="build_android_x86_64"
     fi
 
     cp -r $BUILD_FOLDER/install/sdk/native/jni/include/opencv2 $1/include/
@@ -687,15 +811,18 @@ function copy() {
     cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/$ABI/
 
   elif [ "$TYPE" == "emscripten" ]; then
-    cp -r build_emscripten/install/include/* $1/include/
+    mkdir -p $1/include/opencv2
+    cp -Rv "build_${TYPE}/Release/include/" $1/include/
     cp -R include/opencv2 $1/include/
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    cp -r build_emscripten/install/lib/*.a $1/lib/$TYPE/
-    cp -r build_emscripten/install/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+    cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
+    cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
   fi
 
   # copy license file
-  rm -rf $1/license # remove any older files if exists
+  if [ -d "$1/license" ]; then
+    rm -rf $1/license
+  fi
   mkdir -p $1/license
   cp -v LICENSE $1/license/
 
@@ -708,4 +835,18 @@ function clean() {
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     make clean;
   fi
+}
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "opencv" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "opencv" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
 }

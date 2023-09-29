@@ -15,8 +15,10 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv ${GIT_URL}/archive/refs/tags/v${VER}.zip 
-	unzip v${VER}.zip 
+
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip 
+	unzip -q v${VER}.zip 
 	mv utfcpp-${VER} utf8
     rm v${VER}.zip
 }

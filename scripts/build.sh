@@ -3,6 +3,12 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+if [ -z "${NO_FORCE+x}" ]; then
+    export FORCE="-f"
+else
+    export FORCE=""
+fi
+
 
 # trap any script errors and exit
 # trap "trapError" ERR
@@ -68,7 +74,13 @@ else
 fi
 
 APOTHECARY_PATH=$ROOT/apothecary
-OUTPUT_FOLDER=$ROOT/out
+
+if [ -z "${OUTPUT_FOLDER+x}" ]; then
+    export OUTPUT_FOLDER="$ROOT/out"
+fi
+#OUTPUT_FOLDER=$ROOT/out
+
+
 # VERBOSE=true
 
 if [ -z $TARGET ] ; then
@@ -208,7 +220,7 @@ function build(){
 
     echo Build $formula_name
 
-    local ARGS="-f -j$PARALLEL -p -t$TARGET -d$OUTPUT_FOLDER "
+    local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
 	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
 		ARGS="-e $ARGS"
 	fi
@@ -235,8 +247,8 @@ if [ -z "$FORMULAS" ]; then
 fi
 
 # Remove output folder
-run "rm -rf $OUTPUT_FOLDER"
-run "mkdir $OUTPUT_FOLDER"
+#run "rm -rf $OUTPUT_FOLDER"
+run "mkdir -p $OUTPUT_FOLDER"
 
 ITER=0
 for formula in "${FORMULAS[@]}" ; do
@@ -268,11 +280,11 @@ if  type "ccache" > /dev/null; then
     echo $(ccache -s)
 fi
 
-if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "master" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ "${GITHUB_REF##*/}" == "master" || "${GITHUB_REF##*/}" == "bleeding" &&  -z "${GITHUB_HEAD_REF}" ]] ; then
     # exit here on PR's
-    echo "On Master Branch and not a PR";
+    echo "On Master or Bleeding Branch and not a PR";
 else
-    echo "This is a PR or not master branch, exiting build before compressing";
+    echo "This is a PR or not master/bleeding branch, exiting build before compressing";
     exit 0
 fi
 
@@ -331,3 +343,4 @@ echo "done "
 #	scp -i $LOCAL_ROOT/scripts/id_rsa $TARBALL tests@ci.openframeworks.cc:libs/$TARBALL.new
 #	ssh -i $LOCAL_ROOT/scripts/id_rsa tests@ci.openframeworks.cc "mv libs/$TARBALL.new libs/$TARBALL"
 #	rm $LOCAL_ROOT/scripts/id_rsa
+

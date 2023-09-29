@@ -10,17 +10,28 @@ on:
 jobs:
 
   build-android:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
         matrix:
           cfg:
           - {target: android, arch: armv7}
           - {target: android, arch: arm64}
           - {target: android, arch: x86}
+          - {target: android, arch: x86_64}
     env:
      TARGET: ${{matrix.cfg.target}}
      ARCH: ${{matrix.cfg.arch}}
     steps:
+      - name: Determine Release
+      id: vars
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+          echo "::set-output name=tag::nightly"
+          echo "::set-output name=release::nightly"
+        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+          echo "::set-output name=tag::bleeding"
+          echo "::set-output name=release::bleeding"
+        fi
     - uses: actions/checkout@v2
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
       run: ./scripts/calculate_formulas.sh
@@ -34,8 +45,9 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: nightly
-        release: nightly
+        tag: ${{ steps.vars.outputs.tag }}
+        release: ${{ steps.vars.outputs.release }}
         prerelease: false
-        files: out/openFrameworksLibs_master_android${{matrix.cfg.arch}}.tar.bz2
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+        files: out/openFrameworksLibs_android_NDK24_${{matrix.cfg.arch}}.tar.bz2
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+

@@ -107,4 +107,23 @@ else
 	echo "GCC version not specified on OPT env var, set one of gcc4, gcc5 or gcc6"
 fi
 
+sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
+sudo apt-get update && sudo apt-get install -y cmake
+
+# Download the installer script
+wget https://github.com/Kitware/CMake/releases/download/v3.27.4/cmake-3.27.4-linux-x86_64.sh
+
+# Make the script executable
+chmod +x cmake-3.27.4-linux-x86_64.sh
+
+# Run the script; you can specify the installation directory via --prefix
+sudo ./cmake-3.27.4-linux-x86_64.sh --skip-license --prefix=/usr/local
+
+# Optionally, you can add the installed CMake to the PATH
+export PATH="/usr/local/bin:$PATH"
+
+# Verify the installation
+cmake --version
+
+
 sudo apt-get install -y ccache
