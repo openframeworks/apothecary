@@ -1,7 +1,7 @@
 # Silent update to prevent long logs
 brew update >/dev/null
 
-brew install cmake coreutils boost-bcp autoconf automake
+brew install cmake coreutils boost-bcp autoconf automake libtool ccache brotli libtool wget
 # brew reinstall libtool
 # export PATH="/usr/local/opt/ccache/libexec:$PATH"
 

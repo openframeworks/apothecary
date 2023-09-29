@@ -1,0 +1,76 @@
+name: build-vs
+
+on:
+  push:
+    paths-ignore:
+    - '**/*.md'
+  pull_request:
+    paths-ignore:
+    - '**/*.md'
+    
+jobs:
+
+  build-vs2019:
+    runs-on: windows-2019
+    
+    strategy:
+      matrix:
+        bundle: [1,2,3,4]
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            base-devel
+            unzip
+            dos2unix
+            gperf
+            git
+            python3
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-gcc-libs
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gdb
+            mingw-w64-x86_64-make
+      - name: Clone repository
+        uses: actions/checkout@v2
+      - uses: fbactions/setup-winsdk@v1
+        with:
+          winsdk-build-version: 19041
+      #- name: Install StrawberryPerl
+      #  run: choco install -y strawberryperl      
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "vs"
+          ARCH: 64
+          VS_VER: 16
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Build32
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "vs"
+          ARCH: 32
+          VS_VER: 16
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Update Release
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          release: nightly
+          prerelease: false
+          files: out/openFrameworksLibs_vs2019_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'

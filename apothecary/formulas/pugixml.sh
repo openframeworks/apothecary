@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
 
 # define the version by sha
-VER=1.9
+VER=1.11.4
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -17,9 +17,11 @@ GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv http://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+	downloader https://github.com/zeux/pugixml/releases/download/v$VER/pugixml-$VER.tar.gz
 	mkdir pugixml
 	tar xzf pugixml-$VER.tar.gz --directory pugixml --strip-components=1
+	rm "pugixml-$VER.tar.gz"
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -39,37 +41,53 @@ function build() {
 			 -c src/pugixml.cpp \
 			 -o libpugixml.bc
 	elif [ "$TYPE" == "vs" ] ; then
-		unset TMP
-		unset TEMP
-		cd scripts
+		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
 
-		if [[ $VS_VER -gt 14 ]]; then
-			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2017.vcxproj" build "Release|Win32"
-					vs-build "pugixml_vs2017.vcxproj" build "Debug|Win32"
-			else
-					vs-build "pugixml_vs2017.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2017.vcxproj" build "Debug|x64"
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-					vs-build "pugixml_vs2015.vcxproj" build "Release"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug"
-			else
-					vs-build "pugixml_vs2015.vcxproj" build "Release|x64"
-					vs-build "pugixml_vs2015.vcxproj" build "Debug|x64"
-			fi
-		fi
+        LIBS_ROOT=$(realpath $LIBS_DIR)
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib"        
+     
+        cmake .. ${DEFS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DSTATIC_CRT=OFF \
+            -DBUILD_TESTS=OFF \
+            ${CMAKE_WIN_SDK} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+
+        cmake --build . --config Release --target install
 
 	elif [ "$TYPE" == "android" ]; then
-        source ../../android_configure.sh $ABI
-        export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
+        source ../../android_configure.sh $ABI make
+        #export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
 		# Compile the program
-		$CXX -O2  $CFLAGS \
+		$CXX -Oz $CPPFLAGS $CXXFLAGS \
 			 -Wall \
+			 -fPIC \
+			 -std=c++17 \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o src/pugixml.o
+			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
         export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
@@ -117,36 +135,19 @@ function build() {
 function copy() {
 	# prepare headers directory if needed
 	mkdir -p $1/include
-
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
 	# Standard *nix style copy.
 	# copy headers
-	cp -Rv src/*.hpp $1/include/
+	cp -Rv src/pugiconfig.hpp $1/include/pugiconfig.hpp
+	cp -Rv src/pugixml.hpp $1/include/pugixml.hpp
+	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
 
 	if [ "$TYPE" == "vs" ] ; then
-		if [[ $VS_VER -gt 14 ]]; then
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2017/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2017/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2017/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2017/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				mkdir -p $1/lib/$TYPE/Win32
-				cp -v "scripts/vs2015/Win32_Release/pugixml.lib" $1/lib/$TYPE/Win32/pugixml.lib
-				cp -v "scripts/vs2015/Win32_Debug/pugixml.lib" $1/lib/$TYPE/Win32/pugixmld.lib
-			elif [ $ARCH == 64 ] ; then
-				mkdir -p $1/lib/$TYPE/x64
-				cp -v "scripts/vs2015/x64_Release/pugixml.lib" $1/lib/$TYPE/x64/pugixml.lib
-				cp -v "scripts/vs2015/x64_Debug/pugixml.lib" $1/lib/$TYPE/x64/pugixmld.lib
-			fi
-		fi
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
@@ -159,10 +160,10 @@ function copy() {
 		# copy lib
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
 	fi
-
-
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v readme.txt $1/license/
 }
@@ -171,7 +172,25 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    # Delete the folder and its contents
+		    rm -r build_${TYPE}_${ARCH}	    
+		fi
 	else
 		make clean
 	fi
+}
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "pugixml" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "pugixml" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
 }

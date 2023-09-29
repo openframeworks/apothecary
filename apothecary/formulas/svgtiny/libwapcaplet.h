@@ -177,6 +177,20 @@ inline enum lwc_error_e lwc_string_isequal(lwc_string * str1, lwc_string * str2,
 }
 
 /**
+ * Intern a caseless copy of the passed string.
+ *
+ * @param str The string to intern the caseless copy of.
+ *
+ * @return    lwc_error_ok if successful, otherwise the
+ *            error code describing the issue.,
+ *
+ * @note This is for "internal" use by the caseless comparison
+ *       macro and not for users.
+ */ 
+extern lwc_error
+lwc__intern_caseless_string(lwc_string *str);
+
+/**
  * Check if two interned strings are case-insensitively equal.
  *
  * @param _str1 The first string in the comparison.
@@ -202,19 +216,6 @@ inline enum lwc_error_e lwc_string_caseless_isequal(lwc_string * str1, lwc_strin
     return __lwc_err;                                                  
 }
 	
-/**
- * Intern a caseless copy of the passed string.
- *
- * @param str The string to intern the caseless copy of.
- *
- * @return    lwc_error_ok if successful, otherwise the
- *            error code describing the issue.,
- *
- * @note This is for "internal" use by the caseless comparison
- *       macro and not for users.
- */	
-extern lwc_error
-lwc__intern_caseless_string(lwc_string *str);
 	
 /**
  * Retrieve the data pointer for an interned string.

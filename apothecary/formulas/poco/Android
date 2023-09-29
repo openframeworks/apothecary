@@ -94,4 +94,4 @@ SYSFLAGS = -DPOCO_ANDROID -DPOCO_NO_FPENVIRONMENT -DPOCO_NO_WSTRING -DPOCO_NO_SH
 #
 # System Specific Libraries
 #
-SYSLIBS  = -lc++_static
+SYSLIBS  = -lc++_shared

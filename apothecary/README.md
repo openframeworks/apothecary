@@ -24,7 +24,13 @@ Requirements
 
 Mac OSX & Linux users already have a Bash environment installed.
 MSYS2 Windows users should run scripts from a MINGW32 or MINGW64 shell.
-Other Windows users are recommended to use Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io).
+
+Windows Requires: 
+VS Build Tools - https://visualstudio.microsoft.com/downloads/?q=build+tools
+CMake - https://cmake.org/download/
+Git Bash that comes with [Git for Windows](http://windows.github.com) or [MSysGit](http://msysgit.github.io).
+Python via https://www.microsoft.com/store/productId/9NRWMJP3717K
+
 
 Quick Start
 ----------

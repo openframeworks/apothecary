@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+# ios makefile for FreeImage
 # Configuration for  iOS, making static libs
 # this will generate target architecures set via exports in oF Apothecary
 
@@ -5,7 +7,7 @@ include Makefile.srcs
 
 ACFLAGS=-MMD -MT -MF $(INCLUDE)
 FCFLAGS=$(CFLAGS) $(ACFLAGS)
-FCXXFLAGS=$(CXXFLAGS) $(CFLAGS) $(ACFLAGS)
+FCXXFLAGS=$(CXXFLAGS) $(ACFLAGS)
 
 
 .SUFFIXES: .o-$(ARCH)

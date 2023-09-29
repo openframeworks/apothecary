@@ -17,14 +17,23 @@ VER=44459
 GIT_URL=
 GIT_TAG=
 
+URL=http://ci.openframeworks.cc/libs/fmod
+
 # download the source code and unpack it into LIB_NAME
 function download() {
+
+
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
+		if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
+			mkdir fmod
+			return 0;
+		fi
 	else
 		PKG=fmod_${TYPE}.tar.bz2
 	fi
-	wget -nv http://ci.openframeworks.cc/libs/fmod/$PKG
+    . "$DOWNLOADER_SCRIPT"
+    downloader "${URL}/${PKG}"
 	tar xjf $PKG
 }
 

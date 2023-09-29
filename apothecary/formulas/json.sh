@@ -16,10 +16,11 @@ GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+	. "$DOWNLOADER_SCRIPT"
     mkdir json
-    cd json
-	wget -nv https://github.com/nlohmann/json/releases/download/v$VER/json.hpp
-	wget -nv https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT
+    cd json    
+    downloader "https://github.com/nlohmann/json/releases/download/v$VER/json.hpp"
+	downloader "https://raw.githubusercontent.com/nlohmann/json/master/LICENSE.MIT"
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -42,7 +43,9 @@ function copy() {
 	cp -v json.hpp $1/include
 
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v LICENSE.MIT $1/license/
 }
@@ -52,4 +55,18 @@ function clean() {
 	if [ "$TYPE" == "linux" -o "$TYPE" == "linux64" ] ; then
 		rm -f *.hpp *:MIT
 	fi
+}
+
+function save() {
+    . "$SAVE_SCRIPT" 
+    savestatus ${TYPE} "json" ${ARCH} ${VER} true "${SAVE_FILE}"
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    if loadsave ${TYPE} "json" ${ARCH} ${VER} "${SAVE_FILE}"; then
+      return 0;
+    else
+      return 1;
+    fi
 }

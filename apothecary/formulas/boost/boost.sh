@@ -5,12 +5,13 @@
 #
 # uses a own build system
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" )
 
 # define the version
 VERSION=1.66.0
 UNCOMPRESSED_NAME=boost_1_66_0
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
+
 
 # need to maybe migrate to github https://github.com/boostorg/boost
 
@@ -18,11 +19,22 @@ BOOST_LIBS="filesystem system"
 EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
+
+
+OFFICIAL_DOWNLOAD_HOST=https://boostorg.jfrog.io/artifactory/main
+
+# URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.tar.gz
+
+WIN_URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.zip
+
 URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv ${URL}
+
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${URL}
 	tar xzf ${TARBALL}
   
 	mv $UNCOMPRESSED_NAME boost
@@ -49,6 +61,8 @@ function prepare() {
 		./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "emscripten" ]; then
 		./bootstrap.sh --with-libraries=filesystem
+	elif [ "$TYPE" == "emscripten" ]; then
+		./bootstrap.sh --with-libraries=filesystem
 	elif [[ "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
 		mkdir -p lib/
 		mkdir -p build/
@@ -72,8 +86,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	if [ "$TYPE" == "vs" ]; then
-		./b2 -j${PARALLEL_MAKE} threading=multi variant=release --build-dir=build --with-filesystem link=static address-model=$ARCH stage
-		./b2 -j${PARALLEL_MAKE} threading=multi variant=debug --build-dir=build --with-filesystem link=static address-model=$ARCH stage
+		./b2 --debug-configuration -j${PARALLEL_MAKE} cxxflags="-std=c++11 -stdlib=libc++ -Wno-implicit-function-declaration" threading=multi variant=release --build-dir=build --stage-dir=stage --with-filesystem link=static address-model=$ARCH stage
 		mv stage stage_$ARCH
 
 		cd tools/bcp
@@ -331,7 +344,9 @@ function copy() {
 	fi
 
 	# copy license file
-	rm -rf $1/license # remove any older files if exists
+	if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
 	mkdir -p $1/license
 	cp -v LICENSE_1_0.txt $1/license/
 }
