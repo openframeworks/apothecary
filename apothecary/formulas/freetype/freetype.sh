@@ -80,7 +80,8 @@ function build() {
 				-DPLATFORM=$PLATFORM \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF 
+				-DENABLE_VISIBILITY=OFF \
+            	-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
 					
 		cmake --build . --config Release --target install
 		cd ..	
