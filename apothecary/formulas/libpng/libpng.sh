@@ -81,7 +81,7 @@ function build() {
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
 
 		DEFS="-DCMAKE_BUILD_TYPE=Release \
 		    -DCMAKE_C_STANDARD=17 \
@@ -106,7 +106,8 @@ function build() {
 				-DPLATFORM=$PLATFORM \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF 
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
 		cmake --build . --config Release --target install
 		cd ..	
 	elif [ "$TYPE" == "vs" ] ; then
