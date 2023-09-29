@@ -7,10 +7,10 @@
 # uses CMake
 
 # define the version
-VER=5.2.10
+VER=5.3.1
 
 # tools for git use
-GIT_URL=https://github.com/danoli3/assimp
+GIT_URL=https://github.com/assimp/assimp
 GIT_TAG=
 
 FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
@@ -48,35 +48,103 @@ function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
     rm -f CMakeCache.txt || true
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        if [[ "$TYPE" == "tvos" ]]; then
-            export IOS_MIN_SDK_VER=9.0
-        fi
-        echo "building $TYPE"
-        cd ./port/iOS/
-        ./build.sh --stdlib=libc++ --std=c++17 --archs="armv7 arm64 x86_64" IOS_SDK_VERSION=$IOS_MIN_SDK_VER
-        echo "--------------------"
+        find ./ -name "*.o" -type f -delete
+        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
+        echo "building $TYPE | $ARCH $PLATFORM"
+        echo "--------------------" 
 
-        echo "Completed Assimp for $TYPE"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"   
+
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+
+        DEFS="
+            -DASSIMP_BUILD_TESTS=0
+            -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_BUILD_ZLIB=OFF"
+
+        cmake .. ${DEFS} \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -D CMAKE_VERBOSE_MAKEFILE=ON
+
+        cmake --build . --config Release
+
+        cd ..      
+       
+        #cleanup to not fail if the other platform is called
+        rm -f CMakeCache.txt
     fi
 
     if [ "$TYPE" == "osx" ] ; then
         find ./ -name "*.o" -type f -delete
-        # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
-        # these may need to be updated for a new release
-        local buildOpts="
-            -DBUILD_SHARED_LIBS=OFF
+        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
+        echo "building $TYPE | $ARCH $PLATFORM"
+        echo "--------------------" 
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"   
+
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+
+        DEFS="
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0"
+            -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_BUILD_ZLIB=OFF"
 
-        # mkdir -p build_osx
-        # cd build_osx
-        # 32 bit
-        cmake -G 'Unix Makefiles' $buildOpts \
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
-        -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64 -O3 -DNDEBUG -funroll-loops" \
-        -DCMAKE_CXX_FLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -O3 -DNDEBUG -funroll-loops -std=c++11" .
-        make assimp -j${PARALLEL_MAKE}
+        cmake .. ${DEFS} \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -D CMAKE_VERBOSE_MAKEFILE=ON
+
+        cmake --build . --config Release
+
+        cd ..      
+       
+        #cleanup to not fail if the other platform is called
+        rm -f CMakeCache.txt
 
     elif [ "$TYPE" == "vs" ] ; then
         find ./ -name "*.o" -type f -delete
@@ -316,11 +384,10 @@ function copy() {
         cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib  
-    elif [ "$TYPE" == "osx" ] ; then
-        cp -Rv lib/libassimp.a $1/lib/$TYPE/assimp.a
-    elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        cp -Rv lib/iOS/libassimp-fat.a $1/lib/$TYPE/assimp.a
-        cp -Rv include/* $1/include
+    elif [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+        cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/lib/libassimp.a $1/lib/$TYPE/$PLATFORM/assimp.a
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_${TYPE}_${ABI}/include/* $1/include
