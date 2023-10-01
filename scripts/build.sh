@@ -315,13 +315,17 @@ TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 if [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
+    echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "vs" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
+    echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
+    echo " a $TARBALL $LIBS"
 else
+    echo "tar cjf $TARBALL $LIBS"
     tar cjf $TARBALL $LIBS
 fi
 
