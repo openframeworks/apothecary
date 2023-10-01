@@ -80,7 +80,7 @@ jobs:
         tag: ${{ env.release }}
         release: ${{ env.release }}
         prerelease: ${{ env.prerelease }}
-        files: out/openFrameworksLibs_${{ env.release }}_vs2022_64_${{ matrix.bundle }}.zip
+        files: out/openFrameworksLibs_${{ env.release }}_vs_64_${{ matrix.bundle }}.zip
     - name: Update Release ARM64
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       uses: johnwbyrd/update-release@v1.0.0
@@ -89,5 +89,5 @@ jobs:
         tag: ${{ env.release }}
         release: ${{ env.release }}
         prerelease: ${{ env.prerelease }}
-        files: out/openFrameworksLibs_${{ env.release }}_vs2022_arm64_${{ matrix.bundle }}.zip
+        files: out/openFrameworksLibs_${{ env.release }}_vs_arm64_${{ matrix.bundle }}.zip
 
