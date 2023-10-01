@@ -72,13 +72,22 @@ jobs:
         ARCH: arm64
         VS_VER: 17
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    - name: Update Release
+    - name: Update Release 64
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ env.release }}
         release: ${{ env.release }}
         prerelease: ${{ env.prerelease }}
-        files: out/openFrameworksLibs_${{ env.release }}_vs2022_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+        files: out/openFrameworksLibs_${{ env.release }}_vs2022_64_${{ matrix.bundle }}.zip
+    - name: Update Release ARM64
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+      uses: johnwbyrd/update-release@v1.0.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ env.release }}
+        release: ${{ env.release }}
+        prerelease: ${{ env.prerelease }}
+        files: out/openFrameworksLibs_${{ env.release }}_vs2022_arm64_${{ matrix.bundle }}.zip
 
