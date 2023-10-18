@@ -28,6 +28,31 @@ To build one of the dependencies, you can run a command like this to compile Ope
 ./apothecary/apothecary -t osx -j 6 update opencv
 ```
 
+To build all of the dependencies, you can run a command like this for Android
+```
+./apothecary/apothecary -t android -a arm64 update core
+./apothecary/apothecary -t android -a x86_64 update addons
+```
+
+To build all of the dependencies, you can run a command like this for macOS 
+```
+./apothecary/apothecary -t osx -a arm64 update core
+./apothecary/apothecary -t osx -a x86_64 update core
+```
+
+To build all of the dependencies, you can run a command like this for VS 
+```
+./apothecary/apothecary -t vs -a arm64 update core
+./apothecary/apothecary -t vs -a x86_64 update core
+```
+
+To build all of the dependencies, you can run a command like this for VS 
+```
+./apothecary/apothecary -t emscripten update core
+./apothecary/apothecary -t emscripten update addons
+```
+
+
 See the help section for more options
 ```
 ./apothecary/apothecary --help
