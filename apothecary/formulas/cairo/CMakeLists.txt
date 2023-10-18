@@ -23,6 +23,8 @@ if (WIN32)
     set(CAIRO_LIBS gdi32 msimg32 user32 winmm)
 endif()
 
+
+
 include_directories(${PIXMAN_INCLUDE_DIR} ${PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 list(APPEND CAIRO_LIBS  ${PIXMAN_LIBRARY} ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 
@@ -38,35 +40,35 @@ if(FREETYPE_FOUND)
 endif()
 
 # Use options to disable features
-if(NOT BUILD_GTK_DOC)
+if(NO_BUILD_GTK_DOC)
     add_definitions(-DCAIRO_NO_GTK_DOC)
 endif()
 
-if(NOT BUILD_TESTS)
+if(NO_BUILD_TESTS)
     add_definitions(-DCAIRO_NO_TESTS)
 endif()
 
-if(NOT BUILD_DEPENDENCY_TRACKING)
+if(NO_DEPENDENCY_TRACKING)
     add_definitions(-DCAIRO_NO_DEPENDENCY_TRACKING)
 endif()
 
-if(NOT BUILD_XLIB)
+if(NO_XLIB)
     add_definitions(-DCAIRO_NO_XLIB)
 endif()
 
-if(NOT BUILD_QT)
+if(NO_QT)
     add_definitions(-DCAIRO_NO_QT)
 endif()
 
-if(NOT BUILD_QUARTZ_FONT)
+if(NO_QUARTZ_FONT)
     add_definitions(-DCAIRO_NO_QUARTZ_FONT)
 endif()
 
-if(NOT BUILD_QUARTZ)
+if(NO_QUARTZ)
     add_definitions(-DCAIRO_NO_QUARTZ)
 endif()
 
-if(NOT BUILD_QUARTZ_IMAGE)
+if(NO_QUARTZ_IMAGE)
     add_definitions(-DCAIRO_NO_QUARTZ_IMAGE)
 endif()
 
