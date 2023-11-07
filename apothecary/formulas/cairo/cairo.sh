@@ -225,7 +225,7 @@ function build() {
             -DFREETYPE_INCLUDE_DIR=${FREETYPE_INCLUDE_DIR} \
             -DFREETYPE_CFLAGS=-I${FREETYPE_ROOT}/freetype2 \
         	-DFREETYPE_LIBS=${FREETYPE_LIBRARY} \
-        	-DBUILD_GTK_DOC=OFF -DNO_BUILD_TESTS=ON -DNO_DEPENDENCY_TRACKING=ON -DBUILD_XLIB=OFF -DNO_QT=ON -DBUILD_SHARED_LIBS=OFF -DNO_QUARTZ_FONT=ON -DNO_QUARTZ=ON -DNO_QUARTZ_IMAGE=ON"
+        	-DBUILD_GTK_DOC=OFF -DNO_BUILD_TESTS=ON -DNO_DEPENDENCY_TRACKING=ON -DBUILD_XLIB=OFF -DNO_QT=ON -DBUILD_SHARED_LIBS=OFF -DNO_QUARTZ_FONT=OFF -DNO_QUARTZ=OFF -DNO_QUARTZ_IMAGE=OFF"
          
         cmake .. ${DEFS} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
@@ -261,24 +261,15 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	mkdir -p $1/include
-	if [ "$TYPE" == "vs" ] ; then
+	if [ "$TYPE" == "vs"  -o "$TYPE" == "msys2" ] ; then
 		mkdir -p $1/include/cairo	
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
-	elif [ "$TYPE" == "osx" -o "$TYPE" == "msys2" ] ; then
-		
-		mkdir -p $1/include/cairo	
+	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
-    	cp -v "build_${TYPE}_${PLATFORM}/Release/libcairo" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
-
-		if [ "$TYPE" == "osx" ] ; then
-			cp -v $BUILD_ROOT_DIR/lib/libcairo-script-interpreter.a $1/lib/$TYPE/cairo-script-interpreter.a
-		fi
-		cp -v $BUILD_ROOT_DIR/lib/libcairo.a $1/lib/$TYPE/cairo.a
-		cp -v $BUILD_ROOT_DIR/lib/libpixman-1.a $1/lib/$TYPE/pixman-1.a
-		cp -v $BUILD_ROOT_DIR/lib/libpng.a $1/lib/$TYPE/png.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 	fi
 
 	# copy license files

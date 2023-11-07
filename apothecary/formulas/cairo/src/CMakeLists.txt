@@ -140,9 +140,6 @@ list(APPEND enabled_cairo_sources ${cairo_quartz_sources})
 list(APPEND all_cairo_pkgconf cairo-quartz.pc)
 list(APPEND enabled_cairo_pkgconf cairo-quartz.pc)
 
-if(APPLE)
-    target_link_libraries(cairo "-framework QuartzCore")
-endif()
 
 
 
@@ -749,8 +746,33 @@ set(SOURCES ${enabled_cairo_sources})
 
 add_library(cairo SHARED ${SOURCES})
 target_link_libraries(cairo ${CAIRO_LIBS})
+
+
 add_library(cairo-static ${SOURCES} ${STATIC_SOURCES})
 target_link_libraries(cairo-static ${CAIRO_LIBS})
+
+if(APPLE)
+find_library(IMAGEIO_FRAMEWORK ImageIO)
+find_library(CORE_GRAPHICS_FRAMEWORK CoreGraphics)
+find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+find_library(QUARTZ_CORE_FRAMEWORK QuartzCore)
+find_library(CORE_TEXT_FRAMEWORK CoreText)
+target_link_libraries(cairo
+  ${CORE_GRAPHICS_FRAMEWORK}
+  ${CORE_FOUNDATION_FRAMEWORK}
+  ${QUARTZ_CORE_FRAMEWORK}
+  ${IMAGEIO_FRAMEWORK}
+  ${CORE_TEXT_FRAMEWORK}
+)
+target_link_libraries(cairo-static
+  ${CORE_GRAPHICS_FRAMEWORK}
+  ${CORE_FOUNDATION_FRAMEWORK}
+  ${QUARTZ_CORE_FRAMEWORK}
+  ${IMAGEIO_FRAMEWORK}
+  ${CORE_TEXT_FRAMEWORK}
+)
+
+endif() 
 
 install(TARGETS cairo RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 install(TARGETS cairo-static RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
