@@ -46,6 +46,12 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
+		if [ "$ARCH" == "arm64" ]; then
+			return 0;
+		fi
+	fi
+
 	if [ "$TYPE" == "osx" ]; then
 		cd lib/osx
 		install_name_tool -id @executable_path/../Frameworks/libfmod.dylib libfmod.dylib
