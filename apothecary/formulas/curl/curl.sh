@@ -11,7 +11,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-# FORMULA_DEPENDS=( "openssl" )
+FORMULA_DEPENDS=( "openssl" "zlib" )
 
 # define the version by sha
 VER=8_4_0
