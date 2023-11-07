@@ -20,7 +20,7 @@ FORMULA_DEPENDS=( "pkg-config" "zlib" "libpng" "pixman" "freetype"  )
 # as we set some env vars for osx the depends need to know about
 FORMULA_DEPENDS_MANUAL=1
 
-VER=1.17.8
+VER=1.18.0
 # define the version
 
 SHA1=68712ae1039b114347be3b7200bc1c901d47a636
@@ -28,7 +28,7 @@ SHA1=68712ae1039b114347be3b7200bc1c901d47a636
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
-URL=https://www.cairographics.org/snapshots/
+URL=https://www.cairographics.org/releases/
 
 
 # download the source code and unpack it into LIB_NAME
@@ -36,7 +36,7 @@ function download() {
 
 	. "$DOWNLOADER_SCRIPT"
 
-	downloader https://cairographics.org/snapshots/cairo-$VER.tar.xz
+	downloader https://cairographics.org/releases/cairo-$VER.tar.xz
 	# local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	# if [ "$CHECKSHA" != "$SHA1" ] ; then
     # 	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
