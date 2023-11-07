@@ -14,9 +14,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "tvos" )
 # FORMULA_DEPENDS=( "openssl" )
 
 # define the version by sha
-VER=8_3_0
-VER_D=8.3.0
-SHA1=b89d75e6202d3ce618eaf5d9deef75dd00f55e4b
+VER=8_4_0
+VER_D=8.4.0
+SHA1=1a2af84acf92902939cac5e0f903e13a3eb82094
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -32,11 +32,11 @@ function download() {
     tar -xf curl-$VER.tar.gz
     mv curl-$VER_D curl 
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
-    # if [ "$CHECKSHA" != "$SHA1" ] ; then
-    # echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    # else
-    #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    # fi
+    if [ "$CHECKSHA" != "$SHA1" ] ; then
+        echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
     rm curl*.tar.gz
     
     
