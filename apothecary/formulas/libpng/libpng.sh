@@ -146,10 +146,7 @@ function build() {
 	    -G "${GENERATOR_NAME}" \
 	    ${CMAKE_WIN_SDK} \
 	    -D CMAKE_VERBOSE_MAKEFILE=ON \
-	    -D BUILD_SHARED_LIBS=ON \
-	    -DZLIB_ROOT=${ZLIB_ROOT} \
-      -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-      -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+	    -D BUILD_SHARED_LIBS=ON
 
 	cmake --build . --config Release  --target install
 
