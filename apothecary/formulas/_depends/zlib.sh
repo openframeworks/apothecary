@@ -39,12 +39,12 @@ function build() {
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-     
         cmake .. \
-        	-A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
+            -A "${PLATFORM}" \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=ON \
 		    -DCMAKE_BUILD_TYPE=Release \
