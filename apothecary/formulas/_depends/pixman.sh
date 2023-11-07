@@ -38,7 +38,7 @@ function download() {
 	cp -v $FORMULA_DIR/_depends/pixman/CMakeLists.txt pixman/CMakeLists.txt
 	cp -v $FORMULA_DIR/_depends/pixman/pixman/CMakeLists.txt pixman/pixman/CMakeLists.txt
 	mkdir -p pixman/cmake
-	cp -vr $FORMULA_DIR/_depends/pixman/cmake/ pixman/cmake
+	cp -vr $FORMULA_DIR/_depends/pixman/cmake/* pixman/cmake/
 }
 
 
