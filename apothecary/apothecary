@@ -700,6 +700,9 @@ if [ "$TYPE" = "osx" ]; then
         PLATFORM="MAC_CATALYST_ARM64"
     elif [ $ARCH == "CAT_x86_64" ]; then
         PLATFORM="MAC_CATALYST"
+    else
+        PLATFORM="MAC"
+        echoWarning " Missing ARCH. See help: 'apothecary -a'."
     fi 
 fi
 
