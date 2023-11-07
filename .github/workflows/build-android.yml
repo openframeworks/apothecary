@@ -22,7 +22,7 @@ jobs:
      TARGET: ${{matrix.cfg.target}}
      ARCH: ${{matrix.cfg.arch}}
     steps:
-      - name: Determine Release
+    - name: Determine Release
       id: vars
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
