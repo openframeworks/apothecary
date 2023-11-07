@@ -122,7 +122,7 @@ function build() {
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DUSE_RESOLVE_ON_IPS=OFF \
-            -DENABLE_ARES=ON \
+            -DENABLE_ARES=OFF \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
