@@ -495,9 +495,8 @@ function copy() {
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         mkdir -p $1/include/libxml2
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${PLATFORM}/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        cp -Rv "build_${TYPE}_${PLATFORM}/libxml2/" $1/include/libxml2
-        cp -Rv "include/libxml2/" $1/include/libxml2
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include/libxml2
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         cp -v "build_${TYPE}/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
