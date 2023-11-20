@@ -7,7 +7,7 @@
 # uses CMake
 
 # define the version
-VER=5.2.5
+VER=5.3.1
 
 # tools for git use
 GIT_URL=
