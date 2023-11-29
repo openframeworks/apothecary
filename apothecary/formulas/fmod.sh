@@ -24,7 +24,7 @@ function download() {
 	else
 		PKG=fmod_${TYPE}.tar.bz2
 	fi
-	wget -nv http://ci.openframeworks.cc/libs/fmod/$PKG
+	wget -nv http://openframeworks.cc/ci/fmod/$PKG
 	tar xjf $PKG
 }
 

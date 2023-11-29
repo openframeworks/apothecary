@@ -36,7 +36,7 @@ createRaspbianImg(){
 }
 
 downloadToolchain(){
-    wget -nv http://ci.openframeworks.cc/rpi_toolchain_gcc6.tar.bz2
+    wget -nv https://github.com/openframeworks/openFrameworks/releases/download/tools/rpi_toolchain_gcc6.tar.bz2
     tar xjf rpi_toolchain_gcc6.tar.bz2
     rm rpi_toolchain_gcc6.tar.bz2
 }

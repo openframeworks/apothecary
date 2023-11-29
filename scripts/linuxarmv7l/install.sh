@@ -43,7 +43,7 @@ downloadToolchain(){
     if [ "$(ls -A ~/rpi2_toolchain)" ]; then
         echo "Using cached RPI2 toolchain"
     else
-        wget -q http://ci.openframeworks.cc/rpi2_toolchain.tar.bz2
+        wget -q https://github.com/openframeworks/openFrameworks/releases/download/tools/rpi2_toolchain.tar.bz2
         tar xjf rpi2_toolchain.tar.bz2 -C ~/
         rm rpi2_toolchain.tar.bz2
     fi
