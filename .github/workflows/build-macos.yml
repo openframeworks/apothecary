@@ -22,7 +22,7 @@ jobs:
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
-      run: ./scripts/$TARGET/install.sh
+      run: ./scripts/osx/install.sh
     - name: Build64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: scripts/build.sh
