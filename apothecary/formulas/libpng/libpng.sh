@@ -164,7 +164,12 @@ function copy() {
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include/" $1/include
-
+  elif [ "$TYPE" == "osx" ] ; then
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		mkdir -p $1/include
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
