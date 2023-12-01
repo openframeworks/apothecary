@@ -17,6 +17,7 @@ jobs:
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
+    steps:
     - name: Build64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: scripts/build.sh
@@ -33,23 +34,22 @@ jobs:
         TARGET: "osx"
         ARCH: arm64
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
-        run: ./scripts/calculate_formulas.sh
-      - name: Scripts Install
-        run: ./scripts/$TARGET/install.sh
-      - name: build
-        run: ./scripts/build.sh
-        env:
-            DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
-            GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Update Release
-        uses: johnwbyrd/update-release@v1.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: nightly
-          release: nightly
-          prerelease: false
-          files: out/openFrameworksLibs_${{matrix.cfg.target}}${{matrix.cfg.job}}.tar.bz2
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    - uses: actions/checkout@v4
+    - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
+      run: ./scripts/calculate_formulas.sh
+    - name: Scripts Install
+      run: ./scripts/$TARGET/install.sh
+    - name: build
+      run: ./scripts/build.sh
+      env:
+          DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+    - name: Update Release
+      uses: johnwbyrd/update-release@v1.0.0
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: nightly
+        release: nightly
+        prerelease: false
+        files: out/openFrameworksLibs_${{matrix.cfg.target}}${{matrix.cfg.job}}.tar.bz2
+      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && github.ref == 'refs/heads/master'
