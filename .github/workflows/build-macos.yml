@@ -12,23 +12,27 @@ jobs:
   build-macos-platforms:
     runs-on: macos-12
     strategy:
-        matrix:
-            cfg:
-            - {target: osx, job: 1}
-            - {target: osx, job: 2}
-            - {target: osx, job: 3}
-            - {target: osx, job: 4}
-            # - {target: ios, job: 1}
-            # - {target: ios, job: 2}
-            # - {target: ios, job: 3}
-            # - {target: ios, job: 4}
-            # - {target: tvos, job: 1}
-            # - {target: tvos, job: 2}
-            # - {target: tvos, job: 3}
-            # - {target: tvos, job: 4}
+      matrix:
+        bundle: [1,2,3,4]
     env:
        TARGET: ${{matrix.cfg.target}}
        BUNDLE: ${{matrix.cfg.job}}
+    - name: Build64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: scripts/build.sh
+      env:
+        BUNDLE: ${{ matrix.bundle }}
+        TARGET: "osx"
+        ARCH: x86_64
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+    - name: BuildARM64
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: scripts/build.sh
+      env:
+        BUNDLE: ${{ matrix.bundle }}
+        TARGET: "osx"
+        ARCH: arm64
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     steps:
       - uses: actions/checkout@v2
       - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
