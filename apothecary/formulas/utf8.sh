@@ -6,8 +6,8 @@
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten" )
 
 # define the version
-VER=3.2.5
-VER_=3_2_5
+VER=4.0.2
+VER_=4_0_2
 
 # tools for git use
 GIT_URL=https://github.com/nemtrif/utfcpp
