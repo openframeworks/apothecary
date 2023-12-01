@@ -20,7 +20,7 @@ Emscripten        | [![build-emscripten](https://github.com/openframeworks/apoth
 macOS / iOS / tvOS        | [![build-macos](https://github.com/openframeworks/apothecary/workflows/build-macos/badge.svg)](https://github.com/openframeworks/apothecary/actions)
 
 ## Built Libraries
-Updates on master branch are automatically pushed to [http://ci.openframeworks.cc/libs/ ](http://ci.openframeworks.cc/libs/ ), and downloaded by running the `download_libs.sh` scripts in [openFrameworks if working from git](https://github.com/openframeworks/apothecary/#developers).
+Updates on master branch are automatically pushed to [Nightly Releases](https://github.com/openframeworks/apothecary/releases), and downloaded by running the `download_libs.sh` scripts in [openFrameworks if working from git](https://github.com/openframeworks/apothecary/#developers).
 
 #### Running directly
 To build one of the dependencies, you can run a command like this to compile OpenCV on OSX`

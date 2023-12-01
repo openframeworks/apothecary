@@ -17,7 +17,7 @@ VER=44459
 GIT_URL=
 GIT_TAG=
 
-URL=http://ci.openframeworks.cc/libs/fmod
+URL=http://openframeworks.cc/ci/fmod
 
 # download the source code and unpack it into LIB_NAME
 function download() {
