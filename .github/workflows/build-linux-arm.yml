@@ -15,7 +15,7 @@ jobs:
          TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/rpi_toolchain"
          TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v4
         - name: Scripts Calc Formula
           run: ./scripts/calculate_formulas.sh
         - name: Scripts Install
