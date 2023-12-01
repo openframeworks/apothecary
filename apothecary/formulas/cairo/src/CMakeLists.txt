@@ -124,7 +124,7 @@ list(APPEND enabled_cairo_pkgconf cairo-qt.pc)
 endif()
 
 
-
+if(APPLE)
 list(APPEND supported_cairo_headers ${cairo_quartz_headers})
 list(APPEND all_cairo_headers ${cairo_quartz_headers})
 list(APPEND all_cairo_private ${cairo_quartz_private})
@@ -174,6 +174,7 @@ list(APPEND all_cairo_pkgconf cairo-quartz-image.pc)
 list(APPEND enabled_cairo_pkgconf cairo-quartz-image.pc)
 endif()
 
+endif()
 
 
 if(CAIRO_HAS_WIN32_SURFACE)
