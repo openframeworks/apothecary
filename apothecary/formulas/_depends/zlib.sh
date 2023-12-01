@@ -4,14 +4,14 @@
 # http://zlib.net/
 
 # define the version
-VER=1.2.13
+VER=1.3
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" , "osx", "emscripten")
+FORMULA_TYPES=( "vs" "osx" "emscripten")
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -26,6 +26,9 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	: #noop
+	. "$DOWNLOADER_SCRIPT"
+	downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+
 }
 
 # executed inside the lib src dir
@@ -36,13 +39,12 @@ function build() {
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-     
         cmake .. \
-        	-A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
-            -DCMAKE_INSTALL_PREFIX=Release \
+            -A "${PLATFORM}" \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=ON \
 		    -DCMAKE_BUILD_TYPE=Release \
@@ -58,30 +60,38 @@ function build() {
         cmake --build . --config Release --target install
         cd ..
 	elif [ "$TYPE" == "osx" ] ; then
-		mkdir -p build
-		cd build
-
-		local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-        SYSROOT="-isysroot ${SDK_PATH}"
-        export SDK=macosx
-        export DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER}
-        export ARCHS="-arch arm64 -arch x86_64"
-
-		export CFLAGS="-O2 ${ARCHS} -fomit-frame-pointer -fno-stack-protector -pipe -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot ${SDK_PATH}"
-
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 		cmake .. \
-		    -G "Unix Makefiles" \
-		    -D CMAKE_VERBOSE_MAKEFILE=ON \
-		    -D BUILD_SHARED_LIBS=ON \
-		# cmake .. -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G "Unix Makefiles" 
-		make
+			-DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=OFF \
+		    -DSKIP_EXAMPLE=1 \
+		    -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF 
+
+		 cmake --build . --config Release --target install
+		 cd ..
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-B build \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+	    	-D BUILD_SHARED_LIBS=OFF \
+		    -DSKIP_EXAMPLE=1 \
 	    	-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -92,7 +102,7 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include 
-	  	cmake --build build --target install --config Release
+	  	cmake --build . --target install --config Release 
 	    cd ..
 	fi
 }
@@ -100,13 +110,17 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	if [ "$TYPE" == "osx" ] ; then
-		echo "no install"
+		mkdir -p $1/include    
+	    mkdir -p $1/lib/$TYPE
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/zlibstatic.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
+        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib

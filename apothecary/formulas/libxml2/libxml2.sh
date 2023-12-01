@@ -150,7 +150,6 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-            -CMAKE_SYSTEM_NAME="${PLATFORM}" \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DANDROID_ABI=$ABI \
@@ -175,25 +174,36 @@ function build() {
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -A "${PLATFORM}" \ 
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF 
         cmake --build . --config Release
         cd ..
     elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
 
-        mkdir -p build_$TYPE
-        cd build_$TYPE
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        mkdir -p "build_${TYPE}_$PLATFORM"
+        cd "build_${TYPE}_$PLATFORM"
+        rm -f CMakeCache.txt *.a *.o
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_WITH_LZMA=OFF \
@@ -212,8 +222,11 @@ function build() {
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF
-        cmake --build . --config Release
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DZLIB_ROOT="$LIBS_ROOT/zlib/" \
+            -DZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include" \
+            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        cmake --build . --config Release --target install
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
         find . -name "test*.c" | xargs -r rm
@@ -232,6 +245,7 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
         mkdir -p build_$TYPE
         cd build_$TYPE
+        rm -f CMakeCache.txt *.a *.o
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             -B build \
             -DCMAKE_BUILD_TYPE=Release \
@@ -277,6 +291,7 @@ function build() {
             find . -name "run*.c" | xargs -r rm
             mkdir -p build_$TYPE
             cd build_$TYPE
+            rm -f CMakeCache.txt *.a *.o
             cmake .. \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_C_STANDARD=17 \
@@ -316,6 +331,7 @@ function build() {
 
         mkdir -p build_$TYPE
         cd build_$TYPE
+        rm -f CMakeCache.txt *.a *.o
         cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -344,42 +360,100 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF
         cmake --build . --config Release
         cd ..
-    elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+     elif [ "$TYPE" == "ios" ]; then
+
+        echoVerbose "building $TYPE | $ARCH"
+        echoVerbose "--------------------"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        DEFS='
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \ 
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
+            -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
+            -DLIBXML2_WITH_UNICODE=ON \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DLIBXML2_WITH_ZLIB=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_DOCB=OFF \
+            -DLIBXML2_WITH_SCHEMATRON=OFF'
+
+        cmake .. ${DEFS} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -G Xcode
+        cmake --build . --config Release
+        cmake --install . --config Release
+
+        cd ..
+
+    elif [ "$TYPE" == "tvos" ]; then
         
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
 
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
+        mkdir -p "build_${TYPE}_$PLATFORM"
+        cd "build_${TYPE}_$PLATFORM"
+        rm -f CMakeCache.txt *.a *.o
+        cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DLIBXML2_WITH_LZMA=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBXML2_WITH_ZLIB=ON \
+            -DLIBXML2_WITH_FTP=OFF \
+            -DLIBXML2_WITH_HTTP=OFF \
+            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_ICONV=OFF \
+            -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_MODULES=OFF \
+            -DLIBXML_THREAD_ENABLED=OFF \
+            -DLIBXML2_WITH_OUTPUT=ON \
+            -DLIBXML2_WITH_PYTHON=OFF \
+            -DLIBXML2_WITH_DEBUG=OFF \
+            -DLIBXML2_WITH_THREADS=ON \
+            -DLIBXML2_WITH_PROGRAMS=OFF \
+            -DLIBXML2_WITH_TESTS=OFF \
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
+            -DZLIB_ROOT="$LIBS_ROOT/zlib/" \
+            -DZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include" \
+            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        for IOS_ARCH in ${IOS_ARCHS}; do
-            echo
-            echo
-            echo "Compiling for $IOS_ARCH"
-            source ../../ios_configure.sh $TYPE $IOS_ARCH
-            local PREFIX=$PWD/build/$TYPE/$IOS_ARCH
-            ./autogen --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-            ./configure --prefix=$PREFIX  --host=$HOST --target=$HOST  --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
-            make clean
-            make -j${PARALLEL_MAKE}
-            make install
-        done
-
-        cp -r build/$TYPE/arm64/* build/$TYPE/
-
-        if [ "$TYPE" == "ios" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-                         build/$TYPE/armv7/lib/libxml2.a \
-                         build/$TYPE/arm64/lib/libxml2.a \
-                        -output build/$TYPE/lib/libxml2.a
-        elif [ "$TYPE" == "tvos" ]; then
-            lipo -create build/$TYPE/x86_64/lib/libxml2.a \
-                         build/$TYPE/arm64/lib/libxml2.a \
-                        -output build/$TYPE/lib/libxml2.a
-        fi
+        cmake --build . --config Release
+        cd ..
     fi
 }
 
@@ -399,7 +473,17 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
         cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-    elif [ "$TYPE" == "android" ]; then
+        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
+
+    elif [ "$TYPE" == "tvos" ]; then
+        # copy lib
+        cp -Rv ./build_${TYPE}/Release-appletvos/libxml2.a $1/lib/$TYPE/xml2.a
+     elif [ "$TYPE" == "ios" ]; then
+        # copy lib
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a  
+    elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
@@ -407,7 +491,10 @@ function copy() {
         cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        cp -Rv ./build_${TYPE}/$(platform_name)/libxml2.a $1/lib/$TYPE/xml2.a
+        mkdir -p $1/include/libxml2
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include/libxml2
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         cp -v "build_${TYPE}/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h

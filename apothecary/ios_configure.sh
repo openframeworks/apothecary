@@ -100,15 +100,8 @@ export CROSS_SDK=${CSDK}.sdk
 
 SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
 MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-BITCODE="-fembed-bitcode"
-if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
-    MIN_IOS_VERSION=13.0
-    BITCODE=-fembed-bitcode
-fi
-if [[ "${IOS_ARCH}" == "armv7" ]]; then #maximum for armv7
-    MIN_IOS_VERSION=10.0
-    BITCODE=-fembed-bitcode 
-fi
+MIN_IOS_VERSION=13.0
+
 
 
 export CC="$(xcrun -find -sdk ${SDK} clang)"
@@ -118,10 +111,10 @@ export LIPO="$(xcrun -find -sdk ${SDK} lipo)"
 export SYSROOT="$(xcrun -sdk ${SDK} --show-sdk-path)"
 export CFLAGS_CMAKE="-arch ${IOS_ARCH} "
 export CPPFLAGS_CMAKE="-arch ${IOS_ARCH}  "
-export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
-export CPPFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 $BITCODE -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2 -fPIC $MIN_TYPE$MIN_IOS_VERSION"
+export CPPFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT} -pipe -Oz -gdwarf-2-fPIC $MIN_TYPE$MIN_IOS_VERSION"
 export LDFLAGS="-arch ${IOS_ARCH}  -isysroot ${SYSROOT}"
 if [ "$SDK" = "iphonesimulator" ]; then
-        export CPPFLAGS="$CPPFLAGS -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
-        export CPPFLAGS_CMAKE="${CPPFLAGS_CMAKE}  -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+    export CPPFLAGS="$CPPFLAGS -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
+    export CPPFLAGS_CMAKE="${CPPFLAGS_CMAKE}  -D__IPHONE_OS_VERSION_MIN_REQUIRED=${IPHONEOS_DEPLOYMENT_TARGET%%.*}0000"
 fi

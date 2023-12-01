@@ -47,57 +47,44 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	if [ "$TYPE" == "osx" ] ; then
-		local BUILD_TO_DIR=$BUILD_DIR/freetype/build/$TYPE/
+		
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o
 
-		# these flags are used to create a fat arm64/x86_64 binary with libc++
-		# see https://gist.github.com/tgfrerer/8e2d973ed0cfdd514de6
-		local FAT_CFLAGS="-arch arm64 -arch x86_64 -stdlib=libc++ -mmacosx-version-min=${OSX_MIN_SDK_VER}"
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
 
-		set -e
-		CURRENTPATH=`pwd`
+		DEFS="-DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_C_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DZLIB_ROOT=${ZLIB_ROOT} \
+		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
+		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
+            -DFT_DISABLE_ZLIB=OFF \
+            -DFT_DISABLE_BZIP2=TRUE \
+            -DFT_DISABLE_PNG=OFF \
+            -DFT_DISABLE_HARFBUZZ=TRUE \
+            -DFT_DISABLE_BROTLI=TRUE \
+		    -DBUILD_SHARED_LIBS=OFF \
+		    -DENABLE_STATIC=ON \
+			-DCMAKE_INSTALL_PREFIX=Release \
+			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+			-DCMAKE_INSTALL_INCLUDEDIR=include"
 
-		# Validate environment
-		case $XCODE_DEV_ROOT in
-		     *\ * )
-		           echo "Your Xcode path contains whitespaces, which is not supported."
-		           exit 1
-		          ;;
-		esac
-		case $CURRENTPATH in
-		     *\ * )
-		           echo "Your path contains whitespaces, which is not supported by 'make install'."
-		           exit 1
-		          ;;
-		esac
-
-		local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
-        
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
-
-		./configure --prefix=$BUILD_TO_DIR --without-bzip2 --without-brotli --with-harfbuzz=no --enable-static=yes --enable-shared=no \
-			CFLAGS="$FAT_CFLAGS -fPIC -pipe -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden -isysroot${SDK_PATH}"
-		make clean
-		make -j${PARALLEL_MAKE}
-		make install
-		cp $BUILD_TO_DIR/lib/libfreetype.a lib/$TYPE/libfreetype.a
-
-		cd lib/$TYPE/
-
-		mkdir -p "$BUILD_ROOT_DIR/lib/pkgconfig/"
-
-		# copy pkgconfig file to _buildroot/lib/pkgconfig
-		cp -v $BUILD_TO_DIR/lib/pkgconfig/freetype2.pc $BUILD_ROOT_DIR/lib/pkgconfig/
-
-		# # copy fat lib to where pkgconfig points to, so that subsequent build stages will find it.
-		# pkgconfig points to the $BUILD_TO_DIR
-		cp -vf libfreetype.a $BUILD_TO_DIR/lib/libfreetype.a
-
-		cd ../../
-
-		unset OSX_ARCH STDLIB TOOLCHAIN CC CPP CXX
-
-		echo "-----------"
-		echo "$BUILD_DIR"
+			cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+            	-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+					
+		cmake --build . --config Release --target install
+		cd ..	
 
 	elif [ "$TYPE" == "vs" ] ; then
 		
@@ -113,9 +100,9 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib" 
 
-        rm -rf "build_${TYPE}_${ARCH}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.a *.o
         DEFS="
         	-DCMAKE_BUILD_TYPE=Release \
         	-DCMAKE_C_STANDARD=17 \
@@ -166,229 +153,42 @@ function build() {
 
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
 
-		CSTANDARD=c11 # c89 | c99 | c11 | gnu11
-		CPPSTANDARD=c++11 # c89 | c99 | c11 | gnu11
-		COMPILER_CTYPE=clang # clang, gcc
-		COMPILER_CPPTYPE=clang++ # clang, gcc
-		STDLIB=libc++
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o
 
-		local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="arm64 x86_64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
 
-		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-		set -e
-		CURRENTPATH=`pwd`
+		DEFS="-DCMAKE_BUILD_TYPE=Release \
+		    -DCMAKE_C_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DZLIB_ROOT=${ZLIB_ROOT} \
+		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
+		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
+            -DFT_DISABLE_ZLIB=OFF \
+            -DFT_DISABLE_BZIP2=TRUE \
+            -DFT_DISABLE_PNG=OFF \
+            -DFT_DISABLE_HARFBUZZ=TRUE \
+            -DFT_DISABLE_BROTLI=TRUE \
+		    -DBUILD_SHARED_LIBS=OFF \
+		    -DENABLE_STATIC=ON \
+			-DCMAKE_INSTALL_PREFIX=Release \
+			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+			-DCMAKE_INSTALL_INCLUDEDIR=include"
 
-		DEVELOPER=$XCODE_DEV_ROOT
-		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-		VERSION=$VER
-
-		SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [ "$TYPE" == "ios" ]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-
-		mkdir -p "builddir/$TYPE"
-
-		# Validate environment
-		case $XCODE_DEV_ROOT in
-		     *\ * )
-		           echo "Your Xcode path contains whitespaces, which is not supported."
-		           exit 1
-		          ;;
-		esac
-		case $CURRENTPATH in
-		     *\ * )
-		           echo "Your path contains whitespaces, which is not supported by 'make install'."
-		           exit 1
-		          ;;
-		esac
-
-
-		local TOOLCHAIN=$XCODE_DEV_ROOT/Toolchains/XcodeDefault.xctoolchain
-		MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-		local IOS_CC=$TOOLCHAIN/usr/bin/cc
-		local IOS_HOST="arm-apple-darwin"
-		local IOS_PREFIX="/usr/local/iphone"
-
-		export CC=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
-		export CXX=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
-
-		export LD=$TOOLCHAIN/usr/bin/ld
-		export AR=$TOOLCHAIN/usr/bin/ar
-		export AS=$TOOLCHAIN/usr/bin/as
-		export NM=$TOOLCHAIN/usr/bin/nm
-		export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-		# loop through architectures! yay for loops!
-		for IOS_ARCH in ${IOS_ARCHS}
-		do
-			set +e
-
-			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-			then
-	            if [ "${TYPE}" == "tvos" ]; then
-	                PLATFORM="AppleTVSimulator"
-	            elif [ "$TYPE" == "ios" ]; then
-	                PLATFORM="iPhoneSimulator"
-	            fi
-			else
-	            if [ "${TYPE}" == "tvos" ]; then
-	                PLATFORM="AppleTVOS"
-	            elif [ "$TYPE" == "ios" ]; then
-	                PLATFORM="iPhoneOS"
-	            fi
-			fi
-
-			export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-			export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-			export BUILD_TOOLS="${DEVELOPER}"
-
-			if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-	    		MIN_IOS_VERSION=13.0 # 7.0 as this is the minimum for these architectures
-		    elif [ "${IOS_ARCH}" == "armv7" ] || ["${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=10.0 
-		    fi
-
-	        if [ "${TYPE}" == "tvos" ]; then
-			    MIN_TYPE=-mtvos-version-min=
-			    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-			    	MIN_TYPE=-mtvos-version-min=
-			    fi
-	        elif [ "$TYPE" == "ios" ]; then
-	            MIN_TYPE=-miphoneos-version-min=
-	            if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-	                MIN_TYPE=-mios-simulator-version-min=
-	            fi
-	        fi
-
-	        BITCODE=""
-	        if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
-	            BITCODE=-fembed-bitcode;
-	            MIN_IOS_VERSION=13.0
-	        fi
-
-			export EXTRA_LINK_FLAGS="-std=$CSTANDARD $BITCODE -DNDEBUG -stdlib=$STDLIB $MIN_TYPE$MIN_IOS_VERSION -Os -fPIC -Wno-trigraphs -fpascal-strings -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden"
-			export EXTRA_FLAGS="-arch $IOS_ARCH $EXTRA_LINK_FLAGS $BITCODE -DNDEBUG -fvisibility-inlines-hidden $MIN_TYPE$MIN_IOS_VERSION"
-
-			export PLATFORM_INCLUDE="-I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/ -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/libxml2"
-		    export CFLAGS="-arch $IOS_ARCH $EXTRA_FLAGS -pipe -no-cpp-precomp -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $PLATFORM_INCLUDE"
-			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS"
-			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS"
-			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS"
-
-			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
-			LOG="$CURRENTPATH/builddir/$TYPE/$IOS_ARCH/build-freetype-${VER}-$IOS_ARCH.log"
-			echo "-----------------"
-			echo "Building FreeType-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
-			set +e
-
-			echo "Running make for ${IOS_ARCH}"
-			echo "Please stand by..."
-
-			echo "Configuring..."
-			./configure --without-bzip2 --prefix=$IOS_PREFIX --host=$IOS_HOST --with-harfbuzz=no --without-brotli --enable-static=yes --enable-shared=no \
-			CC="$CC" \
-			CFLAGS="$CFLAGS" \
-			CXXFLAGS="$CXXFLAGS" \
-			CXX="$CXX" \
- 			AS=$AS \
- 			AR=$AR \
-	        NM=$NM \
-			LDFLAGS="$LDFLAGS" >> "${LOG}" 2>&1
-			echo "Cleaning up from Make"
-		    make clean >> "${LOG}" 2>&1
-			echo "Making..."
-			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
-			if [ $? != 0 ];
-		    then
-		    	tail -n 100 "${LOG}"
-		    	echo "Problem while make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Make Successful for ${IOS_ARCH}"
-		    fi
-		    echo "Cleaning up from Make"
-		    make clean >> "${LOG}" 2>&1
-		    if [ $? != 0 ];
-		    then
-		    	tail -n 100 "${LOG}"
-		    	echo "Problem while cleaning make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Finished cleaning."
-		    fi
-
-		    cp objs/.libs/libfreetype.a lib/$TYPE/libfreetype-$IOS_ARCH.a
-
-		    echo "-----------------"
-		    echo "Build Successful for $IOS_ARCH"
-
-		    unset CFLAGS LINKFLAGS LDFLAGS CXXFLAGS PLATFORM_INCLUDE EXTRA_FLAGS EXTRA_LINK_FLAGS
-		done
-
-		echo "-----------------"
-		echo `pwd`
-		echo "Finished for all architectures."
-		mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-		LOG="$CURRENTPATH/builddir/$TYPE/build-freetype-${VER}-lipo.log"
-		# link into universal lib
-		echo "Running lipo to create fat lib"
-		echo "Please stand by..."
-		# link into universal lib
-		cd lib/$TYPE/
-
-		if [ "${TYPE}" == "tvos" ]; then
-			lipo -create libfreetype-arm64.a \
-						libfreetype-x86_64.a \
-						-output libfreetype.a \
-				 	>> "${LOG}" 2>&1
-		elif [ "$TYPE" == "ios" ]; then
-			# libfreetype-armv7s.a  \
-			lipo -create libfreetype-armv7.a \
-						libfreetype-arm64.a \
-						libfreetype-x86_64.a \
-						-output libfreetype.a \
-				 	>> "${LOG}" 2>&1
-		fi
-
-		if [ $? != 0 ];
-		then
-			tail -n 10 "${LOG}"
-		    echo "Problem while creating fat lib with lipo - Please check ${LOG}"
-		    exit 1
-		else
-		   	echo "Lipo Successful."
-		fi
-		cd ../../
-		lipo -info lib/$TYPE/libfreetype.a
-
-		if [[ "$TYPE" == "ios" ]]; then
-			echo "--------------------"
-			echo "Stripping any lingering symbols"
-
-			SLOG="$CURRENTPATH/lib/$TYPE/freetype-stripping.log"
-
-			strip -x lib/$TYPE/libfreetype.a >> "${SLOG}" 2>&1
-			if [ $? != 0 ];
-			then
-				tail -n 100 "${SLOG}"
-			    echo "Problem while stripping lib - Please check ${SLOG}"
-			    exit 1
-			else
-			    echo "Strip Successful for ${SLOG}"
-			fi
-		fi
-
-		echo "--------------------"
-		echo "Build Successful for FreeType $TYPE $VER"
-
-		unset IOS_AR IOS_HOST IOS_PREFIX  CPP CXX CXXCPP CXXCPP CC LD AS AR NM RANLIB LDFLAGS STDLIB
+			cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF 
+					
+		cmake --build . --config Release --target install
+		cd ..
 
 	elif [ "$TYPE" == "android" ] ; then
 
@@ -500,12 +300,11 @@ function copy() {
 
 	# copy lib
 	mkdir -p $1/lib/$TYPE
-	if [ "$TYPE" == "osx" ] ; then
-		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
-		cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/freetype.a
-	elif [ "$TYPE" == "vs" ] ; then
+	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
+	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/Release/lib/freetype.lib" $1/lib/$TYPE/$PLATFORM/libfreetype.lib
@@ -535,21 +334,20 @@ function copy() {
 function clean() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		vs-clean "freetype.sln"
+		rm -f CMakeCache.txt *.a *.o *.lib
+		rm -f "build_${TYPE}_${PLATFORM}"
 	elif [ "$TYPE" == "android" ] ; then
 		rm -f CMakeCache.txt *.a *.o
 		rm -f builddir/$TYPE
 		rm -f builddir
 		rm -f lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
+	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" || "$TYPE" == "osx" ]]; then
 		make clean
-		rm -f *.a *.lib
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+		rm -f CMakeCache.txt *.a *.o
+		rm -f "build_${TYPE}_${PLATFORM}"
 	else
+		rm -f CMakeCache.txt *.a *.o *.lib
 		make clean
-		rm -f *.a *.lib
 	fi
 }
 

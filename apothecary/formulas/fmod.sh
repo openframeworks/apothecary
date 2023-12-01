@@ -17,7 +17,7 @@ VER=44459
 GIT_URL=
 GIT_TAG=
 
-URL=http://ci.openframeworks.cc/libs/fmod
+URL=http://openframeworks.cc/ci/fmod
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -45,6 +45,12 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
+		if [ "$ARCH" == "arm64" ]; then
+			return 0;
+		fi
+	fi
 
 	if [ "$TYPE" == "osx" ]; then
 		cd lib/osx

@@ -15,490 +15,581 @@ set(enabled_cairo_sources ${cairo_sources})
 set(all_cairo_pkgconf cairo.pc)
 set(enabled_cairo_pkgconf cairo.pc)
 
+
+if(CAIRO_HAS_XLIB_SURFACE)
 set(supported_cairo_headers ${cairo_xlib_headers})
 list(APPEND all_cairo_headers ${cairo_xlib_headers})
 list(APPEND all_cairo_private ${cairo_xlib_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xlib_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xlib_sources})
-if(CAIRO_HAS_XLIB_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_xlib_headers})
 list(APPEND enabled_cairo_private ${cairo_xlib_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xlib_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xlib_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xlib.pc)
+
 if(CAIRO_HAS_XLIB_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-xlib.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xlib.pc)
 endif()
 
+
+if(CAIRO_HAS_XLIB_XRENDER_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_xlib_xrender_headers})
 list(APPEND all_cairo_headers ${cairo_xlib_xrender_headers})
 list(APPEND all_cairo_private ${cairo_xlib_xrender_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xlib_xrender_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xlib_xrender_sources})
-if(CAIRO_HAS_XLIB_XRENDER_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_xlib_xrender_headers})
 list(APPEND enabled_cairo_private ${cairo_xlib_xrender_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xlib_xrender_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xlib_xrender_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xlib-xrender.pc)
+
 if(CAIRO_HAS_XLIB_XRENDER_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-xlib-xrender.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xlib-xrender.pc)
 endif()
 
+
+if(CAIRO_HAS_XCB_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_xcb_headers})
 list(APPEND all_cairo_headers ${cairo_xcb_headers})
 list(APPEND all_cairo_private ${cairo_xcb_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xcb_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xcb_sources})
-if(CAIRO_HAS_XCB_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_xcb_headers})
 list(APPEND enabled_cairo_private ${cairo_xcb_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xcb_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xcb_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xcb.pc)
+
 if(CAIRO_HAS_XCB_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-xcb.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xcb.pc)
 endif()
 
+
+if(CAIRO_HAS_XLIB_XCB_FUNCTIONS)
 list(APPEND unsupported_cairo_headers ${cairo_xlib_xcb_headers})
 list(APPEND all_cairo_headers ${cairo_xlib_xcb_headers})
 list(APPEND all_cairo_private ${cairo_xlib_xcb_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xlib_xcb_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xlib_xcb_sources})
-if(CAIRO_HAS_XLIB_XCB_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_xlib_xcb_headers})
 list(APPEND enabled_cairo_private ${cairo_xlib_xcb_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xlib_xcb_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xlib_xcb_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xlib-xcb.pc)
+
 if(CAIRO_HAS_XLIB_XCB_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-xlib-xcb.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xlib-xcb.pc)
 endif()
 
+
+if(CAIRO_HAS_XCB_SHM_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_xcb_shm_headers})
 list(APPEND all_cairo_headers ${cairo_xcb_shm_headers})
 list(APPEND all_cairo_private ${cairo_xcb_shm_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xcb_shm_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xcb_shm_sources})
-if(CAIRO_HAS_XCB_SHM_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_xcb_shm_headers})
 list(APPEND enabled_cairo_private ${cairo_xcb_shm_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xcb_shm_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xcb_shm_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xcb-shm.pc)
+
 if(CAIRO_HAS_XCB_SHM_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-xcb-shm.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xcb-shm.pc)
 endif()
 
+
+if (CAIRO_HAS_QT_SURFACE})
 list(APPEND unsupported_cairo_headers ${cairo_qt_headers})
 list(APPEND all_cairo_headers ${cairo_qt_headers})
 list(APPEND all_cairo_private ${cairo_qt_private})
 list(APPEND all_cairo_cxx_sources ${cairo_qt_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_qt_sources})
-if (CAIRO_HAS_QT_SURFACE})
 list(APPEND enabled_cairo_headers ${cairo_qt_headers})
 list(APPEND enabled_cairo_private ${cairo_qt_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_qt_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_qt_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-qt.pc)
+
 if(CAIRO_HAS_QT_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-qt.pc)
 list(APPEND enabled_cairo_pkgconf cairo-qt.pc)
 endif()
 
+
+if(APPLE)
 list(APPEND supported_cairo_headers ${cairo_quartz_headers})
 list(APPEND all_cairo_headers ${cairo_quartz_headers})
 list(APPEND all_cairo_private ${cairo_quartz_private})
 list(APPEND all_cairo_cxx_sources ${cairo_quartz_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_quartz_sources})
-if(CAIRO_HAS_QUARTZ_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_quartz_headers})
 list(APPEND enabled_cairo_private ${cairo_quartz_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_quartz_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_quartz_sources})
-endif()
-list(APPEND all_cairo_pkgconf cairo-quartz.pc)
-if(CAIRO_HAS_QUARTZ_SURFACE)
-list(APPEND enabled_cairo_pkgconf cairo-quartz.pc)
-endif()
 
-list(APPEND supported_cairo_headers ${cairo_quartz_font_headers})
-list(APPEND all_cairo_headers ${cairo_quartz_font_headers})
-list(APPEND all_cairo_private ${cairo_quartz_font_private})
-list(APPEND all_cairo_cxx_sources ${cairo_quartz_font_cxx_sources})
-list(APPEND all_cairo_sources ${cairo_quartz_font_sources})
+
+
+list(APPEND all_cairo_pkgconf cairo-quartz.pc)
+list(APPEND enabled_cairo_pkgconf cairo-quartz.pc)
+
+
+
+
 if(CAIRO_HAS_QUARTZ_FONT)
 list(APPEND enabled_cairo_headers ${cairo_quartz_font_headers})
 list(APPEND enabled_cairo_private ${cairo_quartz_font_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_quartz_font_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_quartz_font_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-quartz-font.pc)
+
 if(CAIRO_HAS_QUARTZ_FONT)
+list(APPEND all_cairo_pkgconf cairo-quartz-font.pc)
 list(APPEND enabled_cairo_pkgconf cairo-quartz-font.pc)
 endif()
 
+
+
+if(CAIRO_HAS_QUARTZ_IMAGE_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_quartz_image_headers})
 list(APPEND all_cairo_headers ${cairo_quartz_image_headers})
 list(APPEND all_cairo_private ${cairo_quartz_image_private})
 list(APPEND all_cairo_cxx_sources ${cairo_quartz_image_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_quartz_image_sources})
-if(CAIRO_HAS_QUARTZ_IMAGE_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_quartz_image_headers})
 list(APPEND enabled_cairo_private ${cairo_quartz_image_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_quartz_image_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_quartz_image_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-quartz-image.pc)
+
 if(CAIRO_HAS_QUARTZ_IMAGE_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-quartz-image.pc)
 list(APPEND enabled_cairo_pkgconf cairo-quartz-image.pc)
 endif()
 
+endif()
+
+
+if(CAIRO_HAS_WIN32_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_win32_headers})
 list(APPEND all_cairo_headers ${cairo_win32_headers})
 list(APPEND all_cairo_private ${cairo_win32_private})
 list(APPEND all_cairo_cxx_sources ${cairo_win32_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_win32_sources})
-if(CAIRO_HAS_WIN32_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_win32_headers})
 list(APPEND enabled_cairo_private ${cairo_win32_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_win32_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_win32_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-win32.pc)
+
 if(CAIRO_HAS_WIN32_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-win32.pc)
 list(APPEND enabled_cairo_pkgconf cairo-win32.pc)
 endif()
 
+
+
+if(CAIRO_HAS_WIN32_FONT)
 list(APPEND supported_cairo_headers ${cairo_win32_font_headers})
 list(APPEND all_cairo_headers ${cairo_win32_font_headers})
 list(APPEND all_cairo_private ${cairo_win32_font_private})
 list(APPEND all_cairo_cxx_sources ${cairo_win32_font_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_win32_font_sources})
-if(CAIRO_HAS_WIN32_FONT)
 list(APPEND enabled_cairo_headers ${cairo_win32_font_headers})
 list(APPEND enabled_cairo_private ${cairo_win32_font_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_win32_font_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_win32_font_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-win32-font.pc)
+
+
 if(CAIRO_HAS_WIN32_FONT)
+list(APPEND all_cairo_pkgconf cairo-win32-font.pc)
 list(APPEND enabled_cairo_pkgconf cairo-win32-font.pc)
 endif()
 
+
+
+if(CAIRO_HAS_SKIA_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_skia_headers})
 list(APPEND all_cairo_headers ${cairo_skia_headers})
 list(APPEND all_cairo_private ${cairo_skia_private})
 list(APPEND all_cairo_cxx_sources ${cairo_skia_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_skia_sources})
-if(CAIRO_HAS_SKIA_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_skia_headers})
 list(APPEND enabled_cairo_private ${cairo_skia_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_skia_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_skia_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-skia.pc)
+
+
 if(CAIRO_HAS_SKIA_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-skia.pc)
 list(APPEND enabled_cairo_pkgconf cairo-skia.pc)
 endif()
 
+
+
+if(CAIRO_HAS_OS2_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_os2_headers})
 list(APPEND all_cairo_headers ${cairo_os2_headers})
 list(APPEND all_cairo_private ${cairo_os2_private})
 list(APPEND all_cairo_cxx_sources ${cairo_os2_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_os2_sources})
-if(CAIRO_HAS_OS2_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_os2_headers})
 list(APPEND enabled_cairo_private ${cairo_os2_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_os2_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_os2_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-os2.pc)
+
+
 if(CAIRO_HAS_OS2_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-os2.pc)
 list(APPEND enabled_cairo_pkgconf cairo-os2.pc)
 endif()
 
+
+
+if(CAIRO_HAS_BEOS_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_beos_headers})
 list(APPEND all_cairo_headers ${cairo_beos_headers})
 list(APPEND all_cairo_private ${cairo_beos_private})
 list(APPEND all_cairo_cxx_sources ${cairo_beos_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_beos_sources})
-if(CAIRO_HAS_BEOS_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_beos_headers})
 list(APPEND enabled_cairo_private ${cairo_beos_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_beos_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_beos_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-beos.pc)
+
+
 if(CAIRO_HAS_BEOS_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-beos.pc)
 list(APPEND enabled_cairo_pkgconf cairo-beos.pc)
 endif()
 
+
+
+if(CAIRO_HAS_DRM_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_drm_headers})
 list(APPEND all_cairo_headers ${cairo_drm_headers})
 list(APPEND all_cairo_private ${cairo_drm_private})
 list(APPEND all_cairo_cxx_sources ${cairo_drm_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_drm_sources})
-if(CAIRO_HAS_DRM_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_drm_headers})
 list(APPEND enabled_cairo_private ${cairo_drm_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_drm_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_drm_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-drm.pc)
+
+
 if(CAIRO_HAS_DRM_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-drm.pc)
 list(APPEND enabled_cairo_pkgconf cairo-drm.pc)
 endif()
 
+
+if(CAIRO_HAS_GALLIUM_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_gallium_headers})
 list(APPEND all_cairo_headers ${cairo_gallium_headers})
 list(APPEND all_cairo_private ${cairo_gallium_private})
 list(APPEND all_cairo_cxx_sources ${cairo_gallium_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_gallium_sources})
-if(CAIRO_HAS_GALLIUM_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_gallium_headers})
 list(APPEND enabled_cairo_private ${cairo_gallium_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_gallium_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_gallium_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-gallium.pc)
+
 if(CAIRO_HAS_GALLIUM_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-gallium.pc)
 list(APPEND enabled_cairo_pkgconf cairo-gallium.pc)
 endif()
 
+
+
+if(CAIRO_HAS_PNG_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_png_headers})
 list(APPEND all_cairo_headers ${cairo_png_headers})
 list(APPEND all_cairo_private ${cairo_png_private})
 list(APPEND all_cairo_cxx_sources ${cairo_png_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_png_sources})
-if(CAIRO_HAS_PNG_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_png_headers})
 list(APPEND enabled_cairo_private ${cairo_png_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_png_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_png_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-png.pc)
+
+
 if(CAIRO_HAS_PNG_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-png.pc)
 list(APPEND enabled_cairo_pkgconf cairo-png.pc)
 endif()
 
+
+
+if(CAIRO_HAS_GL_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_gl_headers})
 list(APPEND all_cairo_headers ${cairo_gl_headers})
 list(APPEND all_cairo_private ${cairo_gl_private})
 list(APPEND all_cairo_cxx_sources ${cairo_gl_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_gl_sources})
-if(CAIRO_HAS_GL_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_gl_headers})
 list(APPEND enabled_cairo_private ${cairo_gl_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_gl_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_gl_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-gl.pc)
+
+
 if(CAIRO_HAS_GL_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-gl.pc)
 list(APPEND enabled_cairo_pkgconf cairo-gl.pc)
 endif()
 
+
+
+if(CAIRO_HAS_GLESV2_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_glesv2_headers})
 list(APPEND all_cairo_headers ${cairo_glesv2_headers})
 list(APPEND all_cairo_private ${cairo_glesv2_private})
 list(APPEND all_cairo_cxx_sources ${cairo_glesv2_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_glesv2_sources})
-if(CAIRO_HAS_GLESV2_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_glesv2_headers})
 list(APPEND enabled_cairo_private ${cairo_glesv2_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_glesv2_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_glesv2_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-glesv2.pc)
+
 if(CAIRO_HAS_GLESV2_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-glesv2.pc)
 list(APPEND enabled_cairo_pkgconf cairo-glesv2.pc)
 endif()
 
+
+
+if(CAIRO_HAS_DIRECTFB_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_directfb_headers})
 list(APPEND all_cairo_headers ${cairo_directfb_headers})
 list(APPEND all_cairo_private ${cairo_directfb_private})
 list(APPEND all_cairo_cxx_sources ${cairo_directfb_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_directfb_sources})
-if(CAIRO_HAS_DIRECTFB_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_directfb_headers})
 list(APPEND enabled_cairo_private ${cairo_directfb_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_directfb_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_directfb_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-directfb.pc)
+
+
 if(CAIRO_HAS_DIRECTFB_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-directfb.pc)
 list(APPEND enabled_cairo_pkgconf cairo-directfb.pc)
 endif()
 
+
+
+if(CAIRO_HAS_VG_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_vg_headers})
 list(APPEND all_cairo_headers ${cairo_vg_headers})
 list(APPEND all_cairo_private ${cairo_vg_private})
 list(APPEND all_cairo_cxx_sources ${cairo_vg_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_vg_sources})
-if(CAIRO_HAS_VG_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_vg_headers})
 list(APPEND enabled_cairo_private ${cairo_vg_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_vg_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_vg_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-vg.pc)
+
 if(CAIRO_HAS_VG_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-vg.pc)
 list(APPEND enabled_cairo_pkgconf cairo-vg.pc)
 endif()
 
+
+
+if(CAIRO_HAS_EGL_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_egl_headers})
 list(APPEND all_cairo_headers ${cairo_egl_headers})
 list(APPEND all_cairo_private ${cairo_egl_private})
 list(APPEND all_cairo_cxx_sources ${cairo_egl_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_egl_sources})
-if(CAIRO_HAS_EGL_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_egl_headers})
 list(APPEND enabled_cairo_private ${cairo_egl_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_egl_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_egl_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-egl.pc)
+
+
 if(CAIRO_HAS_EGL_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-egl.pc)
 list(APPEND enabled_cairo_pkgconf cairo-egl.pc)
 endif()
 
+
+
+if(CAIRO_HAS_GLX_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_glx_headers})
 list(APPEND all_cairo_headers ${cairo_glx_headers})
 list(APPEND all_cairo_private ${cairo_glx_private})
 list(APPEND all_cairo_cxx_sources ${cairo_glx_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_glx_sources})
-if(CAIRO_HAS_GLX_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_glx_headers})
 list(APPEND enabled_cairo_private ${cairo_glx_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_glx_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_glx_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-glx.pc)
+
 if(CAIRO_HAS_GLX_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-glx.pc)
 list(APPEND enabled_cairo_pkgconf cairo-glx.pc)
 endif()
 
+
+
+if(CAIRO_HAS_WGL_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_wgl_headers})
 list(APPEND all_cairo_headers ${cairo_wgl_headers})
 list(APPEND all_cairo_private ${cairo_wgl_private})
 list(APPEND all_cairo_cxx_sources ${cairo_wgl_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_wgl_sources})
-if(CAIRO_HAS_WGL_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_wgl_headers})
 list(APPEND enabled_cairo_private ${cairo_wgl_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_wgl_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_wgl_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-wgl.pc)
+
+
 if(CAIRO_HAS_WGL_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-wgl.pc)
 list(APPEND enabled_cairo_pkgconf cairo-wgl.pc)
 endif()
 
+
+
+if(CAIRO_HAS_SCRIPT_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_script_headers})
 list(APPEND all_cairo_headers ${cairo_script_headers})
 list(APPEND all_cairo_private ${cairo_script_private})
 list(APPEND all_cairo_cxx_sources ${cairo_script_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_script_sources})
-if(CAIRO_HAS_SCRIPT_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_script_headers})
 list(APPEND enabled_cairo_private ${cairo_script_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_script_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_script_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-script.pc)
+
 if(CAIRO_HAS_SCRIPT_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-script.pc)
 list(APPEND enabled_cairo_pkgconf cairo-script.pc)
 endif()
 
+
+
+if(CAIRO_HAS_FT_FONT)
 list(APPEND supported_cairo_headers ${cairo_ft_headers})
 list(APPEND all_cairo_headers ${cairo_ft_headers})
 list(APPEND all_cairo_private ${cairo_ft_private})
 list(APPEND all_cairo_cxx_sources ${cairo_ft_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_ft_sources})
-if(CAIRO_HAS_FT_FONT)
 list(APPEND enabled_cairo_headers ${cairo_ft_headers})
 list(APPEND enabled_cairo_private ${cairo_ft_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_ft_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_ft_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-ft.pc)
+
+
 if(CAIRO_HAS_FT_FONT)
+list(APPEND all_cairo_pkgconf cairo-ft.pc)
 list(APPEND enabled_cairo_pkgconf cairo-ft.pc)
 endif()
 
+
+
+if(CAIRO_HAS_FC_FONT)
 list(APPEND supported_cairo_headers ${cairo_fc_headers})
 list(APPEND all_cairo_headers ${cairo_fc_headers})
 list(APPEND all_cairo_private ${cairo_fc_private})
 list(APPEND all_cairo_cxx_sources ${cairo_fc_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_fc_sources})
-if(CAIRO_HAS_FC_FONT)
 list(APPEND enabled_cairo_headers ${cairo_fc_headers})
 list(APPEND enabled_cairo_private ${cairo_fc_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_fc_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_fc_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-fc.pc)
+
+
 if(CAIRO_HAS_FC_FONT)
+list(APPEND all_cairo_pkgconf cairo-fc.pc)
 list(APPEND enabled_cairo_pkgconf cairo-fc.pc)
 endif()
 
+
+
+if(CAIRO_HAS_PS_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_ps_headers})
 list(APPEND all_cairo_headers ${cairo_ps_headers})
 list(APPEND all_cairo_private ${cairo_ps_private})
 list(APPEND all_cairo_cxx_sources ${cairo_ps_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_ps_sources})
-if(CAIRO_HAS_PS_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_ps_headers})
 list(APPEND enabled_cairo_private ${cairo_ps_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_ps_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_ps_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-ps.pc)
+
 if(CAIRO_HAS_PS_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-ps.pc)
 list(APPEND enabled_cairo_pkgconf cairo-ps.pc)
 endif()
 
+
+
+if(CAIRO_HAS_PDF_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_pdf_headers})
 list(APPEND all_cairo_headers ${cairo_pdf_headers})
 list(APPEND all_cairo_private ${cairo_pdf_private})
 list(APPEND all_cairo_cxx_sources ${cairo_pdf_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_pdf_sources})
-if(CAIRO_HAS_PDF_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_pdf_headers})
 list(APPEND enabled_cairo_private ${cairo_pdf_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_pdf_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_pdf_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-pdf.pc)
+
 if(CAIRO_HAS_PDF_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-pdf.pc)
 list(APPEND enabled_cairo_pkgconf cairo-pdf.pc)
 endif()
 
+
+
+if(CAIRO_HAS_SVG_SURFACE)
 list(APPEND supported_cairo_headers ${cairo_svg_headers})
 list(APPEND all_cairo_headers ${cairo_svg_headers})
 list(APPEND all_cairo_private ${cairo_svg_private})
 list(APPEND all_cairo_cxx_sources ${cairo_svg_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_svg_sources})
-if(CAIRO_HAS_SVG_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_svg_headers})
 list(APPEND enabled_cairo_private ${cairo_svg_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_svg_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_svg_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-svg.pc)
+
 if(CAIRO_HAS_SVG_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-svg.pc)
 list(APPEND enabled_cairo_pkgconf cairo-svg.pc)
 endif()
 
+
+if(CAIRO_HAS_TEST_SURFACES)
 list(APPEND all_cairo_private ${cairo_test_surfaces_private} ${cairo_test_surfaces_headers})
 list(APPEND all_cairo_cxx_sources ${cairo_test_surfaces_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_test_surfaces_sources})
-if(CAIRO_HAS_TEST_SURFACES)
 list(APPEND enabled_cairo_private ${cairo_test_surfaces_private} ${cairo_test_surfaces_headers})
 list(APPEND enabled_cairo_cxx_sources ${cairo_test_surfaces_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_test_surfaces_sources})
@@ -544,35 +635,41 @@ list(APPEND enabled_cairo_private ${cairo_observer_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_observer_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_observer_sources})
 
+
+
+if(CAIRO_HAS_TEE_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_tee_headers})
 list(APPEND all_cairo_headers ${cairo_tee_headers})
 list(APPEND all_cairo_private ${cairo_tee_private})
 list(APPEND all_cairo_cxx_sources ${cairo_tee_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_tee_sources})
-if(CAIRO_HAS_TEE_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_tee_headers})
 list(APPEND enabled_cairo_private ${cairo_tee_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_tee_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_tee_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-tee.pc)
+
 if(CAIRO_HAS_TEE_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-tee.pc)
 list(APPEND enabled_cairo_pkgconf cairo-tee.pc)
 endif()
 
+
+
+if(CAIRO_HAS_XML_SURFACE)
 list(APPEND unsupported_cairo_headers ${cairo_xml_headers})
 list(APPEND all_cairo_headers ${cairo_xml_headers})
 list(APPEND all_cairo_private ${cairo_xml_private})
 list(APPEND all_cairo_cxx_sources ${cairo_xml_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_xml_sources})
-if(CAIRO_HAS_XML_SURFACE)
 list(APPEND enabled_cairo_headers ${cairo_xml_headers})
 list(APPEND enabled_cairo_private ${cairo_xml_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_xml_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_xml_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-xml.pc)
+
 if(CAIRO_HAS_XML_SURFACE)
+list(APPEND all_cairo_pkgconf cairo-xml.pc)
 list(APPEND enabled_cairo_pkgconf cairo-xml.pc)
 endif()
 
@@ -586,53 +683,61 @@ list(APPEND enabled_cairo_private ${cairo_user_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_user_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_user_sources})
 
+
+
+if(CAIRO_HAS_PTHREAD)
 list(APPEND all_cairo_private ${cairo_pthread_private} ${cairo_pthread_headers})
 list(APPEND all_cairo_cxx_sources ${cairo_pthread_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_pthread_sources})
-if(CAIRO_HAS_PTHREAD)
 list(APPEND enabled_cairo_private ${cairo_pthread_private} ${cairo_pthread_headers})
 list(APPEND enabled_cairo_cxx_sources ${cairo_pthread_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_pthread_sources})
 endif()
 
+
+if(CAIRO_HAS_GOBJECT_FUNCTIONS)
 list(APPEND supported_cairo_headers ${cairo_gobject_headers})
 list(APPEND all_cairo_headers ${cairo_gobject_headers})
 list(APPEND all_cairo_private ${cairo_gobject_private})
 list(APPEND all_cairo_cxx_sources ${cairo_gobject_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_gobject_sources})
-if(CAIRO_HAS_GOBJECT_FUNCTIONS)
 list(APPEND enabled_cairo_headers ${cairo_gobject_headers})
 list(APPEND enabled_cairo_private ${cairo_gobject_private})
 list(APPEND enabled_cairo_cxx_sources ${cairo_gobject_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_gobject_sources})
 endif()
-list(APPEND all_cairo_pkgconf cairo-gobject.pc)
+
+
 if(CAIRO_HAS_GOBJECT_FUNCTIONS)
+list(APPEND all_cairo_pkgconf cairo-gobject.pc)
 list(APPEND enabled_cairo_pkgconf cairo-gobject.pc)
 endif()
 
+
+if(CAIRO_HAS_TRACE)
 list(APPEND all_cairo_private ${cairo_trace_private} ${cairo_trace_headers})
 list(APPEND all_cairo_cxx_sources ${cairo_trace_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_trace_sources})
-if(CAIRO_HAS_TRACE)
 list(APPEND enabled_cairo_private ${cairo_trace_private} ${cairo_trace_headers})
 list(APPEND enabled_cairo_cxx_sources ${cairo_trace_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_trace_sources})
 endif()
 
+
+if(CAIRO_HAS_INTERPRETER)
 list(APPEND all_cairo_private ${cairo_interpreter_private} ${cairo_interpreter_headers})
 list(APPEND all_cairo_cxx_sources ${cairo_interpreter_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_interpreter_sources})
-if(CAIRO_HAS_INTERPRETER)
 list(APPEND enabled_cairo_private ${cairo_interpreter_private} ${cairo_interpreter_headers})
 list(APPEND enabled_cairo_cxx_sources ${cairo_interpreter_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_interpreter_sources})
 endif()
 
+
+if(CAIRO_HAS_SYMBOL_LOOKUP)
 list(APPEND all_cairo_private ${cairo_symbol_lookup_private} ${cairo_symbol_lookup_headers})
 list(APPEND all_cairo_cxx_sources ${cairo_symbol_lookup_cxx_sources})
 list(APPEND all_cairo_sources ${cairo_symbol_lookup_sources})
-if(CAIRO_HAS_SYMBOL_LOOKUP)
 list(APPEND enabled_cairo_private ${cairo_symbol_lookup_private} ${cairo_symbol_lookup_headers})
 list(APPEND enabled_cairo_cxx_sources ${cairo_symbol_lookup_cxx_sources})
 list(APPEND enabled_cairo_sources ${cairo_symbol_lookup_sources})
@@ -642,8 +747,33 @@ set(SOURCES ${enabled_cairo_sources})
 
 add_library(cairo SHARED ${SOURCES})
 target_link_libraries(cairo ${CAIRO_LIBS})
+
+
 add_library(cairo-static ${SOURCES} ${STATIC_SOURCES})
 target_link_libraries(cairo-static ${CAIRO_LIBS})
+
+if(APPLE)
+find_library(IMAGEIO_FRAMEWORK ImageIO)
+find_library(CORE_GRAPHICS_FRAMEWORK CoreGraphics)
+find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+find_library(QUARTZ_CORE_FRAMEWORK QuartzCore)
+find_library(CORE_TEXT_FRAMEWORK CoreText)
+target_link_libraries(cairo
+  ${CORE_GRAPHICS_FRAMEWORK}
+  ${CORE_FOUNDATION_FRAMEWORK}
+  ${QUARTZ_CORE_FRAMEWORK}
+  ${IMAGEIO_FRAMEWORK}
+  ${CORE_TEXT_FRAMEWORK}
+)
+target_link_libraries(cairo-static
+  ${CORE_GRAPHICS_FRAMEWORK}
+  ${CORE_FOUNDATION_FRAMEWORK}
+  ${QUARTZ_CORE_FRAMEWORK}
+  ${IMAGEIO_FRAMEWORK}
+  ${CORE_TEXT_FRAMEWORK}
+)
+
+endif() 
 
 install(TARGETS cairo RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 install(TARGETS cairo-static RUNTIME DESTINATION bin ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)

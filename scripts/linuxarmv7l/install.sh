@@ -32,6 +32,19 @@ EOF
 	touch $HOME/archlinux/timestamp
 }
 
+downloadToolchain(){
+    #wget http://archlinuxarm.org/builder/xtools/x-tools7h.tar.xz
+    #tar xf x-tools7h.tar.xz
+    #rm x-tools7h.tar.xz
+    if [ "$(ls -A ~/rpi2_toolchain)" ]; then
+        echo "Using cached RPI2 toolchain"
+    else
+        wget -q https://github.com/openframeworks/openFrameworks/releases/download/tools/rpi2_toolchain.tar.bz2
+        tar xjf rpi2_toolchain.tar.bz2 -C ~/
+        rm rpi2_toolchain.tar.bz2
+    fi
+}
+
 downloadFirmware(){
     wget -q https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
     unzip -q firmware.zip

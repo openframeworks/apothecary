@@ -81,14 +81,14 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
 
     # used when building some libs for osx
     OSX_LATEST_SDK="xcrun -sdk macosx --show-sdk-version"
-    OSX_SDK_VER=10.15
+    OSX_SDK_VER=13.15
     OSX_MIN_SDK_VER=10.9
 
     # used when building for ios, the sdks you have installed are found in:
     # $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
     IOS_LATEST_SDK="xcrun -sdk iphoneos --show-sdk-version" # stupid hack to keep my syntax highlighting from breaking :P
-    IOS_SDK_VER=13.0
-    IOS_MIN_SDK_VER=10.0
+    IOS_SDK_VER=16.0
+    IOS_MIN_SDK_VER=13.0
 
 if ! which realpath >&/dev/null; then
   if ! which brew >&/dev/null; then
@@ -665,6 +665,47 @@ if [ "$TYPE" = "emscripten" ]; then
 	. "$EMSCRIPTEN_SCRIPT"
 fi
 
+if [ "$TYPE" = "ios" ]; then
+    if [ $ARCH == "armv7" ] ; then
+        PLATFORM="OS"
+    elif [ $ARCH == "x86_64" ] ; then
+        PLATFORM="SIMULATOR64"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="OS64"
+    elif [ $ARCH == "SIM_arm64" ]; then
+        PLATFORM="SIMULATORARM64"
+    elif [ $ARCH == "CAT_arm64" ]; then
+        PLATFORM="MAC_CATALYST_ARM64"
+    elif [ $ARCH == "CAT_x86_64" ]; then
+        PLATFORM="MAC_CATALYST"
+    fi 
+fi
+
+if [ "$TYPE" = "tvos" ]; then
+   if [ $ARCH == "x86_64" ] ; then
+        PLATFORM="SIMULATOR_TVOS"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="TVOS"
+    elif [ $ARCH == "SIM_arm64" ]; then
+        PLATFORM="SIMULATORARM64_TVOS"
+    fi 
+fi
+
+if [ "$TYPE" = "osx" ]; then
+    if [ $ARCH == "x86_64" ] ; then
+        PLATFORM="MAC"
+    elif [ $ARCH == "arm64" ] ; then
+        PLATFORM="MAC_ARM64"
+    elif [ $ARCH == "CAT_arm64" ]; then
+        PLATFORM="MAC_CATALYST_ARM64"
+    elif [ $ARCH == "CAT_x86_64" ]; then
+        PLATFORM="MAC_CATALYST"
+    else
+        PLATFORM="MAC"
+        echoWarning " Missing ARCH. See help: 'apothecary -a'."
+    fi 
+fi
+
 
 # get command
 if [ $# -gt 0 ] ; then
@@ -1200,6 +1241,26 @@ function cleanFormula() {
 	cd $APOTHECARY_DIR
 }
 
+function frameworkFormula() {
+    LIBS_DIR_REAL=$(realpath $LIBS_DIR)
+    if [ ! -e "$LIBS_DIR/$1" ] ; then
+        echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
+    else
+        rm -rf $LIBS_DIR_REAL/$1/lib/*.xcframework
+        echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
+        xcframework_flags=""
+
+        # Loop through each .a file built and make framework
+        for file in $(find "$LIBS_DIR_REAL/$1/lib/$TYPE/" -name "*.a"); do
+            echo "file $file"
+            xcframework_flags+=" -library $file -headers $LIBS_DIR_REAL/$1/include"
+        done
+        #echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
+        xcodebuild -create-xcframework $xcframework_flags -output $LIBS_DIR_REAL/$1/lib/$1.xcframework
+
+    fi
+}
+
 # remove a given library from the cache
 function remove() {
 
@@ -1386,6 +1447,10 @@ function copy() {
 }
 function clean() {
 	echoWarning " Clean function not implemented"
+}
+
+function framework() {
+    echoWarning " Framework function not implemented"
 }
 
 function save() {
@@ -1648,6 +1713,9 @@ case "$A_CMD" in
 
 	clean)
 		doCommand 1 cleanFormula $@ ;;
+
+    framework)
+        doCommand 1 frameworkFormula $@ ;;
 
 	remove)
 		if [ ! -e $BUILD_DIR ] ; then
