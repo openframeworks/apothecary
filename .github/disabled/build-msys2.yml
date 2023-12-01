@@ -43,7 +43,7 @@ jobs:
             libxml2:p
             python3:p
       - name: Clone repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh

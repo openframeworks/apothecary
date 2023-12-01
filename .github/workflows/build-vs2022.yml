@@ -38,7 +38,7 @@ jobs:
           mingw-w64-x86_64-gdb
           mingw-w64-x86_64-make
     - name: Clone repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     #- name: Install StrawberryPerl
     #  run: choco install -y strawberryperl
     - name: Setup MSBuild

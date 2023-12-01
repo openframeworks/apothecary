@@ -34,7 +34,7 @@ jobs:
         ARCH: arm64
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Scripts Calc Formula - ${{matrix.cfg.target}} Bundle ${{matrix.cfg.job}}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install

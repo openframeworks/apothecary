@@ -15,7 +15,7 @@ jobs:
   #        TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/scripts/linuxarmv6l/rpi_toolchain"
   #        TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
   #       steps:
-  #       - uses: actions/checkout@v2
+  #       - uses: actions/checkout@v4
   #       - name: Scripts Calc Formula
   #         run: ./scripts/calculate_formulas.sh
   #       - name: Scripts Install
@@ -51,7 +51,7 @@ jobs:
             echo "::set-output name=tag::bleeding"
             echo "::set-output name=release::bleeding"
           fi
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v4
         - name: Scripts Calc Formula
           run: ./scripts/calculate_formulas.sh
         - name: Scripts Install
@@ -80,7 +80,7 @@ jobs:
 #      TOOLCHAIN_ROOT: "/home/runner/work/apothecary/apothecary/raspbian"
 #      TOOLCHAIN_PREFIX: "aarch64-linux-gnu"
 #    steps:
-#      - uses: actions/checkout@v2
+#      - uses: actions/checkout@v4
 #
 #      - name: Cache raspbian folder
 #        uses: actions/cache@v2
@@ -130,7 +130,7 @@ jobs:
 #         TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
 #         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
 #        steps:
-#        - uses: actions/checkout@v2
+#        - uses: actions/checkout@v4
 #        - name: Scripts Calc Formula
 #          run: ./scripts/calculate_formulas.sh
 #        - name: Scripts Install
