@@ -172,6 +172,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=OFF \
+		    -D CAIRO_WIN32_STATIC_BUILD=ON \
 		    -DENABLE_VISIBILITY=OFF \
 		    ${CMAKE_WIN_SDK}
         cmake --build . --config Release --target install
