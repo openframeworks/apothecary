@@ -3,7 +3,9 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "osx" "ios" "tvos" "vs" ) 
+FORMULA_TYPES=( "osx" "ios" "tvos" "vs")
+
+FORMULA_DEPENDS=( )
 
 VER=1.1.1w
 VERDIR=1.1.1
