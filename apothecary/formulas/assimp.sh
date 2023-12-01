@@ -358,6 +358,12 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DASSIMP_BUILD_ZLIB=ON \
+            -DASSIMP_BUILD_STATIC_LIB=1 \
+            -DASSIMP_BUILD_STL_IMPORTER=0 \
+            -DASSIMP_BUILD_BLEND_IMPORTER=0 \
+            -DASSIMP_BUILD_3MF_IMPORTER=0 \
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
+            -DZLIB_HOME=${ZLIB_ROOT} \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} 
