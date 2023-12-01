@@ -88,9 +88,10 @@ function build() {
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-B build \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+	    	-D BUILD_SHARED_LIBS=OFF \
+		    -DSKIP_EXAMPLE=1 \
 	    	-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
