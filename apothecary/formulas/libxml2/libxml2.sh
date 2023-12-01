@@ -150,7 +150,6 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-            -CMAKE_SYSTEM_NAME="${PLATFORM}" \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DANDROID_ABI=$ABI \
@@ -175,8 +174,7 @@ function build() {
             -DLIBXML2_WITH_THREADS=ON \
             -DLIBXML2_WITH_PROGRAMS=OFF \
             -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -A "${PLATFORM}" \ 
+            -DLIBXML2_WITH_THREAD_ALLOC=OFF 
         cmake --build . --config Release
         cd ..
     elif [ "$TYPE" == "osx" ]; then
