@@ -120,7 +120,7 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/zlibstatic.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
+        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib
