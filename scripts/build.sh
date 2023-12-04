@@ -322,7 +322,7 @@ elif [ "$TARGET" == "vs" ]; then
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    docker cp emscripten:${OUTPUT_FOLDER}/${TARBALL} .
+    echo "tar cjf $TARBALL $LIBS"
     echo " a $TARBALL $LIBS"
 else
     echo "tar cjf $TARBALL $LIBS"
