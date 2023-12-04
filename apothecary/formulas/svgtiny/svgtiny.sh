@@ -327,9 +327,8 @@ function copy() {
 		cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
         # cp -Rv "build_${TYPE}_${PLATFORM}/include/" $1/include/libxml2
 	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/$ABI	    
-		cp -Rv "build_${TYPE}_${ABI}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ABI}/Release/lib/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
+	    mkdir -p $1/lib/$TYPE/$ABI
+        cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
