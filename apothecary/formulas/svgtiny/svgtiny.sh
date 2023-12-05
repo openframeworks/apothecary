@@ -201,17 +201,55 @@ function build() {
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
-            -G 'Unix Makefiles' 
-
-        make -j${PARALLEL_MAKE} VERBOSE=1
+	        -DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include 
+	  	cmake --build . --config Release 
         cd ..
 
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export LDFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-        export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-        make clean
-	    make -j${PARALLEL_MAKE}
+
+		LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
+        LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
+        LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.a"
+
+		echo "building $TYPE | $PLATFORM"
+		mkdir -p build_${TYPE}_${PLATFORM}
+        cd build_${TYPE}_${PLATFORM}
+
+        mkdir -p $1/include/libxml2
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        # cp -v "${LIBXML2_LIBRARY}" $1/lib/$TYPE/$PLATFORM/libxml2.a
+        # cp -Rv "${LIBXML2_INCLUDE_DIR}" $1/include/libxml2
+
+	    cmake .. \
+			-DCMAKE_INSTALL_PREFIX=Release \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=OFF \
+		    -DSKIP_EXAMPLE=1 \
+		    -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DLIBXML2_ROOT=$LIBXML2_ROOT \
+	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
+	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF 
+
+		 cmake --build . --config Release 
+
+		 cd ..
 
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
@@ -285,11 +323,12 @@ function copy() {
         cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
-		cp -Rv libsvgtiny.a $1/lib/$TYPE/svgtiny.a
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
+        # cp -Rv "build_${TYPE}_${PLATFORM}/include/" $1/include/libxml2
 	elif [ "$TYPE" == "android" ] ; then
-	    mkdir -p $1/lib/$TYPE/$ABI	    
-		cp -Rv "build_${TYPE}_${ABI}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ABI}/Release/lib/libsvgtiny.lib" $1/lib/$TYPE/$ABI/libsvgtiny.lib
+	    mkdir -p $1/lib/$TYPE/$ABI
+        cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
