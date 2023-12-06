@@ -811,12 +811,16 @@ function installAndroidToolchain() {
 # bool result is set to second argument
 function isValidType() {
 	local i
-	for i in "${VALID_TYPES[@]}" ; do
-		if [ "$i" == "$1" ] ; then
-			eval $2=1
-			return
-		fi
-	done
+    if [ -z "${VALID_TYPES+x}" ]; then
+        echo "VALID_TYPES is undefined. Initializing with default values..."
+    else
+    	for i in "${VALID_TYPES[@]}" ; do
+    		if [ "$i" == "$1" ] ; then
+    			eval $2=1
+    			return
+    		fi
+    	done
+    fi
 	eval $2=0
 }
 
@@ -824,12 +828,16 @@ function isValidType() {
 # bool result is set to second argument
 function isFormulaType() {
 	local i
-	for i in "${FORMULA_TYPES[@]}" ; do
-		if [ "$i" == "$1" ] ; then
-			eval $2=1
-			return
-		fi
-	done
+    if [ -z "${FORMULA_TYPES+x}" ]; then
+        echo "FORMULA_TYPES is undefined. Initializing with default values..."
+    else
+    	for i in "${FORMULA_TYPES[@]}" ; do
+    		if [ "$i" == "$1" ] ; then
+    			eval $2=1
+    			return
+    		fi
+    	done
+    fi
 	eval $2=0
 }
 
