@@ -324,6 +324,10 @@ elif [ "$TARGET" == "emscripten" ]; then
     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     echo "tar cjf $TARBALL $LIBS"
     echo " a $TARBALL $LIBS"
+elif [ "$TARGET" == "android" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
+    echo "tar cjf $TARBALL $LIBS"
+    tar cjf $TARBALL $LIBS
 else
     echo "tar cjf $TARBALL $LIBS"
     tar cjf $TARBALL $LIBS
