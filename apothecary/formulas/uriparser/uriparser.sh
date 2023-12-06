@@ -30,6 +30,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+
+	echo "uriparser build" 
 	rm -f CMakeCache.txt || true
 
 	if [ "$TYPE" == "vs" ] ; then
@@ -43,7 +45,7 @@ function build() {
 	        -DCMAKE_C_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF
+	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DBUILD_SHARED_LIBS=OFF \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -135,26 +137,44 @@ function build() {
 
 	    mkdir -p build
 		echo "int main(){return 0;}" > tool/uriparse.c
-		cd build
-		mkdir -p ${TYPE}
-		cd ${TYPE}
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 
-		cmake \
+		cmake .. \
+			-DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
+            -DCMAKE_CXX_EXTENSIONS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
- 			-DBUILD_SHARED_LIBS=OFF \
-         	-DCMAKE_BUILD_TYPE=Release \
-         	-DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
          	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
-         	-G 'Unix Makefiles' ../.. 
+         	-DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DHAVE_REALLOCARRAY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_VERBOSE_MAKEFILE=ON
 
-		#./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
-        make clean
-		make -j${PARALLEL_MAKE}
+        cmake --build . --config Release --target install
 
-	    make install
+        rm -f CMakeCache.txt
+
+        cd ..      
+      
 	elif [ "$TYPE" == "emscripten" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
 		mkdir -p build
@@ -253,12 +273,9 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/uriparser/* $1/include/uriparser/
-		# copy lib
-
-		cp -Rv build/$TYPE/lib/liburiparser.a $1/lib/$TYPE/uriparser.a
+		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		# Standard *nix style copy.
 		# copy headers
