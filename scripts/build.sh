@@ -328,6 +328,10 @@ elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
     echo "tar cjf $TARBALL $LIBS"
     tar cjf $TARBALL $LIBS
+elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.tar.bz2
+    echo "tar cjf $TARBALL $LIBS"
+    tar cjf $TARBALL $LIBS
 else
     echo "tar cjf $TARBALL $LIBS"
     tar cjf $TARBALL $LIBS

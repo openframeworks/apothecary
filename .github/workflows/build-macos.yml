@@ -1,0 +1,74 @@
+name: build-macos
+
+on:
+  push:
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
+
+jobs:
+  build-macos-platforms:
+    runs-on: macos-12
+    strategy:
+      matrix:
+        bundle: [1, 2, 3, 4]
+    env:
+      TARGET: "osx"
+      BUNDLE: ${{ matrix.bundle }}
+    steps:
+      - name: Determine Release
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "release=nightly" >> $GITHUB_ENV
+            echo "prerelease=false" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "release=bleeding" >> $GITHUB_ENV
+            echo "prerelease=true" >> $GITHUB_ENV
+          fi
+      - uses: actions/checkout@v4
+      - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
+        run: ./scripts/calculate_formulas.sh
+      - name: Scripts Install
+        run: ./scripts/osx/install.sh
+      - name: Build64
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "osx"
+          DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+          ARCH: x86_64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: BuildARM64
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "osx"
+          DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+          ARCH: arm64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: List output directory
+        run: ls -lah out/
+      - name: Update Release arm64
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.release }}
+          release: ${{ env.release }}
+          prerelease: ${{ env.prerelease }}
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_arm64_${{ matrix.bundle }}.tar.bz2
+      - name: Update Release 64
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.release }}
+          release: ${{ env.release }}
+          prerelease: ${{ env.prerelease }}
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_64_${{ matrix.bundle }}.tar.bz2
