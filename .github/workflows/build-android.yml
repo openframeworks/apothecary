@@ -22,15 +22,16 @@ jobs:
      TARGET: ${{matrix.cfg.target}}
      ARCH: ${{matrix.cfg.arch}}
     steps:
-    - name: Determine Release
+     - name: Determine Release
       id: vars
+      shell: bash
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "::set-output name=tag::nightly"
-          echo "::set-output name=release::nightly"
+          echo "release=nightly" >> $GITHUB_ENV
+          echo "prerelease=false" >> $GITHUB_ENV
         elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "::set-output name=tag::bleeding"
-          echo "::set-output name=release::bleeding"
+          echo "release=bleeding" >> $GITHUB_ENV
+          echo "prerelease=true" >> $GITHUB_ENV
         fi
     - uses: actions/checkout@v2
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.arch}}
@@ -41,13 +42,16 @@ jobs:
       run: ./scripts/build.sh
       env:
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    - name: Update Release
+    - name: List output directory
+      run: ls -lah out/
+    - name: Update Release arm64
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ steps.vars.outputs.tag }}
-        release: ${{ steps.vars.outputs.release }}
-        prerelease: false
-        files: out/openFrameworksLibs_android_NDK24_${{matrix.cfg.arch}}.tar.bz2
-      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+        tag: ${{ env.release }}
+        release: ${{ env.release }}
+        prerelease: ${{ env.prerelease }}
+        files: out/openFrameworksLibs_${{ env.release }}_android_${{matrix.cfg.arch}}.zip
+
 
