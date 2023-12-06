@@ -90,7 +90,6 @@ function build() {
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
 
-        LIBS_ROOT=$(realpath $LIBS_DIR)
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
@@ -211,15 +210,21 @@ function build() {
 
 	elif [ "$TYPE" == "osx" ]; then
 
+        export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
+
         OPENSSL_ROOT="$LIBS_ROOT/openssl/"
         OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
         OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
         OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
 
+
+        PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}"
+         
+
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
 
-        echo "building $TYPE | $PLATFORM"
+        echo "building curl $TYPE | $PLATFORM"
         echo "--------------------"
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -241,10 +246,9 @@ function build() {
             -DENABLE_ARC=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
-            -DOPENSSL_ROOT_DIR="$LIBS_ROOT/openssl/" \
-            -DOPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include" \
-            -DOPENSSL_SSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" \
-            -DOPENSSL_CRYPTO_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" \
+            -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
+            -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
+            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.a;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.a;" \
             -DENABLE_UNIX_SOCKETS=ON \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
