@@ -463,7 +463,7 @@ function copy() {
     mkdir -p $1/include/libxml
     
     # copy common headers
-    cp -Rv include/libxml/* $1/include/libxml/
+   
 
     # create a common lib directory path
     mkdir -p $1/lib/$TYPE
@@ -471,6 +471,7 @@ function copy() {
     # copy files specific to each build TYPE
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv include/libxml/* $1/include/libxml/
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
         cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
@@ -485,19 +486,23 @@ function copy() {
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a  
     elif [ "$TYPE" == "android" ] ; then
         mkdir -p $1/lib/$TYPE/$ABI
+        cp -Rv include/libxml/* $1/include/libxml/
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "emscripten" ]; then
+        cp -Rv include/libxml/* $1/include/libxml/
         cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        mkdir -p $1/include/libxml2
+        mkdir -p $1/include/libxml
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include/libxml2
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/libxml/" $1/include/libxml
+        cp -Rv build_${TYPE}_${PLATFORM}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
         cp -v "build_${TYPE}/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
+        cp -Rv include/libxml/* $1/include/libxml/
     else
         echo "Unknown build TYPE: $TYPE"
         exit 1
