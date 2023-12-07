@@ -235,7 +235,7 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
-            -DNO_FONTCONFIG=OFF \
+            -DNO_FONTCONFIG=ON \
             -D CMAKE_VERBOSE_MAKEFILE=ON 
         cmake --build . --config Release
         cmake --install . --config Release
