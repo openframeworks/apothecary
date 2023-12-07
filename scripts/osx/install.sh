@@ -2,7 +2,7 @@
 brew update >/dev/null
 
 
-brew install cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget
+brew install cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig
 
 # brew reinstall libtool
 
