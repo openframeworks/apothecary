@@ -8,7 +8,9 @@ find_package(PNG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Freetype)
 find_package(Threads)
+if (WIN32)
 find_package(Fontconfig)
+endif()
 
 
 include(Configure_config.cmake)
