@@ -125,7 +125,6 @@ function build() {
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
  			-DURIPARSER_BUILD_WCHAR_T=ON \
- 			-DBUILD_SHARED_LIBS=ON \
 	        -DURIPARSER_BUILD_CHAR=ON \
          	-B${ABI} \
          	-G 'Unix Makefiles' ../..
@@ -165,7 +164,6 @@ function build() {
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
  			-DURIPARSER_BUILD_WCHAR_T=ON \
- 			-DBUILD_SHARED_LIBS=ON \
 	        -DURIPARSER_BUILD_CHAR=ON \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
          	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
@@ -187,13 +185,10 @@ function build() {
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
-		mkdir -p build
-		local BUILD_TO_DIR="build/${TYPE}"
+	    rm -f CMakeCache.txt
+		mkdir -p "build_${TYPE}"
 		echo "int main(){return 0;}" > tool/uriparse.c
-		cd build
-		mkdir -p ${TYPE}
-		cd ${TYPE}
+		cd "build_${TYPE}"
   		export CFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration "
         export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
 		cmake \
@@ -201,18 +196,16 @@ function build() {
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
  			-DURIPARSER_BUILD_WCHAR_T=ON \
- 			-DBUILD_SHARED_LIBS=ON \
 	        -DURIPARSER_BUILD_CHAR=ON \
- 			-DBUILD_SHARED_LIBS=ON \
+ 			-DBUILD_SHARED_LIBS=OFF \
          	-DCMAKE_BUILD_TYPE=Release \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
       	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
-         	-G 'Unix Makefiles' ../.. 
+         	-G 'Unix Makefiles' ..
 		#emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         emmake make clean
 		emmake make -j${PARALLEL_MAKE}
 	    # emmake make install
-	    cd ..
 	    cd ..
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		mkdir -p build
@@ -240,11 +233,9 @@ function build() {
 	 			-DURIPARSER_BUILD_DOCS=OFF \
 	 			-DURIPARSER_BUILD_TOOLS=ON \
 	 			-DURIPARSER_BUILD_WCHAR_T=ON \
-	 			-DBUILD_SHARED_LIBS=ON \
 		        -DURIPARSER_BUILD_CHAR=ON \
 	 			-DBUILD_SHARED_LIBS=OFF \
 	         	-DCMAKE_BUILD_TYPE=Release \
-	 			-DBUILD_SHARED_LIBS=OFF \
 	       		-DCMAKE_C_COMPILER=${CC} \
 	      	 	-DCMAKE_CXX_COMPILER=${CXX} \
 	      	 	-DCMAKE_OSX_SYSROOT=${SYSROOT} \
@@ -253,7 +244,6 @@ function build() {
 	      	 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE=ON \
 	      	 	-DCMAKE_C_FLAGS="" \
 	      	 	-DCMAKE_CXX_FLAGS="" \
-	 			-DBUILD_SHARED_LIBS=OFF \
 	         	-DCMAKE_BUILD_TYPE=Release \
 	         	-G 'Unix Makefiles' 
 	         	cmake --build . --config Release
@@ -292,7 +282,7 @@ function copy() {
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
-		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
+		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
@@ -301,7 +291,7 @@ function copy() {
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		mkdir -p $1/lib/$TYPE
-		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/liburiparser.a
+		cp -Rv "build_${TYPE}/liburiparser.a" $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers
