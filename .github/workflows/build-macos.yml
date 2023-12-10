@@ -71,4 +71,4 @@ jobs:
           tag: ${{ env.release }}
           release: ${{ env.release }}
           prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_64_${{ matrix.bundle }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_x86_64_${{ matrix.bundle }}.tar.bz2
