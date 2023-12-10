@@ -46,7 +46,7 @@ function build() {
 	        -DCMAKE_CXX_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
-	        -DBUILD_SHARED_LIBS=OFF \
+	        -DURIPARSER_ENABLE_INSTALL=ON \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
@@ -56,7 +56,10 @@ function build() {
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        -DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
- 			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DBUILD_SHARED_LIBS=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
  			${CMAKE_WIN_SDK} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
@@ -118,6 +121,12 @@ function build() {
         	-DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DBUILD_SHARED_LIBS=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
          	-B${ABI} \
          	-G 'Unix Makefiles' ../..
         cd ${ABI}
@@ -147,7 +156,6 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
             -DCMAKE_CXX_EXTENSIONS=ON \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -156,6 +164,9 @@ function build() {
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DBUILD_SHARED_LIBS=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
          	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
          	-DPLATFORM=$PLATFORM \
@@ -189,7 +200,10 @@ function build() {
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=ON \
- 			-DBUILD_SHARED_LIBS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DBUILD_SHARED_LIBS=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
+ 			-DBUILD_SHARED_LIBS=ON \
          	-DCMAKE_BUILD_TYPE=Release \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
       	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
@@ -225,6 +239,9 @@ function build() {
 	 			-DURIPARSER_BUILD_TESTS=OFF \
 	 			-DURIPARSER_BUILD_DOCS=OFF \
 	 			-DURIPARSER_BUILD_TOOLS=ON \
+	 			-DURIPARSER_BUILD_WCHAR_T=ON \
+	 			-DBUILD_SHARED_LIBS=ON \
+		        -DURIPARSER_BUILD_CHAR=ON \
 	 			-DBUILD_SHARED_LIBS=OFF \
 	         	-DCMAKE_BUILD_TYPE=Release \
 	 			-DBUILD_SHARED_LIBS=OFF \
@@ -270,10 +287,12 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
@@ -304,6 +323,7 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+		rm -f CMakeCache.txt
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
