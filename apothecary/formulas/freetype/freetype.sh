@@ -56,6 +56,10 @@ function build() {
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
 		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
 
+		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a" 
+
 		DEFS="-DCMAKE_BUILD_TYPE=Release \
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
@@ -64,6 +68,9 @@ function build() {
 		    -DZLIB_ROOT=${ZLIB_ROOT} \
 		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
 		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
+            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DPNG_ROOT=${LIBPNG_ROOT} 
             -DFT_DISABLE_ZLIB=OFF \
             -DFT_DISABLE_BZIP2=TRUE \
             -DFT_DISABLE_PNG=OFF \
