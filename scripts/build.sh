@@ -302,6 +302,7 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
 else
     cd $OUTPUT_FOLDER;
     LIBS=$(ls $OUTPUT_FOLDER)
+    LIBS=$(echo "$LIBS" | tr '\n' ' ')
 fi
     
 CUR_BRANCH="master";
@@ -327,14 +328,14 @@ elif [ "$TARGET" == "emscripten" ]; then
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
     echo "tar cjf $TARBALL $LIBS"
-    tar cjf $TARBALL $LIBS
+    tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "osx" ] || [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.tar.bz2
-    echo "tar cjf $TARBALL $LIBS"
-    tar cjf $TARBALL $LIBS
+    echo "tar cjf ${TARBALL} ${LIBS}"
+    tar cjvf "${TARBALL}" ${LIBS}
 else
     echo "tar cjf $TARBALL $LIBS"
-    tar cjf $TARBALL $LIBS
+    tar cjvf $TARBALL $LIBS
 fi
 
 echo "Packaged libs to upload $TARBALL"

@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs")
+FORMULA_TYPES=( "vs" "osx" )
 
 FORMULA_DEPENDS=( )
 
