@@ -46,7 +46,7 @@ function build() {
 	        -DCMAKE_CXX_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
-	        -DBUILD_SHARED_LIBS=OFF \
+	        -DURIPARSER_ENABLE_INSTALL=ON \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
@@ -57,7 +57,12 @@ function build() {
 	        -DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DBUILD_SHARED_LIBS=OFF \
+ 			-DURIPARSER_SHARED_LIBS=OFF \
+	        -DURIPARSER_BUILD_CHAR=ON \
  			${CMAKE_WIN_SDK} \
+ 			-DCMAKE_VERBOSE_MAKEFILE=ON \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
@@ -95,6 +100,7 @@ function build() {
  			-DANDROID_PLATFORM=${ANDROID_PLATFORM} \
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_SHARED_LIBS=OFF \
  			-DURIPARSER_BUILD_TOOLS=OFF \
  			-DBUILD_SHARED_LIBS=OFF \
        		-DCMAKE_C_COMPILER=${CC} \
@@ -118,6 +124,10 @@ function build() {
         	-DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
          	-B${ABI} \
          	-G 'Unix Makefiles' ../..
         cd ${ABI}
@@ -147,7 +157,6 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
             -DCMAKE_CXX_EXTENSIONS=ON \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -155,7 +164,10 @@ function build() {
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
- 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+ 			-DURIPARSER_SHARED_LIBS=OFF \
+	        -DURIPARSER_BUILD_CHAR=ON \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
          	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
          	-DPLATFORM=$PLATFORM \
@@ -176,29 +188,28 @@ function build() {
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
-	    local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE
-		mkdir -p build
-		local BUILD_TO_DIR="build/${TYPE}"
+	    rm -f CMakeCache.txt
+		mkdir -p "build_${TYPE}"
 		echo "int main(){return 0;}" > tool/uriparse.c
-		cd build
-		mkdir -p ${TYPE}
-		cd ${TYPE}
+		cd "build_${TYPE}"
   		export CFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration "
         export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
 		cmake \
  			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
- 			-DURIPARSER_BUILD_TOOLS=ON \
+ 			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DURIPARSER_SHARED_LIBS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
+	        -DURIPARSER_BUILD_CHAR=ON \
  			-DBUILD_SHARED_LIBS=OFF \
          	-DCMAKE_BUILD_TYPE=Release \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
       	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
-         	-G 'Unix Makefiles' ../.. 
+         	-G 'Unix Makefiles' ..
 		#emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         emmake make clean
 		emmake make -j${PARALLEL_MAKE}
 	    # emmake make install
-	    cd ..
 	    cd ..
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		mkdir -p build
@@ -224,10 +235,12 @@ function build() {
             cmake ../ \
 	 			-DURIPARSER_BUILD_TESTS=OFF \
 	 			-DURIPARSER_BUILD_DOCS=OFF \
-	 			-DURIPARSER_BUILD_TOOLS=ON \
+	 			-DURIPARSER_BUILD_TOOLS=OFF \
+	 			-DURIPARSER_BUILD_WCHAR_T=ON \
+		        -DURIPARSER_BUILD_CHAR=ON \
+		        -DURIPARSER_SHARED_LIBS=OFF \
 	 			-DBUILD_SHARED_LIBS=OFF \
 	         	-DCMAKE_BUILD_TYPE=Release \
-	 			-DBUILD_SHARED_LIBS=OFF \
 	       		-DCMAKE_C_COMPILER=${CC} \
 	      	 	-DCMAKE_CXX_COMPILER=${CXX} \
 	      	 	-DCMAKE_OSX_SYSROOT=${SYSROOT} \
@@ -236,7 +249,6 @@ function build() {
 	      	 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE=ON \
 	      	 	-DCMAKE_C_FLAGS="" \
 	      	 	-DCMAKE_CXX_FLAGS="" \
-	 			-DBUILD_SHARED_LIBS=OFF \
 	         	-DCMAKE_BUILD_TYPE=Release \
 	         	-G 'Unix Makefiles' 
 	         	cmake --build . --config Release
@@ -270,10 +282,12 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
@@ -282,7 +296,7 @@ function copy() {
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		mkdir -p $1/lib/$TYPE
-		cp -Rv build/$TYPE/liburiparser.a $1/lib/$TYPE/liburiparser.a
+		cp -Rv "build_${TYPE}/liburiparser.a" $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers
@@ -304,6 +318,7 @@ function copy() {
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
 		rm -f *.lib
+		rm -f CMakeCache.txt
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
