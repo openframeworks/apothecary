@@ -226,19 +226,19 @@ function build() {
 		-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 		-DCMAKE_CXX_EXTENSIONS=OFF \
 		-DBUILD_SHARED_LIBS=OFF \
-		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
 		-DNO_BUILD_LIBRAWLITE=ON \
 		-DNO_BUILD_OPENEXR=ON \
 		-DNO_BUILD_WEBP=ON \
 		-DNO_BUILD_JXR=ON \
-		-DCMAKE_INSTALL_PREFIX=Release \
         -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         -DCMAKE_INSTALL_INCLUDEDIR=include \
+	    -DCMAKE_INSTALL_PREFIX=. \
 		${CMAKE_WIN_SDK} \
 		-A "${PLATFORM}" \
 		-G "${GENERATOR_NAME}"
-        cmake --build . --target install --config Release 
+        cmake --build . --target install --config Debug 
+        cmake --build . --target install --config Release
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
@@ -285,9 +285,10 @@ function copy() {
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include
 	    mkdir -p $1/lib/$TYPE
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/include
+		cp Source/FreeImage.h $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImage.lib  
+        cp -v "build_${TYPE}_${ARCH}/Debug/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImageD.lib
 	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
