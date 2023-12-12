@@ -81,8 +81,8 @@ if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
 
     # used when building some libs for osx
     OSX_LATEST_SDK="xcrun -sdk macosx --show-sdk-version"
-    OSX_SDK_VER=13.15
-    OSX_MIN_SDK_VER=10.9
+    OSX_SDK_VER=14.0
+    OSX_MIN_SDK_VER=10.15
 
     # used when building for ios, the sdks you have installed are found in:
     # $XCODE_DEV_ROOT/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#.#.sdk
@@ -491,11 +491,15 @@ if [ "$TYPE" = "vs" ]; then
         fi        
     fi
 
+    WIN_CRT=MD #MT
+
     if [ $VS_VER == "17" ]; then
     	VS_YEAR=2022
     	VS_VER=17
     	VS_VER_GEN="$VS_VER $VS_YEAR"
-        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022}"
+        #export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022}-DCMAKE_CXX_FLAGS_RELEASE=\"/${WIN_CRT}\" -DCMAKE_C_FLAGS_RELEASE=\"/${WIN_CRT}\" -DCMAKE_CXX_FLAGS_DEBUG=\"/${WIN_CRT}d\" -DCMAKE_C_FLAGS_DEBUG=\"/${WIN_CRT}d\""
+        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
+    
     else
     	VS_YEAR=2019
     	VS_VER=16
@@ -703,6 +707,20 @@ if [ "$TYPE" = "osx" ]; then
     else
         PLATFORM="MAC"
         echoWarning " Missing ARCH. See help: 'apothecary -a'."
+    fi 
+fi
+
+if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+    if [ $TYPE == "linux" ] ; then
+        ABI="x86"
+    elif [ $TYPE == "linux64" ] ; then
+        ABI="x86_64"
+    elif [ $TYPE == "linuxaarch64" ]; then
+        ABI="aarch64"
+    elif [ $TYPE == "linuxarmv7l" ]; then
+        ABI="armv7l"
+    elif [ $TYPE == "msys2" ]; then
+        ABI="x86_64"
     fi 
 fi
 

@@ -15,7 +15,7 @@ FORMULA_TYPES=( "osx" "vs" )
 #FORMULA_DEPENDS_MANUAL=1
 
 # define the version
-VER=6.0.0
+VER=6.0.1
 
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
@@ -105,27 +105,31 @@ function build() {
     mkdir -p "build_${TYPE}_${ARCH}"
     cd "build_${TYPE}_${ARCH}"
     DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_STANDARD=17 \
         -DCMAKE_CXX_STANDARD=17 \
         -DCMAKE_CXX_STANDARD_REQUIRED=ON \
         -DCMAKE_CXX_EXTENSIONS=OFF
         -DBUILD_SHARED_LIBS=OFF \
-        -DCMAKE_INSTALL_PREFIX=Release \
         -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-        -DCMAKE_INSTALL_INCLUDEDIR=include"         
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DAUDIO_WINDOWS_WASAPI=ON \
+        -DAUDIO_WINDOWS_DS=ON \
+        -DAUDIO_WINDOWS_ASIO=ON \
+        -DBUILD_WITH_STATIC_CRT=OFF 
+        "         
     cmake .. ${DEFS} \
         -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
         -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_LIBDIR="lib" \
+        -DCMAKE_INSTALL_PREFIX=Release \
         ${CMAKE_WIN_SDK} \
-        -DAUDIO_WINDOWS_WASAPI=ON \
-        -DAUDIO_WINDOWS_DS=ON \
-        -DAUDIO_WINDOWS_ASIO=ON \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}"
+
     cmake --build . --config Release --target install
+    cmake --build . --config Debug --target install
+
     cd ..
 	elif [ "$TYPE" == "msys2" ] ; then
 		# Compile the program
@@ -156,8 +160,9 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-    cp -f "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
+		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
+    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
+    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
 		ls

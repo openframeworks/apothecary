@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten")
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "android" "emscripten" "msys2" )
 # uses an automake build system # required for svg
 
 FORMULA_DEPENDS=( "zlib" )
@@ -264,7 +264,6 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_LZMA=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
             -DLIBXML2_WITH_HTML=OFF \
@@ -300,6 +299,8 @@ function build() {
                 -DCMAKE_CXX_EXTENSIONS=OFF \
                 -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
                 -DCMAKE_INSTALL_INCLUDEDIR=include \
+                -DCMAKE_SYSTEM_NAME=$TYPE \
+                -DCMAKE_SYSTEM_PROCESSOR=$ABI \
                 -DLIBXML2_WITH_ZLIB=OFF \
                 -DLIBXML2_WITH_LZMA=OFF \
                 -DBUILD_SHARED_LIBS=OFF \
@@ -340,6 +341,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_SYSTEM_NAME=$TYPE \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_ZLIB=OFF \
