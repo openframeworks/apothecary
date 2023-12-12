@@ -160,8 +160,8 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
-    	cp -f "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
-    	cp -f "build_${TYPE}_${ARCH}/Release/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
+    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
+    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
 		ls
