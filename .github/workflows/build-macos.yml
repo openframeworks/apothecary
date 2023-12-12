@@ -40,7 +40,7 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "osx"
-          DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: x86_64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: BuildARM64
@@ -49,7 +49,7 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "osx"
-          DEVELOPER_DIR: "/Applications/Xcode_13.4.1.app/Contents/Developer"
+          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
