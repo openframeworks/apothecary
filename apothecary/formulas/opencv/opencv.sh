@@ -791,10 +791,7 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     mkdir -p $1/etc
 
-
-
-    # cp -Rv "include/" $1/
-    cp -R "build_${TYPE}_${ARCH}/Release/include/" $1/include/
+    cp -Rv "build_${TYPE}_${ARCH}/Release/include/opencv2" $1/include/
     mkdir -p $1/lib/$TYPE/$PLATFORM/
 
     mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
@@ -808,10 +805,6 @@ function copy() {
 
     cp -Rv "build_${TYPE}_${ARCH}/Release/etc/" $1/etc
 
-
-
-
-   
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.
     # copy headers
