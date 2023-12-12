@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
-VER=4.8.1
+VER=4.7.0
 
 
 # tools for git use
