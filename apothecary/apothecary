@@ -706,6 +706,20 @@ if [ "$TYPE" = "osx" ]; then
     fi 
 fi
 
+if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+    if [ $TYPE == "linux" ] ; then
+        ABI="x86"
+    elif [ $TYPE == "linux64" ] ; then
+        ABI="x86_64"
+    elif [ $TYPE == "linuxaarch64" ]; then
+        ABI="aarch64"
+    elif [ $TYPE == "linuxarmv7l" ]; then
+        ABI="armv7l"
+    elif [ $TYPE == "msys2" ]; then
+        ABI="x86_64"
+    fi 
+fi
+
 
 # get command
 if [ $# -gt 0 ] ; then

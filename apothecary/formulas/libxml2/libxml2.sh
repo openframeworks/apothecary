@@ -300,6 +300,8 @@ function build() {
                 -DCMAKE_CXX_EXTENSIONS=OFF \
                 -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
                 -DCMAKE_INSTALL_INCLUDEDIR=include \
+                -DCMAKE_SYSTEM_NAME=$TYPE \
+                -DCMAKE_SYSTEM_PROCESSOR=$ABI \
                 -DLIBXML2_WITH_ZLIB=OFF \
                 -DLIBXML2_WITH_LZMA=OFF \
                 -DBUILD_SHARED_LIBS=OFF \
@@ -340,6 +342,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_SYSTEM_NAME=$TYPE \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_ZLIB=OFF \
