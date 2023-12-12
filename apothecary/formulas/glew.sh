@@ -46,7 +46,7 @@ function build() {
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
-		cmake  .. \
+		cmake  ../build/cmake \
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -69,7 +69,7 @@ function build() {
 		    -DCMAKE_INSTALL_LIBDIR="lib" \
 		    -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include 
 		cmake --build . --config Release --target install
         cd ..
 
@@ -122,10 +122,9 @@ function copy() {
 
 	# libs
 	if [ "$TYPE" == "osx" ] ; then
-		cp -Rv include/* $1/include
-		mkdir -p $1/lib/$TYPE
-		cp -v libGLEW.a $1/lib/$TYPE/glew.a
-
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+		cp -v -r build_${TYPE}_${PLATFORM}/Release/lib/libGLEW.a $1/lib/$TYPE/$PLATFORM/libGLEW.a
 	elif [ "$TYPE" == "vs" ] ; then
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
