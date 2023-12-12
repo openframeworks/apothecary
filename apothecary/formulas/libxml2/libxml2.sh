@@ -264,7 +264,6 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DLIBXML2_WITH_LZMA=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
             -DLIBXML2_WITH_HTML=OFF \

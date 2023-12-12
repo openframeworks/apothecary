@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
-VER=4.7.0
+VER=4.8.1
 
 
 # tools for git use
@@ -198,27 +198,15 @@ function build() {
     mkdir -p "build_${TYPE}_${ARCH}"
     cd "build_${TYPE}_${ARCH}"
     DEFS="
-        -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_STANDARD=17 \
         -DCMAKE_CXX_STANDARD=17 \
         -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-        -DCMAKE_CXX_EXTENSIONS=OFF
+        -DCMAKE_CXX_EXTENSIONS=OFF \
         -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_INSTALL_PREFIX=Release \
-        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_PREFIX=install \
         -DCMAKE_INSTALL_INCLUDEDIR=include \
         -DCMAKE_INSTALL_LIBDIR="lib" \
-        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include"
-     
-    cmake .. ${DEFS} \
-        -A "${PLATFORM}" \
-        -G "${GENERATOR_NAME}" \
-        -DCMAKE_INSTALL_PREFIX=Release \
-        -D CMAKE_VERBOSE_MAKEFILE=OFF \
-        -D BUILD_SHARED_LIBS=ON \
-        ${CMAKE_WIN_SDK} \
-        -DCMAKE_SYSTEM_NAME=Windows \
-        -DCMAKE_SYSTEM_VERSION=10.0 \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include\
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
         -DBUILD_PNG=OFF \
         -DWITH_OPENCLAMDBLAS=OFF \
@@ -260,7 +248,6 @@ function build() {
         -DBUILD_OPENEXR=OFF \
         -DWITH_DSHOW=OFF \
         -DWITH_VFW=OFF \
-        -DBUILD_SHARED_LIBS=OFF \
         -DWITH_PNG=OFF \
         -DWITH_OPENCL=OFF \
         -DWITH_PVAPI=OFF\
@@ -307,8 +294,34 @@ function build() {
         -DWITH_OPENCLAMDBLAS=OFF \
         -DWITH_OPENCLAMDFFT=OFF \
         -DBUILD_TESTS=OFF \
-        -DCV_DISABLE_OPTIMIZATION=OFF
-    cmake --build . --config Release --target install
+        -DCV_DISABLE_OPTIMIZATION=OFF"
+     
+  
+    cmake .. ${DEFS} \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}" \
+        -DCMAKE_INSTALL_PREFIX=Debug \
+        -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -D BUILD_SHARED_LIBS=ON \
+        ${CMAKE_WIN_SDK}
+
+    cmake --build . --target install --config Debug
+
+
+     cmake .. ${DEFS} \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}" \
+        -DCMAKE_INSTALL_PREFIX=Release \
+        -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -D BUILD_SHARED_LIBS=ON \
+        ${CMAKE_WIN_SDK}
+        
+
+    cmake --build . --target install --config Release
+
+    # cmake -DCMAKE_BUILD_TYPE=Release --build . --config Release 
+
+    # cmake --build build --target install --config Release
 
     cd ..    
     
@@ -776,9 +789,28 @@ function copy() {
     
     mkdir -p $1/include    
     mkdir -p $1/lib/$TYPE
-    cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+    mkdir -p $1/etc
+
+
+
+    # cp -Rv "include/" $1/
+    cp -R "build_${TYPE}_${ARCH}/Release/include/" $1/include/
     mkdir -p $1/lib/$TYPE/$PLATFORM/
-    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM 
+
+    mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
+    mkdir -p $1/lib/$TYPE/$PLATFORM/Release
+
+    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+    cp -v "build_${TYPE}_${ARCH}/Debug/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+
+    cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+    cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+
+    cp -Rv "build_${TYPE}_${ARCH}/Release/etc/" $1/etc
+
+
+
+
    
   elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
     # Standard *nix style copy.

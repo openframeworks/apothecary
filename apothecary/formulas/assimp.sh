@@ -165,21 +165,23 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF 
-            -DBUILD_SHARED_LIBS=OFF
-            -DASSIMP_BUILD_TESTS=0
-            -DASSIMP_BUILD_SAMPLES=0
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DASSIMP_BUILD_TESTS=0 \
+            -DASSIMP_BUILD_SAMPLES=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0"
 
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}" \
+            -DCMAKE_INSTALL_PREFIX=. \
             -DASSIMP_BUILD_ZLIB=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
 
+        cmake --build . --config Debug 
         cmake --build . --config Release
 
         cd ..      
@@ -389,7 +391,12 @@ function copy() {
     if [ "$TYPE" == "vs" ] ; then            
         cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib  
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Release
+        # cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib 
+        # cp -v "build_${TYPE}_${ARCH}/lib/Debug/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimpD.lib
+        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
+        cp -v "build_${TYPE}_${ARCH}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimp.lib
     elif [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
