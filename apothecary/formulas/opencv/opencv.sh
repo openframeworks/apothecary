@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
-VER=4.7.0
+VER=4.8.1
 
 
 # tools for git use
@@ -206,8 +206,7 @@ function build() {
         -DCMAKE_INSTALL_PREFIX=install \
         -DCMAKE_INSTALL_INCLUDEDIR=include \
         -DCMAKE_INSTALL_LIBDIR="lib" \
-        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include\
-        -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         -DBUILD_PNG=OFF \
         -DWITH_OPENCLAMDBLAS=OFF \
         -DBUILD_TESTS=OFF \
@@ -295,15 +294,19 @@ function build() {
         -DWITH_OPENCLAMDFFT=OFF \
         -DBUILD_TESTS=OFF \
         -DCV_DISABLE_OPTIMIZATION=OFF"
-     
-  
+    
     cmake .. ${DEFS} \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}" \
         -DCMAKE_INSTALL_PREFIX=Debug \
+        -DCMAKE_BUILD_TYPE="Debug" \
         -D CMAKE_VERBOSE_MAKEFILE=OFF \
         -D BUILD_SHARED_LIBS=ON \
-        ${CMAKE_WIN_SDK}
+        -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
+        ${CMAKE_WIN_SDK} \
+        -DCV_ENABLE_INTRINSICS=OFF \
+        -DBUILD_WASM_INTRIN_TESTS=OFF \
+        -DBUILD_WITH_STATIC_CRT=OFF 
 
     cmake --build . --target install --config Debug
 
@@ -312,8 +315,13 @@ function build() {
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}" \
         -DCMAKE_INSTALL_PREFIX=Release \
+        -DCMAKE_BUILD_TYPE="Release" \
         -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
         -D BUILD_SHARED_LIBS=ON \
+        -DCV_ENABLE_INTRINSICS=OFF \
+        -DBUILD_WASM_INTRIN_TESTS=OFF \
+        -DBUILD_WITH_STATIC_CRT=OFF \
         ${CMAKE_WIN_SDK}
         
 
@@ -797,8 +805,14 @@ function copy() {
     mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
     mkdir -p $1/lib/$TYPE/$PLATFORM/Release
 
+    mkdir -p $1/bin//$PLATFORM/Debug
+    mkdir -p $1/bin/$PLATFORM/Release
+
     cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
     cp -v "build_${TYPE}_${ARCH}/Debug/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+
+    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
+    cp -v "build_${TYPE}_${ARCH}/Debug/${BUILD_PLATFORM}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
 
     cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
     cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug

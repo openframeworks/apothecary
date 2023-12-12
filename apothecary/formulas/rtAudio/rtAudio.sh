@@ -114,7 +114,8 @@ function build() {
         -DCMAKE_INSTALL_INCLUDEDIR=include \
         -DAUDIO_WINDOWS_WASAPI=ON \
         -DAUDIO_WINDOWS_DS=ON \
-        -DAUDIO_WINDOWS_ASIO=ON 
+        -DAUDIO_WINDOWS_ASIO=ON \
+        -DBUILD_WITH_STATIC_CRT=OFF 
         "         
     cmake .. ${DEFS} \
         -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
