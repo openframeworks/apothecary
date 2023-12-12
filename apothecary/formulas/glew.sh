@@ -42,19 +42,36 @@ function build() {
 
 	if [ "$TYPE" == "osx" ] ; then
 
-		# GLEW will not allow one to simply supply OPT="-arch arm64 -arch x86_64"
-		# so we build them separately.
-
-		# arm64
-		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch arm64  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		mv lib/libGLEW.a libGLEW-arm64.a
-
-		# 64 bit
-		make clean; make -j${PARALLEL_MAKE} glew.lib OPT="-arch x86_64  -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		mv lib/libGLEW.a libGLEW-x86_64.a
-
-		# link into fat universal lib
-		lipo -c libGLEW-arm64.a libGLEW-x86_64.a -o libGLEW.a
+		echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake  .. \
+			-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_BUILD_TYPE=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+			-DPLATFORM=$PLATFORM \
+			-DENABLE_BITCODE=OFF \
+			-DENABLE_ARC=OFF \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+			-DENABLE_VISIBILITY=OFF \
+			-DGLEW_X11=ON \
+		    -DGLEW_EGL=OFF \
+		    -DBUILD_UTILS=OFF \
+		    -DCMAKE_INSTALL_LIBDIR="lib" \
+		    -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+		cmake --build . --config Release --target install
+        cd ..
 
 	elif [ "$TYPE" == "vs" ] ; then
 		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
@@ -72,12 +89,11 @@ function build() {
 		    -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 		    -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
-		    -DBUILD_SHARED_LIBS=ON \
+		    -DBUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_INSTALL_LIBDIR="lib" \
 		    -DGLEW_X11=ON \
 		    -DGLEW_EGL=OFF \
-		    -DBUILD_UTILS=ON \
+		    -DBUILD_UTILS=OFF \
 		    -DCMAKE_INSTALL_LIBDIR="lib" \
 		    -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -114,8 +130,8 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/bin/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32.dll
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/glew32.lib" $1/lib/$TYPE/$PLATFORM/glew32.lib
+        # cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32_s.dll
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libglew32.lib" $1/lib/$TYPE/$PLATFORM/libglew32.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		# TODO: add cb formula
 		mkdir -p $1/lib/$TYPE
