@@ -61,10 +61,12 @@ function build() {
         cd "build_${TYPE}_${PLATFORM}"
 
         DEFS="
-            -DASSIMP_BUILD_TESTS=0
-            -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_BUILD_ZLIB=OFF"
+            -DASSIMP_BUILD_TESTS=OFF
+            -DASSIMP_BUILD_SAMPLES=OFF
+            -DASSIMP_BUILD_3MF_IMPORTER=OFF
+            -DASSIMP_BUILD_ZLIB=OFF
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF
+            "
 
         cmake .. ${DEFS} \
             -DCMAKE_C_STANDARD=17 \
@@ -140,19 +142,15 @@ function build() {
             -D CMAKE_VERBOSE_MAKEFILE=ON
 
         cmake --build . --config Release
-
         cd ..      
-       
         #cleanup to not fail if the other platform is called
         rm -f CMakeCache.txt
 
     elif [ "$TYPE" == "vs" ] ; then
         find ./ -name "*.o" -type f -delete
-        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
-
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.lib"   
@@ -169,13 +167,16 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DASSIMP_BUILD_TESTS=0 \
             -DASSIMP_BUILD_SAMPLES=0 \
-            -DASSIMP_BUILD_3MF_IMPORTER=0"
+            -DASSIMP_BUILD_3MF_IMPORTER=0 \
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
 
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}" \
             -DCMAKE_INSTALL_PREFIX=. \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
             -DASSIMP_BUILD_ZLIB=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \

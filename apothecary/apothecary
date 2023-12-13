@@ -70,7 +70,7 @@ SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
 LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 
-USE_SAVE=0
+USE_SAVE=1
 
 ### Xcode/ios specific settings
 
@@ -105,10 +105,6 @@ echo "This script is run from \"$thisDir\""
 
 fi
 
-# if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ] && [[ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]]; then
-
-# fi
-
 BUILD_MACHINE_ARCH=`uname -m`
 
 # paths to android SDK, etc
@@ -118,8 +114,6 @@ NDK_VERSION=24
 NDK_VERSION_MAJOR=24
 ANDROID_API=21
 ANDROID_PLATFORM=android-${ANDROID_API}
-
-
 
 ################################################################################
 ### PRIVATE VARS, for internal use
@@ -153,7 +147,6 @@ echo "REL_ADDONS_DIR: $REL_ADDONS_DIR"
 
 CHECKOUT=YES
 
-
 # ansi console escape codes
 CON_DEFAULT="\033[0m"
 CON_BOLD="\033[1m"
@@ -181,7 +174,10 @@ VS_BUILD_TOOL=devenv
 WIN10_INSTALLED_SDK_2019=10.0.190410.0
 WIN10_INSTALLED_SDK_2022=10.0.20348.0
 WIN11_INSTALLED_SDK_2022=10.0.22621.0
-VS_TYPE=Community
+VS_TYPE=Community #Professional #Enterprise 
+VS_COMPILER=MSVC #Compiler - MSVC by Default - Clang LLVM available now
+VS_HOST=amd64
+TARGET_WIN_11=0
 
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
@@ -201,6 +197,7 @@ commands:
   remove	remove the library from the build cache
   remove-lib	remove the library from the libs dir
   remove-all	remove the library from the build cache and libs dir
+  framework     build frameworks 
 
 options:
   -t	specify libary type when building, detects type from OS by default
@@ -323,7 +320,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:hgvfpe opt ; do
+while getopts t:a:b:d:s:j:c:hgvfpew opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
@@ -349,6 +346,10 @@ while getopts t:a:b:d:s:j:hgvfpe opt ; do
            export FORCE_DOWNLOAD=1 ;;
 		p) # Dont build dependencies
            export BUILD_DEPENDENCIES=0 ;;
+        w) # win11
+           export TARGET_WIN_11=1 ;;
+        c) # host compiler
+           export VS_COMPILER="$OPTARG" ;;
 		[?]) # print help and exit
 			echo "$HELP" ; exit 0 ;;
 	esac
@@ -386,18 +387,15 @@ function setup_vs_vars(){
         MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
         echo "-- Found MSBuild path: ${MSBUILD_PATH}"
 
-        VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
-        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ]; then
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+        VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
+        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
         else 
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
         fi
-
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 
         export PATH=$VS_BIN_PATH:$PATH
-
-
         (
             # with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
             # set input field separator to colon (:) for current scope
@@ -446,14 +444,10 @@ function with_vs_env(){
     fi
 }
 
-
-
 # used when building for vs - set to 16 if not set explicitly
 if [ "$TYPE" = "vs" ]; then
-
     if [ -z ${VS_VER+x} ]; then 
-           
-        if [ $ARCH == "arm64" ]; then
+        if [ $ARCH == "arm64" ] || [ $ARCH == "arm64ec" ]; then
             VS_VER=17
         else
             VS_VER=17
@@ -461,70 +455,72 @@ if [ "$TYPE" = "vs" ]; then
         fi 
         echo "VS_VER was not set - setting to ${VS_VER}"
     fi
-
-
     VS_64_BIT_ENV='VC\vcvarsall'
-
-
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == "32" ]; then
             PLATFORM=x86
             CROSS_TOOL="amd64_x86"
-            VS_HOST=amd64
         elif [ $ARCH == "64" ]; then
             PLATFORM=x64
             CROSS_TOOL="amd64"
-            VS_HOST=amd64
         elif [ $ARCH == "arm64" ]; then
             PLATFORM=x64
-            VS_HOST=amd64
+            CROSS_TOOL="all"
+        elif [ $ARCH == "arm64ec" ]; then
+            PLATFORM=x64
             CROSS_TOOL="all"
         elif [ $ARCH == "arm" ]; then
             PLATFORM=x64
-            VS_HOST=amd64
             CROSS_TOOL="all"
         else
         	echo "ARCH not set $ARCH"
         	PLATFORM=x64
             CROSS_TOOL="all"
-            VS_HOST=amd64
         fi        
     fi
-
-    WIN_CRT=MD #MT
+    WIN_CRT=/MD
+     if [ $VS_COMPILER == "LLVM" ]; then
+        export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
+        export EXCEPTION_FLAGS="-fexceptions"
+    else
+        export VS_C_FLAGS="/WX-"
+        export FLAGS_RELEASE="${WIN_CRT}"
+        export FLAGS_DEBUG="${WIN_CRT}d"
+        export EXCEPTION_FLAGS="/EHsc"
+    fi
 
     if [ $VS_VER == "17" ]; then
     	VS_YEAR=2022
     	VS_VER=17
     	VS_VER_GEN="$VS_VER $VS_YEAR"
-        #export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022}-DCMAKE_CXX_FLAGS_RELEASE=\"/${WIN_CRT}\" -DCMAKE_C_FLAGS_RELEASE=\"/${WIN_CRT}\" -DCMAKE_CXX_FLAGS_DEBUG=\"/${WIN_CRT}d\" -DCMAKE_C_FLAGS_DEBUG=\"/${WIN_CRT}d\""
-        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
-    
+        if [ $ARCH == "arm64ec" ] || [ $TARGET_WIN_11 == 1 ]; then
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN11_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN11_INSTALLED_SDK_2022} "
+        else 
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
+        fi
     else
     	VS_YEAR=2019
     	VS_VER=16
     	VS_VER_GEN="$VS_VER $VS_YEAR"
-        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2019} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2019}"
+        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2019} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2019} "
 	fi    
-
 	echo "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
-    
     VS_BAT="vcvarsall.bat"
-
-    if [ -z "${WSL_DISTRO_NAME+x}" ]
-	then
+    if [ -z "${WSL_DISTRO_NAME+x}" ]; then
 		DRIVE=/c
 	else
 	  	DRIVE=/mnt/c
 	fi 
-
     if [ -z ${VS_HOSTPLATFORM+x} ]; then
-        VS_HOSTPLATFORM=Hostx64
-    #else
-    #    VS_HOSTPLATFORM=Hostx64
+        if [ ${VS_HOST} == "amd64" ]; then
+            VS_HOSTPLATFORM=Hostx64
+        elif [ ${VS_HOST} == "86" ]; then
+            VS_HOSTPLATFORM=Hostx86
+        else
+            #else if arm or arm64 which is same as VS_HOST
+            VS_HOSTPLATFORM=${VS_HOST}
+        fi
     fi
-
-
     if [ -z ${VS_BASE_PATH+x} ]; then
         if [ "${VS_VER}" = "15" ]; then
             VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/2017/$VS_TYPE"
@@ -540,85 +536,53 @@ if [ "$TYPE" = "vs" ]; then
 			  VS_YEAR_PATH=2019
 			  VC_VERSION=142
 			fi
-
-        	# if [ $ARCH == "arm64" ]; then
-        	# 	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
-          	# 	VS_YEAR=2019
-          	# 	VC_VERSION=142
-        	# else
-            	VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/$VS_YEAR_PATH/$VS_TYPE"
-            	VS_YEAR=$VS_YEAR_PATH
-        	# fi
+            VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/$VS_YEAR_PATH/$VS_TYPE"
+        	VS_YEAR=$VS_YEAR_PATH
         elif [ "${VS_VER}" = "17" ]; then
-
           	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
           	VS_YEAR=2022
           	VC_VERSION=143
             VS_BAT="vcvars$ARCH.bat"
-             #VS_BASE_PATH="${DRIVE}/Program Files (x86)/Microsoft Visual Studio/$VS_YEAR_PATH/$VS_TYPE"
         fi
     fi
-
     if [ $ARCH == 32 ] ; then
         BUILD_PLATFORM="x86"
     elif [ $ARCH == 64 ] ; then
         BUILD_PLATFORM="x64"
     elif [ $ARCH == "arm64" ] ; then
         BUILD_PLATFORM="arm64"
+    elif [ $ARCH == "arm64ec" ] ; then
+        BUILD_PLATFORM="arm64"
     elif [ $ARCH == "arm" ]; then
         BUILD_PLATFORM="arm"
     fi 
-
     if [ $ARCH == 32 ] ; then
         PLATFORM="Win32"
     elif [ $ARCH == 64 ] ; then
         PLATFORM="x64"
     elif [ $ARCH == "arm64" ] ; then
         PLATFORM="ARM64"
+    elif [ $ARCH == "arm64ec" ] ; then
+        PLATFORM="arm64ec"
     elif [ $ARCH == "arm" ]; then
         PLATFORM="ARM"
     fi 
-	
-
-
-	if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ]; then
-           
+	if [ $ARCH == "arm64" ] || [ $ARCH == "arm64ec" ] || [ $ARCH == "ARM" ]; then
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
-
 	else 
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
-
 	fi
-
     echo "VS_VARS_PATH: $VS_VARS_PATH"
-
-    #setup_vs_vars 
-    #cmd.exe \/c "call \"%VS${VS_VER}0COMNTOOLS%..\\..\\${VS_64_BIT_ENV}\" amd64 && $@"
-
-    # echo "vspath:$VS_BASE_PATH"
-    #echo "vspath:$VS_VARS_PATH"
-    #cmd.exe \/c "call \"${VS_VARS_PATH}\""
-
-
-	#export VS_BASE_PATH; 
-	#export VS_VARS_PATH;
-    #export VS_YEAR;
-
-
     if [ -z ${VS_BIN_PATH+x} ]; then	            
-		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/MSVC/" | tail -1)
+		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
 
-        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ]; then
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
         else 
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/MSVC/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
         fi
-
-        
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
-
 		export PATH=$VS_BIN_PATH:$PATH
-
         (
         	# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
 	        # set input field separator to colon (:) for current scope
@@ -634,9 +598,6 @@ if [ "$TYPE" = "vs" ]; then
 
 	        done
         )
-
-        
-
         # Test for existence of directory where cmake should live
         # then prepend cmake path to PATH
         if [ -d "/c/Program Files/CMake/bin/" ]; then
@@ -648,6 +609,8 @@ if [ "$TYPE" = "vs" ]; then
     #echo "NEW PATH: $PATH"
 fi
 
+####  Platform Determination for Targets
+
 if [ "$TYPE" = "msys2" ]; then
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == "32" ]; then
@@ -655,7 +618,7 @@ if [ "$TYPE" = "msys2" ]; then
         elif [ $ARCH == "64" ]; then
             PLATFORM=x64
         elif [ $ARCH == "arm64" ]; then
-            PLATFORM=x64
+            PLATFORM=arm64
         elif [ $ARCH == "arm" ]; then
             PLATFORM=x64
         else
@@ -1071,12 +1034,11 @@ function updateFormula() {
 
 	if [ $USE_SAVE == 1 ]; then
 		if load $1; then
-		   echoInfo "Skipping build as already done for this target "
+		   echoInfo "Skipping - target ${1} already built and up to date"
 		else
-		    echoVerbose "The entry doesn't exist or needs to be rebuilt."
+		    echoVerbose "Building ${1} as deployed library doesn't exist or does needs to be rebuilt as out of date."
 		    buildFormula $1
 		    copyFormula $1
-
 		    save $1
 		fi
 	else
@@ -1183,22 +1145,12 @@ function buildFormula() {
 
 	# dependencies
 	if [ $FORMULA_DEPENDS_MANUAL == 0 ] ; then
-
-		if [ $USE_SAVE == 1 ]; then
-			if apothecaryDependencies load $1; then
-		    	echoInfo "Skipping build apothecaryDependency as already done for this target "
-			else
-				echoVerbose "apothecaryDependency The entry doesn't exist or needs to be rebuilt."       
-				apothecaryDependencies build
-				apothecaryDependencies copy
-				apothecaryDependencies save
-			fi
-		else
-			apothecaryDependencies build
-			apothecaryDependencies copy
-		fi
+		apothecaryDependencies build
+		apothecaryDependencies copy
+        echoInfo "apothecaryDependency built "
+        echoInfo " Now Building \"$1\""
 	fi
-
+    echoInfo "--------------------"
 	build $1
 
 	cd $APOTHECARY_DIR
@@ -1387,8 +1339,9 @@ function vs-build() {
 			DEFAULT_BUILD="Release|ARM"
 		elif [ $ARCH == "arm64" ] ; then
 			DEFAULT_BUILD="Release|ARM64"
+        elif [ $ARCH == "arm64ec" ] ; then
+            DEFAULT_BUILD="Release|ARM64EC"
 		fi
-	
 
 		# Cut part before '|' character of third parameter (which defaults to "Default|x64") and store it as BUILD_CONFIGURATION
 		BUILD_CONFIGURATION="$( cut -d '|' -f 1 <<< "${3:-$DEFAULT_BUILD}" )"
@@ -1492,41 +1445,40 @@ function load() {
 # $1 = command
 # $2 = dependency name
 function apothecaryDepend() {
-	# Dont do anything if BUILD_DEPENDENCIES is false
-	if [ $BUILD_DEPENDENCIES == 0 ] ; then
+    # Don't do anything if BUILD_DEPENDENCIES is false
+    if [ $BUILD_DEPENDENCIES == 0 ] ; then
         echoInfo " ... skipping depend BUILD_DEPENDENCIES == 0 $depend"
-		return
-	fi
+        return
+    fi
 
     local ROOT=$PWD
-	local depend="${2%.*}" # removes extension
+    local depend="${2%.*}" # removes extension
 
-	# detect if dependency is a main OF lib
-	if [ -f $FORMULAS_DIR/$depend.sh -o -d $FORMULAS_DIR/$depend ] ; then
+    # Detect if dependency is a main OF lib or a dependency
+    if [ -f $FORMULAS_DIR/$depend.sh -o -d $FORMULAS_DIR/$depend ] || [ -f $DEPENDS_FORMULA_DIR/$depend.sh -o -d $DEPENDS_FORMULA_DIR/$depend ] ; then
+        :
+    else
+        echoError " Cannot $1, no formula for dependency \"$depend\""
+        exit 1
+    fi
 
-		# don't remove main OF libs if they are dependencies
-		if [ "$1" == "remove" -o "$1" == "remove-lib" -o "$1" == "remove-all" ] ; then
-			echoVerbose " ... skipping main lib dependency $depend"
-			return
-		fi
+    # Skip building if dependency is already up to date
+    if [ $USE_SAVE == 1 ] && load $depend ; then
+        echoInfo "Skipping - dependency $depend already built and up to date"
+        return
+    fi
 
-	# a dependency
-	elif [ -f $DEPENDS_FORMULA_DIR/$depend.sh -o -d $DEPENDS_FORMULA_DIR/$depend ] ; then
-		: # noop
-
-	else
-		echoError " Cannot $1, no formula for dependency \"$depend\""
-		exit 1
-	fi
-
-	# Uses git IF the USE_GIT variable is set
+    # Use git if the USE_GIT variable is set
     if [ $FORCE_DOWNLOAD -eq 1 ]; then
-	    $APOTHECARY_SCRIPT -f -t $TYPE -a $ARCH -j$PARALLEL_MAKE ${USE_GIT:+-g} $1 $depend
+        $APOTHECARY_SCRIPT -f -t $TYPE -a $ARCH -j$PARALLEL_MAKE ${USE_GIT:+-g} $1 $depend
     else
         $APOTHECARY_SCRIPT -t $TYPE -a $ARCH -j$PARALLEL_MAKE ${USE_GIT:+-g} $1 $depend
     fi
+
+    # Return to the original directory
     cd $ROOT
 }
+
 
 # do a command on all formula dependencies in separate apothecary runs
 # $1 = command

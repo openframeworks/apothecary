@@ -25,7 +25,7 @@ function download() {
 
 	if [ "$TYPE" == "vs" ]; then
 		PKG=fmod_${TYPE}${ARCH}.tar.bz2
-		if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
+		if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
 			mkdir fmod
 			return 0;
 		fi
@@ -46,10 +46,8 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
-		if [ "$ARCH" == "arm64" ]; then
-			return 0;
-		fi
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
+		return 0;
 	fi
 
 	if [ "$TYPE" == "osx" ]; then

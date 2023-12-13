@@ -212,7 +212,7 @@ function build() {
 		cd ..
 
     elif [ "$TYPE" == "vs" ]; then
-		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN platform: $PLATFORM"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 		mkdir -p "build_${TYPE}_${ARCH}"
@@ -222,7 +222,7 @@ function build() {
 		-DCMAKE_C_STANDARD=17 \
 		-DCMAKE_CXX_STANDARD=17 \
 		-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-		-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+		-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${EXCEPTION_FLAGS}" \
 		-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 		-DCMAKE_CXX_EXTENSIONS=OFF \
 		-DBUILD_SHARED_LIBS=OFF \

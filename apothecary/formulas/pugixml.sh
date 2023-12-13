@@ -53,29 +53,43 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_LIBDIR=lib"        
      
         cmake .. ${DEFS} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
             -DSTATIC_CRT=OFF \
             -DBUILD_TESTS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
             ${CMAKE_WIN_SDK} \
+            -DCMAKE_BUILD_TYPE=Release \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 
         cmake --build . --config Release --target install
+
+        cmake .. ${DEFS} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
+            -DSTATIC_CRT=OFF \
+            -DBUILD_TESTS=OFF \
+            ${CMAKE_WIN_SDK} \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+
+         cmake --build . --config Debug --target install
+
+         cd ..
 
 	elif [ "$TYPE" == "android" ]; then
         source ../../android_configure.sh $ABI make
@@ -148,6 +162,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
+        cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a

@@ -25,12 +25,11 @@ function download() {
 		mkdir fmodex
 		return;
 	fi
-	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
 		PKG=fmodex_${TYPE}${ARCH}.tar.bz2
-		if [ "$ARCH" == "arm64" ]; then
-			mkdir fmodex
-			return 0;
-		fi
+		mkdir fmodex
+		return 0;
+		
 	else
 		PKG=fmodex_${TYPE}.tar.bz2
 	fi
@@ -48,8 +47,8 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm" ]; then
-		if [ "$ARCH" == "arm64" ]; then
+	if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
+		if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ]; then
 			return 0;
 		fi
 	fi
