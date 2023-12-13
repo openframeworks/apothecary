@@ -8,15 +8,13 @@
 function savestatus {
 
     if [ -z "$2" ]; then
-        echo "Save function not implemented - Param error"
+        #echo "Save function not implemented - Param error"
         return 1
     fi
-
-
     # Check if the save file exists
     #SAVE_FILE="$SCRIPT_DIR/build_status.txt"
     LOCAL_SAVE_FILE="$6"
-    echo "save file: "${LOCAL_SAVE_FILE}" 0:$0 1:$1 2:$2 3:$3 4:$4 5:$5 6:$6"
+    #echoVerboe "save file: "${LOCAL_SAVE_FILE}" 0:$0 1:$1 2:$2 3:$3 4:$4 5:$5 6:$6"
     if [ ! -f "${LOCAL_SAVE_FILE}" ]; then
         touch "${LOCAL_SAVE_FILE}"
         echo "=======" >> "${LOCAL_SAVE_FILE}"

@@ -8,7 +8,7 @@
 function loadsave() {
 
   if [ -z "$2" ]; then
-    echo "Load function not implemented - Param error"
+    #echo "Load function not implemented - Param error"
     return 1
   fi
 

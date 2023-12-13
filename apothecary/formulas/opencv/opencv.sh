@@ -323,14 +323,7 @@ function build() {
         -DBUILD_WASM_INTRIN_TESTS=OFF \
         -DBUILD_WITH_STATIC_CRT=OFF \
         ${CMAKE_WIN_SDK}
-        
-
     cmake --build . --target install --config Release
-
-    # cmake -DCMAKE_BUILD_TYPE=Release --build . --config Release 
-
-    # cmake --build build --target install --config Release
-
     cd ..    
     
   elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
@@ -763,8 +756,6 @@ function build() {
       -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
       -DCMAKE_INSTALL_INCLUDEDIR=include
     cmake --build build --target install --config Release
-    # make 
-    # make install
   fi
 
 }
@@ -808,11 +799,16 @@ function copy() {
     mkdir -p $1/bin//$PLATFORM/Debug
     mkdir -p $1/bin/$PLATFORM/Release
 
-    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-    cp -v "build_${TYPE}_${ARCH}/Debug/${BUILD_PLATFORM}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+    OUTPUT_FOLDER=${BUILD_PLATFORM}
+    if [ "$ARCH" == "arm64ec" ]; then
+      OUTPUT_FOLDER=x64
+    fi
 
-    cp -v "build_${TYPE}_${ARCH}/Release/${BUILD_PLATFORM}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
-    cp -v "build_${TYPE}_${ARCH}/Debug/${BUILD_PLATFORM}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
+    cp -v "build_${TYPE}_${ARCH}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+    cp -v "build_${TYPE}_${ARCH}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+
+    cp -v "build_${TYPE}_${ARCH}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
+    cp -v "build_${TYPE}_${ARCH}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
 
     cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
     cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
