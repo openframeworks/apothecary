@@ -218,13 +218,6 @@ function build() {
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
         DEFS="-DLIBRARY_SUFFIX=${ARCH}"	
-
-
-        if [ "$VS_COMPILER" == "LLVM" ]; then
-			EXCEPTION_FLAGS="-fexceptions"
-		else
-			EXCEPTION_FLAGS="/EHsc"
-		fi
 		cmake  .. ${DEFS} \
 		-DCMAKE_C_STANDARD=17 \
 		-DCMAKE_CXX_STANDARD=17 \

@@ -118,16 +118,29 @@ function build() {
         -DBUILD_WITH_STATIC_CRT=OFF 
         "         
     cmake .. ${DEFS} \
-        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_LIBDIR="lib" \
         -DCMAKE_INSTALL_PREFIX=Release \
         ${CMAKE_WIN_SDK} \
+        ${FLAGS_RELEASE} \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}"
 
     cmake --build . --config Release --target install
+
+    cmake .. ${DEFS} \
+        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1  ${FLAGS_DEBUG} ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_LIBDIR="lib" \
+        -DCMAKE_INSTALL_PREFIX=Debug \
+        ${CMAKE_WIN_SDK} \
+        ${FLAGS_RELEASE} \
+        -A "${PLATFORM}" \
+        -G "${GENERATOR_NAME}"
+
     cmake --build . --config Debug --target install
 
     cd ..
@@ -162,7 +175,7 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
     	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
-    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
+    	cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
 		ls
