@@ -48,27 +48,27 @@ function prepare() {
 function build() {
   rm -f CMakeCache.txt
 
-  LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
-  mkdir -p $LIB_FOLDER
-
   if [ "$TYPE" == "osx" ] ; then
-    LOG="$LIB_FOLDER/opencv2-${VER}.log"
-    
-    # fix for arm64 builds for 4.0.1 which the ittnotify_config.h doesn't detect correctly.
-    # this can prob be removed in later opencv versions
-    sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
-    
-    echo "Logging to $LOG"
-    cd build
+    # sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
+    mkdir -p "build_${TYPE}_${PLATFORM}"
+    cd "build_${TYPE}_${PLATFORM}"
     rm -f CMakeCache.txt
-    echo "Log:" >> "${LOG}" 2>&1
-    set +e
-    cmake .. -DCMAKE_INSTALL_PREFIX=$LIB_FOLDER \
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
-      -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+    DEFS="
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include "
+
+    cmake .. ${DEFS} \
+      -DDEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -std=c++17 -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -O3 -fPIC -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration " \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
@@ -161,35 +161,24 @@ function build() {
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
+      -DWITH_ITT=OFF \
       -DWITH_GTK=OFF \
       -DWITH_GTK_2_X=OFF \
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF 2>&1 | tee -a ${LOG}
-    echo "CMAKE Successful"
-    echo "--------------------"
-    echo "Running make clean"
-
-    make clean 2>&1 | tee -a ${LOG}
-    echo "Make Clean Successful"
-
-    echo "--------------------"
-    echo "Running make"
-    make -j${PARALLEL_MAKE} 2>&1 | tee -a ${LOG}
-    echo "Make  Successful"
-
-    echo "--------------------"
-    echo "Running make install"
-    make install 2>&1 | tee -a ${LOG}
-    echo "Make install Successful"
-
-    echo "--------------------"
-    # we don't do this anymore as it results in duplicate symbol issues
-    # echo "Joining all libs in one"
-    # outputlist="$LIB_FOLDER/lib/lib*.a $LIB_FOLDER/lib/opencv4/3rdparty/*.a"
-    # libtool -static $outputlist -o "$LIB_FOLDER/lib/opencv.a" 2>&1 | tee -a ${LOG}
-    # echo "Joining all libs in one Successful"
+      -D BUILD_opencv_calib3d=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -DENABLE_STRICT_TRY_COMPILE=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=ON 
+      cmake --build . --config Release
+      cmake --install . --config Release
+    cd ..
 
   elif [ "$TYPE" == "vs" ] ; then
     echoInfo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN - "${PLATFORM}""
@@ -771,22 +760,16 @@ function copy() {
   mkdir -p $1/lib/$TYPE
 
   if [ "$TYPE" == "osx" ] ; then
-    # Standard *nix style copy.
-    # copy headers
 
-    LIB_FOLDER="$BUILD_DIR/opencv/build/$TYPE/"
+    mkdir -p $1/lib/$TYPE/$PLATFORM
 
-    cp -R $LIB_FOLDER/include/ $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
+    cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a $1/lib/$TYPE/$PLATFORM/
+    cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
 
-    # copy lib
-    cp -R $LIB_FOLDER/lib/lib*.a $1/lib/$TYPE/
-    cp -R $LIB_FOLDER/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4" $1/include/
 
   elif [ "$TYPE" == "vs" ] ; then
-    
-    mkdir -p $1/include    
+     
     mkdir -p $1/lib/$TYPE
     mkdir -p $1/etc
 
