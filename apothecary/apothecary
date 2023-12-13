@@ -478,15 +478,15 @@ if [ "$TYPE" = "vs" ]; then
             CROSS_TOOL="all"
         fi        
     fi
-    WIN_CRT=MD #MT
+    WIN_CRT=/MD
      if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
+        export EXCEPTION_FLAGS="-fexceptions"
     else
         export VS_C_FLAGS="/WX-"
-        export CXX_FLAGS_RELEASE="/${WIN_CRT}"
-        export C_FLAGS_RELEASE="/${WIN_CRT}"
-        export CXX_FLAGS_DEBUG="/${WIN_CRT}d"
-        export C_FLAGS_DEBUG="/${WIN_CRT}d"
+        export FLAGS_RELEASE="${WIN_CRT}"
+        export FLAGS_DEBUG="${WIN_CRT}d"
+        export EXCEPTION_FLAGS="/EHsc"
     fi
 
     if [ $VS_VER == "17" ]; then
@@ -494,9 +494,9 @@ if [ "$TYPE" = "vs" ]; then
     	VS_VER=17
     	VS_VER_GEN="$VS_VER $VS_YEAR"
         if [ $ARCH == "arm64ec" ] || [ $TARGET_WIN_11 == 1 ]; then
-            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN11_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN11_INSTALLED_SDK_2022}"
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN11_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN11_INSTALLED_SDK_2022} "
         else 
-            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022}"
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
         fi
     else
     	VS_YEAR=2019
