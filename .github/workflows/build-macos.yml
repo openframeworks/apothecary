@@ -52,23 +52,23 @@ jobs:
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build macOS arm64 Simulator
+      - name: Build macOS Catalyst arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "osx"
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
-          ARCH: SIM_arm64
+          ARCH: MAC_CATALYST_ARM64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build macOS Simulator
+      - name: Build macOS Catalyst
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           TARGET: "osx"
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
-          ARCH: SIM_x86_64
+          ARCH: MAC_CATALYST
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
