@@ -34,7 +34,7 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/osx/install.sh
-      - name: Build64
+      - name: Build macOS x86_64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
@@ -43,7 +43,7 @@ jobs:
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: x86_64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: BuildARM64
+      - name: Build macOS arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
@@ -52,8 +52,28 @@ jobs:
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Build macOS arm64 Simulator
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "osx"
+          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
+          ARCH: SIM_arm64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Build macOS Simulator
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          TARGET: "osx"
+          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
+          ARCH: SIM_x86_64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
+      - name: Merge our libaries into Frameworks Here (TODO)
+        run: pwd
       - name: Update Release arm64
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: johnwbyrd/update-release@v1.0.0
