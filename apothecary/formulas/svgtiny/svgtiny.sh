@@ -113,30 +113,35 @@ function build() {
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
         LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.lib"
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
 		echo "building svgtiny $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
 	    echo "--------------------"
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
 	    cd "build_${TYPE}_${ARCH}"
-	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-	        -DCMAKE_BUILD_TYPE=Release \
+	    DEFS="-DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=OFF \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
 	    cmake .. ${DEFS} \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
 	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        ${CMAKE_WIN_SDK} \
+	        -DBUILD_SHARED_LIBS=OFF \
 	        -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
+	        -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
+	        -D CMAKE_VERBOSE_MAKEFILE=ON \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install

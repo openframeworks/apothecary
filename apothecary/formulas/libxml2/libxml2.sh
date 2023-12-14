@@ -78,6 +78,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
     if [ "$TYPE" == "vs" ] ; then 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
@@ -87,28 +88,31 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.lib"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        mkdir -p "build_${TYPE}_${ARCH}"
-        cd "build_${TYPE}_${ARCH}"
-        cmake .. \
-            -A "${PLATFORM}" \
-            ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}" \
-            -DCMAKE_BUILD_TYPE=Release \
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        DEFS="-DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"         
+        cmake .. ${DEFS} \
+            -DBUILD_SHARED_LIBS=ON \
             -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_LZMA=OFF \
             -DLIBXML2_WITH_ZLIB=ON \
-            -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_FTP=OFF \
             -DLIBXML2_WITH_HTTP=OFF \
-            -DLIBXML2_WITH_HTML=OFF \
+            -DLIBXML2_WITH_HTML=ON \
             -DLIBXML2_WITH_ICONV=OFF \
             -DLIBXML2_WITH_LEGACY=OFF \
+            -DLIBXML2_WITH_UNICODE=ON \
             -DLIBXML2_WITH_MODULES=OFF \
             -DLIBXML_THREAD_ENABLED=OFF \
             -DLIBXML2_WITH_OUTPUT=ON \
@@ -120,12 +124,20 @@ function build() {
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_DOCB=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            ${CMAKE_WIN_SDK} \
+            -DCMAKE_PREFIX_PATH="${ZLIB_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DLIBXML2_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-
-        cmake --build . --config Release
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Release --target install
         cd ..
             
     elif [ "$TYPE" == "android" ]; then
@@ -465,19 +477,16 @@ function copy() {
     # prepare headers directory if needed
     mkdir -p $1/include/libxml
     
-    # copy common headers
-   
-
     # create a common lib directory path
     mkdir -p $1/lib/$TYPE
 
     # copy files specific to each build TYPE
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv include/libxml/* $1/include/libxml/
-        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
-        cp -Rv build_${TYPE}_${ARCH}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-        cp -v "build_${TYPE}_${ARCH}/Release/libxml2s.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib       
+        mkdir -p $1/include/libxml
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/"* $1/include/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
+        cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.dll" $1/lib/$TYPE/$PLATFORM/libxml2.dll     
 
     elif [ "$TYPE" == "tvos" ]; then
         # copy lib

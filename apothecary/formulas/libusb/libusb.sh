@@ -66,6 +66,7 @@ function build() {
 	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        ${CMAKE_WIN_SDK} \
+	        -DCMAKE_VERBOSE_MAKEFILE=ON \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install

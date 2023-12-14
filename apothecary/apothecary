@@ -70,7 +70,7 @@ SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
 LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 
-USE_SAVE=1
+USE_SAVE=0
 
 ### Xcode/ios specific settings
 
