@@ -405,7 +405,7 @@ function copy() {
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ] ; then            
-        cp -v -r build_${TYPE}_${ARCH}/include/* $1/include
+        cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
         mkdir -p $1/lib/$TYPE/$PLATFORM/Release
@@ -438,7 +438,7 @@ function copy() {
 function clean() {
 
     if [ "$TYPE" == "vs" ] ; then
-        rm -f build_${TYPE}_${ARCH}
+        rm -f build_${TYPE}_${PLATFORM}
         rm -f CMakeCache.txt
         echo "Assimp VS | $TYPE | $ARCH cleaned"
 
