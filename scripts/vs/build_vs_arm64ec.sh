@@ -3,6 +3,10 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
+ROOT=$(cd $(dirname "$0"); pwd -P)/../../
+APOTHECARY_PATH=$ROOT/apothecary
+
 BUNDLE_NO="$1"
 # Check if the argument is provided
 if [ -z "${BUNDLE_NO+x}" ]; then
@@ -14,20 +18,13 @@ else
 fi
 
 export TARGET=vs
-export ARCH=arm
+export ARCH=arm64ec
 export NO_FORCE=ON
 
 echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
-echo "Apothecary path: $MAIN_PATH"
-export OUTPUT_FOLDER="$ROOT/armout"
+echo "Apothecary path: $APOTHECARY_PATH"
 
-export NO_FORCE=ON
-export VS_VER=17
-
-
-ls
-pwd
-./scripts/build.sh
+${ROOT}./scripts/build.sh
 
