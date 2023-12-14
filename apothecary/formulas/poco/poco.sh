@@ -462,8 +462,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
         # poco needs some dlls 
-        mkdir -p $1/bin/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/bin/$TYPE/$PLATFORM/ 
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/lib/$TYPE/$PLATFORM/ 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
 		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE

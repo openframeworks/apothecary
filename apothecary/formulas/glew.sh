@@ -128,7 +128,6 @@ function copy() {
 	elif [ "$TYPE" == "vs" ] ; then
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		mkdir -p $1/bin/$TYPE/$PLATFORM/
         # cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32_s.dll
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libglew32.lib" $1/lib/$TYPE/$PLATFORM/libglew32.lib
 	elif [ "$TYPE" == "msys2" ] ; then

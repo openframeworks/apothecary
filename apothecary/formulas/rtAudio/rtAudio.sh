@@ -125,7 +125,6 @@ function build() {
         -DCMAKE_INSTALL_LIBDIR="lib" \
         -DCMAKE_INSTALL_PREFIX=Release \
         ${CMAKE_WIN_SDK} \
-        ${FLAGS_RELEASE} \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}"
 
@@ -138,7 +137,6 @@ function build() {
         -DCMAKE_INSTALL_LIBDIR="lib" \
         -DCMAKE_INSTALL_PREFIX=Debug \
         ${CMAKE_WIN_SDK} \
-        ${FLAGS_RELEASE} \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}"
 
@@ -174,15 +172,13 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		mkdir -p $1/bin/$TYPE/$PLATFORM/
-
 		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
 
     	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
     	cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
 
-    	cp -vf "build_${TYPE}_${ARCH}/Release/bin/rtaudio.dll" $1/bin/$TYPE/$PLATFORM/rtaudio.dll
-    	cp -vf "build_${TYPE}_${ARCH}/Debug/bin/rtaudiod.dll" $1/bin/$TYPE/$PLATFORM/rtaudioD.dll
+    	cp -vf "build_${TYPE}_${ARCH}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
+    	cp -vf "build_${TYPE}_${ARCH}/Debug/bin/rtaudiod.dll" $1/lib/$TYPE/$PLATFORM/rtaudioD.dll
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build

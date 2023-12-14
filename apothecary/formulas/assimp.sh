@@ -153,38 +153,53 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.lib"   
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/${PLATFORM}/zlib.lib"   
 
-        mkdir -p "build_${TYPE}_${ARCH}"
-        cd "build_${TYPE}_${ARCH}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 
         DEFS="
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
             -DASSIMP_BUILD_TESTS=0 \
             -DASSIMP_BUILD_SAMPLES=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF \
+            -DBUILD_WITH_STATIC_CRT=OFF"
 
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}" \
-            -DCMAKE_INSTALL_PREFIX=. \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DASSIMP_BUILD_ZLIB=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-
-        cmake --build . --config Debug 
         cmake --build . --config Release
 
+        cmake .. ${DEFS} \
+            -A "${PLATFORM}" \
+            ${CMAKE_WIN_SDK} \
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DASSIMP_BUILD_ZLIB=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+        cmake --build . --config Debug 
+        
         cd ..      
        
         #cleanup to not fail if the other platform is called
@@ -394,10 +409,10 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
         mkdir -p $1/lib/$TYPE/$PLATFORM/Release
-        # cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib 
-        # cp -v "build_${TYPE}_${ARCH}/lib/Debug/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimpD.lib
-        cp -v "build_${TYPE}_${ARCH}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
-        cp -v "build_${TYPE}_${ARCH}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimp.lib
+        cp -v "build_${TYPE}_${PLATFORM}/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/libassimp.dll
+        cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.dll
+        cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
+        cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimp.lib
     elif [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
