@@ -21,9 +21,6 @@ echo "Target: $TARGET"
 echo "Architecture: $ARCH"
 echo "Bundle: $BUNDLE"
 echo "Apothecary path: $MAIN_PATH"
-# export OUTPUT_FOLDER="$ROOT/armout"
-
-
 
 ls
 pwd
