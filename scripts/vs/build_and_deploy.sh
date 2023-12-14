@@ -1,21 +1,23 @@
 #!/bin/bash
 
 # Apothecary ROOT dir relative
-ROOT=$(cd "$(dirname "$0")"; pwd -P)/../../
+
 SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
-APOTHECARY_PATH=$ROOT/apothecary
+ROOT=$(cd $(dirname "${SCRIPT_DIR}/../../../"); pwd -P)
+APOTHECARY_PATH=${ROOT}/apothecary
 
 # Set OF_ROOT directory
 if [ -z "${OF_ROOT+x}" ]; then
-    export OF_ROOT=$(cd "$(dirname "$0")"; pwd -P)/../../../../
+    export OF_ROOT=$(cd "$(dirname "$ROOT/../../../")"; pwd -P)
 fi
 
 # openFrameworks libs directory
-OF_LIBS=$OF_ROOT/libs
+OF_LIBS=${OF_ROOT}/libs
+OF_ADDONS=${OF_ROOT}/addons
 
 # control 
 if [ -z "${BUILD_LIBRARIES+x}" ]; then
-    BUILD_LIBRARIES=1
+    BUILD_LIBRARIES=0
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
@@ -27,16 +29,29 @@ if [ -z "${PLATFORM+x}" ]; then
 fi
 
 if [ -z "${ARCH+x}" ]; then
-    ARCH=arm64
+    ARCH=64
 fi
+
+if [ -z "${OVERWRITE+x}" ]; then
+    OVERWRITE=1
+fi
+
+# Set OUTPUT_FOLDER for the build
+export OUTPUT_FOLDER="${ROOT}/out"
+
+echo "Verify Locations:"
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+echo "OF_LIBS: $OF_LIBS"
+echo "OF_ADDONS: $OF_ADDONS"
+echo "ROOT: $ROOT"
+echo "APOTHECARY_PATH: $APOTHECARY_PATH"
+echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
+
 
 build_libraries() {
     for BUNDLE_NO in {1..4}
     do
         echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
-
-        # Set OUTPUT_FOLDER for the build
-        export OUTPUT_FOLDER="$ROOT/out"
         
         ${SCRIPT_DIR}/./build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
 
@@ -51,13 +66,24 @@ build_libraries() {
 # move built libraries to openFrameworks libs directory
 move_libraries() {
 
-    if ! command -v rsync &> /dev/null; then
-        echo "Using cp to move libraries..."
-        cp -a "$OUTPUT_FOLDER/." "$OF_LIBS/"
-    else
-        echo "Using rsync to move libraries..."
-        rsync -a "$OUTPUT_FOLDER/" "$OF_LIBS/"
-    fi
+    echo "moving libraries from apothecary out to $OF_LIBS"
+
+
+        echo "Source Folder: ${OUTPUT_FOLDER}"
+        echo "Destination Folder: ${OF_LIBS}"
+
+        if ! command -v rsync &> /dev/null; then
+            echo "Using cp to move libraries..."
+            for file in "${OUTPUT_FOLDER}"/*; do
+                cp -av "$file" "${OF_LIBS}/"
+            done
+        else
+            echo "Using rsync to move libraries..."
+            for file in "${OUTPUT_FOLDER}"/*; do
+                rsync -av "$file" "${OF_LIBS}/"
+            done
+        fi
+
 
     echo "Libraries moved to openFrameworks libs directory."
 }
@@ -79,20 +105,22 @@ sort_libraries() {
     fi
 
     for ((i=0;i<${#addonslibs[@]};++i)); do
-        if [ -e ${addonslibs[i]} ]; then
+        if [ -e ${OF_LIBS}/${addonslibs[i]} ]; then
             echo "Copying ${addonslibs[i]} to ${addons[i]}"
-            addon_path="$OF_LIBS/../addons/${addons[i]}/libs/${addonslibs[i]}"
+            addon_path="${OF_ADDONS}/${addons[i]}/libs/${addonslibs[i]}"
             if [ $OVERWRITE -eq 1 ] && [ -e $addon_path ]; then
                 echo "Removing old ${addonslibs[i]} libraries"
-                rm -rf $addon_path
+                rm -rf ${addon_path}
             fi
             mkdir -p $addon_path
             if ! command -v rsync &> /dev/null; then      
-                cp -a ${addonslibs[i]}/* $addon_path  
+                cp -av ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
             else
-                rsync -a ${addonslibs[i]}/ $addon_path/
+                rsync -av ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
             fi
-            rm -rf ${addonslibs[i]}
+            rm -rf ${OF_LIBS}/${addonslibs[i]}
+        else
+            echo "Addon not found at ${OF_LIBS}/${addonslibs[i]}"
         fi
     done
 }
@@ -103,11 +131,18 @@ fi
 
 if [ ${MOVE_LIBRARIES} == 1 ]; then
 
+  echo "========================"
+
    echo "Moving Latest Libraries to openFrameworks core libs directory"
    move_libraries
 
+   echo "========================"
+
    echo "Updating and moving addons to correct directories from libs directory"
    sort_libraries
+
+   echo "========================"
 fi
 
 echo "Apothecary openFrameworks Build and installation complete."
+
