@@ -58,15 +58,34 @@ build_libraries() {
     # List of architectures
     ARCH_LIST=("arm64" "x86_64" "MAC_CATALYST_ARM64" "MAC_CATALYST")
 
-    # Loop over each architecture
-    for ARCH in "${ARCH_LIST[@]}"; do
-        echo "Building for architecture: $ARCH"
+    # # Loop over each architecture
+    # for ARCH in "${ARCH_LIST[@]}"; do
+    #     echo "Building for architecture: $ARCH"
 
-        # Inner loop for bundles
-        for BUNDLE_NO in {1..4}; do
+    #     # Inner loop for bundles
+    #     for BUNDLE_NO in {1..4}; do
+    #         echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
+
+    #         # Call the build script with the current architecture and bundle number
+    #         ${SCRIPT_DIR}/build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
+
+    #         # Check for successful completion
+    #         if [ $? -ne 0 ]; then
+    #             echo "Error building $PLATFORM $ARCH bundle $BUNDLE_NO"
+    #             exit 1
+    #         fi
+    #     done
+    # done
+
+    # Loop over each bundle
+    for BUNDLE_NO in {1..4}; do
+        echo "Building bundle $BUNDLE_NO"
+
+        # Inner loop for each architecture
+        for ARCH in "${ARCH_LIST[@]}"; do
             echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
 
-            # Call the build script with the current architecture and bundle number
+            # Call the build script with the current bundle number and architecture
             ${SCRIPT_DIR}/build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
 
             # Check for successful completion
