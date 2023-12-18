@@ -63,6 +63,11 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include "
+      if [ "${ARCH}" == "arm64" ]; then
+        EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF"
+      else 
+        EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_SSE3=ON -DENABLE_SSE41=ON -DENABLE_SSE42=ON -DENABLE_SSSE3=ON"
+      fi
 
     cmake .. ${DEFS} \
       -DDEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
@@ -167,6 +172,7 @@ function build() {
       -DWITH_OPENCLAMDBLAS=OFF \
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
+      ${EXTRA_DEFS} \
       -D BUILD_opencv_calib3d=OFF \
       -DBUILD_PERF_TESTS=OFF \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
@@ -283,6 +289,12 @@ function build() {
         -DWITH_OPENCLAMDFFT=OFF \
         -DBUILD_TESTS=OFF \
         -DCV_DISABLE_OPTIMIZATION=OFF"
+
+      if [[ ${ARCH} == "arm64ec" || "${ARCH}" == "arm64" ]]; then
+        EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF"
+      else 
+        EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_SSE3=ON -DENABLE_SSE41=ON -DENABLE_SSE42=ON -DENABLE_SSSE3=ON"
+      fi
     
     cmake .. ${DEFS} \
         -A "${PLATFORM}" \
@@ -292,9 +304,8 @@ function build() {
         -D CMAKE_VERBOSE_MAKEFILE=OFF \
         -D BUILD_SHARED_LIBS=ON \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
+        ${EXTRA_DEFS} \
         ${CMAKE_WIN_SDK} \
-        -DCV_ENABLE_INTRINSICS=OFF \
-        -DBUILD_WASM_INTRIN_TESTS=OFF \
         -DBUILD_WITH_STATIC_CRT=OFF 
 
     cmake --build . --target install --config Debug
@@ -308,8 +319,7 @@ function build() {
         -D CMAKE_VERBOSE_MAKEFILE=OFF \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
         -D BUILD_SHARED_LIBS=ON \
-        -DCV_ENABLE_INTRINSICS=OFF \
-        -DBUILD_WASM_INTRIN_TESTS=OFF \
+        ${EXTRA_DEFS} \
         -DBUILD_WITH_STATIC_CRT=OFF \
         ${CMAKE_WIN_SDK}
     cmake --build . --target install --config Release
@@ -534,6 +544,12 @@ function build() {
     echo ${ANDROID_NDK}
     pwd
 
+    if [[ ${ABI} == "arm64-v8a" || "${ABI}" == "armeabi-v7a" ]]; then
+      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF"
+    else 
+      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_SSE3=ON -DENABLE_SSE41=ON -DENABLE_SSE42=ON -DENABLE_SSSE3=ON"
+    fi
+
     cmake  \
       -DANDROID_TOOLCHAIN=clang++ \
       -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake  \
@@ -600,6 +616,7 @@ function build() {
       -DWITH_PVAPI=OFF \
       -DWITH_EIGEN=OFF \
       -DWITH_ITT=OFF \
+      ${EXTRA_DEFS} \
       -DBUILD_TESTS=OFF \
       -DANDROID_NDK=${NDK_ROOT} \
       -DCMAKE_BUILD_TYPE=Release \
