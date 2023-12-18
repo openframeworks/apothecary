@@ -14,22 +14,28 @@ FORMULA_DEPENDS=( "zlib" "libpng" )
 VER=2.13.2
 FVER=213
 
+GIT_VER=VER-2-13-2
+
 # tools for git use
 GIT_URL=https://git.savannah.gnu.org/r/freetype/freetype2.git
 GIT_TAG=VER-2-13
 URL=http://download.savannah.nongnu.org/releases/freetype
 MIRROR_URL=https://mirror.ossplanet.net/nongnu/freetype
+GIT_HUB=https://github.com/freetype/freetype/tags
+GIT_HUB_URL=https://github.com/freetype/freetype/archive/refs/tags/VER-2-13-2.tar.gz
+
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	echo "Downloading freetype-$VER"
+	echo "Downloading freetype-$GIT_VER"
 
 	. "$DOWNLOADER_SCRIPT"
-	downloader $URL/freetype-$VER.tar.gz
+	downloader $GIT_HUB_URL
 	
-	tar -xzf freetype-$VER.tar.gz
-	mv freetype-$VER freetype
-	rm freetype*.tar.gz
+	tar -xzf $GIT_VER.tar.gz
+	mv freetype-$GIT_VER freetype
+	rm $GIT_VER*.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
