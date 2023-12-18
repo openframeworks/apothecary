@@ -483,7 +483,11 @@ if [ "$TYPE" = "vs" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
         export EXCEPTION_FLAGS="-fexceptions"
     else
-        export VS_C_FLAGS="/WX- /Gy"
+        if [ $ARCH == "arm64ec" ]; then
+            export VS_C_FLAGS="/Gy"
+        else
+            export VS_C_FLAGS=""
+        fi
         export FLAGS_RELEASE="${WIN_CRT}"
         export FLAGS_DEBUG="${WIN_CRT}d"
         export EXCEPTION_FLAGS="/EHsc"
