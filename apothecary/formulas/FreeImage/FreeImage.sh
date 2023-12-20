@@ -318,7 +318,7 @@ function build() {
         mkdir -p $BUILD_DIR/FreeImage/Dist/$ABI
         mv libfreeimage.a $BUILD_DIR/FreeImage/Dist/$ABI
     elif [ "$TYPE" == "emscripten" ]; then
-        export CFLAGS="-pthread -std=c++14"
+        export CFLAGS="-pthread"
 	export CXXFLAGS="-pthread -std=c++14"
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE
         rm -rf $BUILD_DIR/FreeImagePatched
