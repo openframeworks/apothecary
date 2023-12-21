@@ -37,6 +37,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	cp -f $FORMULA_DIR/CMakeLists.txt .
+	cp -f $FORMULA_DIR/config.h.in .
 }
 
 # executed inside the lib src dir
@@ -57,7 +58,7 @@ function build() {
 	        -DCMAKE_CXX_STANDARD=17 \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=OFF \
+	        -DBUILD_SHARED_LIBS=ON \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
@@ -92,7 +93,8 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-    	cp -f "build_${TYPE}_${ARCH}/Release/lib/libusb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
+    	cp -f "build_${TYPE}_${ARCH}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
+    	cp -f "build_${TYPE}_${ARCH}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
 
 	fi
 
