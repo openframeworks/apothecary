@@ -52,24 +52,24 @@ jobs:
           DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build macOS Catalyst arm64
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/build.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
-          TARGET: "osx"
-          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
-          ARCH: MAC_CATALYST_ARM64
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build macOS Catalyst
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/build.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
-          TARGET: "osx"
-          DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
-          ARCH: MAC_CATALYST
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      # - name: Build macOS Catalyst arm64
+      #   working-directory: ${{ env.GITHUB_WORKSPACE }}
+      #   run: scripts/build.sh
+      #   env:
+      #     BUNDLE: ${{ matrix.bundle }}
+      #     TARGET: "osx"
+      #     DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
+      #     ARCH: CAT_arm64
+      #     GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      # - name: Build macOS Catalyst
+      #   working-directory: ${{ env.GITHUB_WORKSPACE }}
+      #   run: scripts/build.sh
+      #   env:
+      #     BUNDLE: ${{ matrix.bundle }}
+      #     TARGET: "osx"
+      #     DEVELOPER_DIR: "/Applications/Xcode_15.0.1.app/Contents/Developer"
+      #     ARCH: CAT_x86_64
+      #     GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
       - name: Merge our libaries into Frameworks Here (TODO)

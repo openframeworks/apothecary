@@ -18,7 +18,7 @@ else
 fi
 
 export TARGET=osx
-export ARCH=MAC_CATALYST_ARM64
+export ARCH=CAT_arm64
 export NO_FORCE=ON
 
 echo "Target: $TARGET"

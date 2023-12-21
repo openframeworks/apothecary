@@ -56,7 +56,7 @@ echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
 
 build_libraries() {
     # List of architectures
-    ARCH_LIST=("arm64" "x86_64" "MAC_CATALYST_ARM64" "MAC_CATALYST")
+    ARCH_LIST=("arm64" "x86_64" "CAT_arm64" "CAT_x86_64")
 
     # # Loop over each architecture
     # for ARCH in "${ARCH_LIST[@]}"; do
@@ -82,15 +82,15 @@ build_libraries() {
         echo "Building bundle $BUNDLE_NO"
 
         # Inner loop for each architecture
-        for ARCH in "${ARCH_LIST[@]}"; do
-            echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
+        for ARCHE in "${ARCH_LIST[@]}"; do
+            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
 
             # Call the build script with the current bundle number and architecture
-            ${SCRIPT_DIR}/build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
+            ${SCRIPT_DIR}/build_${PLATFORM}_${ARCHE}.sh ${BUNDLE_NO}
 
             # Check for successful completion
             if [ $? -ne 0 ]; then
-                echo "Error building $PLATFORM $ARCH bundle $BUNDLE_NO"
+                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
                 exit 1
             fi
         done
