@@ -48,7 +48,7 @@ function download() {
         git checkout -b v${VER} tags/v${VER}
         cd ../
         if [ ! -d "icu" ] ; then    
-            wget -q "${DEPEND_URL}.zip"
+            downloader "${DEPEND_URL}.zip"
             unzip -qq "icu4c-${ICU_VER_U}-src.zip"
             rm -f "icu4c-${ICU_VER_U}-src.zip"
         fi
