@@ -27,10 +27,10 @@ DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VE
 
 # download the source code and unpack it into LIB_NAME
 function download() {
+    . "$DOWNLOADER_SCRIPT"
 
     if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
         DOWNLOAD_TYPE="zip"
-        . "$DOWNLOADER_SCRIPT"
         git clone $GIT_URL
         cd libxml2
         git checkout -b v${VER} tags/v${VER}
