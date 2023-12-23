@@ -672,7 +672,6 @@ function build() {
       -DBUILD_opencv_objc_bindings_generator=NO \
       -DBUILD_opencv_java=OFF \
       -DBUILD_opencv_python=OFF \
-      -DBUILD_opencv_js=ON \
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
@@ -687,11 +686,11 @@ function build() {
       -DBUILD_opencv_stitching=OFF \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
-      -DBUILD_opencv_objdetect=OFF \
+      -DBUILD_opencv_objdetect=ON \
       -DBUILD_opencv_video=OFF \
       -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_features2d=OFF \
-      -DBUILD_opencv_flann=OFF \
+      -DBUILD_opencv_features2d=ON \
+      -DBUILD_opencv_flann=ON \
       -DBUILD_opencv_photo=OFF \
       -DBUILD_opencv_python=OFF \
       -DBUILD_opencv_shape=OFF \
