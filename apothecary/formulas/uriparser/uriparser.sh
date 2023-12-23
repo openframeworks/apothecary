@@ -188,13 +188,12 @@ function build() {
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
- 		source "$EMSDK/emsdk_env.sh"
 		rm -f CMakeCache.txt
 		mkdir -p "build_${TYPE}"
 		cd "build_${TYPE}"
   		export CFLAGS="-Wno-implicit-function-declaration "
         	export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
-		emmake cmake \
+		emcmake cmake \
  		-DURIPARSER_BUILD_TESTS=OFF \
  		-DURIPARSER_BUILD_DOCS=OFF \
  		-DURIPARSER_BUILD_TOOLS=OFF \
