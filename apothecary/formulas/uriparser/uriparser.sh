@@ -188,22 +188,25 @@ function build() {
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
+
+		cp $FORMULA_DIR/CMakeLists.txt . # tmporay
 		rm -f CMakeCache.txt
 		mkdir -p "build_${TYPE}"
 		cd "build_${TYPE}"
-  		export CFLAGS="-Wno-implicit-function-declaration "
+  			export CFLAGS="-Wno-implicit-function-declaration "
         	export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
-		emcmake cmake \
- 		-DURIPARSER_BUILD_TESTS=OFF \
- 		-DURIPARSER_BUILD_DOCS=OFF \
- 		-DURIPARSER_BUILD_TOOLS=OFF \
- 		-DURIPARSER_SHARED_LIBS=OFF \
- 		-DURIPARSER_BUILD_WCHAR_T=ON \
+			$EMSDK/upstream/emscripten/emcmake cmake \
+ 			-DURIPARSER_BUILD_TESTS=OFF \
+ 			-DURIPARSER_BUILD_DOCS=OFF \
+ 			-DURIPARSER_BUILD_TOOLS=OFF \
+ 			-DURIPARSER_SHARED_LIBS=OFF \
+ 			-DURIPARSER_BUILD_WCHAR_T=ON \
 	        -DURIPARSER_BUILD_CHAR=ON \
- 		-DBUILD_SHARED_LIBS=OFF \
+ 			-DBUILD_SHARED_LIBS=OFF \
          	-DCMAKE_BUILD_TYPE=Release \
          	-DCMAKE_C_FLAGS=${CFLAGS} \
       	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
+      	 	-DURIPARSER_BUILD_TOOLS=ON \
          	-G 'Unix Makefiles' ..
 		#emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         	emmake make clean
@@ -295,7 +298,7 @@ function copy() {
 		cp -Rv include/uriparser/* $1/include/uriparser/
 		# copy lib
 		mkdir -p $1/lib/$TYPE
-		cp -Rv "build_${TYPE}/liburiparser.a" $1/lib/$TYPE/liburiparser.a
+		cp -Rv "build_${TYPE}/uriparser_wasm.wasm" $1/lib/$TYPE/liburiparser.wasm
     elif [ "$TYPE" == "android" ]; then
 		# Standard *nix style copy.
 		# copy headers
@@ -324,8 +327,7 @@ function clean() {
 		fi
 	elif [ "$TYPE" == "emscripten" ]; then
 		rm -f CMakeCache.txt
-		rm -f build/emscripten
-		rm -r build
+		rm -f build_${TYPE}
 		make clean
 	elif [ "$TYPE" == "android" ]; then
 		rm -f CMakeCache.txt
