@@ -30,13 +30,16 @@ GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
 URL=https://www.cairographics.org/releases/
 
+GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}.tar.bz2
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 
 	. "$DOWNLOADER_SCRIPT"
 
-	downloader https://cairographics.org/releases/cairo-$VER.tar.xz
+	downloader ${GIT_LAB}
+	#downloader https://cairographics.org/releases/cairo-$VER.tar.xz
 	# local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	# if [ "$CHECKSHA" != "$SHA1" ] ; then
     # 	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
@@ -44,9 +47,9 @@ function download() {
     # else
     #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     # fi
-	tar -xf cairo-$VER.tar.xz
+	tar -xf cairo-$VER.tar.bz2
 	mv cairo-$VER cairo
-	rm cairo-$VER.tar.xz
+	rm cairo-$VER.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -210,6 +213,8 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
             -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
@@ -235,6 +240,7 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DNO_FONTCONFIG=OFF \
             -D CMAKE_VERBOSE_MAKEFILE=ON 
         cmake --build . --config Release
