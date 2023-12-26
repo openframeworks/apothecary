@@ -799,9 +799,6 @@ function copy() {
     mkdir -p $1/bin/$PLATFORM/Release
 
     OUTPUT_FOLDER=${BUILD_PLATFORM}
-    if [ "$ARCH" == "arm64ec" ]; then
-      OUTPUT_FOLDER=x64
-    fi
 
     cp -v "build_${TYPE}_${ARCH}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
     cp -v "build_${TYPE}_${ARCH}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
