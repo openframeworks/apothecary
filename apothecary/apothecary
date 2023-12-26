@@ -568,7 +568,7 @@ if [ "$TYPE" = "vs" ]; then
     elif [ $ARCH == "arm64" ] ; then
         PLATFORM="ARM64"
     elif [ $ARCH == "arm64ec" ] ; then
-        PLATFORM="arm64ec"
+        PLATFORM="ARM64EC"
     elif [ $ARCH == "arm" ]; then
         PLATFORM="ARM"
     fi 
@@ -623,9 +623,11 @@ if [ "$TYPE" = "msys2" ]; then
         elif [ $ARCH == "64" ]; then
             PLATFORM=x64
         elif [ $ARCH == "arm64" ]; then
-            PLATFORM=arm64
+            PLATFORM=ARM64
+        elif [ $ARCH == "arm64ec" ]; then
+            PLATFORM=ARM64EC
         elif [ $ARCH == "arm" ]; then
-            PLATFORM=x64
+            PLATFORM=ARM
         else
             PLATFORM=x64
         fi        
