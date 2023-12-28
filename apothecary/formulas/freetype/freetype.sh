@@ -116,6 +116,13 @@ function build() {
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.a *.o
+
+        NO_LINK_BROTLI=OFF
+
+        if [ "$PLATFORM" == "ARM64EC" ] ; then
+       		NO_LINK_BROTLI=ON
+      	fi
+
         DEFS="
         	-DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -125,7 +132,7 @@ function build() {
             -DFT_DISABLE_BZIP2=TRUE \
             -DFT_DISABLE_PNG=OFF \
             -DFT_DISABLE_HARFBUZZ=TRUE \
-            -DFT_DISABLE_BROTLI=TRUE \
+            -DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
@@ -353,7 +360,7 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
+        # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a

@@ -39,9 +39,9 @@ function build() {
       cd "build_${TYPE}_${PLATFORM}"
 
       if [ "$PLATFORM" == "ARM64EC" ] ; then
-            echo "ARM64EC platform detected, exiting build function."
-            return
-        fi
+        echo "ARM64EC platform detected, exiting build function."
+        return
+      fi
 
       DEFS="
           -DCMAKE_C_STANDARD=17 \
