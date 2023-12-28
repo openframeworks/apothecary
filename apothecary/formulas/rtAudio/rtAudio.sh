@@ -104,23 +104,22 @@ function build() {
     GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
     mkdir -p "build_${TYPE}_${ARCH}"
     cd "build_${TYPE}_${ARCH}"
-    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-        -DCMAKE_C_STANDARD=17 \
+
+    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
+    DEFS="-DCMAKE_C_STANDARD=17 \
         -DCMAKE_CXX_STANDARD=17 \
         -DCMAKE_CXX_STANDARD_REQUIRED=ON \
         -DCMAKE_CXX_EXTENSIONS=OFF
-        -DBUILD_SHARED_LIBS=ON \
-        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DBUILD_SHARED_LIBS=OFF \
         -DCMAKE_INSTALL_INCLUDEDIR=include \
-        -DAUDIO_WINDOWS_WASAPI=ON \
-        -DAUDIO_WINDOWS_DS=ON \
-        -DAUDIO_WINDOWS_ASIO=ON \
-        -DBUILD_WITH_STATIC_CRT=OFF \
+        -DRTAUDIO_API_WASAPI=ON \
+        -DRTAUDIO_API_DS=ON \
+        -DRTAUDIO_API_ASIO=ON \
+        -DNEED_PTHREAD=ON \
         -DRTAUDIO_STATIC_MSVCRT=OFF
         "         
     cmake .. ${DEFS} \
         -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE}  ${EXCEPTION_FLAGS}" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_LIBDIR="lib" \
         -DCMAKE_INSTALL_PREFIX=Release \
@@ -129,10 +128,10 @@ function build() {
         -G "${GENERATOR_NAME}"
 
     cmake --build . --config Release --target install
-
+    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
     cmake .. ${DEFS} \
+    	-UCMAKE_CXX_FLAGS \
         -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG}  ${EXCEPTION_FLAGS}" \
-        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1  ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
         -DCMAKE_BUILD_TYPE=Debug \
         -DCMAKE_INSTALL_LIBDIR="lib" \
         -DCMAKE_INSTALL_PREFIX=Debug \
@@ -141,6 +140,8 @@ function build() {
         -G "${GENERATOR_NAME}"
 
     cmake --build . --config Debug --target install
+
+    unset CXXFLAGS
 
     cd ..
 	elif [ "$TYPE" == "msys2" ] ; then
@@ -177,8 +178,8 @@ function copy() {
     	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
     	cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
 
-    	cp -vf "build_${TYPE}_${ARCH}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
-    	cp -vf "build_${TYPE}_${ARCH}/Debug/bin/rtaudiod.dll" $1/lib/$TYPE/$PLATFORM/rtaudioD.dll
+    	#cp -vf "build_${TYPE}_${ARCH}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
+    	#cp -vf "build_${TYPE}_${ARCH}/Debug/bin/rtaudiod.dll" $1/lib/$TYPE/$PLATFORM/rtaudioD.dll
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
