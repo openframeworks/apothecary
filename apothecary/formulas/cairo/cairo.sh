@@ -270,7 +270,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	mkdir -p $1/include
-	if [ "$TYPE" == "vs"  -o "$TYPE" == "msys2" ] ; then
+	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include/cairo	
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/

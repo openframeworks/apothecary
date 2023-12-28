@@ -71,7 +71,7 @@ LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 SECURE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/secure.sh")"
 
-USE_SAVE=1
+USE_SAVE=0
 
 ### Xcode/ios specific settings
 
