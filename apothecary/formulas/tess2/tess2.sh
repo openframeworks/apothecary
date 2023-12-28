@@ -101,6 +101,8 @@ function build() {
 	        ${CMAKE_WIN_SDK} \
 	        -DCMAKE_CXX_FLAGS=-DNDEBUG \
 	        -DCMAKE_C_FLAGS=-DNDEBUG \
+	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install

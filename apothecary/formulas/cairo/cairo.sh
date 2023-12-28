@@ -176,6 +176,9 @@ function build() {
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=OFF \
 		    -D CAIRO_WIN32_STATIC_BUILD=ON \
+		    -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+		    -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
 		    -DENABLE_VISIBILITY=OFF \
 		    ${CMAKE_WIN_SDK}
         cmake --build . --config Release --target install
@@ -242,6 +245,7 @@ function build() {
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DNO_FONTCONFIG=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -D CMAKE_VERBOSE_MAKEFILE=ON 
         cmake --build . --config Release
         cmake --install . --config Release

@@ -164,6 +164,8 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DOPENSSL_INSTALL_MAN=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             ${BUILD_OPTS_CMAKE} \
             ${CMAKE_WIN_SDK} \
             -A "${PLATFORM}" \
