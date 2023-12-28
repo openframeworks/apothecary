@@ -128,7 +128,6 @@ function build() {
             -DFT_DISABLE_BROTLI=TRUE \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DBUILD_SHARED_LIBS=ON \
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
@@ -136,42 +135,50 @@ function build() {
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=bin"
 
+		 env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
+
          cmake .. ${DEFS} \
-            -D CMAKE_VERBOSE_MAKEFILE=OFF \
-		    -D BUILD_SHARED_LIBS=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=OFF \
 		    ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DPNG_ROOT=${LIBPNG_ROOT} 
         cmake --build . --config Release --target install   
 
-
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
         cmake .. ${DEFS} \
-            -D CMAKE_VERBOSE_MAKEFILE=OFF \
-		    -D BUILD_SHARED_LIBS=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=ON \
+		    -D BUILD_SHARED_LIBS=OFF \
 		    ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_PREFIX=Debug \
+            -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} " \
+            -DCMAKE_PREFIX_PATH="${ZLIB_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DPNG_ROOT=${LIBPNG_ROOT} 
         cmake --build . --config Debug --target install 
+        unset CXXFLAGS
 
         cd ..
 
@@ -343,9 +350,7 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/lib/"*.exp $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/bin/"*.dll $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/bin/"*.pdb $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a

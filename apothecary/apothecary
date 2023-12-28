@@ -137,14 +137,14 @@ OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
 REL_LIBS_DIR=${APOTHECARY_DIR}/../
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
-echo "OF: $OF_ROOT/"
-echo "APOTHECARY: $APOTHECARY_DIR"
-echo "FORMULAS: $FORMULAS_DIR"
-echo "BUILD: $BUILD_DIR"
-echo "LIBS_DIR: $LIBS_DIR"
-echo "CUSTOM_LIBS_DIR: $CUSTOM_LIBS_DIR"
-echo "ADDONS: $ADDONS_DIR"
-echo "REL_ADDONS_DIR: $REL_ADDONS_DIR"
+# echo "OF: $OF_ROOT/"
+# echo "APOTHECARY: $APOTHECARY_DIR"
+# echo "FORMULAS: $FORMULAS_DIR"
+# echo "BUILD: $BUILD_DIR"
+# echo "LIBS_DIR: $LIBS_DIR"
+# echo "CUSTOM_LIBS_DIR: $CUSTOM_LIBS_DIR"
+# echo "ADDONS: $ADDONS_DIR"
+# echo "REL_ADDONS_DIR: $REL_ADDONS_DIR"
 
 CHECKOUT=YES
 
@@ -454,7 +454,7 @@ if [ "$TYPE" = "vs" ]; then
             VS_VER=17
             #16 for 2019 
         fi 
-        echo "VS_VER was not set - setting to ${VS_VER}"
+        echoVerbose "VS_VER was not set - setting to ${VS_VER}"
     fi
     VS_64_BIT_ENV='VC\vcvarsall'
     if [ -z ${PLATFORM+x}]; then
@@ -485,9 +485,9 @@ if [ "$TYPE" = "vs" ]; then
         export EXCEPTION_FLAGS="-fexceptions"
     else
         if [ $ARCH == "arm64ec" ]; then
-            export VS_C_FLAGS="/Gy"
+            export VS_C_FLAGS="/Gy /GL-"
         else
-            export VS_C_FLAGS=""
+            export VS_C_FLAGS="/GL-"
         fi
         export FLAGS_RELEASE="${WIN_CRT}"
         export FLAGS_DEBUG="${WIN_CRT}d"
@@ -509,7 +509,7 @@ if [ "$TYPE" = "vs" ]; then
     	VS_VER_GEN="$VS_VER $VS_YEAR"
         export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2019} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2019} "
 	fi    
-	echo "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
+	echoVerbose "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
     VS_BAT="vcvarsall.bat"
     if [ -z "${WSL_DISTRO_NAME+x}" ]; then
 		DRIVE=/c
@@ -577,7 +577,7 @@ if [ "$TYPE" = "vs" ]; then
 	else 
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 	fi
-    echo "VS_VARS_PATH: $VS_VARS_PATH"
+    echoVerbose "VS_VARS_PATH: $VS_VARS_PATH"
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
 
@@ -586,7 +586,7 @@ if [ "$TYPE" = "vs" ]; then
         else 
             export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
         fi
-        echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
+        echoVerbose "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 		export PATH=$VS_BIN_PATH:$PATH
         (
         	# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
@@ -598,7 +598,7 @@ if [ "$TYPE" = "vs" ]; then
 	    	        echo "Couldn't confirm Visual Studio path exists: '$vs_bin_directory', probably installed on a non standard location?"
 	        	    exit 1
 	        	else
-	        		echo "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'"
+	        		echoVerbose "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'"
 		        fi
 
 	        done
