@@ -6,21 +6,21 @@
 # https://github.com/google/brotli
 
 # define the version
-VER=1.0.9
+VER=1.1.0
 
 # tools for git use
 GIT_URL=https://github.com/google/brotli
 GIT_TAG=v$VER
-VS_VER="16 2019"
 
 FORMULA_TYPES=( "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	wget -nv --no-check-certificate ${GIT_URL}/v$VER.tar.gz -O zlib-$VER.tar.gz
-	tar -xf zlib-$VER.tar.gz
-	mv zlib-$VER zlib
-	rm zlib-$VER.tar.gz
+	. "$DOWNLOADER_SCRIPT"
+	downloader ${GIT_URL}/archive/refs/tags/v$VER.tar.gz 
+	tar -xf v$VER.tar.gz
+	mv brotli-$VER brotli
+	rm v$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -31,61 +31,70 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	if [ "$TYPE" == "vs" ] ; then
-		mkdir build && cd build
-		if [ $VS_VER == 15 ] ; then
-			if [ $ARCH == 32 ] ; then
-				cmake . -G "Visual Studio $VS_VER Win32"
-				cmake --build . --config Release
-			elif [ $ARCH == 64 ] ; then
-				cmake . -G "Visual Studio $VS_VER Win64"
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				cmake . -G "Visual Studio $VS_VER ARM"
-				cmake --build . --config Release
-			fi
-		else
-			if [ $ARCH == 32 ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A Win32
-				cmake --build . --config Release
-			elif [ $ARCH == 64 ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A x64
-				cmake --build . --config Release
-			elif [ $ARCH == "arm" ]; then
-				cmake . -G "Visual Studio $VS_VER" -A ARM
-				cmake --build . --config Release
-			elif [ $ARCH == "arm64" ] ; then
-				cmake . -G "Visual Studio $VS_VER" -A ARM64
-				cmake --build . --config Release
-			fi
-		fi
+			find ./ -name "*.o" -type f -delete
+      echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+      echo "--------------------"
+      GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
+      mkdir -p "build_${TYPE}_${PLATFORM}"
+      cd "build_${TYPE}_${PLATFORM}"
+
+      if [ "$PLATFORM" == "ARM64EC" ] ; then
+        echo "ARM64EC platform detected, exiting build function."
+        return
+      fi
+
+      DEFS="
+          -DCMAKE_C_STANDARD=17 \
+          -DCMAKE_CXX_STANDARD=17 \
+          -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+          -DCMAKE_CXX_EXTENSIONS=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBUILD_TESTING=OFF
+          "
+      cmake .. ${DEFS} \
+          -A "${PLATFORM}" \
+          ${CMAKE_WIN_SDK} \
+          -G "${GENERATOR_NAME}" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=Release \
+          -DCMAKE_INSTALL_LIBDIR="lib" \
+          -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+          -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
+          -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
+          -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+          -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" 
+
+      cmake --build . --config Release
+     	cd ..      
+      rm -f CMakeCache.txt
+  elif [ "$TYPE" == "osx" ] ; then
+  	echo "TODO"
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
+  mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "osx" ] ; then
+		echo "TODO"
 		return
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ $ARCH == 32 ] ; then
-			PLATFORM="Win32"
-		elif [ $ARCH == 64 ] ; then
-			PLATFORM="x64"
-		elif [ $ARCH == "arm64" ] ; then
-			PLATFORM="ARM64"
-		elif [ $ARCH == "arm" ]; then
-			PLATFORM="ARM"
-		fi
-		# mkdir -p $1/../cairo/lib/$TYPE/$PLATFORM/
-		# cp -v Release/zlibstatic.lib $1/../cairo/lib/$TYPE/$PLATFORM/zlib.lib
-	else
-		make install
+		if [ "$PLATFORM" == "ARM64EC" ] ; then
+            echo "ARM64EC platform detected, exiting build function."
+            return
+    fi
+
+		cp -v -r c/include/* $1/include
+    mkdir -p $1/lib/$TYPE/$PLATFORM/
+    cp -v "build_${TYPE}_${PLATFORM}/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
+
 	fi
 }
 
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		
+		echo "TODO"
 	else
 		make uninstall
 		make clean
@@ -100,7 +109,6 @@ function save() {
 function load() {
     . "$LOAD_SCRIPT"
     echo "load file ${SAVE_FILE}"
-
     if loadsave ${TYPE} "brotli" ${ARCH} ${VER} "${SAVE_FILE}"; then
       echo "The entry exists and doesn't need to be rebuilt."
       return 0;

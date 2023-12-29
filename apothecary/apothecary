@@ -321,7 +321,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:c:hgvfpew opt ; do
+while getopts t:a:b:d:s:j:m:c:hgvfpew opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
@@ -351,6 +351,8 @@ while getopts t:a:b:d:s:j:c:hgvfpew opt ; do
            export TARGET_WIN_11=1 ;;
         c) # host compiler
            export VS_COMPILER="$OPTARG" ;;
+        m) # set the -m parameter for make
+           export MULTITHREADED_TYPE="$OPTARG" ;;
 		[?]) # print help and exit
 			echo "$HELP" ; exit 0 ;;
 	esac
@@ -479,18 +481,47 @@ if [ "$TYPE" = "vs" ]; then
             CROSS_TOOL="all"
         fi        
     fi
-    WIN_CRT=/MD
-     if [ $VS_COMPILER == "LLVM" ]; then
+    
+
+    if [ -z ${MULTITHREADED_TYPE+x} ]; then
+        MULTITHREADED_TYPE="MD"
+    fi
+    if [ $MULTITHREADED_TYPE == "MD" ]; then
+        MT_TYPE="/MD"
+        echoVerbose "MULTITHREADED_TYPE MD"
+    elif [ $MULTITHREADED_TYPE == "MT" ]; then
+        MT_TYPE="/MT"
+        echoVerbose "MULTITHREADED_TYPE MT"
+    fi
+
+    if [ -z ${CALLING_CONVENTION_TYPE+x} ]; then
+        CALLING_CONVENTION="Gz"
+    fi
+    if [ $CALLING_CONVENTION == "Gz" ]; then
+        CALLING_CONVENTION="/Gz" 
+        echoVerbose "CALLING_CONVENTION ${MT_TYPE} __stdcall"
+    elif [ $MULTITHREADED_TYPE == "Gd" ]; then
+        CALLING_CONVENTION="/Gd"
+        echoVerbose "CALLING_CONVENTION ${MT_TYPE} __cdecl"
+    elif [ $MULTITHREADED_TYPE == "Gr" ]; then
+        CALLING_CONVENTION="/Gr"
+        echoVerbose "CALLING_CONVENTION ${MT_TYPE} __fastcall (/Gr)"
+    elif [ $MULTITHREADED_TYPE == "Gv" ]; then
+        CALLING_CONVENTION="/Gv"
+        echoVerbose "CALLING_CONVENTION ${MT_TYPE} __vectorcall (/Gv)"
+    fi
+    
+    if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
         export EXCEPTION_FLAGS="-fexceptions"
     else
-        if [ $ARCH == "arm64ec" ]; then
-            export VS_C_FLAGS="/Gy /GL-"
+        if [ $ARCH == "arm64ec" ]; then              
+            export VS_C_FLAGS="/Gy /GL- /guard:cf"
         else
             export VS_C_FLAGS="/GL-"
         fi
-        export FLAGS_RELEASE="${WIN_CRT}"
-        export FLAGS_DEBUG="${WIN_CRT}d"
+        export FLAGS_RELEASE="${MT_TYPE} ${CALLING_CONVENTION}"
+        export FLAGS_DEBUG="${MT_TYPE}d ${CALLING_CONVENTION}"
         export EXCEPTION_FLAGS="/EHsc"
     fi
 

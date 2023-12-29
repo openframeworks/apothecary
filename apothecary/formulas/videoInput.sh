@@ -58,6 +58,8 @@ function build() {
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
             ${CMAKE_WIN_SDK} \
 		    -D BUILD_SHARED_LIBS=ON 

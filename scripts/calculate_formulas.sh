@@ -6,6 +6,7 @@ set -o pipefail
 FORMULAS=(
     # Dependencies for other formulas (cairo)
     "pixman"
+    "brotli"
     "pkg-config"
     "zlib"
 
@@ -37,7 +38,7 @@ FORMULAS=(
     "curl"
     "poco"
     "svgtiny"
-    "uri"
+    #"uri"
     "cairo"
 )
 
@@ -50,6 +51,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "pkg-config"
             "zlib"
             "libpng"
+            "brotli"
             "freetype"
 
             # All formulas
@@ -72,7 +74,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
 
             # # Formulas with depenencies in the end
             "cairo"
-            "uri"
+            #"uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
         if [ "$TARGET" == "tvos" ]; then
