@@ -20,7 +20,7 @@ function download() {
 	downloader ${GIT_URL}/archive/refs/tags/v$VER.tar.gz 
 	tar -xf v$VER.tar.gz
 	mv brotli-$VER brotli
-	rm brotli-$VER.tar.gz
+	rm v$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
