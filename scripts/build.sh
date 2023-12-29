@@ -37,13 +37,13 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
 
         #PATH=\"$DOCKER_HOME/bin:\$PATH\"
         echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula.log 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula${ARCH}.log 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        run "tail -n 100 formula.log"
+        run "tail -n 100 formula${ARCH}.log"
     }
 
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')

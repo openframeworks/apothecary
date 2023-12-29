@@ -86,7 +86,7 @@ function copy() {
 
 		cp -v -r c/include/* $1/include
     mkdir -p $1/lib/$TYPE/$PLATFORM/
-    cp -v "build_${TYPE}_${PLATFORM}/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
+    cp -v "build_${TYPE}_${PLATFORM}/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
 
 	fi
 }
