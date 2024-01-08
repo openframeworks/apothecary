@@ -16,7 +16,7 @@ fi
 trapError() {
 	echo
 	echo " ^ Received error building $formula_name ^"
-	cat formula.log
+	cat "formula_${ARCH}.log"
 	if [ "$formula_name" == "boost" ]; then
 	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
 	fi
@@ -37,13 +37,13 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
 
         #PATH=\"$DOCKER_HOME/bin:\$PATH\"
         echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> formula${ARCH}.log 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> "formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        run "tail -n 100 formula${ARCH}.log"
+        run "tail -n 100 formula_${ARCH}.log"
     }
 
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
@@ -60,13 +60,13 @@ else
         trap "trapError" ERR
 
         echo "$@"
-        eval "$@" >> formula.log 2>&1 &
+        eval "$@" >> "formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        run "tail -n 100 formula.log"
+        run "tail -n 100 formula_${ARCH}.log"
     }
 
     ROOT=$(cd $(dirname "$0"); pwd -P)/..
@@ -233,7 +233,7 @@ function build(){
         echo "./apothecary $ARGS update $formula_name"
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
-        echo "./apothecary $ARGS update $formula_name" > formula.log 2>&1
+        echo "./apothecary $ARGS update $formula_name" >> "formula_${ARCH}.log" 2>&1
         run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
