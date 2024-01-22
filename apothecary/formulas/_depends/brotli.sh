@@ -17,10 +17,14 @@ FORMULA_TYPES=( "vs" )
 # download the source code and unpack it into LIB_NAME
 function download() {
 	. "$DOWNLOADER_SCRIPT"
-	downloader ${GIT_URL}/archive/refs/tags/v$VER.tar.gz 
-	tar -xf v$VER.tar.gz
-	mv brotli-$VER brotli
-	rm v$VER.tar.gz
+	#downloader ${GIT_URL}/archive/refs/tags/v$VER.tar.gz 
+  #tar -xf v$VER.tar.gz
+  #mv brotli-$VER brotli
+  #rm v$VER.tar.gz
+  downloader ${GIT_URL}/archive/refs/heads/master.tar.gz
+  tar -xf master.tar.gz
+  mv brotli-master brotli
+  rm master.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -38,10 +42,10 @@ function build() {
       mkdir -p "build_${TYPE}_${PLATFORM}"
       cd "build_${TYPE}_${PLATFORM}"
 
-      if [ "$PLATFORM" == "ARM64EC" ] ; then
-        echo "ARM64EC platform detected, exiting build function."
-        return
-      fi
+      # if [ "$PLATFORM" == "ARM64EC" ] ; then
+      #   echo "ARM64EC platform detected, exiting build function."
+      #   return
+      # fi
 
       DEFS="
           -DCMAKE_C_STANDARD=17 \
@@ -79,11 +83,6 @@ function copy() {
 		echo "TODO"
 		return
 	elif [ "$TYPE" == "vs" ] ; then
-		if [ "$PLATFORM" == "ARM64EC" ] ; then
-            echo "ARM64EC platform detected, exiting build function."
-            return
-    fi
-
 		cp -v -r c/include/* $1/include
     mkdir -p $1/lib/$TYPE/$PLATFORM/
     cp -v "build_${TYPE}_${PLATFORM}/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
