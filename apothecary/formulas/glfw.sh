@@ -45,8 +45,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFS="
+        	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -58,6 +58,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include"         
      
         cmake .. ${DEFS} \
+        	-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -96,12 +97,14 @@ function build() {
 				-DGLFW_BUILD_EXAMPLES=OFF \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
+				-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
 				-DENABLE_BITCODE=OFF \
 				-DCMAKE_CXX_FLAGS="-fPIC ${CFLAGS}" \
 				-DCMAKE_C_FLAGS="-fPIC ${CFLAGS}" \
 				-DENABLE_ARC=OFF \
 				-DENABLE_VISIBILITY=OFF \
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 				-DBUILD_SHARED_LIBS=OFF \
 				-DCMAKE_BUILD_TYPE=Release \
 			    -DCMAKE_C_STANDARD=17 \

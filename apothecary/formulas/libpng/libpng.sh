@@ -5,18 +5,18 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.44
+VER=1.6.40
 WIN_VER=1644
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
 #URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # Glenn Randers-Pehrson 
-URL=https://github.com/pnggroup/libpng/archive/refs/tags/${VER}
+URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40
 SHA=
-WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/${VER}
+WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.40
 
-FORMULA_TYPES=( "osx" "vs" )
+FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "xros" )
 
 FORMULA_DEPENDS=( "zlib" ) 
 
@@ -31,6 +31,7 @@ function download() {
 		mv "libpng-${VER}" libpng
 		rm "v${VER}.zip"
 	else 
+		echo https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.42.tar.gz
 		downloader "${URL}.tar.gz"
 		tar -xf "v${VER}.tar.gz"
 		mv "libpng-${VER}" libpng
@@ -68,13 +69,13 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	
-	if [ "$TYPE" == "osx" ] ; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
 		DEFS="-DCMAKE_BUILD_TYPE=Release \
 		    -DCMAKE_C_STANDARD=17 \
@@ -85,7 +86,7 @@ function build() {
 		    -DZLIB_ROOT=${ZLIB_ROOT} \
 		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
 		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
-		    -DPNG_BUILD_ZLIB=ON \
+		    -DPNG_BUILD_ZLIB=OFF \
 		    -DPNG_TESTS=OFF \
 		    -DPNG_SHARED=OFF \
 		    -DPNG_STATIC=ON \
@@ -114,7 +115,7 @@ function build() {
 
 		Z_ROOT="$LIBS_ROOT/zlib/"
 		Z_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		Z_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.lib"
+		Z_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
 		DEFS="
 				-DCMAKE_BUILD_TYPE=Release \
@@ -164,7 +165,7 @@ function copy() {
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
 		cp -RvT "build_${TYPE}_${ARCH}/Release/include/" $1/include
-  elif [ "$TYPE" == "osx" ] ; then
+  elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
@@ -196,7 +197,7 @@ function clean() {
 		if [ -d "build_${TYPE}_${ABI}" ]; then
 	        rm -r build_${TYPE}_${ABI}     
 	    fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "visionos" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
 	        rm -r build_${TYPE}_${PLATFORM}     
 	    fi

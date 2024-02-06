@@ -155,7 +155,7 @@ CON_YELLOW="\033[33m"
 CON_GREEN="\033[32m"
 
 # used to filter out bad build types
-VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "visionos" "catos" "android" "emscripten" )
+VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "xros" "catos" "android" "emscripten" )
 
 # verbose mode bool
 A_VERBOSE=0
@@ -707,7 +707,7 @@ if [ "$TYPE" = "watchos" ]; then
     fi 
 fi
 
-if [ "$TYPE" = "visionos" ]; then
+if [ "$TYPE" = "xros" ]; then
     export FLAG_RELEASE="-O3"
     if [ $ARCH == "arm64" ] ; then
         PLATFORM="VISIONOS"

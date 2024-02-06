@@ -125,6 +125,7 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
@@ -257,6 +258,7 @@ function build() {
             -DCURL_ENABLE_SSL=ON \
             -DHTTP_ONLY=ON \
             -DCMAKE_MACOSX_BUNDLE=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DUSE_SECURE_TRANSPORT=ON -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DENABLE_LDAP=OFF -DENABLE_LDAPS=OFF -DENABLE_VERBOSE=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_IPV6=OFF 
         cmake --build . --config Release --target install
         cd ..
