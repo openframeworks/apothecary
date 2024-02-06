@@ -39,114 +39,88 @@ function download() {
 
 # executed inside the lib src dir
 function build() {
-
-	# The ./configure / MAKEFILE sequence is broken for OSX, making it
-	# impossible to create universal libs in one pass.  As a result, we compile
-	# the project manually according to the author's page:
-	# https://www.music.mcgill.ca/~gary/rtaudio/compiling.html
+	DEFS="
+			-DCMAKE_C_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+	        -DCMAKE_CXX_EXTENSIONS=OFF
+	        -DBUILD_SHARED_LIBS=OFF \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include
+	    "
 
 	if [ "$TYPE" == "osx" ] ; then
-  #       rm -f librtaudio.a
-  #       rm -f librtaudio-x86_64
-
-		# # Compile the program
-		# /usr/bin/g++ -O2 \
-		# 			 -Wall \
-		# 			 -fPIC \
-		# 			 -stdlib=libc++ \
-		# 			 -arch arm64 -arch x86_64 \
-		# 			 -Iinclude \
-		# 			 -DHAVE_GETTIMEOFDAY \
-		# 			 -D__MACOSX_CORE__ \
-		# 			 -mmacosx-version-min=${OSX_MIN_SDK_VER} \
-		# 			 -c RtAudio.cpp \
-		# 			 -o RtAudio.o
-
-		# /usr/bin/ar ruv librtaudio.a RtAudio.o
-		# /usr/bin/ranlib librtaudio.a
-
-		mkdir -p build
-		cd build
-		export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		export LDFLAGS="-arch arm64 -arch x86_64"
-    
-		cmake .. -G "Unix Makefiles" \
-			-DCMAKE_CXX_STANDARD=11 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_EXTENSION=OFF \
-			-DCMAKE_CXX_FLAGS="-fPIC ${CFLAGS}" \
-			-DCMAKE_C_FLAGS="-fPIC ${CFLAGS}" \
-			-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-			-DRTAUDIO_API_ASIO=OFF \
-			-DBUILD_TESTING=OFF
-		make
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+				-DCMAKE_CXX_FLAGS="-fPIC -DUSE_PTHREADS=1" \
+			    -DCMAKE_C_FLAGS="-fPIC -DUSE_PTHREADS=1" \
+			    -DCMAKE_C_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			    -DCMAKE_CXX_EXTENSIONS=OFF \
+			    -DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				-DRTAUDIO_API_ASIO=OFF \
+				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+				-DHAVE_GETTIMEOFDAY=ON \
+				-DCMAKE_INSTALL_LIBDIR=lib \
+				-DBUILD_TESTING=OFF
+		cmake --build . --config Release --target install
 		cd ..
-
-		#/usr/bin/g++ -O2 \
-		#			 -Wall \
-		#			 -fPIC \
-		#			 -stdlib=libc++ \
-		#			 -arch x86_64 \
-		#			 -Iinclude \
-		#			 -DHAVE_GETTIMEOFDAY \
-		#			 -D__MACOSX_CORE__ \
-		#			 -c RtAudio.cpp \
-		#			 -o RtAudio.o
-
-		#/usr/bin/ar ruv librtaudio-x86_64.a RtAudio.o
-		#/usr/bin/ranlib librtaudio-x86_64.a
-
-		#lipo -c librtaudio.a librtaudio-x86_64.a -o librtaudio.a
 
 	elif [ "$TYPE" == "vs" ] ; then
 		echo "building rtAudio $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-    echo "--------------------"
-    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-    mkdir -p "build_${TYPE}_${ARCH}"
-    cd "build_${TYPE}_${ARCH}"
+	    echo "--------------------"
+	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+	    mkdir -p "build_${TYPE}_${ARCH}"
+	    cd "build_${TYPE}_${ARCH}"
 
-    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
-    DEFS="-DCMAKE_C_STANDARD=17 \
-        -DCMAKE_CXX_STANDARD=17 \
-        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-        -DCMAKE_CXX_EXTENSIONS=OFF
-        -DBUILD_SHARED_LIBS=OFF \
-        -DCMAKE_INSTALL_INCLUDEDIR=include \
-        -DRTAUDIO_API_WASAPI=ON \
-        -DRTAUDIO_API_DS=ON \
-        -DRTAUDIO_API_ASIO=ON \
-        -DNEED_PTHREAD=ON \
-        -DRTAUDIO_STATIC_MSVCRT=OFF
-        "         
-    cmake .. ${DEFS} \
-    	-UCMAKE_CXX_FLAGS \
-        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_LIBDIR="lib" \
-        -DCMAKE_INSTALL_PREFIX=Release \
-        ${CMAKE_WIN_SDK} \
-        -A "${PLATFORM}" \
-        -G "${GENERATOR_NAME}"
+	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
+	    VS_DEFS="
+	        -DRTAUDIO_API_WASAPI=ON \
+	        -DRTAUDIO_API_DS=ON \
+	        -DRTAUDIO_API_ASIO=ON \
+	        -DNEED_PTHREAD=ON \
+	        -DRTAUDIO_STATIC_MSVCRT=OFF
+	        "         
+	    cmake .. ${VS_DEFS} ${DEFS} \
+	    	-UCMAKE_CXX_FLAGS \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+	        -DCMAKE_BUILD_TYPE=Release \
+	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        -DCMAKE_INSTALL_PREFIX=Release \
+	        ${CMAKE_WIN_SDK} \
+	        -A "${PLATFORM}" \
+	        -G "${GENERATOR_NAME}"
 
-    cmake --build . --config Release --target install
-    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
-    cmake .. ${DEFS} \
-    	-UCMAKE_CXX_FLAGS \
-        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS}  ${EXCEPTION_FLAGS}" \
-        -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DCMAKE_INSTALL_LIBDIR="lib" \
-        -DCMAKE_INSTALL_PREFIX=Debug \
-        ${CMAKE_WIN_SDK} \
-        -A "${PLATFORM}" \
-        -G "${GENERATOR_NAME}"
+	    cmake --build . --config Release --target install
+	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
+	    cmake .. ${VS_DEFS} ${DEFS}  \
+	    	-UCMAKE_CXX_FLAGS \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS}  ${EXCEPTION_FLAGS}" \
+	        -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+	        -DCMAKE_BUILD_TYPE=Debug \
+	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        -DCMAKE_INSTALL_PREFIX=Debug \
+	        ${CMAKE_WIN_SDK} \
+	        -A "${PLATFORM}" \
+	        -G "${GENERATOR_NAME}"
 
-    cmake --build . --config Debug --target install
+	    cmake --build . --config Debug --target install
 
-    unset CXXFLAGS
+	    unset CXXFLAGS
 
-    cd ..
+	    cd ..
 	elif [ "$TYPE" == "msys2" ] ; then
 		# Compile the program
 		local API="--with-wasapi --with-ds " # asio as well?
@@ -177,12 +151,8 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
-
     	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
     	cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
-
-    	#cp -vf "build_${TYPE}_${ARCH}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
-    	#cp -vf "build_${TYPE}_${ARCH}/Debug/bin/rtaudiod.dll" $1/lib/$TYPE/$PLATFORM/rtaudioD.dll
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
@@ -191,7 +161,9 @@ function copy() {
 		cp -v build/librtaudio.dll.a $1/lib/$TYPE/librtaudio.dll.a
 
 	elif [ "$TYPE" == "osx" ] ; then
-		cp -v build/librtaudio.a $1/lib/$TYPE/rtaudio.a
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
+    	cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
 	fi
 
 	# copy license file
