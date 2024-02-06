@@ -69,7 +69,7 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 

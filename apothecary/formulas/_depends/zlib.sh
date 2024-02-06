@@ -11,7 +11,7 @@ GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "tvos" "xros" )
+FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "tvos" "xros" "catos" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
