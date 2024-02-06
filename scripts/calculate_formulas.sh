@@ -91,6 +91,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
         fi
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
+            "zlib"
             "libxml2"
             "svgtiny"
             "assimp"
