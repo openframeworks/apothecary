@@ -11,7 +11,7 @@ GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" "osx" "emscripten")
+FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "tvos" "xros" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -33,7 +33,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 	if [ "$TYPE" == "vs" ] ; then
 
 		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
@@ -45,7 +45,7 @@ function build() {
         cmake .. \
             -G "${GENERATOR_NAME}" \
             -A "${PLATFORM}" \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=ON \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -61,13 +61,14 @@ function build() {
 		    ${CMAKE_WIN_SDK} 
         cmake --build . --config Release --target install
         cd ..
-	elif [ "$TYPE" == "osx" ] ; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
 		cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=OFF \
+		    -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
 		    -DSKIP_EXAMPLE=1 \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -76,6 +77,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DPLATFORM=$PLATFORM \
@@ -92,6 +95,7 @@ function build() {
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
+	    	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	    	-D BUILD_SHARED_LIBS=OFF \
 		    -DSKIP_EXAMPLE=1 \
 	    	-DCMAKE_C_STANDARD=17 \
@@ -111,7 +115,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	if [ "$TYPE" == "osx" ] ; then
+	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
@@ -145,7 +149,17 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		vs-clean "${VS_VER}/zlib.sln"
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
+    elif [ "$TYPE" == "emscripten" ] ; then
+    	if [ -d "build_${TYPE}" ]; then
+            rm -r build_${TYPE}     
+        fi
 	else
 		make uninstall
 		make clean

@@ -155,7 +155,7 @@ CON_YELLOW="\033[33m"
 CON_GREEN="\033[32m"
 
 # used to filter out bad build types
-VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "android" "emscripten" )
+VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "visionos" "catos" "android" "emscripten" )
 
 # verbose mode bool
 A_VERBOSE=0
@@ -519,7 +519,7 @@ if [ "$TYPE" = "vs" ]; then
         else
             export VS_C_FLAGS="/GL-"
         fi
-        export FLAGS_RELEASE="${MT_TYPE} ${CALLING_CONVENTION}"
+        export FLAGS_RELEASE="${MT_TYPE} ${CALLING_CONVENTION} -O3"
         export FLAGS_DEBUG="${MT_TYPE}d ${CALLING_CONVENTION}"
         export EXCEPTION_FLAGS="/EHsc"
     fi
@@ -645,10 +645,10 @@ if [ "$TYPE" = "vs" ]; then
 fi
 
 ####  Platform Determination for Targets
-
-OPTIM_LEVEL=-O3
+export VERBOSE_MAKEFILE=NO
 
 if [ "$TYPE" = "msys2" ]; then
+    export FLAG_RELEASE="-O3"
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == "32" ]; then
             PLATFORM=x86
@@ -667,12 +667,13 @@ if [ "$TYPE" = "msys2" ]; then
 fi
 
 if [ "$TYPE" = "emscripten" ]; then
+    export FLAG_RELEASE="-O3"
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
 	. "$EMSCRIPTEN_SCRIPT"
 fi
 
 if [ "$TYPE" = "ios" ]; then
-    OPTIM_LEVEL="-Os"
+    export FLAG_RELEASE="-Os"
     if [ $ARCH == "armv7" ] ; then
         PLATFORM="OS"
     elif [ $ARCH == "x86_64" ] ; then
@@ -681,16 +682,12 @@ if [ "$TYPE" = "ios" ]; then
         PLATFORM="OS64"
     elif [ $ARCH == "SIM_arm64" ]; then
         PLATFORM="SIMULATORARM64"
-    elif [ $ARCH == "CAT_arm64" ]; then
-        PLATFORM="MAC_CATALYST_ARM64"
-    elif [ $ARCH == "CAT_x86_64" ]; then
-        PLATFORM="MAC_CATALYST"
     fi 
 fi
 
 if [ "$TYPE" = "tvos" ]; then
-    OPTIM_LEVEL="-Os"
-    if [ $ARCH == "x86_64" ] ; then
+    export FLAG_RELEASE="-Os"
+    if [ $ARCH == "x86_64" ] || [ $ARCH == "64" ]; then
         PLATFORM="SIMULATOR_TVOS"
     elif [ $ARCH == "arm64" ] ; then
         PLATFORM="TVOS"
@@ -700,7 +697,7 @@ if [ "$TYPE" = "tvos" ]; then
 fi
 
 if [ "$TYPE" = "watchos" ]; then
-    OPTIM_LEVEL="-Os"
+    export FLAG_RELEASE="-Os"
     if [ $ARCH == "arm64_32" ] ; then
         PLATFORM="WATCHOS"
     elif [ $ARCH == "SIM_WATCH" ] ; then
@@ -711,25 +708,31 @@ if [ "$TYPE" = "watchos" ]; then
 fi
 
 if [ "$TYPE" = "visionos" ]; then
+    export FLAG_RELEASE="-O3"
     if [ $ARCH == "arm64" ] ; then
         PLATFORM="VISIONOS"
-    elif [ $ARCH == "x86_64" ] ; then
+    elif [ $ARCH == "x86_64" ] || [ $ARCH == "64" ]; then
         PLATFORM="SIMULATOR64_VISIONOS"
     elif [ $ARCH == "SIM_arm64" ]; then
         PLATFORM="SIMULATOR_VISIONOS"
     fi 
 fi
 
+if [ "$TYPE" = "catos" ]; then
+    export FLAG_RELEASE="-Os"
+    if [ $ARCH == "arm64" ]; then
+            PLATFORM="MAC_CATALYST_ARM64"
+    elif [ $ARCH == "x86_64" ] || [ $ARCH == "64" ]; then
+        PLATFORM="MAC_CATALYST"
+    fi 
+fi
+
 if [ "$TYPE" = "osx" ]; then
-    OPTIM_LEVEL="-O3"
-    if [ $ARCH == "x86_64" ] ; then
+    export FLAG_RELEASE="-O3"
+    if [ $ARCH == "x86_64" ] || [ $ARCH == "64" ] ; then
         PLATFORM="MAC"
     elif [ $ARCH == "arm64" ] ; then
         PLATFORM="MAC_ARM64"
-    elif [ $ARCH == "CAT_arm64" ]; then
-        PLATFORM="MAC_CATALYST_ARM64"
-    elif [ $ARCH == "CAT_x86_64" ]; then
-        PLATFORM="MAC_CATALYST"
     else
         PLATFORM="MAC"
         echoWarning " Missing ARCH. See help: 'apothecary -a'."
