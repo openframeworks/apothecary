@@ -102,8 +102,7 @@ if ! which realpath >&/dev/null; then
 fi
 
 thisDir=$( dirname "`realpath "$0"`" )
-echo "This script is run from \"$thisDir\""
-
+# echo "This script is run from \"$thisDir\""
 fi
 
 BUILD_MACHINE_ARCH=`uname -m`
@@ -1282,17 +1281,62 @@ function frameworkFormula() {
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
     else
-        rm -rf $LIBS_DIR_REAL/$1/lib/*.xcframework
+        rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
+
         echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
         xcframework_flags=""
 
-        # Loop through each .a file built and make framework
-        for file in $(find "$LIBS_DIR_REAL/$1/lib/$TYPE/" -name "*.a"); do
-            echo "file $file"
-            xcframework_flags+=" -library $file -headers $LIBS_DIR_REAL/$1/include"
-        done
-        #echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
-        xcodebuild -create-xcframework $xcframework_flags -output $LIBS_DIR_REAL/$1/lib/$1.xcframework
+        if [[ "$TYPE" == "osx" ]] ; then
+            if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
+                exit 0;
+            fi
+
+            MAC_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC/" -name "*.a" | head -n 1)
+            MAC_ARM64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_ARM64/" -name "*.a" | head -n 1)
+            #MAC_CATALYST_ARM64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_CATALYST_ARM64/" -name "*.a" | head -n 1)
+
+            MAC_FILENAME=$(basename "$MAC_ARCH")
+
+            rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
+            xcrun lipo -create $MAC_ARCH $MAC_ARM64_ARCH -output $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
+            xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME || true
+            xcframework_flags+=" -library $MAC_FILENAME"
+
+            #xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_CATALYST_ARM64_ARCH || true
+            #xcframework_flags+=" -library MAC_CATALYST_ARM64/${MAC_FILENAME}"
+
+        elif [[ "$TYPE" == "ios" ]] ; then
+            # Loop through each .a file built and make framework
+            for file in $(find "$LIBS_DIR_REAL/$1/lib/$TYPE/" -name "*.a"); do
+                echo "file $file"
+                # otool -l  $file
+            done
+
+            OS64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/OS64/" -name "*.a" | head -n 1)
+            SIMULATOR64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/SIMULATOR64_ARCH/" -name "*.a" | head -n 1)
+            SIMULATORARM64=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/SIMULATORARM64/" -name "*.a" | head -n 1)
+
+            IOS_FILENAME=$(basename "$OS64_ARCH")
+
+            rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/$IOS_FILENAME
+            xcrun lipo -create $SIMULATOR64_ARCH $SIMULATORARM64 -output $LIBS_DIR_REAL/$1/lib/$TYPE/$IOS_FILENAME
+            xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$IOS_FILENAME || true
+
+            xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/OS64 || true
+
+            xcframework_flags+=" -library $IOS_FILENAME"
+            xcframework_flags+=" -library OS64/${IOS_FILENAME}"
+
+        fi
+
+        xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
+        echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
+        HERE_DIR=$(cd $(dirname "./"); pwd -P)
+        cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
+        xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+        echoSuccess " xcframework for $TYPE built successfully."
+        echo "========================"
+        cd $HERE_DIR
 
     fi
 }

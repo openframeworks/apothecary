@@ -55,7 +55,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             "freetype"
 
             # All formulas
-            "boost"
+            #"boost"
             "FreeImage"
             "fmod"
             "glew"
