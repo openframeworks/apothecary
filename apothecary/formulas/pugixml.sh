@@ -9,7 +9,7 @@
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
 
 # define the version by sha
-VER=1.13
+VER=1.14
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml
@@ -31,6 +31,14 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+	DEFS="  -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib"        
     if [ "$TYPE" == "emscripten" ]; then
         rm -f libpugixml.bc
 
@@ -53,17 +61,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_INSTALL_LIBDIR=lib"        
-     
         cmake .. ${DEFS} \
+       		-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -75,10 +74,10 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
-
         cmake --build . --config Release --target install
 
         cmake .. ${DEFS} \
+        	-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
             -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
@@ -90,7 +89,6 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Debug \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
-
          cmake --build . --config Debug --target install
 
          cd ..
@@ -108,14 +106,27 @@ function build() {
 			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
 	elif [ "$TYPE" == "osx" ]; then
-        export CFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER}"
-		clang++ -O2  $CFLAGS \
-			 -Wall \
-			 -Iinclude \
-			 -c src/pugixml.cpp \
-			 -o src/pugixml.o
-        libtool src/pugixml.o -o libpugixml.a
-        ranlib libpugixml.a
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+			    -DCMAKE_C_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			    -DCMAKE_CXX_EXTENSIONS=OFF \
+			    -DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				-DCMAKE_INSTALL_LIBDIR=lib 
+		cmake --build . --config Release --target install
+		cd ..
 	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
         if [ "${TYPE}" == "tvos" ]; then
             IOS_ARCHS="x86_64 arm64"
@@ -168,8 +179,10 @@ function copy() {
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
 	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# copy lib
-		cp -Rv libpugixml.a $1/lib/$TYPE/pugixml.a
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		# copy lib
@@ -195,6 +208,12 @@ function clean() {
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+		rm -f *.a
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            # Delete the folder and its contents
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
 	else
 		make clean
 	fi
