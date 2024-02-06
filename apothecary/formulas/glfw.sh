@@ -14,7 +14,7 @@ FORMULA_TYPES=( "osx" "vs" )
 # GIT_URL=https://github.com/ofTheo/glfw/
 GIT_URL=https://github.com/glfw/glfw/
 # VER=master
-VER=3.3.8
+VER=3.3.9
 GIT_BRANCH=$VER
 
 # download the source code and unpack it into LIB_NAME
@@ -76,6 +76,46 @@ function build() {
         cmake --build . --config Release --target install
 
         cd ..
+	elif [ "$TYPE" == "osx" ] ; then
+		if [ $CROSSCOMPILING -eq 1 ]; then
+            source ../../${TYPE}_configure.sh
+            EXTRA_CONFIG="-DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2 -DCMAKE_LIBRARY_PATH=$SYSROOT/usr/lib -DCMAKE_INCLUDE_PATH=$SYSROOT/usr/include"
+        else
+            EXTRA_CONFIG=" "
+        fi
+		# *nix build system
+
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+
+		# OS X needs both arches specified to be universal
+		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call
+		cmake .. -DGLFW_BUILD_DOCS=OFF \
+				-DGLFW_BUILD_TESTS=OFF \
+				-DGLFW_BUILD_EXAMPLES=OFF \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DCMAKE_CXX_FLAGS="-fPIC ${CFLAGS}" \
+				-DCMAKE_C_FLAGS="-fPIC ${CFLAGS}" \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+			    -DCMAKE_C_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			    -DCMAKE_CXX_EXTENSIONS=OFF \
+			    -DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				-DCMAKE_INSTALL_LIBDIR=lib \
+				$EXTRA_CONFIG
+		cmake --build . --config Release --target install
+		cd ..
+
+
 	else
         if [ $CROSSCOMPILING -eq 1 ]; then
             source ../../${TYPE}_configure.sh
@@ -90,23 +130,17 @@ function build() {
 
 		# OS X needs both arches specified to be universal
 		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call
-		if [ "$TYPE" == "osx" ] ; then
-			cmake .. -DGLFW_BUILD_DOCS=OFF \
-					-DGLFW_BUILD_TESTS=OFF \
-					-DGLFW_BUILD_EXAMPLES=OFF \
-					-DBUILD_SHARED_LIBS=OFF \
-					-DCMAKE_BUILD_TYPE=Release \
-                    -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
-                    -DCMAKE_C_FLAGS="-arch arm64 -arch x86_64" \
-					$EXTRA_CONFIG
-		else
-			cmake .. -DGLFW_BUILD_DOCS=OFF \
-					-DGLFW_BUILD_TESTS=OFF \
-					-DGLFW_BUILD_EXAMPLES=OFF \
-					-DBUILD_SHARED_LIBS=OFF \
-					-DCMAKE_BUILD_TYPE=Release
-					$EXTRA_CONFIG
-		fi
+		cmake .. -DGLFW_BUILD_DOCS=OFF \
+				-DGLFW_BUILD_TESTS=OFF \
+				-DGLFW_BUILD_EXAMPLES=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+			    -DCMAKE_C_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			    -DCMAKE_CXX_EXTENSIONS=OFF \
+				$EXTRA_CONFIG
+		
 
  		make clean
  		make -j${PARALLEL_MAKE}
@@ -128,9 +162,10 @@ function copy() {
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
-		cp -Rv include/GLFW/* $1/include/GLFW/
-		# copy lib
-		cp -Rv build/src/libglfw3.a $1/lib/$TYPE/glfw3.a
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
 	fi
 
 	# copy license file
@@ -148,6 +183,12 @@ function clean() {
         if [ -d "build_${TYPE}_${ARCH}" ]; then
             # Delete the folder and its contents
             rm -r build_${TYPE}_${ARCH}     
+        fi
+    elif [ "$TYPE" == "osx" ] ; then
+		rm -f *.a
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            # Delete the folder and its contents
+            rm -r build_${TYPE}_${PLATFORM}     
         fi
 	else
 		make clean
