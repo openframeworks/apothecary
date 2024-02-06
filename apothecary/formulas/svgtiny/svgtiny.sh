@@ -139,7 +139,6 @@ function build() {
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        ${CMAKE_WIN_SDK} \
 	        -DBUILD_SHARED_LIBS=OFF \
-	        -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
 	        -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
@@ -170,6 +169,7 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DANDROID_ABI=$ABI \
@@ -197,6 +197,10 @@ function build() {
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
         LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$PLATFORM/libxml2.a"
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
 		echo "building $TYPE | $PLATFORM"
 		mkdir -p build_${TYPE}_${PLATFORM}
         cd build_${TYPE}_${PLATFORM}
@@ -210,6 +214,7 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=OFF \
+		    -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
 		    -DSKIP_EXAMPLE=1 \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -218,6 +223,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=ON \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
