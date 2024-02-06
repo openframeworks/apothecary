@@ -51,30 +51,38 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
-	if [ "$TYPE" == "osx" ] ; then
-	    # use CMake for the build using CMakeLists.txt from HomeBrew since the original source doesn't have one
-	    # see : https://github.com/mxcl/homebrew/pull/19634/files
-	    cp -v $FORMULA_DIR/CMakeLists.txt .
-
-		unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
-		rm -f CMakeCache.txt
-
-		STD_LIB_FLAGS="-stdlib=libc++"
-		OPTIM_FLAGS="-O3"				 # 	choose "fastest" optimisation
-
-		export CFLAGS="-arch arm64 -arch x86_64 $OPTIM_FLAGS -DNDEBUG -fPIC"
-		export CPPFLAGS=$CFLAGS
-		export LINKFLAGS="$CFLAGS $STD_LIB_FLAGS"
-		export LDFLAGS="$LINKFLAGS"
-		export CXXFLAGS=$CPPFLAGS
-
-		mkdir -p build
-		cd build
-		cmake -G 'Unix Makefiles' -DCMAKE_OSX_DEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
-				..
-		make clean
-		make -j${PARALLEL_MAKE}
+	DEFS="
+	        -DCMAKE_C_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD=17 \
+	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+	        -DCMAKE_CXX_EXTENSIONS=OFF
+	        -DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+	        -DCMAKE_INSTALL_INCLUDEDIR=include
+	     "    
+ 
+	cp -v $FORMULA_DIR/CMakeLists.txt .
+	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "visionos" ]; then
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DENABLE_BITCODE=OFF \
+				-DENABLE_ARC=OFF \
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+			    -DCMAKE_C_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD=17 \
+			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			    -DCMAKE_CXX_EXTENSIONS=OFF \
+			    -DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include
+		cmake --build . --config Release --target install
+		cd ..
 
 	elif [ "$TYPE" == "vs" ] ; then
 		cp -v $FORMULA_DIR/CMakeLists.txt .
@@ -82,22 +90,14 @@ function build() {
 	    echo "--------------------"
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
-	    cd "build_${TYPE}_${ARCH}"
-	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_C_STANDARD=17 \
-	        -DCMAKE_CXX_STANDARD=17 \
-	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=OFF \
-	        -DCMAKE_INSTALL_PREFIX=Release \
-	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
+	    cd "build_${TYPE}_${ARCH}"        
 	    cmake .. ${DEFS} \
+	    	-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
+	        -DBUILD_SHARED_LIBS=OFF \
 	        ${CMAKE_WIN_SDK} \
 	        -DCMAKE_CXX_FLAGS=-DNDEBUG \
 	        -DCMAKE_C_FLAGS=-DNDEBUG \
@@ -107,203 +107,6 @@ function build() {
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
 	    cd ..
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-	    cp -v $FORMULA_DIR/CMakeLists.txt .
-		local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
-
-		SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-		set -e
-		CURRENTPATH=`pwd`
-
-		DEVELOPER=$XCODE_DEV_ROOT
-		TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-
-		mkdir -p "builddir/$TYPE"
-
-		# Validate environment
-		case $XCODE_DEV_ROOT in
-		     *\ * )
-		           echo "Your Xcode path contains whitespaces, which is not supported."
-		           exit 1
-		          ;;
-		esac
-		case $CURRENTPATH in
-		     *\ * )
-		           echo "Your path contains whitespaces, which is not supported by 'make install'."
-		           exit 1
-		          ;;
-		esac
-
-		export CC=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
-		export CPP=$TOOLCHAIN/usr/bin/$COMPILER_CPPTYPE
-		export CXX=$TOOLCHAIN/usr/bin/$COMPILER_CTYPE
-		export CXXCPP=$TOOLCHAIN/usr/bin/$COMPILER_CPPTYPE
-
-		export LD=$TOOLCHAIN/usr/bin/ld
-		export AR=$TOOLCHAIN/usr/bin/ar
-		export AS=$TOOLCHAIN/usr/bin/as
-		export NM=$$TOOLCHAIN/usr/bin/nm
-		export RANLIB=$TOOLCHAIN/usr/bin/ranlib
-
-		SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [ "$TYPE" == "ios" ]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-
-		EXTRA_LINK_FLAGS="-stdlib=libc++ -Os -fPIC"
-		EXTRA_FLAGS="$EXTRA_LINK_FLAGS -fvisibility-inlines-hidden"
-
-		# loop through architectures! yay for loops!
-		for IOS_ARCH in ${IOS_ARCHS}
-		do
-
-			unset CFLAGS CPPFLAGS LINKFLAGS CXXFLAGS LDFLAGS
-            
-			rm -f CMakeCache.txt
-			set +e
-
-			if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-			then
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVSimulator"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneSimulator"
-                fi
-			else
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVOS"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneOS"
-                fi
-			fi
-
-			export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-			export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-			export BUILD_TOOLS="${DEVELOPER}"
-
-			MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-		    if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-		    	MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-		    elif [ "${IOS_ARCH}" == "i386" ]; then
-		    	MIN_IOS_VERSION=7.0
-		    fi
-
-            if [ "${TYPE}" == "tvos" ]; then
-    		    MIN_TYPE=-mtvos-version-min=
-    		    if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-    		    	MIN_TYPE=-mtvos-simulator-version-min=
-    		    fi
-            elif [ "$TYPE" == "ios" ]; then
-                MIN_TYPE=-miphoneos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mios-simulator-version-min=
-                fi
-            fi
-
-            BITCODE=""
-            if [[ "$TYPE" == "tvos" ]] || [[ "${IOS_ARCH}" == "arm64" ]]; then
-                BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=13.0
-            fi
-
-
-			export CFLAGS="-arch $IOS_ARCH $BITCODE -DNDEBUG -pipe -no-cpp-precomp -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $MIN_TYPE$MIN_IOS_VERSION -I${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/include/"
-
-			export CPPFLAGS=$CFLAGS
-			export LINKFLAGS="$CFLAGS $EXTRA_LINK_FLAGS "
-			export LDFLAGS="-L${CROSS_TOP}/SDKs/${CROSS_SDK}/usr/lib/ $LINKFLAGS -std=c++17 -stdlib=libc++"
-			export CXXFLAGS="$CFLAGS $EXTRA_FLAGS"
-
-			mkdir -p "$CURRENTPATH/builddir/$TYPE/$IOS_ARCH"
-			LOG="$CURRENTPATH/builddir/$TYPE/$IOS_ARCH/build-tess2-${VER}-$IOS_ARCH.log"
-			echo "-----------------"
-			echo "Building tess2-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
-			set +e
-
-			echo "Running make for ${IOS_ARCH}"
-			echo "Please stand by..."
-
-			cmake -G 'Unix Makefiles' -DCMAKE_OSX_SYSROOT="/" -DCMAKE_OSX_DEPLOYMENT_TARGET=""  #need these flags because newer cmake tries to be smart and breaks simulator builds 
-			make clean >> "${LOG}" 2>&1
-			make -j${PARALLEL_MAKE} >> "${LOG}" 2>&1
-
-			if [ $? != 0 ];
-		    then
-		    	tail -n 100 "${LOG}"
-		    	echo "Problem while make - Please check ${LOG}"
-		    	exit 1
-		    else
-		    	echo "Make Successful for ${IOS_ARCH}"
-		    fi
-
-			mv libtess2.a builddir/$TYPE/libtess2-$IOS_ARCH.a
-
-		done
-
-		echo "-----------------"
-		echo `pwd`
-		echo "Finished for all architectures."
-		mkdir -p "$CURRENTPATH/builddir/$TYPE/"
-
-		mkdir -p "lib/$TYPE"
-
-		# link into universal lib
-		echo "Running lipo to create fat lib"
-		echo "Please stand by..."
-
-		if [[ "${TYPE}" == "tvos" ]]; then
-			lipo -create -arch arm64 builddir/$TYPE/libtess2-arm64.a \
-			 	-arch x86_64 builddir/$TYPE/libtess2-x86_64.a \
-			 	-output builddir/$TYPE/libtess2.a
-		 elif [[ "$TYPE" == "ios" ]]; then
-            # builddir/$TYPE/libtess2-armv7s.a
-            lipo -create -arch armv7 builddir/$TYPE/libtess2-armv7.a \
-			 	-arch arm64 builddir/$TYPE/libtess2-arm64.a \
-			 	-arch x86_64 builddir/$TYPE/libtess2-x86_64.a \
-			 	-output builddir/$TYPE/libtess2.a
-		fi
-
-		if [ $? != 0 ];
-		then
-			tail -n 10 "${LOG}"
-		    echo "Problem while creating fat lib with lipo - Please check ${LOG}"
-		    exit 1
-		else
-		   	echo "Lipo Successful."
-		fi
-
-		mv builddir/$TYPE/libtess2.a lib/$TYPE/libtess2.a
-		lipo -info lib/$TYPE/libtess2.a
-
-		if [[ "$TYPE" == "ios" ]]; then
-			echo "--------------------"
-			echo "Stripping any lingering symbols"
-
-			SLOG="$CURRENTPATH/lib/$TYPE/tess2-stripping.log"
-
-			strip -x lib/$TYPE/libtess2.a >> "${SLOG}" 2>&1
-			if [ $? != 0 ];
-			then
-				tail -n 100 "${SLOG}"
-			    echo "Problem while stripping lib - Please check ${SLOG}"
-			    exit 1
-			else
-			    echo "Strip Successful for ${SLOG}"
-			fi
-		fi
-
-		echo "--------------------"
-		echo "Build Successful for Tess2 $TYPE"
-		unset SDKROOT CFLAGS CC LD CPP CXX AR AS NM CXXCPP RANLIB LDFLAGS CPPFLAGS CXXFLAGS LINKFLAGS
-		unset CROSS_TOP CROSS_SDK BUILD_TOOLS
-
 	elif [ "$TYPE" == "android" ] ; then
  
         # setup android paths / variables
@@ -394,11 +197,11 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/tess2.lib" $1/lib/$TYPE/$PLATFORM/tess2.lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
-		cp -v lib/$TYPE/libtess2.a $1/lib/$TYPE/tess2.a
-
-	elif [ "$TYPE" == "osx" ]; then
-		cp -v build/libtess2.a $1/lib/$TYPE/tess2.a
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "visionos" ]; then
+		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		mkdir -p $1/include
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 
 	elif [ "$TYPE" == "emscripten" ]; then
 		cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
@@ -409,7 +212,6 @@ function copy() {
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
-		#cp -v build/$TYPE/$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a #make
 		cp -v build_$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
 	else
 		cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
@@ -426,25 +228,20 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		rm -f CMakeCache.txt *.lib
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
 	elif [ "$TYPE" == "android" ] ; then
-		rm -f CMakeCache.txt *.a *.o
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
-		make clean
-		rm -f CMakeCache.txt *.a *.lib
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+	        rm -r build_${TYPE}_${ABI}     
+	    fi
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "visionos" ]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+	        rm -r build_${TYPE}_${PLATFORM}     
+	    fi
 	else
 		make clean
-		rm -f CMakeCache.txt *.a *.lib
 	fi
 }
 
