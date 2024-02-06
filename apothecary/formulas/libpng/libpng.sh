@@ -54,18 +54,10 @@ function prepare() {
 	apothecaryDepend copy zlib
 
 	if [ "$TYPE" == "vs" ] ; then
-
-		
-
 		#need to download this for the vs solution to build
 		if [ ! -e ../zlib ] ; then
 			echoError "libpng needs zlib, please update that formula first"
 		fi
-		#CURRENTPATH=`pwd`
-		#cp -vr $FORMULA_DIR/vs2015 projects/
-		# ls ../zlib
-		# ls ../zlib/Release
-		# cp ../zlib/Release/zlib.lib ../zlib/zlib.lib
 	fi
 
 
@@ -197,10 +189,17 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-    if [ -d "build_${TYPE}_${ARCH}" ]; then
-        # Delete the folder and its contents
-        rm -r build_${TYPE}_${ARCH}     
-    fi
+	    if [ -d "build_${TYPE}_${ARCH}" ]; then
+	        rm -r build_${TYPE}_${ARCH}     
+	    fi
+	elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+	        rm -r build_${TYPE}_${ABI}     
+	    fi
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "visionos" ]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+	        rm -r build_${TYPE}_${PLATFORM}     
+	    fi
 	else
 		make uninstall
 		make clean

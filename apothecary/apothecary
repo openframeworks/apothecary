@@ -646,6 +646,8 @@ fi
 
 ####  Platform Determination for Targets
 
+OPTIM_LEVEL=-O3
+
 if [ "$TYPE" = "msys2" ]; then
     if [ -z ${PLATFORM+x}]; then
         if [ $ARCH == "32" ]; then
@@ -670,6 +672,7 @@ if [ "$TYPE" = "emscripten" ]; then
 fi
 
 if [ "$TYPE" = "ios" ]; then
+    OPTIM_LEVEL="-Os"
     if [ $ARCH == "armv7" ] ; then
         PLATFORM="OS"
     elif [ $ARCH == "x86_64" ] ; then
@@ -686,7 +689,8 @@ if [ "$TYPE" = "ios" ]; then
 fi
 
 if [ "$TYPE" = "tvos" ]; then
-   if [ $ARCH == "x86_64" ] ; then
+    OPTIM_LEVEL="-Os"
+    if [ $ARCH == "x86_64" ] ; then
         PLATFORM="SIMULATOR_TVOS"
     elif [ $ARCH == "arm64" ] ; then
         PLATFORM="TVOS"
@@ -696,7 +700,8 @@ if [ "$TYPE" = "tvos" ]; then
 fi
 
 if [ "$TYPE" = "watchos" ]; then
-   if [ $ARCH == "arm64_32" ] ; then
+    OPTIM_LEVEL="-Os"
+    if [ $ARCH == "arm64_32" ] ; then
         PLATFORM="WATCHOS"
     elif [ $ARCH == "SIM_WATCH" ] ; then
         PLATFORM="SIMULATOR_WATCHOS"
@@ -706,7 +711,7 @@ if [ "$TYPE" = "watchos" ]; then
 fi
 
 if [ "$TYPE" = "visionos" ]; then
-   if [ $ARCH == "arm64" ] ; then
+    if [ $ARCH == "arm64" ] ; then
         PLATFORM="VISIONOS"
     elif [ $ARCH == "x86_64" ] ; then
         PLATFORM="SIMULATOR64_VISIONOS"
@@ -716,6 +721,7 @@ if [ "$TYPE" = "visionos" ]; then
 fi
 
 if [ "$TYPE" = "osx" ]; then
+    OPTIM_LEVEL="-O3"
     if [ $ARCH == "x86_64" ] ; then
         PLATFORM="MAC"
     elif [ $ARCH == "arm64" ] ; then
@@ -1286,7 +1292,7 @@ function frameworkFormula() {
         echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
         xcframework_flags=""
 
-        if [[ "$TYPE" == "osx" ]] ; then
+        if [[ "$TYPE" == "osx" ]] || [[ "$TYPE" == "ios" ]] || [[ "$TYPE" == "tvos" ]]; then
             if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
                 exit 0;
             fi

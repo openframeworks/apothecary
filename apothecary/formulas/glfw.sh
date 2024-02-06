@@ -69,6 +69,7 @@ function build() {
             -DGLFW_BUILD_TESTS=OFF \
             -DGLFW_BUILD_DOCS=OFF \
             -DGLFW_VULKAN_STATIC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             ${CMAKE_WIN_SDK} \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
