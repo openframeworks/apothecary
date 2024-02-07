@@ -44,6 +44,12 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
+      - name: Package
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release arm64
         if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
         uses: johnwbyrd/update-release@v1.0.0

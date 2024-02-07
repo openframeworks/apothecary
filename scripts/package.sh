@@ -88,14 +88,6 @@ if [ -z $TARGET ] ; then
     exit 1
 fi
 
-echo "Running apothecary from $PWD"
-echo "Target: $TARGET"
-echo "Architecture: $ARCH"
-echo "Bundle: $BUNDLE"
-echo "Apothecary path: $APOTHECARY_PATH"
-echo "Output folder is: $OUTPUT_FOLDER"
-
-
 isRunning(){
     if [ “$(uname)” == “Linux” ]; then
 		if [ -d /proc/$1 ]; then
@@ -246,28 +238,76 @@ if [ -z "$FORMULAS" ]; then
     exit 0
 fi
 
-# Remove output folder
-#run "rm -rf $OUTPUT_FOLDER"
-run "mkdir -p $OUTPUT_FOLDER"
 
-ITER=0
-for formula in "${FORMULAS[@]}" ; do
-    formula_name="${formula%.*}"
+# if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
+#     docker cp emscripten:$CCACHE_DOCKER /home/travis/.ccache
+# fi
 
-    if [ "$TRAVIS" = true ] ; then
-        travis_fold_start "build.$ITER" "Build $formula_name"
-        travis_time_start
+if  type "ccache" > /dev/null; then
+    echo $(ccache -s)
+fi
+
+if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[ ! -z ${APPVEYOR+x} && -z ${APPVEYOR_PULL_REQUEST_NUMBER+x} ]] || [[ ("${GITHUB_REF##*/}" == "master" || "${GITHUB_REF##*/}" == "bleeding") && -z "${GITHUB_HEAD_REF}" ]]; then
+    # exit here on PR's
+    echo "On Master or Bleeding Branch and not a PR - zipping build";
+else
+    echo "This is a PR or not master/bleeding branch, exiting build before compressing";
+    exit 0
+fi
+
+if [ -z ${APPVEYOR+x} ]; then
+    if [[ $TRAVIS_SECURE_ENV_VARS == "false" ]] && [[ -z "${GA_CI_SECRET}" ]]; then
+        echo "No secure vars set so exiting before compressing";
+        exit 0
     fi
+fi
 
-    build
+echo "Compressing libraries from $OUTPUT_FOLDER"
+if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
+    LIBS=${LIBSX//[$'\t\r\n']/ }
+else
+    cd $OUTPUT_FOLDER;
+    LIBS=$(ls $OUTPUT_FOLDER)
+    LIBS=$(echo "$LIBS" | tr '\n' ' ')
+fi
+    
+CUR_BRANCH="master";
+if [ "$GITHUB_ACTIONS" = true ]; then
+    CUR_BRANCH="${GITHUB_REF##*/}"
+elif [ "$TRAVIS" = true ]; then
+    CUR_BRANCH="$TRAVIS_BRANCH"
+fi
 
-    if [ "$TRAVIS" = true ] ; then
-        travis_time_finish
-        travis_fold_end "build.$ITER"
-        ITER=$(expr $ITER + 1)
-    fi
-done
+# if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
-echo ""
-echo ""
+# fi
 
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+if [ "$TARGET" == "msys2" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
+    "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
+    echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
+elif [ "$TARGET" == "vs" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+    "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
+    echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
+elif [ "$TARGET" == "emscripten" ]; then
+    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    echo "tar cjf $TARBALL $LIBS"
+    echo " a $TARBALL $LIBS"
+elif [ "$TARGET" == "android" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
+    echo "tar cjf $TARBALL $LIBS"
+    tar cjvf $TARBALL $LIBS
+elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.tar.bz2
+    echo "tar cjf ${TARBALL} ${LIBS}"
+    tar cjvf "${TARBALL}" ${LIBS}
+else
+    echo "tar cjf $TARBALL $LIBS"
+    tar cjvf $TARBALL $LIBS
+fi
+
+echo "Packaged libs to upload $TARBALL"
+echo "done "

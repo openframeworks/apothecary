@@ -78,7 +78,7 @@ build_libraries() {
     # done
 
     # Loop over each bundle
-    for BUNDLE_NO in {1..4}; do
+    for BUNDLE_NO in {1..3}; do
         echo "Building bundle $BUNDLE_NO"
 
         # Inner loop for each architecture
