@@ -698,7 +698,7 @@ fi
 
 if [ "$TYPE" = "watchos" ]; then
     export FLAG_RELEASE="-Os"
-    if [ $ARCH == "arm64_32" ] ; then
+    if [ $ARCH == "arm64_32" ] || [ $ARCH == "arm64" ]; then
         PLATFORM="WATCHOS"
     elif [ $ARCH == "SIM_WATCH" ] ; then
         PLATFORM="SIMULATOR_WATCHOS"

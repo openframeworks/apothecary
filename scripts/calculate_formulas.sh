@@ -43,7 +43,59 @@ FORMULAS=(
 )
 
 # Seperate in bundles on osx
-if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] || [ "$TARGET" == "vs" ]; then
+if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+if [ "$BUNDLE" == "1" ]; then
+
+        FORMULAS=(
+            # Dependencies for other formulas (cairo)
+            "pixman"
+            "pkg-config"
+            "zlib"
+            "libpng"
+            "brotli"
+            "freetype"
+            # All formulas
+            "libxml2"
+            "svgtiny"
+            "assimp"
+            "FreeImage"
+            "glew"
+            "glm"
+            "json"
+            "kiss"
+            "pugixml"
+            "utf8"
+            "videoInput"
+            "rtAudio"
+            "tess2"
+            "uriparser"
+            # # Formulas with depenencies in the end
+            "cairo"
+        )
+    elif [ "$BUNDLE" == "2" ]; then
+        if [[ "$TYPE" =~ ^(osx)$ ]]; then
+            FORMULAS=(
+                "zlib"
+                "glfw"
+                "opencv"
+                "portaudio"
+                "libusb"
+                "fmod"
+            )
+        else
+            FORMULAS=(
+                "opencv"
+            )
+        fi
+    elif [ "$BUNDLE" == "3" ]; then
+        FORMULAS=(
+            "openssl"
+            "curl"
+            # "poco"
+        )
+    fi
+
+elif [ "$TARGET" == "vs" ]; then
     if [ "$BUNDLE" == "1" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)

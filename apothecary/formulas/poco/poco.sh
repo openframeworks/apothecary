@@ -111,33 +111,55 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
-    if [ "$TYPE" == "osx" ] ; then
-        CURRENTPATH=`pwd`
-        echo "--------------------"
-        echo "Making Poco-${VER}"
-        echo "--------------------"
-        echo "Configuring for universal arm64 and x86_64 libc++ ..."
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+       
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 
-        # Locate the path of the openssl libs distributed with openFrameworks.
-        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
-        local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
-        
-        local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
-        
-        sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
-        local SDK_PATH=$(xcrun --sdk macosx --show-sdk-path)
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+        cmake .. ${DEFS} \
+            ${BUILD_OPTS} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCURL_USE_OPENSSL=ON \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DOPENSSL_USE_STATIC_LIBS=YES 
+        cmake --build . --config Release --target install
+        cd ..
 
-        export ARCHFLAGS="-arch arm64 -arch x86_64 -mmacosx-version-min=${OSX_MIN_SDK_VER} -isysroot${SDK_PATH}"
-        ./configure $BUILD_OPTS --config=Darwin-clang-libc++ \
-            --prefix=$BUILD_DIR/poco/install/$TYPE
-            
-        make -j${PARALLEL_MAKE}
-        make install
-        rm -f install/$TYPE/lib/*d.a
+
     elif [ "$TYPE" == "vs" ] ; then
 
         BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
@@ -190,6 +212,7 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_USE_STATIC_LIBS=YES \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
@@ -202,199 +225,6 @@ function build() {
 
         rm ${OPENSSL_PATH}/lib/libssl.lib
         rm ${OPENSSL_PATH}/lib/libcrypto.lib
-
-    elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        set -e
-        SDKVERSION=""
-        if [ "${TYPE}" == "tvos" ]; then
-            SDKVERSION=`xcrun -sdk appletvos --show-sdk-version`
-        elif [ "$TYPE" == "ios" ]; then
-            SDKVERSION=`xcrun -sdk iphoneos --show-sdk-version`
-        fi
-        CURRENTPATH=`pwd`
-
-        DEVELOPER=$XCODE_DEV_ROOT
-        TOOLCHAIN=${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain
-        VERSION=$VER
-
-        local IOS_ARCHS
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
-
-        echo "--------------------"
-        echo $CURRENTPATH
-
-        # Validate environment
-        case $XCODE_DEV_ROOT in
-             *\ * )
-                   echo "Your Xcode path contains whitespaces, which is not supported."
-                   exit 1
-                  ;;
-        esac
-        case $CURRENTPATH in
-             *\ * )
-                   echo "Your path contains whitespaces, which is not supported by 'make install'."
-                   exit 1
-                  ;;
-        esac
-
-        echo "------------"
-        # To Fix: global:62: *** Current working directory not under $PROJECT_BASE.  Stop. make
-        echo "Note: For Poco, make sure to call it with lowercase poco name: ./apothecary -t ios update poco"
-        echo "----------"
-
-        local BUILD_POCO_CONFIG_IPHONE=iPhone-clang-libc++
-        local BUILD_POCO_CONFIG_SIMULATOR=iPhoneSimulator-clang-libc++
-
-        # Locate the path of the openssl libs distributed with openFrameworks.
-        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-
-        # get the absolute path to the included openssl libs
-        local OF_LIBS_OPENSSL_ABS_PATH=$(cd $(dirname $OF_LIBS_OPENSSL); pwd)/$(basename $OF_LIBS_OPENSSL)
-
-        local OPENSSL_INCLUDE=$OF_LIBS_OPENSSL_ABS_PATH/include
-        local OPENSSL_LIBS=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE
-
-        local BUILD_OPTS="$BUILD_OPTS --include-path=$OPENSSL_INCLUDE --library-path=$OPENSSL_LIBS"
-
-        STATICOPT_CC=-fPIC
-        STATICOPT_CXX=-fPIC
-  
-        sed -i '' 's/DEFAULT_TARGET = all_static/DEFAULT_TARGET = static_release/g' build/rules/global
-
-        # loop through architectures! yay for loops!
-        for IOS_ARCH in ${IOS_ARCHS}
-        do
-            MIN_IOS_VERSION=$IOS_MIN_SDK_VER
-            # min iOS version for arm64 is iOS 7
-
-            if [[ "${IOS_ARCH}" == "arm64" || "${IOS_ARCH}" == "x86_64" ]]; then
-                MIN_IOS_VERSION=7.0 # 7.0 as this is the minimum for these architectures
-            elif [ "${IOS_ARCH}" == "i386" ]; then
-                MIN_IOS_VERSION=7.0 # 6.0 to prevent start linking errors
-            fi
-            export IPHONE_SDK_VERSION_MIN=$IOS_MIN_SDK_VER
-
-            export POCO_TARGET_OSARCH=$IOS_ARCH
-
-            MIN_TYPE=-miphoneos-version-min=
-
-            if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-            then
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVSimulator"
-                    BUILD_POCO_CONFIG="AppleTVSimulator"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneSimulator"
-                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_SIMULATOR
-                fi
-            else
-                if [ "${TYPE}" == "tvos" ]; then
-                    PLATFORM="AppleTVOS"
-                    BUILD_POCO_CONFIG="AppleTV"
-                elif [ "$TYPE" == "ios" ]; then
-                    PLATFORM="iPhoneOS"
-                    BUILD_POCO_CONFIG=$BUILD_POCO_CONFIG_IPHONE
-                fi
-            fi
-
-            if [ "${TYPE}" == "tvos" ]; then
-                MIN_TYPE=-mtvos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mtvos-simulator-version-min=
-                fi
-            elif [ "$TYPE" == "ios" ]; then
-                MIN_TYPE=-miphoneos-version-min=
-                if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]]; then
-                    MIN_TYPE=-mios-simulator-version-min=
-                fi
-            fi
-
-            BITCODE=""
-            NOFORK=""
-            if [[ "$TYPE" == "tvos" ]]; then
-                BITCODE=-fembed-bitcode;
-                MIN_IOS_VERSION=9.0
-                NOFORK="-DPOCO_NO_FORK_EXEC"
-            fi
-
-            export CROSS_TOP="${DEVELOPER}/Platforms/${PLATFORM}.platform/Developer"
-            export CROSS_SDK="${PLATFORM}${SDKVERSION}.sdk"
-            export BUILD_TOOLS="${DEVELOPER}"
-
-            mkdir -p "$CURRENTPATH/build/$TYPE/$IOS_ARCH"
-            set +e
-
-            if [[ "${IOS_ARCH}" == "i386" || "${IOS_ARCH}" == "x86_64" ]];
-            then
-                export OSFLAGS="-arch $POCO_TARGET_OSARCH $BITCODE -DNDEBUG $NOFORK -fPIC -DPOCO_ENABLE_CPP11 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $MIN_TYPE$MIN_IOS_VERSION"
-            else
-                export OSFLAGS="-arch $POCO_TARGET_OSARCH $BITCODE -DNDEBUG $NOFORK -fPIC -DPOCO_ENABLE_CPP11 -isysroot ${CROSS_TOP}/SDKs/${CROSS_SDK} $MIN_TYPE$MIN_IOS_VERSION"
-            fi
-            echo "--------------------"
-            echo "Making Poco-${VER} for ${PLATFORM} ${SDKVERSION} ${IOS_ARCH} : iOS Minimum=$MIN_IOS_VERSION"
-            echo "--------------------"
-      
-            echo "Configuring for ${IOS_ARCH} ..."
-            ./configure $BUILD_OPTS --config=$BUILD_POCO_CONFIG
-
-            echo "--------------------"
-            echo "Running make for ${IOS_ARCH}"
-            make -j${PARALLEL_MAKE}
-            unset POCO_TARGET_OSARCH IPHONE_SDK_VERSION_MIN OSFLAGS
-            unset CROSS_TOP CROSS_SDK BUILD_TOOLS
-
-            echo "--------------------"
-
-        done
-
-        if [[ "${TYPE}" == "tvos" ]] ; then
-            cd lib/AppleTVOS
-            # link into universal lib, strip "lib" from filename
-            local lib
-            for lib in $( ls -1 arm64) ; do
-                local renamedLib=$(echo $lib | sed 's|lib||')
-                if [ ! -e $renamedLib ] ; then
-                        lipo -extract x86_64 ../AppleTVSimulator/x86_64/$lib -o ../AppleTVSimulator/x86_64/$lib
-                        lipo -c arm64/$lib \
-                        ../AppleTVSimulator/x86_64/$lib \
-                        -o ../tvos/$renamedLib
-                fi
-            done
-        elif [[ "$TYPE" == "ios" ]]; then
-            cd lib/iPhoneOS
-            # link into universal lib, strip "lib" from filename
-            local lib
-            for lib in $( ls -1 arm64) ; do
-                local renamedLib=$(echo $lib | sed 's|lib||')
-                if [ ! -e $renamedLib ] ; then
-                        lipo -c armv7/$lib \
-                        arm64/$lib \
-                        ../iPhoneSimulator/x86_64/$lib \
-                        -o ../ios/$renamedLib
-                fi
-            done
-        fi
-
-
-        cd ../../
-
-        if [[ "$TYPE" == "ios" ]]; then
-            echo "--------------------"
-            echo "Stripping any lingering symbols"
-
-            cd lib/$TYPE
-            local TOBESTRIPPED
-            for TOBESTRIPPED in $( ls -1) ; do
-                strip -x $TOBESTRIPPED
-            done
-            cd ../../
-        fi
-
-        echo "Completed."
 
     elif [ "$TYPE" == "android" ] ; then
         BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
@@ -447,17 +277,16 @@ function copy() {
     cp -Rv XML/include/Poco/* $1/include/Poco
     cp -Rv Zip/include/Poco/Zip $1/include/Poco
 
-  rm -rf $1/lib/$TYPE
-  mkdir -p $1/lib/$TYPE
+    rm -rf $1/lib/$TYPE
+    mkdir -p $1/lib/$TYPE
 
 	# libs
-	if [ "$TYPE" == "osx" ] ; then
-		for lib in install/$TYPE/lib/*.a; do
-			dstlib=$(basename $lib | sed "s/lib\(.*\)/\1/")
-			cp -v $lib $1/lib/$TYPE/$dstlib
-		done
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		cp -v lib/$TYPE/*.a $1/lib/$TYPE
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		mkdir -p $1/include    
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
@@ -499,15 +328,18 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
-	if [ "$TYPE" == "vs" ] ; then
-		rm -f *.lib
+    if [ "$TYPE" == "vs" ] ; then
         if [ -d "build_${TYPE}_${ARCH}" ]; then
-            # Delete the folder and its contents
             rm -r build_${TYPE}_${ARCH}     
         fi
-	elif [ "$TYPE" == "android" ] ; then
-		cd build_$ABI
-		make clean
+    elif [ "$TYPE" == "android" ] ; then
+        if [ -d "build_${TYPE}_${ABI}" ]; then
+            rm -r build_${TYPE}_${ABI}     
+        fi
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}  
+        fi   
 	else
 		make clean
 	fi
