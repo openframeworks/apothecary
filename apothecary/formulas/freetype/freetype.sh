@@ -343,7 +343,7 @@ function copy() {
 	mkdir -p $1/include/freetype2/
 
 	# copy files from the build root
-	cp -Rv include/* $1/include/freetype2/
+	cp -R include/* $1/include/freetype2/
 
 	# older versions before 2.5.x
 	#mkdir -p $1/include/freetype2/freetype/config
@@ -354,11 +354,11 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
+		cp -R "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -RvT "build_${TYPE}_${ARCH}/Release/include" $1/include
+		cp -RT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
         # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
 
@@ -394,10 +394,10 @@ function clean() {
 		rm -f builddir/$TYPE
 		rm -f builddir
 		rm -f lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" || "$TYPE" == "osx" ]]; then
-		make clean
-		rm -f CMakeCache.txt *.a *.o
-		rm -f "build_${TYPE}_${PLATFORM}"
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+			rm -r build_${TYPE}_${PLATFORM}     
+		fi
 	else
 		rm -f CMakeCache.txt *.a *.o *.lib
 		make clean
