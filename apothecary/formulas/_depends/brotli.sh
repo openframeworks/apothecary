@@ -61,6 +61,7 @@ function build() {
           -G "${GENERATOR_NAME}" \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX=Release \
+          -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
           -DCMAKE_INSTALL_LIBDIR="lib" \
           -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
           -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \

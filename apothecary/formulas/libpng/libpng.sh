@@ -16,7 +16,7 @@ URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40
 SHA=
 WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.40
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "xros" )
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" )
 
 FORMULA_DEPENDS=( "zlib" ) 
 
@@ -69,7 +69,7 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	
-	if [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 
@@ -165,7 +165,7 @@ function copy() {
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
 		cp -RT "build_${TYPE}_${ARCH}/Release/include/" $1/include
-  elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
@@ -197,7 +197,7 @@ function clean() {
 		if [ -d "build_${TYPE}_${ABI}" ]; then
 	        rm -r build_${TYPE}_${ABI}     
 	  fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
 	        rm -r build_${TYPE}_${PLATFORM}     
 	  fi

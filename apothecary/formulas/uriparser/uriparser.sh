@@ -7,9 +7,7 @@
 # uses a CMake build system
 
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
-
-
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
 
 # define the version by sha
 VER=0.9.7
@@ -30,16 +28,14 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
 	echo "uriparser build" 
-	rm -f CMakeCache.txt || true
-
 	if [ "$TYPE" == "vs" ] ; then
 		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
 	    echo "--------------------"
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
 	    cd "build_${TYPE}_${ARCH}"
+	    rm -f CMakeCache.txt || true
 	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=17 \
@@ -62,7 +58,7 @@ function build() {
  			-DURIPARSER_SHARED_LIBS=OFF \
 	        -DURIPARSER_BUILD_CHAR=ON \
  			${CMAKE_WIN_SDK} \
- 			-DCMAKE_VERBOSE_MAKEFILE=ON \
+ 			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
@@ -70,9 +66,6 @@ function build() {
 	elif [ "$TYPE" == "android" ]; then
 		echo "Android "
 		source ../../android_configure.sh $ABI cmake
-	    #cp $FORMULA_DIR/CMakeLists.txt .
-
-
 	    echo "Mkdir build"
 		mkdir -p build
 		echo "Mkdir build/${ABI}"
@@ -82,8 +75,7 @@ function build() {
 		mkdir -p ${TYPE}
 		cd ${TYPE}
 		mkdir -p ${ABI}
-		#echo "cd build/${ABI}"
-		#cp $FORMULA_DIR/CMakeLists.txt .
+		rm -f CMakeCache.txt || true
 		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
@@ -136,26 +128,22 @@ function build() {
 		
 		cd ../../..
 
-	elif [ "$TYPE" == "osx" ]; then
-
-		echo "macOS "
-        export CFLAGS=""
-        export CXXFLAGS="-mmacosx-version-min=${OSX_MIN_SDK_VER}"
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
         export LDFLAGS=" "
-	    local BUILD_TO_DIR="build/${TYPE}"
-
-	    mkdir -p build
+	    
 		echo "int main(){return 0;}" > tool/uriparse.c
 		mkdir -p "build_${TYPE}_${PLATFORM}"
-        cd "build_${TYPE}_${PLATFORM}"
-
+    	cd "build_${TYPE}_${PLATFORM}"
+    	rm -f CMakeCache.txt || true
 		cmake .. \
 			-DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -D_GNU_SOURCE" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+      		-DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_CXX_EXTENSIONS=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -168,8 +156,6 @@ function build() {
  			-DURIPARSER_BUILD_WCHAR_T=ON \
  			-DURIPARSER_SHARED_LIBS=OFF \
 	        -DURIPARSER_BUILD_CHAR=ON \
-         	-DCMAKE_C_FLAGS=${CFLAGS} \
-         	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
          	-DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
@@ -179,12 +165,10 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_VERBOSE_MAKEFILE=ON
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
 
         cmake --build . --config Release --target install
-
         rm -f CMakeCache.txt
-
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
@@ -210,66 +194,6 @@ function build() {
 		emmake make -j${PARALLEL_MAKE}
 	    	# emmake make install
 	    	cd ..
-	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		mkdir -p build
-		# cd build
-
-		mkdir -p "build/${TYPE}"
-		# cd ${TYPE}
-
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="arm64 x86_64 " #armv7s
-        fi
-
-		for IOS_ARCH in ${IOS_ARCHS}; do
-			source ../../ios_configure.sh $TYPE $IOS_ARCH
-            mkdir -p ${IOS_ARCH}
-			cd ${IOS_ARCH}
-            echo "Compiling for $IOS_ARCH"
-    	    
-            local BUILD_TO_DIR=$BUILD_DIR/uriparser/build/$TYPE/$IOS_ARCH
-            # ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared --host=$HOST --target=$HOST
-            cmake ../ \
-	 			-DURIPARSER_BUILD_TESTS=OFF \
-	 			-DURIPARSER_BUILD_DOCS=OFF \
-	 			-DURIPARSER_BUILD_TOOLS=OFF \
-	 			-DURIPARSER_BUILD_WCHAR_T=ON \
-		        -DURIPARSER_BUILD_CHAR=ON \
-		        -DURIPARSER_SHARED_LIBS=OFF \
-	 			-DBUILD_SHARED_LIBS=OFF \
-	         	-DCMAKE_BUILD_TYPE=Release \
-	       		-DCMAKE_C_COMPILER=${CC} \
-	      	 	-DCMAKE_CXX_COMPILER=${CXX} \
-	      	 	-DCMAKE_OSX_SYSROOT=${SYSROOT} \
-	      	 	-DCMAKE_SYSTEM_NAME="${TYPE}" \
-	      	 	-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-	      	 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE=ON \
-	      	 	-DCMAKE_C_FLAGS="" \
-	      	 	-DCMAKE_CXX_FLAGS="" \
-	         	-DCMAKE_BUILD_TYPE=Release \
-	         	-G 'Unix Makefiles' 
-	         	cmake --build . --config Release
-
-	         make clean
-             make -j${PARALLEL_MAKE}
-             #make install 
-	         cd ..
-
-        done
-
-        cp -r build/$TYPE/arm64/* build/$TYPE/
-
-        if [ "${TYPE}" == "ios" ]; then
-            lipo -create build/$TYPE/x86_64/lib/liburiparser.a \
-                         build/$TYPE/arm64/lib/liburiparser.a \
-                        -output build/$TYPE/lib/liburiparser.a
-        elif [ "$TYPE" == "tvos" ]; then
-            lipo -create build/$TYPE/x86_64/lib/liburiparser.a \
-                         build/$TYPE/arm64/lib/liburiparser.a \
-                        -output build/$TYPE/lib/liburiparser.a
-        fi
 	fi
 }
 
@@ -281,31 +205,23 @@ function copy() {
 	mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+		cp -R "build_${TYPE}_${ARCH}/Release/include/" $1/
 		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		cp -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
 		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/uriparser/* $1/include/uriparser/
-		# copy lib
+		cp -R include/uriparser/* $1/include/uriparser/
 		mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}/liburiparser.a" $1/lib/$TYPE/liburiparser.a
     elif [ "$TYPE" == "android" ]; then
-		# Standard *nix style copy.
-		# copy headers
-		cp -Rv include/uriparser/* $1/include/uriparser/
-		# copy lib
+		cp -R include/uriparser/* $1/include/uriparser/
 		mkdir -p $1/lib/$TYPE/$ABI/
 		cp -Rv build/$TYPE/$ABI/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
 	fi
-
-	# copy license file
 	if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
@@ -316,22 +232,17 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		rm -f *.lib
-		rm -f CMakeCache.txt
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    # Delete the folder and its contents
-		    rm -r build_${TYPE}_${ARCH}	    
+		  rm -r build_${TYPE}_${ARCH}     
 		fi
-	elif [ "$TYPE" == "emscripten" ]; then
-		rm -f CMakeCache.txt
-		rm -f build/emscripten
-		rm -r build
-		make clean
-	elif [ "$TYPE" == "android" ]; then
-		rm -f CMakeCache.txt
-		rm -f build/liburiparser.a
-		rm -r  build
-		make clean
+	elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+		rm -r build_${TYPE}_${ABI}     
+		fi
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+		  rm -r build_${TYPE}_${PLATFORM}     
+		fi
 	else
 		make clean
 	fi

@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "tvos" "android" )
+FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "watchos" "xros" "tvos" "android" )
 
 # define the version by sha
 VER=1.14
@@ -105,7 +105,7 @@ function build() {
 			 -c src/pugixml.cpp \
 			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
-	elif [ "$TYPE" == "osx" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		cmake .. ${DEFS} \
@@ -178,10 +178,10 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
@@ -208,7 +208,7 @@ function clean() {
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
 		rm -f *.a
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             # Delete the folder and its contents

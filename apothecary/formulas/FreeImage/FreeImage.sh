@@ -7,7 +7,7 @@
 # Makefile build system,
 # some Makefiles are out of date so patching/modification may be required
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten")
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
 
 # define the version
 
@@ -77,7 +77,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -103,8 +103,8 @@ function build() {
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_INSTALL_PREFIX=Release \
@@ -115,43 +115,6 @@ function build() {
 			 
 		cmake --build . --config Release --target install
         cd ..
-
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
-		echo "building $TYPE | $PLATFORM"
-        echo "--------------------"
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		cmake  .. \
-			-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_INSTALL_PREFIX=Release \
-		    -DCMAKE_INSTALL_LIBDIR="lib" \
-			-DNO_BUILD_LIBRAWLITE=ON \
-			-DNO_BUILD_OPENEXR=ON \
-			-DNO_BUILD_WEBP=ON \
-			-DNO_BUILD_JXR=ON \
-			-DCMAKE_INSTALL_PREFIX=Release \
-	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-	        -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
-			-DPLATFORM=$PLATFORM \
-			-DENABLE_BITCODE=OFF \
-			-DENABLE_ARC=OFF \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF 
-		cmake --build . --config Release --target install
-        cd ..
-
 	elif [ "$TYPE" == "android" ] ; then
         
         source ../../android_configure.sh $ABI cmake
@@ -309,7 +272,7 @@ function copy() {
 	mkdir -p $1/include
 
 	# lib
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
@@ -321,11 +284,6 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImage.lib  
         cp -v "build_${TYPE}_${ARCH}/Debug/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImageD.lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        mkdir -p $1/include
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 	elif [ "$TYPE" == "android" ] ; then
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
@@ -354,18 +312,21 @@ function copy() {
 function clean() {
 
 	if [ "$TYPE" == "android" ] ; then
-		make clean
-		rm -rf Dist
-		rm -f *.a
-		rm -f lib
+		if [ -d "build_${ABI}" ]; then
+            rm -r build_${ABI}     
+        fi
 	elif [ "$TYPE" == "emscripten" ] ; then
-	    make clean
-	    rm -rf Dist
-		rm -f *.a
-		rm -f build_emscripten
-		rm -f lib
-	elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		rm -f CMakeCache.txt *.a *.o
+	    if [ -d "build_${TYPE}" ]; then
+            rm -r build_${TYPE}     
+        fi
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
+    elif [ "$TYPE" == "vs" ] ; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
 	else
 		make clean
 		# run dedicated clean script

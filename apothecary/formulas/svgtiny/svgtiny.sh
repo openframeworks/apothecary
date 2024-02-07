@@ -7,7 +7,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "osx" "vs" "ios" "tvos" "android" "emscripten" "msys2" )
+FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "msys2" )
 
 #dependencies
 FORMULA_DEPENDS=( "libxml2" "zlib" )
@@ -191,7 +191,7 @@ function build() {
 	  	cmake --build . --config Release 
         cd ..
 
-	elif [ "$TYPE" == "osx" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
 		LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
@@ -204,12 +204,8 @@ function build() {
 		echo "building $TYPE | $PLATFORM"
 		mkdir -p build_${TYPE}_${PLATFORM}
         cd build_${TYPE}_${PLATFORM}
-
         mkdir -p $1/include/libxml2
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        # cp -v "${LIBXML2_LIBRARY}" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        # cp -Rv "${LIBXML2_INCLUDE_DIR}" $1/include/libxml2
-
 	    cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
@@ -223,8 +219,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=ON \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti " \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
@@ -289,6 +285,7 @@ function build() {
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY
@@ -310,11 +307,9 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-		# copy lib
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
-        # cp -Rv "build_${TYPE}_${PLATFORM}/include/" $1/include/libxml2
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
         cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
@@ -342,12 +337,17 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		make clean
-		rm -f *.lib
-		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    # Delete the folder and its contents
-		    rm -r build_${TYPE}_${ARCH}	    
-		fi
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}     
+        fi
+    elif [ "$TYPE" == "emscripten" ] ; then
+    	if [ -d "build_${TYPE}" ]; then
+            rm -r build_${TYPE}     
+        fi
 	fi
 }
 

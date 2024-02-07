@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "vs" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
@@ -48,8 +48,13 @@ function prepare() {
 function build() {
   rm -f CMakeCache.txt
 
-  if [ "$TYPE" == "osx" ] ; then
+  if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     # sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
+    
+    ZLIB_ROOT="$LIBS_ROOT/zlib/"
+    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
     mkdir -p "build_${TYPE}_${PLATFORM}"
     cd "build_${TYPE}_${PLATFORM}"
     rm -f CMakeCache.txt
@@ -62,7 +67,9 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include "
+            -DCMAKE_INSTALL_INCLUDEDIR=include -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} "
       if [ "${ARCH}" == "arm64" ]; then
         EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF"
       else 
@@ -70,10 +77,18 @@ function build() {
       fi
 
     cmake .. ${DEFS} \
-      -DDEPLOYMENT_TARGET=${OSX_MIN_SDK_VER} \
+      -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+      -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+      -DPLATFORM=$PLATFORM \
+      -DENABLE_BITCODE=OFF \
+      -DENABLE_ARC=OFF \
+      -DENABLE_VISIBILITY=OFF \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration" \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration " \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration" \
+      -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+      -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
@@ -161,7 +176,7 @@ function build() {
       -DWITH_OPENCLCLAMDFFT=OFF \
       -DWITH_OPENCL_SVM=OFF \
       -DWITH_LAPACK=OFF \
-      -DBUILD_ZLIB=ON \
+      -DBUILD_ZLIB=OFF \
       -DWITH_WEBP=OFF \
       -DWITH_VTK=OFF \
       -DWITH_PVAPI=OFF \
@@ -175,13 +190,8 @@ function build() {
       ${EXTRA_DEFS} \
       -D BUILD_opencv_calib3d=OFF \
       -DBUILD_PERF_TESTS=OFF \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
-            -DPLATFORM=$PLATFORM \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DENABLE_VISIBILITY=OFF \
-            -DENABLE_STRICT_TRY_COMPILE=ON \
-            -D CMAKE_VERBOSE_MAKEFILE=ON 
+      -DENABLE_STRICT_TRY_COMPILE=ON \
+      -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
       cmake --build . --config Release
       cmake --install . --config Release
     cd ..
@@ -779,7 +789,7 @@ function copy() {
   # prepare libs directory if needed
   mkdir -p $1/lib/$TYPE
 
-  if [ "$TYPE" == "osx" ] ; then
+  if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
     mkdir -p $1/lib/$TYPE/$PLATFORM
 
@@ -815,17 +825,6 @@ function copy() {
 
     cp -Rv "build_${TYPE}_${ARCH}/Release/etc/" $1/etc
 
-  elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-    # Standard *nix style copy.
-    # copy headers
-
-    LIB_FOLDER="$BUILD_ROOT_DIR/$TYPE/FAT/opencv"
-
-    cp -Rv lib/include/ $1/include/
-    cp -R include/opencv2 $1/include/
-    cp -R modules/*/include/opencv2/* $1/include/opencv2/
-    mkdir -p $1/lib/$TYPE
-    cp -v lib/$TYPE/*.a $1/lib/$TYPE
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
       local BUILD_FOLDER="build_android_arm"
@@ -865,10 +864,18 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-  if [ "$TYPE" == "osx" ] ; then
-    make clean;
-  elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-    make clean;
+  if [ "$TYPE" == "vs" ] ; then
+    if [ -d "build_${TYPE}_${ARCH}" ]; then
+      rm -r build_${TYPE}_${ARCH}     
+    fi
+  elif [ "$TYPE" == "android" ] ; then
+    if [ -d "build_${TYPE}_${ABI}" ]; then
+    rm -r build_${TYPE}_${ABI}     
+    fi
+  elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+      rm -r build_${TYPE}_${PLATFORM}     
+    fi
   fi
 }
 

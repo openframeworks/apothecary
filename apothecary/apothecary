@@ -1295,24 +1295,35 @@ function frameworkFormula() {
         echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
         xcframework_flags=""
 
-        if [[ "$TYPE" == "osx" ]] || [[ "$TYPE" == "ios" ]] || [[ "$TYPE" == "tvos" ]]; then
-            if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
-                exit 0;
-            fi
+        if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
+            exit 0;
+        fi
 
+        if [[ "$TYPE" == "osx" ]] ; then
+            
             MAC_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC/" -name "*.a" | head -n 1)
             MAC_ARM64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_ARM64/" -name "*.a" | head -n 1)
-            #MAC_CATALYST_ARM64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_CATALYST_ARM64/" -name "*.a" | head -n 1)
-
+         
             MAC_FILENAME=$(basename "$MAC_ARCH")
 
             rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
             xcrun lipo -create $MAC_ARCH $MAC_ARM64_ARCH -output $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
+            
             xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME || true
             xcframework_flags+=" -library $MAC_FILENAME"
 
-            #xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_CATALYST_ARM64_ARCH || true
-            #xcframework_flags+=" -library MAC_CATALYST_ARM64/${MAC_FILENAME}"
+        elif [[ "$TYPE" == "catos" ]] ; then
+            
+            MAC_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_CATALYST/" -name "*.a" | head -n 1)
+            MAC_ARM64_ARCH=$(find "$LIBS_DIR_REAL/$1/lib/$TYPE/MAC_CATALYST_ARM64/" -name "*.a" | head -n 1)
+            
+            MAC_FILENAME=$(basename "$MAC_ARCH")
+
+            rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
+            xcrun lipo -create $MAC_ARCH $MAC_ARM64_ARCH -output $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME
+            
+            xcrun codesign --sign - $LIBS_DIR_REAL/$1/lib/$TYPE/$MAC_FILENAME || true
+            xcframework_flags+=" -library $MAC_FILENAME"
 
         elif [[ "$TYPE" == "ios" ]] ; then
             # Loop through each .a file built and make framework

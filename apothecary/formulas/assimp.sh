@@ -13,7 +13,7 @@ VER=5.3.1
 GIT_URL=https://github.com/assimp/assimp
 GIT_TAG=
 
-FORMULA_TYPES=( "osx" "ios" "tvos" "android" "emscripten" "vs" )
+FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "vs" )
 
 FORMULA_DEPENDS=( "zlib" )
 
@@ -46,77 +46,25 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
-    rm -f CMakeCache.txt || true
-    if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-        find ./ -name "*.o" -type f -delete
-        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
+    
+    
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         echo "building $TYPE | $ARCH $PLATFORM"
         echo "--------------------" 
-
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"   
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
-
-        DEFS="
-            -DASSIMP_BUILD_TESTS=OFF
-            -DASSIMP_BUILD_SAMPLES=OFF
-            -DASSIMP_BUILD_3MF_IMPORTER=OFF
-            -DASSIMP_BUILD_ZLIB=OFF
-            -DASSIMP_WARNINGS_AS_ERRORS=OFF
-            "
-
-        cmake .. ${DEFS} \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
-            -DPLATFORM=$PLATFORM \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-            -DENABLE_VISIBILITY=OFF \
-            -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -D CMAKE_VERBOSE_MAKEFILE=ON
-
-        cmake --build . --config Release
-
-        cd ..      
-       
-        #cleanup to not fail if the other platform is called
-        rm -f CMakeCache.txt
-    fi
-
-    if [ "$TYPE" == "osx" ] ; then
+        rm -f CMakeCache.txt || true
         find ./ -name "*.o" -type f -delete
-        #architecture selection inspired int he tess formula, shouldn't build both architectures in the same run
-        echo "building $TYPE | $ARCH $PLATFORM"
-        echo "--------------------" 
-
-        ZLIB_ROOT="$LIBS_ROOT/zlib/"
-        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"   
-
-        mkdir -p "build_${TYPE}_${PLATFORM}"
-        cd "build_${TYPE}_${PLATFORM}"
-
         DEFS="
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_BUILD_3MF_IMPORTER=0
-            -DASSIMP_BUILD_ZLIB=OFF"
+            -DASSIMP_BUILD_ZLIB=OFF 
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
 
         cmake .. ${DEFS} \
             -DCMAKE_C_STANDARD=17 \
@@ -140,7 +88,7 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -D CMAKE_VERBOSE_MAKEFILE=ON
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
 
         cmake --build . --config Release
         cd ..      
@@ -148,7 +96,7 @@ function build() {
         rm -f CMakeCache.txt
 
     elif [ "$TYPE" == "vs" ] ; then
-        find ./ -name "*.o" -type f -delete
+        
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
@@ -158,7 +106,8 @@ function build() {
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
-
+        find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true
         DEFS="
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -206,14 +155,10 @@ function build() {
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build . --config Debug 
-        
-        cd ..      
-       
-        #cleanup to not fail if the other platform is called
-        rm -f CMakeCache.txt
+        rm -f CMakeCache.txt || true
+        cd .. 
         echo "--------------------"
         echo "Completed Assimp for $TYPE | $ARCH | $VS_VER"
-
 
     elif [ "$TYPE" == "msys2" ] ; then
         echoWarning "TODO: msys2 build"
@@ -296,14 +241,12 @@ function build() {
                 -DCMAKE_INSTALL_PREFIX=install"
         fi
         
-        find ./ -name "*.o" -type f -delete
+        
         
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
-
-        rm -f CMakeCache.txt
-
-
+        find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true
         export CFLAGS=""
         export CPPFLAGS=""
         export LDFLAGS=""
@@ -357,8 +300,7 @@ function build() {
         cd ..
     
     elif [ "$TYPE" == "emscripten" ] ; then
-        find ./ -name "*.o" -type f -delete
-
+    
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
@@ -371,6 +313,8 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0"
         mkdir -p build_$TYPE
         cd build_$TYPE
+        find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             -B . \
             $buildOpts \
@@ -394,6 +338,7 @@ function build() {
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} 
 
         cmake --build . --config Release
+        rm -f CMakeCache.txt || true
         cd ..
 
     fi

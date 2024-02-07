@@ -183,13 +183,11 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		rm -f *.lib
         if [ -d "build_${TYPE}_${ARCH}" ]; then
             # Delete the folder and its contents
             rm -r build_${TYPE}_${ARCH}     
         fi
     elif [ "$TYPE" == "osx" ] ; then
-		rm -f *.a
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             # Delete the folder and its contents
             rm -r build_${TYPE}_${PLATFORM}     

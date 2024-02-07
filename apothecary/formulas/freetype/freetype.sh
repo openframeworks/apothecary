@@ -218,6 +218,7 @@ function build() {
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
 		    -DZLIB_ROOT=${ZLIB_ROOT} \
 		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
 		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
@@ -345,14 +346,8 @@ function copy() {
 	# copy files from the build root
 	cp -R include/* $1/include/freetype2/
 
-	# older versions before 2.5.x
-	#mkdir -p $1/include/freetype2/freetype/config
-	#cp -Rv include/* $1/include/freetype2/freetype
-	#cp -Rv include/ft2build.h $1/include/
-
-	# copy lib
 	mkdir -p $1/lib/$TYPE
-	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
@@ -387,17 +382,22 @@ function copy() {
 function clean() {
 
 	if [ "$TYPE" == "vs" ] ; then
-		rm -f CMakeCache.txt *.a *.o *.lib
-		rm -f "build_${TYPE}_${PLATFORM}"
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+			rm -r build_${TYPE}_${ARCH}     
+		fi
+	elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+		rm -r build_${TYPE}_${ABI}     
+		fi
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+			rm -r build_${TYPE}_${PLATFORM}     
+		fi
 	elif [ "$TYPE" == "android" ] ; then
 		rm -f CMakeCache.txt *.a *.o
 		rm -f builddir/$TYPE
 		rm -f builddir
 		rm -f lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
-		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-			rm -r build_${TYPE}_${PLATFORM}     
-		fi
 	else
 		rm -f CMakeCache.txt *.a *.o *.lib
 		make clean

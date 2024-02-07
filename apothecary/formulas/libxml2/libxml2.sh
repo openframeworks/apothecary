@@ -6,7 +6,7 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "tvos" "catos" "xros" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
 # uses an automake build system # required for svg
 
 FORMULA_DEPENDS=( "zlib" )
@@ -136,7 +136,7 @@ function build() {
             -DLIBXML2_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release --target install
@@ -192,7 +192,8 @@ function build() {
             -DLIBXML2_WITH_THREAD_ALLOC=OFF 
         cmake --build . --config Release
         cd ..
-    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
 
@@ -408,7 +409,7 @@ function copy() {
         cp -Rv include/libxml/* $1/include/libxml/
         cp -v "build_${TYPE}/build/libxml2.a" $1/lib/$TYPE/libxml2.a
         cp -Rv build_${TYPE}/build/libxml/xmlversion.h $1/include/libxml/xmlversion.h
-    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/include/libxml
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
