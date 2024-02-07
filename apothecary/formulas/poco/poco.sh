@@ -8,13 +8,13 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 # define the version
-VER=1.12.4-release
+VER=1.12.5p2-release
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
 
-FORMULA_TYPES=( )
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" )
 
 #dependencies
 FORMULA_DEPENDS=( "openssl" )

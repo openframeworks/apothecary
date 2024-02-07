@@ -6,7 +6,7 @@
 #
 # uses a makeifle build system
 
-FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "watchos" "xros" "tvos" "android" )
+FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "watchos" "xros" "catos" "tvos" "android" )
 
 # define the version by sha
 VER=1.14
@@ -105,7 +105,7 @@ function build() {
 			 -c src/pugixml.cpp \
 			 -o src/pugixml.o $LDFLAGS -shared -v
         $AR ruv libpugixml.a src/pugixml.o
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		cmake .. ${DEFS} \
@@ -114,6 +114,7 @@ function build() {
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
 				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 				-DBUILD_SHARED_LIBS=OFF \
 				-DCMAKE_BUILD_TYPE=Release \
@@ -167,8 +168,6 @@ function copy() {
 	# prepare libs directory if needed
 	mkdir -p $1/lib/$TYPE
 
-	# Standard *nix style copy.
-	# copy headers
 	cp -Rv src/pugiconfig.hpp $1/include/pugiconfig.hpp
 	cp -Rv src/pugixml.hpp $1/include/pugixml.hpp
 	# sed -i '$1/include/pugixml.hpp' 's/pugiconfig.hpp/pugiconfig.hpp' $1/include/pugixml.hpp
@@ -178,18 +177,16 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
-		# copy lib
 		cp -Rv libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
-		# copy lib
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
 	fi
 	# copy license file
@@ -208,7 +205,7 @@ function clean() {
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
-	elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ] || [ "$TYPE" == "xros" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		rm -f *.a
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             # Delete the folder and its contents
