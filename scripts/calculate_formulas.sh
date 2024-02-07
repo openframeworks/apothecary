@@ -36,7 +36,7 @@ FORMULAS=(
 
     # Formulas with depenencies in the end
     "curl"
-    "poco"
+    # "poco"
     "svgtiny"
     #"uri"
     "cairo"
@@ -86,7 +86,7 @@ if [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ] || [ "$TARGET" == "osx" ] |
             FORMULAS=(
                 "openssl"
                 "curl"
-                "poco"
+                # "poco"
             )
         fi
     elif [ "$BUNDLE" == "3" ]; then
