@@ -10,7 +10,7 @@ FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emsc
 
 # define the version
 
-VER=4.8.1
+VER=4.9.0
 
 
 # tools for git use
