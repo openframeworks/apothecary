@@ -56,7 +56,7 @@ echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
 
 build_libraries() {
     # List of architectures
-    ARCH_LIST=("arm64" "x86_64" "CAT_arm64" "CAT_x86_64")
+    ARCH_LIST=("arm64" "x86_64")
 
     # # Loop over each architecture
     # for ARCH in "${ARCH_LIST[@]}"; do
@@ -124,6 +124,15 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
+    for BUNDLE_NO in {1..4}; do
+        echo "Building bundle $BUNDLE_NO"
+            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
+            ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
+            if [ $? -ne 0 ]; then
+                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
+                exit 1
+            fi
+    done
 }
 
 # sort libraries from openFrameworks libs to addons directories where applicable

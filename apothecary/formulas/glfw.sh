@@ -30,7 +30,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	rm -f CMakeCache.txt
+	
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 
 	if [ "$TYPE" == "vs" ] ; then
 		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
@@ -38,9 +39,7 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-
-        LIBS_ROOT=$(realpath $LIBS_DIR)
-
+        rm -f CMakeCache.txt *.o *.lib
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
@@ -89,6 +88,7 @@ function build() {
 
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.o *.a
 
 		# OS X needs both arches specified to be universal
 		# for some reason it doesn't build if passed through EXTRA_CONFIG so have do break it up into a separate cmake call

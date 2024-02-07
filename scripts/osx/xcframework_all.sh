@@ -80,24 +80,14 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
-    ARCH_LIST=("arm64" "x86_64" "CAT_arm64" "CAT_x86_64")
-
     for BUNDLE_NO in {1..4}; do
         echo "Building bundle $BUNDLE_NO"
-
-        # Inner loop for each architecture
-        # for ARCHE in "${ARCH_LIST[@]}"; do
             echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-
-            # Call the build script with the current bundle number and architecture
             ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
-
-            # Check for successful completion
             if [ $? -ne 0 ]; then
                 echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
                 exit 1
             fi
-        # done
     done
 }
 
