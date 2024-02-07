@@ -25,16 +25,15 @@ if [ -z "${MOVE_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    PLATFORM=watchos
+    PLATFORM=vs
 fi
 
 if [ -z "${OVERWRITE+x}" ]; then
     OVERWRITE=1
 fi
 
-if [ -z "${XCFRAMEWORK+x}" ]; then
-    XCFRAMEWORK=1
-fi
+
+
 
 # Set OUTPUT_FOLDER for the build
 export OUTPUT_FOLDER="${ROOT}/out"
@@ -50,29 +49,10 @@ echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
 
 build_libraries() {
     # List of architectures
-    ARCH_LIST=("arm64" "x86_64" "SIM_arm64")
-
-    # # Loop over each architecture
-    # for ARCH in "${ARCH_LIST[@]}"; do
-    #     echo "Building for architecture: $ARCH"
-
-    #     # Inner loop for bundles
-    #     for BUNDLE_NO in {1..4}; do
-    #         echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
-
-    #         # Call the build script with the current architecture and bundle number
-    #         ${SCRIPT_DIR}/build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
-
-    #         # Check for successful completion
-    #         if [ $? -ne 0 ]; then
-    #             echo "Error building $PLATFORM $ARCH bundle $BUNDLE_NO"
-    #             exit 1
-    #         fi
-    #     done
-    # done
+    ARCH_LIST=("arm64" "64" "arm64ec")
 
     # Loop over each bundle
-    for BUNDLE_NO in {1..3}; do
+    for BUNDLE_NO in {1..2}; do
         echo "Building bundle $BUNDLE_NO"
 
         # Inner loop for each architecture
@@ -168,10 +148,6 @@ sort_libraries() {
 
 if [ ${BUILD_LIBRARIES} == 1 ]; then
    build_libraries
-fi
-
-if [ ${XCFRAMEWORK} == 1 ]; then
-   build_xcframework
 fi
 
 if [ ${MOVE_LIBRARIES} == 1 ]; then

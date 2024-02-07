@@ -21,16 +21,12 @@ if [ -z "${BUILD_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
-    MOVE_LIBRARIES=0
+    MOVE_LIBRARIES=1
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
     PLATFORM=osx
 fi
-
-# if [ -z "${ARCH+x}" ]; then
-#     ARCH=x86_64
-# fi
 
 if [ -z "${OVERWRITE+x}" ]; then
     OVERWRITE=1

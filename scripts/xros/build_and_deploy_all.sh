@@ -21,7 +21,7 @@ if [ -z "${BUILD_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
-    MOVE_LIBRARIES=0
+    MOVE_LIBRARIES=1
 fi
 
 if [ -z "${PLATFORM+x}" ]; then

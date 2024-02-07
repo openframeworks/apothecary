@@ -17,7 +17,7 @@ OF_ADDONS=${OF_ROOT}/addons
 
 # control 
 if [ -z "${BUILD_LIBRARIES+x}" ]; then
-    BUILD_LIBRARIES=0
+    BUILD_LIBRARIES=1
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
@@ -49,7 +49,7 @@ echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
 
 
 build_libraries() {
-    for BUNDLE_NO in {1..4}
+    for BUNDLE_NO in {1..2}
     do
         echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
         

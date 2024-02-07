@@ -21,16 +21,13 @@ if [ -z "${BUILD_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
-    MOVE_LIBRARIES=0
+    MOVE_LIBRARIES=1
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
     PLATFORM=catos
 fi
 
-# if [ -z "${ARCH+x}" ]; then
-#     ARCH=x86_64
-# fi
 
 if [ -z "${OVERWRITE+x}" ]; then
     OVERWRITE=1
@@ -40,9 +37,6 @@ if [ -z "${XCFRAMEWORK+x}" ]; then
     XCFRAMEWORK=1
 fi
 
-
-
-# Set OUTPUT_FOLDER for the build
 export OUTPUT_FOLDER="${ROOT}/out"
 
 echo "Verify Locations:"
