@@ -17,8 +17,8 @@ else
     export BUNDLE=$BUNDLE_NO
 fi
 
-export TARGET=osx
-export ARCH=MAC_CATALYST
+export TARGET=ios
+export ARCH=SIM_arm64
 export NO_FORCE=ON
 
 echo "Target: $TARGET"
@@ -27,4 +27,5 @@ echo "Bundle: $BUNDLE"
 echo "Apothecary path: $APOTHECARY_PATH"
 
 ${ROOT}./scripts/build.sh
+
 
