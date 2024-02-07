@@ -12,7 +12,7 @@ FORMULAS=(
 
     # All formulas
     "assimp"
-    "boost"
+    # "boost"
     "FreeImage"
     "libpng"
     "libxml2"
