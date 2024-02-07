@@ -25,7 +25,7 @@ if [ -z "${MOVE_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    PLATFORM=osx
+    PLATFORM=tvos
 fi
 
 # if [ -z "${ARCH+x}" ]; then
@@ -80,7 +80,7 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
-    for BUNDLE_NO in {1..4}; do
+    for BUNDLE_NO in {1..3}; do
         echo "Building bundle $BUNDLE_NO"
             echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
             ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
