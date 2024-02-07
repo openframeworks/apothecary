@@ -46,8 +46,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-  rm -f CMakeCache.txt
-
+  LIBS_ROOT=$(realpath $LIBS_DIR)
   if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     # sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
     
@@ -57,7 +56,7 @@ function build() {
 
     mkdir -p "build_${TYPE}_${PLATFORM}"
     cd "build_${TYPE}_${PLATFORM}"
-    rm -f CMakeCache.txt
+    rm -f CMakeCache.txt || true
     DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -70,7 +69,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} "
-      if [ "${ARCH}" == "arm64" ]; then
+      if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
         EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF"
       else 
         EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DENABLE_SSE=ON -DENABLE_SSE2=ON -DENABLE_SSE3=ON -DENABLE_SSE41=ON -DENABLE_SSE42=ON -DENABLE_SSSE3=ON"
@@ -202,6 +201,7 @@ function build() {
     GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
     mkdir -p "build_${TYPE}_${ARCH}"
     cd "build_${TYPE}_${ARCH}"
+    rm -f CMakeCache.txt || true
     DEFS="
         -DCMAKE_C_STANDARD=17 \
         -DCMAKE_CXX_STANDARD=17 \
@@ -313,22 +313,19 @@ function build() {
         -DCMAKE_BUILD_TYPE="Debug" \
         -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
         -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-        -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
         -D BUILD_SHARED_LIBS=ON \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
         ${EXTRA_DEFS} \
         ${CMAKE_WIN_SDK} \
         -DBUILD_WITH_STATIC_CRT=OFF 
-
-    cmake --build . --target install --config Debug
-
-
+     cmake --build . --target install --config Debug
      cmake .. ${DEFS} \
         -A "${PLATFORM}" \
         -G "${GENERATOR_NAME}" \
         -DCMAKE_INSTALL_PREFIX=Release \
         -DCMAKE_BUILD_TYPE="Release" \
-        -D CMAKE_VERBOSE_MAKEFILE=OFF \
+        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
         -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
         -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -462,61 +459,6 @@ function build() {
       -DBUILD_TESTS=OFF \
       -DWITH_ITT=${WITH_ITT} \
       -DBUILD_PERF_TESTS=OFF
-
-
-      echo "--------------------"
-      echo "Running make clean for ${IOS_ARCH}"
-      make clean
-
-      echo "--------------------"
-      echo "Running make for ${IOS_ARCH}"
-      make -j${PARALLEL_MAKE}
-
-      echo "--------------------"
-      echo "Running make install for ${IOS_ARCH}"
-      make install
-
-      rm -f CMakeCache.txt
-      cd ..
-    done
-
-    mkdir -p lib/$TYPE
-    echo "--------------------"
-    echo "Creating Fat Libs"
-    cd "build/$TYPE"
-    # link into universal lib, strip "lib" from filename
-    local lib
-    rm -rf arm64/lib/pkgconfig
-
-    for lib in arm64/lib/*.a; do
-      baselib=$(basename $lib)
-      local renamedLib=$(echo $baselib | sed 's|lib||')
-      if [ ! -e $renamedLib ] ; then
-        echo "renamed $renamedLib";
-        if [[ "${TYPE}" == "tvos" ]] ; then
-          lipo -c arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
-        elif [[ "$TYPE" == "ios" ]]; then
-          lipo -c armv7/lib/$baselib arm64/lib/$baselib x86_64/lib/$baselib -o "$CURRENTPATH/lib/$TYPE/$renamedLib"
-        fi
-      fi
-    done
-
-    cd ../../
-    echo "--------------------"
-    echo "Copying includes"
-    cp -R "build/$TYPE/x86_64/include/" "lib/include/"
-
-    echo "--------------------"
-    echo "Stripping any lingering symbols"
-
-    cd lib/$TYPE
-    for TOBESTRIPPED in $( ls -1) ; do
-      strip -x $TOBESTRIPPED
-    done
-
-    cd ../../
-
-  # end if iOS
 
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
@@ -671,8 +613,8 @@ function build() {
       -DCPU_BASELINE='' \
       -DCPU_DISPATCH='' \
       -DCV_TRACE=OFF \
-      -DCMAKE_C_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
-      -DCMAKE_CXX_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128" \
+      -DCMAKE_C_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128 ${FLAG_RELEASE}" \
+      -DCMAKE_CXX_FLAGS="-pthread -I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128 ${FLAG_RELEASE}" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
       -DBUILD_EXAMPLES=OFF \

@@ -235,37 +235,6 @@ function build() {
 		 cmake --build . --config Release 
 
 		 cd ..
-
-	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
-		for IOS_ARCH in ${IOS_ARCHS}; do
-            echo
-            echo
-            echo "Compiling for $IOS_ARCH"
-    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-            export CPPFLAGS=" -I$LIBS_DIR/libxml2/include" #fix linking issues
-            make clean
-	        make -j${PARALLEL_MAKE}
-            mv libsvgtiny.a libsvgtiny_$IOS_ARCH.a
-        done
-
-        if [ "$TYPE" == "ios" ]; then
-            lipo -create libsvgtiny_x86_64.a \
-                         libsvgtiny_armv7.a \
-                         libsvgtiny_arm64.a \
-                        -output libsvgtiny.a
-        elif [ "$TYPE" == "tvos" ]; then
-            lipo -create libsvgtiny_x86_64.a \
-                         libsvgtiny_arm64.a \
-                        -output libsvgtiny.a
-        fi
-
-
 	elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p build_$TYPE
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
@@ -280,6 +249,8 @@ function build() {
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_INSTALL_PREFIX=Release \

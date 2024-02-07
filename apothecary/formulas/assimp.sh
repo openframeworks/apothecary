@@ -46,8 +46,6 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
-    
-    
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         echo "building $TYPE | $ARCH $PLATFORM"
         echo "--------------------" 

@@ -740,6 +740,7 @@ if [ "$TYPE" = "osx" ]; then
 fi
 
 if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+    export FLAG_RELEASE="-O3"
     if [ $TYPE == "linux" ] ; then
         ABI="x86"
     elif [ $TYPE == "linux64" ] ; then
