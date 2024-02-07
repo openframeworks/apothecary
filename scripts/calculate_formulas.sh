@@ -106,6 +106,10 @@ elif [ "$TARGET" == "vs" ]; then
             "brotli"
             "freetype"
 
+            "libxml2"
+            "svgtiny"
+            "assimp"
+
             # All formulas
             #"boost"
             "FreeImage"
@@ -123,34 +127,17 @@ elif [ "$TARGET" == "vs" ]; then
             "rtAudio"
             "tess2"
             "uriparser"
+            "opencv"
 
             # # Formulas with depenencies in the end
             "cairo"
             #"uri"
         )
     elif [ "$BUNDLE" == "2" ]; then
-        if [ "$TARGET" == "tvos" ]; then
-            FORMULAS=(
-                "openssl"
-                "curl"
-            )
-        else
-            FORMULAS=(
-                "openssl"
-                "curl"
-                # "poco"
-            )
-        fi
-    elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
-            "zlib"
-            "libxml2"
-            "svgtiny"
-            "assimp"
-        )
-    elif [ "$BUNDLE" == "4" ]; then
-        FORMULAS=(
-            "opencv"
+            "openssl"
+            "curl"
+            # "poco"
         )
     fi
 fi
