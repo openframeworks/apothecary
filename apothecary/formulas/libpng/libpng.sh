@@ -171,7 +171,7 @@ function copy() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
-		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng.a
 		# cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	else

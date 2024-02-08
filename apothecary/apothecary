@@ -1396,8 +1396,12 @@ function frameworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        # # Find and delete directories that do not have the .xcframework extension
-        # find . -mindepth 1 -type d ! -name '*.xcframework' -exec rm -rf {} +
+        for dir in $dirs; do
+            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+                echo "Removing directory: $dir"
+                rm -rf "$dir"
+            fi
+        done
 
         echo "========================"
         cd $HERE_DIR
