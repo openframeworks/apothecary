@@ -39,6 +39,7 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
+          TARGET: "osx"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: x86_64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -46,6 +47,7 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
+          TARGET: "osx"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -55,12 +57,14 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/osx/xcframework_all.sh
         env:
+          TARGET: "osx"
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package final
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
         env:
+          TARGET: "osx"
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release arm64

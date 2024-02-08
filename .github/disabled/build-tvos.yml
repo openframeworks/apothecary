@@ -1,4 +1,4 @@
-name: build-catOS
+name: build-tvos
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       matrix:
         bundle: [1, 2, 3]
     env:
-      TARGET: "catos"
+      TARGET: "tvos"
       BUNDLE: ${{ matrix.bundle }}
       DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
     steps:
@@ -34,26 +34,36 @@ jobs:
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
-        run: ./scripts/osx/install.sh
-      - name: Build Catalyst arm64
+        run: ./scripts/tvos/install.sh
+      - name: Build tvOS arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
+          TARGET: "tvos"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build Catalyst x86_64
+      - name: Build tvOS x86_64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
+          TARGET: "tvos"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: x86_64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Build tvOS SIMULATOR arm64
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          TARGET: "tvos"
+          BUNDLE: ${{ matrix.bundle }}
+          ARCH: SIM_arm64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
-      - name: Merge our iOS libaries into XC Framework 
+      - name: Merge our tvOS libaries into XC Framework 
         working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/ios/xcframework_all.sh
+        run: scripts/tvos/xcframework_all.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -63,7 +73,7 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Update Release arm64
+      - name: Update Release tvOS arm64
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: johnwbyrd/update-release@v1.0.0
         with:
