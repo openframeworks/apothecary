@@ -100,9 +100,9 @@ function build() {
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
       -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
+      -DBUILD_opencv_videoio=ON \
+      -DBUILD_opencv_videostab=ON \
+      -DBUILD_opencv_highgui=ON \
       -DBUILD_opencv_imgcodecs=ON \
       -DBUILD_opencv_stitching=ON \
       -DBUILD_opencv_calib3d=ON \
@@ -128,7 +128,7 @@ function build() {
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
       -DWITH_PVAPI=OFF \
-      -DWITH_OPENEXR=OFF \
+      -DWITH_OPENEXR=ON \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
       -DWITH_LAPACK=OFF \
