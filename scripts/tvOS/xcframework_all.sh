@@ -28,9 +28,6 @@ if [ -z "${PLATFORM+x}" ]; then
     PLATFORM=tvos
 fi
 
-# if [ -z "${ARCH+x}" ]; then
-#     ARCH=x86_64
-# fi
 
 if [ -z "${OVERWRITE+x}" ]; then
     OVERWRITE=1
@@ -80,15 +77,11 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
-    for BUNDLE_NO in {1..3}; do
-        echo "Building bundle $BUNDLE_NO"
-            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-            ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
-            if [ $? -ne 0 ]; then
-                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-                exit 1
-            fi
-    done
+    ${SCRIPT_DIR}/build_xcframework.sh
+    if [ $? -ne 0 ]; then
+        echo "Error building build_xcframework $PLATFORM$ARCHE"
+        exit 1
+    fi
 }
 
 # sort libraries from openFrameworks libs to addons directories where applicable

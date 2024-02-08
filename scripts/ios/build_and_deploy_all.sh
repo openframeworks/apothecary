@@ -21,7 +21,7 @@ if [ -z "${BUILD_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
-    MOVE_LIBRARIES=0
+    MOVE_LIBRARIES=1
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
@@ -124,15 +124,11 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
-    for BUNDLE_NO in {1..4}; do
-        echo "Building bundle $BUNDLE_NO"
-            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-            ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
-            if [ $? -ne 0 ]; then
-                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-                exit 1
-            fi
-    done
+    ${SCRIPT_DIR}/build_xcframework.sh
+    if [ $? -ne 0 ]; then
+        echo "Error building build_xcframework $PLATFORM$ARCHE"
+        exit 1
+    fi
 }
 
 # sort libraries from openFrameworks libs to addons directories where applicable
