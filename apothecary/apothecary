@@ -1310,41 +1310,45 @@ function frameworkFormula() {
         declare -A ARCH_PAIRS=(
             ["MAC"]="MAC_ARM64"
             ["MAC_CATALYST"]="MAC_CATALYST_ARM64"
-            ["SIMULATOR64_ARCH"]="SIMULATORARM64"
+            ["SIMULATOR64"]="SIMULATORARM64"
             ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
             ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
             ["WATCHOS"]="WATCHOS" # Same note as TVOS
             ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
-            ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
+            ["OS64"]="OS64"
+            ["WATCHOS"]="WATCHOS"
+            ["VISIONOS"]="SIMULATOR64_VISIONOS" # And again, for VISIONOS
+            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS" 
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
         declare -a merged_dirs=()
         for ARCH in "${!ARCH_PAIRS[@]}"; do
             PAIR="${ARCH_PAIRS[$ARCH]}"
             DIR_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/"
+            echo "ARCH: $ARCH"
             if [ -d "$DIR_PATH" ]; then
                 MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}"
-                mkdir -p "$MERGED_DIR"
                 declare -a archive_paths=()
                 while IFS= read -r -d $'\0' file; do
                     archive_paths+=("$file")
                 done < <(find "$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/" -name "*.a" -print0)
-                # for path in "${archive_paths[@]}"; do
-                #     echo "Archive path: $path"
-                # done
+                for path in "${archive_paths[@]}"; do
+                    echo "Archive path: $path"
+                done
+                num_archive_paths=${#archive_paths[@]}
                 for ARCH_FILE in "${archive_paths[@]}"; do
                     # Determine paired architecture directory
                     PAIR_FILE="${ARCH_FILE/$ARCH/$PAIR}"
-                    if [ -f "$PAIR_FILE" ]; then
+                    path_found_in_array=false
+                    if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
+                        mkdir -p "$MERGED_DIR"
                         # Determine the output filename in the merged directory
                         PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
                         MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
-                        # echo "Merging $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
                         # Use lipo to merge the architectures into a single file - prevents linking errors
                         xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
                         # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
                         xcrun codesign --sign - $MERGED_PATH || true
-                        path_found_in_array=false
                         for dir in "${merged_dirs[@]}"; do
                             if [[ "$dir" == "$PATH_MERGE" ]]; then
                                 path_found_in_array=true
@@ -1354,12 +1358,23 @@ function frameworkFormula() {
                         if [[ $path_found_in_array == false ]]; then
                             merged_dirs+=("$PATH_MERGE")
                         fi
-                        
                     else
                         MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                         xcrun codesign --sign - $MERGED_PATH || true
-                        if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
-                            xcframework_flags+=" -library $MERGED_PATH"
+                        if [[ "$num_archive_paths" -gt 1 ]]; then
+                            for dir in "${merged_dirs[@]}"; do
+                                if [[ "$dir" == "$PATH_MERGE" ]]; then
+                                    path_found_in_array=true
+                                    break 
+                                fi
+                            done
+                            if [[ $path_found_in_array == false ]]; then
+                                merged_dirs+=("$PATH_MERGE")
+                            fi
+                        else
+                            if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
+                                xcframework_flags+=" -library $MERGED_PATH"
+                            fi
                         fi
                     fi
                 done
@@ -1396,13 +1411,13 @@ function frameworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        for dir in $dirs; do
-            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
-                echo "Removing directory: $dir"
-                rm -rf "$dir"
-            fi
-        done
+        # dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        # for dir in $dirs; do
+        #     if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+        #         echo "Removing directory: $dir"
+        #         rm -rf "$dir"
+        #     fi
+        # done
 
         echo "========================"
         cd $HERE_DIR
