@@ -100,8 +100,8 @@ function build() {
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_python3=OFF \
       -DBUILD_opencv_apps=OFF \
-      -DBUILD_opencv_videoio=ON \
-      -DBUILD_opencv_videostab=ON \
+      -DBUILD_opencv_videoio=OFF \
+      -DBUILD_opencv_videostab=OFF \
       -DBUILD_opencv_highgui=ON \
       -DBUILD_opencv_imgcodecs=ON \
       -DBUILD_opencv_stitching=ON \
