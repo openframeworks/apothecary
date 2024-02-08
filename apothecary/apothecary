@@ -1396,6 +1396,7 @@ function frameworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
+        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
         for dir in $dirs; do
             if [[ ! "$dir" =~ .*.xcframework$ ]]; then
                 echo "Removing directory: $dir"
