@@ -102,9 +102,11 @@ function build() {
       -DBUILD_opencv_apps=OFF \
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
-      -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
-      -DBUILD_opencv_stitching=OFF \
+      -DBUILD_opencv_highgui=ON \
+      -DBUILD_opencv_imgcodecs=ON \
+      -DBUILD_opencv_stitching=ON \
+      -DBUILD_opencv_calib3d=ON \
+      -DBUILD_opencv_objdetect=ON \
       -DWITH_1394=OFF \
       -DWITH_CARBON=OFF \
       -DWITH_JPEG=OFF \
@@ -126,7 +128,7 @@ function build() {
       -DWITH_QUICKTIME=OFF \
       -DWITH_V4L=OFF \
       -DWITH_PVAPI=OFF \
-      -DWITH_OPENEXR=OFF \
+      -DWITH_OPENEXR=ON \
       -DWITH_EIGEN=OFF \
       -DBUILD_TESTS=OFF \
       -DWITH_LAPACK=OFF \
@@ -187,7 +189,6 @@ function build() {
       -DWITH_OPENCLAMDFFT=OFF \
       -DBUILD_TESTS=OFF \
       ${EXTRA_DEFS} \
-      -D BUILD_opencv_calib3d=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DENABLE_STRICT_TRY_COMPILE=ON \
       -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
@@ -234,6 +235,7 @@ function build() {
         -DBUILD_opencv_python2=OFF \
         -DBUILD_opencv_python3=OFF \
         -DBUILD_NEW_PYTHON_SUPPORT=OFF \
+        -DBUILD_opencv_objdetect=ON \
         -DHAVE_opencv_python3=OFF \
         -DHAVE_opencv_python=OFF \
         -DHAVE_opencv_python2=OFF \
@@ -241,8 +243,9 @@ function build() {
         -DBUILD_opencv_videoio=OFF \
         -DBUILD_opencv_videostab=OFF \
         -DBUILD_opencv_highgui=OFF \
-        -DBUILD_opencv_imgcodecs=OFF \
-        -DBUILD_opencv_stitching=OFF \
+        -DBUILD_opencv_imgcodecs=ON \
+        -DBUILD_opencv_stitching=ON \
+        -DBUILD_opencv_calib3d=ON \
         -DBUILD_PERF_TESTS=OFF \
         -DBUILD_JASPER=OFF \
         -DBUILD_DOCS=OFF \
@@ -400,10 +403,10 @@ function build() {
       -DANDROID_ABI=${ABI} \
       -DBUILD_ANDROID_PROJECTS=OFF \
       -DBUILD_ANDROID_EXAMPLES=OFF \
-      -DBUILD_opencv_objdetect=OFF \
+      -DBUILD_opencv_objdetect=ON \
       -DBUILD_opencv_video=OFF \
       -DBUILD_opencv_videoio=OFF \
-      -DBUILD_opencv_features2d=OFF \
+      -DBUILD_opencv_features2d=ON \
       -DBUILD_opencv_flann=OFF \
       -DBUILD_opencv_highgui=ON \
       -DBUILD_opencv_ml=ON \
@@ -414,6 +417,7 @@ function build() {
       -DBUILD_opencv_superres=OFF \
       -DBUILD_opencv_ts=OFF \
       -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_calib3d=ON \
       -DWITH_MATLAB=OFF \
       -DWITH_CUDA=OFF \
       -DBUILD_SHARED_LIBS=OFF \
@@ -508,7 +512,7 @@ function build() {
       -DBUILD_opencv_videoio=OFF \
       -DBUILD_opencv_videostab=OFF \
       -DBUILD_opencv_highgui=OFF \
-      -DBUILD_opencv_imgcodecs=OFF \
+      -DBUILD_opencv_imgcodecs=ON \
       -DBUILD_opencv_python2=OFF \
       -DBUILD_opencv_gapi=OFF \
       -DBUILD_opencv_ml=OFF \
@@ -530,6 +534,7 @@ function build() {
       -DBUILD_opencv_superres=OFF \
       -DBUILD_opencv_ts=OFF \
       -DBUILD_opencv_videostab=OFF \
+      -DBUILD_opencv_calib3d=ON \
       -DWITH_MATLAB=OFF \
       -DWITH_CUDA=OFF \
       -DENABLE_SSE=OFF \
