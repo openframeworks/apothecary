@@ -174,9 +174,15 @@ VS_BUILD_TOOL=devenv
 WIN10_INSTALLED_SDK_2019=10.0.190410.0
 WIN10_INSTALLED_SDK_2022=10.0.20348.0
 WIN11_INSTALLED_SDK_2022=10.0.22621.0
-VS_TYPE=Community #Professional #Enterprise 
-VS_COMPILER=MSVC #Compiler - MSVC by Default - Clang LLVM available now
-VS_HOST=amd64
+if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
+    VS_TYPE=Community 
+fi
+if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
+    VS_COMPILER=MSVC 
+fi
+if [ -z "${VS_HOST+x}" ]; then
+    VS_HOST=amd64 
+fi
 TARGET_WIN_11=0
 
 # nice, detailed help message
@@ -389,11 +395,15 @@ function setup_vs_vars(){
         MSBUILD_PATH="${VS_INSTALL_PATH}\MSBuild\\${VS_VER}.0\Bin\MSBuild.exe"
         echo "-- Found MSBuild path: ${MSBUILD_PATH}"
 
-        VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
-        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
-        else 
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+        if [ $VS_COMPILER == "MSVC" ]; then 
+            VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
+            if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
+                export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            else 
+                export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            fi
+        else
+            VS_BIN_PATH=$(ls "$VS_BASE_PATH/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/" | tail -1)
         fi
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 
@@ -513,6 +523,8 @@ if [ "$TYPE" = "vs" ]; then
     if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
         export EXCEPTION_FLAGS="-fexceptions"
+        export FLAGS_RELEASE="-O3"
+        export FLAGS_DEBUG=""
     else
         if [ $ARCH == "arm64ec" ]; then              
             export VS_C_FLAGS="/Gy /GL- /guard:cf"
@@ -575,6 +587,7 @@ if [ "$TYPE" = "vs" ]; then
         	VS_YEAR=$VS_YEAR_PATH
         elif [ "${VS_VER}" = "17" ]; then
           	VS_BASE_PATH="${DRIVE}/Program Files/Microsoft Visual Studio/2022/$VS_TYPE"
+            export VS_BASE_PATH_CLANG="${DRIVE}/Program Files/Microsoft Visual Studio/2022/"
           	VS_YEAR=2022
           	VC_VERSION=143
             VS_BAT="vcvars$ARCH.bat"
@@ -611,11 +624,16 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
 
-        if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
-        else 
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+        if [ $VS_COMPILER == "MSVC" ]; then 
+            if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
+                export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            else 
+                export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
+            fi
+        else
+            VS_BIN_PATH=$(ls "$VS_BASE_PATH/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/" | tail -1)
         fi
+        
         echoVerbose "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 		export PATH=$VS_BIN_PATH:$PATH
         (
