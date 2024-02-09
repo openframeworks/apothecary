@@ -161,14 +161,14 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/include 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/glfw3.lib" $1/lib/$TYPE/$PLATFORM/glfw3.lib   
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include 
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
 	fi
 

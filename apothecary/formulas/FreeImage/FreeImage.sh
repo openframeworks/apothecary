@@ -276,7 +276,7 @@ function copy() {
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/include	
+		cp Source/FreeImage.h $1/include
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include
 	    mkdir -p $1/lib/$TYPE
