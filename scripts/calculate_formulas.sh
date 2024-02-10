@@ -13,8 +13,8 @@ FORMULAS=(
     # All formulas
     "assimp"
     # "boost"
-    "FreeImage"
     "libpng"
+    "FreeImage"
     "libxml2"
     "freetype"
     "fmod"
