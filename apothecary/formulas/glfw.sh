@@ -161,7 +161,7 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/include 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/glfw3.lib" $1/lib/$TYPE/$PLATFORM/glfw3.lib   
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
