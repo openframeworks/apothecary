@@ -12,9 +12,9 @@ FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emsc
 # define the version
 
  # 3.18.0
-VER=31910
+VER=31911
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=test3.19.0
+GIT_TAG=test3.19.1
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -76,12 +76,16 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+
+		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"	
 		
 		  DEFS="-DCMAKE_C_STANDARD=17 \
 		        -DCMAKE_CXX_STANDARD=17 \
@@ -107,8 +111,11 @@ function build() {
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DPNG_ROOT=${LIBPNG_ROOT} \
+			-DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
 			-DCMAKE_INSTALL_PREFIX=Release \
-			-DCMAKE_INSTALL_PREFIX=Release \
+			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 			-DPLATFORM=$PLATFORM 
