@@ -703,7 +703,7 @@ if [ "$TYPE" = "watchos" ]; then
     elif [ $ARCH == "SIM_WATCH" ] ; then
         PLATFORM="SIMULATOR_WATCHOS"
     elif [ $ARCH == "SIM_arm64" ]; then
-        PLATFORM="SIMULATORARM64_TVOS"
+        PLATFORM="SIMULATORARM64_WATCHOS"
     fi 
 fi
 
