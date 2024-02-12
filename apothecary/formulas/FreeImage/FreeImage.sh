@@ -34,33 +34,8 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-
-	if [ "$TYPE" == "osx" ] ; then
-
-		cp -rf $FORMULA_DIR/Makefile.osx Makefile.osx
-
-		# set SDK using apothecary settings
-		perl -pi -e tmp "s|MACOSX_SDK =.*|MACOSX_SDK = $OSX_SDK_VER|" Makefile.osx
-		perl -pi -e tmp "s|MACOSX_MIN_SDK =.*|MACOSX_MIN_SDK = $OSX_MIN_SDK_VER|" Makefile.osx
-
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
-		mkdir -p Dist/$TYPE
-		mkdir -p builddir/$TYPE
-
-		# copy across new Makefile for iOS.
-		cp -v $FORMULA_DIR/Makefile.ios Makefile.ios
-
-		# delete problematic file including a main fucntion
-		# https://github.com/openframeworks/openFrameworks/issues/5980
-
-		perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
-
-        #rm Source/LibWebP/src/dsp/dec_neon.c
-
-        perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
-		
-	elif [ "$TYPE" == "android" ]; then
+			
+	if [ "$TYPE" == "android" ]; then
 	    local BUILD_TO_DIR=$BUILD_DIR/FreeImage
 	    cd $BUILD_DIR/FreeImage
 	    perl -pi -e "s/#define HAVE_SEARCH_H/\/\/#define HAVE_SEARCH_H/g" Source/LibTIFF4/tif_config.h
@@ -147,6 +122,10 @@ function build() {
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
 
+       	LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$ABI/libpng.a"	
+
         cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
         	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
       		-D CMAKE_C_COMPILER=${CC} \
@@ -166,6 +145,9 @@ function build() {
         	-D ANDROID_TOOLCHAIN=clang \
         	-D CMAKE_BUILD_TYPE=Release \
         	-D FT_REQUIRE_HARFBUZZ=FALSE \
+        	-DPNG_ROOT=${LIBPNG_ROOT} \
+			-DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
         	-DDISABLE_PERF_MEASUREMENT=ON \
         	-DLIBRAW_LIBRARY_BUILD=ON\
         	-DLIBRAW_NODLL=ON \
@@ -196,7 +178,10 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
-        
+
+		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"        
         
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_C_STANDARD=17 \
@@ -209,6 +194,9 @@ function build() {
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
 			-DNO_BUILD_JXR=ON \
+			-DPNG_ROOT=${LIBPNG_ROOT} \
+			-DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
 			-DBUILD_SHARED_LIBS=OFF"	
 		env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
 		cmake  .. ${DEFS} \
@@ -246,6 +234,10 @@ function build() {
     elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+
+	    LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/libpng.a"
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-B build \
 	    	-DCMAKE_C_STANDARD=17 \
@@ -259,6 +251,9 @@ function build() {
 			-DNO_BUILD_OPENEXR=ON \
 			-DNO_BUILD_WEBP=ON \
 			-DNO_BUILD_JXR=ON \
+			-DPNG_ROOT=${LIBPNG_ROOT} \
+			-DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
 		    -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
