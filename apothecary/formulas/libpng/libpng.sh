@@ -5,16 +5,16 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.40
+VER=1.6.42
 WIN_VER=1644
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
 #URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # Glenn Randers-Pehrson 
-URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40
+URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
 SHA=
-WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.40
+WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" )
 
