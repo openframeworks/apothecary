@@ -150,8 +150,8 @@ function build() {
 
 		source ../../android_configure.sh $ABI cmake
 
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
+		mkdir -p "build_${TYPE}_${ABI}"
+		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
 
 		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c17"
@@ -197,7 +197,7 @@ function build() {
 
 	    ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
 
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-B build \
@@ -233,12 +233,12 @@ function copy() {
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	elif [ "$TYPE" == "android" ] ; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$ABI/libpng.a
 		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
+		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}/Release/lib/libpng16_static.wasm" $1/lib/$TYPE/libpng.wasm
 		cp -RT "build_${TYPE}/Release/include/" $1/include
