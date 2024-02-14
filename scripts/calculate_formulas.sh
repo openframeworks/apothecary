@@ -40,6 +40,7 @@ FORMULAS=(
     "svgtiny"
     #"uri"
     "cairo"
+    "fmt"
 )
 
 # Seperate in bundles on osx
@@ -71,6 +72,7 @@ if [ "$BUNDLE" == "1" ]; then
             "uriparser"
             # # Formulas with depenencies in the end
             "cairo"
+
         )
     elif [ "$BUNDLE" == "2" ]; then
         if [[ "$TYPE" =~ ^(osx)$ ]]; then
@@ -89,6 +91,7 @@ if [ "$BUNDLE" == "1" ]; then
         fi
     elif [ "$BUNDLE" == "3" ]; then
         FORMULAS=(
+            "fmt"
             "openssl"
             "curl"
             # "poco"
@@ -135,6 +138,7 @@ elif [ "$TARGET" == "vs" ]; then
         )
     elif [ "$BUNDLE" == "2" ]; then
         FORMULAS=(
+            "fmt"
             "openssl"
             "curl"
             # "poco"
