@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# this is the OpenFrameworks library apothecary,
+# this is the openFrameworks library apothecary,
 # it mixes formulas and potions to build and update the C/C++ lib dependencies
 #
 # formulas are simple scripts which implement the download, build, copy, & clean
@@ -10,9 +10,10 @@
 # Core OF lib formulas are located in the formulas dir and addon formulas should
 # be in addons/ofxMyAddon/scripts/formulas
 #
-# 2014 OpenFrameworks team
+# 2014 openFrameworks team
 # 2013 Dan Wilcox <danomatika@gmail.com>,
 # supported by the CMU Studio for Creative Inquiry: http://studioforcreativeinquiry.org
+# 2024 Dan Rosser <danoli3@gmail.com> 
 #
 # references:
 #  http://stackoverflow.com/questions/12219001/standalone-shell-script-vs-shell-function
@@ -155,7 +156,7 @@ CON_YELLOW="\033[33m"
 CON_GREEN="\033[32m"
 
 # used to filter out bad build types
-VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "xros" "watchos" "catos" "android" "emscripten" )
+VALID_TYPES=( "osx" "macos" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "xros" "watchos" "catos" "android" "emscripten" )
 
 # verbose mode bool
 A_VERBOSE=0
@@ -183,7 +184,7 @@ TARGET_WIN_11=0
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
 
 about:
- this is the OpenFrameworks library apothecary
+ this is the openFrameworks library apothecary
   it mixes formulas and potions to build and
   update OF C/C++ lib dependencies
 
@@ -1288,9 +1289,13 @@ function cleanFormula() {
 
 function frameworkFormula() {
     LIBS_DIR_REAL=$(realpath $LIBS_DIR)
+    PLATFORM_TYPES=("ios" "osx" "catos" "xros" "watchos" "tvos")
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
     else
+        if [  ! -e "$LIBS_DIR_REAL/$1/lib/$TYPE" && $TYPE == "macos" ]; then
+            mkdir -p $LIBS_DIR_REAL/$1/lib/$TYPE
+        fi
         rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 
         echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
@@ -1322,65 +1327,71 @@ function frameworkFormula() {
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
         declare -a merged_dirs=()
-        for ARCH in "${!ARCH_PAIRS[@]}"; do
-            PAIR="${ARCH_PAIRS[$ARCH]}"
-            DIR_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/"
-            echo "ARCH: $ARCH"
-            if [ -d "$DIR_PATH" ]; then
-                MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}"
-                declare -a archive_paths=()
-                while IFS= read -r -d $'\0' file; do
-                    archive_paths+=("$file")
-                done < <(find "$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/" -name "*.a" -print0)
-                for path in "${archive_paths[@]}"; do
-                    echo "Archive path: $path"
-                done
-                num_archive_paths=${#archive_paths[@]}
-                for ARCH_FILE in "${archive_paths[@]}"; do
-                    # Determine paired architecture directory
-                    PAIR_FILE="${ARCH_FILE/$ARCH/$PAIR}"
-                    path_found_in_array=false
-                    if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
-                        mkdir -p "$MERGED_DIR"
-                        # Determine the output filename in the merged directory
-                        PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
-                        MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
-                        # Use lipo to merge the architectures into a single file - prevents linking errors
-                        xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
-                        # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
-                        xcrun codesign --sign - $MERGED_PATH || true
-                        for dir in "${merged_dirs[@]}"; do
-                            if [[ "$dir" == "$PATH_MERGE" ]]; then
-                                path_found_in_array=true
-                                break 
+        for CURRENT_TYPE in "${PLATFORM_TYPES[@]}"; do
+            if [ -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" ]; then
+                echo "Processing platform type: $CURRENT_TYPE"
+                for ARCH in "${!ARCH_PAIRS[@]}"; do
+                    PAIR="${ARCH_PAIRS[$ARCH]}"
+                    DIR_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/"
+                    echo "ARCH: $ARCH"
+                    if [ -d "$DIR_PATH" ]; then
+                        MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}"
+                        declare -a archive_paths=()
+                        while IFS= read -r -d $'\0' file; do
+                            archive_paths+=("$file")
+                        done < <(find "$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/" -name "*.a" -print0)
+                        for path in "${archive_paths[@]}"; do
+                            echo "Archive path: $path"
+                        done
+                        num_archive_paths=${#archive_paths[@]}
+                        for ARCH_FILE in "${archive_paths[@]}"; do
+                            # Determine paired architecture directory
+                            PAIR_FILE="${ARCH_FILE/$ARCH/$PAIR}"
+                            path_found_in_array=false
+                            if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
+                                mkdir -p "$MERGED_DIR"
+                                # Determine the output filename in the merged directory
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
+                                # Use lipo to merge the architectures into a single file - prevents linking errors
+                                xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
+                                # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
+                                xcrun codesign --sign - $MERGED_PATH || true
+                                for dir in "${merged_dirs[@]}"; do
+                                    if [[ "$dir" == "$PATH_MERGE" ]]; then
+                                        path_found_in_array=true
+                                        break 
+                                    fi
+                                done
+                                if [[ $path_found_in_array == false ]]; then
+                                    merged_dirs+=("$PATH_MERGE")
+                                fi
+                            else
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
+                                xcrun codesign --sign - $MERGED_PATH || true
+                                if [[ "$num_archive_paths" -gt 1 ]]; then
+                                    for dir in "${merged_dirs[@]}"; do
+                                        if [[ "$dir" == "$PATH_MERGE" ]]; then
+                                            path_found_in_array=true
+                                            break 
+                                        fi
+                                    done
+                                    if [[ $path_found_in_array == false ]]; then
+                                        merged_dirs+=("$PATH_MERGE")
+                                    fi
+                                else
+                                    if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
+                                        xcframework_flags+=" -library $MERGED_PATH"
+                                    fi
+                                fi
                             fi
                         done
-                        if [[ $path_found_in_array == false ]]; then
-                            merged_dirs+=("$PATH_MERGE")
-                        fi
-                    else
-                        MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
-                        xcrun codesign --sign - $MERGED_PATH || true
-                        if [[ "$num_archive_paths" -gt 1 ]]; then
-                            for dir in "${merged_dirs[@]}"; do
-                                if [[ "$dir" == "$PATH_MERGE" ]]; then
-                                    path_found_in_array=true
-                                    break 
-                                fi
-                            done
-                            if [[ $path_found_in_array == false ]]; then
-                                merged_dirs+=("$PATH_MERGE")
-                            fi
-                        else
-                            if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
-                                xcframework_flags+=" -library $MERGED_PATH"
-                            fi
-                        fi
                     fi
                 done
+            else
+                echoVerbose "Platform type directory does not exist: $LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE"
             fi
         done
-
         # Final merging pass to combine binaries of same / merged architectures into single binary to prevent linking issues
         for dir in "${merged_dirs[@]}"; do
             echo "Processing directory: $dir"

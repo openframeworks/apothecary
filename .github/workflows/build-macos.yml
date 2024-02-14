@@ -71,7 +71,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: xcframework-${{ env.TARGET }}-${{ matrix.bundle }}
-          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          path: out/openFrameworksLibs_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           if-no-files-found: error
       #   if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
     

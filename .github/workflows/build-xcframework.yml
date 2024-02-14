@@ -1,4 +1,4 @@
-name: Merge XC Frameworks After Builds
+name: build-xcframeworks
 on:
   workflow_run:
     workflows: ["build-ios", "build-tvos", "build-macos"]
