@@ -1,0 +1,40 @@
+name: Merge XC Frameworks After Builds
+on:
+  workflow_run:
+    workflows: ["build-ios", "build-tvos", "build-macos"]
+    types: [completed]
+jobs:
+  build-xcframework:
+    runs-on: runs-on: macos-14
+    env:
+      BUNDLE: ${{ matrix.bundle }}
+      DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
+    steps:
+      - name: Determine Release
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "release=nightly" >> $GITHUB_ENV
+            echo "prerelease=false" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "release=bleeding" >> $GITHUB_ENV
+            echo "prerelease=true" >> $GITHUB_ENV
+          fi
+      - uses: actions/checkout@v4
+      - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
+        run: ./scripts/calculate_formulas.sh
+      - name: Scripts Install
+        run: ./scripts/macos/install.sh
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+      - name: Extract Artifacts to /out
+        run: |
+          mkdir -p /out
+          find downloaded-artifacts -name '*.tar.gz' -exec tar -xzvf {} -C /out \;
+      - name: Merge our tvOS libaries into XC Framework 
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/macos/xcframework_all.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
