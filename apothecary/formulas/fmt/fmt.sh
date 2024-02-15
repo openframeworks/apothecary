@@ -125,7 +125,6 @@ function build() {
 
 			cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-				-DPLATFORM=$PLATFORM \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 				-DCMAKE_C_COMPILER=${CC} \
