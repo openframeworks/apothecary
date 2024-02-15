@@ -26,9 +26,9 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	: #noop
-	. "$DOWNLOADER_SCRIPT"
+	# . "$DOWNLOADER_SCRIPT"
 	# downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
-	cp -Rv $FORMULA_DIR/ ./
+	cp -v "$FORMULA_DIR"/*.txt ./
 
 }
 
@@ -43,6 +43,7 @@ function build() {
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.lib *.o *.wasm
         cmake .. \
             -G "${GENERATOR_NAME}" \
             -A "${PLATFORM}" \
@@ -65,6 +66,7 @@ function build() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o 
 		cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -93,6 +95,7 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o *.wasm
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \

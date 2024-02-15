@@ -194,7 +194,7 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
-	    rm -f CMakeCache.txt *.a *.o
+	    rm -f CMakeCache.txt *.a *.o *.wasm
 
 	    ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
