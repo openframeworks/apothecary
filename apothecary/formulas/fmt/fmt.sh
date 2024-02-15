@@ -12,7 +12,7 @@ URL=${GIT_URL}/archive/refs/tags/${VER}
 
 SHA=
 
-FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux64" "msys2" "linuxaarch64" )
 
 FORMULA_DEPENDS=(  ) 
 
@@ -69,7 +69,7 @@ function build() {
 		cd "build_${TYPE}_${PLATFORM}"
 		rm -f CMakeCache.txt *.a *.o
 		cmake .. ${DEFS} \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
 				-DCMAKE_INSTALL_PREFIX=Release \
 				-DCMAKE_BUILD_TYPE=Release \
@@ -150,6 +150,48 @@ function build() {
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
 		cmake --build . --config Release --target install
 		cd ..
+	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
+			mkdir -p build_$TYPE
+	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o
+	    cmake .. \
+	    	${DEFS} \
+	    	-DCMAKE_SYSTEM_NAME=$TYPE \
+        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+				-DCMAKE_C_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				cmake --build . --target install --config Release
+	    cd ..
+	elif [ "$TYPE" == "linuxaarch64" ]; then
+      source ../../${TYPE}_configure.sh
+      mkdir -p build_$TYPE
+	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o
+	    cmake .. \
+	    	${DEFS} \
+	    	-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/aarch64-linux-gnu.toolchain.cmake \
+	    	-DCMAKE_SYSTEM_NAME=$TYPE \
+        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+				-DCMAKE_C_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				cmake --build . --target install --config Release
+	    cd ..
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
@@ -227,7 +269,7 @@ function clean() {
 	elif [ "$TYPE" == "emscripten" ] ; then
 		if [ -d "build_${TYPE}" ]; then
 			rm -r build_${TYPE}     
-	  	fi
+	  fi
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
 			rm -r build_${TYPE}_${PLATFORM}     
