@@ -61,6 +61,7 @@ function prepare() {
 		fi
 	fi
 
+	cp -Rv $FORMULA_DIR/ ./
 
 	
 }
@@ -79,7 +80,7 @@ function build() {
 		    -DPNG_TESTS=OFF \
 		    -DPNG_SHARED=OFF \
 		    -DPNG_STATIC=ON \
-		    -DBUILD_SHARED_LIBS=ON \
+		    -DBUILD_SHARED_LIBS=OFF \
 		    -DPNG_HARDWARE_OPTIMIZATIONS=ON \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 			-DCMAKE_INSTALL_INCLUDEDIR=include"
@@ -98,7 +99,7 @@ function build() {
 				-DPLATFORM=$PLATFORM \
 				-DZLIB_ROOT=${ZLIB_ROOT} \
 		    	-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-		    	-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+		    	-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
 				-DCMAKE_INSTALL_PREFIX=Release \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
@@ -129,7 +130,7 @@ function build() {
 			-B . \
 			-DZLIB_ROOT=${ZLIB_ROOT} \
 	    	-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-	    	-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+	    	-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
 	    	-DCMAKE_INSTALL_PREFIX=Release \
 			-DCMAKE_BUILD_TYPE=Release \
 		    -A "${PLATFORM}" \
@@ -146,7 +147,7 @@ function build() {
 
 		cd ..	
 
-	if [ "$TYPE" == "android" ] ; then
+	elif [ "$TYPE" == "android" ] ; then
 
 		source ../../android_configure.sh $ABI cmake
 
@@ -197,23 +198,27 @@ function build() {
 
 	    ZLIB_ROOT="$LIBS_ROOT/zlib/"
 		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.wasm"
 
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-B build \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+	    	${DEFS} \
+	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+	    	-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti -fPIC ${FLAG_RELEASE}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti -fPIC ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_INSTALL_PREFIX=Release \
-			-DCMAKE_BUILD_TYPE=Release \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DDPNG_BUILD_ZLIB=OFF \
 			-DZLIB_ROOT=${ZLIB_ROOT} \
-		    -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-		    -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR}
-	    cmake --build build --target install --config Release
+			-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+			-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DBUILD_SHARED_LIBS=ON \
+			-DPNG_EXECUTABLES=ON \
+			-DPNG_BUILD_ZLIB=OFF 
+	    cmake --build . --target install --config Release
 	    cd ..
-	fi
 		
 	fi
 
@@ -240,7 +245,7 @@ function copy() {
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
-		cp -v "build_${TYPE}/Release/lib/libpng16_static.wasm" $1/lib/$TYPE/libpng.wasm
+		cp -v "build_${TYPE}/libpng_wasm.wasm" $1/lib/$TYPE/libpng.wasm
 		cp -RT "build_${TYPE}/Release/include/" $1/include
 	else
 		mkdir -p $1/include

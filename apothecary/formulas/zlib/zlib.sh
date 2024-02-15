@@ -27,7 +27,8 @@ function download() {
 function prepare() {
 	: #noop
 	. "$DOWNLOADER_SCRIPT"
-	downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+	# downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+	cp -Rv $FORMULA_DIR/ ./
 
 }
 
@@ -132,7 +133,7 @@ function copy() {
 		mkdir -p $1/lib
 		cp -Rv "build_${TYPE}/Release/include"* $1/include/
 		mkdir -p $1/lib/$TYPE
-		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/zlib.a
+		cp -v "build_${TYPE}/zlib_wasm.wasm" $1/lib/$TYPE/zlib.wasm
 	else
 		make install
 	fi
