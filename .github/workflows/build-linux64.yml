@@ -14,35 +14,36 @@ jobs:
     strategy:
         matrix:
           cfg:
-          - {target: linux, opt: gcc6}
+          - {target: linux64, opt: gcc6}
     env:
      TARGET: ${{matrix.cfg.target}}
      OPT: ${{matrix.cfg.opt}}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4.1.1
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
       run: ./scripts/$TARGET/install.sh
     - name: Determine Release
-      id: vars
-      shell: bash
-      run: |
-        if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "release=nightly" >> $GITHUB_ENV
-          echo "prerelease=false" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "release=bleeding" >> $GITHUB_ENV
-          echo "prerelease=true" >> $GITHUB_ENV
-        fi
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "release=nightly" >> $GITHUB_ENV
+            echo "prerelease=false" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "release=bleeding" >> $GITHUB_ENV
+            echo "prerelease=true" >> $GITHUB_ENV
+          fi
     - name: build
       run: ./scripts/build.sh
       env:
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-    - name: Package
+    - name: Package 
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
         env:
+          TARGET: "linux64"
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     - name: Update Release 
