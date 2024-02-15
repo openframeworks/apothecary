@@ -118,11 +118,6 @@ function build() {
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
-
-		export CFLAGS="$CFLAGS -DNDEBUG -frtti -std=c17"
-		export CXXFLAGS="$CFLAGS -DNDEBUG frtti -std=c++17"
-		export LDFLAGS="$LDFLAGS"
-
 			cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
@@ -157,8 +152,6 @@ function build() {
 	    	${DEFS} \
 	    	-DCMAKE_SYSTEM_NAME=$TYPE \
         -DCMAKE_SYSTEM_PROCESSOR=$ABI \
-				-DCMAKE_C_STANDARD=17 \
-				-DCMAKE_CXX_STANDARD=17 \
 				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
