@@ -29,7 +29,7 @@ function download() {
 		downloader "${URL}.tar.gz"
 		tar -xf "${VER}.tar.gz"
 		mv "fmt-${VER}" fmt
-		rm "fmt-${VER}.tar.gz"
+		rm "${VER}.tar.gz"
 	fi
 }
 
