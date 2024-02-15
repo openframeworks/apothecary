@@ -135,7 +135,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include"              
         cmake .. ${DEFS} \
             ${BUILD_OPTS} \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \

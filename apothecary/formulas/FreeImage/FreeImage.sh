@@ -101,7 +101,7 @@ function build() {
 				-DENABLE_ARC=OFF \
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 				-DENABLE_VISIBILITY=OFF \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake
 		        "         
 		cmake  .. ${DEFS} \
 			-DCMAKE_C_STANDARD=17 \

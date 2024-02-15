@@ -77,7 +77,7 @@ function build() {
 
     cmake .. ${DEFS} \
       -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-      -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+      -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
       -DPLATFORM=$PLATFORM \
       -DENABLE_BITCODE=OFF \
       -DENABLE_ARC=OFF \
