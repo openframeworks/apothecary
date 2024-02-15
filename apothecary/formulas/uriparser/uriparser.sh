@@ -175,20 +175,20 @@ function build() {
 		rm -f CMakeCache.txt
 		mkdir -p "build_${TYPE}"
 		cd "build_${TYPE}"
-  		export CFLAGS="-Wno-implicit-function-declaration "
-        	export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
-		emcmake cmake \
- 		-DURIPARSER_BUILD_TESTS=OFF \
- 		-DURIPARSER_BUILD_DOCS=OFF \
- 		-DURIPARSER_BUILD_TOOLS=OFF \
- 		-DURIPARSER_SHARED_LIBS=OFF \
- 		-DURIPARSER_BUILD_WCHAR_T=ON \
-	        -DURIPARSER_BUILD_CHAR=ON \
- 		-DBUILD_SHARED_LIBS=OFF \
-         	-DCMAKE_BUILD_TYPE=Release \
-         	-DCMAKE_C_FLAGS=${CFLAGS} \
-      	 	-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
-         	-G 'Unix Makefiles' ..
+		export CFLAGS="-Wno-implicit-function-declaration "
+      	export CXXFLAGS="-fvisibility-inlines-hidden  -Wno-implicit-function-declaration"
+				emcmake cmake \
+				-DURIPARSER_BUILD_TESTS=OFF \
+				-DURIPARSER_BUILD_DOCS=OFF \
+				-DURIPARSER_BUILD_TOOLS=OFF \
+				-DURIPARSER_SHARED_LIBS=OFF \
+				-DURIPARSER_BUILD_WCHAR_T=ON \
+				-DURIPARSER_BUILD_CHAR=ON \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_BUILD_TYPE=Release \
+				-DCMAKE_C_FLAGS=${CFLAGS} \
+				-DCMAKE_CXX_FLAGS=${CXXFLAGS} \
+       	-G 'Unix Makefiles' ..
 		#emconfigure ./configure --prefix=$BUILD_TO_DIR --disable-test --disable-doc --enable-static --disable-shared
         	emmake make clean
 		emmake make -j${PARALLEL_MAKE}

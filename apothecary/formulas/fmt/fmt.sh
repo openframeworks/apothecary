@@ -9,6 +9,7 @@ VER=10.2.1
 # tools for git use
 GIT_URL=https://github.com/fmtlib/fmt
 URL=${GIT_URL}/archive/refs/tags/${VER}
+
 SHA=
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
@@ -31,12 +32,18 @@ function download() {
 		mv "fmt-${VER}" fmt
 		rm "${VER}.tar.gz"
 	fi
+
+	cp -Rv $FORMULA_DIR/ ./
+
+
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 
 	echoVerbose "prepare"
+	# . "$DOWNLOADER_SCRIPT"
+	# downloader "$CMAKE_URL"
 	
 }
 
@@ -61,7 +68,6 @@ function build() {
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		rm -f CMakeCache.txt *.a *.o
-		
 		cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
@@ -105,7 +111,7 @@ function build() {
 
 		cd ..	
 
-	if [ "$TYPE" == "android" ] ; then
+	elif [ "$TYPE" == "android" ] ; then
 
 		source ../../android_configure.sh $ABI cmake
 
@@ -147,21 +153,26 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
-	    rm -f CMakeCache.txt *.a *.o
-
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-B build \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+	    	${DEFS} \
+	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+	    	-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DCMAKE_INSTALL_PREFIX=Release \
-			-DCMAKE_BUILD_TYPE=Release \
 			-DBUILD_SHARED_LIBS=OFF \
-	    cmake --build build --target install --config Release
+		    -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
+		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=. \
+		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. 
+	    cmake --build . --target install --config Release
 	    cd ..
 	fi
 		
-	fi
 
 }
 
@@ -182,16 +193,16 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.lib" $1/lib/$TYPE/$ABI/libfmt.a
-		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
+		cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
-		cp -v "build_${TYPE}/Release/lib/libfmt.wasm" $1/lib/$TYPE/libfmt.wasm
-		cp -RT "build_${TYPE}/Release/include/" $1/include
+		cp -v "build_${TYPE}/bin/fmt_wasm.wasm" $1/lib/$TYPE/libfmt.wasm
+		cp -R "build_${TYPE}/Release/include/" $1/include
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/Release/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 
@@ -206,20 +217,23 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-    if [ -d "build_${TYPE}_${ARCH}" ]; then
-        rm -r build_${TYPE}_${ARCH}     
-    fi
+		if [ -d "build_${TYPE}_${ARCH}" ]; then
+		    rm -r build_${TYPE}_${ARCH}     
+		fi
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d "build_${TYPE}_${ABI}" ]; then
-	        rm -r build_${TYPE}_${ABI}     
-	  fi
+			rm -r build_${TYPE}_${ABI}     
+	  	fi
+	elif [ "$TYPE" == "emscripten" ] ; then
+		if [ -d "build_${TYPE}" ]; then
+			rm -r build_${TYPE}     
+	  	fi
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-	        rm -r build_${TYPE}_${PLATFORM}     
-	  fi
+			rm -r build_${TYPE}_${PLATFORM}     
+	  	fi
 	else
-		make uninstall
-		make clean
+		echoVerbose "clean not setup for $TYPE"
 	fi
 }
 
