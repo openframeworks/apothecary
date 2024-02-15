@@ -27,7 +27,7 @@ function download() {
 		rm "${VER}.zip"
 	else 
 		downloader "${URL}.tar.gz"
-		tar -xf "fmt-${VER}.tar.gz"
+		tar -xf "${VER}.tar.gz"
 		mv "fmt-${VER}" fmt
 		rm "fmt-${VER}.tar.gz"
 	fi
