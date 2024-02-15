@@ -70,6 +70,8 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: List output directory2
+        run: ls -lah out/
       - name: Upload binaries as Artifact
         uses: actions/upload-artifact@v3
         with:
