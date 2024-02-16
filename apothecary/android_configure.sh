@@ -139,17 +139,17 @@ if [ "$ABI" = "armeabi-v7a" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET "
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET  "
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/arm-linux-androideabi"
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -march=armv7-a -mfloat-abi=softfp -Wl,--fix-cortex-a8 -Wl,--no-undefined"
+    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET " 
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET"
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/aarch64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS"
+    export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ "$ABI" = "x86-64" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET"
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET "
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/x86_64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -shared -Wl,--no-undefined"
+    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ "$ABI" = "x86" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET"  #march=i686  -target i686-linux-android 
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET" #  -target i686-none-linux-android
