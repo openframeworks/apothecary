@@ -209,6 +209,7 @@ function build() {
 	    	${DEFS} \
 	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 	    	-DCMAKE_C_STANDARD=17 \
+	    	-DEMSCRIPTEN=ON \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti -fPIC ${FLAG_RELEASE}" \
@@ -222,7 +223,7 @@ function build() {
 			-DCMAKE_BUILD_TYPE=Release \
 			-DBUILD_SHARED_LIBS=ON \
 			-DPNG_EXECUTABLES=OFF \
-			-DPNG_BUILD_ZLIB=OFF 
+			-DPNG_BUILD_ZLIB=OFF
 	    cmake --build . --target install --config Release
 	    cd ..
 		
