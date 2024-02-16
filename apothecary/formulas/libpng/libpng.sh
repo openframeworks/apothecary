@@ -6,7 +6,6 @@
 # define the version
 MAJOR_VER=16
 VER=1.6.42
-WIN_VER=1644
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
@@ -100,6 +99,7 @@ function build() {
 				-DZLIB_ROOT=${ZLIB_ROOT} \
 		    	-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
 		    	-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+		    	-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 				-DCMAKE_INSTALL_PREFIX=Release \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
@@ -131,6 +131,7 @@ function build() {
 			-DZLIB_ROOT=${ZLIB_ROOT} \
 	    	-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
 	    	-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+	    	-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 	    	-DCMAKE_INSTALL_PREFIX=Release \
 			-DCMAKE_BUILD_TYPE=Release \
 		    -A "${PLATFORM}" \
@@ -149,14 +150,14 @@ function build() {
 
 	elif [ "$TYPE" == "android" ] ; then
 
-		source ../../android_configure.sh $ABI cmake
+		source $APOTHECARY_DIR/android_configure.sh $ABI cmake
 
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
 
-		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c17"
-		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c++17"
+		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c17"
+		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c++17"
 		export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
 
 
@@ -169,7 +170,7 @@ function build() {
 				-DPLATFORM=$PLATFORM \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-				D CMAKE_C_COMPILER=${CC} \
+				-DCMAKE_C_COMPILER=${CC} \
 				-DCMAKE_INSTALL_PREFIX=Release \
 				-DCMAKE_BUILD_TYPE=Release \
 	     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
@@ -186,6 +187,10 @@ function build() {
 	        	-D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
 	        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
 	        	-D ANDROID_TOOLCHAIN=clang \
+	        	-DZLIB_ROOT=${ZLIB_ROOT} \
+				-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+				-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+				-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 				-DENABLE_VISIBILITY=OFF \
 				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
@@ -213,9 +218,10 @@ function build() {
 			-DZLIB_ROOT=${ZLIB_ROOT} \
 			-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
 			-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+			-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DBUILD_SHARED_LIBS=ON \
-			-DPNG_EXECUTABLES=ON \
+			-DPNG_EXECUTABLES=OFF \
 			-DPNG_BUILD_ZLIB=OFF 
 	    cmake --build . --target install --config Release
 	    cd ..
@@ -246,7 +252,7 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}/libpng_wasm.wasm" $1/lib/$TYPE/libpng.wasm
-		cp -RT "build_${TYPE}/Release/include/" $1/include
+		cp -R "build_${TYPE}/Release/include/" $1/include
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -271,8 +277,8 @@ function clean() {
     fi
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d "build_${TYPE}_${ABI}" ]; then
-	        rm -r build_${TYPE}_${ABI}     
-	  fi
+			rm -r build_${TYPE}_${ABI}     
+		fi
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
 	        rm -r build_${TYPE}_${PLATFORM}     
