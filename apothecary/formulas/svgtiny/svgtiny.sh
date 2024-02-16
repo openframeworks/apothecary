@@ -164,6 +164,7 @@ function build() {
         export LDFLAGS=""
         cmake .. -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI=$ABI \
+			-DCMAKE_ANDROID_ARCH_ABI=$ABI \
             -DANDROID_TOOLCHAIN=clang++ \
             -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++17 -Wno-implicit-function-declaration -frtti " \

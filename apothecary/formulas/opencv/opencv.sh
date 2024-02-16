@@ -394,6 +394,7 @@ function build() {
       -DCMAKE_SYSROOT=$SYSROOT \
       -DANDROID_NDK=$NDK_ROOT \
       -DANDROID_ABI=$ABI \
+      -DCMAKE_ANDROID_ARCH_ABI=$ABI \
       -DANDROID_STL=c++_shared \
       -DCMAKE_C_STANDARD=17 \
       -DCMAKE_CXX_STANDARD=17 \
@@ -456,7 +457,6 @@ function build() {
       -DBUILD_TESTS=OFF \
       -DANDROID_NDK=${NDK_ROOT} \
       -DCMAKE_BUILD_TYPE=Release \
-      -DANDROID_ABI=$ABI \
       -DANDROID_STL=c++_shared \
       -DANDROID_PLATFORM=$ANDROID_PLATFORM \
       -DBUILD_PERF_TESTS=OFF ..

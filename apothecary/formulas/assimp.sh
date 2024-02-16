@@ -186,6 +186,7 @@ function build() {
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
                 -DCMAKE_BUILD_TYPE=Release
                 -DANDROID_ABI=$ABI
+                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
                 -DANDROID_STL=c++_static
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DANDROID_FORCE_ARM_BUILD=TRUE
@@ -203,6 +204,7 @@ function build() {
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
                 -DCMAKE_BUILD_TYPE=Release
                 -DANDROID_ABI=$ABI
+                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
                 -DANDROID_STL=c++_static
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DANDROID_FORCE_ARM_BUILD=TRUE
@@ -219,6 +221,7 @@ function build() {
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
                 -DCMAKE_BUILD_TYPE=Release
                 -DANDROID_ABI=$ABI
+                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
                 -DANDROID_STL=c++_static
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DCMAKE_INSTALL_PREFIX=install"
@@ -234,6 +237,7 @@ function build() {
                 -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
                 -DCMAKE_BUILD_TYPE=Release
                 -DANDROID_ABI=$ABI
+                -DCMAKE_ANDROID_ARCH_ABI=$ABI
                 -DANDROID_STL=c++_static
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DCMAKE_INSTALL_PREFIX=install"
@@ -287,6 +291,7 @@ function build() {
             -DANDROID_NDK=$NDK_ROOT \
             -DCMAKE_BUILD_TYPE=Release \
             -DANDROID_ABI=$ABI \
+            -DCMAKE_ANDROID_ARCH_ABI=$ABI \
             -DANDROID_STL=c++_shared \
             -DANDROID_PLATFORM=$ANDROID_PLATFORM \
             -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
