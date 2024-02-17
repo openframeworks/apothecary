@@ -41,13 +41,6 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 
-	
-
-	# generate the configure script if it's not there
-	if [ ! -f configure ] ; then
-		./autogen.sh
-	fi
-
 	apothecaryDepend download zlib
 	apothecaryDepend prepare zlib
 	apothecaryDepend build zlib
@@ -60,7 +53,8 @@ function prepare() {
 		fi
 	fi
 
-	cp -Rv $FORMULA_DIR/ ./
+	rm -f ./CMakeLists.txt
+	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 
 	
 }
