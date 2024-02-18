@@ -74,7 +74,7 @@ createArchImg(){
     #sudo ./arch-bootstrap.sh archlinux
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
-    sudo apt-get install -y coreutils realpath gperf crossbuild-essential-arm64 
+    sudo apt-get install -y coreutils realpath gperf crossbuild-essential-arm64 build-essential
 	cd $HOME
 	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz 
 	mkdir archlinux
