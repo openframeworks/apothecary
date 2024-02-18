@@ -81,6 +81,22 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+        
+        # if [ $CROSSCOMPILING -eq 1 ]; then
+        #     source ../../${TYPE}_configure.sh
+        #     export LDFLAGS=-L$SYSROOT/usr/lib
+        #     export CFLAGS=-I$SYSROOT/usr/include
+        # fi
+        
+        # export CFLAGS="$(pkg-config libxml-2.0 --cflags)"
+        
+        # if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] ; then
+        #     export CFLAGS="-I$LIBS_DIR/libxml2/include"
+        # fi
+        
+        # make clean
+	    # make -j${PARALLEL_MAKE}
+
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
         LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/libxml2.a"

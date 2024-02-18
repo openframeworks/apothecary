@@ -7,10 +7,7 @@
 # uses an automake build system
 
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-# uses an automake build system # required for svg
-
 FORMULA_DEPENDS=( "zlib" )
-
 
 # define the version by sha
 VER=2.12.5
@@ -338,6 +335,10 @@ function build() {
                 -DLIBXML2_WITH_THREAD_ALLOC=OFF 
             cmake --build . --config Release
             cd ..
+
+        #./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        #make clean
+        #make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
         source ../../${TYPE}_configure.sh
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
