@@ -53,7 +53,7 @@ jobs:
          TARGET: "linuxaarch64"
          SYSROOT: "/home/runner/archlinux"
          TOOLCHAIN_ROOT: "/home/runner/rpi2_toolchain"
-         TOOLCHAIN_PREFIX: "arm-linux-gnueabihf"
+         TOOLCHAIN_PREFIX: "aarch64-linux-gnu"
         steps:
         - uses: actions/checkout@v2
         - name: Scripts Calc Formula
