@@ -16,10 +16,10 @@ export BUILDROOT=$(cd $(dirname $0); pwd -P)
 export SYSROOT=$(dirname $0)/../archlinux
 
 if [ ! -d $SYSROOT ]; then
-	wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-2-latest.tar.gz
+	wget http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.tar.gz
 	mkdir $SYSROOT
-	tar xzf ArchLinuxARM-rpi-2-latest.tar.gz -C $SYSROOT 2> /dev/null
-	rm ArchLinuxARM-rpi-2-latest.tar.gz
+	tar xzf ArchLinuxARM-rpi-aarch64-latest.tar.gz -C $SYSROOT 2> /dev/null
+	rm ArchLinuxARM-rpi-aarch64-latest.tar.gz
 fi
 
 export SYSROOT=$(cd $(dirname $0)/../archlinux; pwd -P)
@@ -27,9 +27,9 @@ mkdir -p $BUILDROOT/logs
 
 
 INSTALL_PATH=$(cd $(dirname $0)/..; pwd -P)/rpi2_toolchain
-TARGET=arm-linux-gnueabihf
-LINUX_ARCH=arm
-CONFIGURATION_OPTIONS="--disable-werror --with-arch=armv7-a --with-float=hard --with-fpu=vfpv3-d16"
+TARGET=aarch64-linux-gnu
+LINUX_ARCH=aarch64
+CONFIGURATION_OPTIONS="--disable-werror --with-arch=aarch64 --with-float=hard --with-fpu=vfpv3-d16"
 SYSROOT_OPTIONS="--with-sysroot=$SYSROOT --with-build-sysroot=$SYSROOT"
 
 PARALLEL_MAKE=-j8
