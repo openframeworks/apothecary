@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 #
-# GLFW
-# creating windows with OpenGL contexts and managing input and events
-# http://www.glfw.org
+# Strictly RFC 3986 compliant URI parsing and handling library written in C89; 
 #
 # uses a CMake build system
 
