@@ -53,13 +53,13 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
-      - name: Merge our libaries into XC Framework 
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/osx/xcframework_all.sh
-        env:
-          TARGET: "osx"
-          BUNDLE: ${{ matrix.bundle }}
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      # - name: Merge our libaries into XC Framework 
+      #   working-directory: ${{ env.GITHUB_WORKSPACE }}
+      #   run: scripts/osx/xcframework_all.sh
+      #   env:
+      #     TARGET: "osx"
+      #     BUNDLE: ${{ matrix.bundle }}
+      #     GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package final
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
@@ -67,12 +67,20 @@ jobs:
           TARGET: "osx"
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Update Release
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: johnwbyrd/update-release@v1.0.0
+      - name: Upload binaries as Artifact
+        uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.release }}
-          release: ${{ env.release }}
-          prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          name: xcframework-${{ env.TARGET }}-${{ matrix.bundle }}
+          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          if-no-files-found: error
+      #   if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+    
+      # - name: Update Release
+      #   if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      #   uses: johnwbyrd/update-release@v1.0.0
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     tag: ${{ env.release }}
+      #     release: ${{ env.release }}
+      #     prerelease: ${{ env.prerelease }}
+      #     files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
