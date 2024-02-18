@@ -69,7 +69,7 @@ function build() {
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
             -D CMAKE_VERBOSE_MAKEFILE=OFF \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \

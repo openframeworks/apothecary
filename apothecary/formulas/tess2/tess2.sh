@@ -66,7 +66,7 @@ function build() {
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		cmake .. ${DEFS} \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
@@ -144,6 +144,7 @@ function build() {
         	-DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DANDROID_ABI=$ABI \
+			-DCMAKE_ANDROID_ARCH_ABI=$ABI \
             -DANDROID_STL=c++_shared \
         	-DCMAKE_C_STANDARD=17 \
         	-DCMAKE_CXX_STANDARD=17 \

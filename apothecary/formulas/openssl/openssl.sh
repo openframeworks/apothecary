@@ -121,7 +121,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             ${BUILD_OPTS_CMAKE} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
 			-DCMAKE_MACOSX_BUNDLE=OFF \
@@ -223,7 +223,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             ${BUILD_OPTS_CMAKE} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
 			-DCMAKE_MACOSX_BUNDLE=OFF \

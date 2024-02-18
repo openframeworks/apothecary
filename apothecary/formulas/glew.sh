@@ -57,7 +57,7 @@ function build() {
 			-DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/ios.toolchain.cmake \
+		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
 			-DENABLE_ARC=OFF \

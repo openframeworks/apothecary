@@ -46,11 +46,12 @@ downloadToolchain(){
 }
 
 downloadFirmware(){
-    wget -q https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
-    unzip -q firmware.zip
-    ${SUDO} cp -r firmware-master/opt archlinux/
-    rm -r firmware-master
-    rm firmware.zip
+    echo "no firmware"
+    # wget -q https://github.com/raspberrypi/firmware/archive/master.zip -O firmware.zip
+    # unzip -q firmware.zip
+    # ${SUDO} cp -r firmware-master/opt archlinux/
+    # rm -r firmware-master
+    # rm firmware.zip
 }
 
 
