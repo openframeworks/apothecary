@@ -9,7 +9,7 @@ VER=10.2.1
 # tools for git use
 GIT_URL=https://github.com/fmtlib/fmt
 URL=${GIT_URL}/archive/refs/tags/${VER}
-
+GIT_TAG=master
 SHA=
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux64" "msys2" "linuxaarch64" )
@@ -21,20 +21,20 @@ FORMULA_DEPENDS=(  )
 function download() {
 	. "$DOWNLOADER_SCRIPT"
 
-	if [ "$TYPE" == "vs" ] ; then
-		downloader "${URL}.zip"
-		unzip -q "${VER}.zip"
-		mv "fmt-${VER}" fmt
-		rm "${VER}.zip"
-	else 
-		downloader "${URL}.tar.gz"
-		tar -xf "${VER}.tar.gz"
-		mv "fmt-${VER}" fmt
-		rm "${VER}.tar.gz"
-	fi
+	git clone --branch $GIT_TAG --depth=1 $GIT_URL 
 
-	cp -Rv $FORMULA_DIR/ ./
-
+	# if [ "$TYPE" == "vs" ] ; then
+	# 	downloader "${URL}.zip"
+	# 	unzip -q "${VER}.zip"
+	# 	mv "fmt-${VER}" fmt
+	# 	rm "${VER}.zip"
+	# else 
+	# 	downloader "${URL}.tar.gz"
+	# 	tar -xf "${VER}.tar.gz"
+	# 	mv "fmt-${VER}" fmt
+	# 	rm "${VER}.tar.gz"
+	# fi
+	
 
 }
 
@@ -43,7 +43,8 @@ function prepare() {
 
 	echoVerbose "prepare"
 	# . "$DOWNLOADER_SCRIPT"
-	# downloader "$CMAKE_URL"
+	rm -f ./CMakeLists.txt
+	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 	
 }
 
