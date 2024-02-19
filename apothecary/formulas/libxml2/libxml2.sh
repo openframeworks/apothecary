@@ -7,10 +7,7 @@
 # uses an automake build system
 
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-# uses an automake build system # required for svg
-
 FORMULA_DEPENDS=( "zlib" )
-
 
 # define the version by sha
 VER=2.12.5
@@ -23,7 +20,6 @@ ICU_VER=74-2
 ICU_VER_U=74_2
 
 DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src
-
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -77,8 +73,8 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    LIBS_ROOT=$(realpath $LIBS_DIR)
 
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "vs" ] ; then 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
@@ -302,6 +298,12 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build build --config Release
         cd ..
+        # # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
+        # # wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
+        # emconfigure ./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        # emmake make clean
+        # emmake make -j${PARALLEL_MAKE}
+
     elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
             #./autogen.sh
             find . -name "test*.c" | xargs -r rm
@@ -338,8 +340,14 @@ function build() {
                 -DLIBXML2_WITH_THREAD_ALLOC=OFF 
             cmake --build . --config Release
             cd ..
+
+        #./configure --without-lzma --without-zlib --disable-shared --enable-static --without-ftp --without-html --without-http --without-iconv --without-legacy --without-modules --without-output --without-python
+        #make clean
+        #make -j${PARALLEL_MAKE}
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
+
         source ../../${TYPE}_configure.sh
+
         export CFLAGS="$CFLAGS -DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
 

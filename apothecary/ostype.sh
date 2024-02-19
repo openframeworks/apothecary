@@ -23,6 +23,8 @@ elif [ "$OS" == "linux" ]; then
 		OS="linuxarmv6l"
 	elif [ "$ARCH" == "armv7l" ] ; then
 		OS="linuxarmv7l"
+	elif [ "$ARCH" == "aarch64" ] ; then
+		OS="linuxaarch64"
 	else
 		# We don't know this one, but we will try to make a reasonable guess.
 		OS="linux"$ARCH

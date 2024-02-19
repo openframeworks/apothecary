@@ -20,7 +20,6 @@ EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
 
-
 OFFICIAL_DOWNLOAD_HOST=https://boostorg.jfrog.io/artifactory/main
 
 # URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.tar.gz
@@ -28,7 +27,6 @@ OFFICIAL_DOWNLOAD_HOST=https://boostorg.jfrog.io/artifactory/main
 WIN_URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.zip
 
 URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
-
 
 # download the source code and unpack it into LIB_NAME
 function download() {

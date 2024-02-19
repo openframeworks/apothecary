@@ -1836,19 +1836,22 @@ fi
 
 
 CROSSCOMPILING=0
-if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv7l" ]; then
-    if [[ $(uname -m) != armv* ]]; then
+if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "linuxaarch64" ]; then
+    if [[ $(uname -m) != armv* ]] && [[ $(uname -m) != aarch64 ]]; then
         CROSSCOMPILING=1
-        if [[ -z ${TOOLCHAIN_PREFIX+z} ]];  then
-            export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+        if [ -z $TOOLCHAIN_PREFIX ]; then
+            if [ "$TYPE" == "linuxaarch64" ]; then
+                export TOOLCHAIN_PREFIX=aarch64-linux-gnu
+            else
+                export TOOLCHAIN_PREFIX=arm-linux-gnueabihf
+            fi
         fi
-
-        if [[  -z ${SYSROOT+z} ]]; then
+        if [ -z $SYSROOT ]; then
             echoError "Trying to cross compile but SYSROOT environment variable is not set"
             echoError "Should be set to root of target OS image"
             exit 1
         fi
-        if [[  -z ${TOOLCHAIN_ROOT+z} ]];  then
+        if [ -z $TOOLCHAIN_ROOT ]; then
             echoWarning "Trying to cross compile but TOOLCHAIN_ROOT not set"
             echoWarning "Trying to continue in case PATH is set to correct toolchain"
             echoWarning "If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain"

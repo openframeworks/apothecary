@@ -16,11 +16,20 @@ createArchImg(){
     
     sudo add-apt-repository ppa:dns/gnu -y
     sudo apt-get update -q
+<<<<<<< HEAD
     sudo apt-get install -y coreutils gperf
     sudo apt-get update && sudo apt-get install -y autoconf libtool automake
     mkdir ~/archlinux
     cd ~/archlinux
 	wget -v http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
+=======
+    sudo apt-get install -y coreutils gperf 
+    sudo apt-get install -y multistrap unzip crossbuild-essential-armhf libc6-dev build-essential
+    sudo apt-get install -y autoconf automake pkgconf rsync
+	cd $HOME
+	wget -v http://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz
+	mkdir archlinux
+>>>>>>> e8cbd9d (build essential gcc)
 	
     #./arch-bootstrap_downloadonly.sh -a armv7h -r "http://eu.mirror.archlinuxarm.org/" archlinux
 	junest -- <<EOF
