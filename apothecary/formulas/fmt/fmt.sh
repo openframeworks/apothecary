@@ -188,27 +188,27 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o *.wasm
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	${DEFS} \
 	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 	    	-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=. \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. 
 	    cmake --build . --target install --config Release
 	    cd ..
 	fi
 		
-
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
