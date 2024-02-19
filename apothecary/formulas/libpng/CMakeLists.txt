@@ -19,9 +19,9 @@ cmake_minimum_required(VERSION 3.6)
 
 set(PNGLIB_MAJOR 1)
 set(PNGLIB_MINOR 6)
-set(PNGLIB_REVISION 43)
-#set(PNGLIB_SUBREVISION 0)
-set(PNGLIB_SUBREVISION "git")
+set(PNGLIB_REVISION 41)
+set(PNGLIB_SUBREVISION 0)
+#set(PNGLIB_SUBREVISION "git")
 set(PNGLIB_VERSION ${PNGLIB_MAJOR}.${PNGLIB_MINOR}.${PNGLIB_REVISION})
 set(PNGLIB_ABI_VERSION ${PNGLIB_MAJOR}${PNGLIB_MINOR})
 set(PNGLIB_SHARED_VERSION ${PNGLIB_ABI_VERSION}.${PNGLIB_REVISION}.${PNGLIB_SUBREVISION})
@@ -249,35 +249,6 @@ if(TARGET_ARCH MATCHES "^(mipsel|mips64el)")
     endif()
 endif()
 
-# Set definitions and sources for LoongArch.
-if(TARGET_ARCH MATCHES "^(loongarch)")
-  include(CheckCCompilerFlag)
-  set(PNG_LOONGARCH_LSX_POSSIBLE_VALUES on off)
-  set(PNG_LOONGARCH_LSX "on"
-      CACHE STRING "Enable LOONGARCH_LSX optimizations: on|off; on is default")
-  set_property(CACHE PNG_LOONGARCH_LSX
-               PROPERTY STRINGS ${PNG_LOONGARCH_LSX_POSSIBLE_VALUES})
-  list(FIND PNG_LOONGARCH_LSX_POSSIBLE_VALUES ${PNG_LOONGARCH_LSX} index)
-  if(index EQUAL -1)
-    message(FATAL_ERROR "PNG_LOONGARCH_LSX must be one of [${PNG_LOONGARCH_LSX_POSSIBLE_VALUES}]")
-  elseif(NOT PNG_LOONGARCH_LSX STREQUAL "off")
-    CHECK_C_COMPILER_FLAG("-mlsx" COMPILER_SUPPORTS_LSX)
-    if(COMPILER_SUPPORTS_LSX)
-      set(libpng_loongarch_sources
-          loongarch/loongarch_lsx_init.c
-          loongarch/filter_lsx_intrinsics.c)
-      set_source_files_properties(${libpng_loongarch_sources}
-                                  PROPERTIES
-                                  COMPILE_FLAGS "-mlsx")
-      add_definitions(-DPNG_LOONGARCH_LSX_OPT=1)
-    else()
-      message(FATAL_ERROR "Compiler does not support -mlsx option")
-    endif()
-  else()
-    add_definitions(-DPNG_LOONGARCH_LSX_OPT=0)
-  endif()
-endif()
-
 else(PNG_HARDWARE_OPTIMIZATIONS)
 
 # Set definitions and sources for ARM.
@@ -298,11 +269,6 @@ endif()
 # Set definitions and sources for MIPS.
 if(TARGET_ARCH MATCHES "^(mipsel|mips64el)")
   add_definitions(-DPNG_MIPS_MSA_OPT=0)
-endif()
-
-# Set definitions and sources for LoongArch.
-if(TARGET_ARCH MATCHES "^(loongarch)")
-  add_definitions(-DPNG_LOONGARCH_LSX_OPT=0)
 endif()
 
 endif(PNG_HARDWARE_OPTIMIZATIONS)
@@ -386,7 +352,7 @@ else()
                        COMMAND "${CMAKE_COMMAND}"
                                "-DINPUT=${_GC_INPUT}"
                                "-DOUTPUT=${_GC_OUTPUT}"
-                               -P "${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/genchk.cmake"
+                               -P "${CMAKE_CURRENT_BINARY_DIR}/genchk.cmake"
                        DEPENDS "${_GC_INPUT}" ${_GC_DEPENDS}
                        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endfunction()
@@ -409,7 +375,7 @@ else()
                        COMMAND "${CMAKE_COMMAND}"
                                "-DINPUT=${_GO_INPUT}"
                                "-DOUTPUT=${_GO_OUTPUT}"
-                               -P "${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/genout.cmake"
+                               -P "${CMAKE_CURRENT_BINARY_DIR}/genout.cmake"
                        DEPENDS "${_GO_INPUT}" ${_GO_DEPENDS}
                        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endfunction()
@@ -428,7 +394,7 @@ else()
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${_GSO_OUTPUT}"
                        COMMAND "${CMAKE_COMMAND}"
                                "-DOUTPUT=${_GSO_OUTPUT}"
-                               -P "${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/gensrc.cmake"
+                               -P "${CMAKE_CURRENT_BINARY_DIR}/gensrc.cmake"
                        DEPENDS ${_GSO_DEPENDS}
                        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endfunction()
@@ -558,7 +524,7 @@ else()
   add_custom_target(png_genprebuilt
                     COMMAND "${CMAKE_COMMAND}"
                             "-DOUTPUT=scripts/pnglibconf.h.prebuilt"
-                            -P "${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/gensrc.cmake"
+                            -P "${CMAKE_CURRENT_BINARY_DIR}/gensrc.cmake"
                     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
   # A single target handles generation of all generated files.
@@ -615,7 +581,6 @@ set(libpng_sources
     ${libpng_intel_sources}
     ${libpng_mips_sources}
     ${libpng_powerpc_sources}
-    ${libpng_loongarch_sources}
 )
 set(pngtest_sources
     pngtest.c
@@ -949,27 +914,6 @@ if(PNG_SHARED AND PNG_TOOLS)
   list(APPEND PNG_BIN_TARGETS png-fix-itxt)
 endif()
 
-if(EMSCRIPTEN)
-    set(LIBPNG_WASM_SOURCES
-        ${pngfix_sources}
-    )
-    add_executable(libpng_wasm
-        ${LIBPNG_WASM_SOURCES}
-    )
-    target_include_directories(libpng_wasm PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${ZLIB_INCLUDE_DIRS}
-    )
-    target_link_libraries(libpng_wasm ${ZLIB_LIBRARIES} ${M_LIBRARY})
-    set_target_properties(libpng_wasm PROPERTIES COMPILE_FLAGS "-Os -fPIC -s SIDE_MODULE=1 ")
-    set_target_properties(libpng_wasm PROPERTIES LINK_FLAGS    "-Os -fPIC -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
-    set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-
-    list(APPEND PNG_BIN_TARGETS libpng_wasm)
-
-endif()
-
-
 # Create a symlink from src to dest (if possible), or, alternatively,
 # copy src to dest if different.
 function(create_symlink DEST_FILE)
@@ -1023,13 +967,13 @@ endfunction()
 
 # Create source generation scripts.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/genchk.cmake.in
-               ${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/genchk.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/genchk.cmake
                @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/genout.cmake.in
-               ${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/genout.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/genout.cmake
                @ONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/gensrc.cmake.in
-               ${CMAKE_CURRENT_BINARY_DIR}/scripts/cmake/gensrc.cmake
+               ${CMAKE_CURRENT_BINARY_DIR}/gensrc.cmake
                @ONLY)
 
 # libpng is a library so default to 'lib'
@@ -1082,6 +1026,16 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
               DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif()
   endif()
+endif()
+
+if(EMSCRIPTEN)
+    add_executable(libpng_wasm ${pngfix_sources})
+    target_include_directories(libpng_wasm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${ZLIB_INCLUDE_DIRS})
+    target_link_libraries(libpng_wasm ${ZLIB_LIBRARIES} ${M_LIBRARY})
+    set_target_properties(libpng_wasm PROPERTIES COMPILE_FLAGS " -fPIC -s SIDE_MODULE=1 ")
+    set_target_properties(libpng_wasm PROPERTIES LINK_FLAGS    "-fPIC -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
+    set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
+    list(APPEND PNG_BIN_TARGETS libpng_wasm)
 endif()
 
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
