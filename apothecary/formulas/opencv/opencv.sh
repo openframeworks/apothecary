@@ -483,9 +483,11 @@ function build() {
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
-    
+    find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true
     emcmake cmake .. \
       -B build \
+      -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
       -DCMAKE_BUILD_TYPE="Release" \
       -DCMAKE_INSTALL_LIBDIR="lib" \
       -DCMAKE_C_STANDARD=17 \

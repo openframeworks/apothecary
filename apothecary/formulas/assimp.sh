@@ -306,7 +306,7 @@ function build() {
     
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.wasm"
         # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
         # these may need to be updated for a new release
         local buildOpts="
@@ -320,6 +320,7 @@ function build() {
         rm -f CMakeCache.txt || true
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             -B . \
+            -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
             $buildOpts \
             -DCMAKE_C_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_CXX_FLAGS="-O3 -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
@@ -341,7 +342,6 @@ function build() {
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} 
 
         cmake --build . --config Release
-        rm -f CMakeCache.txt || true
         cd ..
 
     fi
