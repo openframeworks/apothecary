@@ -42,6 +42,9 @@ function prepare() {
     rm -rf modules/objc_bindings_generator
     rm -rf modules/objc
   fi
+  rm -f modules/imgcodecs/src/ios_conversions.mm
+  cp -v $FORMULA_DIR/ios_conversions.mm ./modules/imgcodecs/src/ios_conversions.mm
+
 }
 
 # executed inside the lib src dir
@@ -105,6 +108,7 @@ function build() {
       -DBUILD_opencv_highgui=ON \
       -DBUILD_opencv_imgcodecs=ON \
       -DBUILD_opencv_stitching=ON \
+      -DOPENCV_DISABLE_PKG_CONFIG=ON \
       -DBUILD_opencv_calib3d=ON \
       -DBUILD_opencv_objdetect=ON \
       -DWITH_1394=OFF \
