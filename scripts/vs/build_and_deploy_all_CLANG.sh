@@ -16,11 +16,11 @@ OF_LIBS=${OF_ROOT}/libs
 OF_ADDONS=${OF_ROOT}/addons
 
 if [ -z "${MULTITHREADED_TYPE+x}" ]; then # MD (MutliDynamic) # MT (Multi)
-    export MULTITHREADED_TYPE=MD 
+    MULTITHREADED_TYPE=MD 
 fi
 
 if [ -z ${CALLING_CONVENTION+x} ]; then # Gz (__stdcall) # Gd (__cdecl) # Gr (__fastcall) # Gv ( __vectorcall )
-    export CALLING_CONVENTION="Gz" #these changes effect how libraries are bound/loaded and called 
+    CALLING_CONVENTION="Gz" #these changes effect how libraries are bound/loaded and called 
 fi
 
 if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
@@ -28,15 +28,15 @@ if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
 fi
 
 if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
-    export VS_COMPILER=Clang 
+    export VS_COMPILER=LLVM
 fi
 
 if [ -z "${VS_HOST+x}" ]; then
-    export VS_HOST=amd64 
+    VS_HOST=amd64 
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    export PLATFORM=vs
+    PLATFORM=vs
 fi
 
 if [ -z "${OVERWRITE+x}" ]; then

@@ -403,7 +403,7 @@ function setup_vs_vars(){
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
             fi
         else
-            VS_BIN_PATH=$(ls "$VS_BASE_PATH/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/" | tail -1)
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$BUILD_PLATFORM/bin"
         fi
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 
@@ -468,7 +468,7 @@ if [ "$TYPE" = "vs" ]; then
         echoVerbose "VS_VER was not set - setting to ${VS_VER}"
     fi
     VS_64_BIT_ENV='VC\vcvarsall'
-    if [ -z ${PLATFORM+x}]; then
+    if [ -z ${PLATFORM+x} ]; then
         if [ $ARCH == "32" ]; then
             PLATFORM=x86
             CROSS_TOOL="amd64_x86"
@@ -505,7 +505,10 @@ if [ "$TYPE" = "vs" ]; then
 
     if [ -z ${CALLING_CONVENTION_TYPE+x} ]; then
         CALLING_CONVENTION="Gz"
+    else
+        CALLING_CONVENTION="Gz"
     fi
+
     if [ $CALLING_CONVENTION == "Gz" ]; then
         CALLING_CONVENTION="/Gz" 
         echoVerbose "CALLING_CONVENTION ${MT_TYPE} __stdcall"
@@ -522,7 +525,7 @@ if [ "$TYPE" = "vs" ]; then
     
     if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
-        export EXCEPTION_FLAGS="-fexceptions"
+        export EXCEPTION_FLAGS=""
         export FLAGS_RELEASE="-O3"
         export FLAGS_DEBUG=""
     else
@@ -536,22 +539,6 @@ if [ "$TYPE" = "vs" ]; then
         export EXCEPTION_FLAGS="/EHsc"
     fi
 
-    if [ $VS_VER == "17" ]; then
-    	VS_YEAR=2022
-    	VS_VER=17
-    	VS_VER_GEN="$VS_VER $VS_YEAR"
-        if [ $ARCH == "arm64ec" ] || [ $TARGET_WIN_11 == 1 ]; then
-            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN11_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN11_INSTALLED_SDK_2022} "
-        else 
-            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
-        fi
-    else
-    	VS_YEAR=2019
-    	VS_VER=16
-    	VS_VER_GEN="$VS_VER $VS_YEAR"
-        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2019} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2019} "
-	fi    
-	echoVerbose "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
     VS_BAT="vcvarsall.bat"
     if [ -z "${WSL_DISTRO_NAME+x}" ]; then
 		DRIVE=/c
@@ -623,7 +610,6 @@ if [ "$TYPE" = "vs" ]; then
     echoVerbose "VS_VARS_PATH: $VS_VARS_PATH"
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
-
         if [ $VS_COMPILER == "MSVC" ]; then 
             if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
@@ -631,7 +617,7 @@ if [ "$TYPE" = "vs" ]; then
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
             fi
         else
-            VS_BIN_PATH=$(ls "$VS_BASE_PATH/Common7/IDE/CommonExtensions/Microsoft/Llvm/bin/" | tail -1)
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$BUILD_PLATFORM/bin"
         fi
         
         echoVerbose "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
@@ -657,6 +643,27 @@ if [ "$TYPE" = "vs" ]; then
             export PATH="/c/Program Files/CMake/bin/:$PATH"
         fi
     fi
+    if [ $VS_VER == "17" ]; then
+        VS_YEAR=2022
+        VS_VER=17
+        VS_VER_GEN="$VS_VER $VS_YEAR"
+        if [ $ARCH == "arm64ec" ] || [ $TARGET_WIN_11 == 1 ]; then
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN11_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN11_INSTALLED_SDK_2022} "
+        else 
+            export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2022} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2022} "
+        fi
+
+        if [ $VS_COMPILER == "LLVM" ]; then
+            export CMAKE_WIN_SDK="${CMAKE_WIN_SDK} -DCMAKE_CXX_COMPILER=${VS_BIN_PATH}/clang++ -DCMAKE_C_COMPILER=${VS_BIN_PATH}/clang -T ClangCL"
+        fi
+    else
+        VS_YEAR=2019
+        VS_VER=16
+        VS_VER_GEN="$VS_VER $VS_YEAR"
+        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${WIN10_INSTALLED_SDK_2019} -DCMAKE_SYSTEM_VERSION=${WIN10_INSTALLED_SDK_2019} "
+    fi    
+    echoVerbose "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
+
     #echo "PATH: $PATH"
     #PATH="/c/Program Files/CMake/bin:/c/windows;/c/windows/system32:/c/windows/system32/Wbem:$VS_BIN_PATH:/c/Program Files/Git/cmd:/c/Windows/System32/WindowsPowerShell/v1.0:/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/mingw32/bin:/usr/bin:/"
     #echo "NEW PATH: $PATH"
