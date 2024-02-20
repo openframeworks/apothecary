@@ -287,7 +287,7 @@ function copy() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
-        cp -f "build_${TYPE}/Release/lib/libsvgtiny_wasm.wasm" $1/lib/$TYPE/libsvgtiny.wasm        
+        cp -f "build_${TYPE}/Release/lib/svgtiny_wasm.wasm" $1/lib/$TYPE/svgtiny.wasm        
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
