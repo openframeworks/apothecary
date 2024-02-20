@@ -42,17 +42,25 @@ function download() {
 function prepare() {
 	mkdir -p lib/$TYPE
 
-	apothecaryDependencies download
-    
-    apothecaryDepend prepare zlib
-    apothecaryDepend build zlib
-    apothecaryDepend copy zlib
+	rm -f ./CMakeLists.txt
+	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
 # executed inside the lib src dir
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
-	if [ "$TYPE" == "osx" ] ; then
+	DEFS="
+		    -DCMAKE_C_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD=17 \
+		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+		    -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DFT_DISABLE_ZLIB=OFF \
+            -DFT_DISABLE_BZIP2=TRUE \
+            -DFT_DISABLE_PNG=OFF \
+            -DFT_DISABLE_HARFBUZZ=TRUE \
+			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+			-DCMAKE_INSTALL_INCLUDEDIR=include"
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
@@ -66,35 +74,37 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a" 
 
-		DEFS="-DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_C_STANDARD=17 \
-		    -DCMAKE_CXX_STANDARD=17 \
-		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-		    -DCMAKE_CXX_EXTENSIONS=OFF \
-		    -DZLIB_ROOT=${ZLIB_ROOT} \
+        NO_LINK_BROTLI=OFF
+        if [ "$PLATFORM" == "ARM64EC" ] ; then
+       		NO_LINK_BROTLI=ON
+      	fi
+
+		EXTRA_DEFS="
+			-DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} \
+			-DCMAKE_BUILD_TYPE=Release \
+		    -DZLIB_ROOT=${ZLIB_LIBRARY} \
 		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
-		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
+		    -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+		    -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
-            -DPNG_ROOT=${LIBPNG_ROOT} 
-            -DFT_DISABLE_ZLIB=OFF \
-            -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_DISABLE_PNG=OFF \
-            -DFT_DISABLE_HARFBUZZ=TRUE \
-            -DFT_DISABLE_BROTLI=TRUE \
+            -DPNG_ROOT=${LIBPNG_ROOT} \
+            -DCMAKE_INSTALL_PREFIX=Release \
 		    -DBUILD_SHARED_LIBS=OFF \
-		    -DENABLE_STATIC=ON \
-			-DCMAKE_INSTALL_PREFIX=Release \
-			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-			-DCMAKE_INSTALL_INCLUDEDIR=include"
+		    -DENABLE_STATIC=ON"
 
 			cmake .. ${DEFS} \
+				${EXTRA_DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
+				-DCMAKE_BUILD_TYPE=Release \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
 				-DENABLE_VISIBILITY=OFF \
-            	-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
 					
 		cmake --build . --config Release --target install
 		cd ..	
@@ -115,23 +125,14 @@ function build() {
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        rm -f CMakeCache.txt *.a *.o
+        rm -f CMakeCache.txt *.lib *.o
 
         NO_LINK_BROTLI=OFF
-
         if [ "$PLATFORM" == "ARM64EC" ] ; then
        		NO_LINK_BROTLI=ON
       	fi
 
-        DEFS="
-        	-DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DFT_DISABLE_ZLIB=OFF \
-            -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_DISABLE_PNG=OFF \
-            -DFT_DISABLE_HARFBUZZ=TRUE \
+        EXTRA_DEFS="
             -DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
@@ -145,6 +146,7 @@ function build() {
 		 env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
 
          cmake .. ${DEFS} \
+         	${EXTRA_DEFS} \
             -D CMAKE_VERBOSE_MAKEFILE=ON \
 		    -D BUILD_SHARED_LIBS=OFF \
 		    ${CMAKE_WIN_SDK} \
@@ -160,6 +162,7 @@ function build() {
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
@@ -183,6 +186,7 @@ function build() {
             -DCMAKE_PREFIX_PATH="${ZLIB_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
@@ -203,46 +207,46 @@ function build() {
 		make clean;
 		make -j${PARALLEL_MAKE}
 
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		rm -f CMakeCache.txt *.a *.o
-
-		ZLIB_ROOT="$LIBS_ROOT/zlib/"
-		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
-
-		DEFS="-DCMAKE_BUILD_TYPE=Release \
-		    -DCMAKE_C_STANDARD=17 \
-		    -DCMAKE_CXX_STANDARD=17 \
-		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-		    -DCMAKE_CXX_EXTENSIONS=OFF \
-		    -DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
-		    -DZLIB_ROOT=${ZLIB_ROOT} \
-		    -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
-		    -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} \
-            -DFT_DISABLE_ZLIB=OFF \
-            -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_DISABLE_PNG=OFF \
-            -DFT_DISABLE_HARFBUZZ=TRUE \
-            -DFT_DISABLE_BROTLI=TRUE \
-		    -DBUILD_SHARED_LIBS=OFF \
-		    -DENABLE_STATIC=ON \
-			-DCMAKE_INSTALL_PREFIX=Release \
-			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-			-DCMAKE_INSTALL_INCLUDEDIR=include"
-
-			cmake .. ${DEFS} \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-				-DPLATFORM=$PLATFORM \
-				-DENABLE_BITCODE=OFF \
-				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF 
-					
-		cmake --build . --config Release --target install
-		cd ..
-
+	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "msys2" ]; then
+			mkdir -p build_$TYPE
+	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o
+	    cmake .. \
+	    	${DEFS} \
+	    	-DCMAKE_SYSTEM_NAME=$TYPE \
+        	-DCMAKE_SYSTEM_PROCESSOR=$ABI \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				cmake --build . --target install --config Release
+	    cd ..
+	elif [ "$TYPE" == "linuxaarch64" ]; then
+      source ../../${TYPE}_configure.sh
+      mkdir -p build_$TYPE
+	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o
+	    cmake .. \
+	    	${DEFS} \
+	    	-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/aarch64-linux-gnu.toolchain.cmake \
+	    	-DCMAKE_SYSTEM_NAME=$TYPE \
+        	-DCMAKE_SYSTEM_PROCESSOR=$ABI \
+				-DCMAKE_C_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+				-DCMAKE_INSTALL_INCLUDEDIR=include \
+				cmake --build . --target install --config Release
+	    cd ..
 	elif [ "$TYPE" == "android" ] ; then
 
         source ../../android_configure.sh $ABI cmake
@@ -256,6 +260,15 @@ function build() {
         export CPPFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""
+
+       	 NO_LINK_BROTLI=OFF
+        if [ "$PLATFORM" == "ARM64" ] ; then
+       		NO_LINK_BROTLI=ON
+      	fi
+
+        EXTRA_DEFS="
+            -DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} 
+            "
 
         cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
         	-D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
@@ -297,18 +310,25 @@ function build() {
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.wasm"
 
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/libpng.a" 
-
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/libpng.wasm" 
+        NO_LINK_BROTLI=ON
         mkdir -p build_$TYPE
         cd build_$TYPE
-        $EMSDK/upstream/emscripten/emcmake cmake .. \
+        rm -f CMakeCache.txt *.a *.o *.wasm
+	    $EMSDK/upstream/emscripten/emcmake cmake .. \
+	    	${DEFS} \
+	    	-DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} \
+	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+    		-DCMAKE_C_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD=17 \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR}" \
             -B . \
-            -DCMAKE_C_FLAGS="${FLAG_RELEASE} -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
-            -DCMAKE_CXX_FLAGS="${FLAG_RELEASE} -DNDEBUG -DUSE_PTHREADS=1 -I${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -321,8 +341,8 @@ function build() {
             -DFT_DISABLE_BZIP2=ON \
             -DFT_DISABLE_PNG=ON \
             -DFT_DISABLE_HARFBUZZ=ON \
-            -DFT_DISABLE_BROTLI=ON \
             -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
