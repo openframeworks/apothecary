@@ -403,7 +403,7 @@ function setup_vs_vars(){
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
             fi
         else
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$BUILD_PLATFORM/bin"
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/Llvm/$BUILD_PLATFORM/bin"
         fi
         echo "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
 
@@ -526,7 +526,7 @@ if [ "$TYPE" = "vs" ]; then
     if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
         export EXCEPTION_FLAGS=""
-        export FLAGS_RELEASE="-O3"
+        export FLAGS_RELEASE=""
         export FLAGS_DEBUG=""
     else
         if [ $ARCH == "arm64ec" ]; then              
@@ -617,7 +617,7 @@ if [ "$TYPE" = "vs" ]; then
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
             fi
         else
-            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$BUILD_PLATFORM/bin"
+            export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/Llvm/$BUILD_PLATFORM/bin"
         fi
         
         echoVerbose "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
@@ -654,7 +654,7 @@ if [ "$TYPE" = "vs" ]; then
         fi
 
         if [ $VS_COMPILER == "LLVM" ]; then
-            export CMAKE_WIN_SDK="${CMAKE_WIN_SDK} -DCMAKE_CXX_COMPILER=${VS_BIN_PATH}/clang++ -DCMAKE_C_COMPILER=${VS_BIN_PATH}/clang -T ClangCL"
+            export CMAKE_WIN_SDK="${CMAKE_WIN_SDK} -DCMAKE_CXX_COMPILER=${VS_BIN_PATH}/clang++ -DCMAKE_C_COMPILER=${VS_BIN_PATH}/clang -T ClangCL -DLLVM_ENABLE_RUNTIMES=libcxx -DLIBCXX_ENABLE_SHARED=NO -DLIBCXX_ENABLE_STATIC=YES"
         fi
     else
         VS_YEAR=2019
