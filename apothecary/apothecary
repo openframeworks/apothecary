@@ -486,10 +486,10 @@ if [ "$TYPE" = "vs" ]; then
         MULTITHREADED_TYPE="MD"
     fi
     if [ $MULTITHREADED_TYPE == "MD" ]; then
-        MT_TYPE="/MD"
+        export MT_TYPE="/MD"
         echoVerbose "MULTITHREADED_TYPE MD"
     elif [ $MULTITHREADED_TYPE == "MT" ]; then
-        MT_TYPE="/MT"
+        export MT_TYPE="/MT"
         echoVerbose "MULTITHREADED_TYPE MT"
     fi
 

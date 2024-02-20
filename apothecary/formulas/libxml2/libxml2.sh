@@ -138,7 +138,6 @@ function build() {
             ${CMAKE_WIN_SDK} \
             -DCMAKE_PREFIX_PATH="${ZLIB_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DLIBXML2_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -230,8 +229,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DZLIB_ROOT="$LIBS_ROOT/zlib/" \
             -DZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include" \
-            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a" \
-            -DLIBXML2_ROOT=${ZLIB_ROOT} 
+            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a" 
         cmake --build . --config Release --target install
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
@@ -269,7 +267,6 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DLIBXML2_ROOT=${ZLIB_ROOT} \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
