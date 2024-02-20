@@ -52,6 +52,8 @@ jobs:
           echo "release=bleeding" >> $GITHUB_ENV
           echo "prerelease=true" >> $GITHUB_ENV
         fi
+    - name: Install ninja-build tool
+      uses: seanmiddleditch/gha-setup-ninja@v4
     - name: Build64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: scripts/build.sh
