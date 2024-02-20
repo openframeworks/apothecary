@@ -178,23 +178,7 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DLIBXML2_WITH_LZMA=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DLIBXML2_WITH_FTP=OFF \
-            -DLIBXML2_WITH_HTTP=OFF \
-            -DLIBXML2_WITH_HTML=OFF \
-            -DLIBXML2_WITH_ICONV=OFF \
-            -DLIBXML2_WITH_LEGACY=OFF \
-            -DLIBXML2_WITH_MODULES=OFF \
-            -DLIBXML_THREAD_ENABLED=OFF \
-            -DLIBXML2_WITH_OUTPUT=ON \
-            -DLIBXML2_WITH_PYTHON=OFF \
-            -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=ON \
-            -DLIBXML2_WITH_PROGRAMS=OFF \
-            -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF 
+            -DCMAKE_CXX_EXTENSIONS=OFF
         cmake --build . --config Release
         cd ..
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
@@ -210,6 +194,7 @@ function build() {
         cd "build_${TYPE}_$PLATFORM"
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
+             ${DEFS} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
@@ -242,7 +227,7 @@ function build() {
         export CXXFLAGS="-pthread"
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.wasm"
         mkdir -p build_$TYPE
         cd build_$TYPE
         rm -f CMakeCache.txt *.a *.o *.wasm
@@ -306,6 +291,7 @@ function build() {
         cd build_$TYPE
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
+            ${DEFS} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \

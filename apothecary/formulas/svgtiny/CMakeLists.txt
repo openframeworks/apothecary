@@ -52,8 +52,8 @@ add_library(svgtiny STATIC ${SRC_FILES})
 target_link_libraries(svgtiny dom wapcaplet expat m ${LIBXML2_LIBRARY})
 
 if(EMSCRIPTEN)
-    add_executable(svgtiny ${SRC_FILES})
-    target_include_directories(svgtiny PRIVATE 
+    add_executable(svgtiny_wasm ${SRC_FILES})
+    target_include_directories(svgtiny_wasm PRIVATE 
     ${LIBXML2_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -63,9 +63,9 @@ if(EMSCRIPTEN)
     ${CMAKE_CURRENT_SOURCE_DIR}/libwapcaplet/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/libparserutils/src)
-    target_link_libraries(svgtiny ${LIBXML2_LIBRARY} dom wapcaplet expat m)
-    set_target_properties(svgtiny PROPERTIES COMPILE_FLAGS " -fPIC -s SIDE_MODULE=1 ")
-    set_target_properties(svgtiny PROPERTIES LINK_FLAGS    "-fPIC -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
+    target_link_libraries(svgtiny_wasm ${LIBXML2_LIBRARY} m)
+    set_target_properties(svgtiny_wasm PROPERTIES COMPILE_FLAGS " -fPIC -s SIDE_MODULE=1 ")
+    set_target_properties(svgtiny_wasm PROPERTIES LINK_FLAGS    "-fPIC -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
     set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
 endif()
 
