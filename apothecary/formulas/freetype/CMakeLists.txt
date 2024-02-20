@@ -497,7 +497,7 @@ target_include_directories(
 
 if (EMSCRIPTEN)
     add_executable(freetype_wasm ${PUBLIC_HEADERS} ${PUBLIC_CONFIG_HEADERS} ${PRIVATE_HEADERS} ${BASE_SRCS})
-    set_target_properties(freetype_wasm PROPERTIES VERSION ${LIBRARY_VERSION} SOVERSION ${LIBRARY_SOVERSION})
+    #set_target_properties(freetype_wasm PROPERTIES VERSION ${LIBRARY_VERSION} SOVERSION ${LIBRARY_SOVERSION})
     target_compile_definitions(freetype_wasm PRIVATE FT2_BUILD_LIBRARY)
     target_include_directories(freetype_wasm 
       PUBLIC

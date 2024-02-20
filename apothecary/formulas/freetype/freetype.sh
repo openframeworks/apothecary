@@ -54,9 +54,9 @@ function build() {
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DFT_DISABLE_ZLIB=OFF \
+            -DFT_DISABLE_ZLIB=FALSE \
             -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_DISABLE_PNG=OFF \
+            -DFT_DISABLE_PNG=FALSE \
             -DFT_DISABLE_HARFBUZZ=TRUE \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 			-DCMAKE_INSTALL_INCLUDEDIR=include"
@@ -283,6 +283,7 @@ function build() {
      	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
      	 	-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_PREFIX=Release \
         	-D ANDROID_ABI=${ABI} \
         	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
         	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
@@ -337,10 +338,6 @@ function build() {
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DBUILD_SHARED_LIBS=OFF \
-            -DFT_DISABLE_ZLIB=OFF \
-            -DFT_DISABLE_BZIP2=ON \
-            -DFT_DISABLE_PNG=ON \
-            -DFT_DISABLE_HARFBUZZ=ON \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
@@ -349,7 +346,7 @@ function build() {
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DPNG_ROOT=${LIBPNG_ROOT}
 
-        cmake --build . --config Release
+        cmake --build . --config Release --target install 
         cd ..
 	fi
 }
@@ -386,7 +383,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
 	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
-		cp -v "build_${TYPE}/libfreetype.a" $1/lib/$TYPE/libfreetype.a
+		cp -v "build_${TYPE}/freetype_wasm.wasm" $1/lib/$TYPE/libfreetype.wasm
 	fi
 
 	# copy license files
@@ -414,11 +411,10 @@ function clean() {
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
 			rm -r build_${TYPE}_${PLATFORM}     
 		fi
-	elif [ "$TYPE" == "android" ] ; then
-		rm -f CMakeCache.txt *.a *.o
-		rm -f builddir/$TYPE
-		rm -f builddir
-		rm -f lib
+	elif [ "$TYPE" == "emscripten" ] ; then
+		if [ -d "build_${TYPE}" ]; then
+			rm -r build_${TYPE}     
+		fi
 	else
 		rm -f CMakeCache.txt *.a *.o *.lib
 		make clean
