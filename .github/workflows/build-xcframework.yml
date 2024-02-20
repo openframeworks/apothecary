@@ -25,7 +25,7 @@ jobs:
             echo "prerelease=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
-      - name: Scripts Calc Formula - ${{ env.TARGET }}
+      - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/macos/install.sh
@@ -35,7 +35,7 @@ jobs:
           path: out
       - name: Extract Artifacts to /out
         run: |
-          find downloaded-artifacts -name '*.tar.gz' -exec tar -xzvf {} -C /out \;
+          find -name '*.tar.gz' -exec tar -xzvf {} -C out \;
       - name: List output directory out
         run: ls -lah out/
       - name: List output directory ./
