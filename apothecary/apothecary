@@ -1689,7 +1689,7 @@ function apothecaryDepend() {
     fi
 
     # Capture the returned path into a variable
-    DIRECTORY_PATH=$(get_directory_path "$TYPE" "$BASE_DIR" "$PLATFORM" "$ABI")
+    DIRECTORY_PATH=$(get_directory_path "$TYPE" "$1" "$PLATFORM" "$ARCH")
     echo "Presumed directory path: $DIRECTORY_PATH"
 
     # Use git if the USE_GIT variable is set

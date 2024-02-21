@@ -232,28 +232,37 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libpng.lib
 		cp -RT "build_${TYPE}_${ARCH}/Release/include/" $1/include
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libpng.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	elif [ "$TYPE" == "android" ] ; then
 		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
-		cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$ABI/libpng.a
+		cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16_static.a" $1/lib/$TYPE/$ABI/libpng.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libpng.a
 		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}/libpng_wasm.wasm" $1/lib/$TYPE/libpng.wasm
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libpng.wasm
 		cp -R "build_${TYPE}/Release/include/" $1/include
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
 		cp -v "build_${TYPE}_${PLATFORM}/Release/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
-		
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libpng.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 
