@@ -69,7 +69,7 @@ function build() {
 		 			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		        -A "${PLATFORM}" \
 		        -G "${GENERATOR_NAME}"
-	    cmake --build . --config Release --target install
+	    cmake --build . --config Release 
 	    cd ..
 	elif [ "$TYPE" == "android" ]; then
 		echo "Android "
@@ -152,7 +152,7 @@ function build() {
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
 
-        cmake --build . --config Release --target install
+        cmake --build . --config Release
         rm -f CMakeCache.txt
         cd ..      
       
