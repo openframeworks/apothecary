@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" "osx" )
+FORMULA_TYPES=( "vs" )
 
 FORMULA_DEPENDS=( )
 
@@ -109,6 +109,7 @@ function build() {
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o
 		cmake  .. \
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
@@ -143,8 +144,7 @@ function build() {
 		fi
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        pwd
-
+        rm -f CMakeCache.txt *.a *.o *.lib
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -301,6 +301,7 @@ function build() {
 		export BUILD_TO_DIR=build_$ABI
 		CURRENTPATH=`pwd`
 		mkdir -p BUILD_TO_DIR
+		rm -f CMakeCache.txt *.a *.o 
 		echo "Build Dir $BUILD_TO_DIR"
 		export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
 		# echo "./Config:"

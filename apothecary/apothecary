@@ -670,6 +670,7 @@ if [ "$TYPE" = "emscripten" ]; then
     export FLAG_RELEASE="-O3"
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
 	. "$EMSCRIPTEN_SCRIPT"
+    PLATFORM=WASM
 fi
 
 if [ "$TYPE" = "ios" ]; then
@@ -752,6 +753,7 @@ if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarc
     elif [ $TYPE == "msys2" ]; then
         ABI="x86_64"
     fi 
+    PLATFORM=ABI
 fi
 
 
@@ -1867,6 +1869,7 @@ if [[ "$TYPE" == "android" ]] ; then
 		ABI=""
 		echoError "Targeting android, ARCH not set! Please use -a arm64"
 	fi
+    PLATFORM=ABI
 else 
 	ABI=""
 fi
