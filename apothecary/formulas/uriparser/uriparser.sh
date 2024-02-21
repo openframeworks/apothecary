@@ -152,7 +152,7 @@ function build() {
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
 
-        cmake --build . --config Release --target install
+        cmake --build . --config Release
         rm -f CMakeCache.txt
         cd ..      
       
@@ -193,8 +193,8 @@ function copy() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		cp -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
 		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
+    mkdir -p $1/lib/$TYPE/$PLATFORM/
+    cp -Rv build_${TYPE}_${PLATFORM}lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		cp -R include/uriparser/* $1/include/uriparser/
 		mkdir -p $1/lib/$TYPE
