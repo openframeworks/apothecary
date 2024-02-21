@@ -51,6 +51,7 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o
 		cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
@@ -83,7 +84,7 @@ function build() {
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
 	    cd "build_${TYPE}_${ARCH}"
-
+			rm -f CMakeCache.txt *.lib *.o
 	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
 	    VS_DEFS="
 	        -DRTAUDIO_API_WASAPI=ON \
@@ -126,6 +127,7 @@ function build() {
 		local API="--with-wasapi --with-ds " # asio as well?
 		mkdir -p build
 		cd build
+		rm -f CMakeCache.txt *.a *.o
 		cmake .. -G "Unix Makefiles" \
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
