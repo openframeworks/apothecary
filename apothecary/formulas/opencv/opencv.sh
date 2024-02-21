@@ -676,6 +676,7 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
     cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+    
   fi
 
   # copy license file

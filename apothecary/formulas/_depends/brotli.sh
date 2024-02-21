@@ -41,7 +41,7 @@ function build() {
       GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
       mkdir -p "build_${TYPE}_${PLATFORM}"
       cd "build_${TYPE}_${PLATFORM}"
-
+      rm -f CMakeCache.txt *.a *.o *.lib
       # if [ "$PLATFORM" == "ARM64EC" ] ; then
       #   echo "ARM64EC platform detected, exiting build function."
       #   return

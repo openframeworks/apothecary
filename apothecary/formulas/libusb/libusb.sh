@@ -98,11 +98,15 @@ function copy() {
     	cp -f "build_${TYPE}_${ARCH}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
     	cp -f "build_${TYPE}_${ARCH}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
 
+    	. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v libusb/.libs/libusb-1.0.a $1/lib/$TYPE/usb-1.0.0.a
+        cp -v libusb/.libs/libusb-1.0.a $1/lib/$TYPE/usb-1.0.a
+        . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/usb-1.0.a
 	fi
 
 	echoWarning "TODO: License Copy"

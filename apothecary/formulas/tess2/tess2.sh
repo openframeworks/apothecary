@@ -226,21 +226,24 @@ function copy() {
 		. "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/libtess2.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
-
 	elif [ "$TYPE" == "emscripten" ]; then
 		cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
 		. "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/tess2.lib
-
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 		cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
-
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libtess2.a
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf $1/lib/$TYPE/$ABI
 	    mkdir -p $1/lib/$TYPE/$ABI
 		cp -v build_$ABI/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libtess2.a
 	else
 		cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libtess2.a
 	fi
 
 	# copy license files

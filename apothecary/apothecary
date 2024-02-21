@@ -786,6 +786,40 @@ fi
 
  fi
 
+get_directory_path() {
+    local type="$1"
+    local base_dir="$2"
+    local platform="$3"
+    local abi="$4"
+    local final_path=""
+
+    case "$type" in
+        vs)
+            final_path="${base_dir}/lib/${type}/${platform}/"
+            ;;
+        osx|ios|tvos|xros|catos|watchos)
+            final_path="${base_dir}/lib/${type}/${platform}/"
+            ;;
+        emscripten)
+            final_path="${base_dir}/lib/${type}/"
+            ;;
+        linux64|linux|msys2)
+            final_path="${base_dir}/lib/${type}/"
+            ;;
+        android)
+            final_path="${base_dir}/lib/${type}/${abi}/"
+            ;;
+        *)
+            echo "Unsupported type: $type" >&2
+            return 1  # Return with error if type is unsupported
+            ;;
+    esac
+
+    echo "$final_path"  # This will be the function's return value
+}
+
+
+
 ################################################################################
 ### FUNCTIONS
 
@@ -1653,6 +1687,10 @@ function apothecaryDepend() {
         echoInfo "Skipping - dependency $depend already built and up to date"
         return
     fi
+
+    # Capture the returned path into a variable
+    DIRECTORY_PATH=$(get_directory_path "$TYPE" "$BASE_DIR" "$PLATFORM" "$ABI")
+    echo "Presumed directory path: $DIRECTORY_PATH"
 
     # Use git if the USE_GIT variable is set
     if [ $FORCE_DOWNLOAD -eq 1 ]; then

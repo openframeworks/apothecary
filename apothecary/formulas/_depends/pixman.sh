@@ -51,7 +51,7 @@ function build() {
       
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
-
+         rm -f CMakeCache.txt *.a *.o 
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -87,7 +87,7 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
-
+         rm -f CMakeCache.txt *.a *.o *.lib
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
