@@ -191,10 +191,10 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
     	cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		cp -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+		cp -R include/uriparser/* $1/include/uriparser/
 		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
     mkdir -p $1/lib/$TYPE/$PLATFORM/
-    cp -Rv build_${TYPE}_${PLATFORM}lib/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
+    cp -Rv build_${TYPE}_${PLATFORM}/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		cp -R include/uriparser/* $1/include/uriparser/
 		mkdir -p $1/lib/$TYPE

@@ -57,7 +57,7 @@ function build() {
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
-
+		rm -f CMakeCache.txt *.a *.o 
 		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
 		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
 		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"	
@@ -115,6 +115,7 @@ function build() {
         rm -rf "build_${ABI}/CMakeCache.txt"
 		mkdir -p "build_$ABI"
 		cd "./build_$ABI"
+		rm -f CMakeCache.txt *.a *.o 
 		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
         #export CFLAGS=""
@@ -178,7 +179,7 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
-
+		rm -f CMakeCache.txt *.a *.o *.lib
 		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
 		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
 		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"        
@@ -280,6 +281,8 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
 		cp Source/FreeImage.h $1/include
+		 . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/FreeImage.a
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include
 	    mkdir -p $1/lib/$TYPE
@@ -287,11 +290,15 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImage.lib  
         cp -v "build_${TYPE}_${ARCH}/Debug/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImageD.lib
+         . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/FreeImage.lib
 	elif [ "$TYPE" == "android" ] ; then
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
 	    cp -v build_$ABI/libFreeImage.a $1/lib/$TYPE/$ABI/libFreeImage.a
+	    . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$ABI/libFreeImage.a
     elif [ "$TYPE" == "emscripten" ]; then
         cp Source/FreeImage.h $1/include
         if [ -d $1/lib/$TYPE/ ]; then
@@ -299,6 +306,8 @@ function copy() {
         fi
         mkdir -p $1/lib/$TYPE
         cp -v build_${TYPE}/build/libFreeImage.a $1/lib/$TYPE/libfreeimage.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libfreeimage.a
 	fi
 
     # copy license files

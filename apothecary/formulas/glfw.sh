@@ -163,6 +163,8 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/glfw3.lib" $1/lib/$TYPE/$PLATFORM/glfw3.lib   
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/glfw3.lib
 	elif [ "$TYPE" == "osx" ]; then
 		# Standard *nix style copy.
 		# copy headers
@@ -170,6 +172,8 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include 
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libglfw3.a
 	fi
 
 	# copy license file

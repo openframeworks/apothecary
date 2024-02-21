@@ -52,7 +52,7 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 
-	DEFS="
+	export DEFS="
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -223,21 +223,29 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libfmt.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	elif [ "$TYPE" == "android" ] ; then
 		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.lib" $1/lib/$TYPE/$ABI/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libfmt.a
 		cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}/bin/fmt_wasm.wasm" $1/lib/$TYPE/libfmt.wasm
 		cp -R "build_${TYPE}/Release/include/" $1/include
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libfmt.wasm
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libfmt.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 

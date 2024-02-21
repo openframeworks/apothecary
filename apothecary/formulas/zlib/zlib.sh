@@ -163,24 +163,33 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
+        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/zlib.lib
     elif [ "$TYPE" == "android" ] ; then
 		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
 		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$ABI/zlib.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib
 		cp -Rv "build_${TYPE}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE
 		cp -v "build_${TYPE}/zlib_wasm.wasm" $1/lib/$TYPE/zlib.wasm
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/zlib.wasm
+
 	else
 		make install
 	fi

@@ -369,10 +369,14 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libfreetype.a
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -RT "build_${TYPE}_${ARCH}/Release/include" $1/include
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
+        . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libfreetype.lib
         # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
 
 	elif [ "$TYPE" == "msys2" ] ; then
@@ -382,8 +386,12 @@ function copy() {
 	    rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
 	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
+	    . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 		cp -v "build_${TYPE}/freetype_wasm.wasm" $1/lib/$TYPE/libfreetype.wasm
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libfreetype.wasm
 	fi
 
 	# copy license files

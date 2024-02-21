@@ -1,7 +1,7 @@
 Apothecary 
 ==========
 
-This is the [OpenFrameworks](http://openframeworks.cc) library apothecary. It mixes formulas and potions to build and update the C/C++ lib dependencies.
+This is the [openFrameworks](http://openframeworks.cc) library apothecary. It mixes formulas and potions to build and update the C/C++ lib dependencies.
 
 This repository builds all the openFrameworks libraries through test servers and stores them. 
 
