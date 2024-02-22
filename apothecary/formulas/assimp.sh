@@ -368,7 +368,7 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
         cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
         cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
-    elif [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/lib/libassimp.a $1/lib/$TYPE/$PLATFORM/assimp.a
@@ -405,6 +405,9 @@ function clean() {
         fi
         rm -f CMakeCache.txt  2> /dev/null
 
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        rm -f build_${TYPE}_${PLATFORM}
+        rm -f CMakeCache.txt
     else
         make clean
         make rebuild_cache
