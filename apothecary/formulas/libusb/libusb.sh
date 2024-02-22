@@ -11,6 +11,7 @@ FORMULA_TYPES=( "osx" "vs" )
 GIT_URL=https://github.com/libusb/libusb
 GIT_TAG=1.0.26
 GIT_BRANCH_VS=master
+VER=1.0.26
 
 URL=https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
 
