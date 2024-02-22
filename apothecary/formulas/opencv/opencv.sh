@@ -17,14 +17,6 @@ VER=4.9.0
 GIT_URL=https://github.com/opencv/opencv.git
 GIT_TAG=$VER
 
-# these paths don't really matter - they are set correctly further down
-local LIB_FOLDER="$BUILD_ROOT_DIR/opencv"
-local LIB_FOLDER32="$LIB_FOLDER-32"
-local LIB_FOLDER64="$LIB_FOLDER-64"
-local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
-local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
-
-
 # download the source code and unpack it into LIB_NAME
 function download() {
   curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
@@ -42,6 +34,9 @@ function prepare() {
     rm -rf modules/objc_bindings_generator
     rm -rf modules/objc
   fi
+
+  rm -f ./modules/imgcodecs/src/ios_conversions.mm
+  cp $FORMULA_DIR/ios_conversions.mm ./modules/imgcodecs/src/ios_conversions.mm
 }
 
 # executed inside the lib src dir
