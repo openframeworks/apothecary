@@ -30,7 +30,7 @@ GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
 URL=https://www.cairographics.org/releases/
 
-GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}.tar.bz2
+GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}
 
 
 # download the source code and unpack it into LIB_NAME
@@ -38,7 +38,17 @@ function download() {
 
 	. "$DOWNLOADER_SCRIPT"
 
-	downloader ${GIT_LAB}
+	if [ "$TYPE" == "vs" ] ; then
+		downloader ${GIT_LAB}.zip
+		unzip -qq "cairo-$VER.zip"
+        rm -f "cairo-$VER.zip"
+		mv cairo-$VER cairo
+	else
+		downloader ${GIT_LAB}.tar.bz2
+		tar -xf cairo-$VER.tar.bz2
+		mv cairo-$VER cairo
+		rm cairo-$VER.tar.bz2
+	fi
 	#downloader https://cairographics.org/releases/cairo-$VER.tar.xz
 	# local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	# if [ "$CHECKSHA" != "$SHA1" ] ; then
@@ -47,9 +57,6 @@ function download() {
     # else
     #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     # fi
-	tar -xf cairo-$VER.tar.bz2
-	mv cairo-$VER cairo
-	rm cairo-$VER.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir
