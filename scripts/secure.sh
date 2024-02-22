@@ -61,29 +61,27 @@ echo "OUTPUT_LOCATION: $OUTPUT_LOCATION"
 # Calculate SHA hash for the provided binary, if available
 BINARY_SHA=$(calculate_hash "$BINARY_SEC")
 
-OUTPUT_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.json"
-
+# OUTPUT_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.json"
+# 
 # Create or overwrite the .json file
-cat <<EOF > "$OUTPUT_FILE"
-{
-  "buildTime": "$BUILD_TIME",
-  "gitHash": "$GIT_HASH",
-  "gitBranch": "$GIT_BRANCH",
-  "gitUrl": "$GIT_URL",
-  "binarySha": "$BINARY_SHA",
-  "binary": "$FILENAME",
-  "version": "$VER",
-}
-EOF
-cat "$OUTPUT_FILE"
+# cat <<EOF > "$OUTPUT_FILE"
+# {
+#   "buildTime": "$BUILD_TIME",
+#   "gitHash": "$GIT_HASH",
+#   "gitBranch": "$GIT_BRANCH",
+#   "gitUrl": "$GIT_URL",
+#   "binarySha": "$BINARY_SHA",
+#   "binary": "$FILENAME",
+#   "version": "$VER",
+# }
+# EOF
+# cat "$OUTPUT_FILE"
 
 OUTPUT_PKL_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.pkl"
 
-# Create or overwrite the .pkl file
+# Create or overwrite the .pkl file - Pkl simple Key = Value
 cat <<EOF > "$OUTPUT_PKL_FILE"
 buildTime = "$BUILD_TIME"
-gitHash = "$GIT_HASH"
-gitBranch = "$GIT_BRANCH"
 gitUrl = "$GIT_URL"
 binarySha = "$BINARY_SHA"
 binary = $FILENAME"
