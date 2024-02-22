@@ -16,6 +16,8 @@ CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
 
+GIT_URL=$SITE
+
 # download the source code and unpack it into LIB_NAME
 function download() {
 
