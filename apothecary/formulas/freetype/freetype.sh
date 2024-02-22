@@ -74,10 +74,10 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a" 
 
-        NO_LINK_BROTLI=OFF
-        if [ "$PLATFORM" == "ARM64EC" ] ; then
-       		NO_LINK_BROTLI=ON
-      	fi
+        NO_LINK_BROTLI=ON
+        # if [ "$PLATFORM" == "arm64" ] ; then
+       		# NO_LINK_BROTLI=ON
+      	# fi
 
 		EXTRA_DEFS="
 			-DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} \
