@@ -61,6 +61,8 @@ BUILD_DIR=
 # full path to the destination dir for compiled libs
 LIBS_DIR=""
 
+DEPEND_DIR=""
+
 # number of parallel tasks to run on make.
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
@@ -1818,6 +1820,7 @@ echoVerbose "Build dir: $BUILD_DIR"
 # use default libs dir?
 if [ -z "${CUSTOM_LIBS_DIR+x}" ] ; then
 	export LIBS_DIR=$REL_LIBS_DIR
+    export REAL_LIBS_DIR=$REL_LIBS_DIR
     export IS_CUSTOM_LIBS_DIR=0
     echoVerbose "CUSTOM_LIBS_DIR is empty: $LIBS_DIR REL_LIBS_DIR:$REL_LIBS_DIR"
 else # manually set
@@ -1825,6 +1828,8 @@ else # manually set
 		/*) export LIBS_DIR=$CUSTOM_LIBS_DIR ;; # absolute path
 	 	*) export LIBS_DIR=$WD/$CUSTOM_LIBS_DIR ;; # relative path
 	esac
+    export REAL_LIBS_DIR=$REL_LIBS_DIR
+    export REAL_LIBS_DIR=$REL_LIBS_DIR
 	export IS_CUSTOM_LIBS_DIR=1
     echoVerbose "CUSTOM_LIBS_DIR is set: $LIBS_DIR custom:$CUSTOM_LIBS_DIR"
 fi

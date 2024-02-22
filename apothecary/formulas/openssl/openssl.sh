@@ -7,10 +7,10 @@ FORMULA_TYPES=( "vs" )
 
 FORMULA_DEPENDS=( )
 
-VER=1.1.1w
-VERDIR=1.1.1
-SHA1=76fbf3ca4370e12894a408ef75718f32cdab9671
-SHA256=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
+VER=3.2.1
+VERDIR=3.2.1
+SHA1=9668723d65d21a9d13e985203ce8c27ac5ecf3ae
+SHA256=83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -29,7 +29,6 @@ function download() {
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		# https://www.openssl.org/source/openssl-1.1.1n.tar.gz.sha1
 		downloader ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
@@ -49,12 +48,6 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "tvos" ]; then
-		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
-    elif [ "$TYPE" == "osx" ]; then
-        cp $FORMULA_DIR/13-macos-arm.conf Configurations/  	
-    fi
-
     cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
 	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
 	cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
@@ -70,6 +63,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
 
 	BUILD_OPTS_CMAKE=" -DOPENSSL_NO_DEPRECATED=ON \
@@ -106,7 +100,7 @@ function build() {
 	-DOPENSSL_NO_STATIC_ENGINE=ON \
 	-DOPENSSL_NO_AFALGENG=ON"
 
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -116,11 +110,12 @@ function build() {
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             ${BUILD_OPTS_CMAKE} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
@@ -176,67 +171,6 @@ function build() {
         cmake --build . --config Release --target install
 
         cd ..
-
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
-		
-  
-		# # make sure backed up if multiplatform compiling apothecary 
-  		cp "apps/speed.c" "apps/speed.c.orig"
-		cp "test/drbgtest.c" "test/drbgtest.c.orig"
-		cp "apps/ocsp.c" "apps/ocsp.c.orig"
-		cp "crypto/async/arch/async_posix.c" "crypto/async/arch/async_posix.c.orig"
-		cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
-		
-
-		
-            if [ "${TYPE}" == "tvos" ]; then
-
-                # Patch apps/speed.c to not use fork()
-                sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-                sed -i -- 's/fork()/-1/' "./test/drbgtest.c"
-				sed -i -- 's/!defined(OPENSSL_NO_POSIX_IO)/defined(HAVE_FORK)/' "./apps/ocsp.c"
-				sed -i -- 's/fork()/-1/' "./apps/ocsp.c"
-				sed -i -- 's/!defined(OPENSSL_NO_ASYNC)/defined(HAVE_FORK)/' "./crypto/async/arch/async_posix.h"
-				# Patch Configure to build for tvOS, not iOS
-				sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
-
-				
-                echo "tvos patched files for fork() issue and tvOS changes"
-                EXTRA_FLAGS="-DNO_FORK"
-            else
-            	EXTRA_FLAGS=""
-            fi
-
-
-            echo "building $TYPE | $PLATFORM"
-        echo "--------------------"
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		cmake  .. \
-			-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            ${BUILD_OPTS_CMAKE} \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-			-DPLATFORM=$PLATFORM \
-			-DENABLE_BITCODE=OFF \
-			-DCMAKE_MACOSX_BUNDLE=OFF \
-			-DENABLE_ARC=OFF \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF
-		cmake --build . --config Release --target install
-        cd ..
-
-        
-
 	elif [ "$TYPE" == "android" ]; then
 
 		if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
@@ -379,25 +313,14 @@ function build() {
 		# make DESTDIR="inst" install 
 
 	else
-
-		# cd build-linux-x86_64
-  #       - cmake ../ -DBUILD_OPENSSL=ON -DOPENSSL_BUILD_VERSION=$OPENSSL_BUILD_VERSION -DOPENSSL_BUILD_HASH=$OPENSSL_BUILD_HASH -DOPENSSL_INSTALL_MAN=ON -DOPENSSL_ENABLE_TESTS=ON
-  #       - chmod -R 777 .  
-
 		echoWarning "TODO: build $TYPE lib"
-
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	
-	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		# if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-		# 	mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-		# fi
-		# cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-		# cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
@@ -406,10 +329,8 @@ function copy() {
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
-
 		. "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/$PLATFORM/libssl.a
-
 
 	elif [ "$TYPE" == "vs" ]; then
 		mkdir -p $1/include    
@@ -448,7 +369,7 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	
-	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		make clean
 		# clean up old build folder
 		rm -rf /build
@@ -465,13 +386,6 @@ function clean() {
 		    # Delete the folder and its contents
 		    rm -r build_${TYPE}_${ARCH}	    
 		fi
-	elif [[ "$TYPE" == "osx" ]] ; then
-		make clean
-		# clean up old build folder
-		rm -rf /build
-		# clean up compiled libraries
-		rm -rf /lib
-		rm -rf *.a
 	else
 		echoWarning "TODO: clean $TYPE lib"
 		make clean

@@ -6,7 +6,7 @@
 #
 # an autotools project
 
-FORMULA_TYPES=( "osx" "vs" "ios" "tvos" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten" )
 
 FORMULA_DEPENDS=( "zlib" "libpng" )
 
