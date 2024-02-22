@@ -70,6 +70,7 @@ SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
 LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 SECURE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/secure.sh")"
+FORMAT_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/format.sh")"
 
 USE_SAVE=0
 
@@ -1873,8 +1874,6 @@ if [[ "$TYPE" == "android" ]] ; then
 else 
 	ABI=""
 fi
-
-
 
 CROSSCOMPILING=0
 if [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv7l" ]; then
