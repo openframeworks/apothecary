@@ -276,26 +276,37 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/include/" $1/ 
-        cp -f "build_${TYPE}_${ARCH}/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
+		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
         cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$ABI/libsvgtiny.a
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
         cp -f "build_${TYPE}/svgtiny_wasm.wasm" $1/lib/$TYPE/svgtiny.wasm        
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/svgtiny.wasm
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
 		mkdir -p $1/lib/$TYPE/$
 		cp -Rv "include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/libsvgtiny.a
     elif [ "$TYPE" == "msys2" ] ; then
 		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/libsvgtiny.a
 	fi
-
 
 	# copy license file
 	if [ -d "$1/license" ]; then
