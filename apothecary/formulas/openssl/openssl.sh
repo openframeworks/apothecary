@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=(  )
+FORMULA_TYPES=( "vs" )
 
 FORMULA_DEPENDS=( )
 
@@ -15,8 +15,7 @@ SHA256=83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
-
-GIT_URL=$SITE
+GIT_URL=https://github.com/danoli3/openssl-cmake
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -39,25 +38,34 @@ function download() {
     else
     	tar -xf $FILENAME.tar.gz
 		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-		mv $FILENAME openssl
+		mv $FILENAME openssl_temp
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
-		
 	fi
+	# Clone the openssl-cmake repository
+	git clone --branch "3.0" --depth=1 $GIT_URL openssl_cmake_temp
+
+	# Organize directories as needed
+	mkdir -p openssl
+	mkdir -p openssl/openssl
+	mv openssl_temp/* openssl/openssl
+
+	rm -rf openssl_cmake_temp/openssl
+	mv openssl_cmake_temp/* openssl/
+
+	rm -rf openssl_temp openssl_cmake_temp
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
-	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
-	cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
-	mkdir -p ./cmake/
-	cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
-	cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
-	cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
-
-
-
+    # cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
+	# cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
+	# cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
+	# mkdir -p ./cmake/
+	# cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
+	# cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
+	# cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
+	echo "prepare"
 }
 
 # executed inside the lib src dir
@@ -98,7 +106,8 @@ function build() {
 	-DOPENSSL_NO_UNIT_TEST=ON \
 	-DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
 	-DOPENSSL_NO_STATIC_ENGINE=ON \
-	-DOPENSSL_NO_AFALGENG=ON"
+	-DOPENSSL_NO_AFALGENG=ON \
+	-DOPENSSL_BUILD_DOCS=OFF"
 
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		echo "building $TYPE | $PLATFORM"
@@ -159,12 +168,13 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DOPENSSL_INSTALL_MAN=ON \
+            -DOPENSSL_INSTALL_MAN=OFF \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             ${BUILD_OPTS_CMAKE} \
             ${CMAKE_WIN_SDK} \
+            -DOPENSSL_TARGET_ARCH=$BUILD_PLATFORM \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 
