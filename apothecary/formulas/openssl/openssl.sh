@@ -7,10 +7,10 @@ FORMULA_TYPES=( "vs" )
 
 FORMULA_DEPENDS=( )
 
-VER=3.2.1
+VER=3.0.12
 VERDIR=3.2.1
-SHA1=9668723d65d21a9d13e985203ce8c27ac5ecf3ae
-SHA256=83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39
+SHA1=b48e20c07facfdf6da9ad43a6c5126d51897699b
+SHA256=f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -74,42 +74,44 @@ function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
 
-	BUILD_OPTS_CMAKE=" -DOPENSSL_NO_DEPRECATED=ON \
+	DEFS=" -DOPENSSL_NO_DEPRECATED=ON \
 	-DOPENSSL_NO_COMP=ON \
 	-DOPENSSL_NO_EC_NISTP_64_GCC_128=ON \
 	-DOPENSSL_NO_ENGINE=ON \
-	-DOPENSSL_NO_GMP=ON \
-	-DOPENSSL_NO_JPAKE=ON \
-	-DOPENSSL_NO_LIBUNBOUND=ON \
 	-DOPENSSL_NO_MD2=ON \
 	-DOPENSSL_NO_RC5=ON \
 	-DOPENSSL_NO_RFC3779=ON \
 	-DOPENSSL_NO_SCTP=ON \
 	-DOPENSSL_NO_SSL_TRACE=ON \
-	-DOPENSSL_NO_SSL2=ON \
-	-DOPENSSL_NO_SSL3=ON \
+	-DOPENSSL_NO_SSL3=OFF \
 	-DOPENSSL_NO_STORE=ON \
 	-DOPENSSL_NO_UNIT_TEST=ON \
 	-DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
 	-DOPENSSL_NO_ASAN=ON \
 	-DOPENSSL_NO_ASM=ON \
 	-DOPENSSL_NO_CRYPTO_MDEBUG=ON \
-	-DOPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE=ON \
 	-DOPENSSL_NO_DEVCRYPTOENG=ON \
 	-DOPENSSL_NO_EGD=ON \
 	-DOPENSSL_NO_EXTERNAL_TESTS=ON \
 	-DOPENSSL_NO_FUZZ_AFL=ON \
 	-DOPENSSL_NO_FUZZ_LIBFUZZER=ON \
-	-DOPENSSL_NO_HEARTBEATS=ON \
 	-DOPENSSL_NO_MSAN=ON \
 	-DOPENSSL_NO_UBSAN=ON \
 	-DOPENSSL_NO_UNIT_TEST=ON \
 	-DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
-	-DOPENSSL_NO_STATIC_ENGINE=ON \
+	-DOPENSSL_NO_STATIC_ENGINE=OFF \
+	-DOPENSSL_STATIC_ENGINE=ON \
+	-DOPENSSL_THREADS=ON \
+	-DBUILD_TESTING=OFF \
 	-DOPENSSL_NO_AFALGENG=ON \
+	-DOPENSSL_ZLIB=ON \
 	-DOPENSSL_BUILD_DOCS=OFF"
 
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -126,7 +128,10 @@ function build() {
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
-            ${BUILD_OPTS_CMAKE} \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            ${DEFS} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
@@ -148,31 +153,39 @@ function build() {
         if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    rm -rf "build_${TYPE}_${ARCH}"
 		fi
+
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.a *.o *.lib
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        CUSTOM_DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
      
         cmake .. ${DEFS} \
+			${CUSTOM_DEFS} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DCMAKE_BUILD_TYPE=Release \
-            -DOPENSSL_INSTALL_MAN=OFF \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            ${BUILD_OPTS_CMAKE} \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_TARGET_ARCH=$BUILD_PLATFORM \
             -A "${PLATFORM}" \
@@ -187,21 +200,15 @@ function build() {
 	    	echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
 	    	return
 		fi
-
-
-		 source ../../android_configure.sh $ABI make
-
-		 #wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
-		 # source ./setenv-android.sh
+		source ../../android_configure.sh $ABI make
+		#wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
+		# source ./setenv-android.sh
 		echo "NDK_ROOT: $NDK_ROOT"
 
 		export RELEASE=2.6.37
 		export SYSTEM=android
 		export ARCH=arm
 		export CROSS_COMPILE="arm-linux-androideabi-"
-
-
-
 		export ANDROID_SYSROOT="$SYSROOT"
 		#export SYSROOT="$ANDROID_SYSROOT"
 		export NDK_SYSROOT="$ANDROID_SYSROOT"
@@ -240,9 +247,6 @@ function build() {
 		#./setenv-android.sh
 
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
-
-
-
 
 		export BUILD_TO_DIR=build_$ABI
 		CURRENTPATH=`pwd`
@@ -287,9 +291,6 @@ function build() {
 		    export CONFIGURE="android-x86"
 		fi
 		
-		
-		
-
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
@@ -313,14 +314,6 @@ function build() {
 		rm $SYSROOT/usr/lib/crtbegin_so.o
 		rm $SYSROOT/usr/lib/crtend_android.o
 		rm $SYSROOT/usr/lib/crtend_so.o
-
-		#ake all
-		
-		
-		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
-		# make VERBOSE=1
-		# mkdir -p inst
-		# make DESTDIR="inst" install 
 
 	else
 		echoWarning "TODO: build $TYPE lib"
@@ -346,15 +339,13 @@ function copy() {
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-
         FILE_POSTFIX=-x64
         if [ ${ARCH} == "32" ]; then
         	FILE_POSTFIX=""
         fi
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib 
-
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib
         . "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/$PLATFORM/libssl.lib
 
@@ -364,8 +355,6 @@ function copy() {
 		fi
 		mkdir -p $1/lib/$TYPE/$ABI
 		cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
-		# cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
-		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 	fi
 
 	# copy license file
@@ -380,21 +369,16 @@ function copy() {
 function clean() {
 	
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		make clean
-		# clean up old build folder
-		rm -rf /build
-		# clean up compiled libraries
-		rm -rf /lib
-		# reset files back to original if
-		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-		cp "Makefile.orig" "Makefile"
-		cp "Configure.orig" "Configure"
-		# if [ "$TYPE" == "vs" ] ; then
-		# 	cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+		    rm -r build_${TYPE}_${PLATFORM}
+		fi
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    # Delete the folder and its contents
-		    rm -r build_${TYPE}_${ARCH}	    
+		    rm -r build_${TYPE}_${ARCH}
+		fi
+	elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+		    rm -r build_${TYPE}_${ABI}
 		fi
 	else
 		echoWarning "TODO: clean $TYPE lib"
