@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" )
+FORMULA_TYPES=( "vs" "osx" "ios" )
 
 FORMULA_DEPENDS=( "zlib" )
 
@@ -135,8 +135,7 @@ function build() {
 			-DCMAKE_MACOSX_BUNDLE=OFF \
 			-DENABLE_ARC=OFF \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF \
-			-G Xcode
+			-DENABLE_VISIBILITY=OFF
 		cmake --build . --config Release --target install
         cd ..
 
