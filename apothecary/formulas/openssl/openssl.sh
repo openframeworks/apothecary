@@ -111,7 +111,6 @@ function build() {
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
 	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
-
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -157,6 +156,10 @@ function build() {
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
 	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
 	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+	    if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
+			DEFS="$DEFS -DOPENSSL_ASM=OFF"
+	    fi
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
