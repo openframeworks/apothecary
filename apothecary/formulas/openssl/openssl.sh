@@ -5,7 +5,7 @@
 # define the version
 FORMULA_TYPES=( "vs" )
 
-FORMULA_DEPENDS=( )
+FORMULA_DEPENDS=( "zlib" )
 
 VER=3.0.12
 VERDIR=3.2.1
@@ -58,13 +58,10 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    # cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
-	# cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
-	# cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
-	# mkdir -p ./cmake/
-	# cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
-	# cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
-	# cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
+    apothecaryDependencies download
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
 	echo "prepare"
 }
 
