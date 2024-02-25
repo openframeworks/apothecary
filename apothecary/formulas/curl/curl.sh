@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "vs" )
+FORMULA_TYPES=( "vs" "osx" "ios" "tvos" "catos" "xros" "watchos" )
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
@@ -14,9 +14,9 @@ FORMULA_TYPES=( "vs" )
 FORMULA_DEPENDS=( "openssl" "zlib" )
 
 # define the version by sha
-VER=8_4_0
-VER_D=8.4.0
-SHA1=1a2af84acf92902939cac5e0f903e13a3eb82094
+VER=8_6_0
+VER_D=8.6.0
+SHA1=ec363b8c17ce83af85f4f18f6c5a2f19efd4e0e3
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl.git
@@ -113,7 +113,8 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCURL_STATICLIB=OFF \
+            -DCURL_STATICLIB=ON \
+            -DBUILD_STATIC_LIBS=ON \
             -DCURL_USE_OPENSSL=ON \
             -DUSE_SSLEAY=ON \
             -DUSE_OPENSSL=ON \
@@ -122,7 +123,9 @@ function build() {
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -212,7 +215,8 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libssl.a
         rm ${OPENSSL_PATH}/lib/libcrypto.a
 
-	elif [ "$TYPE" == "osx" ]; then
+	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+
 
         export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
 
@@ -221,12 +225,17 @@ function build() {
         OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
         OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}"
+        PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
          
-
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
+
+        cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
+
 
         echo "building curl $TYPE | $PLATFORM"
         echo "--------------------"
@@ -240,6 +249,8 @@ function build() {
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCURL_STATICLIB=ON \
+            -DBUILD_STATIC_LIBS=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -247,12 +258,22 @@ function build() {
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
+            -DCMAKE_USE_SYSTEM_CURL=OFF \
             -DENABLE_ARC=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
             -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.a;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.a;" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
+            -DUSE_RESOLVE_ON_IPS=OFF \
+            -DENABLE_ARES=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DENABLE_UNIX_SOCKETS=ON \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
@@ -265,53 +286,8 @@ function build() {
 
         rm ${OPENSSL_PATH}/lib/libssl.a
         rm ${OPENSSL_PATH}/lib/libcrypto.a
+        rm ${ZLIB_ROOT}/lib/zlib.a
 
-	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        OPENSSL_ROOT="$LIBS_ROOT/openssl/"
-        OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
-        OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
-        OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
-
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-
-        echo "building $TYPE | $PLATFORM"
-        echo "--------------------"
-        mkdir -p "build_${TYPE}_${PLATFORM}"
-        cd "build_${TYPE}_${PLATFORM}"
-        cmake  .. \
-            -DCMAKE_C_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-            -DPLATFORM=$PLATFORM \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-            -DENABLE_VISIBILITY=OFF \
-            -DOPENSSL_ROOT_DIR="$LIBS_ROOT/openssl/" \
-            -DOPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include" \
-            -DOPENSSL_SSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" \
-            -DOPENSSL_CRYPTO_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" \
-            -DENABLE_UNIX_SOCKETS=ON \
-            -DUSE_RESOLVE_ON_IPS=OFF \
-            -DCURL_ENABLE_SSL=ON \
-            -DHTTP_ONLY=ON \
-            -DCMAKE_MACOSX_BUNDLE=OFF \
-            -DUSE_SECURE_TRANSPORT=ON -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DENABLE_LDAP=OFF -DENABLE_LDAPS=OFF -DENABLE_VERBOSE=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_IPV6=OFF 
-        cmake --build . --config Release --target install
-        cd ..
-
-        rm ${OPENSSL_PATH}/lib/libssl.a
-        rm ${OPENSSL_PATH}/lib/libcrypto.a
     else
         echo "building other for $TYPE"
         if [ $CROSSCOMPILING -eq 1 ]; then
