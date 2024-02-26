@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" "osx" "ios" "catos" "xros"  )
+FORMULA_TYPES=( "vs" "osx" "ios" "xros"  )
 
 FORMULA_DEPENDS=( "zlib" )
 

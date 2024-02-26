@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "vs" "osx" "ios" "catos" "xros" )
+FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
