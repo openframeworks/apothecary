@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" "osx" "ios" "tvos" "catos" "xros" "watchos" )
+FORMULA_TYPES=( "vs" "osx" "ios" "catos" "xros"  )
 
 FORMULA_DEPENDS=( "zlib" )
 
@@ -113,11 +113,11 @@ function build() {
 		cd "build_${TYPE}_${PLATFORM}"
 
 
-		if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
-			LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./apps/speed.c"
-			# Patch Configure to build for tvOS, not iOS
-			LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
-		fi
+		# if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
+		# 	# LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./openssl/apps/speed.c"
+		# 	# Patch Configure to build for tvOS, not iOS
+		# 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./openssl/Configure"
+		# fi
 
 		rm -f CMakeCache.txt *.a *.o
 		cmake  .. \
@@ -128,7 +128,11 @@ function build() {
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
+			-DBUILD_TESTING=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DNO_FORK=ON \
+			-DOPENSSL_OCSP=OFF \
+			-DOPENSSL_CMP=OFF \
 			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DZLIB_ROOT=${ZLIB_ROOT} \
