@@ -274,13 +274,20 @@ function build() {
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DENABLE_UNIX_SOCKETS=ON \
+            -DENABLE_UNIX_SOCKETS=OFF \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
             -DHTTP_ONLY=ON \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DUSE_SECURE_TRANSPORT=ON -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DENABLE_LDAP=OFF -DENABLE_LDAPS=OFF -DENABLE_VERBOSE=ON -DENABLE_THREADED_RESOLVER=OFF -DENABLE_IPV6=OFF 
+            -DUSE_SECURE_TRANSPORT=ON \
+            -DUSE_NGHTTP2=OFF \
+            -DUSE_LIBIDN2=OFF \
+            -DENABLE_LDAP=OFF \
+            -DENABLE_LDAPS=OFF \
+            -DENABLE_VERBOSE=ON \
+            -DENABLE_THREADED_RESOLVER=ON \
+            -DENABLE_IPV6=ON
         cmake --build . --config Release --target install
         cd ..
 
