@@ -50,20 +50,18 @@ function prepare() {
     apothecaryDependencies download
 
     # cp -f $FORMULA_DIR/CMakeLists.txt .
+  
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib  
 
-    if [ "$TYPE" == "vs" ] || [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
+    apothecaryDepend prepare openssl
+    apothecaryDepend build openssl
+    apothecaryDepend copy openssl  
+    
 
-        apothecaryDepend prepare zlib
-        apothecaryDepend build zlib
-        apothecaryDepend copy zlib  
+    echo "prepared"
 
-        apothecaryDepend prepare openssl
-        apothecaryDepend build openssl
-        apothecaryDepend copy openssl  
-        
-
-        echo "prepared"
-    fi
 
 }
 
@@ -275,6 +273,7 @@ function build() {
             -DENABLE_ARES=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DENABLE_UNIX_SOCKETS=OFF \
+            -DHAVE_LIBSOCKET=OFF \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
             -DHTTP_ONLY=ON \
