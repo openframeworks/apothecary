@@ -111,6 +111,14 @@ function build() {
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+
+
+		if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
+			LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./apps/speed.c"
+			# Patch Configure to build for tvOS, not iOS
+			LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
+		fi
+
 		rm -f CMakeCache.txt *.a *.o
 		cmake  .. \
 			-DCMAKE_C_STANDARD=17 \

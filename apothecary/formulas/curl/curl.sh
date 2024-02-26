@@ -49,7 +49,7 @@ function prepare() {
 
     apothecaryDependencies download
 
-    cp -f $FORMULA_DIR/CMakeLists.txt .
+    # cp -f $FORMULA_DIR/CMakeLists.txt .
 
     if [ "$TYPE" == "vs" ] || [ "$TYPE" == "osx" ] || [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
 
