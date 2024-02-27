@@ -4,7 +4,7 @@
 # http://zlib.net/
 
 # define the version
-VER=1.3
+VER=1.3.1
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
@@ -26,8 +26,9 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	: #noop
-	. "$DOWNLOADER_SCRIPT"
-	downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+	# . "$DOWNLOADER_SCRIPT"
+	# downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+	cp -v "$FORMULA_DIR"/*.txt ./
 
 }
 
@@ -42,11 +43,14 @@ function build() {
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.lib *.o *.wasm
         cmake .. \
             -G "${GENERATOR_NAME}" \
             -A "${PLATFORM}" \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=ON \
+		    -DZLIB_BUILD_EXAMPLES=OFF \
+		    -DSKIP_EXAMPLE=ON \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -64,12 +68,14 @@ function build() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o 
 		cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-		    -DSKIP_EXAMPLE=1 \
+		    -DZLIB_BUILD_EXAMPLES=OFF \
+		    -DSKIP_EXAMPLE=ON \
 		    -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
@@ -89,15 +95,52 @@ function build() {
 
 		 cmake --build . --config Release --target install
 		 cd ..
+    elif [ "$TYPE" == "android" ] ; then
+
+		source $APOTHECARY_DIR/android_configure.sh $ABI cmake
+		mkdir -p "build_${TYPE}_${ABI}"
+		cd "build_${TYPE}_${ABI}"
+		rm -f CMakeCache.txt *.a *.o
+		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -std=c17"
+		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -std=c++17"
+
+		cmake .. ${DEFS} \
+				-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+				-DPLATFORM=$PLATFORM \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -std=c++17" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -std=c17" \
+				-DCMAKE_C_COMPILER=${CC} \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_BUILD_TYPE=Release \
+	     	 	-D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
+	     	 	-D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
+	     	 	-D CMAKE_CXX_COMPILER_AR=${AR} \
+	     	 	-D CMAKE_C_COMPILER_AR=${AR} \
+	     	 	-D CMAKE_C_COMPILER=${CC} \
+	     	 	-D CMAKE_CXX_COMPILER=${CXX} \
+	     	 	-D CMAKE_C_FLAGS=${CFLAGS} \
+	     	 	-D CMAKE_CXX_FLAGS=${CXXFLAGS} \
+	        	-D ANDROID_ABI=${ABI} \
+	        	-D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
+	        	-D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
+	        	-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+	        	-D ANDROID_TOOLCHAIN=clang \
+				-DENABLE_VISIBILITY=OFF \
+				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+		cmake --build . --config Release --target install
+		cd ..
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o *.wasm
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	-DCMAKE_BUILD_TYPE=Release \
 	    	-DCMAKE_INSTALL_LIBDIR="build_${TYPE}" \
 	    	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	    	-D BUILD_SHARED_LIBS=OFF \
-		    -DSKIP_EXAMPLE=1 \
+		    -DZLIB_BUILD_EXAMPLES=OFF \
+		    -DSKIP_EXAMPLE=ON \
 	    	-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -120,25 +163,38 @@ function copy() {
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a 
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include    
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib  
+        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/zlib.lib
+    elif [ "$TYPE" == "android" ] ; then
+		mkdir -p $1/lib/$TYPE/$ABI/
+		mkdir -p $1/include
+		cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
+		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$ABI/zlib.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/include
 		mkdir -p $1/lib
-		cp -Rv "build_${TYPE}/Release/include"* $1/include/
+		cp -Rv "build_${TYPE}/Release/include/"* $1/include/
 		mkdir -p $1/lib/$TYPE
-		cp -v "build_${TYPE}/Release/lib/libz.a" $1/lib/$TYPE/zlib.a
+		cp -v "build_${TYPE}/zlib_wasm.wasm" $1/lib/$TYPE/zlib.wasm
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/zlib.wasm
+
 	else
 		make install
 	fi
 
 	# copy license file
-	
 	if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
@@ -156,6 +212,10 @@ function clean() {
 		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}     
         fi
+    elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+			rm -r build_${TYPE}_${ABI}     
+		fi
     elif [ "$TYPE" == "emscripten" ] ; then
     	if [ -d "build_${TYPE}" ]; then
             rm -r build_${TYPE}     

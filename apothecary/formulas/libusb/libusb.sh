@@ -11,6 +11,7 @@ FORMULA_TYPES=( "osx" "vs" )
 GIT_URL=https://github.com/libusb/libusb
 GIT_TAG=1.0.26
 GIT_BRANCH_VS=master
+VER=1.0.26
 
 URL=https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
 
@@ -98,11 +99,15 @@ function copy() {
     	cp -f "build_${TYPE}_${ARCH}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
     	cp -f "build_${TYPE}_${ARCH}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
 
+    	. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libusb-1.0.lib
 	fi
 
     if [ "$TYPE" == "osx" ] ; then
         mkdir -p $1/lib/$TYPE
-        cp -v libusb/.libs/libusb-1.0.a $1/lib/$TYPE/usb-1.0.0.a
+        cp -v libusb/.libs/libusb-1.0.a $1/lib/$TYPE/usb-1.0.a
+        . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/usb-1.0.a
 	fi
 
 	echoWarning "TODO: License Copy"

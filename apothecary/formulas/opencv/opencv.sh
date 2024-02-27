@@ -17,14 +17,6 @@ VER=4.9.0
 GIT_URL=https://github.com/opencv/opencv.git
 GIT_TAG=$VER
 
-# these paths don't really matter - they are set correctly further down
-local LIB_FOLDER="$BUILD_ROOT_DIR/opencv"
-local LIB_FOLDER32="$LIB_FOLDER-32"
-local LIB_FOLDER64="$LIB_FOLDER-64"
-local LIB_FOLDER_IOS="$LIB_FOLDER-IOS"
-local LIB_FOLDER_IOS_SIM="$LIB_FOLDER-IOSIM"
-
-
 # download the source code and unpack it into LIB_NAME
 function download() {
   curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
@@ -42,6 +34,9 @@ function prepare() {
     rm -rf modules/objc_bindings_generator
     rm -rf modules/objc
   fi
+
+  rm -f ./modules/imgcodecs/src/ios_conversions.mm
+  cp $FORMULA_DIR/ios_conversions.mm ./modules/imgcodecs/src/ios_conversions.mm
 }
 
 # executed inside the lib src dir
@@ -66,9 +61,10 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_LIBRARY=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_INCLUDE_DIRS=${ZLIB_LIBRARY} "
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} "
       if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
         EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DENABLE_SSE=OFF -DENABLE_SSE2=OFF -DENABLE_SSE3=OFF -DENABLE_SSE41=OFF -DENABLE_SSE42=OFF -DENABLE_SSSE3=OFF -DWITH_CAROTENE=OFF"
       else 
@@ -483,9 +479,11 @@ function build() {
 
     mkdir -p build_${TYPE}
     cd build_${TYPE}
-    
+    find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true
     emcmake cmake .. \
       -B build \
+      -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
       -DCMAKE_BUILD_TYPE="Release" \
       -DCMAKE_INSTALL_LIBDIR="lib" \
       -DCMAKE_C_STANDARD=17 \
@@ -674,6 +672,7 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
     cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+    
   fi
 
   # copy license file

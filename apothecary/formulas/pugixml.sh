@@ -31,7 +31,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-	DEFS="  -DCMAKE_C_STANDARD=17 \
+	export DEFS="  -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
@@ -41,7 +41,6 @@ function build() {
             -DCMAKE_INSTALL_LIBDIR=lib"        
     if [ "$TYPE" == "emscripten" ]; then
         rm -f libpugixml.bc
-
 		# Compile the program
 		emcc -O2 \
 			 -Wall \
@@ -54,7 +53,7 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-
+        rm -f CMakeCache.txt *.a *.o *.lib
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
@@ -108,6 +107,7 @@ function build() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o 
 		cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
@@ -128,36 +128,6 @@ function build() {
 				-DCMAKE_INSTALL_LIBDIR=lib 
 		cmake --build . --config Release --target install
 		cd ..
-	elif [ "$TYPE" == "ios" ] || [ "$TYPE" == "tvos" ]; then
-        if [ "${TYPE}" == "tvos" ]; then
-            IOS_ARCHS="x86_64 arm64"
-        elif [ "$TYPE" == "ios" ]; then
-            IOS_ARCHS="x86_64 armv7 arm64" #armv7s
-        fi
-		for IOS_ARCH in ${IOS_ARCHS}; do
-            echo
-            echo
-            echo "Compiling for $IOS_ARCH"
-    	    source ../../ios_configure.sh $TYPE $IOS_ARCH
-            export CFLAGS="$CFLAGS -I$LIBS_DIR/libxml2/include"
-		    $CXX -O2 \
-			     $CFLAGS \
-			     -c src/pugixml.cpp \
-			     -o src/pugixml.o
-            ar ruv libpugixml_$IOS_ARCH.a src/pugixml.o
-        done
-
-        if [ "$TYPE" == "ios" ]; then
-            lipo -create libpugixml_x86_64.a \
-                         libpugixml_armv7.a \
-                         libpugixml_arm64.a \
-                        -output libpugixml.a
-        elif [ "$TYPE" == "tvos" ]; then
-            lipo -create libpugixml_x86_64.a \
-                         libpugixml_arm64.a \
-                        -output libpugixml.a
-        fi
-        ranlib libpugixml.a
 	fi
 }
 
@@ -177,17 +147,25 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/pugixml.lib
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+        cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include 
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libpugixml.a
 	elif [ "$TYPE" == "android" ] ; then
 	    mkdir -p $1/lib/$TYPE/$ABI
 		cp -Rv libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$ABI/libpugixml.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
 		cp -Rv libpugixml.bc $1/lib/$TYPE/libpugixml.bc
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/libpugixml.bc
 	fi
 	# copy license file
 	if [ -d "$1/license" ]; then
@@ -214,6 +192,11 @@ function clean() {
 	else
 		make clean
 	fi
+}
+
+function secure() {
+    . "$SECURE_SCRIPT"
+    secure $1/lib/$TYPE/$PLATFORM/pugixml.lib
 }
 
 function save() {

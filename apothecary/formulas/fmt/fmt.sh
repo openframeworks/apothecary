@@ -9,7 +9,7 @@ VER=10.2.1
 # tools for git use
 GIT_URL=https://github.com/fmtlib/fmt
 URL=${GIT_URL}/archive/refs/tags/${VER}
-
+GIT_TAG=master
 SHA=
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux64" "msys2" "linuxaarch64" )
@@ -21,20 +21,20 @@ FORMULA_DEPENDS=(  )
 function download() {
 	. "$DOWNLOADER_SCRIPT"
 
-	if [ "$TYPE" == "vs" ] ; then
-		downloader "${URL}.zip"
-		unzip -q "${VER}.zip"
-		mv "fmt-${VER}" fmt
-		rm "${VER}.zip"
-	else 
-		downloader "${URL}.tar.gz"
-		tar -xf "${VER}.tar.gz"
-		mv "fmt-${VER}" fmt
-		rm "${VER}.tar.gz"
-	fi
+	git clone --branch $GIT_TAG --depth=1 $GIT_URL 
 
-	cp -Rv $FORMULA_DIR/ ./
-
+	# if [ "$TYPE" == "vs" ] ; then
+	# 	downloader "${URL}.zip"
+	# 	unzip -q "${VER}.zip"
+	# 	mv "fmt-${VER}" fmt
+	# 	rm "${VER}.zip"
+	# else 
+	# 	downloader "${URL}.tar.gz"
+	# 	tar -xf "${VER}.tar.gz"
+	# 	mv "fmt-${VER}" fmt
+	# 	rm "${VER}.tar.gz"
+	# fi
+	
 
 }
 
@@ -43,7 +43,8 @@ function prepare() {
 
 	echoVerbose "prepare"
 	# . "$DOWNLOADER_SCRIPT"
-	# downloader "$CMAKE_URL"
+	rm -f ./CMakeLists.txt
+	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 	
 }
 
@@ -51,7 +52,7 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 
-	DEFS="
+	export DEFS="
 		    -DCMAKE_C_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD=17 \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -187,27 +188,27 @@ function build() {
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p build_$TYPE
 	    cd build_$TYPE
+	    rm -f CMakeCache.txt *.a *.o *.wasm
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
 	    	${DEFS} \
 	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 	    	-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
+				-DCMAKE_CXX_STANDARD=17 \
+				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c17 -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+				-DCMAKE_CXX_EXTENSIONS=OFF \
+				-DBUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
+        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+        -DCMAKE_INSTALL_INCLUDEDIR=include \
+        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE=. \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE=. \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. 
 	    cmake --build . --target install --config Release
 	    cd ..
 	fi
 		
-
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
@@ -222,21 +223,29 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libfmt.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	elif [ "$TYPE" == "android" ] ; then
 		mkdir -p $1/lib/$TYPE/$ABI/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.lib" $1/lib/$TYPE/$ABI/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$ABI/libfmt.a
 		cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
 		mkdir -p $1/include
 		cp -v "build_${TYPE}/bin/fmt_wasm.wasm" $1/lib/$TYPE/libfmt.wasm
 		cp -R "build_${TYPE}/Release/include/" $1/include
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libfmt.wasm
 	else
 		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libfmt.a
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 

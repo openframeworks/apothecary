@@ -3,18 +3,19 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" "osx" )
+FORMULA_TYPES=( "vs" "osx" "ios" "xros"  )
 
-FORMULA_DEPENDS=( )
+FORMULA_DEPENDS=( "zlib" )
 
-VER=1.1.1w
-VERDIR=1.1.1
-SHA1=76fbf3ca4370e12894a408ef75718f32cdab9671
-SHA256=cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8
+VER=3.0.12
+VERDIR=3.2.1
+SHA1=b48e20c07facfdf6da9ad43a6c5126d51897699b
+SHA256=f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
+GIT_URL=https://github.com/danoli3/openssl-cmake
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -27,7 +28,6 @@ function download() {
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
-		# https://www.openssl.org/source/openssl-1.1.1n.tar.gz.sha1
 		downloader ${MIRROR}/source/$FILENAME.tar.gz.sha1
 	fi
 	CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
@@ -38,88 +38,107 @@ function download() {
     else
     	tar -xf $FILENAME.tar.gz
 		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-		mv $FILENAME openssl
+		mv $FILENAME openssl_temp
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
-		
 	fi
+	# Clone the openssl-cmake repository
+	git clone --branch "3.0" --depth=1 $GIT_URL openssl_cmake_temp
+
+	# Organize directories as needed
+	mkdir -p openssl
+	mkdir -p openssl/openssl
+	mv openssl_temp/* openssl/openssl
+
+	rm -rf openssl_cmake_temp/openssl
+	mv openssl_cmake_temp/* openssl/
+
+	rm -rf openssl_temp openssl_cmake_temp
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	if [ "$TYPE" == "tvos" ]; then
-		cp $FORMULA_DIR/20-ios-tvos-cross.conf Configurations/
-    elif [ "$TYPE" == "osx" ]; then
-        cp $FORMULA_DIR/13-macos-arm.conf Configurations/  	
-    fi
-
-    cp -f $FORMULA_DIR/openssl-cmake/CMakeLists.txt .
-	cp -f $FORMULA_DIR/openssl-cmake/*.cmake .
-	cp -f $FORMULA_DIR/openssl-cmake/crypto/* ./crypto/
-	mkdir -p ./cmake/
-	cp -f $FORMULA_DIR/openssl-cmake/apps/* ./apps/
-	cp -f $FORMULA_DIR/openssl-cmake/cmake/* ./cmake/
-	cp -f $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt ./ssl/CMakeLists.txt
-
-
-
+    apothecaryDependencies download
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+	echo "prepare"
 }
 
 # executed inside the lib src dir
 function build() {
 
-	BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
+	LIBS_ROOT=$(realpath $LIBS_DIR)
 
-	BUILD_OPTS_CMAKE=" -DOPENSSL_NO_DEPRECATED=ON \
+	DEFS=" -DOPENSSL_NO_DEPRECATED=ON \
 	-DOPENSSL_NO_COMP=ON \
 	-DOPENSSL_NO_EC_NISTP_64_GCC_128=ON \
 	-DOPENSSL_NO_ENGINE=ON \
-	-DOPENSSL_NO_GMP=ON \
-	-DOPENSSL_NO_JPAKE=ON \
-	-DOPENSSL_NO_LIBUNBOUND=ON \
 	-DOPENSSL_NO_MD2=ON \
 	-DOPENSSL_NO_RC5=ON \
 	-DOPENSSL_NO_RFC3779=ON \
 	-DOPENSSL_NO_SCTP=ON \
 	-DOPENSSL_NO_SSL_TRACE=ON \
-	-DOPENSSL_NO_SSL2=ON \
-	-DOPENSSL_NO_SSL3=ON \
+	-DOPENSSL_NO_SSL3=OFF \
 	-DOPENSSL_NO_STORE=ON \
 	-DOPENSSL_NO_UNIT_TEST=ON \
 	-DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
 	-DOPENSSL_NO_ASAN=ON \
 	-DOPENSSL_NO_ASM=ON \
 	-DOPENSSL_NO_CRYPTO_MDEBUG=ON \
-	-DOPENSSL_NO_CRYPTO_MDEBUG_BACKTRACE=ON \
 	-DOPENSSL_NO_DEVCRYPTOENG=ON \
 	-DOPENSSL_NO_EGD=ON \
 	-DOPENSSL_NO_EXTERNAL_TESTS=ON \
 	-DOPENSSL_NO_FUZZ_AFL=ON \
 	-DOPENSSL_NO_FUZZ_LIBFUZZER=ON \
-	-DOPENSSL_NO_HEARTBEATS=ON \
 	-DOPENSSL_NO_MSAN=ON \
 	-DOPENSSL_NO_UBSAN=ON \
 	-DOPENSSL_NO_UNIT_TEST=ON \
 	-DOPENSSL_NO_WEAK_SSL_CIPHERS=ON \
-	-DOPENSSL_NO_STATIC_ENGINE=ON \
-	-DOPENSSL_NO_AFALGENG=ON"
+	-DOPENSSL_NO_STATIC_ENGINE=OFF \
+	-DOPENSSL_STATIC_ENGINE=ON \
+	-DOPENSSL_THREADS=ON \
+	-DBUILD_TESTING=ON \
+	-DOPENSSL_NO_AFALGENG=ON \
+	-DOPENSSL_ZLIB=ON \
+	-DOPENSSL_BUILD_DOCS=OFF"
 
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+
+
+		# if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
+		# 	# LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./openssl/apps/speed.c"
+		# 	# Patch Configure to build for tvOS, not iOS
+		# 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./openssl/Configure"
+		# fi
+
+		rm -f CMakeCache.txt *.a *.o
 		cmake  .. \
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
+			-DBUILD_TESTING=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
+			-DNO_FORK=ON \
+			-DOPENSSL_OCSP=OFF \
+			-DOPENSSL_CMP=OFF \
+			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
-            ${BUILD_OPTS_CMAKE} \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            ${DEFS} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
@@ -127,8 +146,7 @@ function build() {
 			-DCMAKE_MACOSX_BUNDLE=OFF \
 			-DENABLE_ARC=OFF \
 			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF \
-			-G Xcode
+			-DENABLE_VISIBILITY=OFF
 		cmake --build . --config Release --target install
         cd ..
 
@@ -141,121 +159,66 @@ function build() {
         if [ -d "build_${TYPE}_${ARCH}" ]; then
 		    rm -rf "build_${TYPE}_${ARCH}"
 		fi
+
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+
+	    if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
+			DEFS="$DEFS -DOPENSSL_ASM=OFF"
+	    fi
+
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        pwd
-
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        rm -f CMakeCache.txt *.a *.o *.lib
+        CUSTOM_DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
      
         cmake .. ${DEFS} \
+			${CUSTOM_DEFS} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DCMAKE_BUILD_TYPE=Release \
-            -DOPENSSL_INSTALL_MAN=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            ${BUILD_OPTS_CMAKE} \
             ${CMAKE_WIN_SDK} \
+            -DOPENSSL_TARGET_ARCH=$BUILD_PLATFORM \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
 
         cmake --build . --config Release --target install
 
         cd ..
-
-	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-
-		
-  
-		# # make sure backed up if multiplatform compiling apothecary 
-  		cp "apps/speed.c" "apps/speed.c.orig"
-		cp "test/drbgtest.c" "test/drbgtest.c.orig"
-		cp "apps/ocsp.c" "apps/ocsp.c.orig"
-		cp "crypto/async/arch/async_posix.c" "crypto/async/arch/async_posix.c.orig"
-		cp "crypto/ui/ui_openssl.c" "crypto/ui/ui_openssl.c.orig"
-		
-
-		
-            if [ "${TYPE}" == "tvos" ]; then
-
-                # Patch apps/speed.c to not use fork()
-                sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "apps/speed.c"
-                sed -i -- 's/fork()/-1/' "./test/drbgtest.c"
-				sed -i -- 's/!defined(OPENSSL_NO_POSIX_IO)/defined(HAVE_FORK)/' "./apps/ocsp.c"
-				sed -i -- 's/fork()/-1/' "./apps/ocsp.c"
-				sed -i -- 's/!defined(OPENSSL_NO_ASYNC)/defined(HAVE_FORK)/' "./crypto/async/arch/async_posix.h"
-				# Patch Configure to build for tvOS, not iOS
-				sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./Configure"
-
-				
-                echo "tvos patched files for fork() issue and tvOS changes"
-                EXTRA_FLAGS="-DNO_FORK"
-            else
-            	EXTRA_FLAGS=""
-            fi
-
-
-            echo "building $TYPE | $PLATFORM"
-        echo "--------------------"
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		cmake  .. \
-			-DCMAKE_C_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD=17 \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            ${BUILD_OPTS_CMAKE} \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-			-DPLATFORM=$PLATFORM \
-			-DENABLE_BITCODE=OFF \
-			-DCMAKE_MACOSX_BUNDLE=OFF \
-			-DENABLE_ARC=OFF \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF
-		cmake --build . --config Release --target install
-        cd ..
-
-        
-
 	elif [ "$TYPE" == "android" ]; then
 
 		if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
 	    	echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
 	    	return
 		fi
-
-
-		 source ../../android_configure.sh $ABI make
-
-		 #wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
-		 # source ./setenv-android.sh
+		source ../../android_configure.sh $ABI make
+		#wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
+		# source ./setenv-android.sh
 		echo "NDK_ROOT: $NDK_ROOT"
 
 		export RELEASE=2.6.37
 		export SYSTEM=android
 		export ARCH=arm
 		export CROSS_COMPILE="arm-linux-androideabi-"
-
-
-
 		export ANDROID_SYSROOT="$SYSROOT"
 		#export SYSROOT="$ANDROID_SYSROOT"
 		export NDK_SYSROOT="$ANDROID_SYSROOT"
@@ -295,12 +258,10 @@ function build() {
 
 		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 
-
-
-
 		export BUILD_TO_DIR=build_$ABI
 		CURRENTPATH=`pwd`
 		mkdir -p BUILD_TO_DIR
+		rm -f CMakeCache.txt *.a *.o 
 		echo "Build Dir $BUILD_TO_DIR"
 		export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
 		# echo "./Config:"
@@ -340,9 +301,6 @@ function build() {
 		    export CONFIGURE="android-x86"
 		fi
 		
-		
-		
-
 		echo "PATH:$PATH"
 		#export PATH=-I${SYSROOT}/usr/lib/
 		export OUTPUT_DIR=
@@ -367,34 +325,15 @@ function build() {
 		rm $SYSROOT/usr/lib/crtend_android.o
 		rm $SYSROOT/usr/lib/crtend_so.o
 
-		#ake all
-		
-		
-		# cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS="-I$CURRENTPATH/include $BUILD_OPTS"  ..
-		# make VERBOSE=1
-		# mkdir -p inst
-		# make DESTDIR="inst" install 
-
 	else
-
-		# cd build-linux-x86_64
-  #       - cmake ../ -DBUILD_OPENSSL=ON -DOPENSSL_BUILD_VERSION=$OPENSSL_BUILD_VERSION -DOPENSSL_BUILD_HASH=$OPENSSL_BUILD_HASH -DOPENSSL_INSTALL_MAN=ON -DOPENSSL_ENABLE_TESTS=ON
-  #       - chmod -R 777 .  
-
 		echoWarning "TODO: build $TYPE lib"
-
 	fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	
-	if [[ "$TYPE" == "osx" || "$TYPE" == "ios" || "$TYPE" == "tvos" ]] ; then
-		# if [ -f build/$TYPE/include/openssl/opensslconf.h ]; then
-		# 	mv build/$TYPE/include/openssl/opensslconf.h build/$TYPE/include/openssl/opensslconf_${TYPE}.h
-		# fi
-		# cp -RHv build/$TYPE/include/openssl/* $1/include/openssl/
-		# cp -v $FORMULA_DIR/opensslconf.h $1/include/openssl/opensslconf.h
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
@@ -403,28 +342,29 @@ function copy() {
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
-
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libssl.a
 
 	elif [ "$TYPE" == "vs" ]; then
 		mkdir -p $1/include    
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-
         FILE_POSTFIX=-x64
         if [ ${ARCH} == "32" ]; then
         	FILE_POSTFIX=""
         fi
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib 
-        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl-1_1${FILE_POSTFIX}.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib
+        cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib
+        . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libssl.lib
+
 	elif [ "$TYPE" == "android" ] ; then
 		if [ -d $1/lib/$TYPE/$ABI ]; then
 			rm -r $1/lib/$TYPE/$ABI
 		fi
 		mkdir -p $1/lib/$TYPE/$ABI
 		cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
-		# cp -rv build_$ABI/crypto/*.a $1/lib/$TYPE/$ABI/
-		mv include/openssl/opensslconf_android.h include/openssl/opensslconf.h
 	fi
 
 	# copy license file
@@ -438,30 +378,18 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 	
-	if [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]] ; then
-		make clean
-		# clean up old build folder
-		rm -rf /build
-		# clean up compiled libraries
-		rm -rf /lib
-		# reset files back to original if
-		cp "crypto/ui/ui_openssl.c.orig" "crypto/ui/ui_openssl.c"
-		cp "Makefile.orig" "Makefile"
-		cp "Configure.orig" "Configure"
-		# if [ "$TYPE" == "vs" ] ; then
-		# 	cmd //c buildwin.cmd ${VS_VER}0 clean static_md both Win32 nosamples notests
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+		    rm -r build_${TYPE}_${PLATFORM}
+		fi
 	elif [ "$TYPE" == "vs" ] ; then
 		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    # Delete the folder and its contents
-		    rm -r build_${TYPE}_${ARCH}	    
+		    rm -r build_${TYPE}_${ARCH}
 		fi
-	elif [[ "$TYPE" == "osx" ]] ; then
-		make clean
-		# clean up old build folder
-		rm -rf /build
-		# clean up compiled libraries
-		rm -rf /lib
-		rm -rf *.a
+	elif [ "$TYPE" == "android" ] ; then
+		if [ -d "build_${TYPE}_${ABI}" ]; then
+		    rm -r build_${TYPE}_${ABI}
+		fi
 	else
 		echoWarning "TODO: clean $TYPE lib"
 		make clean

@@ -40,6 +40,8 @@ else
     GIT_BRANCH="N/A"
 fi
 
+
+
 if [ -z "${BINARY_SEC+x}" ]; then
     BINARY_SEC=${2:-}
 fi
@@ -48,37 +50,43 @@ if [ -z "${VERSION+x}" ]; then
     VERSION=${2:-}
 fi
 
+secure() { 
+BINARY_SEC=$1
+OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
+FILENAME=$(basename "$BINARY_SEC")
+FILENAME_WITHOUT_EXT="${FILENAME%.*}"
 
-# If OUTPUT_LOCATION is not set, and if the second argument is not provided,
-# set OUTPUT_LOCATION to the directory of BINARY_SEC
-if [ -z "${OUTPUT_LOCATION+x}" ]; then
-    if [ -z "$2" ]; then
-        if [ -n "$BINARY_SEC" ]; then
-            OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
-        else
-            OUTPUT_LOCATION=.
-        fi
-    else
-        OUTPUT_LOCATION=$2
-    fi
-    echo "OUTPUT_LOCATION: $OUTPUT_LOCATION"
-fi
+echo "OUTPUT_LOCATION: $OUTPUT_LOCATION"
 
 # Calculate SHA hash for the provided binary, if available
 BINARY_SHA=$(calculate_hash "$BINARY_SEC")
 
-OUTPUT_FILE="${OUTPUT_LOCATION:-.}/version.json"
+# OUTPUT_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.json"
+# 
+# Create or overwrite the .json file
+# cat <<EOF > "$OUTPUT_FILE"
+# {
+#   "buildTime": "$BUILD_TIME",
+#   "gitHash": "$GIT_HASH",
+#   "gitBranch": "$GIT_BRANCH",
+#   "gitUrl": "$GIT_URL",
+#   "binarySha": "$BINARY_SHA",
+#   "binary": "$FILENAME",
+#   "version": "$VER",
+# }
+# EOF
+# cat "$OUTPUT_FILE"
 
-# Create or overwrite the version.json file
-cat <<EOF > "$OUTPUT_FILE"
-{
-  "buildTime": "$BUILD_TIME",
-  "gitHash": "$GIT_HASH",
-  "gitBranch": "$GIT_BRANCH",
-  "binarySha": "$BINARY_SHA",
-  "version": "$VERSION",
-}
+OUTPUT_PKL_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.pkl"
+
+# Create or overwrite the .pkl file - Pkl simple Key = Value
+cat <<EOF > "$OUTPUT_PKL_FILE"
+buildTime = "$BUILD_TIME"
+gitUrl = "$GIT_URL"
+binarySha = "$BINARY_SHA"
+binary = $FILENAME"
+version = "$VER"
 EOF
+cat "$OUTPUT_PKL_FILE"
 
-# Display the contents of the version.json file
-cat "$OUTPUT_FILE"
+}

@@ -51,6 +51,7 @@ function build() {
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o
 		cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
@@ -83,7 +84,7 @@ function build() {
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 	    mkdir -p "build_${TYPE}_${ARCH}"
 	    cd "build_${TYPE}_${ARCH}"
-
+			rm -f CMakeCache.txt *.lib *.o
 	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
 	    VS_DEFS="
 	        -DRTAUDIO_API_WASAPI=ON \
@@ -126,6 +127,7 @@ function build() {
 		local API="--with-wasapi --with-ds " # asio as well?
 		mkdir -p build
 		cd build
+		rm -f CMakeCache.txt *.a *.o
 		cmake .. -G "Unix Makefiles" \
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
@@ -151,8 +153,10 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv build_${TYPE}_${ARCH}/Release/include/rtaudio/* $1/include/
-    	cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
-    	cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
+    cp -vf "build_${TYPE}_${ARCH}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
+    cp -vf "build_${TYPE}_${ARCH}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
+   	. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/rtaudio.lib
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		cd build
@@ -163,7 +167,9 @@ function copy() {
 	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
-    	cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
+    cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
+    . "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/librtaudio.a
 	fi
 
 	# copy license file

@@ -27,7 +27,6 @@ function download() {
 	mv glew-$VER glew
 	rm glew-$VER.tgz
 
-
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -40,12 +39,13 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
 		echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o 
 		cmake  ../build/cmake \
 			-DCMAKE_C_STANDARD=17 \
 			-DCMAKE_CXX_STANDARD=17 \
@@ -80,6 +80,7 @@ function build() {
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
 
+		rm -f CMakeCache.txt *.lib *.o 
 		DEFS="-DLIBRARY_SUFFIX=${ARCH}"
 
 		cmake ../build/cmake ${DEFS} \
@@ -119,19 +120,21 @@ function copy() {
 	# headers
 	rm -rf $1/include
 	mkdir -p $1/include
-	
-	
 
 	# libs
-	if [ "$TYPE" == "osx" ] ; then
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
 		cp -v -r build_${TYPE}_${PLATFORM}/Release/lib/libGLEW.a $1/lib/$TYPE/$PLATFORM/libGLEW.a
+		. "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libGLEW.a
 	elif [ "$TYPE" == "vs" ] ; then
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/		
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         # cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32_s.dll
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libglew32.lib" $1/lib/$TYPE/$PLATFORM/libglew32.lib
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libglew32.lib
 	elif [ "$TYPE" == "msys2" ] ; then
 		# TODO: add cb formula
 		mkdir -p $1/lib/$TYPE

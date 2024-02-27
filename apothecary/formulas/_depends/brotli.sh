@@ -41,7 +41,7 @@ function build() {
       GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
       mkdir -p "build_${TYPE}_${PLATFORM}"
       cd "build_${TYPE}_${PLATFORM}"
-
+      rm -f CMakeCache.txt *.a *.o *.lib
       # if [ "$PLATFORM" == "ARM64EC" ] ; then
       #   echo "ARM64EC platform detected, exiting build function."
       #   return
@@ -72,8 +72,36 @@ function build() {
       cmake --build . --config Release
      	cd ..      
       rm -f CMakeCache.txt
-  elif [ "$TYPE" == "osx" ] ; then
-  	echo "TODO"
+  elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o 
+    cmake .. \
+      -DCMAKE_INSTALL_PREFIX=Release \
+        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+        -D BUILD_SHARED_LIBS=OFF \
+        -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+        -DZLIB_BUILD_EXAMPLES=OFF \
+        -DSKIP_EXAMPLE=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF 
+
+     cmake --build . --config Release --target install
+     cd ..
 	fi
 }
 
@@ -81,20 +109,29 @@ function build() {
 function copy() {
   mkdir -p $1/lib/$TYPE
 	if [ "$TYPE" == "osx" ] ; then
-		echo "TODO"
-		return
+		mkdir -p $1/include    
+    mkdir -p $1/lib/$TYPE/$PLATFORM/
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
+    cp -v "build_${TYPE}_${PLATFORM}/Release/lib/brotli.a" $1/lib/$TYPE/$PLATFORM/brotli.a
+    . "$SECURE_SCRIPT"
+    secure $1/lib/$TYPE/$PLATFORM/zlib.a 
 	elif [ "$TYPE" == "vs" ] ; then
 		cp -v -r c/include/* $1/include
     mkdir -p $1/lib/$TYPE/$PLATFORM/
     cp -v "build_${TYPE}_${PLATFORM}/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
-
 	fi
 }
 
 # executed inside the lib src dir
 function clean() {
 	if [ "$TYPE" == "vs" ] ; then
-		echo "TODO"
+    if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+        rm -r build_${TYPE}_${PLATFORM}     
+    fi
+  elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+        rm -r build_${TYPE}_${PLATFORM}     
+    fi
 	else
 		make uninstall
 		make clean

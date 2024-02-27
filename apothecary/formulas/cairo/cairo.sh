@@ -30,7 +30,7 @@ GIT_URL=http://anongit.freedesktop.org/git/cairo
 GIT_TAG=$VER
 URL=https://www.cairographics.org/releases/
 
-GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}.tar.bz2
+GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}
 
 
 # download the source code and unpack it into LIB_NAME
@@ -38,7 +38,17 @@ function download() {
 
 	. "$DOWNLOADER_SCRIPT"
 
-	downloader ${GIT_LAB}
+	if [ "$TYPE" == "vs" ] ; then
+		downloader ${GIT_LAB}.zip
+		unzip -qq "cairo-$VER.zip"
+        rm -f "cairo-$VER.zip"
+		mv cairo-$VER cairo
+	else
+		downloader ${GIT_LAB}.tar.bz2
+		tar -xf cairo-$VER.tar.bz2
+		mv cairo-$VER cairo
+		rm cairo-$VER.tar.bz2
+	fi
 	#downloader https://cairographics.org/releases/cairo-$VER.tar.xz
 	# local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
 	# if [ "$CHECKSHA" != "$SHA1" ] ; then
@@ -47,9 +57,6 @@ function download() {
     # else
     #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     # fi
-	tar -xf cairo-$VER.tar.bz2
-	mv cairo-$VER cairo
-	rm cairo-$VER.tar.bz2
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -143,6 +150,7 @@ function build() {
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.a *.o *.lib
         DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -209,6 +217,7 @@ function build() {
 
 	    mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
+         rm -f CMakeCache.txt *.a *.o 
         DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=17 \
@@ -279,9 +288,13 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
+    	. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libcairo.lib
 	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/$PLATFORM/libcairo.a
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 	fi
 
