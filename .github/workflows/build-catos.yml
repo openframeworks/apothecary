@@ -66,7 +66,7 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Update Release arm64
+      - name: Update Release XCFramework
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: johnwbyrd/update-release@v1.0.0
         with:
@@ -74,13 +74,4 @@ jobs:
           tag: ${{ env.release }}
           release: ${{ env.release }}
           prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_arm64_${{ matrix.bundle }}.tar.bz2
-      - name: Update Release 64
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: johnwbyrd/update-release@v1.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.release }}
-          release: ${{ env.release }}
-          prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_x86_64_${{ matrix.bundle }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
