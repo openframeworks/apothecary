@@ -33,7 +33,7 @@ if [ -z "${OVERWRITE+x}" ]; then
 fi
 
 if [ -z "${XCFRAMEWORK+x}" ]; then
-    XCFRAMEWORK=1
+    XCFRAMEWORK=0
 fi
 
 

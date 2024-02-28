@@ -15,17 +15,16 @@ fi
 OF_LIBS=${OF_ROOT}/libs
 OF_ADDONS=${OF_ROOT}/addons
 
-# control 
 if [ -z "${BUILD_LIBRARIES+x}" ]; then
     BUILD_LIBRARIES=1
 fi
 
 if [ -z "${MOVE_LIBRARIES+x}" ]; then
-    MOVE_LIBRARIES=1
+    MOVE_LIBRARIES=0
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    PLATFORM=ios
+    PLATFORM=macos
 fi
 
 # if [ -z "${ARCH+x}" ]; then
@@ -37,7 +36,7 @@ if [ -z "${OVERWRITE+x}" ]; then
 fi
 
 if [ -z "${XCFRAMEWORK+x}" ]; then
-    XCFRAMEWORK=0
+    XCFRAMEWORK=1
 fi
 
 
@@ -52,50 +51,6 @@ echo "OF_ADDONS: $OF_ADDONS"
 echo "ROOT: $ROOT"
 echo "APOTHECARY_PATH: $APOTHECARY_PATH"
 echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
-
-
-build_libraries() {
-    # List of architectures
-    ARCH_LIST=("arm64" "x86_64" "SIM_arm64")
-
-    # # Loop over each architecture
-    # for ARCH in "${ARCH_LIST[@]}"; do
-    #     echo "Building for architecture: $ARCH"
-
-    #     # Inner loop for bundles
-    #     for BUNDLE_NO in {1..4}; do
-    #         echo "Building $PLATFORM $ARCH bundle $BUNDLE_NO"
-
-    #         # Call the build script with the current architecture and bundle number
-    #         ${SCRIPT_DIR}/build_${PLATFORM}_${ARCH}.sh ${BUNDLE_NO}
-
-    #         # Check for successful completion
-    #         if [ $? -ne 0 ]; then
-    #             echo "Error building $PLATFORM $ARCH bundle $BUNDLE_NO"
-    #             exit 1
-    #         fi
-    #     done
-    # done
-
-    # Loop over each bundle
-    for BUNDLE_NO in {1..3}; do
-        echo "Building bundle $BUNDLE_NO"
-
-        # Inner loop for each architecture
-        for ARCHE in "${ARCH_LIST[@]}"; do
-            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-
-            # Call the build script with the current bundle number and architecture
-            ${SCRIPT_DIR}/build_${PLATFORM}_${ARCHE}.sh ${BUNDLE_NO}
-
-            # Check for successful completion
-            if [ $? -ne 0 ]; then
-                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-                exit 1
-            fi
-        done
-    done
-}
 
 # move built libraries to openFrameworks libs directory
 move_libraries() {
@@ -126,7 +81,7 @@ build_xcframework() {
     echo "build_xcframework"
     ${SCRIPT_DIR}/build_xcframework.sh
     if [ $? -ne 0 ]; then
-        echo "Error building build_xcframework $PLATFORM$ARCHE"
+        echo "Error building $PLATFORM$ARCHE"
         exit 1
     fi
 }
@@ -156,7 +111,7 @@ sort_libraries() {
                 rm -rf ${addon_path}
             fi
             mkdir -p $addon_path
-            if ! command -v rsync &> /dev/null; then      
+            if ! command -v rsync &> /dev/null; then
                 cp -av ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
             else
                 rsync -av ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
@@ -168,9 +123,6 @@ sort_libraries() {
     done
 }
 
-if [ ${BUILD_LIBRARIES} == 1 ]; then
-   build_libraries
-fi
 
 if [ ${XCFRAMEWORK} == 1 ]; then
    build_xcframework
@@ -178,7 +130,7 @@ fi
 
 if [ ${MOVE_LIBRARIES} == 1 ]; then
 
-  echo "========================"
+   echo "========================"
 
    echo "Moving Latest Libraries to openFrameworks core libs directory"
    move_libraries
@@ -192,4 +144,3 @@ if [ ${MOVE_LIBRARIES} == 1 ]; then
 fi
 
 echo "Apothecary openFrameworks Build and installation complete."
-
