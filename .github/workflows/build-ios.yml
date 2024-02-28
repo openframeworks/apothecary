@@ -58,6 +58,19 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
+      - name: Package Binaries for Artifact
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Upload binaries as Artifact
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: actions/upload-artifact@v3
+        with:
+          name: xcframework-${{ env.TARGET }}-${{ matrix.bundle }}
+          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
       - name: Merge our iOS libaries into XC Framework 
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/ios/xcframework_all.sh

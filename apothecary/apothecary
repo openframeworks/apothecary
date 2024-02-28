@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# this is the OpenFrameworks library apothecary,
+# this is the openFrameworks library apothecary,
 # it mixes formulas and potions to build and update the C/C++ lib dependencies
 #
 # formulas are simple scripts which implement the download, build, copy, & clean
@@ -10,8 +10,9 @@
 # Core OF lib formulas are located in the formulas dir and addon formulas should
 # be in addons/ofxMyAddon/scripts/formulas
 #
-# 2014 OpenFrameworks team
+# 2014 openFrameworks team
 # 2013 Dan Wilcox <danomatika@gmail.com>,
+# 2024 Dan Rosser <danoli3@gmail.com>,
 # supported by the CMU Studio for Creative Inquiry: http://studioforcreativeinquiry.org
 #
 # references:
@@ -182,6 +183,10 @@ VS_COMPILER=MSVC #Compiler - MSVC by Default - Clang LLVM available now
 VS_HOST=amd64
 TARGET_WIN_11=0
 
+if [ -z "${XCFRAMEWORK_ALL+x}" ]; then
+    export XCFRAMEWORK_ALL=false
+fi
+
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
 
@@ -228,6 +233,8 @@ options:
   -p 	dont build dependencies
 
   -h	print this usage guide
+
+  -x xcframework all
 
 examples:
   # update all core libs and addon libs
@@ -323,7 +330,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:m:c:hgvfpew opt ; do
+while getopts t:a:b:d:s:j:m:c:hgvfpewx opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
@@ -355,6 +362,8 @@ while getopts t:a:b:d:s:j:m:c:hgvfpew opt ; do
            export VS_COMPILER="$OPTARG" ;;
         m) # set the -m parameter for make
            export MULTITHREADED_TYPE="$OPTARG" ;;
+        x) # set the -x xcframeworks build
+           export XCFRAMEWORK_ALL="$OPTARG" ;;
 		[?]) # print help and exit
 			echo "$HELP" ; exit 0 ;;
 	esac
@@ -1326,6 +1335,7 @@ function cleanFormula() {
 }
 
 function frameworkFormula() {
+
     LIBS_DIR_REAL=$(realpath $LIBS_DIR)
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
@@ -1341,7 +1351,7 @@ function frameworkFormula() {
 
         if ((BASH_VERSINFO[0] < 4)); then
             echo "The current version of Bash does not support associative arrays."
-            echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}" 
+            echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
             echo "brew install bash"
             exit 1
         fi
@@ -1357,7 +1367,7 @@ function frameworkFormula() {
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
             ["VISIONOS"]="SIMULATOR64_VISIONOS" # And again, for VISIONOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS" 
+            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
         declare -a merged_dirs=()
@@ -1391,7 +1401,7 @@ function frameworkFormula() {
                         for dir in "${merged_dirs[@]}"; do
                             if [[ "$dir" == "$PATH_MERGE" ]]; then
                                 path_found_in_array=true
-                                break 
+                                break
                             fi
                         done
                         if [[ $path_found_in_array == false ]]; then
@@ -1404,7 +1414,7 @@ function frameworkFormula() {
                             for dir in "${merged_dirs[@]}"; do
                                 if [[ "$dir" == "$PATH_MERGE" ]]; then
                                     path_found_in_array=true
-                                    break 
+                                    break
                                 fi
                             done
                             if [[ $path_found_in_array == false ]]; then
@@ -1447,6 +1457,7 @@ function frameworkFormula() {
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
         cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
@@ -1457,10 +1468,168 @@ function frameworkFormula() {
                 rm -rf "$dir"
             fi
         done
+        echo "========================"
+        cd $HERE_DIR
+    fi
+}
 
+function xframeworkFormula() {
+
+    LIBS_DIR_REAL=$(realpath $LIBS_DIR)
+    PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos") #watchos
+    if [ ! -e "$LIBS_DIR/$1" ] ; then
+        echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
+    else
+        rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
+
+        echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
+        xcframework_flags=""
+
+        if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
+            exit 0;
+        fi
+        if [  ! -e "$LIBS_DIR_REAL/$1/lib/$TYPE" && $TYPE == "macos" ]; then
+            mkdir -p $LIBS_DIR_REAL/$1/lib/$TYPE
+        fi
+
+        if ((BASH_VERSINFO[0] < 4)); then
+            echo "The current version of Bash does not support associative arrays."
+            echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
+            echo "brew install bash"
+            exit 1
+        fi
+
+        declare -A ARCH_PAIRS=(
+            ["MAC"]="MAC_ARM64"
+            ["MAC_CATALYST"]="MAC_CATALYST_ARM64"
+            ["SIMULATOR64"]="SIMULATORARM64"
+            ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
+            ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
+            ["WATCHOS"]="WATCHOS" # Same note as TVOS
+            ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
+            ["OS64"]="OS64"
+            ["WATCHOS"]="WATCHOS"
+            ["VISIONOS"]="SIMULATOR64_VISIONOS" # And again, for VISIONOS
+            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS"
+        )
+        # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
+        declare -a merged_dirs=()
+        for CURRENT_TYPE in "${PLATFORM_TYPES[@]}"; do
+            if [ -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" ]; then
+                echo "Processing platform type: $CURRENT_TYPE"
+                for ARCH in "${!ARCH_PAIRS[@]}"; do
+                    PAIR="${ARCH_PAIRS[$ARCH]}"
+                    DIR_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/"
+                    echo "ARCH: $ARCH"
+                    if [ -d "$DIR_PATH" ]; then
+                        MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}"
+                        declare -a archive_paths=()
+                        while IFS= read -r -d $'\0' file; do
+                            archive_paths+=("$file")
+                        done < <(find "$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/" -name "*.a" -print0)
+                        for path in "${archive_paths[@]}"; do
+                            echo "Archive path: $path"
+                        done
+                        num_archive_paths=${#archive_paths[@]}
+                        for ARCH_FILE in "${archive_paths[@]}"; do
+                            # Determine paired architecture directory
+                            PAIR_FILE="${ARCH_FILE/$ARCH/$PAIR}"
+                            path_found_in_array=false
+                            if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
+                                mkdir -p "$MERGED_DIR"
+                                # Determine the output filename in the merged directory
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
+                                # Use lipo to merge the architectures into a single file - prevents linking errors
+                                xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
+                                # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
+                                xcrun codesign --sign - $MERGED_PATH || true
+                                for dir in "${merged_dirs[@]}"; do
+                                    if [[ "$dir" == "$PATH_MERGE" ]]; then
+                                        path_found_in_array=true
+                                        break
+                                    fi
+                                done
+                                if [[ $path_found_in_array == false ]]; then
+                                    merged_dirs+=("$PATH_MERGE")
+                                fi
+                            else
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
+                                xcrun codesign --sign - $MERGED_PATH || true
+                                if [[ "$num_archive_paths" -gt 1 ]]; then
+                                    for dir in "${merged_dirs[@]}"; do
+                                        if [[ "$dir" == "$PATH_MERGE" ]]; then
+                                            path_found_in_array=true
+                                            break
+                                        fi
+                                    done
+                                    if [[ $path_found_in_array == false ]]; then
+                                        merged_dirs+=("$PATH_MERGE")
+                                    fi
+                                else
+                                    if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
+                                        xcframework_flags+=" -library $MERGED_PATH"
+                                    fi
+                                fi
+                            fi
+                        done
+                    fi
+                done
+            else
+                echoVerbose "Platform type directory does not exist: $LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE"
+            fi
+        done
+
+        # Final merging pass to combine binaries of same / merged architectures into single binary to prevent linking issues
+        for dir in "${merged_dirs[@]}"; do
+            echo "Processing directory: $dir"
+            rm -f "${dir}/lib${1}_combined.a"
+            a_files=($(find "$dir" -name '*.a' -print0 | xargs -0))
+            num_files=${#a_files[@]}
+            if [ "$num_files" -gt 1 ]; then
+                echo "Multiple archives found in $dir. Commencing the merge..."
+                libtool -static -o "${dir}/lib${1}_combined.a" "${a_files[@]}"
+                # echo "Merged into ${dir}/lib${1}_combined.a"
+                lipo -info "${dir}/lib${1}_combined.a"
+                xcrun codesign --sign - "${dir}/lib${1}_combined.a" || true
+                if [[ ! "$xcframework_flags" =~ "${dir}/lib${1}_combined.a" ]]; then
+                    xcframework_flags+=" -library ${dir}/lib${1}_combined.a"
+                fi
+            else
+                # Directly use the single archive or skip if none
+                xcframework_flags+=" -library ${a_files[0]}"
+             fi
+        done
+
+        xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
+
+        echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
+        HERE_DIR=$(cd $(dirname "./"); pwd -P)
+        cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
+        xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+        echoSuccess " xcframework for $TYPE built successfully."
+        echo "========================"
+        # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
+        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        for dir in $dirs; do
+            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+                echo "Removing directory: $dir"
+                rm -rf "$dir"
+            fi
+        done
         echo "========================"
         cd $HERE_DIR
 
+        xcframework_path="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
+
+        # Loop over each .a file found within the xcframework
+        find "$xcframework_path" -type f -name "*.a" | while read -r lib_a; do
+            echo "Securing $lib_a..."
+            lipo -info "$lib_a"
+            xcrun codesign --sign - "$lib_a" || true
+            . "$SECURE_SCRIPT"
+            secure "$lib_a"
+        done
     fi
 }
 
@@ -1924,8 +2093,11 @@ case "$A_CMD" in
 		doCommand 1 cleanFormula $@ ;;
 
     framework)
-        doCommand 1 frameworkFormula $@ ;;
-
+        if [ "$XFRAMEWORKALL" == "true" ]; then
+            doCommand 1 xframeworkFormula $@
+        else
+            doCommand 1 frameworkFormula $@
+        fi ;;
 	remove)
 		if [ ! -e $BUILD_DIR ] ; then
 			echoInfo " Nothing to remove"

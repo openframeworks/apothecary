@@ -2,7 +2,7 @@ name: build-xcframeworks
 
 on:
   workflow_run:
-    workflows: [build-ios, build-tvos, build-macos, build-catOS]
+    workflows: [build-ios, build-tvos, build-macos, build-catOS, build-visionos]
     types:
       - completed
 jobs:
@@ -40,11 +40,26 @@ jobs:
         run: ls -lah out/
       - name: List output directory ./
         run: ls -lah ./
-      # - name: Merge built libaries into Mega XC Framework
-      #   working-directory: ${{ env.GITHUB_WORKSPACE }}
-      #   run: scripts/macos/xcframework_all.sh
-      #   env:
-      #     GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Merge built libaries into Mega XC Framework
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/macos/xcframework_all.sh
+        env:
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Package Final
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+      - name: Update Release arm64
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: johnwbyrd/update-release@v1.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.release }}
+          release: ${{ env.release }}
+          prerelease: ${{ env.prerelease }}
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
