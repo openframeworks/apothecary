@@ -330,7 +330,7 @@ echoVerbose() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:m:c:hgvfpewx opt ; do
+while getopts t:a:b:d:s:j:m:c:x:hgvfpew opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
@@ -363,7 +363,7 @@ while getopts t:a:b:d:s:j:m:c:hgvfpewx opt ; do
         m) # set the -m parameter for make
            export MULTITHREADED_TYPE="$OPTARG" ;;
         x) # set the -x xcframeworks build
-           export XCFRAMEWORK_ALL="$OPTARG" ;;
+           export XCFRAMEWORK_ALL=true;;
 		[?]) # print help and exit
 			echo "$HELP" ; exit 0 ;;
 	esac
