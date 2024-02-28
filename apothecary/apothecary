@@ -1477,6 +1477,8 @@ function xframeworkFormula() {
 
     LIBS_DIR_REAL=$(realpath $LIBS_DIR)
     PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos") #watchos
+    VERSION=""
+    DEFINES=""
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
     else
@@ -1530,6 +1532,14 @@ function xframeworkFormula() {
                         for path in "${archive_paths[@]}"; do
                             echo "Archive path: $path"
                         done
+                        PKL_PATH=$(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" -type f -name "*.pkl")
+                        if [ ! -z "$PKL_PATH" ]; then
+                            # Using grep and cut to extract version and DEFINES
+                            VERSION=$(grep 'version =' "$PKL_PATH" | cut -d '"' -f 2)
+                            # Adjust the grep pattern once DEFINES is added to your .pkl format
+                            DEFINES=$(grep 'defines =' "$PKL_PATH" | cut -d '"' -f 2)
+                            # echo "Found VERSION: $VERSION, DEFINES: $DEFINES in $PKL_PATH"
+                        fi
                         num_archive_paths=${#archive_paths[@]}
                         for ARCH_FILE in "${archive_paths[@]}"; do
                             # Determine paired architecture directory
@@ -1621,14 +1631,13 @@ function xframeworkFormula() {
         cd $HERE_DIR
 
         xcframework_path="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
-
         # Loop over each .a file found within the xcframework
         find "$xcframework_path" -type f -name "*.a" | while read -r lib_a; do
             echo "Securing $lib_a..."
             lipo -info "$lib_a"
             xcrun codesign --sign - "$lib_a" || true
-            . "$SECURE_SCRIPT"
-            secure "$lib_a"
+             . "$SECURE_SCRIPT"
+            secure "$lib_a" "$VERSION" "$DEFINES"
         done
     fi
 }
@@ -2093,7 +2102,7 @@ case "$A_CMD" in
 		doCommand 1 cleanFormula $@ ;;
 
     framework)
-        if [ "$XFRAMEWORKALL" == "true" ]; then
+        if [ "$XCFRAMEWORK_ALL" == "true" ]; then
             doCommand 1 xframeworkFormula $@
         else
             doCommand 1 frameworkFormula $@

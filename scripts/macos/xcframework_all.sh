@@ -24,7 +24,7 @@ if [ -z "${MOVE_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    PLATFORM=osx
+    PLATFORM=macos
 fi
 
 # if [ -z "${ARCH+x}" ]; then
