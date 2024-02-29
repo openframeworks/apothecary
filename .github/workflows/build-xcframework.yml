@@ -37,8 +37,6 @@ jobs:
         run: |
           find -name '*.tar.gz' -exec tar -xzvf {} -C out \;
       - name: List output directory out
-        run: ls -lah out/
-      - name: List output directory ./
         run: ls -lah ./
       - name: Merge built libaries into Mega XC Framework
         working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -52,7 +50,7 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release arm64
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.repository == 'openframeworks/apothecary' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: johnwbyrd/update-release@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
