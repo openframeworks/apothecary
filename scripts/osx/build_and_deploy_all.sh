@@ -187,5 +187,5 @@ if [ ${MOVE_LIBRARIES} == 1 ]; then
    echo "========================"
 fi
 
-echo "Apothecary openFrameworks Build and installation complete."
+echo "Apothecary openFrameworks $PLATFORM dependencies Build and installation complete"
 

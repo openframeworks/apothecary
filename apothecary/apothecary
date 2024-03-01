@@ -1490,7 +1490,7 @@ function xframeworkFormula() {
         if [[ $1 == "fmod" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "libusb" ]] || [[ $1 == "utf8" ]]; then
             exit 0;
         fi
-        if [  ! -e "$LIBS_DIR_REAL/$1/lib/$TYPE" && $TYPE == "macos" ]; then
+        if [[  ! -e "$LIBS_DIR_REAL/$1/lib/$TYPE" ]] && [[ $TYPE == "macos" ]]; then
             mkdir -p $LIBS_DIR_REAL/$1/lib/$TYPE
         fi
 
@@ -1620,13 +1620,13 @@ function xframeworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        for dir in $dirs; do
-            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
-                echo "Removing directory: $dir"
-                rm -rf "$dir"
-            fi
-        done
+        # dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        # for dir in $dirs; do
+        #     if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+        #         echo "Removing directory: $dir"
+        #         rm -rf "$dir"
+        #     fi
+        # done
         echo "========================"
         cd $HERE_DIR
 
