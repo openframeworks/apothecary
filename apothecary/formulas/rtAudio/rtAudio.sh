@@ -30,7 +30,7 @@ function download() {
 	downloader ${GIT_URL}/archive/refs/tags/$VER.tar.gz
 	tar -xf ${VER}.tar.gz
 	mv rtaudio-${VER} rtaudio
-	rm rtaudio-${VER}.tar.gz
+	rm ${VER}.tar.gz
 }
 
 # # prepare the build environment, executed inside the lib src dir
