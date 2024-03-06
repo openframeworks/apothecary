@@ -26,10 +26,11 @@ URL=https://www.music.mcgill.ca/~gary/rtaudio/release/
 function download() {
 	#curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
 	. "$DOWNLOADER_SCRIPT"
-	downloader ${URL}/rtaudio-${VER}.tar.gz
-	tar -xf rtaudio-${VER}.tar.gz
-	mv rtaudio-${VER} rtAudio
-	rm rtaudio-${VER}.tar.gz
+	# downloader ${URL}/rtaudio-${VER}.tar.gz 
+	downloader ${GIT_URL}/archive/refs/tags/$VER.tar.gz
+	tar -xf ${VER}.tar.gz
+	mv rtaudio-${VER} rtaudio
+	rm ${VER}.tar.gz
 }
 
 # # prepare the build environment, executed inside the lib src dir

@@ -84,7 +84,7 @@ cat <<EOF > "$OUTPUT_PKL_FILE"
 buildTime = "$BUILD_TIME"
 gitUrl = "$GIT_URL"
 binarySha = "$BINARY_SHA"
-binary = $FILENAME"
+binary = "$FILENAME"
 version = "$VER"
 EOF
 cat "$OUTPUT_PKL_FILE"

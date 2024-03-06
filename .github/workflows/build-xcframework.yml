@@ -30,12 +30,12 @@ jobs:
       - name: Scripts Install
         run: ./scripts/macos/install.sh
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: out
       - name: Extract Artifacts to /out
         run: |
-          find -name '*.tar.gz' -exec tar -xzvf {} -C out \;
+          find out -name '*.zip' -exec unzip -d out/ {} \;
       - name: List output directory out
         run: ls -lah ./
       - name: Merge built libaries into Mega XC Framework
