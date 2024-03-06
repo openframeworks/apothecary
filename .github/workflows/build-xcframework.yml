@@ -2,7 +2,7 @@ name: build-xcframeworks
 
 on:
   workflow_run:
-    workflows: [build-ios, build-tvos, build-macos, build-catOS, build-visionos]
+    workflows: [build-ios, build-tvos, build-macos, build-catOS, build-xros, build-watchos, build-xros]
     types:
       - completed
 jobs:

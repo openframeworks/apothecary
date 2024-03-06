@@ -1,4 +1,4 @@
-name: build-catOS
+name: build-catos
 
 on:
   push:

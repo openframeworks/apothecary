@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten" )
+FORMULA_TYPES=( "osx" "ios" "catos" "xros" "tvos" "vs" "android" "emscripten" )
 
 # define the version
 
