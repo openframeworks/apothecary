@@ -1,4 +1,4 @@
-name: build-catOS
+name: build-xros
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       matrix:
         bundle: [1, 2, 3]
     env:
-      TARGET: "catos"
+      TARGET: "xros"
       BUNDLE: ${{ matrix.bundle }}
       DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
     steps:
@@ -34,25 +34,31 @@ jobs:
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
-        run: ./scripts/catos/install.sh
-      - name: Build Catalyst arm64
+        run: ./scripts/tvos/install.sh
+      - name: Build VisionOS
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
-          TARGET: "catos"
+          TARGET: "xros"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: arm64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Build Catalyst x86_64
+      - name: Build VisionOS
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
-          TARGET: "catos"
+          TARGET: "xros"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: x86_64
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: List output directory
-        run: ls -lah out/
+      - name: Build VisionOS SIMULATOR arm64
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          TARGET: "xros"
+          BUNDLE: ${{ matrix.bundle }}
+          ARCH: SIM_arm64
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package Binaries for Artifact
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -64,16 +70,17 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: actions/upload-artifact@v4
         with:
-          name: mac-cataylst-libs-${{ env.TARGET }}-${{ matrix.bundle }}
+          name: xros-libs-${{ env.TARGET }}-${{ matrix.bundle }}
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.zip
           retention-days: 2
-      - name: Merge our iOS libaries into XC Framework 
+      - name: List output directory
+        run: ls -lah out/
+      - name: Merge our tvOS libaries into XC Framework 
         working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/catos/xcframework_all.sh
+        run: scripts/tvos/xcframework_all.sh
         env:
-          TARGET: "catos"
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package
