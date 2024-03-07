@@ -30,7 +30,6 @@ jobs:
             echo "release=bleeding" >> $GITHUB_ENV
             echo "prerelease=true" >> $GITHUB_ENV
           fi
-      - uses: actions/github-script@v7
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
         run: ./scripts/calculate_formulas.sh
