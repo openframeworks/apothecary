@@ -1,18 +1,56 @@
 name: build-xcframeworks
 
 on:
-  workflow_run:
-    workflows: [build-ios, build-tvos, build-macos, build-catOS, build-xros, build-watchos, build-xros]
+  push:
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
+
+
+    workflows: [, build-tvos, build-macos, build-catos, build-xros, build-watchos, build-xros]
     types:
       - completed
 jobs:
-  on-success:
+  wait-for-workflows:
+    runs-on: [ubuntu-latest]
+    steps:
+    - name: Wait build-ios
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-ios.yml'
+    - name: Wait build-macos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-macos.yml'
+    - name: Wait build-xros
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-xros.yml'
+    - name: Wait build-catos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-catos.yml'
+    - name: Wait build-tvos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-tvos.yml'
+    - name: Wait build-watchos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-watchos.yml'
+  build-xcframework:
     runs-on: macos-14
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     env:
       DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
     steps:
-      - run: echo 'The triggering workflow passed'
       - name: Determine Release
         id: vars
         shell: bash
@@ -24,18 +62,19 @@ jobs:
             echo "release=bleeding" >> $GITHUB_ENV
             echo "prerelease=true" >> $GITHUB_ENV
           fi
+      - uses: actions/github-script@v7
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/macos/install.sh
-      - name: Download all artifacts
-        uses: actions/github-script@v7
+      - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: out
+          pattern: libs-*
+          merge-multiple: true
       - name: Extract Artifacts to /out
         run: |
           find out -name '*.zip' -exec unzip -d out/ {} \;
@@ -61,8 +100,3 @@ jobs:
           release: ${{ env.release }}
           prerelease: ${{ env.prerelease }}
           files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
