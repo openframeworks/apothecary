@@ -62,7 +62,11 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/macos/install.sh
+<<<<<<< HEAD
       - name: Download All Artifacts
+=======
+      - name: Download all artifacts
+>>>>>>> actions
         uses: actions/download-artifact@v4
         with:
           run-id: ${{ github.event.workflow_run.id }}

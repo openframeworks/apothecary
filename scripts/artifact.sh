@@ -283,13 +283,13 @@ fi
 
 # fi
 
-TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
+TARBALL=../openFrameworksLibs_${CUR_BRANCH}_$TARGET$OPT$ARCH$BUNDLE.tar.bz2
 if [ "$TARGET" == "msys2" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
+    TARBALL=../openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "vs" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+    TARBALL=../openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
@@ -297,11 +297,11 @@ elif [ "$TARGET" == "emscripten" ]; then
     echo "tar cjf $TARBALL $LIBS"
     echo " a $TARBALL $LIBS"
 elif [ "$TARGET" == "android" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
+    TARBALL=../openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
     echo "tar cjf $TARBALL $LIBS"
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip
+    TARBALL=../openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip
     echo "zip -r ${TARBALL} ${LIBS}"
     zip -r "${TARBALL}" ${LIBS}
 else

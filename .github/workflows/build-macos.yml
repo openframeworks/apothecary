@@ -67,7 +67,7 @@ jobs:
           name: libs-macos-${{ env.TARGET }}-${{ matrix.bundle }}
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.zip
+          path: openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.zip
           retention-days: 2
       - name: Merge our libaries into XC Framework 
         working-directory: ${{ env.GITHUB_WORKSPACE }}
