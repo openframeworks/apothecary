@@ -42,6 +42,7 @@ jobs:
         workflow: 'build-watchos.yml'
   build-xcframework:
     runs-on: macos-14
+    needs: wait-for-workflows
     env:
       DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
     steps:
