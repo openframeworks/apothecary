@@ -67,6 +67,8 @@ jobs:
         with:
           run-id: ${{ github.event.workflow_run.id }}
           path: out
+          repository: openframeworks/apothecary
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           pattern: libs-*
           merge-multiple: true
       - name: Extract Artifacts to /out
