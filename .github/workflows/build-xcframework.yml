@@ -100,6 +100,7 @@ jobs:
               const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
               fs.writeFileSync(artifactPath, Buffer.from(download.data));
               console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
+            }
       - name: Extract Artifacts to /out
         run: |
           find out -name '*.zip' -exec unzip -d out/ {} \;
