@@ -8,6 +8,10 @@ on:
     paths-ignore:
       - '**/README.md'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-macos-platforms:
     runs-on: macos-14

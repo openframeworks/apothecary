@@ -61,8 +61,6 @@ if [ "$BUNDLE" == "1" ]; then
             "assimp"
             "FreeImage"
             "glew"
-            "glm"
-            "json"
             "kiss"
             "pugixml"
             "utf8"
@@ -77,6 +75,8 @@ if [ "$BUNDLE" == "1" ]; then
     elif [ "$BUNDLE" == "2" ]; then
         if [[ "$TARGET" =~ ^(osx)$ ]]; then
             FORMULAS=(
+                "glm"
+                "json"
                 "zlib"
                 "glfw"
                 "opencv"
@@ -86,6 +86,8 @@ if [ "$BUNDLE" == "1" ]; then
             )
         else
             FORMULAS=(
+                "glm"
+                "json"
                 "opencv"
             )
         fi

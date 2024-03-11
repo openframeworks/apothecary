@@ -6,6 +6,12 @@ on:
   pull_request:
     paths-ignore:
       - "**/README.md"
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+  
 jobs:
   # build-linux-arm6:
   #       runs-on: ubuntu-latest
