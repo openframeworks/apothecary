@@ -62,19 +62,43 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/macos/install.sh
-<<<<<<< HEAD
-      - name: Download All Artifacts
-=======
-      - name: Download all artifacts
->>>>>>> actions
-        uses: actions/download-artifact@v4
+      - name: 'Download all artifacts'
+        uses: actions/github-script@v7
         with:
-          run-id: ${{ github.event.workflow_run.id }}
-          path: out
-          repository: openframeworks/apothecary
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          pattern: libs-*
-          merge-multiple: true
+          script: |
+            const fs = require('fs');
+            const { Octokit } = require("@octokit/core");
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+            const path = require('path');
+
+            // Ensure the output directory exists
+            const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
+            if (!fs.existsSync(outputDir)){
+              fs.mkdirSync(outputDir);
+            }
+
+            // List all artifacts for the repository
+            const artifacts = await octokit.request('GET /repos/openframeworks/apothecary/actions/artifacts', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 15
+            });
+
+            for (const artifact of artifacts.data.artifacts) {
+              
+              const downloadResponse = await octokit.request(artifact.archive_download_url, {
+                method: 'GET',
+                headers: {
+                  authorization: `token ${process.env.GITHUB_TOKEN}`,
+                },
+                responseType: 'arraybuffer',
+              });
+
+              const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
+              fs.writeFileSync(artifactPath, Buffer.from(downloadResponse.data));
+              console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
+            }
       - name: Extract Artifacts to /out
         run: |
           find out -name '*.zip' -exec unzip -d out/ {} \;
