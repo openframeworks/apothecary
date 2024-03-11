@@ -105,8 +105,10 @@ jobs:
       - name: Extract Artifacts to /out
         run: |
           find out -name '*.zip' -exec unzip -d out/ {} \;
-      - name: List output directory out
+      - name: List output directory
         run: ls -lah ./
+      - name: List output directory out
+        run: ls -lah ./out
       - name: Merge built libaries into Mega XC Framework
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/macos/xcframework_all.sh
@@ -126,4 +128,4 @@ jobs:
           tag: ${{ env.release }}
           release: ${{ env.release }}
           prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}.tar.bz2

@@ -1461,13 +1461,13 @@ function frameworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        for dir in $dirs; do
-            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
-                echo "Removing directory: $dir"
-                rm -rf "$dir"
-            fi
-        done
+        # dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        # for dir in $dirs; do
+        #     if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+        #         echo "Removing directory: $dir"
+        #         rm -rf "$dir"
+        #     fi
+        # done
         echo "========================"
         cd $HERE_DIR
     fi
@@ -1476,7 +1476,7 @@ function frameworkFormula() {
 function xframeworkFormula() {
 
     LIBS_DIR_REAL=$(realpath $LIBS_DIR)
-    PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos") #watchos
+    PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos" "watchos")
     VERSION=""
     DEFINES=""
     if [ ! -e "$LIBS_DIR/$1" ] ; then
@@ -1521,24 +1521,21 @@ function xframeworkFormula() {
                 echo "Processing platform type: $CURRENT_TYPE"
                 for ARCH in "${!ARCH_PAIRS[@]}"; do
                     PAIR="${ARCH_PAIRS[$ARCH]}"
-                    DIR_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/"
+                    DIR_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$ARCH/"
                     echo "ARCH: $ARCH"
                     if [ -d "$DIR_PATH" ]; then
-                        MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}"
+                        MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}"
                         declare -a archive_paths=()
                         while IFS= read -r -d $'\0' file; do
                             archive_paths+=("$file")
-                        done < <(find "$LIBS_DIR_REAL/$1/lib/$TYPE/$ARCH/" -name "*.a" -print0)
+                        done < <(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$ARCH/" -name "*.a" -print0)
                         for path in "${archive_paths[@]}"; do
                             echo "Archive path: $path"
                         done
                         PKL_PATH=$(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" -type f -name "*.pkl")
                         if [ ! -z "$PKL_PATH" ]; then
-                            # Using grep and cut to extract version and DEFINES
                             VERSION=$(grep 'version =' "$PKL_PATH" | cut -d '"' -f 2)
-                            # Adjust the grep pattern once DEFINES is added to your .pkl format
                             DEFINES=$(grep 'defines =' "$PKL_PATH" | cut -d '"' -f 2)
-                            # echo "Found VERSION: $VERSION, DEFINES: $DEFINES in $PKL_PATH"
                         fi
                         num_archive_paths=${#archive_paths[@]}
                         for ARCH_FILE in "${archive_paths[@]}"; do
@@ -1548,8 +1545,8 @@ function xframeworkFormula() {
                             if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
                                 mkdir -p "$MERGED_DIR"
                                 # Determine the output filename in the merged directory
-                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
-                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}/
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
                                 # Use lipo to merge the architectures into a single file - prevents linking errors
                                 xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
                                 # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
@@ -1564,7 +1561,7 @@ function xframeworkFormula() {
                                     merged_dirs+=("$PATH_MERGE")
                                 fi
                             else
-                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                                 xcrun codesign --sign - $MERGED_PATH || true
                                 if [[ "$num_archive_paths" -gt 1 ]]; then
                                     for dir in "${merged_dirs[@]}"; do
@@ -1620,13 +1617,13 @@ function xframeworkFormula() {
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
         # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        # dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        # for dir in $dirs; do
-        #     if [[ ! "$dir" =~ .*.xcframework$ ]]; then
-        #         echo "Removing directory: $dir"
-        #         rm -rf "$dir"
-        #     fi
-        # done
+        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+        for dir in $dirs; do
+            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
+                echo "Removing directory: $dir"
+                rm -rf "$dir"
+            fi
+        done
         echo "========================"
         cd $HERE_DIR
 
