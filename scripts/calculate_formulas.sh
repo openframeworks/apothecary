@@ -44,7 +44,7 @@ FORMULAS=(
 )
 
 # Seperate in bundles on osx
-if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 if [ "$BUNDLE" == "1" ]; then
 
         FORMULAS=(
@@ -75,7 +75,7 @@ if [ "$BUNDLE" == "1" ]; then
 
         )
     elif [ "$BUNDLE" == "2" ]; then
-        if [[ "$TYPE" =~ ^(osx)$ ]]; then
+        if [[ "$TARGET" =~ ^(osx)$ ]]; then
             FORMULAS=(
                 "zlib"
                 "glfw"
