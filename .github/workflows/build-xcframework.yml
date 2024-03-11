@@ -104,7 +104,13 @@ jobs:
             }
       - name: Extract Artifacts to /out
         run: |
-          find out -name '*.zip' -exec unzip -v -o -d out/ {} \;
+          mkdir -p out
+          for zip in out/*.zip; do
+              echo "Extracting $zip..."
+              unzip -o "$zip" -d out/
+          done
+          echo "Extraction complete."
+          rm out/*.zip
       - name: List output directory
         run: ls -lah ./
       - name: List output directory out
