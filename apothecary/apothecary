@@ -1532,10 +1532,19 @@ function xframeworkFormula() {
                         for path in "${archive_paths[@]}"; do
                             echo "Archive path: $path"
                         done
-                        PKL_PATH=$(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" -type f -name "*.pkl")
-                        if [ ! -z "$PKL_PATH" ]; then
+                        PKL_PATH=$(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" -type f -name "*.pkl" | head -n 1)
+                        if [[ -n "$PKL_PATH" ]]; then
+                            echo "Found PKL file at $PKL_PATH"
                             VERSION=$(grep 'version =' "$PKL_PATH" | cut -d '"' -f 2)
                             DEFINES=$(grep 'defines =' "$PKL_PATH" | cut -d '"' -f 2)
+                            if [[ -z "$VERSION" ]]; then
+                                echo "No version info found in PKL file"
+                            fi
+                            if [[ -z "$DEFINES" ]]; then
+                                echo "No defines info found in PKL file."
+                            fi
+                        else
+                            echo "NO Found PKL file at $1 - $CURRENT_TYPE"
                         fi
                         num_archive_paths=${#archive_paths[@]}
                         for ARCH_FILE in "${archive_paths[@]}"; do
