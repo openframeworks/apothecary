@@ -104,13 +104,23 @@ jobs:
             }
       - name: Extract Artifacts to /out
         run: |
-          mkdir -p out
-          for zip in out/*.zip; do
-              echo "Extracting $zip..."
-              unzip -o "$zip" -d out/
+          cd out
+          mkdir -p extract_here
+          for zip in *.zip; do
+              echo "Extracting $zip into temporary directory..."
+              unzip -o "$zip" -d extract_here
           done
-          echo "Extraction complete."
-          rm out/*.zip
+          for dir in extract_here/*/; do
+            if [ -d "$dir" ]; then
+                subdir_name=$(basename "$dir")
+                mkdir -p "./$subdir_name"
+                echo " moving ${dir} to ${subdir_name}"
+                rsync -avh --ignore-existing "$dir" "./$subdir_name"
+            fi
+          done
+          rm -rf extract_here
+          rm *.zip
+          cd ..
       - name: List output directory
         run: ls -lah ./
       - name: List output directory out
