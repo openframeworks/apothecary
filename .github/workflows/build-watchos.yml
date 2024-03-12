@@ -77,6 +77,11 @@ jobs:
           name: libs-watchos-${{ env.TARGET }}-${{ matrix.bundle }}
           path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 2
+      - name: Remove .tar.bz2 files
+        run: |
+          echo "Removing .tar.bz2 files from out/ directory..."
+          rm -f out/*.tar.bz2
+          echo "Cleanup complete."
       - name: List output directory
         run: ls -lah out/
       - name: Merge our watch libaries into XC Framework 
