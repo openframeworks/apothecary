@@ -75,9 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libs-watchos-${{ env.TARGET }}-${{ matrix.bundle }}
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path: openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.zip
+          path: openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 2
       - name: List output directory
         run: ls -lah out/
