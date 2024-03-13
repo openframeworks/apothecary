@@ -150,9 +150,9 @@ function build() {
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
 
-		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c17"
-		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c++17"
-		export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
+		export CFLAGS="$CFLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c17"
+		export CXXFLAGS="$CFLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c++17"
+		export LDFLAGS="$LDFLAGS -shared"
 
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
