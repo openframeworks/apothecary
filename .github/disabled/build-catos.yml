@@ -72,11 +72,12 @@ jobs:
           path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 2
       - name: Remove .tar.bz2 files
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
           echo "Cleanup complete."
-      - name: Merge our iOS libaries into XC Framework 
+      - name: Merge our iOS libaries into XC Framework
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/catos/xcframework_all.sh
         env:
@@ -84,6 +85,7 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
         env:
