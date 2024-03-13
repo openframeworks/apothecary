@@ -85,7 +85,7 @@ jobs:
             const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              per_page: 15
+              per_page: 18
             });
 
             for (const artifact of artifacts.data.artifacts) {

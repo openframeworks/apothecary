@@ -17,7 +17,7 @@ else
     export BUNDLE=$BUNDLE_NO
 fi
 
-export TARGET=osx
+export TARGET=macos
 export ARCH=arm64
 export NO_FORCE=ON
 export XFRAMEWORKALL=TRUE

@@ -47,7 +47,13 @@ BUILD_DEPENDENCIES=1
 
 # build settings
 HOST_OS= # compile os ("osx", "windows", "linux")
-TYPE= # library build type ("osx", "ios", "vs", etc)
+# library build type ("osx", "ios", "vs", etc)
+if [ -z "${TYPE+x}" ]; then
+    echo "No TYPE argument provided."
+    TYPE=
+else
+    echo "Argument TYPE 1: $TYPE"
+fi
 ARCH=64 # library build arch, 32 or 64 bit (not used for some build types)
 
 # full path to this script's dir
@@ -811,7 +817,7 @@ get_directory_path() {
         vs)
             final_path="${base_dir}/lib/${type}/${platform}/"
             ;;
-        osx|ios|tvos|xros|catos|watchos)
+        osx|ios|tvos|xros|catos|watchos|macos)
             final_path="${base_dir}/lib/${type}/${platform}/"
             ;;
         emscripten)
@@ -1448,7 +1454,7 @@ function frameworkFormula() {
             else
                 # Directly use the single archive or skip if none
                 xcframework_flags+=" -library ${a_files[0]}"
-             fi
+            fi
         done
 
         xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
@@ -1475,6 +1481,7 @@ function frameworkFormula() {
 
 function xframeworkFormula() {
 
+    TYPE=macos
     LIBS_DIR_REAL=$(realpath $LIBS_DIR)
     PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos" "watchos")
     VERSION=""
@@ -1482,7 +1489,7 @@ function xframeworkFormula() {
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
     else
-        rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
+        # rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 
         echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
         xcframework_flags=""
@@ -1492,6 +1499,10 @@ function xframeworkFormula() {
         fi
         if [[  ! -e "$LIBS_DIR_REAL/$1/lib/$TYPE" ]] && [[ $TYPE == "macos" ]]; then
             mkdir -p $LIBS_DIR_REAL/$1/lib/$TYPE
+        fi
+
+        if [[ $TYPE == "macos" ]]; then
+            echoSuccess "Building macOS xcframework"
         fi
 
         if ((BASH_VERSINFO[0] < 4)); then
@@ -1522,8 +1533,8 @@ function xframeworkFormula() {
                 for ARCH in "${!ARCH_PAIRS[@]}"; do
                     PAIR="${ARCH_PAIRS[$ARCH]}"
                     DIR_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$ARCH/"
-                    echo "ARCH: $ARCH"
                     if [ -d "$DIR_PATH" ]; then
+                        echo "Processing ARCH: $ARCH"
                         MERGED_DIR="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}"
                         declare -a archive_paths=()
                         while IFS= read -r -d $'\0' file; do
@@ -1533,26 +1544,33 @@ function xframeworkFormula() {
                             echo "Archive path: $path"
                         done
                         PKL_PATH=$(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" -type f -name "*.pkl" | head -n 1)
-                        if [[ -n "$PKL_PATH" ]]; then
+                        if [[ -f "$PKL_PATH" ]]; then
                             echo "Found PKL file at $PKL_PATH"
-                            VERSION=$(grep 'version =' "$PKL_PATH" | cut -d '"' -f 2)
-                            DEFINES=$(grep 'defines =' "$PKL_PATH" | cut -d '"' -f 2)
+                            VERSION=$(grep 'version =' "$PKL_PATH" | cut -d '"' -f 2 | xargs) # Use xargs to trim whitespace
+                            echo "VERSION $VERSION"
+                            # DEFINES=$(grep 'defines =' "$PKL_PATH" | cut -d '"' -f 2 | xargs) # Use xargs to trim whitespace
+                            # echo "DEFINES $DEFINES"
                             if [[ -z "$VERSION" ]]; then
-                                echo "No version info found in PKL file"
+                                echo "No version info found in PKL file. Using default."
+                                VERSION="default_version" # Provide a default version or handle error
                             fi
-                            if [[ -z "$DEFINES" ]]; then
-                                echo "No defines info found in PKL file."
-                            fi
+                            # if [[ -z "$DEFINES" ]]; then
+                            #     echo "No defines info found in PKL file. Continuing without defines."
+                            #     # Handle missing defines case or provide default
+                            # fi
                         else
-                            echo "NO Found PKL file at $1 - $CURRENT_TYPE"
+                            echo "No PKL file found at $1 - $CURRENT_TYPE. Ensure .pkl files are present and correctly named."
+                            # Handle error or provide defaults for VERSION and DEFINES
                         fi
                         num_archive_paths=${#archive_paths[@]}
                         for ARCH_FILE in "${archive_paths[@]}"; do
+                            echo "ARCH_FILE: $ARCH_FILE $1 - $CURRENT_TYPE"
                             # Determine paired architecture directory
                             PAIR_FILE="${ARCH_FILE/$ARCH/$PAIR}"
                             path_found_in_array=false
                             if [[ -f "$PAIR_FILE" && "$ARCH" != "$PAIR" ]]; then
                                 mkdir -p "$MERGED_DIR"
+                                echo "MERGED_DIR: $ARCH - Pair: $PAIR"
                                 # Determine the output filename in the merged directory
                                 PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}/
                                 MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
@@ -1568,9 +1586,14 @@ function xframeworkFormula() {
                                 done
                                 if [[ $path_found_in_array == false ]]; then
                                     merged_dirs+=("$PATH_MERGE")
+                                    echo "path_found_in_array == false adding $PATH_MERGE"
+                                else
+                                    echo "path_found_in_array == true"
                                 fi
                             else
+
                                 MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
+                                echo "MERGED_PATH: $ARCH - $MERGED_PATH"
                                 xcrun codesign --sign - $MERGED_PATH || true
                                 if [[ "$num_archive_paths" -gt 1 ]]; then
                                     for dir in "${merged_dirs[@]}"; do
@@ -1581,10 +1604,16 @@ function xframeworkFormula() {
                                     done
                                     if [[ $path_found_in_array == false ]]; then
                                         merged_dirs+=("$PATH_MERGE")
+                                        echo "path_found_in_array == false adding $PATH_MERGE"
+                                    else
+                                        echo "path_found_in_array == true"
                                     fi
                                 else
                                     if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
                                         xcframework_flags+=" -library $MERGED_PATH"
+                                        echo "xcframework_flags: adding -library $MERGED_PATH"
+                                    else
+                                        echo "xcframework_flags: not adding already in full flags: $xcframework_flags"
                                     fi
                                 fi
                             fi
@@ -1597,6 +1626,7 @@ function xframeworkFormula() {
         done
 
         # Final merging pass to combine binaries of same / merged architectures into single binary to prevent linking issues
+        echo "merged_dirs:"
         for dir in "${merged_dirs[@]}"; do
             echo "Processing directory: $dir"
             rm -f "${dir}/lib${1}_combined.a"
@@ -1625,15 +1655,7 @@ function xframeworkFormula() {
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
-        # echo "=========DANGER ZONE DELETE ALL BINARIES EXCEPT XCFRAMEWORK ==============="
-        dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
-        for dir in $dirs; do
-            if [[ ! "$dir" =~ .*.xcframework$ ]]; then
-                echo "Removing directory: $dir"
-                rm -rf "$dir"
-            fi
-        done
-        echo "========================"
+        
         cd $HERE_DIR
 
         xcframework_path="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
@@ -1644,6 +1666,19 @@ function xframeworkFormula() {
             xcrun codesign --sign - "$lib_a" || true
              . "$SECURE_SCRIPT"
             secure "$lib_a" "$VERSION" "$DEFINES"
+        done
+
+        for PLATFORM in "${PLATFORM_TYPES[@]}"; do
+            PLATFORM_DIR="${LIBS_DIR_REAL}/${1}/lib/$PLATFORM"
+            echo "Cleaning up $PLATFORM platform type..."
+            if [ -d "$PLATFORM_DIR" ]; then
+                dirs_to_clean=$(find "${LIBS_DIR_REAL}/${1}/lib/$PLATFORM/" -mindepth 1 -maxdepth 1 -type d ! -name "*.xcframework")
+                for dir in $dirs_to_clean; do
+                    echo "Removing directory: $dir"
+                    rm -rf "$dir"
+                done
+                rm -rf "$PLATFORM_DIR"
+            fi
         done
     fi
 }
