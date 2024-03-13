@@ -66,6 +66,7 @@ jobs:
         VS_VER: 17
         GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     - name: Package
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
