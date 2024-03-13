@@ -5,7 +5,7 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.42
+VER=1.6.43
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
@@ -30,7 +30,7 @@ function download() {
 		mv "libpng-${VER}" libpng
 		rm "v${VER}.zip"
 	else 
-		echo https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.42.tar.gz
+		echo "https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}.tar.gz"
 		downloader "${URL}.tar.gz"
 		tar -xf "v${VER}.tar.gz"
 		mv "libpng-${VER}" libpng
@@ -150,9 +150,9 @@ function build() {
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
 
-		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c17"
-		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c++17"
-		export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
+		export CFLAGS="$CFLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c17"
+		export CXXFLAGS="$CFLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -std=c++17"
+		export LDFLAGS="$LDFLAGS -shared"
 
 
 		ZLIB_ROOT="$LIBS_ROOT/zlib/"
