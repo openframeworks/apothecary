@@ -5,7 +5,7 @@
 
 # define the version
 MAJOR_VER=16
-VER=1.6.42
+VER=1.6.43
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
@@ -30,7 +30,7 @@ function download() {
 		mv "libpng-${VER}" libpng
 		rm "v${VER}.zip"
 	else 
-		echo https://github.com/pnggroup/libpng/archive/refs/tags/v1.6.42.tar.gz
+		echo "https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}.tar.gz"
 		downloader "${URL}.tar.gz"
 		tar -xf "v${VER}.tar.gz"
 		mv "libpng-${VER}" libpng
