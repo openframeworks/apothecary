@@ -1,14 +1,26 @@
 name: build-xcframeworks
 on:
   push:
+    branches:
+      - master
+      - bleeding
     paths-ignore:
       - '**/README.md'
   pull_request:
+    branches:
+      - master
+      - bleeding
     paths-ignore:
       - '**/README.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   wait-for-workflows:
     runs-on: [ubuntu-latest]
+    if: github.repository == 'openframeworks/apothecary' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
     steps:
     - name: Wait build-ios
       uses: NathanFirmo/wait-for-other-action@v1.0.4
@@ -42,9 +54,11 @@ jobs:
         workflow: 'build-watchos.yml'
   build-xcframework:
     runs-on: macos-14
+    if: github.repository == 'openframeworks/apothecary' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
     needs: wait-for-workflows
     env:
       DEVELOPER_DIR: "/Applications/Xcode_15.2.app/Contents/Developer"
+      TARGET: "macos"
     steps:
       - name: Determine Release
         id: vars
@@ -67,9 +81,6 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const { Octokit } = require("@octokit/core");
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
             const path = require('path');
 
             // Ensure the output directory exists
@@ -79,31 +90,45 @@ jobs:
             }
 
             // List all artifacts for the repository
-            const artifacts = await octokit.request('GET /repos/openframeworks/apothecary/actions/artifacts', {
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              per_page: 15
+              per_page: 18
             });
 
             for (const artifact of artifacts.data.artifacts) {
               
-              const downloadResponse = await octokit.request(artifact.archive_download_url, {
-                method: 'GET',
-                headers: {
-                  authorization: `token ${process.env.GITHUB_TOKEN}`,
-                },
-                responseType: 'arraybuffer',
+              // Download each artifact
+              const download = await github.rest.actions.downloadArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+                archive_format: 'zip',
               });
 
               const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
-              fs.writeFileSync(artifactPath, Buffer.from(downloadResponse.data));
+              fs.writeFileSync(artifactPath, Buffer.from(download.data));
               console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
             }
       - name: Extract Artifacts to /out
         run: |
-          find out -name '*.zip' -exec unzip -d out/ {} \;
-      - name: List output directory out
+          mkdir -p out
+          for zip in out/*.zip; do
+              echo "Extracting $zip..."
+              unzip -o "$zip" -d out/
+          done
+          echo "Extraction complete."
+          rm out/*.zip
+          for tarball in out/*.tar.bz2; do
+              echo "Extracting $tarball..."
+              tar -xjf "$tarball" -C out/
+          done
+          echo ".tar.bz2 extraction complete."
+          rm -f out/*.tar.bz2 
+      - name: List output directory
         run: ls -lah ./
+      - name: List output directory out
+        run: ls -lah ./out
       - name: Merge built libaries into Mega XC Framework
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/macos/xcframework_all.sh
@@ -123,4 +148,4 @@ jobs:
           tag: ${{ env.release }}
           release: ${{ env.release }}
           prerelease: ${{ env.prerelease }}
-          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}.tar.bz2

@@ -301,9 +301,9 @@ elif [ "$TARGET" == "android" ]; then
     echo "tar cjf $TARBALL $LIBS"
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    TARBALL=../openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip
-    echo "zip -r ${TARBALL} ${LIBS}"
-    zip -r "${TARBALL}" ${LIBS}
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2
+    echo "tar cjf ${TARBALL} ${LIBS}"
+    tar cjvf "${TARBALL}" ${LIBS}
 else
     echo "tar cjf $TARBALL $LIBS"
     tar cjvf $TARBALL $LIBS
