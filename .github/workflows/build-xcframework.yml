@@ -32,11 +32,11 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: 'build-macos.yml'
-    # - name: Wait build-xros
-    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     workflow: 'build-xros.yml'
+    - name: Wait build-xros
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-xros.yml'
     - name: Wait build-catos
       uses: NathanFirmo/wait-for-other-action@v1.0.4
       with:
