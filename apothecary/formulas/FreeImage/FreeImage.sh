@@ -11,6 +11,8 @@ FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emsc
 
 # define the version
 
+FORMULA_DEPENDS=( "zlib" "libpng" )
+
  # 3.18.0
 VER=31911
 GIT_URL=https://github.com/danoli3/FreeImage
@@ -60,7 +62,11 @@ function build() {
 		rm -f CMakeCache.txt *.a *.o 
 		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
 		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
-		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"	
+		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
+
+		ZLIB_ROOT="$LIBS_ROOT/zlib/"
+	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 		
 		  DEFS="-DCMAKE_C_STANDARD=17 \
 		        -DCMAKE_CXX_STANDARD=17 \
@@ -91,6 +97,10 @@ function build() {
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
 			-DCMAKE_INSTALL_PREFIX=Release \
 			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+			-DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DBUILD_ZLIB=OFF \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 			-DPLATFORM=$PLATFORM 

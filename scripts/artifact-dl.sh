@@ -11,7 +11,7 @@ fi
 
 OWNER="openframeworks"
 REPO="apothecary"
-PER_PAGE=18
+PER_PAGE=20
 OUTPUT_DIR="./out"
 
 TOKEN="$1"
