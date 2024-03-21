@@ -163,9 +163,9 @@ function copy() {
         secure $1/lib/$TYPE/$ABI/libpugixml.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
-		cp -Rv libpugixml.o $1/lib/$TYPE/libpugixml.o
+		cp -Rv libpugixml.a $1/lib/$TYPE/libpugixml.a
 		. "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/libpugixml.o
+        secure $1/lib/$TYPE/libpugixml.a
 	fi
 	# copy license file
 	if [ -d "$1/license" ]; then
