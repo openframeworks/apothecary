@@ -40,13 +40,13 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_LIBDIR=lib"        
     if [ "$TYPE" == "emscripten" ]; then
-        rm -f libpugixml.o
+        rm -f libpugixml.a
 		# Compile the program
 		emcc -O2 \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o libpugixml.o
+			 -o libpugixml.a
 	elif [ "$TYPE" == "vs" ] ; then
 		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
