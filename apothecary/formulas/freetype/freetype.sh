@@ -359,15 +359,15 @@ function copy() {
     fi
 
 	# copy headers
-	mkdir -p $1/include/freetype2/
+	mkdir -p $1/include/freetype/
 
 	# copy files from the build root
-	cp -R include/* $1/include/freetype2/
+	cp -R include/* $1/include/freetype/
 
 	mkdir -p $1/lib/$TYPE
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -R "build_${TYPE}_${PLATFORM}/Release/include" $1/include
+		cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
 		. "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/$PLATFORM/libfreetype.a
