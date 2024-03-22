@@ -360,10 +360,14 @@ function copy() {
 
 	# copy headers
 	mkdir -p $1/include/freetype2/
+
+	# copy files from the build root
+	cp -R include/* $1/include/freetype2/
+
 	mkdir -p $1/lib/$TYPE
 	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
+		cp -R "build_${TYPE}_${PLATFORM}/Release/include" $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
 		. "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/$PLATFORM/libfreetype.a
@@ -377,17 +381,14 @@ function copy() {
 
 	elif [ "$TYPE" == "msys2" ] ; then
 		# cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
-		cp -R include/* $1/include/freetype2/
 		echoWarning "TODO: copy msys2 lib"
 	elif [ "$TYPE" == "android" ] ; then
 	    rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -R include/* $1/include/freetype2/
 	    cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
 	    . "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/$ABI/libfreetype.a
 	elif [ "$TYPE" == "emscripten" ] ; then
-		cp -R include/* $1/include/freetype2/
 		cp -v "build_${TYPE}/freetype_wasm.wasm" $1/lib/$TYPE/libfreetype.wasm
 		. "$SECURE_SCRIPT"
 		secure $1/lib/$TYPE/libfreetype.wasm
