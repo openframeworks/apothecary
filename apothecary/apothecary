@@ -1369,11 +1369,11 @@ function frameworkFormula() {
             ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
             ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
             ["WATCHOS"]="WATCHOS" # Same note as TVOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
+            ["SIMULATOR_WATCHOS"]="SIMULATOR_WATCHOS"
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
-            ["VISIONOS"]="SIMULATOR64_VISIONOS" # And again, for VISIONOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS"
+            ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
+            ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
         declare -a merged_dirs=()
@@ -1400,6 +1400,7 @@ function frameworkFormula() {
                         # Determine the output filename in the merged directory
                         PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/
                         MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}_${PAIR}/$(basename "$ARCH_FILE" .a).a"
+                        file $ARCH_FILE
                         # Use lipo to merge the architectures into a single file - prevents linking errors
                         xcrun lipo -create "$ARCH_FILE" "$PAIR_FILE" -output "$MERGED_PATH"
                         # echo "Merged $ARCH_FILE and $PAIR_FILE into $MERGED_PATH"
@@ -1522,10 +1523,10 @@ function xframeworkFormula() {
             ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
             ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
             ["WATCHOS"]="WATCHOS" # Same note as TVOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
+            ["SIMULATOR_WATCHOS"]="SIMULATOR_WATCHOS"
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
-            ["VISIONOS"]="SIMULATOR64_VISIONOS" # And again, for VISIONOS
+            ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
             ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
@@ -1662,15 +1663,17 @@ function xframeworkFormula() {
         
         cd $HERE_DIR
 
-        xcframework_path="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
+        XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
         # Loop over each .a file found within the xcframework
-        find "$xcframework_path" -type f -name "*.a" | while read -r lib_a; do
+        find "$XCFRAMEWORK_PATH" -type f -name "*.a" | while read -r lib_a; do
             echo "Securing $lib_a..."
             lipo -info "$lib_a"
             xcrun codesign --sign - "$lib_a" || true
              . "$SECURE_SCRIPT"
             secure "$lib_a" "$VERSION" "$DEFINES"
         done
+
+        # codesign --timestamp -s  $XCFRAMEWORK_PATH
 
         for PLATFORM in "${PLATFORM_TYPES[@]}"; do
             PLATFORM_DIR="${LIBS_DIR_REAL}/${1}/lib/$PLATFORM"
