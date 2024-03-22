@@ -337,7 +337,7 @@ function copy() {
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib       
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/curl.a
