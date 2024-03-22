@@ -1429,6 +1429,7 @@ function frameworkFormula() {
                         else
                             if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
                                 xcframework_flags+=" -library $MERGED_PATH"
+                                xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                             fi
                         fi
                     fi
@@ -1450,14 +1451,16 @@ function frameworkFormula() {
                 xcrun codesign --sign - "${dir}/lib${1}_combined.a" || true
                 if [[ ! "$xcframework_flags" =~ "${dir}/lib${1}_combined.a" ]]; then
                     xcframework_flags+=" -library ${dir}/lib${1}_combined.a"
+                    xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                 fi
             else
                 # Directly use the single archive or skip if none
                 xcframework_flags+=" -library ${a_files[0]}"
+                xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
             fi
         done
 
-        xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
+        
 
         echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
@@ -1611,6 +1614,7 @@ function xframeworkFormula() {
                                 else
                                     if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
                                         xcframework_flags+=" -library $MERGED_PATH"
+                                        xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                                         echo "xcframework_flags: adding -library $MERGED_PATH"
                                     else
                                         echo "xcframework_flags: not adding already in full flags: $xcframework_flags"
@@ -1640,14 +1644,14 @@ function xframeworkFormula() {
                 xcrun codesign --sign - "${dir}/lib${1}_combined.a" || true
                 if [[ ! "$xcframework_flags" =~ "${dir}/lib${1}_combined.a" ]]; then
                     xcframework_flags+=" -library ${dir}/lib${1}_combined.a"
+                    xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                 fi
             else
                 # Directly use the single archive or skip if none
                 xcframework_flags+=" -library ${a_files[0]}"
+                xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
              fi
         done
-
-        xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
 
         echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
