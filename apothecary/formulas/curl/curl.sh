@@ -228,10 +228,13 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
+
+        rm -f ${OPENSSL_PATH}/lib/libssl.a || true
+        rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
+        rm -f ${ZLIB_ROOT}/lib/zlib.a || true
          
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-
         cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
 
 
@@ -334,7 +337,7 @@ function copy() {
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib       
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/curl.a

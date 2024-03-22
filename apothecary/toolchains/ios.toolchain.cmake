@@ -262,10 +262,10 @@ if(NOT DEFINED DEPLOYMENT_TARGET)
     set(DEPLOYMENT_TARGET "6.0")
   elseif(PLATFORM STREQUAL "MAC")
     # Unless specified, SDK version 10.13 (High Sierra) is used by default as the minimum target version (macos).
-    set(DEPLOYMENT_TARGET "11.0")
+    set(DEPLOYMENT_TARGET "10.15")
   elseif(PLATFORM STREQUAL "VISIONOS" OR PLATFORM STREQUAL "SIMULATOR_VISIONOS" OR PLATFORM STREQUAL "SIMULATOR64_VISIONOS")
     # Unless specified, SDK version 1.0 is used by default as minimum target version (visionOS).
-    set(DEPLOYMENT_TARGET "1.0")
+    set(DEPLOYMENT_TARGET "1.1")
   elseif(PLATFORM STREQUAL "MAC_ARM64")
     # Unless specified, SDK version 11.0 (Big Sur) is used by default as the minimum target version (macOS on arm).
     set(DEPLOYMENT_TARGET "11.0")
@@ -274,10 +274,10 @@ if(NOT DEFINED DEPLOYMENT_TARGET)
     set(DEPLOYMENT_TARGET "11.0")
   elseif(PLATFORM STREQUAL "MAC_CATALYST" OR PLATFORM STREQUAL "MAC_CATALYST_ARM64")
     # Unless specified, SDK version 13.0 is used by default as the minimum target version (mac catalyst minimum requirement).
-    set(DEPLOYMENT_TARGET "13.1")
+    set(DEPLOYMENT_TARGET "15.0")
   else()
     # Unless specified, SDK version 11.0 is used by default as the minimum target version (iOS, tvOS).
-    set(DEPLOYMENT_TARGET "13.0")
+    set(DEPLOYMENT_TARGET "15.0")
   endif()
   message(STATUS "[DEFAULTS] Using the default min-version since DEPLOYMENT_TARGET not provided!")
 elseif(DEFINED DEPLOYMENT_TARGET AND PLATFORM MATCHES "^MAC_CATALYST" AND ${DEPLOYMENT_TARGET} VERSION_LESS "13.1")
