@@ -40,13 +40,13 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_LIBDIR=lib"        
     if [ "$TYPE" == "emscripten" ]; then
-        rm -f libpugixml.o
+        rm -f libpugixml.a
 		# Compile the program
 		emcc -O2 \
 			 -Wall \
 			 -Iinclude \
 			 -c src/pugixml.cpp \
-			 -o libpugixml.o
+			 -o libpugixml.a
 	elif [ "$TYPE" == "vs" ] ; then
 		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
@@ -163,9 +163,9 @@ function copy() {
         secure $1/lib/$TYPE/$ABI/libpugixml.a
 	elif [ "$TYPE" == "emscripten" ] ; then
 	    mkdir -p $1/lib/$TYPE
-		cp -Rv libpugixml.o $1/lib/$TYPE/libpugixml.o
+		cp -Rv libpugixml.a $1/lib/$TYPE/libpugixml.a
 		. "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/libpugixml.o
+        secure $1/lib/$TYPE/libpugixml.a
 	fi
 	# copy license file
 	if [ -d "$1/license" ]; then
