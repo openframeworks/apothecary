@@ -1373,7 +1373,7 @@ function frameworkFormula() {
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
             ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
+            ["SIMULATOR64_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
         declare -a merged_dirs=()
@@ -1415,6 +1415,7 @@ function frameworkFormula() {
                             merged_dirs+=("$PATH_MERGE")
                         fi
                     else
+                        PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/
                         MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                         xcrun codesign --sign - $MERGED_PATH || true
                         if [[ "$num_archive_paths" -gt 1 ]]; then
@@ -1527,7 +1528,7 @@ function xframeworkFormula() {
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
             ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
-            ["SIMULATOR_VISIONOS"]="SIMULATOR_VISIONOS"
+            ["SIMULATOR64_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
         declare -a merged_dirs=()
@@ -1595,7 +1596,7 @@ function xframeworkFormula() {
                                     echo "path_found_in_array == true"
                                 fi
                             else
-
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/
                                 MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                                 echo "MERGED_PATH: $ARCH - $MERGED_PATH"
                                 xcrun codesign --sign - $MERGED_PATH || true
