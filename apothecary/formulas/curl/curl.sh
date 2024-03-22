@@ -228,10 +228,13 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
+
+        rm -f ${OPENSSL_PATH}/lib/libssl.a || true
+        rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
+        rm -f ${ZLIB_ROOT}/lib/zlib.a || true
          
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-
         cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
 
 

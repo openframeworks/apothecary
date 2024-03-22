@@ -52,7 +52,7 @@ if [ -z "${TYPE+x}" ]; then
     echo "No TYPE argument provided."
     TYPE=
 else
-    echo "Argument TYPE 1: $TYPE"
+    echo "TYPE : $TYPE"
 fi
 ARCH=64 # library build arch, 32 or 64 bit (not used for some build types)
 
