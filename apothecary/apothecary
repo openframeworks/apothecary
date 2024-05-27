@@ -1309,12 +1309,7 @@ function buildFormula() {
     export LIBS_DIR_REAL=$(realpath $LIBS_DIR)
 	echo
 	echoInfo " Building \"$1\""
-	echo
-	if [ ! -e $BUILD_DIR/$1 ] ; then
-		echoError " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
-		echoError " Did you download the formula?"
-		exit 1
-	fi
+	
 
     if [ ! -e $1 ] ; then
         if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
@@ -1327,6 +1322,12 @@ function buildFormula() {
                 echoInfo " Precompiled not found or outdated. Continue buildFormula for \"$1\" "
             fi
         fi
+    fi
+    echo 
+    if [ ! -e $BUILD_DIR/$1 ] ; then
+        echoError " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
+        echoError " Did you download the formula?"
+        exit 1
     fi
 	cd $BUILD_DIR/$1
 	# dependencies
@@ -1367,7 +1368,7 @@ function copyFormula() {
     fi
 
 	if [ ! -e $BUILD_DIR/$1 ] ; then
-		echoError " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
+		echoWarning " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
 		echoError " Did you download the formula?"
 		exit 1
 	fi
@@ -1389,8 +1390,8 @@ function cleanFormula() {
 
 	if [ ! -e $BUILD_DIR/$1 ] ; then
 		echoError " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
-		echoError " Did you download the formula?"
-		exit 1
+		echoError " Did you download the formula? Clean build folder however"
+		exit 0
 	fi
 
 	cd $BUILD_DIR/$1
@@ -1964,7 +1965,8 @@ function framework() {
 }
 
 function load() {
-	echoWarning " Load function not implemented"
+    echoWarning " load function not implemented"
+	echo "0"
 }
 
 # do a command on a given dependency in a separate apothecary run
