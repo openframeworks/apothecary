@@ -88,8 +88,8 @@ function build() {
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-		mkdir -p "build_${TYPE}_${ARCH}"
-		cd "build_${TYPE}_${ARCH}"
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
          rm -f CMakeCache.txt *.a *.o *.lib
         cmake  .. \
             -DCMAKE_C_STANDARD=17 \
@@ -124,29 +124,26 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 
+    . "$SECURE_SCRIPT"
+    mkdir -p $1/include
+    if [ -d "$1/license" ]; then
+            rm -rf $1/license
+    fi
+    mkdir -p $1/license
 	if [ "$TYPE" == "vs" ] ; then		
 
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
-    	cp -RvT "build_${TYPE}_${ARCH}/Release/include/pixman-1" $1/include
-
-    	# copy license file
-		if [ -d "$1/license" ]; then
-	        rm -rf $1/license
-	    fi
-		mkdir -p $1/license
-		cp -v COPYING $1/license/LICENSE
-
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
+    	cp -RvT "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
+        secure $1/lib/$TYPE/$PLATFORM/libpixman-1.lib pixman.pkl
 	else # osx
 		# lib
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/pixman/lib/libpixman-1.a" $1/lib/$TYPE/$PLATFORM/libpixman-1.a
     	cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
-
-    	# copy license file
-		mkdir -p $1/license
-		cp -v COPYING $1/license/LICENSE
+        secure $1/lib/$TYPE/$PLATFORM/libpixman-1.a pixman.pkl
 	fi
+    cp -v COPYING $1/license/LICENSE
 
 }
 
