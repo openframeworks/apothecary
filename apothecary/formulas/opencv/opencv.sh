@@ -731,12 +731,8 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
     cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
-
-    secure $1/lib/$TYPE/$PLATFORM/libopencv_core.a opencv.pkl
-    
+    secure $1/lib/$TYPE/libopencv_core.a opencv.pkl
   fi
-
-  
   cp -v LICENSE $1/license/
 
 }
