@@ -99,7 +99,7 @@ version = "$VER"
 buildTime = "$BUILD_TIME"
 type = "$TARGET"
 gitUrl = "$GIT_URL"
-binary = "$FILENAME"
+binary = "$ACTUAL_FILENAME"
 binarySha = "$BINARY_SHA"
 EOF
 #defines = "$DEFINES"
