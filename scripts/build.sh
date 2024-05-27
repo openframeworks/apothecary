@@ -9,11 +9,7 @@ else
     export FORCE=""
 fi
 
-if [ -z "${FORCE+x}" ]; then
-    export FORCE=""
-else
-    export FORCE="-f"
-fi
+
 
 
 # trap any script errors and exit
@@ -224,7 +220,7 @@ fi
 function build(){
     trap "trapError" ERR
 
-    echo Build $formula_name
+    echo "Build $formula_name $FORCE"
 
     local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
 	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
