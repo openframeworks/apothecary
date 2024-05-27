@@ -310,21 +310,19 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	mkdir -p $1/include
+	. "$SECURE_SCRIPT"
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/include/cairo	
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
     	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
-    	. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$PLATFORM/libcairo.lib
+		secure $1/lib/$TYPE/$PLATFORM/libcairo.lib cairo.pkl
 	elif [ "$TYPE" == "osx" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$PLATFORM/libcairo.a
+		secure $1/lib/$TYPE/$PLATFORM/libcairo.a cairo.pkl
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
 	fi
-
 	# copy license files
 	if [ -d "$1/license" ]; then
         rm -rf $1/license
@@ -345,16 +343,14 @@ function clean() {
 	make clean
 }
 
-function save() {
-    . "$SAVE_SCRIPT" 
-    savestatus ${TYPE} "cairo" ${ARCH} ${VER} true "${SAVE_FILE}"
-}
 
 function load() {
-    . "$LOAD_SCRIPT"
-    if loadsave ${TYPE} "cairo" ${ARCH} ${VER} "${SAVE_FILE}"; then
-      return 0;
+     . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "cairo" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${PLATFORM} )
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
     else
-      return 1;
+        echo 0
     fi
 }
