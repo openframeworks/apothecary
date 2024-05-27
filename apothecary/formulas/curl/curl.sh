@@ -330,20 +330,20 @@ function copy() {
 
 	if [ "$TYPE" == "vs" ] ; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/curl/"* $1/ 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/ 
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib  
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib curl.pkl
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/curl/"* $1/include
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/curl.a curl.pkl
 	elif [ "$TYPE" == "android" ] ; then
         #mkdir -p $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build/$TYPE/$ABI/include/curl/* $1/include/curl/
+        cp -Rv build/$TYPE/$ABI/include/* $1/include/curl/
 		# copy lib
         cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
         . "$SECURE_SCRIPT"
