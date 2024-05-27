@@ -701,7 +701,7 @@ function copy() {
 
     cp -Rv "build_${TYPE}_${PLATFORM}/Release/etc/"* $1/etc
 
-    secure $1/lib/$TYPE/$PLATFORM/opencv_core490.lib opencv.pkl
+    secure $1/lib/$TYPE/$PLATFORM/Release/opencv_core490.lib opencv.pkl
 
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
