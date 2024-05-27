@@ -644,6 +644,12 @@ function copy() {
   mkdir -p $1/etc
   . "$SECURE_SCRIPT"
 
+  # copy license file
+  if [ -d "$1/license" ]; then
+    rm -rf $1/license
+  fi
+  mkdir -p $1/license
+
   if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
     mkdir -p $1/lib/$TYPE/$PLATFORM
@@ -651,6 +657,10 @@ function copy() {
     cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
 
     cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4" $1/include/
+
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/share/opencv4/"* $1/etc
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/share/licenses/"* $1/license
+    cp -v LICENSE $1/license/
 
     secure $1/lib/$TYPE/$PLATFORM/libopencv_core.a opencv.pkl
 
@@ -726,11 +736,7 @@ function copy() {
     
   fi
 
-  # copy license file
-  if [ -d "$1/license" ]; then
-    rm -rf $1/license
-  fi
-  mkdir -p $1/license
+  
   cp -v LICENSE $1/license/
 
 }
