@@ -29,16 +29,16 @@ calculate_hash() {
 BUILD_TIME=$(date -u +"%Y-%m-%d T%H:%M:%SZ")
 
 # Check if git is available and repository exists
-if command -v git &>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
-    # Get the current Git commit hash
-    GIT_HASH=$(git rev-parse HEAD)
+# if command -v git &>/dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
+#     # Get the current Git commit hash
+#     GIT_HASH=$(git rev-parse HEAD)
 
-    # Get the current Git branch
-    GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-else
-    GIT_HASH="N/A"
-    GIT_BRANCH="N/A"
-fi
+#     # Get the current Git branch
+#     GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+# else
+#     GIT_HASH="N/A"
+#     GIT_BRANCH="N/A"
+# fi
 
 if [ -z "${BINARY_SEC+x}" ]; then
     BINARY_SEC=${1:-}
@@ -53,8 +53,14 @@ secure() {
     else
         BINARY_SEC=$1
     fi
-    if [ -z "${2+x}" ]; then NAME=""; else
+
+    OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
+    ACTUAL_FILENAME=$(basename "$BINARY_SEC")
+    ACTUAL_FILENAME_WITHOUT_EXT="${ACTUAL_FILENAME%.*}"
+
+    if [ -z "${2+x}" ]; then NAME=$ACTUAL_FILENAME_WITHOUT_EXT; else
         NAME=$2
+        NAME="${NAME%.*}"
     fi
 
     if [ -z "${DEFS+x}" ]; then DEFINES=""; else
@@ -65,8 +71,7 @@ secure() {
         TARGET=$TYPE
     fi
 
-    OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
-    ACTUAL_FILENAME=$(basename "$BINARY_SEC")
+    
     if [ -n "$NAME" ]; then
         FILENAME="$NAME"
     else
@@ -74,6 +79,7 @@ secure() {
     fi
 
     FILENAME_WITHOUT_EXT="${FILENAME%.*}"
+
     # Calculate SHA hash for the provided binary, if available
     BINARY_SHA=$(calculate_hash "$BINARY_SEC")
     # OUTPUT_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.json"
