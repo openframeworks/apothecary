@@ -383,7 +383,7 @@ function copy() {
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -v "build_${TYPE}/lib/libassimp.a" $1/lib/$TYPE/libassimp.a
-        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
+        secure $1/lib/$TYPE/libassimp.a assimp.pkl
     fi
 
     # copy license files
