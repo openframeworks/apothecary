@@ -751,10 +751,12 @@ if [ "$TYPE" = "watchos" ]; then
     export FLAG_RELEASE="-Os"
     if [ $ARCH == "arm64_32" ] || [ $ARCH == "arm64" ]; then
         PLATFORM="WATCHOS"
-    elif [ $ARCH == "SIM_WATCH" ] ; then
+    elif [ $ARCH == "x86_64" ] ; then
         PLATFORM="SIMULATOR_WATCHOS"
     elif [ $ARCH == "SIM_arm64" ]; then
         PLATFORM="SIMULATORARM64_WATCHOS"
+    else
+        echoError "watchOS incorrect ARCH:[$ARCH]"
     fi 
 fi
 
@@ -1670,6 +1672,7 @@ function xframeworkFormula() {
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
         declare -a merged_dirs=()
+        LIB_NAME=""
         for CURRENT_TYPE in "${PLATFORM_TYPES[@]}"; do
             if [ -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" ]; then
                 echo "Processing platform type: $CURRENT_TYPE"
