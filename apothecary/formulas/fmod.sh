@@ -64,8 +64,10 @@ function build() {
 function copy() {
 	cp -r ../fmod/ $1/
 
-	. "$SECURE_SCRIPT"
-	secure $1/lib/$TYPE/libfmod.dylib fmod
+	if [ "$TYPE" == "osx" ]; then
+		. "$SECURE_SCRIPT"
+		secure $1/lib/$TYPE/libfmod.dylib fmod
+	fi
 }
 
 # executed inside the lib src dir
