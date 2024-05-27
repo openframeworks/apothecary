@@ -134,13 +134,13 @@ function copy() {
 
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
-    	cp -RvT "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
+    	cp -RvT "build_${TYPE}_${PLATFORM}/Release/include/pixman-1/"* $1/include
         secure $1/lib/$TYPE/$PLATFORM/libpixman-1.lib pixman.pkl
 	else # osx
 		# lib
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/pixman/lib/libpixman-1.a" $1/lib/$TYPE/$PLATFORM/libpixman-1.a
-    	cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1" $1/include
+    	cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1/"* $1/include
         secure $1/lib/$TYPE/$PLATFORM/libpixman-1.a pixman.pkl
 	fi
     cp -v COPYING $1/license/LICENSE
