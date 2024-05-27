@@ -15,15 +15,17 @@ VER=4.9.0
 FORMULA_DEPENDS=( "zlib" "libpng" )
 
 # tools for git use
-GIT_URL=https://github.com/opencv/opencv.git
+GIT_URL=https://github.com/opencv/opencv
 GIT_TAG=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-  curl -L https://github.com/opencv/opencv/archive/refs/tags/$VER.zip --output opencv-$VER.zip
-  unzip -q opencv-$VER.zip
-  mv opencv-$VER $1
-  rm opencv*.zip
+
+  . "$DOWNLOADER_SCRIPT"
+  downloader $GIT_URL/archive/refs/tags/$VER.tar.gz
+  tar -xzf $VER.tar.gz
+  mv opencv-$VER opencv
+  rm $VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -202,8 +204,8 @@ function build() {
     echoInfo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN - "${PLATFORM}""
     echoInfo "--------------------"
     GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
-    mkdir -p "build_${TYPE}_${ARCH}"
-    cd "build_${TYPE}_${ARCH}"
+    mkdir -p "build_${TYPE}_${PLATFORM}"
+    cd "build_${TYPE}_${PLATFORM}"
     rm -f CMakeCache.txt || true
 
     ZLIB_ROOT="$LIBS_ROOT/zlib/"
@@ -637,57 +639,59 @@ function copy() {
 
   # prepare headers directory if needed
   mkdir -p $1/include
-
   # prepare libs directory if needed
   mkdir -p $1/lib/$TYPE
+  mkdir -p $1/etc
+  . "$SECURE_SCRIPT"
 
   if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
     mkdir -p $1/lib/$TYPE/$PLATFORM
-
     cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a $1/lib/$TYPE/$PLATFORM/
     cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
 
     cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4" $1/include/
 
+    secure $1/lib/$TYPE/$PLATFORM/libopencv_core.a opencv.pkl
+
   elif [ "$TYPE" == "vs" ] ; then
      
-    mkdir -p $1/lib/$TYPE
-    mkdir -p $1/etc
-
-    cp -Rv "build_${TYPE}_${ARCH}/Release/include/opencv2" $1/include/
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv2" $1/include/
     mkdir -p $1/lib/$TYPE/$PLATFORM/
 
     mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
     mkdir -p $1/lib/$TYPE/$PLATFORM/Release
 
-    mkdir -p $1/bin//$PLATFORM/Debug
+    mkdir -p $1/bin/$PLATFORM/Debug
     mkdir -p $1/bin/$PLATFORM/Release
 
     # if [[ "$ARCH" =~ ^(64|x64)$ ]]; then
 
       OUTPUT_FOLDER=${BUILD_PLATFORM}
 
-      cp -v "build_${TYPE}_${ARCH}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-      cp -v "build_${TYPE}_${ARCH}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+    if [ -d "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/" ]; then
 
-      cp -v "build_${TYPE}_${ARCH}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
-      cp -v "build_${TYPE}_${ARCH}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
-    # else
+      cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+      cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
 
-    #   cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-    #   cp -v "build_${TYPE}_${ARCH}/Debug/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+      cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
+      cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
+    else
 
-    #   cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/bin/$PLATFORM/Release
-    #   cp -v "build_${TYPE}_${ARCH}/Debug/bin/"*.dll $1/bin/$PLATFORM/Debug
+      cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+      cp -v "build_${TYPE}_${PLATFORM}/Debug/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
 
-    # fi
+      cp -v "build_${TYPE}_${PLATFORM}/Release/bin/"*.dll $1/bin/$PLATFORM/Release
+      cp -v "build_${TYPE}_${PLATFORM}/Debug/bin/"*.dll $1/bin/$PLATFORM/Debug
 
-    cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-    cp -v "build_${TYPE}_${ARCH}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+    fi
 
+    cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+    cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
 
-    cp -Rv "build_${TYPE}_${ARCH}/Release/etc/" $1/etc
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/etc/"* $1/etc
+
+    secure $1/lib/$TYPE/$PLATFORM/opencv_core490.lib opencv.pkl
 
   elif [ "$TYPE" == "android" ]; then
     if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
@@ -708,6 +712,8 @@ function copy() {
     cp -r $BUILD_FOLDER/install/sdk/native/staticlibs/$ABI/*.a $1/lib/$TYPE/$ABI/
     cp -r $BUILD_FOLDER/install/sdk/native/3rdparty/libs/$ABI/*.a $1/lib/$TYPE/$ABI/
 
+    secure $1/lib/$TYPE/$PLATFORM/libopencv_core.a opencv.pkl
+
   elif [ "$TYPE" == "emscripten" ]; then
     mkdir -p $1/include/opencv2
     cp -Rv "build_${TYPE}/Release/include/" $1/include/
@@ -715,6 +721,8 @@ function copy() {
     cp -R modules/*/include/opencv2/* $1/include/opencv2/
     cp -v build_${TYPE}/Release/lib/*.a $1/lib/$TYPE/
     cp -v build_${TYPE}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/
+
+    secure $1/lib/$TYPE/$PLATFORM/libopencv_core.a opencv.pkl
     
   fi
 
