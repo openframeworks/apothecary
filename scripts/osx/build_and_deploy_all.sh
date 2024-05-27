@@ -96,33 +96,34 @@ build_libraries() {
 # move built libraries to openFrameworks libs directory
 move_libraries() {
 
-    echo "moving libraries from apothecary out to $OF_LIBS"
+    echo 
+    echo " Apothecary - Moving libraries from apothecary out to [$OF_LIBS]"
 
-
-        echo "Source Folder: ${OUTPUT_FOLDER}"
-        echo "Destination Folder: ${OF_LIBS}"
+        echo "  Source Folder: [${OUTPUT_FOLDER}]"
+        echo "  Destination Folder: [${OF_LIBS}]"
 
         if ! command -v rsync &> /dev/null; then
-            echo "Using cp to move libraries..."
+            echo " Using cp to move libraries..."
             for file in "${OUTPUT_FOLDER}"/*; do
-                cp -av "$file" "${OF_LIBS}/"
+                cp -a "$file" "${OF_LIBS}/"
             done
         else
-            echo "Using rsync to move libraries..."
+            echo " Using rsync to move libraries..."
             for file in "${OUTPUT_FOLDER}"/*; do
-                rsync -av "$file" "${OF_LIBS}/"
+                rsync -a "$file" "${OF_LIBS}/"
             done
         fi
 
 
-    echo "Libraries moved to openFrameworks libs directory."
+    echo " Libraries moved to openFrameworks libs directory."
+    echo " "
 }
 
 build_xcframework() {
     echo "build_xcframework"
     ${SCRIPT_DIR}/build_xcframework.sh
     if [ $? -ne 0 ]; then
-        echo "Error building $PLATFORM$ARCHE"
+        echo " Error building $PLATFORM$ARCHE"
         exit 1
     fi
 }
@@ -145,7 +146,7 @@ sort_libraries() {
 
     for ((i=0;i<${#addonslibs[@]};++i)); do
         if [ -e ${OF_LIBS}/${addonslibs[i]} ]; then
-            echo "Copying ${addonslibs[i]} to ${addons[i]}"
+            echo " Copying ${addonslibs[i]} to ${addons[i]}"
             addon_path="${OF_ADDONS}/${addons[i]}/libs/${addonslibs[i]}"
             if [ $OVERWRITE -eq 1 ] && [ -e $addon_path ]; then
                 echo "Removing old ${addonslibs[i]} libraries"
@@ -153,13 +154,13 @@ sort_libraries() {
             fi
             mkdir -p $addon_path
             if ! command -v rsync &> /dev/null; then      
-                cp -av ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
+                cp -a ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
             else
-                rsync -av ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
+                rsync -a ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
             fi
             rm -rf ${OF_LIBS}/${addonslibs[i]}
         else
-            echo "Addon not found at ${OF_LIBS}/${addonslibs[i]}"
+            echo " Addon not found at ${OF_LIBS}/${addonslibs[i]}"
         fi
     done
 }
