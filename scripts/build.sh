@@ -68,7 +68,7 @@ else
         wait $apothecaryPID
 
         echo "Tail of log for $formula_name"
-        run "tail -n 100 formula_${ARCH}.log"
+        run "tail -n 10 formula_${ARCH}.log"
     }
 
     ROOT=$(cd $(dirname "$0"); pwd -P)/..
