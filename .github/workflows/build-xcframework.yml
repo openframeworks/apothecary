@@ -32,26 +32,26 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: 'build-macos.yml'
-    - name: Wait build-xros
-      uses: NathanFirmo/wait-for-other-action@v1.0.4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: 'build-xros.yml'
-    - name: Wait build-catos
-      uses: NathanFirmo/wait-for-other-action@v1.0.4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: 'build-catos.yml'
+    # - name: Wait build-xros
+    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     workflow: 'build-xros.yml'
+    # - name: Wait build-catos
+    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     workflow: 'build-catos.yml'
     - name: Wait build-tvos
       uses: NathanFirmo/wait-for-other-action@v1.0.4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: 'build-tvos.yml'
-    - name: Wait build-watchos
-      uses: NathanFirmo/wait-for-other-action@v1.0.4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: 'build-watchos.yml'
+    # - name: Wait build-watchos
+    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     workflow: 'build-watchos.yml'
   build-xcframework:
     runs-on: macos-14
     if: github.repository == 'openframeworks/apothecary' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
