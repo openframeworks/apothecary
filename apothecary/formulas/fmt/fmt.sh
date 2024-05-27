@@ -215,45 +215,38 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 	mkdir -p $1/include
+	. "$SECURE_SCRIPT"
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ARCH}/Release/lib/fmt.lib" $1/lib/$TYPE/$PLATFORM/fmt.lib
 		cp -RT "build_${TYPE}_${ARCH}/Release/include/" $1/include
+		secure $1/lib/$TYPE/$PLATFORM/fmt.lib fmt.pkl
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		mkdir -p $1/include
 		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$ABI/libfmt.a
+		secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
 	elif [ "$TYPE" == "android" ] ; then
 		mkdir -p $1/lib/$TYPE/$ABI/
-		mkdir -p $1/include
 		cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.lib" $1/lib/$TYPE/$ABI/libfmt.a
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$ABI/libfmt.a
+		secure $1/lib/$TYPE/$ABI/libfmt.a fmt.pkl
 		cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/
-		mkdir -p $1/include
 		cp -v "build_${TYPE}/bin/fmt_wasm.wasm" $1/lib/$TYPE/libfmt.wasm
 		cp -R "build_${TYPE}/Release/include/" $1/include
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/libfmt.wasm
+		secure $1/lib/$TYPE/libfmt.wasm fmt.pkl
 	else
-		mkdir -p $1/include
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$PLATFORM/libfmt.a
+		secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
 
 	# copy license file
 	if [ -d "$1/license" ]; then
-    rm -rf $1/license
-  fi
+		rm -rf $1/license
+  	fi
 	mkdir -p $1/license
 	cp -v LICENSE $1/license/
 }
