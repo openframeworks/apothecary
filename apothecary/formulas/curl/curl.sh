@@ -14,12 +14,12 @@ FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
 FORMULA_DEPENDS=( "openssl" "zlib" )
 
 # define the version by sha
-VER=8_6_0
-VER_D=8.6.0
-SHA1=ec363b8c17ce83af85f4f18f6c5a2f19efd4e0e3
+VER=8.8.0
+VER_D=8_8_0
+SHA1=27b90781ec6353d9b52e88e4802c7436b1ed0529
 
 # tools for git use
-GIT_URL=https://github.com/curl/curl.git
+GIT_URL=https://github.com/curl/curl
 GIT_TAG=$VER
 
 
@@ -28,9 +28,9 @@ function download() {
 
     . "$DOWNLOADER_SCRIPT"
 
-    curl -Lk https://github.com/curl/curl/releases/download/curl-$VER/curl-$VER_D.tar.gz -o curl-$VER.tar.gz   
+    downloader $GIT_URL/releases/download/curl-$VER_D/curl-$VER.tar.gz
     tar -xf curl-$VER.tar.gz
-    mv curl-$VER_D curl 
+    mv curl-$VER curl
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
     if [ "$CHECKSHA" != "$SHA1" ] ; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
@@ -38,8 +38,6 @@ function download() {
         echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     fi
     rm curl*.tar.gz
-    
-    
 	
 }
 
