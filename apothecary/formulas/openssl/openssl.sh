@@ -7,10 +7,10 @@ FORMULA_TYPES=( "vs" "osx" "ios" "xros"  )
 
 FORMULA_DEPENDS=( "zlib" )
 
-VER=3.0.12
-VERDIR=3.2.1
-SHA1=b48e20c07facfdf6da9ad43a6c5126d51897699b
-SHA256=f93c9e8edde5e9166119de31755fc87b4aa34863662f67ddfcba14d0b6b69b61
+VER=3.3.0
+VERDIR=3.3.0
+SHA1=34cdf3259fd2af83ab2c92ac30c56f79ff5ad59e
+SHA256=53e66b043322a606abf0087e7699a0e033a37fa13feb9742df35c3a33b18fb02
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -54,10 +54,10 @@ DEFS=" -DOPENSSL_NO_DEPRECATED=ON \
 function download() {
 
 	. "$DOWNLOADER_SCRIPT"
-	local FILENAME=openssl-$VER
+	FILENAME=openssl-$VER
 
 	if ! [ -f $FILENAME ]; then
-		downloader ${MIRROR}/source/$FILENAME.tar.gz
+		downloader "${MIRROR}/source/${FILENAME}.tar.gz" 
 	fi
 
 	if ! [ -f $FILENAME.sha1 ]; then
@@ -69,14 +69,14 @@ function download() {
 		echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM]- Developer has not updated SHA or Man in the Middle Attack"
     	exit
     else
-    	tar -xf $FILENAME.tar.gz
+    	tar -xf "${FILENAME}.tar.gz"
 		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
 		mv $FILENAME openssl_temp
 		rm $FILENAME.tar.gz
 		rm $FILENAME.tar.gz.sha1
 	fi
 	# Clone the openssl-cmake repository
-	git clone --branch "3.0" --depth=1 $GIT_URL openssl_cmake_temp
+	git clone --branch "3.3" --depth=1 $GIT_URL openssl_cmake_temp
 
 	# Organize directories as needed
 	mkdir -p openssl
