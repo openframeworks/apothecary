@@ -357,7 +357,7 @@ function copy() {
     rm -rf $1/include/*
     cp -Rv include/* $1/include
 
-
+    . "$SECURE_SCRIPT"
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ] ; then            
@@ -369,17 +369,21 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
         cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
         cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
+        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/lib/libassimp.a $1/lib/$TYPE/$PLATFORM/assimp.a
+        secure $1/lib/$TYPE/$PLATFORM/assimp.a assimp.pkl
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_${TYPE}_${ABI}/include/* $1/include
         cp -Rv build_${TYPE}_${ABI}/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
+        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv build_emscripten/include/* $1/include
         cp -v "build_${TYPE}/lib/libassimp.a" $1/lib/$TYPE/libassimp.a
+        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
     fi
 
     # copy license files
