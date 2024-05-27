@@ -78,8 +78,8 @@ downloader() {
     fi
 
     for URL in "${URLS[@]}"; do
-        FILENAME=$(basename "$URL")
-        echo "Downloading [$FILENAME] @ [$URL]"
+        DL_FILENAME=$(basename "$URL")
+        echo "Downloading [$DL_FILENAME] @ [$URL]"
         if [[ "${SILENT}" == "1" ]]; then
             if command -v wget2 2>/dev/null; then
                 wget2 -q $URL 2> /dev/null;
