@@ -1425,6 +1425,8 @@ function cleanFormula() {
 
 function frameworkFormula() {
 
+    echoStart " frameworkFormula [\"$1\"] for:[${TYPE}]"
+
     export LIBS_DIR_REAL=$(realpath $LIBS_DIR)
     XLIBSLOCAL="$APOTHECARY_DIR/../xout"
     if [[  ! -e "$XLIBSLOCAL" ]]; then
@@ -1465,7 +1467,7 @@ function frameworkFormula() {
             ["SIMULATOR64_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
-        PLATFORM_TYPES=("ios" "osx" )
+        PLATFORM_TYPES=("ios" "osx" "tvos" )
         declare -a merged_dirs=()
         VERSION=""
         LIB_NAME=""
