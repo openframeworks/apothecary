@@ -1540,15 +1540,8 @@ function frameworkFormula() {
                                     echo "path_found_in_array == true"
                                 fi
                             else
-                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/MERGE_${ARCH}/
-                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/MERGE_${ARCH}/$(basename "$ARCH_FILE" .a).a"
-                                mkdir -p "$PATH_MERGE"
-                                echo "MERGED_PATH: $ARCH - $MERGED_PATH"
-                                if ! command -v rsync &> /dev/null; then    
-                                    rsync -av --include --delete '*/' --include '*.a' --exclude '*' "$DIR_PATH/" "$PATH_MERGE/"
-                                else
-                                    cp -v "$DIR_PATH"/*.a "$PATH_MERGE"
-                                fi
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                                 xcrun codesign --sign - $MERGED_PATH || true
                                 if [[ "$num_archive_paths" -gt 1 ]]; then
                                     for dir in "${merged_dirs[@]}"; do
@@ -1559,17 +1552,11 @@ function frameworkFormula() {
                                     done
                                     if [[ $path_found_in_array == false ]]; then
                                         merged_dirs+=("$PATH_MERGE")
-                                        echo "path_found_in_array == false adding $PATH_MERGE"
-                                    else
-                                        echo "path_found_in_array == true"
                                     fi
                                 else
                                     if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
                                         xcframework_flags+=" -library $MERGED_PATH"
                                         xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
-                                        echo "xcframework_flags: adding -library $MERGED_PATH"
-                                    else
-                                        echo "xcframework_flags: not adding already in full flags: $xcframework_flags"
                                     fi
                                 fi
                             fi
@@ -1613,7 +1600,7 @@ function frameworkFormula() {
 
         
 
-       echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
+        echoSuccess " flags: [\"$1\" \"$xcframework_flags\"]"
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
         cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
@@ -1797,15 +1784,8 @@ function xframeworkFormula() {
                                     echo "path_found_in_array == true"
                                 fi
                             else
-                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/MERGE_${ARCH}/
-                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/MERGE_${ARCH}/$(basename "$ARCH_FILE" .a).a"
-                                mkdir -p "$PATH_MERGE"
-                                echo "MERGED_PATH: $ARCH - $MERGED_PATH"
-                                if ! command -v rsync &> /dev/null; then    
-                                    rsync -av --include --delete '*/' --include '*.a' --exclude '*' "$DIR_PATH/" "$PATH_MERGE/"
-                                else
-                                    cp -v "$DIR_PATH"/*.a "$PATH_MERGE"
-                                fi
+                                PATH_MERGE=$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/
+                                MERGED_PATH="$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/${ARCH}/$(basename "$ARCH_FILE" .a).a"
                                 xcrun codesign --sign - $MERGED_PATH || true
                                 if [[ "$num_archive_paths" -gt 1 ]]; then
                                     for dir in "${merged_dirs[@]}"; do
@@ -1816,17 +1796,11 @@ function xframeworkFormula() {
                                     done
                                     if [[ $path_found_in_array == false ]]; then
                                         merged_dirs+=("$PATH_MERGE")
-                                        echo "path_found_in_array == false adding $PATH_MERGE"
-                                    else
-                                        echo "path_found_in_array == true"
                                     fi
                                 else
                                     if [[ ! "$xcframework_flags" =~ "$MERGED_PATH" ]]; then
                                         xcframework_flags+=" -library $MERGED_PATH"
                                         xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
-                                        echo "xcframework_flags: adding -library $MERGED_PATH"
-                                    else
-                                        echo "xcframework_flags: not adding already in full flags: $xcframework_flags"
                                     fi
                                 fi
                             fi
