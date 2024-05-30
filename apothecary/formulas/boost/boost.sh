@@ -5,7 +5,7 @@
 #
 # uses a own build system
 
-FORMULA_TYPES=( "osx" )
+FORMULA_TYPES=(  )
 
 # define the version
 VERSION=1.66.0
