@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=3.2.2
+VERSION=3.2.3
 printDownloaderHelp(){
 cat << EOF
     
@@ -152,7 +152,7 @@ downloader() {
             check_remote_vs_local "$LOCAL_FILE" "$REMOTE_URL"
             if [ $CHECK_RESULT -eq 0 ]; then
                 URLS_TO_DOWNLOAD+="${URL} -o ${FILENAME} "
-                if [ -n "${URLS[$i+1]}" ]; then
+                if [ $((i + 1)) -lt ${#URLS[@]} ]; then
                     URLS_TO_DOWNLOAD+="-k ";
                 fi
             else
