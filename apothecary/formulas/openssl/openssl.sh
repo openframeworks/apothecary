@@ -54,26 +54,26 @@ DEFS=" -DOPENSSL_NO_DEPRECATED=ON \
 function download() {
 
 	. "$DOWNLOADER_SCRIPT"
-	FILENAME=openssl-$VER
+	FILE_NAME=openssl-$VER
 
-	if ! [ -f $FILENAME ]; then
-		downloader "${MIRROR}/source/${FILENAME}.tar.gz" 
+	if ! [ -f $FILE_NAME ]; then
+		downloader "${MIRROR}/source/${FILE_NAME}.tar.gz" 
 	fi
 
-	if ! [ -f $FILENAME.sha1 ]; then
-		downloader ${MIRROR}/source/$FILENAME.tar.gz.sha1
+	if ! [ -f $FILE_NAME.sha1 ]; then
+		downloader ${MIRROR}/source/$FILE_NAME.tar.gz.sha1
 	fi
-	CHECKSHA=$(shasum $FILENAME.tar.gz | awk '{print $1}')
-	FILESUM=$(head -1 $FILENAME.tar.gz.sha1)
+	CHECKSHA=$(shasum $FILE_NAME.tar.gz | awk '{print $1}')
+	FILESUM=$(head -1 $FILE_NAME.tar.gz.sha1)
 	if [[ " $CHECKSHA" != $FILESUM || $CHECKSHA != "$SHA1" ]] ;  then
 		echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM]- Developer has not updated SHA or Man in the Middle Attack"
     	exit
     else
-    	tar -xf "${FILENAME}.tar.gz"
+    	tar -xf "${FILE_NAME}.tar.gz"
 		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-		mv $FILENAME openssl_temp
-		rm $FILENAME.tar.gz
-		rm $FILENAME.tar.gz.sha1
+		mv $FILE_NAME openssl_temp
+		rm $FILE_NAME.tar.gz
+		rm $FILE_NAME.tar.gz.sha1
 	fi
 	# Clone the openssl-cmake repository
 	git clone --branch "3.3" --depth=1 $GIT_URL openssl_cmake_temp
