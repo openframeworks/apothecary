@@ -245,6 +245,7 @@ function build() {
             -DCMAKE_C_STANDARD=17 \
             -DCMAKE_CXX_STANDARD=17 \
             -DDO_XML_INSTALL=ON \
+            -GXcode \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=ON \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
@@ -318,7 +319,7 @@ function copy() {
         secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a svgtiny.pkl
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
 		. "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a svgtiny.pkl
 	elif [ "$TYPE" == "android" ] ; then

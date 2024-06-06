@@ -154,7 +154,12 @@ function copy() {
 		secure $1/lib/$TYPE/$PLATFORM/libusb.a libusb.pkl
 	fi
 
-	echoWarning "TODO: License Copy"
+	# copy license file
+    if [ -d "$1/license" ]; then
+        rm -r $1/license
+    fi
+    mkdir -p $1/license
+    cp -v COPYING $1/license/
 }
 
 # executed inside the lib src dir
