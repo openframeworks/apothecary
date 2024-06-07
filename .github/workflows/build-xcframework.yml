@@ -101,6 +101,7 @@ jobs:
               per_page: 30
             });
 
+            const max=9;
             const artifactNamesToDownload = ['libs-ios-ios-1', 'libs-ios-ios-2', 'libs-ios-ios-3',
                                              'libs-macos-osx-1', 'libs-macos-osx-2', 'libs-macos-osx-3', 
                                              'libs-tvos-tvos-1', 'libs-tvos-tvos-2', 'libs-tvos-tvos-3'
@@ -121,6 +122,9 @@ jobs:
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
                 count++;
+                if (count >= max) {
+                  break;
+                }
               }
             }
       - name: Extract Artifacts to /out

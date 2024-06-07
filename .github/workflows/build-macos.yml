@@ -65,9 +65,9 @@ jobs:
               repo: context.repo.repo,
               sort: 'created_at',
               direction: 'desc',
-              per_page: 30
+              per_page: 20
             });
-
+            const max=3;
             const artifactNamesToDownload = ['libs-macos-osx-1', 'libs-macos-osx-2', 'libs-macos-osx-3'];
             let count = 0;
             
@@ -85,6 +85,9 @@ jobs:
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
                 count++;
+                if (count >= max) {
+                  break;
+                }
               }
             }
       - name: Extract Artifacts to /out

@@ -84,14 +84,19 @@ jobs:
             repo: context.repo.repo,
             sort: 'created_at',
             direction: 'desc',
-            per_page: 48
+            per_page: 30
           });
 
-          const artifactNamesToDownload = ['libs-${{ env.TARGET }}-${{ env.ARCH }}-${{ matrix.bundle }}'];
+          const target = process.env.TARGET;
+          const arch = process.env.ARCH;
+          const bundle = process.env.MATRIX_BUNDLE;
+          const artifactName = `libs-${target}-${arch}-${bundle}`;
+
           let count = 0;
-          
+          const max = 1;
+
           for (const artifact of artifacts.data.artifacts) {
-            if (artifactNamesToDownload.includes(artifact.name) && !artifact.expired) {
+            if (artifact.name === artifactName && !artifact.expired) {
               // Download the artifact
               const download = await github.rest.actions.downloadArtifact({
                 owner: context.repo.owner,
@@ -104,6 +109,9 @@ jobs:
               fs.writeFileSync(artifactPath, Buffer.from(download.data));
               console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
               count++;
+              if (count >= max) {
+                break;
+              }
             }
           }
     - name: Extract Artifacts to /out

@@ -65,11 +65,12 @@ jobs:
               repo: context.repo.repo,
               sort: 'created_at',
               direction: 'desc',
-              per_page: 30
+              per_page: 20
             });
 
             const artifactNamesToDownload = ['libs-tvos-tvos-1', 'libs-tvos-tvos-2', 'libs-tvos-tvos-3'];
             let count = 0;
+            const max=3;
             
             for (const artifact of artifacts.data.artifacts) {
               if (artifactNamesToDownload.includes(artifact.name) && !artifact.expired) {
@@ -85,6 +86,9 @@ jobs:
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
                 count++;
+                if (count >= max) {
+                  break;
+                }
               }
             }
       - name: Extract Artifacts to /out
