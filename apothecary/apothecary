@@ -1446,12 +1446,15 @@ function frameworkFormula() {
         X_LIBS="$XDIR/${1}/lib/${TYPE}/"
         X_INCLUDE=$XDIR/${1}/include
         X_LICENSE=$XDIR/${1}/license
-        mkdir -p "${X_LIBS}"
+        
+        mkdir -p "${X_INCLUDE}"
+        mkdir -p "${X_LICENSE}"
 
-        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "libusb" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
-            if ! command -v rsync &> /dev/null; then      
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/" ]]; then
-                    cp -av "${LIBS_DIR_REAL}/${1}/lib/"* ${X_LIBS}
+        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
+             if ! command -v rsync &> /dev/null; then      
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ]]; then
+                    mkdir -p "${X_LIBS}"
+                    cp -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"* ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
@@ -1460,8 +1463,9 @@ function frameworkFormula() {
                     cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
                 fi
             else
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/" ${X_LIBS}
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}" ]]; then
+                    mkdir -p "${X_LIBS}"
+                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
@@ -1472,7 +1476,7 @@ function frameworkFormula() {
             fi
             exit 0;
         fi
-
+        mkdir -p "${X_LIBS}"
         if ((BASH_VERSINFO[0] < 4)); then
             echo "The current version of Bash does not support associative arrays."
             echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
@@ -1713,12 +1717,15 @@ function xframeworkFormula() {
         X_LIBS="$XDIR/${1}/lib/${TYPE}/"
         X_INCLUDE=$XDIR/${1}/include
         X_LICENSE=$XDIR/${1}/license
-        mkdir -p "${X_LIBS}"
+        
+        mkdir -p "${X_INCLUDE}"
+        mkdir -p "${X_LICENSE}"
 
-        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "libusb" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
+        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
             if ! command -v rsync &> /dev/null; then      
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/" ]]; then
-                    cp -av "${LIBS_DIR_REAL}/${1}/lib/"* ${X_LIBS}
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ]]; then
+                    mkdir -p "${X_LIBS}"
+                    cp -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"* ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
@@ -1727,8 +1734,9 @@ function xframeworkFormula() {
                     cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
                 fi
             else
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/" ${X_LIBS}
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}" ]]; then
+                    mkdir -p "${X_LIBS}"
+                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
@@ -1739,7 +1747,7 @@ function xframeworkFormula() {
             fi
             exit 0;
         fi
-    
+        mkdir -p "${X_LIBS}"
         if [[ $TYPE == "macos" ]]; then
             echoSuccess "Building macOS xcframework"
         fi
