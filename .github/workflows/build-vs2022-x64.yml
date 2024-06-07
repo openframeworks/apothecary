@@ -11,9 +11,15 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  TARGET: "vs"
+  ARCH: 64
+  NO_FORCE: 1
+  VS_VER: 17
+  GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     
 jobs:
-
   build-vs2022:
     runs-on: windows-2022
     strategy:
@@ -97,48 +103,48 @@ jobs:
               count++;
             }
           }
-    # - name: Extract Artifacts to /out
-    #   run: |
-    #     mkdir -p out
-    #     for zip in out/*.zip; do
-    #         echo "Extracting $zip..."
-    #         unzip -o "$zip" -d out/
-    #     done
-    #     echo "Extraction complete."
-    #     rm out/*.zip
-    #     for tarball in out/*.tar.bz2; do
-    #         echo "Extracting $tarball..."
-    #         tar -xjf "$tarball" -C out/
-    #     done
-    #     echo ".tar.bz2 extraction complete."
-    #     rm -f out/*.tar.bz2 
-    #     rm -f xout/*.tar.bz2
+    - name: Extract Artifacts to /out
+      run: |
+          mkdir -p out
+          if ls out/*.zip 1> /dev/null 2>&1; then
+            for zip in out/*.zip; do
+                echo "Extracting $zip..."
+                unzip -o "$zip" -d out/
+            done
+            echo "Extraction complete."
+            rm out/*.zip
+          else
+            echo "No zip files to extract."
+          fi
+          if ls out/*.tar.bz2 1> /dev/null 2>&1; then
+            for tarball in out/*.tar.bz2; do
+                echo "Extracting $tarball..."
+                tar -xjf "$tarball" -C out/
+            done
+            echo ".tar.bz2 extraction complete."
+            rm -f out/*.tar.bz2
+          else
+            echo "No .tar.bz2 files to extract."
+          fi
+          rm -f xout/*.tar.bz2 
+          rm -f out/*.tar.bz2
     - name: Build64
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: scripts/build.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
-        TARGET: "vs"
-        ARCH: 64
-        NO_FORCE: 1
-        VS_VER: 17
-        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     - name: Package
-      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+      # if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
-        TARGET: "vs"
-        ARCH: 64
-        VS_VER: 17
-        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
     - name: Upload binaries as Artifact
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      # if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: actions/upload-artifact@v4
       with:
         name: libs-${{ env.TARGET }}-${{ env.ARCH }}-${{ matrix.bundle }}
-        path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.zip
+        path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
         retention-days: 31
     - name: Update Release 64
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
@@ -148,5 +154,5 @@ jobs:
         tag: ${{ env.release }}
         release: ${{ env.release }}
         prerelease: ${{ env.prerelease }}
-        files: out/openFrameworksLibs_${{ env.release }}_vs_64_${{ matrix.bundle }}.zip
+        files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
 

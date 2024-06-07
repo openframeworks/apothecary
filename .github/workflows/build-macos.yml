@@ -142,6 +142,7 @@ jobs:
         run: scripts/osx/xcframework_all.sh
         env:
           TARGET: "osx"
+          NO_FORCE: 1
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Package final
