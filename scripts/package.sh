@@ -259,7 +259,7 @@ if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]] || [[
     echo "On Master or Bleeding Branch and not a PR - zipping build";
 else
     echo "This is a PR or not master/bleeding branch, exiting build before compressing";
-    exit 0
+    # exit 0
 fi
 
 if [ -z ${APPVEYOR+x} ]; then
