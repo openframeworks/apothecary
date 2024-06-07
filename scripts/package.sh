@@ -280,10 +280,14 @@ else
 fi
     
 CUR_BRANCH="master";
-if [ "$GITHUB_ACTIONS" = true ]; then
-    CUR_BRANCH="${GITHUB_REF##*/}"
-elif [ "$TRAVIS" = true ]; then
-    CUR_BRANCH="$TRAVIS_BRANCH"
+if [ -z "${RELEASE+x}" ]; then
+    if [ "$GITHUB_ACTIONS" = true ]; then
+        CUR_BRANCH="${GITHUB_REF##*/}"
+    elif [ "$TRAVIS" = true ]; then
+        CUR_BRANCH="$TRAVIS_BRANCH"
+    fi
+else
+    CUR_BRANCH="$RELEASE"
 fi
 
 
