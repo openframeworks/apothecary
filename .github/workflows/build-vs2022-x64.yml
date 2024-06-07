@@ -56,11 +56,11 @@ jobs:
       shell: bash
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "release=nightly" >> $GITHUB_ENV
-          echo "prerelease=false" >> $GITHUB_ENV
+          echo "RELEASE=nightly" >> $GITHUB_ENV
+          echo "PRERELEASE=false" >> $GITHUB_ENV
         elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "release=bleeding" >> $GITHUB_ENV
-          echo "prerelease=true" >> $GITHUB_ENV
+          echo "RELEASE=bleeding" >> $GITHUB_ENV
+          echo "PRERELEASE=true" >> $GITHUB_ENV
         fi
     - name: 'Download artifacts'
       uses: actions/github-script@v7
@@ -139,20 +139,28 @@ jobs:
       run: scripts/package.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
+    - name: Debug Environment Variables
+      run: |
+        echo "release: ${{ env.RELEASE }}"
+        echo "TARGET: ${{ env.TARGET }}"
+        echo "ARCH: ${{ env.ARCH }}"
+        echo "BUNDLE: ${{ matrix.bundle }}"
     - name: Upload binaries as Artifact
       # if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: actions/upload-artifact@v4
+      env:
+        release: ${{ env.RELEASE }}
       with:
         name: libs-${{ env.TARGET }}-${{ env.ARCH }}-${{ matrix.bundle }}
-        path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
-        retention-days: 31
+        path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+        retention-days: 1
     - name: Update Release 64
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.release }}
-        release: ${{ env.release }}
-        prerelease: ${{ env.prerelease }}
-        files: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+        tag: ${{ env.RELEASE }}
+        release: ${{ env.RELEASE }}
+        prerelease: ${{ env.PRERELEASE }}
+        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
 
