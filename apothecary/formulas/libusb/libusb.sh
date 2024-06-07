@@ -5,34 +5,32 @@
 
 FORMULA_TYPES=( "osx" "vs" )
 
-# for osx 1.0.21 breaks libfreenect so this branch has 1.0.20 with changes to the XCode project to make it build static and not dynamic
-#for vs 1.0.21 is good - but needs an unmerged PR / patch to fix iso transfers
-
 GIT_URL=https://github.com/libusb/libusb
-GIT_TAG=1.0.27
+GIT_TAG=v1.0.27-rc2
 GIT_BRANCH_VS=master
-VER=1.0.27
+VER=1.0.27-rc2
 
-URL=https://github.com/libusb/libusb/releases/download/v${GIT_TAG}/libusb-${GIT_TAG}.tar.bz2
+URL=https://github.com/libusb/libusb/archive/refs/tags/v${VER}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
+	# git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
+	. "$DOWNLOADER_SCRIPT"
+	if [ "$TYPE" == "vs" ] ; then
+        downloader "${URL}.zip"
+		unzip v${VER}.zip
+		mv libusb-${VER} libusb
+	fi
+  
+	if [ "$TYPE" == "osx" ] ; then
+        downloader "${URL}.tar.gz"
+		tar -xzf v${VER}.tar.gz
 
-	# if [ "$TYPE" == "vs" ] ; then
-  #       echo "Running: git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}"
-  #       git clone --branch ${GIT_BRANCH_VS} ${GIT_URL}
-	# fi
-  #
-	# if [ "$TYPE" == "osx" ] ; then
-  #       echo "Running: git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}"
-  #       git clone --branch ${GIT_BRANCH_OSX} ${GIT_URL}
-	# fi
-	# . "$DOWNLOADER_SCRIPT"
-	# downloader ${URL}
-	# tar xjf libusb-${GIT_TAG}.tar.bz2
-	# mv libusb-${GIT_TAG} libusb
+		mv libusb-${VER} libusb
+	fi
+	
+	
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -49,10 +47,8 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 
-
 	if [ "$TYPE" == "vs" ] ; then
 
-	
 		echo "building libusb $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
 	    echo "--------------------"
 	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
