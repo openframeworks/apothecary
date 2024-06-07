@@ -12,6 +12,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  TARGET: "tvos"
+  NO_FORCE: 1
+  GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+
 jobs:
   build-macos-platforms:
     runs-on: macos-14
@@ -19,7 +24,6 @@ jobs:
       matrix:
         bundle: [1, 2, 3]
     env:
-      TARGET: "tvos"
       BUNDLE: ${{ matrix.bundle }}
       DEVELOPER_DIR: "/Applications/Xcode_15.4.app/Contents/Developer"
     steps:
@@ -28,11 +32,14 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "release=nightly" >> $GITHUB_ENV
-            echo "prerelease=false" >> $GITHUB_ENV
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "release=bleeding" >> $GITHUB_ENV
-            echo "prerelease=true" >> $GITHUB_ENV
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
@@ -82,47 +89,47 @@ jobs:
             }
       - name: Extract Artifacts to /out
         run: |
-          mkdir -p out
-          for zip in out/*.zip; do
-              echo "Extracting $zip..."
-              unzip -o "$zip" -d out/
-          done
-          echo "Extraction complete."
-          rm out/*.zip
-          for tarball in out/*.tar.bz2; do
-              echo "Extracting $tarball..."
-              tar -xjf "$tarball" -C out/
-          done
-          echo ".tar.bz2 extraction complete."
-          rm -f out/*.tar.bz2 
-          rm -f xout/*.tar.bz2
+            mkdir -p out
+            if ls out/*.zip 1> /dev/null 2>&1; then
+              for zip in out/*.zip; do
+                  echo "Extracting $zip..."
+                  unzip -o "$zip" -d out/
+              done
+              echo "Extraction complete."
+              rm out/*.zip
+            else
+              echo "No zip files to extract."
+            fi
+            if ls out/*.tar.bz2 1> /dev/null 2>&1; then
+              for tarball in out/*.tar.bz2; do
+                  echo "Extracting $tarball..."
+                  tar -xjf "$tarball" -C out/
+              done
+              echo ".tar.bz2 extraction complete."
+              rm -f out/*.tar.bz2
+            else
+              echo "No .tar.bz2 files to extract."
+            fi
+            rm -f xout/*.tar.bz2 
+            rm -f out/*.tar.bz2
       - name: Build tvOS arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
-          TARGET: "tvos"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: arm64
-          NO_FORCE: 1
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Build tvOS x86_64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
-          TARGET: "tvos"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: x86_64
-          NO_FORCE: 1
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Build tvOS SIMULATOR arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
         env:
-          TARGET: "tvos"
           BUNDLE: ${{ matrix.bundle }}
           ARCH: SIM_arm64
-          NO_FORCE: 1
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
       - name: Package Binaries for Artifact
@@ -137,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: libs-tvos-${{ env.TARGET }}-${{ matrix.bundle }}
-          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 31
       - name: Remove .tar.bz2 files
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
@@ -164,7 +171,7 @@ jobs:
         uses: johnwbyrd/update-release@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.release }}
-          release: ${{ env.release }}
-          prerelease: ${{ env.prerelease }}
-          files: xout/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+          tag: ${{ env.RELEASE }}
+          release: ${{ env.RELEASE }}
+          prerelease: ${{ env.PRERELEASE }}
+          files: xout/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2

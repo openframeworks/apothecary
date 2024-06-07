@@ -138,13 +138,13 @@ jobs:
       env:
         BUNDLE: ${{ matrix.bundle }}
     - name: Package
-      # if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
     - name: Upload binaries as Artifact
-      # if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: actions/upload-artifact@v4
       env:
         release: ${{ env.RELEASE }}

@@ -170,7 +170,7 @@ jobs:
         uses: johnwbyrd/update-release@v1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ env.release }}
-          release: ${{ env.release }}
-          prerelease: ${{ env.prerelease }}
-          files: xout/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}.tar.bz2
+          tag: ${{ env.RELEASE }}
+          release: ${{ env.RELEASE }}
+          prerelease: ${{ env.PRERELEASE }}
+          files: xout/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}.tar.bz2
