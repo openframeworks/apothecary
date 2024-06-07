@@ -65,11 +65,14 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "release=nightly" >> $GITHUB_ENV
-            echo "prerelease=false" >> $GITHUB_ENV
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "release=bleeding" >> $GITHUB_ENV
-            echo "prerelease=true" >> $GITHUB_ENV
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula
@@ -98,7 +101,10 @@ jobs:
               per_page: 30
             });
 
-            const artifactNamesToDownload = ['libs-ios-ios-1', 'libs-ios-ios-2', 'libs-ios-ios-3', 'libs-macos-osx-1', 'libs-macos-osx-2', 'libs-macos-osx-3', 'libs-tvos-tvos-1', 'libs-tvos-tvos-2', 'libs-tvos-tvos-3'];
+            const artifactNamesToDownload = ['libs-ios-ios-1', 'libs-ios-ios-2', 'libs-ios-ios-3',
+                                             'libs-macos-osx-1', 'libs-macos-osx-2', 'libs-macos-osx-3', 
+                                             'libs-tvos-tvos-1', 'libs-tvos-tvos-2', 'libs-tvos-tvos-3'
+                                             ];
             let count = 0;
             
             for (const artifact of artifacts.data.artifacts) {
@@ -119,20 +125,29 @@ jobs:
             }
       - name: Extract Artifacts to /out
         run: |
-          mkdir -p out
-          for zip in out/*.zip; do
-              echo "Extracting $zip..."
-              unzip -o "$zip" -d out/
-          done
-          echo "Extraction complete."
-          rm out/*.zip
-          for tarball in out/*.tar.bz2; do
-              echo "Extracting $tarball..."
-              tar -xjf "$tarball" -C out/
-          done
-          echo ".tar.bz2 extraction complete."
-          rm -f out/*.tar.bz2 
-          rm -f xout/*.tar.bz2
+            mkdir -p out
+            if ls out/*.zip 1> /dev/null 2>&1; then
+              for zip in out/*.zip; do
+                  echo "Extracting $zip..."
+                  unzip -o "$zip" -d out/
+              done
+              echo "Extraction complete."
+              rm out/*.zip
+            else
+              echo "No zip files to extract."
+            fi
+            if ls out/*.tar.bz2 1> /dev/null 2>&1; then
+              for tarball in out/*.tar.bz2; do
+                  echo "Extracting $tarball..."
+                  tar -xjf "$tarball" -C out/
+              done
+              echo ".tar.bz2 extraction complete."
+              rm -f out/*.tar.bz2
+            else
+              echo "No .tar.bz2 files to extract."
+            fi
+            rm -f xout/*.tar.bz2 
+            rm -f out/*.tar.bz2
       - name: List output directory
         run: ls -lah ./
       - name: List output directory out

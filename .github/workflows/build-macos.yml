@@ -28,11 +28,14 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            echo "release=nightly" >> $GITHUB_ENV
-            echo "prerelease=false" >> $GITHUB_ENV
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "release=bleeding" >> $GITHUB_ENV
-            echo "prerelease=true" >> $GITHUB_ENV
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
