@@ -1604,9 +1604,11 @@ function frameworkFormula() {
         # Final merging pass to combine binaries of same / merged architectures into single binary to prevent linking issues
         for dir in "${merged_dirs[@]}"; do
             echo "Processing directory: $dir"
-            # rm -f "${dir}/${1}.a"
+            
+            # Find all .a files in the directory
             a_files=($(find "$dir" -name '*.a' -print0 | xargs -0))
-            echo "[$dir]"
+            echo "[$dir] - Found archives: ${#a_files[@]}"
+            
             num_files=${#a_files[@]}
             if [ "$num_files" -gt 1 ]; then
                 echo "Multiple archives found in $dir. Commencing the merge..."
@@ -1622,12 +1624,12 @@ function frameworkFormula() {
                     xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                 fi
             elif [ "$num_files" -gt 0 ]; then
-                # Directly use the single archive or skip if none
-                echo "Directly use the single archive or skip if none ${a_files[0]}]"
+                # Directly use the single archive
+                echo "Directly use the single archive ${a_files[0]}"
                 xcframework_flags+=" -library ${a_files[0]}"
                 xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
             else
-                echo " Skip for [$dir]]"
+                echo "No archives found. Skip for [$dir]"
             fi
         done
 
@@ -1721,7 +1723,7 @@ function xframeworkFormula() {
         mkdir -p "${X_INCLUDE}"
         mkdir -p "${X_LICENSE}"
 
-        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "libusb" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
+        if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
             if ! command -v rsync &> /dev/null; then      
                 if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ]]; then
                     mkdir -p "${X_LIBS}"
@@ -1878,14 +1880,17 @@ function xframeworkFormula() {
         # Final merging pass to combine binaries of same / merged architectures into single binary to prevent linking issues
         echo "merged_dirs:"
         for dir in "${merged_dirs[@]}"; do
-            echo "Processing directory: [$dir]"
-            rm -f "${dir}/${1}.a"
+            echo "Processing directory: $dir"
+            
+            # Find all .a files in the directory
             a_files=($(find "$dir" -name '*.a' -print0 | xargs -0))
+            echo "[$dir] - Found archives: ${#a_files[@]}"
+            
             num_files=${#a_files[@]}
             if [ "$num_files" -gt 1 ]; then
-                echo "Multiple archives found in [$dir]. Commencing the merge..."
+                echo "Multiple archives found in $dir. Commencing the merge..."
                 libtool -static -o "${dir}/${1}.a" "${a_files[@]}"
-                echo "Merged into [${dir}/${1}.a]"
+                echo "Merged into ${dir}/${1}.a"
                 for a_file in "${a_files[@]}"; do
                     rm -f "$a_file"
                 done
@@ -1896,12 +1901,12 @@ function xframeworkFormula() {
                     xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
                 fi
             elif [ "$num_files" -gt 0 ]; then
-                # Directly use the single archive or skip if none
-                echo "Directly use the single archive or skip if none ${a_files[0]}]"
+                # Directly use the single archive
+                echo "Directly use the single archive ${a_files[0]}"
                 xcframework_flags+=" -library ${a_files[0]}"
                 xcframework_flags+=" -headers $LIBS_DIR_REAL/$1/include"
             else
-                echo " Skip for [$dir]]"
+                echo "No archives found. Skip for [$dir]"
             fi
         done
 
