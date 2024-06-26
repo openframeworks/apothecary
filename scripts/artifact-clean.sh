@@ -116,7 +116,7 @@ for formula in "${FORMULAS[@]}"; do
 done
 
 # Iterate over the folders in the library base directory
-for library_dir in "$LIBRARY_BASE_DIR"/*; do
+for library_dir in "$OUTPUT_FOLDER"/*; do
     library_name=$(basename "$library_dir")
     
     # Check if the library name is not in the keep list
