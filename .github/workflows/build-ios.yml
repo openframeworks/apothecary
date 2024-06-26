@@ -137,6 +137,13 @@ jobs:
           ARCH: SIM_arm64
       - name: List output directory
         run: ls -lah out/
+      - name: Cleanup out of bundle
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/artifact-clean.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+      - name: List output directory2
+        run: ls -lah out/
       - name: Package Binaries for Artifact
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
