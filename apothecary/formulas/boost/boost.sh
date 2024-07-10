@@ -16,7 +16,7 @@ TARBALL=$UNCOMPRESSED_NAME.tar.gz
 # need to maybe migrate to github https://github.com/boostorg/boost
 
 BOOST_LIBS="filesystem system"
-EXTRA_CPPFLAGS="-std=c++11 -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
+EXTRA_CPPFLAGS="-std=c++${CPP_STANDARD} -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
 
@@ -86,7 +86,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	if [ "$TYPE" == "vs" ]; then
-		./b2 --debug-configuration -j${PARALLEL_MAKE} cxxflags="-std=c++11 -stdlib=libc++ -Wno-implicit-function-declaration" threading=multi variant=release --build-dir=build --stage-dir=stage --with-filesystem link=static address-model=$ARCH stage
+		./b2 --debug-configuration -j${PARALLEL_MAKE} cxxflags="-std=c++${CPP_STANDARD} -stdlib=libc++ -Wno-implicit-function-declaration" threading=multi variant=release --build-dir=build --stage-dir=stage --with-filesystem link=static address-model=$ARCH stage
 		mv stage stage_$ARCH
 
 		cd tools/bcp
@@ -94,7 +94,7 @@ function build() {
 
 
 	elif [ "$TYPE" == "osx" ]; then
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++${CPP_STANDARD} -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
 		cd tools/bcp
 		../../b2
 	elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
@@ -281,12 +281,12 @@ EOF
 	    echo "Finished Build for $TYPE"
 	elif [ "$TYPE" == "emscripten" ]; then
 	    cp $FORMULA_DIR/project-config-emscripten.jam project-config.jam
-		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11" threading=multi threadapi=pthread variant=release --build-dir=build --stage-dir=stage link=static stage
+		./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++${CPP_STANDARD}" threading=multi threadapi=pthread variant=release --build-dir=build --stage-dir=stage link=static stage
 	elif [ "$TYPE" == "android" ]; then
 	    rm -rf stage stage_$ARCH
 
         source ../../android_configure.sh $ABI
-        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++11 $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
+        ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++${CPP_STANDARD} $CFLAGS" cflags="$CFLAGS" threading=multi threadapi=pthread target-os=android variant=release --build-dir=build_$ARCH link=static stage
 
 		# Run ranlib on binaries (not called corectly by b2)
 		${RANLIB} stage/lib/libboost_filesystem.a
