@@ -45,7 +45,6 @@ jobs:
             base-devel
             unzip
             dos2unix
-            wget2
             git
           pacboy: >-
             gcc:p
