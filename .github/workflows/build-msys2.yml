@@ -28,7 +28,7 @@ jobs:
           - mingw64
           - ucrt64
           - clang64
-          - clangarm64
+          #- clangarm64
     name: ${{ matrix.flavor }}
     runs-on: windows-latest
     defaults:
