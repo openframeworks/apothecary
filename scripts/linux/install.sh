@@ -43,6 +43,8 @@ echoDots(){
     done
 }
 
+echo "GCC Version: $OPT"
+
 if [ "$OPT" == "gcc4" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
     sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -149,7 +151,8 @@ sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2uni
 sudo apt-get update && sudo apt-get install -y cmake
 
 # Download the installer script
-CMAKE_VERSION=3.33.0
+CMAKE_VERSION=3.30.0
+https://github.com/Kitware/CMake/releases/download/v3.30.0/cmake-3.30.0-linux-x86_64.sh
 wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh
 chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh
 sudo ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix=/usr/local

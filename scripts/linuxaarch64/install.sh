@@ -75,7 +75,7 @@ relativeSoftLinks
 cd $ROOT/raspbian/usr/lib/aarch64-linux-gnu
 relativeSoftLinks
 
-CMAKE_VERSION=3.33.0
+CMAKE_VERSION=3.30.0
 wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-aarch64.sh
 chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh
 sudo ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix=/usr/local
