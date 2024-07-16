@@ -183,14 +183,14 @@ function build() {
 		    -DZLIB_BUILD_EXAMPLES=OFF \
 		    -DSKIP_EXAMPLE=ON \
 	        -DCMAKE_SYSTEM_NAME=$TYPE \
+	        -DCMAKE_INSTALL_PREFIX=Release \
     		-DCMAKE_SYSTEM_PROCESSOR=$ARCH \
     		-DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include 
-	    cmake --build . --config Release 
-	    ls -a
+	    cmake --build . --target install --config Release
 	    cd ..
 	fi
 }
