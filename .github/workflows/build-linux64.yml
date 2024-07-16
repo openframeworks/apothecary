@@ -35,7 +35,7 @@ jobs:
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.opt}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
-      run: ./scripts/$TARGET/install.sh
+      run: ./scripts/linux/install.sh
     - name: Determine Release
       id: vars
       shell: bash
