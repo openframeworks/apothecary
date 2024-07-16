@@ -6,7 +6,7 @@
 #
 # uses an autotools build system
 
-FORMULA_TYPES=( "osx" "vs" )
+FORMULA_TYPES=( "osx" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" )
 
 #FORMULA_DEPENDS=( "pkg-config" )
 
@@ -44,8 +44,7 @@ function build() {
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=OFF \
+	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include
 	    "
 
@@ -63,13 +62,10 @@ function build() {
 				-DBUILD_SHARED_LIBS=OFF \
 				-DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS="-fPIC -DUSE_PTHREADS=1" \
-			  -DCMAKE_C_FLAGS="-fPIC -DUSE_PTHREADS=1" \
-			  -DCMAKE_C_STANDARD=${C_STANDARD} \
-			  -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			  -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			  -DCMAKE_CXX_EXTENSIONS=OFF \
-			  -DCMAKE_INSTALL_PREFIX=Release \
-			  -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
+				-DCMAKE_C_FLAGS="-fPIC -DUSE_PTHREADS=1" \
+				-DCMAKE_INSTALL_PREFIX=Release \
+				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+				-DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
 				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 				-DCMAKE_INSTALL_INCLUDEDIR=include \
 				-DRTAUDIO_API_ASIO=OFF \
@@ -102,6 +98,7 @@ function build() {
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        -DCMAKE_INSTALL_PREFIX=Release \
+	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        ${CMAKE_WIN_SDK} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
@@ -115,6 +112,7 @@ function build() {
 	        -DCMAKE_BUILD_TYPE=Debug \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        -DCMAKE_INSTALL_PREFIX=Debug \
+	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        ${CMAKE_WIN_SDK} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
@@ -124,18 +122,40 @@ function build() {
 	    unset CXXFLAGS
 
 	    cd ..
-	elif [ "$TYPE" == "msys2" ] ; then
+	elif [[ "$TYPE" =~ ^(linux|linux64|linuxarmv6l|linuxarmv7l|linuxaarch64)$ ]]; then
 		# Compile the program
-		local API="--with-wasapi --with-ds " # asio as well?
 		mkdir -p build
 		cd build
 		rm -f CMakeCache.txt *.a *.o
-		cmake .. -G "Unix Makefiles" \
+		cmake .. ${DEFS} \
+			-G "Unix Makefiles" \
+			-DAUDIO_WINDOWS_WASAPI=OFF \
+			-DAUDIO_WINDOWS_DS=OFF \
+			-DAUDIO_WINDOWS_ASIO=OFF \
+			-DRTAUDIO_API_OSS=ON \
+			-DRTAUDIO_API_ALSA=ON \
+			-DRTAUDIO_API_PULSE=ON \
+			-DRTAUDIO_API_JACK=ON \
+			-DCMAKE_VERBOSE_MAKEFILE=ON \
+			-DBUILD_TESTING=OFF
+		make
+		make install
+	
+	  # /inst   
+	elif [ "$TYPE" == "msys2" ] ; then
+		# Compile the program
+		mkdir -p build
+		cd build
+		rm -f CMakeCache.txt *.a *.o
+		cmake .. ${DEFS} \
+			-G "Unix Makefiles" \
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
 			-DAUDIO_WINDOWS_ASIO=ON \
+			-DCMAKE_VERBOSE_MAKEFILE=ON \
 			-DBUILD_TESTING=OFF
 		make
+		make install
 	fi
 
 	# clean up env vars

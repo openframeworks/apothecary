@@ -13,12 +13,12 @@ trapError() {
 
 installPackages(){
     sudo apt-get update -q
-    sudo apt-get -y install multistrap unzip coreutils gperf
+    sudo apt-get -y install multistrap unzip coreutils gperf 
+    sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
     sudo apt-get update && sudo apt-get install -y autoconf libtool automake
 }
 
 createRaspbianImg(){
-    #needed since Ubuntu 18.04 - allow non https repositories
     mkdir -p raspbian/etc/apt/apt.conf.d/
     echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee raspbian/etc/apt/apt.conf.d/90insecure
     multistrap -a arm64 -d raspbian -f multistrap.conf
@@ -57,22 +57,27 @@ relativeSoftLinks(){
     done
 }
 
-if [[ $(uname -m) != armv* ]]; then
+# run install
+ROOT=$( cd "$(dirname "$0")" ; pwd -P )
+echo $ROOT
+cd $ROOT
+installPackages
+createRaspbianImg
+downloadToolchain
+downloadFirmware
 
-	ROOT=$( cd "$(dirname "$0")" ; pwd -P )
-	echo $ROOT
-	cd $ROOT
-	installPackages
-	createRaspbianImg
-	downloadToolchain
-	downloadFirmware
+cp -rn rpi_toolchain/aarch64-linux-gnu/libc/lib/* $ROOT/raspbian/usr/lib/
+cp -rn rpi_toolchain/aarch64-linux-gnu/libc/usr/lib/* $ROOT/raspbian/usr/lib/
+cp -rn rpi_toolchain/aarch64-linux-gnu/lib/* $ROOT/raspbian/usr/lib/
 
-        cp -rn rpi_toolchain/aarch64-linux-gnu/libc/lib/* $ROOT/raspbian/usr/lib/
-        cp -rn rpi_toolchain/aarch64-linux-gnu/libc/usr/lib/* $ROOT/raspbian/usr/lib/
-        cp -rn rpi_toolchain/aarch64-linux-gnu/lib/* $ROOT/raspbian/usr/lib/
+cd $ROOT/raspbian/usr/lib
+relativeSoftLinks
+cd $ROOT/raspbian/usr/lib/aarch64-linux-gnu
+relativeSoftLinks
 
-        cd $ROOT/raspbian/usr/lib
-        relativeSoftLinks
-        cd $ROOT/raspbian/usr/lib/aarch64-linux-gnu
-        relativeSoftLinks
-fi
+CMAKE_VERSION=3.33.0
+wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-aarch64.sh
+chmod +x cmake-${CMAKE_VERSION}-linux-aarch64.sh
+sudo ./cmake-${CMAKE_VERSION}-linux-aarch64.sh --skip-license --prefix=/usr/local
+export PATH="/usr/local/bin:$PATH"
+
