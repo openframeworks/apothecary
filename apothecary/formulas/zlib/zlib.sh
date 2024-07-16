@@ -236,9 +236,13 @@ function copy() {
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ > /dev/null 2>&1
 		mkdir -p $1/lib/$TYPE/$ARCH/
 <<<<<<< HEAD
+<<<<<<< HEAD
         cp -v "build_${TYPE}_${ARCH}/Release/z.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
 =======
         cp -v "build_${TYPE}_${ARCH}/Release/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+=======
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+>>>>>>> 12f3df4 (release path zlib)
         . "$SECURE_SCRIPT"
 >>>>>>> 3f69c09 (zlib location)
         secure $1/lib/$TYPE/$PLATFORM/zlib.a
