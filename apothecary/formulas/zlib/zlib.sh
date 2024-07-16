@@ -228,6 +228,11 @@ function copy() {
 		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+<<<<<<< HEAD
+=======
+		mkdir -p $1/include    
+	    mkdir -p $1/lib/$TYPE/$PLATFORM
+>>>>>>> 63674b5 (zlib target folder)
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ > /dev/null 2>&1
 		mkdir -p $1/lib/$TYPE/$ARCH/
 <<<<<<< HEAD
