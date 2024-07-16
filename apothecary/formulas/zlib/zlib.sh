@@ -230,7 +230,12 @@ function copy() {
     elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
 		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ > /dev/null 2>&1
 		mkdir -p $1/lib/$TYPE/$ARCH/
+<<<<<<< HEAD
         cp -v "build_${TYPE}_${ARCH}/Release/z.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+=======
+        cp -v "build_${TYPE}_${ARCH}/Release/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+        . "$SECURE_SCRIPT"
+>>>>>>> 3f69c09 (zlib location)
         secure $1/lib/$TYPE/$PLATFORM/zlib.a
 	else
 		make install
