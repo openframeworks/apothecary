@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=3.1.42
+VERSION=3.1.64
 
 if [ -z "${EMSDK+x}" ]; then
 	echo "Unix Emscripten SDK not yet found"
@@ -14,10 +14,10 @@ if [ -z "${EMSDK+x}" ]; then
   python -m pip install --upgrade pip setuptools virtualenv
   ./emsdk install latest
   ./emsdk activate latest --permanent
-  ./emsdk_env
-  ./emsdk install ${VERSION}  
-	
 else
-  echo "Emscripten SDK found at $EMSDK"
-  source "$EMSDK/emsdk_env"  
+	echo "Emscripten SDK found at $EMSDK"
+	cd ${EMSDK}
+	./emsdk install latest
+  ./emsdk activate latest --permanent
+  source "$EMSDK/emsdk_env.sh"
 fi
