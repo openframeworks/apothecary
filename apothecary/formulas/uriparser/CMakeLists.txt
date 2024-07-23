@@ -409,35 +409,6 @@ if(URIPARSER_BUILD_DOCS)
     endif()
 endif()
 
-if (EMSCRIPTEN)
-    add_executable(uriparser_wasm ${API_HEADER_FILES} ${LIBRARY_CODE_FILES} )
-    target_include_directories(uriparser_wasm 
-        PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        PRIVATE
-            ${CMAKE_CURRENT_BINARY_DIR}  # for UriConfig.h
-    )
-    
-    target_compile_definitions(uriparser_wasm PRIVATE URI_LIBRARY_BUILD)
-    if (NOT URIPARSER_SHARED_LIBS)
-        target_compile_definitions(uriparser_wasm PUBLIC URI_STATIC_BUILD)
-    endif()
-    if(NOT URIPARSER_BUILD_CHAR)
-        target_compile_definitions(uriparser_wasm PUBLIC URI_NO_ANSI)
-    endif()
-    if(NOT URIPARSER_BUILD_WCHAR_T)
-        target_compile_definitions(uriparser_wasm PUBLIC URI_NO_UNICODE)
-    endif()
-    if(URIPARSER_COMPILER_SUPPORTS_VISIBILITY)
-        target_compile_definitions(uriparser_wasm PRIVATE URI_VISIBILITY)
-    endif()
-    set_target_properties(uriparser_wasm PROPERTIES COMPILE_FLAGS " -fPIC -s SIDE_MODULE=1 ")
-    set_target_properties(uriparser_wasm PROPERTIES LINK_FLAGS    "-fPIC -s WASM=1 -s SIDE_MODULE=1 -s STANDALONE_WASM --no-entry")
-    set_target_properties(uriparser_wasm PROPERTIES PUBLIC_HEADER "${API_HEADER_FILES}")
-    set(CMAKE_EXECUTABLE_SUFFIX ".a")
-endif()
-
 #
 # CMake files for find_package(uriparser [..] CONFIG [..])
 #

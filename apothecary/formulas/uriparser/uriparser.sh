@@ -34,18 +34,18 @@ function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 	DEFS=" 
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
-      -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-      -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-      -DCMAKE_CXX_EXTENSIONS=OFF \
+			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DURIPARSER_BUILD_TESTS=OFF \
  			-DURIPARSER_BUILD_DOCS=OFF \
  			-DURIPARSER_BUILD_TOOLS=OFF \
  			-DURIPARSER_BUILD_WCHAR_T=ON \
  			-DURIPARSER_SHARED_LIBS=OFF \
  			-DDBUILD_SHARED_LIBS=OFF \
-	    -DURIPARSER_BUILD_CHAR=ON \
-	    -DURIPARSER_ENABLE_INSTALL=OFF \
-	    -DURIPARSER_WARNINGS_AS_ERRORS=OFF
+			-DURIPARSER_BUILD_CHAR=ON \
+			-DURIPARSER_ENABLE_INSTALL=OFF \
+			-DURIPARSER_WARNINGS_AS_ERRORS=OFF
 	   "
 	if [ "$TYPE" == "vs" ] ; then
 		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
@@ -157,24 +157,24 @@ function build() {
         cd ..      
       
 	elif [ "$TYPE" == "emscripten" ]; then
-		mkdir -p "build_${TYPE}_$PLATFORM"
-		cd "build_${TYPE}_$PLATFORM"
-		rm -f CMakeCache.txt *.a *.o *.a
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		rm -f CMakeCache.txt *.a *.o 
         $EMSDK/upstream/emscripten/emcmake cmake .. \
 			${DEFS} \
 			-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
-			-DCMAKE_C_STANDARD=${C_STANDARD} \
+			-DCMAKE_VERBOSE_MAKEFILE=ON \
 			-B . \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \
-			-DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 			-DCMAKE_INSTALL_INCLUDEDIR=include \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DBUILD_SHARED_LIBS=OFF \
+			-DENABLE_VISIBILITY=OFF \
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}"
-		cmake --build . --config Release 
+		# cmake --build . --config Release 
+		$EMSDK/upstream/emscripten/emmake make
 		cd ..
 	fi
 }
@@ -199,10 +199,11 @@ function copy() {
 		cp -Rv build_${TYPE}_${PLATFORM}/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
 		secure $1/lib/$TYPE/$PLATFORM/uriparser.lib
 	elif [ "$TYPE" == "emscripten" ]; then
+		mkdir -p $1/lib/$TYPE/${PLATFORM}
 		cp -R include/uriparser/* $1/include/uriparser/
-		mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -Rv "build_${TYPE}_$PLATFORM/uriparser_wasm.a" $1/lib/$TYPE/$PLATFORM/uriparser.a
-		secure $1/lib/$TYPE/$PLATFORM/uriparser.a
+		cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
+		cp -Rv "build_${TYPE}_${PLATFORM}/liburiparser.a" $1/lib/$TYPE/${PLATFORM}/uriparser.a
+		secure $1/lib/$TYPE/${PLATFORM}/uriparser.a
     elif [ "$TYPE" == "android" ]; then
 		cp -R include/uriparser/* $1/include/uriparser/
 		mkdir -p $1/lib/$TYPE/$ABI/

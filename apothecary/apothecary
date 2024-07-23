@@ -769,6 +769,7 @@ if [ "$TYPE" = "msys2" ]; then
 fi
 
 if [ "$TYPE" = "emscripten" ]; then
+    CPP_STANDARD=17
     if [ $ARCH == "64" ] ; then
         PLATFORM="WASM64"
         PLATFORM_FLAG="-DMEMORY64"
