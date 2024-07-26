@@ -139,7 +139,7 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libusb-1.0/" $1/
-    	cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb.dll
+    	cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
     	cp -f "build_${TYPE}_${PLATFORM}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb.lib
 		secure $1/lib/$TYPE/$PLATFORM/libusb.lib libusb
 	fi
