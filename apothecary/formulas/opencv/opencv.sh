@@ -230,8 +230,8 @@ function build() {
     LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
     LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
 
-    FLAG_RELEASE=${FLAG_RELEASE/-DUNICODE/}
-    FLAG_RELEASE=${FLAG_RELEASE/-D_UNICODE/}
+    FLAGS_RELEASE=${FLAGS_RELEASE/-DUNICODE/}
+    FLAGS_RELEASE=${FLAGS_RELEASE/-D_UNICODE/}
 
     DEFS="
         -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -392,7 +392,7 @@ function build() {
   elif [ "$TYPE" == "android" ]; then
     export ANDROID_NDK=${NDK_ROOT}
     if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
-      local BUILD_FOLDER="build_android_arm"
+      local BUILD_FOLDER="build_androREid_arm"
       local BUILD_SCRIPT="cmake_android_arm.sh"
     elif [ "$ABI" = "arm64-v8a" ]; then
       local BUILD_FOLDER="build_android_arm64"
