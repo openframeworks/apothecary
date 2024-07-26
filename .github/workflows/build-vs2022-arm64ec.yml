@@ -18,7 +18,7 @@ env:
   NO_FORCE: 1
   VS_VER: 17
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-  USE_ARTIFACT: true
+  USE_ARTIFACT: false
     
 jobs:
 
