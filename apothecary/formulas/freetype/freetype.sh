@@ -49,7 +49,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
-	DEFS="
+	DEFS="	-DFT_CONFIG_OPTION_SUBPIXEL_RENDERING=ON \
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -87,7 +87,7 @@ function build() {
 		EXTRA_DEFS="
 			${BROTLI} \
 			-DFT_DISABLE_PNG=FALSE \
-            -D FT_REQUIRE_PNG=TRUE \
+            -DFT_REQUIRE_PNG=TRUE \
 			-DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
@@ -131,7 +131,15 @@ function build() {
 		
 		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"  
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+
+        grep '#elif defined( _M_ARM64 ) || defined( _M_ARM )' include/freetype/internal/ftcalc.h
+		if [ $? -eq 0 ]; then
+		    sed -i 's/#elif defined( _M_ARM64 ) || defined( _M_ARM )/#elif defined( _M_ARM64 ) || defined( _M_ARM ) || defined( _M_ARM64EC )/g' include/freetype/internal/ftcalc.h
+		    echo "ARM64EC Patch applied successfully. 2.13.2 https://gitlab.freedesktop.org/freetype/freetype/-/merge_requests/334"
+		else
+		    echo "ARM64EC Patch The line to be replaced was not found. 2.13.2 "
+		fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
@@ -158,13 +166,7 @@ function build() {
         if [ "$PLATFORM" == "ARM64EC" ] ; then
             BROTLI="
 			-DFT_REQUIRE_BROTLI=FALSE \
-			-DFT_DISABLE_BROTLI=TRUE \
-			-DENABLE_SSE=OFF \
-			-DENABLE_SSE2=OFF \
-			-DENABLE_SSE3=OFF \
-			-DENABLE_SSE41=OFF \
-			-DENABLE_SSE42=OFF \
-			-DENABLE_SSSE3=OFF"
+			-DFT_DISABLE_BROTLI=TRUE"
       	fi
         EXTRA_DEFS="
             ${BROTLI} \
@@ -182,7 +184,7 @@ function build() {
 		    -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG=lib \
 		    -DCMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG=lib \
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=bin"
-		 env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
+		 env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
          cmake .. ${DEFS} \
          	${EXTRA_DEFS} \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -190,15 +192,11 @@ function build() {
 		    ${CMAKE_WIN_SDK} \
 		    -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
-            -DFT_DISABLE_BZIP2=TRUE \
-            -DFT_REQUIRE_BZIP2=FALSE \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
-            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS} " \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -216,7 +214,7 @@ function build() {
             -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY};${LIBBROTLI_ENC_LIB};${LIBBROTLI_DEC_LIB}"
         cmake --build . --config Release --target install   
 
-        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
         cmake .. ${DEFS} \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=OFF \
@@ -226,10 +224,8 @@ function build() {
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_PREFIX=Debug \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} " \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \

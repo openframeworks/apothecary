@@ -587,16 +587,16 @@ if [ "$TYPE" = "vs" ]; then
     if [ $VS_COMPILER == "LLVM" ]; then
         export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
         export EXCEPTION_FLAGS=""
-        export FLAGS_RELEASE="-O3"
-        export FLAGS_DEBUG="-O0"
+        export FLAGS_RELEASE="-O3 -DUNICODE -D_UNICODE"
+        export FLAGS_DEBUG="-O0 -DUNICODE -D_UNICODE"
     else
         if [ $ARCH == "arm64ec" ]; then              
             export VS_C_FLAGS="/Gy /GL- /guard:cf"
         else
             export VS_C_FLAGS="/GL-"
         fi
-        export FLAGS_RELEASE="${MT_TYPE} ${CALLING_CONVENTION} /O2"
-        export FLAGS_DEBUG="${MT_TYPE}d ${CALLING_CONVENTION} /Od"
+        export FLAGS_RELEASE="${MT_TYPE} ${CALLING_CONVENTION} /O2 /DNDEBUG -DUNICODE -D_UNICODE"
+        export FLAGS_DEBUG="${MT_TYPE}d ${CALLING_CONVENTION} /Od /DDEBUG -DUNICODE -D_UNICODE"
         export EXCEPTION_FLAGS="/EHsc"
     fi
 
