@@ -16,7 +16,7 @@ env:
   TARGET: "tvos"
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-  USE_ARTIFACT: true
+  USE_ARTIFACT: false
 
 jobs:
   build-macos-platforms:
