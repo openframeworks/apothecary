@@ -702,7 +702,7 @@ function copy() {
     mkdir -p $1/lib/$TYPE/$PLATFORM
     cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a $1/lib/$TYPE/$PLATFORM/
     cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
-    cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.dylib $1/lib/$TYPE/$PLATFORM
+    cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/"*.dylib $1/lib/$TYPE/$PLATFORM 2>/dev/null || true
 
     cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" $1/include/
 
