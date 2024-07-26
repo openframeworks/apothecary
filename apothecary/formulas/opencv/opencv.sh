@@ -55,6 +55,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
   LIBS_ROOT=$(realpath $LIBS_DIR)
+
   if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     # sed -i'' -e  "s|return __TBB_machine_fetchadd4(ptr, 1) + 1L;|return __atomic_fetch_add(ptr, 1L, __ATOMIC_SEQ_CST) + 1L;|" 3rdparty/ittnotify/src/ittnotify/ittnotify_config.h
     
@@ -101,10 +102,8 @@ function build() {
       -DENABLE_VISIBILITY=OFF \
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration " \
-      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration" \
-      -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
-      -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+      -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration -DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+      -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration -DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DBUILD_SHARED_LIBS=OFF \
       -DBUILD_DOCS=OFF \
@@ -231,6 +230,9 @@ function build() {
     LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
     LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
 
+    FLAG_RELEASE=${FLAG_RELEASE/-DUNICODE/}
+    FLAG_RELEASE=${FLAG_RELEASE/-D_UNICODE/}
+
     DEFS="
         -DCMAKE_C_STANDARD=${C_STANDARD} \
         -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -345,8 +347,8 @@ function build() {
         -DCMAKE_INSTALL_PREFIX=Debug \
         -DCMAKE_BUILD_TYPE="Debug" \
         -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
-        -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
         -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
         -D BUILD_SHARED_LIBS=ON \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
@@ -371,8 +373,8 @@ function build() {
         -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules \
         -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
         -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
-        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-        -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
         -D BUILD_SHARED_LIBS=ON \
         ${EXTRA_DEFS} \
         -DZLIB_ROOT=${ZLIB_ROOT} \
