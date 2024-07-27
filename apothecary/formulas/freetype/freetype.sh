@@ -49,7 +49,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
-	DEFS="	-DFT_CONFIG_OPTION_SUBPIXEL_RENDERING=ON \
+	DEFS="
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
