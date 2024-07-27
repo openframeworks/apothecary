@@ -230,8 +230,8 @@ function build() {
     LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
     LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
 
-    FLAGS_RELEASE=${FLAGS_RELEASE/-DUNICODE/}
-    FLAGS_RELEASE=${FLAGS_RELEASE/-D_UNICODE/}
+    FLAG_RELEASE=$(echo $FLAG_RELEASE | sed 's/-DUNICODE//g' | sed 's/-D_UNICODE//g')
+
 
     DEFS="
         -DCMAKE_C_STANDARD=${C_STANDARD} \
