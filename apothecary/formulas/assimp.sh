@@ -315,6 +315,8 @@ function build() {
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
         mkdir -p build_${TYPE}_${PLATFORM}
         cd build_${TYPE}_${PLATFORM}
         find ./ -name "*.o" -type f -delete

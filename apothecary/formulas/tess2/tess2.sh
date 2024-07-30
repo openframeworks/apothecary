@@ -173,9 +173,10 @@ function build() {
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCPU_BASELINE='' \
 			-DCPU_DISPATCH='' \
-			-DCV_TRACE=OFF \
-			-DCMAKE_C_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128 ${FLAG_RELEASE}" \
-			-DCMAKE_CXX_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ -msimd128 ${FLAG_RELEASE}"
+			-DCMAKE_CXX_FLAGS_RELEASE=" ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS_RELEASE="${FLAG_RELEASE} " \
+			-DCMAKE_C_FLAGS=" ${FLAG_RELEASE}" \
+			-DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}"
     	$EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
 	elif [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "msys2" ]; then
 	    mkdir -p build

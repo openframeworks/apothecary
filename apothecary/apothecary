@@ -803,7 +803,7 @@ if [ "$TYPE" = "emscripten" ]; then
     export CPP_STANDARD=17
     if [ $ARCH == 64 ] ; then
         export PLATFORM="WASM64"
-        export PLATFORM_FLAG="-DMEMORY64"
+        export PLATFORM_FLAG="-DMEMORY64 -sSUPPORT_LONGJMP=wasm -matomics -mbulk-memory"
         echo "Emscripten: ARCH:${ARCH}"
     else
         export PLATFORM="WASM"
@@ -818,7 +818,7 @@ if [ "$TYPE" = "emscripten" ]; then
     else
         PTHREADS_FLAG=""
     fi
-    export FLAG_RELEASE="-DWASM=ON -DNDEBUG -Os ${PTHREADS_FLAG} -fPIC ${PLATFORM_FLAG} -fvisibility=hidden -Wno-implicit-function-declaration -frtti -fexceptions -fwasm-exceptions"
+    export FLAG_RELEASE="-DWASM=ON -DNDEBUG -Os ${PTHREADS_FLAG} -fPIC ${PLATFORM_FLAG} -fvisibility=hidden -Wno-implicit-function-declaration -frtti -fwasm-exceptions"
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
 	. "$EMSCRIPTEN_SCRIPT"
 fi
