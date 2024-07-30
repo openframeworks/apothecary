@@ -53,7 +53,6 @@ if [ -z "${TYPE+x}" ]; then
     TYPE=
 fi
 
-ARCH=64
 
 # full path to this script's dir
 APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -172,28 +171,6 @@ CON_GREEN="\033[32m"
 # used to filter out bad build types
 VALID_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "msys2" "ios" "tvos" "xros" "watchos" "catos" "android" "emscripten" )
 
-# verbose mode bool
-if [ -z "${A_VERBOSE+x}" ]; then
-    export A_VERBOSE=0
-fi
-
-# If formula already exists force download
-if [ -z "${FORCE_DOWNLOAD+x}" ]; then
-    export FORCE_DOWNLOAD=0
-fi
-
-if [ -z "${LIBS_DIR_REAL+x}" ]; then
-    export LIBS_DIR_REAL=
-fi
-
-if [ -z "${C_STANDARD+x}" ]; then
-    export C_STANDARD=17
-fi
-
-if [ -z "${CPP_STANDARD+x}" ]; then
-    export CPP_STANDARD=23
-fi
-
 
 PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-}
 
@@ -211,24 +188,7 @@ VS_BUILD_TOOL=devenv
 WIN10_INSTALLED_SDK_2019=10.0.190410.0
 WIN10_INSTALLED_SDK_2022=10.0.20348.0
 WIN11_INSTALLED_SDK_2022=10.0.22621.0
-if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
-    VS_TYPE=Community 
-fi
-if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
-    VS_COMPILER=MSVC 
-fi
-if [ -z "${VS_HOST+x}" ]; then
-    VS_HOST=amd64 
-fi
-TARGET_WIN_11=0
 
-if [ -z "${XCFRAMEWORK_ALL+x}" ]; then
-    export XCFRAMEWORK_ALL=false
-fi
-
-if [ -z "${LOADSAVE_RESULT+x}" ]; then
-    declare -a LOADSAVE_RESULT=0
-fi
 
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]
@@ -382,12 +342,18 @@ trapError() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:y:m:c:x:hgvfpew opt ; do
+while getopts t:a:b:d:s:j:m:c:hgvfpewy opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
 		a) # set the architecture
-		   export ARCH=$OPTARG ;;
+		    export ARCH=$OPTARG
+            if [ -z "${ARCH+x}" ]; then
+                echo "No ARCH argument provided"
+            else
+                echo "ARCH argument: ${ARCH}"
+            fi
+            ;;
 		b) # set the build dir
 		   export BUILD_DIR="$(realpath \"$OPTARG\")" ;;
 		d) # set lib destination dir
@@ -425,6 +391,55 @@ while getopts t:a:b:d:s:j:y:m:c:x:hgvfpew opt ; do
 	esac
 done
 shift $(expr $OPTIND - 1)
+
+
+if [ -z "${ARCH+x}" ]; then
+    echo "No ARCH argument provided"
+else
+    echo "ARCH argument: ${ARCH}"
+fi
+
+# verbose mode bool
+if [ -z "${A_VERBOSE+x}" ]; then
+    export A_VERBOSE=0
+fi
+
+# If formula already exists force download
+if [ -z "${FORCE_DOWNLOAD+x}" ]; then
+    export FORCE_DOWNLOAD=0
+fi
+
+if [ -z "${LIBS_DIR_REAL+x}" ]; then
+    export LIBS_DIR_REAL=
+fi
+
+if [ -z "${C_STANDARD+x}" ]; then
+    export C_STANDARD=17
+fi
+
+if [ -z "${CPP_STANDARD+x}" ]; then
+    export CPP_STANDARD=23
+fi
+
+if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
+    VS_TYPE=Community 
+fi
+if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
+    VS_COMPILER=MSVC 
+fi
+if [ -z "${VS_HOST+x}" ]; then
+    VS_HOST=amd64 
+fi
+TARGET_WIN_11=0
+
+if [ -z "${XCFRAMEWORK_ALL+x}" ]; then
+    export XCFRAMEWORK_ALL=false
+fi
+
+if [ -z "${LOADSAVE_RESULT+x}" ]; then
+    declare -a LOADSAVE_RESULT=0
+fi
+
 
 function setup_vs_vars(){
     
@@ -787,10 +802,12 @@ if [ "$TYPE" = "emscripten" ]; then
     export CPP_STANDARD=17
     if [ $ARCH == 64 ] ; then
         export PLATFORM="WASM64"
-        PLATFORM_FLAG="-DMEMORY64"
+        export PLATFORM_FLAG="-DMEMORY64"
+        echo "Emscripten: ARCH:${ARCH}"
     else
         export PLATFORM="WASM"
-        PLATFORM_FLAG=""
+        export PLATFORM_FLAG=""
+         echo "Emscripten: ARCH:${ARCH}"
     fi
     if [ -z "${PTHREADS_ENABLED+x}" ]; then
         export PTHREADS_ENABLED=0

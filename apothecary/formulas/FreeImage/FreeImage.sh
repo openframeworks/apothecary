@@ -13,7 +13,7 @@ FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emsc
 
 FORMULA_DEPENDS=( "zlib" "libpng" )
 
-VER=31980
+VER=31982
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.19.8
 
@@ -76,7 +76,7 @@ function build() {
 				-DBUILD_JXR=OFF \
 				-DENABLE_BITCODE=OFF \
 				-DENABLE_ARC=OFF \
-				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+				-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
 				-DENABLE_VISIBILITY=OFF \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake
 		        "         
@@ -273,8 +273,8 @@ function build() {
 			-DBUILD_WEBP=OFF \
 			-DBUILD_JXR=OFF \
 			-DBUILD_TESTS=OFF \
-			-DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="${FLAG_RELEASE}" \
+			-DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE} " \
+			-DCMAKE_C_FLAGS="${FLAG_RELEASE} " \
 			-DPNG_ROOT=${LIBPNG_ROOT} \
 			-DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
