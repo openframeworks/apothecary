@@ -342,7 +342,7 @@ trapError() {
 #### PARSE COMMANDLINE
 
 # from http://www.mkssoftware.com/docs/man1/getopts.1.asp
-while getopts t:a:b:d:s:j:m:c:hgvfpewy opt ; do
+while getopts t:a:b:d:s:j:m:c:hgvxfpewy opt ; do
 	case "$opt" in
 		t) # set the library build type
 		   export TYPE="$OPTARG" ;;
