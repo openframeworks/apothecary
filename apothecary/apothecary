@@ -394,7 +394,8 @@ shift $(expr $OPTIND - 1)
 
 
 if [ -z "${ARCH+x}" ]; then
-    echo "No ARCH argument provided"
+    echo "No ARCH argument provided - setting to 64"
+    ARCH=64
 else
     echo "ARCH argument: ${ARCH}"
 fi
