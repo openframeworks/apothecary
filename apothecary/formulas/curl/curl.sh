@@ -14,9 +14,9 @@ FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
 FORMULA_DEPENDS=( "openssl" "zlib" )
 
 # define the version by sha
-VER=8.8.0
-VER_D=8_8_0
-SHA1=27b90781ec6353d9b52e88e4802c7436b1ed0529
+VER=8.9.1
+VER_D=8_9_1
+SHA1=9bcf387f274ae96ad591115d9f9f23700ec76ceb
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl
