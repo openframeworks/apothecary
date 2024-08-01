@@ -419,13 +419,13 @@ if [ -z "${CPP_STANDARD+x}" ]; then
 fi
 
 if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
-    VS_TYPE=Community 
+    export VS_TYPE=Community 
 fi
 if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
-    VS_COMPILER=MSVC 
+    export VS_COMPILER=MSVC 
 fi
 if [ -z "${VS_HOST+x}" ]; then
-    VS_HOST=amd64 
+    export VS_HOST=amd64 
 fi
 TARGET_WIN_11=0
 
@@ -552,24 +552,24 @@ if [ "$TYPE" = "vs" ]; then
     VS_64_BIT_ENV='VC\vcvarsall'
     if [ -z ${PLATFORM+x} ]; then
         if [ $ARCH == 32 ]; then
-            export PLATFORM=x86
-            export CROSS_TOOL="amd64_x86"
+            PLATFORM=x86
+            CROSS_TOOL="amd64_x86"
         elif [ $ARCH == 64 ] || [ $ARCH == "x86_64" ]; then
-            export PLATFORM=x64
-            export CROSS_TOOL="amd64"
+            PLATFORM=x64
+            CROSS_TOOL="amd64"
         elif [ $ARCH == "arm64" ]; then
-            export PLATFORM=x64
-            export CROSS_TOOL="all"
+            PLATFORM=x64
+            CROSS_TOOL="all"
         elif [ $ARCH == "arm64ec" ]; then
-            export PLATFORM=x64
-            export CROSS_TOOL="all"
+            PLATFORM=x64
+            CROSS_TOOL="all"
         elif [ $ARCH == "arm" ]; then
-            export PLATFORM=x64
-            export CROSS_TOOL="all"
+            PLATFORM=x64
+            CROSS_TOOL="all"
         else
         	echo "ARCH not set $ARCH"
-        	export PLATFORM=x64
-            export CROSS_TOOL="all"
+        	PLATFORM=x64
+            CROSS_TOOL="all"
         fi        
     fi
     
@@ -578,10 +578,10 @@ if [ "$TYPE" = "vs" ]; then
         MULTITHREADED_TYPE="MD"
     fi
     if [ $MULTITHREADED_TYPE == "MD" ]; then
-        export MT_TYPE="/MD"
+        MT_TYPE="/MD"
         echoVerbose "MULTITHREADED_TYPE MD"
     elif [ $MULTITHREADED_TYPE == "MT" ]; then
-        export MT_TYPE="/MT"
+        MT_TYPE="/MT"
         echoVerbose "MULTITHREADED_TYPE MT"
     fi
 
@@ -664,29 +664,23 @@ if [ "$TYPE" = "vs" ]; then
         fi
     fi
     if [ $ARCH == 32 ] ; then
-        export BUILD_PLATFORM="x86"
+        PLATFORM="Win32"
+        BUILD_PLATFORM="x86"
     elif [ $ARCH == 64 ] ; then
-        export BUILD_PLATFORM="x64"
+        PLATFORM="x64"
+        BUILD_PLATFORM="x64"
     elif [ $ARCH == "arm64" ] ; then
-        export BUILD_PLATFORM="arm64"
+        PLATFORM="ARM64"
+        BUILD_PLATFORM="arm64"
     elif [ $ARCH == "arm64ec" ] ; then
-        export BUILD_PLATFORM="arm64"
+        PLATFORM="ARM64EC"
+        BUILD_PLATFORM="arm64"
     elif [ $ARCH == "arm" ]; then
-        export BUILD_PLATFORM="arm"
+        PLATFORM="ARM"
+        BUILD_PLATFORM="arm"
     else
         echoError "Apothecary -a not a valid passed architecture:[${ARCH}]"
         exit;
-    fi 
-    if [ $ARCH == 32 ] ; then
-        export PLATFORM="Win32"
-    elif [ $ARCH == 64 ] ; then
-        export PLATFORM="x64"
-    elif [ $ARCH == "arm64" ] ; then
-        export PLATFORM="ARM64"
-    elif [ $ARCH == "arm64ec" ] ; then
-        export PLATFORM="ARM64EC"
-    elif [ $ARCH == "arm" ]; then
-        export PLATFORM="ARM"
     fi 
 	if [ $ARCH == "arm64" ] || [ $ARCH == "arm64ec" ] || [ $ARCH == "ARM" ]; then
 		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
@@ -697,7 +691,7 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${VS_BIN_PATH+x} ]; then	            
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
         if [ $VS_COMPILER == "MSVC" ]; then 
-            if [ $ARCH == "arm64" ] || [ $ARCH == "ARM" ] || [ $ARCH == "arm64ec" ]; then
+            if [ $ARCH == "arm64" ] || [ $ARCH == "arm" ] || [ $ARCH == "arm64ec" ]; then
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
             else 
                 export VS_BIN_PATH="$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/$VS_VER_DIR/bin/$VS_HOSTPLATFORM/$BUILD_PLATFORM"
@@ -792,7 +786,6 @@ if [ "$TYPE" = "msys2" ]; then
             esac
         fi
     fi
-    export PLATFORM=$ARCH
 fi
 
 if [ "$TYPE" = "emscripten" ]; then
