@@ -87,8 +87,12 @@ function build() {
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.a *.o *.lib
 
+        OPENSSL_ROOT="$LIBS_ROOT/openssl/"
+        OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
+        OPENSSL_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/openssl.lib"
+        OPENSSL_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/libcrypto.lib"
+
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
-        export X_ZLIB_ROOT=$(cygpath -w ${ZLIB_ROOT} | sed "s/\\\/\\\\\\\\/g")
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
@@ -100,7 +104,6 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_GENERATOR_PLATFORM=x64 \
             -DCMAKE_CXX_EXTENSIONS=OFF
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
