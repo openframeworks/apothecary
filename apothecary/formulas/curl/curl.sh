@@ -98,6 +98,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_GENERATOR_PLATFORM=x64 \
             -DCMAKE_CXX_EXTENSIONS=OFF
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
