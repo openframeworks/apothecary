@@ -553,23 +553,17 @@ if [ "$TYPE" = "vs" ]; then
     if [ -z ${PLATFORM+x} ]; then
         if [ $ARCH == 32 ]; then
             PLATFORM=x86
-            CROSS_TOOL="amd64_x86"
         elif [ $ARCH == 64 ] || [ $ARCH == "x86_64" ]; then
             PLATFORM=x64
-            CROSS_TOOL="amd64"
         elif [ $ARCH == "arm64" ]; then
             PLATFORM=x64
-            CROSS_TOOL="all"
         elif [ $ARCH == "arm64ec" ]; then
             PLATFORM=x64
-            CROSS_TOOL="all"
         elif [ $ARCH == "arm" ]; then
             PLATFORM=x64
-            CROSS_TOOL="all"
         else
         	echo "ARCH not set $ARCH"
         	PLATFORM=x64
-            CROSS_TOOL="all"
         fi        
     fi
     
@@ -665,19 +659,24 @@ if [ "$TYPE" = "vs" ]; then
     fi
     if [ $ARCH == 32 ] ; then
         export PLATFORM="Win32"
-        BUILD_PLATFORM="x86"
+        export BUILD_PLATFORM="x86"
+        export CROSS_TOOL="amd64_x86"
     elif [ $ARCH == 64 ] || [ $ARCH == "x86_64" ]; then
         export PLATFORM="x64"
-        BUILD_PLATFORM="x64"
+        export BUILD_PLATFORM="x64"
+        export CROSS_TOOL="amd64"
     elif [ $ARCH == "arm64" ] ; then
         export PLATFORM="ARM64"
-        BUILD_PLATFORM="arm64"
+        export BUILD_PLATFORM="arm64"
+        export CROSS_TOOL="all"
     elif [ $ARCH == "arm64ec" ] ; then
         export PLATFORM="ARM64EC"
-        BUILD_PLATFORM="arm64"
+        export BUILD_PLATFORM="arm64"
+        export CROSS_TOOL="all"
     elif [ $ARCH == "arm" ]; then
         export PLATFORM="ARM"
-        BUILD_PLATFORM="arm"
+        export BUILD_PLATFORM="arm"
+        export CROSS_TOOL="all"
     else
         echoError "Apothecary -a not a valid passed architecture:[${ARCH}]"
         exit;
