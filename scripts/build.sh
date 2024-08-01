@@ -14,7 +14,7 @@ if [ -z "${ARCH+x}" ]; then
 fi
 
 if [ -z "${PTHREADS_ENABLED+x}" ]; then
-    export PTHREADS_ENABLED=0
+    export PTHREADS_ENABLED=1
 fi
 
 # Print the value to verify it's set
