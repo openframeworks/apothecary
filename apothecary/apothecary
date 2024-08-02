@@ -798,7 +798,7 @@ fi
 
 if [ "$TYPE" = "emscripten" ]; then
     export CPP_STANDARD=23
-    FLAG_RELEASE=0
+    FLAG_RELEASE=""
     export PLATFORM_FLAG=""
     if [ $ARCH == 64 ] ; then
         export PLATFORM="WASM64"
