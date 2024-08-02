@@ -110,15 +110,21 @@ function build() {
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"              
         cmake .. ${DEFS} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 " \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CPP_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCURL_TARGET_WINDOWS_VERSION=${CMAKE_WIN_SDK_HEX} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCURL_STATICLIB=ON \
             -DBUILD_STATIC_LIBS=ON \
+            -DBUILD_STATIC_CURL=ON \
+            -DCURL_STATICLIB=ON \
+            -DBUILD_STATIC_LIBS=ON \
+            -DENABLE_UNICODE=ON \
             -DCURL_USE_OPENSSL=ON \
             -DUSE_SSLEAY=ON \
             -DUSE_OPENSSL=ON \
@@ -261,6 +267,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCURL_STATICLIB=ON \
             -DBUILD_STATIC_LIBS=ON \
+            -DENABLE_UNICODE=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
