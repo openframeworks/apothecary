@@ -1572,9 +1572,9 @@ function frameworkFormula() {
 
         if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
              if ! command -v rsync &> /dev/null; then      
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ]]; then
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/" ]]; then
                     mkdir -p "${X_LIBS}"
-                    cp -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"* ${X_LIBS}
+                    cp -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/"* ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
@@ -1583,9 +1583,9 @@ function frameworkFormula() {
                     cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
                 fi
             else
-                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}" ]]; then
+                if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}" ]]; then
                     mkdir -p "${X_LIBS}"
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ${X_LIBS}
+                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/" ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
                     rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
@@ -1624,7 +1624,7 @@ function frameworkFormula() {
         LIB_NAME=""
         CURRENT_TYPE=$TYPE
         BINARY_NAME=""
-        XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${TYPE}/$1.xcframework"
+        XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/$1.xcframework"
         declare -a merged_dirs=()
         LIB_NAME=""
         for CURRENT_TYPE in "${PLATFORM_TYPES[@]}"; do
