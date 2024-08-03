@@ -17,10 +17,9 @@ else
     export BUNDLE=$BUNDLE_NO
 fi
 
-export TARGET=macos
+export TARGET=osx
 export ARCH=arm64
 export NO_FORCE=ON
-export XFRAMEWORKALL=TRUE
 
 echo "Target: $TARGET"
 echo "Architecture: $ARCH"
@@ -39,7 +38,11 @@ for formula in "${FORMULAS[@]}" ; do
     #echo "./apothecary $ARGS framework $formula_name"
     eval "cd $APOTHECARY_PATH";
     echo "---------"
-    eval "./apothecary -x $ARGS framework $formula_name"
+    eval "./apothecary $ARGS framework $formula_name" 
+    
 done
 echo "Apothecary openFrameworks Build XCFramework for $TARGET complete."
 echo "========================"
+
+
+

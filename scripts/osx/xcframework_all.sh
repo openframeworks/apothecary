@@ -15,6 +15,7 @@ fi
 OF_LIBS=${OF_ROOT}/libs
 OF_ADDONS=${OF_ROOT}/addons
 
+# control 
 if [ -z "${BUILD_LIBRARIES+x}" ]; then
     BUILD_LIBRARIES=1
 fi
@@ -24,7 +25,7 @@ if [ -z "${MOVE_LIBRARIES+x}" ]; then
 fi
 
 if [ -z "${PLATFORM+x}" ]; then
-    PLATFORM=macos
+    PLATFORM=osx
 fi
 
 # if [ -z "${ARCH+x}" ]; then
@@ -111,7 +112,7 @@ sort_libraries() {
                 rm -rf ${addon_path}
             fi
             mkdir -p $addon_path
-            if ! command -v rsync &> /dev/null; then
+            if ! command -v rsync &> /dev/null; then      
                 cp -av ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
             else
                 rsync -av ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
@@ -144,3 +145,4 @@ if [ ${MOVE_LIBRARIES} == 1 ]; then
 fi
 
 echo "Apothecary openFrameworks Build and installation complete."
+

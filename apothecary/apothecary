@@ -1752,6 +1752,13 @@ function frameworkFormula() {
 
         echoSuccess " flags: [\"$1\" \"$xcframework_flags\"]"
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
+
+        if [[ $TYPE == "osx" ]]; then
+            TYPE_OUT="macos"
+        else
+            TYPE_OUT=${TYPE}
+        fi
+
         cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
         echoSuccess " xcframework for $TYPE built successfully."
