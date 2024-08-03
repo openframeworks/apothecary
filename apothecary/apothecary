@@ -1269,7 +1269,7 @@ function doCommand() {
 					# does this formula support the current build type?
 					local bFormulaType=0 # bool
 					isFormulaType $TYPE bFormulaType
-					if [ $bFormulaType == 0 ] ; then
+					if [ $bFormulaType == 0 ] && [ $TYPE != "macos" ] ; then
 						echoInfo " Skipping \"$currentLib\": $cmd not needed for type \"$TYPE\""
 					else
 						# do command
@@ -1547,6 +1547,10 @@ function frameworkFormula() {
         
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
+        exit 0;
+    elif [  $1 == "pkg-config" ] ; then
+        echoVerbose " No need to create framework for: \"$1\""
+        exit 0;
     else
         rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 
@@ -1820,6 +1824,10 @@ function xframeworkFormula() {
     
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
+        exit 0;
+    elif [  $1 == "pkg-config" ] ; then
+        echoVerbose " No need to create framework for: \"$1\""
+        exit 0;
     else
         # rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 
