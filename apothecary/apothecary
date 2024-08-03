@@ -1758,7 +1758,9 @@ function frameworkFormula() {
             TYPE_OUT=${TYPE}
         fi
 
-        cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
+
+        XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/$1.xcframework"
+        cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/"
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
@@ -2035,7 +2037,7 @@ function xframeworkFormula() {
 
         echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
-        cd "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"
+        cd "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/"
         xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
         echoSuccess " xcframework for $TYPE built successfully."
         echo "========================"
