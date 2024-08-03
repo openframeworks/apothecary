@@ -1545,19 +1545,25 @@ function frameworkFormula() {
         mkdir -p $XLIBSLOCAL
     fi
     export XLIBS_DIR_REAL=$(realpath $XLIBSLOCAL)
+
+     if [[ $TYPE == "osx" ]]; then
+        TYPE_OUT="macos"
+    else
+        TYPE_OUT=${TYPE}
+    fi
         
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
     elif [  $1 == "pkg-config" ] || [  $1 == "kiss" ]; then
         echoVerbose " No need to create framework for: \"$1\""
     else
-        rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
+        rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE_OUT/*.xcframework
 
-        echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE/\" "
+        echoSuccess " Framework lib dest dir: \"$1\" \"$LIBS_DIR_REAL/$1/lib/$TYPE_OUT/\" "
         xcframework_flags=""
 
         XDIR="${XLIBS_DIR_REAL}/"
-        X_LIBS="$XDIR/${1}/lib/${TYPE}/"
+        X_LIBS="$XDIR/${1}/lib/${TYPE_OUT}/"
         X_INCLUDE=$XDIR/${1}/include
         X_LICENSE=$XDIR/${1}/license
         
@@ -1752,11 +1758,7 @@ function frameworkFormula() {
         echoSuccess " flags: [\"$1\" \"$xcframework_flags\"]"
         HERE_DIR=$(cd $(dirname "./"); pwd -P)
 
-        if [[ $TYPE == "osx" ]]; then
-            TYPE_OUT="macos"
-        else
-            TYPE_OUT=${TYPE}
-        fi
+       
 
 
         XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/$1.xcframework"
