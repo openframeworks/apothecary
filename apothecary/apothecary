@@ -351,7 +351,8 @@ trapError() {
 while getopts t:a:b:d:s:j:m:c:hgvxfpewy opt ; do
 	case "$opt" in
 		t) # set the library build type
-		   export TYPE="$OPTARG" ;;
+		    export TYPE="$OPTARG";;
+            #export TARGET=$TYPE
 		a) # set the architecture
 		    export ARCH=$OPTARG
             if [ -z "${ARCH+x}" ]; then
@@ -1547,10 +1548,8 @@ function frameworkFormula() {
         
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
-        exit 0;
-    elif [  $1 == "pkg-config" ] ; then
+    elif [  $1 == "pkg-config" ] || [  $1 == "kiss" ]; then
         echoVerbose " No need to create framework for: \"$1\""
-        exit 0;
     else
         rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 
@@ -1831,10 +1830,8 @@ function xframeworkFormula() {
     
     if [ ! -e "$LIBS_DIR/$1" ] ; then
         echoVerbose " Nothing to create framework from to merge in lib dest dir: \"$1\""
-        exit 0;
-    elif [  $1 == "pkg-config" ] ; then
+    elif [[ "$1" =~ ^(kiss|portaudio|pkg-config|videoInput)$ ]]; then
         echoVerbose " No need to create framework for: \"$1\""
-        exit 0;
     else
         # rm -rf $LIBS_DIR_REAL/$1/lib/$TYPE/*.xcframework
 

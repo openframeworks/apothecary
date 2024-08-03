@@ -187,7 +187,7 @@ function travis_nanoseconds() {
 }
 
 if [ -z ${PARALLEL+x} ]; then
-    if [ "$TARGET" == "osx" ]; then
+    if [ "$TARGET" == "osx" ] || [ "$TARGET" == "macos" ]; then
         PARALLEL=4
     elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
         PARALLEL=2
@@ -222,7 +222,7 @@ if  type "ccache" > /dev/null; then
 fi
 
 if [ "$TARGET" == "linux" ]; then
-    TARGET="linux64"
+    export TARGET="linux64"
     if [ "$OPT" == "gcc5" ]; then
         export CC="gcc-5"
         export CXX="g++-5 -std=c++11"

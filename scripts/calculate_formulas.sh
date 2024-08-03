@@ -44,7 +44,7 @@ FORMULAS=(
 )
 
 # Seperate in bundles on osx
-if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+if [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
 if [ "$BUNDLE" == "1" ]; then
 
         FORMULAS=(
@@ -72,7 +72,7 @@ if [ "$BUNDLE" == "1" ]; then
 
         )
     elif [ "$BUNDLE" == "2" ]; then
-        if [[ "$TARGET" =~ ^(osx)$ ]]; then
+        if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
             FORMULAS=(
                 "glm"
                 "json"
@@ -97,6 +97,41 @@ if [ "$BUNDLE" == "1" ]; then
             "curl"
             # "poco"
         )
+    else 
+         FORMULAS=(
+        "pixman"
+            "pkg-config"
+            "zlib"
+            "utf8"
+            "libpng"
+            "brotli"
+            "pugixml"
+            "freetype"
+            "libxml2"
+            "svgtiny"
+            "FreeImage"
+            "assimp"
+            "glew"
+            "json"
+            "zlib"
+            "glfw"
+            "opencv"
+            "portaudio"
+            "libusb"
+            "fmod"
+            "glm"
+            "json"
+            "opencv"
+            "videoInput"
+            "rtAudio"
+            "tess2"
+            "uriparser"
+            "cairo"
+            "fmt"
+            "openssl"
+            "curl"
+            # "poco"
+            )
     fi
 
 elif [ "$TARGET" == "vs" ]; then
