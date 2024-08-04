@@ -124,6 +124,7 @@ function build() {
             -DBUILD_STATIC_CURL=ON \
             -DCURL_STATICLIB=ON \
             -DBUILD_STATIC_LIBS=ON \
+            -DUSE_LIBIDN2=OFF \
             -DENABLE_UNICODE=ON \
             -DCURL_USE_OPENSSL=ON \
             -DUSE_SSLEAY=ON \
