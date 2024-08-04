@@ -15,6 +15,7 @@ concurrency:
 env:
   TARGET: "emscripten"
   EMSDK_VERSION: "3.1.64"
+  USE_ARTIFACT: true
 
 jobs:
   build-emscripten:
