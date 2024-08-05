@@ -11,7 +11,7 @@ FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 #dependencies
-FORMULA_DEPENDS=( "openssl" "zlib" )
+FORMULA_DEPENDS=( "openssl" "zlib" "brotli" )
 
 # define the version by sha
 VER=8.9.1
@@ -239,9 +239,16 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
+        LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
+        LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
+
+        LIBBROTLI_LIBRARY="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlicommon.a"
+        LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlienc.a"
+        LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
         
-        PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
+        #PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
 
         rm -f ${OPENSSL_PATH}/lib/libssl.a || true
         rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
@@ -261,8 +268,8 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCURL_STATICLIB=ON \
@@ -277,33 +284,39 @@ function build() {
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DCMAKE_USE_SYSTEM_CURL=OFF \
-            -DENABLE_ARC=OFF \
+            -DENABLE_ARC=ON \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCURL_DISABLE_LDAP=ON \
             -DENABLE_VISIBILITY=OFF \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
-            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.a;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.a;" \
+            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.a:$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.a" \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
-            -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DENABLE_UNIX_SOCKETS=OFF \
             -DHAVE_LIBSOCKET=OFF \
-            -DUSE_RESOLVE_ON_IPS=OFF \
             -DCURL_ENABLE_SSL=ON \
-            -DHTTP_ONLY=ON \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DUSE_SECURE_TRANSPORT=ON \
+            -DUSE_SECURE_TRANSPORT=OFF \
             -DUSE_NGHTTP2=OFF \
+            -DCURL_USE_SECTRANSP=OFF \
+            -DCURL_DISABLE_POP3=ON \
+            -DCURL_CA_FALLBACK=ON \
+            -DCURL_DISABLE_IMAP=ON \
+            -DENABLE_WEBSOCKETS=ON \
+            -DENABLE_UNIX_SOCKETS=ON \
+            -DCURL_BROTLI=ON \
+            -DBROTLIDEC_LIBRARY=${LIBBROTLI_DEC_LIB} \
+            -DBROTLICOMMON_LIBRARY=${LIBBROTLI_LIBRARY} \
+            -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DUSE_LIBIDN2=OFF \
-            -DENABLE_LDAP=OFF \
-            -DENABLE_LDAPS=OFF \
             -DENABLE_VERBOSE=ON \
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
