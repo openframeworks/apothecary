@@ -247,7 +247,7 @@ function build() {
         LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlienc.a"
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
+        # export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
         
         #PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
 
@@ -313,11 +313,11 @@ function build() {
             -DCURL_DISABLE_IMAP=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DENABLE_UNIX_SOCKETS=ON \
-            -DCURL_BROTLI=ON \
+            -DCURL_BROTLI=OFF \
             -DBROTLIDEC_LIBRARY=${LIBBROTLI_DEC_LIB} \
             -DBROTLICOMMON_LIBRARY=${LIBBROTLI_LIBRARY} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
-            -DUSE_LIBIDN2=OFF \
+            -DUSE_LIBIDN2=ON \
             -DENABLE_VERBOSE=ON \
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
