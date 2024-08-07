@@ -1612,14 +1612,14 @@ function frameworkFormula() {
             ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
             ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
             ["WATCHOS"]="WATCHOS" # Same note as TVOS
-            ["SIMULATOR_WATCHOS"]="SIMULATOR_WATCHOS"
+            ["SIMULATORARM64_WATCHOS"]="SIMULATOR_WATCHOS"
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
             ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
             ["SIMULATOR64_VISIONOS"]="SIMULATOR_VISIONOS"
         )
         # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems 
-        PLATFORM_TYPES=("ios" "osx" "tvos" )
+        PLATFORM_TYPES=("ios" "osx" "tvos" "catos" "xros" "watchos" )
         declare -a merged_dirs=()
         VERSION=""
         LIB_NAME=""
@@ -1900,7 +1900,7 @@ function xframeworkFormula() {
             ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
             ["TVOS"]="TVOS" # Note: If TVOS doesn't have a pair, it's listed for consistency
             ["WATCHOS"]="WATCHOS" # Same note as TVOS
-            ["SIMULATOR_WATCHOS"]="SIMULATOR_WATCHOS"
+            ["SIMULATORARM64_WATCHOS"]="SIMULATOR_WATCHOS"
             ["OS64"]="OS64"
             ["WATCHOS"]="WATCHOS"
             ["VISIONOS"]="VISIONOS" # And again, for VISIONOS
