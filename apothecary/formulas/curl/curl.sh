@@ -48,6 +48,10 @@ function prepare() {
     apothecaryDependencies download
 
     # cp -f $FORMULA_DIR/CMakeLists.txt .
+
+    apothecaryDepend prepare brotli
+    apothecaryDepend build brotli
+    apothecaryDepend copy brotli
   
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
@@ -104,7 +108,7 @@ function build() {
         LIBBROTLI_DEC_LIB="$LIBBROTLI_LIBRARY/brotlidec.lib"
 
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;${PKG_CONFIG_PATH};${OF_LIBS_OPENSSL}/lib/$TYPE/$PLATFORM;${ZLIB_ROOT}/lib/$TYPE/$PLATFORM${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;${PKG_CONFIG_PATH};${OF_LIBS_OPENSSL}/lib/$TYPE/$PLATFORM;${ZLIB_ROOT}/lib/$TYPE/$PLATFORM;${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
 
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
