@@ -96,8 +96,15 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
+        LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
+        LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
+        LIBBROTLI_LIBRARY="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM"
+        LIBBROTLI_COMMON_LIB="$LIBBROTLI_LIBRARY/brotlicommon.lib"
+        LIBBROTLI_ENC_LIB="$LIBBROTLI_LIBRARY/brotlienc.lib"
+        LIBBROTLI_DEC_LIB="$LIBBROTLI_LIBRARY/brotlidec.lib"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;${PKG_CONFIG_PATH};${OF_LIBS_OPENSSL}/lib/$TYPE/$PLATFORM;${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;${PKG_CONFIG_PATH};${OF_LIBS_OPENSSL}/lib/$TYPE/$PLATFORM;${ZLIB_ROOT}/lib/$TYPE/$PLATFORM${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
 
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
@@ -137,6 +144,10 @@ function build() {
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
+            -DCURL_BROTLI=ON \
+            -DBROTLIDEC_LIBRARY=${LIBBROTLI_DEC_LIB} \
+            -DBROTLICOMMON_LIBRARY=${LIBBROTLI_LIBRARY} \
+            -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -247,7 +258,7 @@ function build() {
         LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlienc.a"
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
-        # export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
         
         #PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
 
@@ -313,11 +324,11 @@ function build() {
             -DCURL_DISABLE_IMAP=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DENABLE_UNIX_SOCKETS=ON \
-            -DCURL_BROTLI=OFF \
+            -DCURL_BROTLI=ON \
             -DBROTLIDEC_LIBRARY=${LIBBROTLI_DEC_LIB} \
             -DBROTLICOMMON_LIBRARY=${LIBBROTLI_LIBRARY} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
-            -DUSE_LIBIDN2=ON \
+            -DUSE_LIBIDN2=OFF \
             -DENABLE_VERBOSE=ON \
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
