@@ -378,7 +378,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include 
         mkdir -p $1/bin
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/bin/"* $1/bin
+        cp -Rv "build_${TYPE}_${ARCH}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib curl.pkl
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
