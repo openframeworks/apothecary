@@ -6,7 +6,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
+FORMULA_TYPES=( "vs" "osx" "ios" "xros" "tvos" "catos")
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
@@ -150,9 +150,9 @@ function build() {
             -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
             -DCURL_BROTLI=ON \
             -DBROTLIDEC_LIBRARY=${LIBBROTLI_DEC_LIB} \
-            -DBROTLICOMMON_LIBRARY=${LIBBROTLI_LIBRARY} \
+            -DBROTLICOMMON_LIBRARY=${LIBBROTLI_COMMON_LIB} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
-            -DBROTLI_LIBRARIES="${LIBBROTLI_LIBRARY} ;${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB}" \
+            -DBROTLI_LIBRARIES="${LIBBROTLI_COMMON_LIB} ;${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB}" \
             -DBROTLI_INCLUDE_DIRS="${LIBBROTLI_INCLUDE_DIR}" \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
@@ -377,11 +377,15 @@ function copy() {
 	if [ "$TYPE" == "vs" ] ; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include 
+        mkdir -p $1/bin
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib curl.pkl
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
+        mkdir -p $1/bin
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         secure $1/lib/$TYPE/$PLATFORM/curl.a curl.pkl
 	elif [ "$TYPE" == "android" ] ; then
