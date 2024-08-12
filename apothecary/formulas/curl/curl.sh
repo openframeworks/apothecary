@@ -75,9 +75,8 @@ function build() {
         export OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
         local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+         export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
     fi
-
-    export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 	
 	if [ "$TYPE" == "vs" ] ; then
 		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
