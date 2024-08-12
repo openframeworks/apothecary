@@ -131,7 +131,7 @@ downloader() {
     NO_SSL=0
     COMPRESSION=1
     VERBOSE=0
-    WGET2=1
+    WGET2=0
     CURL=1
     WGET=1
     CLOSE_CONNECTION=1
