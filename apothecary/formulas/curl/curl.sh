@@ -71,9 +71,11 @@ function prepare() {
 function build() {
 
     LIBS_ROOT=$(realpath $LIBS_DIR)
-    export OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
-    local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-    local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+    if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
+        export OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
+        local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
+        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+    fi
 
     export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 	
@@ -246,12 +248,21 @@ function build() {
 	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
 
-        export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
-
-        OPENSSL_ROOT="$LIBS_ROOT/openssl/"
-        OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
-        OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
-        OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
+        if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
+            export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
+            OPENSSL_ROOT="$LIBS_ROOT/openssl/"
+            OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
+            OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
+            OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
+            USE_SECURE_TRANSPORT=OFF
+        else
+            # disabled for tvOS SSL
+            OPENSSL_ROOT=""
+            OPENSSL_INCLUDE_DIR=""
+            OPENSSL_LIBRARY="" 
+            OPENSSL_LIBRARY_CRYPT=""
+            USE_SECURE_TRANSPORT=ON
+        fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
@@ -271,11 +282,11 @@ function build() {
         rm -f ${OPENSSL_PATH}/lib/libssl.a || true
         rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
         rm -f ${ZLIB_ROOT}/lib/zlib.a || true
-         
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-        cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
-
+         if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
+            cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
+            cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
+            cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
+        fi
 
         echo "building curl $TYPE | $PLATFORM"
         echo "--------------------"
@@ -322,7 +333,7 @@ function build() {
             -DCURL_ENABLE_SSL=ON \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DUSE_SECURE_TRANSPORT=OFF \
+            -DUSE_SECURE_TRANSPORT=${USE_SECURE_TRANSPORT} \
             -DUSE_NGHTTP2=OFF \
             -DCURL_USE_SECTRANSP=OFF \
             -DCURL_DISABLE_POP3=ON \
