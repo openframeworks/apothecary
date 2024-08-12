@@ -261,6 +261,7 @@ function build() {
             OPENSSL_LIBRARY="" 
             OPENSSL_LIBRARY_CRYPT=""
             USE_SECURE_TRANSPORT=ON
+            OPENSSL_PATH=""
         fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
@@ -275,13 +276,11 @@ function build() {
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
-        
-        #PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM};${ZLIB_LIBRARY}/lib/${TYPE}/${PLATFORM}"
-
-        rm -f ${OPENSSL_PATH}/lib/libssl.a || true
-        rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
-        rm -f ${ZLIB_ROOT}/lib/zlib.a || true
+    
          if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
+            rm -f ${OPENSSL_PATH}/lib/libssl.a || true
+            rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
+            rm -f ${ZLIB_ROOT}/lib/zlib.a || true
             cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
             cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
             cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
