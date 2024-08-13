@@ -94,6 +94,32 @@ jobs:
                 }
               }
             }
+      - name: Extract Artifacts to /out
+        if: env.USE_ARTIFACT == 'true'
+        run: |
+            mkdir -p out
+            if ls out/*.zip 1> /dev/null 2>&1; then
+              for zip in out/*.zip; do
+                  echo "Extracting $zip..."
+                  unzip -o "$zip" -d out/
+              done
+              echo "Extraction complete."
+              rm out/*.zip
+            else
+              echo "No zip files to extract."
+            fi
+            if ls out/*.tar.bz2 1> /dev/null 2>&1; then
+              for tarball in out/*.tar.bz2; do
+                  echo "Extracting $tarball..."
+                  tar -xjf "$tarball" -C out/
+              done
+              echo ".tar.bz2 extraction complete."
+              rm -f out/*.tar.bz2
+            else
+              echo "No .tar.bz2 files to extract."
+            fi
+            rm -f xout/*.tar.bz2 
+            rm -f out/*.tar.bz2
 
       - name: build
         run: ./scripts/build.sh
