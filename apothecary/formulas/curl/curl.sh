@@ -361,7 +361,7 @@ function build() {
         if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
             rm ${OPENSSL_PATH}/lib/libssl.a
             rm ${OPENSSL_PATH}/lib/libcrypto.a
-        endif
+        fi
         rm ${ZLIB_ROOT}/lib/zlib.a
 
     else
