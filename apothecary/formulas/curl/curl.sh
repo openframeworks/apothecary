@@ -260,7 +260,7 @@ function build() {
                 -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
         else
             # disabled for tvOS SSL
-            OPENSSL_ROOT=""
+            OPENSSL_ROOT="$LIBS_ROOT"
             OPENSSL_INCLUDE_DIR=""
             OPENSSL_LIBRARY="" 
             OPENSSL_LIBRARY_CRYPT=""
@@ -284,15 +284,6 @@ function build() {
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${OPENSSL_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
-    
-         if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
-            rm -f ${OPENSSL_PATH}/lib/libssl.a || true
-            rm -f ${OPENSSL_PATH}/lib/libcrypto.a || true
-            rm -f ${ZLIB_ROOT}/lib/zlib.a || true
-            cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
-            cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
-            cp ${ZLIB_LIBRARY} ${ZLIB_ROOT}/lib/zlib.a
-        fi
 
         echo "building curl $TYPE | $PLATFORM"
         echo "--------------------"
@@ -357,12 +348,6 @@ function build() {
             -DENABLE_IPV6=ON
         cmake --build . --config Release --target install
         cd ..
-
-        if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
-            rm ${OPENSSL_PATH}/lib/libssl.a
-            rm ${OPENSSL_PATH}/lib/libcrypto.a
-        fi
-        rm ${ZLIB_ROOT}/lib/zlib.a
 
     else
         echo "building other for $TYPE"
