@@ -254,6 +254,10 @@ function build() {
             OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
             OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
             USE_SECURE_TRANSPORT=OFF
+            CURL_ENABLE_SSL=ON
+            SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
+                -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
+                -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
         else
             # disabled for tvOS SSL
             OPENSSL_ROOT=""
@@ -263,6 +267,9 @@ function build() {
             USE_SECURE_TRANSPORT=ON
             OPENSSL_PATH=""
             OF_LIBS_OPENSSL_ABS_PATH=""
+            CURL_ENABLE_SSL=OFF
+            SSL_DEFS=""
+
         fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
@@ -316,9 +323,7 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCURL_DISABLE_LDAP=ON \
             -DENABLE_VISIBILITY=OFF \
-            -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
-            -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
-            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.a:$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.a" \
+            ${SSL_DEFS} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -329,7 +334,7 @@ function build() {
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DENABLE_UNIX_SOCKETS=OFF \
             -DHAVE_LIBSOCKET=OFF \
-            -DCURL_ENABLE_SSL=ON \
+            -DCURL_ENABLE_SSL=${CURL_ENABLE_SSL} \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DUSE_SECURE_TRANSPORT=${USE_SECURE_TRANSPORT} \
@@ -353,8 +358,10 @@ function build() {
         cmake --build . --config Release --target install
         cd ..
 
-        rm ${OPENSSL_PATH}/lib/libssl.a
-        rm ${OPENSSL_PATH}/lib/libcrypto.a
+        if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
+            rm ${OPENSSL_PATH}/lib/libssl.a
+            rm ${OPENSSL_PATH}/lib/libcrypto.a
+        endif
         rm ${ZLIB_ROOT}/lib/zlib.a
 
     else
