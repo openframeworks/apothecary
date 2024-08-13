@@ -262,6 +262,7 @@ function build() {
             OPENSSL_LIBRARY_CRYPT=""
             USE_SECURE_TRANSPORT=ON
             OPENSSL_PATH=""
+            OF_LIBS_OPENSSL_ABS_PATH=""
         fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
