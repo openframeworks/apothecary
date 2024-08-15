@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=4.2.0
+VERSION=4.2.1
 printDownloaderHelp(){
 cat << EOF
     
@@ -306,7 +306,7 @@ downloader() {
               REMOTE_URL=$URL
               FORWARDED=$(finalurl "$URL")
           	  FORWARDED_URLS+=($FORWARDED)
-          	  FINAL_URLS+="$FOWARDED"
+          	  FINAL_URLS+="$FORWARDED"
               check_remote_vs_local "$LOCAL_FILE" "$REMOTE_URL" 1
               if [ $CHECK_RESULT -eq 0 ]; then
                   URLS_TO_DOWNLOAD+="${URL}"
@@ -321,9 +321,9 @@ downloader() {
           LOCAL_FILE=$FILENAME
           REMOTE_URL=$URL
           if validate_url "$URL"; then
-          		FORWARDED=$(finalurl "$URL")
-              FORWARDED_URLS+=($FORWARDED)
-             	FINAL_URLS+="$FOWARDED"
+          	   FORWARDED=$(finalurl "$URL")
+               FORWARDED_URLS+=($FORWARDED)
+               FINAL_URLS+="$FORWARDED"
               check_remote_vs_local "$LOCAL_FILE" "$REMOTE_URL" 0
               if [ $CHECK_RESULT -eq 0 ]; then
                   URLS_TO_DOWNLOAD+="${URL} -o ${FILENAME}"
