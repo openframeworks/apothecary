@@ -352,7 +352,7 @@ downloader() {
     fi
    
     if [[ $VERBOSE == 1 ]]; then
-        EXTRA_ARGS+="--verbose" 
+        EXTRA_ARGS+=" --verbose "
         #-w "\n[%{url_effective}]\n\nDownload Size:[%{size_download}B] in Time total:[%{time_total}s] DL speed:[%{speed_download}B/s] - Time in redirects:[%{time_redirect}s]"
     fi
     EXTRA_ARGS=$(echo "$EXTRA_ARGS" | sed 's/[[:space:]]*$//')
