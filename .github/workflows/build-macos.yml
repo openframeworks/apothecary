@@ -63,11 +63,11 @@ jobs:
 
             // List all artifacts for the repository
             const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner: 'openframeworks',
+              repo: 'apothecary',
               sort: 'created_at',
               direction: 'desc',
-              per_page: 20
+              per_page: 50
             });
             const max=3;
             const artifactNamesToDownload = ['libs-macos-osx-1', 'libs-macos-osx-2', 'libs-macos-osx-3'];

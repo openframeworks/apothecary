@@ -39,6 +39,7 @@ jobs:
         shell: msys2 {0}
     steps:
     - name: Log old artifacts for potential deletion
+      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: actions/github-script@v7.0.1
       env:
         GH_TOKEN: ${{ secrets.CI_SECRET }}
