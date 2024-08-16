@@ -9,9 +9,6 @@ else
     export FORCE=""
 fi
 
-
-
-
 # trap any script errors and exit
 # trap "trapError" ERR
 
@@ -78,12 +75,22 @@ fi
 APOTHECARY_PATH=$ROOT/apothecary
 
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
-    export OUTPUT_FOLDER="$ROOT/out"
+    export OUTPUT_FOLDER="$ROOT/xout"
+fi
+
+if [ -z "$1" ]; then
+   echo " TARGET: $1"
+else
+    TARGET=$1
+fi
+
+if [ -z "$2" ]; then
+   echo " Bundle: $2"
+else
+    BUNDLE=$2
 fi
 
 #OUTPUT_FOLDER=$ROOT/out
-
-
 # VERBOSE=true
 
 if [ -z $TARGET ] ; then
@@ -120,15 +127,15 @@ OUT_BUNDLE_DIR="${OUTPUT_FOLDER}_$BUNDLE"
 mkdir -p "$OUT_BUNDLE_DIR"
 
 # Iterate over the folders in the library base directory
-for library_dir in "$OUTPUT_FOLDER"/*; do
-    library_name=$(basename "$library_dir")
+for LIBRARY_DIR in "$OUTPUT_FOLDER"/*; do
+    LIBRARY_NAME=$(basename "$LIBRARY_DIR")
     
     # Check if the library name is in the keep list
-    if [ -n "${KEEP_LIBRARIES[$library_name]}" ]; then
-        echo "Moving library folder: $library_dir to $OUT_BUNDLE_DIR"
-        mv "$library_dir" "$OUT_BUNDLE_DIR/"
+    if [ -n "${KEEP_LIBRARIES[$LIBRARY_NAME]}" ]; then
+        echo "Moving library folder: $LIBRARY_DIR to $OUT_BUNDLE_DIR"
+        mv "$LIBRARY_DIR" "$OUT_BUNDLE_DIR/"
     else
-        echo "Keeping library folder: $library_dir in $OUTPUT_FOLDER"
+        echo "Keeping library folder: $LIBRARY_DIR in $OUTPUT_FOLDER"
     fi
 done
 
