@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=4.2.1
+VERSION=4.2.2
 printDownloaderHelp(){
 cat << EOF
     
@@ -73,20 +73,20 @@ check_remote_vs_local() {
   USE_WGET2="$3"
   echo "  [downloader] check if local == remote: [$REMOTE_URL]"
   if [ ! -f "$LOCAL_FILE" ]; then
-    echo "  [downloader] No download cache"
-    echo "  [downloader] Proceeding with download. "
-    CHECK_RESULT=0
-    return
+  echo "  [downloader] No download cache"
+  echo "  [downloader] Proceeding with download. "
+  CHECK_RESULT=0
+  return
   else
-    echo "  [downloader] Found download cache."
-    echo "  [cache] [$LOCAL_FILE]"
+  echo "  [downloader] Found download cache."
+  echo "  [cache] [$LOCAL_FILE]"
   fi
   LocalSize=$(wc -c < "$LOCAL_FILE" | tr -d '[:space:]')
   #REMOTE_CALL="wget2 --spider --max-redirect=${MAX_REDIRECTS} ${EXTRA_ARGS}"
   REMOTE_CALL=""
-	headers=$(curl -L -I --retry ${RETRY_MAX} --max-redirs ${MAX_REDIRECTS} ${EXTRA_ARGS} --retry-connrefused --silent --head $REMOTE_URL)
-	RemoteSize=$(echo "$headers" | awk '/[cC]ontent-[lL]ength/ {print $2}' | tr -d '\r' | tail -n 1)
-	modified=$(echo "$headers" | awk '/[lL]ast-[mM]odified/ {print $0}' | sed 's/^[lL]ast-[mM]odified: //')
+  headers=$(curl -L -I --retry ${RETRY_MAX} --max-redirs ${MAX_REDIRECTS} ${EXTRA_ARGS} --retry-connrefused --silent --head $REMOTE_URL)
+  RemoteSize=$(echo "$headers" | awk '/[cC]ontent-[lL]ength/ {print $2}' | tr -d '\r' | tail -n 1)
+  modified=$(echo "$headers" | awk '/[lL]ast-[mM]odified/ {print $0}' | sed 's/^[lL]ast-[mM]odified: //')
   LocalSizeMB=$(convert_bytes_to_mb $LocalSize)
   RemoteSizeMB=$(convert_bytes_to_mb $RemoteSize)
 
@@ -161,6 +161,7 @@ downloader() {
     CLOSE_CONNECTION=1
     URLS=()
     FORWARDED_URLS=()
+    FINAL_EXTRA_ARGS=""
     CLOSE_EXTRA_ARGS=""
     while [[ $# -gt 0 ]]; do
         key="$1"
@@ -297,6 +298,9 @@ downloader() {
     # [download]
     URLS_TO_DOWNLOAD=""
     FINAL_URLS=""
+    EXTRA_ARGS=$(echo "$EXTRA_ARGS" | sed 's/[[:space:]]*$//')
+    FINAL_EXTRA_ARGS=$(echo "$FINAL_EXTRA_ARGS" | sed 's/[[:space:]]*$//')
+    URLS_TO_DOWNLOAD=$(echo "$URLS_TO_DOWNLOAD" | sed 's/[[:space:]]*$//')
     for ((i = 0; i < ${#URLS[@]}; i++)); do
         URL="${URLS[$i]}"
         FILENAME=$(basename "$URL")
