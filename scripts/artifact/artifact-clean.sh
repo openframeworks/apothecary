@@ -71,7 +71,7 @@ else
         run "tail -n 10 formula_${ARCH}.log"
     }
 
-    ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    ROOT=$(cd $(dirname "$0"); pwd -P)/../..
     LOCAL_ROOT=$ROOT
 fi
 
