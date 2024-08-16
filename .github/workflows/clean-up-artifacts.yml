@@ -24,6 +24,7 @@ env:
   NO_FORCE: 1
   VS_VER: 17
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+  GH_TOKEN: ${{ secrets.CI_SECRET }}
   USE_ARTIFACT: true
 
 jobs:
@@ -38,18 +39,23 @@ jobs:
         shell: msys2 {0}
     steps:
     - name: Log old artifacts for potential deletion
-      uses: actions/github-script@v7
+      uses: actions/github-script@v7.0.1
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.CI_SECRET }}
         REPO: ${{ github.repository }}
+        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
         BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
       with:
         script: |
+          console.log(`Token: ${process.env.GH_TOKEN ? "Present" : "Missing"}`);
+          console.log(`GA_CI_SECRET: ${process.env.GA_CI_SECRET ? "Present" : "Missing"}`);
           const artifacts = await github.rest.actions.listArtifactsForRepo({
             owner: context.repo.owner,
             repo: context.repo.repo,
             per_page: 100 // Get up to 100 artifacts
           });
+
+          console.log(artifacts);
 
           const keepLatestArtifacts = artifacts.data.artifacts
             .filter(artifact => !artifact.expired)
@@ -76,12 +82,13 @@ jobs:
             if (!artifact.expired && keepLatestArtifacts[type].id !== artifact.id) {
               console.log(`Would delete older artifact: ${artifact.name}`);
               //
-              
+              /**
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 artifact_id: artifact.id
               });
+              */
                
               console.log(`Deleted older artifact: ${artifact.name}`);
              
