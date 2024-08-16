@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=4.2.2
+VERSION=4.2.3
 printDownloaderHelp(){
 cat << EOF
     
@@ -22,8 +22,7 @@ cat << EOF
     -w, --wget                  using wget (fallback - if system installed), disables wget2/cURL
     -x, --close-connection      close connections ports TCP/HTTP 1.0/1.1/2.0 (default)
     -p, --keep-port-alive       (disabled)
-
-
+    
 EOF
 }
 
@@ -405,7 +404,7 @@ downloader() {
         else
             FIRST_URL="${FORWARDED_URLS[0]}"
             echo "  [downloader] Closing the ports yarr url:[$FIRST_URL]"
-      			curl -L --retry-connrefused --insecure --silent --head --max-time 1 --verbose --retry ${RETRY_MAX} ${CLOSE_EXTRA_ARGS} --no-keepalive --header "Connection: close" --retry-delay ${RETRY_DELAY_S} --max-redirs ${MAX_REDIRECTS} ${FIRST_URL}
+      			curl -I -L --retry-connrefused --insecure --silent --head --max-time 1 --verbose --retry ${RETRY_MAX} ${CLOSE_EXTRA_ARGS} --no-keepalive --header "Connection: close" --retry-delay ${RETRY_DELAY_S} --max-redirs ${MAX_REDIRECTS} ${FIRST_URL}
       	fi
     	fi
     fi
