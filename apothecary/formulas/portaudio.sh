@@ -7,9 +7,12 @@
 # build not currently needed on any platform
 
 FORMULA_TYPES=( "" )
+FORMULA_DEPENDS=( )
 
 # define the version
 VER=stable_v19_20110326
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=

@@ -9,9 +9,12 @@
 # the OPT flag is used for CFLAGS (& LDFLAGS I think?)
 
 FORMULA_TYPES=( "osx" "vs" )
+FORMULA_DEPENDS=( )
 
 # define the version
 VER=2.2.0
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/nigels-com/glew.git

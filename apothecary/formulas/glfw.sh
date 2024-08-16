@@ -7,6 +7,7 @@
 # uses a CMake build system
 
 FORMULA_TYPES=( "osx" "vs" )
+FORMULA_DEPENDS=( )
 
 # define the version by branch  
 # VER=2018-cmake-fix
@@ -16,6 +17,8 @@ GIT_URL=https://github.com/glfw/glfw
 # VER=master
 VER=3.4
 GIT_BRANCH=$VER
+BUILD_ID=1
+DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {

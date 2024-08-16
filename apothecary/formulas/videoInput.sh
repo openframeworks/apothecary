@@ -7,9 +7,12 @@
 # Visual Studio & Code Blocks projects are provided
 
 FORMULA_TYPES=( "vs" "msys2" )
+FORMULA_DEPENDS=(  ) 
 
 # define the version
 VER=master
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/ofTheo/videoInput.git
@@ -102,7 +105,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_SYSTEM_NAME=MSYS \
             -DCMAKE_SYSTEM_PROCESSOR=${ARCH}
         

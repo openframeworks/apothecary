@@ -3,18 +3,19 @@
 # a low-level software library for pixel manipulation
 # http://pixman.org/
 
+FORMULA_TYPES=( "osx" "vs" )
+FORMULA_DEPENDS=( )
+
 # define the version
 VER=0.43.4
 SHA1=d7baa6377b6f48e29db011c669788bb1268d08ad
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pixman.git
 GIT_TAG=pixman-$VER
 URL=https://cairographics.org/releases
-
-
-
-FORMULA_TYPES=( "osx" "vs" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -76,7 +77,7 @@ function build() {
             -DENABLE_ARC=OFF \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DBUILD_STATIC=ON \
             -DBUILD_SHARED=OFF 
             # -G Xcode 
@@ -107,7 +108,7 @@ function build() {
 		    -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -D CMAKE_VERBOSE_MAKEFILE=OFF \
+            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             ${CMAKE_WIN_SDK} \
 		    -DBUILD_STATIC=ON \
             -DBUILD_SHARED=OFF \

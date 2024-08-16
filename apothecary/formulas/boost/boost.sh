@@ -6,12 +6,14 @@
 # uses a own build system
 
 FORMULA_TYPES=(  )
+FORMULA_DEPENDS=( )
 
 # define the version
 VERSION=1.66.0
 UNCOMPRESSED_NAME=boost_1_66_0
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
-
+BUILD_ID=1
+DEFINES=""
 
 # need to maybe migrate to github https://github.com/boostorg/boost
 

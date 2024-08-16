@@ -4,13 +4,15 @@
 
 # define the version
 FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
-
 FORMULA_DEPENDS=( "zlib" )
 
 VER=3.3.1
 VERDIR=3.3.1
 SHA1=7376042523b6a229bc697b8099c2af369d1a84c6
 SHA256=53e66b043322a606abf0087e7699a0e033a37fa13feb9742df35c3a33b18fb02
+
+BUILD_ID=1
+DEFINES=""
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org

@@ -7,16 +7,16 @@
 # uses a CMake build system
 
 FORMULA_TYPES=( "vs" "osx" "ios" "xros" "tvos" "catos")
+FORMULA_DEPENDS=( "openssl" "zlib" "brotli" )
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
-#dependencies
-FORMULA_DEPENDS=( "openssl" "zlib" "brotli" )
 
-# define the version by sha
 VER=8.9.1
 VER_D=8_9_1
 SHA1=9bcf387f274ae96ad591115d9f9f23700ec76ceb
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl
@@ -327,7 +327,6 @@ function build() {
             -DHAVE_LIBSOCKET=OFF \
             -DCURL_ENABLE_SSL=${CURL_ENABLE_SSL} \
             -DCMAKE_MACOSX_BUNDLE=OFF \
-            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DUSE_SECURE_TRANSPORT=${USE_SECURE_TRANSPORT} \
             -DUSE_NGHTTP2=OFF \
             -DCURL_USE_SECTRANSP=OFF \

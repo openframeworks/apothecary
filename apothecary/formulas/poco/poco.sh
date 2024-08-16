@@ -7,17 +7,18 @@
 # uses an autotools build system,
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
+FORMULA_TYPES=( "osx" "vs"  )
+FORMULA_DEPENDS=( "openssl" )
+
 # define the version
 VER=1.12.5p2-release
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
 
-FORMULA_TYPES=( "osx" "vs"  )
-
-#dependencies
-FORMULA_DEPENDS=( "openssl" )
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about

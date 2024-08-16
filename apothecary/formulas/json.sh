@@ -6,9 +6,12 @@
 #
 
 FORMULA_TYPES=( "osx" "msys2" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
+FORMULA_DEPENDS=( )
 
 # define the version
 VER=3.11.2
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/nlohmann/json

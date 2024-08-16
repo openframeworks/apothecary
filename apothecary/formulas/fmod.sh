@@ -7,11 +7,13 @@
 # fmod is downloaded as a binary from the fmod.com website and copied
 # into the openFrameworks library directory.
 
-
 FORMULA_TYPES=( "osx" "vs" "linux" "linux64" )
+FORMULA_DEPENDS=( )
 
 # define the version
 VER=44459
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=

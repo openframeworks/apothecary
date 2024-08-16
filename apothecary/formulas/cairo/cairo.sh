@@ -13,7 +13,6 @@
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
 FORMULA_TYPES=( "osx" "vs" )
-
 FORMULA_DEPENDS=( "zlib" "libpng" "pixman" "freetype" )
 
 # tell apothecary we want to manually call the dependency commands
@@ -21,9 +20,10 @@ FORMULA_DEPENDS=( "zlib" "libpng" "pixman" "freetype" )
 FORMULA_DEPENDS_MANUAL=1
 
 VER=1.18.0
-# define the version
+BUILD_ID=1
+DEFINES=""
 
-SHA1=68712ae1039b114347be3b7200bc1c901d47a636
+SHA1=fae6760ed0772681ddc60c603c9bb525ac74f000
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/cairo
@@ -38,25 +38,33 @@ function download() {
 
 	. "$DOWNLOADER_SCRIPT"
 
-	if [ "$TYPE" == "vs" ] ; then
-		downloader ${GIT_LAB}.zip
-		unzip -qq "cairo-$VER.zip"
-        rm -f "cairo-$VER.zip"
-		mv cairo-$VER cairo
-	else
-		downloader ${GIT_LAB}.tar.bz2
-		tar -xf cairo-$VER.tar.bz2
-		mv cairo-$VER cairo
-		rm cairo-$VER.tar.bz2
-	fi
+	downloader ${URL}/cairo-$VER.tar.xz
+	tar -xJf cairo-$VER.tar.xz
+
+	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
+	rm cairo-$VER.tar.xz
+	if [ "$CHECKSHA" != "$SHA1" ] ; then
+    	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+    	exit
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
+
+	mv "cairo-$VER" cairo
+
+	# if [ "$TYPE" == "vs" ] ; then
+	# 	downloader ${GIT_LAB}.zip
+	# 	unzip -qq "cairo-$VER.zip"
+    #     rm -f "cairo-$VER.zip"
+	# 	mv cairo-$VER cairo
+	# else
+	# 	downloader ${GIT_LAB}.tar.bz2
+	# 	tar -xf cairo-$VER.tar.bz2
+	# 	mv cairo-$VER cairo
+	# 	rm cairo-$VER.tar.bz2
+	# fi
 	#downloader https://cairographics.org/releases/cairo-$VER.tar.xz
-	# local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
-	# if [ "$CHECKSHA" != "$SHA1" ] ; then
-    # 	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    # 	exit
-    # else
-    #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    # fi
+	
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -197,7 +205,7 @@ function build() {
             -DCMAKE_INCLUDE_PATH="${LIBBROTLI_INCLUDE_DIR};${FREETYPE_INCLUDE_DIR};${LIBPNG_INCLUDE_DIR};${ZLIB_INCLUDE_DIR};${PIXMAN_INCLUDE_DIR}" \
             -DCMAKE_LIBRARY_PATH="${LIBBROTLI_LIBRARY};${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB};${FREETYPE_LIBRARY};${LIBPNG_LIBRARY};${ZLIB_LIBRARY};${PIXMAN_LIBRARY}" \
             -DCMAKE_INSTALL_PREFIX=Release \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D CAIRO_WIN32_STATIC_BUILD=ON \
 		    -DNO_FONTCONFIG=OFF \
 		    -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -285,7 +293,7 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DNO_FONTCONFIG=OFF \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -D CMAKE_VERBOSE_MAKEFILE=ON 
+            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
         cmake --build . --config Release
         cmake --install . --config Release
 	    cd ..

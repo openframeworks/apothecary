@@ -5,11 +5,13 @@
 # http://pugixml.org/
 #
 # uses a makeifle build system
-
 FORMULA_TYPES=( "emscripten" "osx" "vs" "ios" "watchos" "xros" "catos" "tvos" "android" )
+FORMULA_DEPENDS=( )
 
 # define the version by sha
 VER=1.14
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/zeux/pugixml

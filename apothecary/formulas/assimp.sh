@@ -6,16 +6,17 @@
 #
 # uses CMake
 
+FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "vs" )
+FORMULA_DEPENDS=( "zlib" )
+
 # define the version
 VER=5.3.1
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/assimp/assimp
 GIT_TAG=
-
-FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "vs" )
-
-FORMULA_DEPENDS=( "zlib" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {

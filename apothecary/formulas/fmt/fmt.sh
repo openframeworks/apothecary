@@ -3,6 +3,9 @@
 # {fmt} is an open-source formatting library providing a fast and safe alternative to C stdio and C++ iostreams.
 # https://github.com/fmtlib/fmt
 
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux64" "linuxaarch64" )
+FORMULA_DEPENDS=(  ) 
+
 # define the version
 VER=10.2.1
 
@@ -11,11 +14,8 @@ GIT_URL=https://github.com/fmtlib/fmt
 URL=${GIT_URL}/archive/refs/tags/${VER}
 GIT_TAG=master
 SHA=
-
-FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux64" "linuxaarch64" )
-
-FORMULA_DEPENDS=(  ) 
-
+BUILD_ID=1
+DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {

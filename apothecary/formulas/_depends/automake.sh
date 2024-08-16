@@ -4,15 +4,19 @@
 # https://www.gnu.org/software/automake/
 # requires PERL https://www.perl.org/get.html
 
+FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l" )
+FORMULA_DEPENDS=( )
 
 # define the version
 VER=1.16.4
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://ftp.gnu.org/gnu/automake/automake
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "linuxarmv6l", "linuxarmv7l" )
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {

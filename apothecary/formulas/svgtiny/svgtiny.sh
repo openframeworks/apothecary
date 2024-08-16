@@ -7,12 +7,12 @@
 # uses a makeifle build system
 
 FORMULA_TYPES=( "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-
-#dependencies
 FORMULA_DEPENDS=( "zlib" "libxml2" )
 
 # define the version by sha
 VER=0.1.8
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=git://git.netsurf-browser.org/libsvgtiny.git
@@ -145,7 +145,7 @@ function build() {
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
 	        -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
-	        -D CMAKE_VERBOSE_MAKEFILE=ON \
+	        -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INSTALL_PREFIX=. \
 	        -A "${PLATFORM}" \
@@ -166,7 +166,7 @@ function build() {
 	        -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
 	        -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
 	        -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
-	        -D CMAKE_VERBOSE_MAKEFILE=ON \
+	        -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        -DCMAKE_BUILD_TYPE=Debug \
 	        -DCMAKE_INSTALL_PREFIX=. \
 	        -A "${PLATFORM}" \
@@ -236,7 +236,7 @@ function build() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
 	    cmake .. \
 			-DCMAKE_INSTALL_PREFIX=Release \
-            -D CMAKE_VERBOSE_MAKEFILE=ON \
+            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -D BUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
 		    -DSKIP_EXAMPLE=1 \

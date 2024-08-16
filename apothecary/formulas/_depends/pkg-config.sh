@@ -5,6 +5,8 @@
 
 # define the version
 VER=0.29.2
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pkg-config.git

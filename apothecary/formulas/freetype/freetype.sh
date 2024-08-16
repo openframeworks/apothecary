@@ -7,13 +7,14 @@
 # an autotools project
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten" )
-
 FORMULA_DEPENDS=( "zlib" "libpng" "brotli" )
 
 # define the version
 VER=2.13.2
 BUILD=1
 FVER=213
+BUILD_ID=1
+DEFINES=""
 
 GIT_VER=VER-2-13-2
 

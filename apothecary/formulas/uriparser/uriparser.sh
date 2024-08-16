@@ -8,13 +8,16 @@
 
 
 FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
+FORMULA_DEPENDS=(  )
 
-# define the version by sha
 VER=0.9.7
+BUILD_INFO=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/uriparser/uriparser
 GIT_TAG=$VER
+
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -47,6 +50,7 @@ function build() {
 			-DURIPARSER_ENABLE_INSTALL=OFF \
 			-DURIPARSER_WARNINGS_AS_ERRORS=OFF
 	   "
+	DEFINES+="$DEFS "
 	if [ "$TYPE" == "vs" ] ; then
 		echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
 	    echo "--------------------"
@@ -61,14 +65,14 @@ function build() {
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
 	    cmake .. ${DEFS} \
-	    		${EXTRA_DEFS} \
-	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-		 			${CMAKE_WIN_SDK} \
-		 			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-		        -A "${PLATFORM}" \
-		        -G "${GENERATOR_NAME}"
+			${EXTRA_DEFS} \
+			-DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_INSTALL_LIBDIR="lib" \
+			${CMAKE_WIN_SDK} \
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+			-A "${PLATFORM}" \
+			-G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
 	    cd ..
 	elif [ "$TYPE" == "android" ]; then
@@ -114,6 +118,7 @@ function build() {
          	-DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
          	-DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
          	-DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+         	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
          	-DANDROID_TOOLCHAIN=clang++ \
          	-DCMAKE_BUILD_TYPE=Release \
          	-DCMAKE_SYSROOT=$SYSROOT \
@@ -163,7 +168,7 @@ function build() {
         $EMSDK/upstream/emscripten/emcmake cmake .. \
 			${DEFS} \
 			-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
-			-DCMAKE_VERBOSE_MAKEFILE=ON \
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-B . \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DCMAKE_BUILD_TYPE=Release \

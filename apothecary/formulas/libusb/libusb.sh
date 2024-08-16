@@ -4,11 +4,14 @@
 # Visual Studio and OS X
 
 FORMULA_TYPES=( "osx" "vs" )
+FORMULA_DEPENDS=(  ) 
 
 GIT_URL=https://github.com/libusb/libusb
 GIT_TAG=v1.0.27-rc2
 GIT_BRANCH_VS=master
 VER=1.0.27-rc2
+BUILD_ID=1
+DEFINES=""
 
 URL=https://github.com/libusb/libusb/archive/refs/tags/v${VER}
 
@@ -76,7 +79,7 @@ function build() {
             -DLIBUSB_INSTALL_TARGETS=ON \
             -DLIBUSB_BUILD_SHARED_LIBS=ON \
 	        ${CMAKE_WIN_SDK} \
-	        -DCMAKE_VERBOSE_MAKEFILE=ON \
+	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 	        -A "${PLATFORM}" \
 	        -G "${GENERATOR_NAME}"
 	    cmake --build . --config Release --target install
@@ -122,7 +125,7 @@ function build() {
 	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
-	        -DCMAKE_VERBOSE_MAKEFILE=ON
+	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
 	    cmake --build . --config Release --target install
 	    cd ..
 	fi

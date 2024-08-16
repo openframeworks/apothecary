@@ -16,6 +16,8 @@ FORMULA_TYPES=( "osx" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxa
 
 # define the version
 VER=6.0.1
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/thestk/rtaudio
@@ -136,7 +138,7 @@ function build() {
 			-DRTAUDIO_API_ALSA=ON \
 			-DRTAUDIO_API_PULSE=ON \
 			-DRTAUDIO_API_JACK=ON \
-			-DCMAKE_VERBOSE_MAKEFILE=ON \
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-DBUILD_TESTING=OFF
 		make
 		make install
@@ -152,7 +154,7 @@ function build() {
 			-DAUDIO_WINDOWS_WASAPI=ON \
 			-DAUDIO_WINDOWS_DS=ON \
 			-DAUDIO_WINDOWS_ASIO=ON \
-			-DCMAKE_VERBOSE_MAKEFILE=ON \
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-DBUILD_TESTING=OFF
 		make
 		make install

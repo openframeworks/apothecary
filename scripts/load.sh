@@ -18,6 +18,7 @@ function loadsave() {
   local arch="$3"
   local version="$4"
   local pkldir="$5"
+  local buildInfo="$6"
 
   BINARY_SEC=${pkldir}
   #OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
@@ -28,7 +29,6 @@ function loadsave() {
   #echo " BINARY_SEC:[$BINARY_SEC] load file: [$OUTPUT_PKL_FILE] [0:$0 1:$1 2:$2 3:$3 4:$4]"
   #echo " FILENAME: [$FILENAME] [FILENAME_WITHOUT_EXT:$FILENAME_WITHOUT_EXT OUTPUT_PKL_FILE:$OUTPUT_PKL_FILE]"
 
-  # Check if the file exists
   # if [[ ! -f "$LOCAL_SAVE_FILE" ]]; then
   #     touch $LOCAL_SAVE_FILE
   #     return 1
@@ -50,9 +50,20 @@ function loadsave() {
   local buildTime=$(grep 'buildTime =' "$OUTPUT_PKL_FILE" | cut -d '"' -f 2)
   local fileVersion=$(grep 'version =' "$OUTPUT_PKL_FILE" | cut -d '"' -f 2)
 
-   # Check if the version matches
+  if grep -q 'buildNumber =' "$OUTPUT_PKL_FILE"; then
+    local buildNumber=$(grep 'buildNumber =' "$OUTPUT_PKL_FILE" | cut -d '"' -f 2)
+  else
+    local buildNumber=1
+  fi
+
   if [[ "$fileVersion" != "$version" ]]; then
     echo " Build confirmed. Previous build has Version mismatch: $fileVersion != $version"
+    echo 0
+    return 0
+  fi
+
+  if [[ "${buildNumber}" != "" && "${buildInfo}" != "${buildNumber}" ]]; then
+    echo " Build confirmed. Previous build number has mismatch: $buildInfo != $buildNumber"
     echo 0
     return 0
   fi

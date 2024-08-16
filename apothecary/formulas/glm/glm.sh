@@ -6,6 +6,7 @@
 #
 
 FORMULA_TYPES=( "osx" "msys2" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
+FORMULA_DEPENDS=(  )
 
 # tools for git use
 GIT_URL=https://github.com/g-truc/glm

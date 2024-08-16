@@ -7,17 +7,15 @@
 # uses an automake build system
 
 FORMULA_TYPES=( "osx" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-# uses an automake build system # required for svg
-
 FORMULA_DEPENDS=( "zlib" )
-
 
 # define the version by sha
 VER=2.12.7
+BUILD_ID=1
+DEFINES=""
+
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
-
 GIT_URL=https://github.com/GNOME/libxml2.git
-
 
 ICU_VER=74-2
 ICU_VER_U=74_2

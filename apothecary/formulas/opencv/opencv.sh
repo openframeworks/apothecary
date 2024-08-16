@@ -7,12 +7,12 @@
 # uses a CMake build system
 
 FORMULA_TYPES=( "osx" "ios" "catos" "xros" "tvos" "vs" "android" "emscripten" )
+FORMULA_DEPENDS=( "zlib" "libpng" )
 
 # define the version
-
 VER=4.10.0
-
-FORMULA_DEPENDS=( "zlib" "libpng" )
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv
@@ -20,7 +20,7 @@ GIT_TAG=$VER
 
 
 GIT_CONTRIB_URL=https://github.com/opencv/opencv_contrib
-VER=4.10.0
+VER_CONTRIB=$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {

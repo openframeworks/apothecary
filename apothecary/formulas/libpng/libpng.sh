@@ -3,21 +3,22 @@
 # the official PNG reference library
 # http://libpng.org/pub/png/libpng.html
 
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
+FORMULA_DEPENDS=( "zlib" ) 
+
 # define the version
 MAJOR_VER=16
 VER=1.6.43
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
-#URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # Glenn Randers-Pehrson 
+#URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # RIP Glenn Randers-Pehrson 
 URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
 SHA=
 WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
-
-FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-
-FORMULA_DEPENDS=( "zlib" ) 
 
 
 # download the source code and unpack it into LIB_NAME
@@ -214,7 +215,7 @@ function build() {
 	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 	    	-DCMAKE_C_STANDARD=${C_STANDARD} \
 	    	-DEMSCRIPTEN=ON \
-	    	-DCMAKE_VERBOSE_MAKEFILE=ON \
+	    	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DPNG_HARDWARE_OPTIMIZATIONS=OFF \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -239,7 +240,7 @@ function build() {
 	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 	    	-DCMAKE_C_STANDARD=${C_STANDARD} \
 	    	-DEMSCRIPTEN=ON \
-	    	-DCMAKE_VERBOSE_MAKEFILE=ON \
+	    	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DPNG_HARDWARE_OPTIMIZATIONS=OFF \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \

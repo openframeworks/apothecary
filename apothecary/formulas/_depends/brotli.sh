@@ -5,14 +5,17 @@
 # It is similar in speed with deflate but offers more dense compression.
 # https://github.com/google/brotli
 
+FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" )
+FORMULA_DEPENDS=( )
+
 # define the version
 VER=1.1.0
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/google/brotli
 GIT_TAG=v$VER
-
-FORMULA_TYPES=( "osx" "vs" "ios" "watchos" "catos" "xros" "tvos" )
 
 # download the source code and unpack it into LIB_NAME
 function download() {

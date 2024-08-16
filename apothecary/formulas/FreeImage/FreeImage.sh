@@ -16,6 +16,8 @@ FORMULA_DEPENDS=( "zlib" "libpng" )
 VER=31990
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.19.9
+BUILD_ID=1
+DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -222,7 +224,7 @@ function build() {
 			-DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
 			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
 			-DCMAKE_BUILD_TYPE=Release \
-			-D CMAKE_VERBOSE_MAKEFILE=ON \
+			-D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -DCMAKE_INSTALL_PREFIX=. \
 			${CMAKE_WIN_SDK} \
 			-A "${PLATFORM}" \
@@ -238,7 +240,7 @@ function build() {
 			-DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
 			-DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
 			-DCMAKE_BUILD_TYPE=Debug \
-			-D CMAKE_VERBOSE_MAKEFILE=ON \
+			-D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 		    -DCMAKE_INSTALL_PREFIX=. \
 			${CMAKE_WIN_SDK} \
 			-A "${PLATFORM}" \

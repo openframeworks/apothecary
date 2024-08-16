@@ -10,9 +10,12 @@
 
 # define the version
 FORMULA_TYPES=( "osx" "vs" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "android" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64" "msys2" )
+FORMULA_DEPENDS=(  ) 
 
 # define the version
 VER=1.0.2
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/memononen/libtess2
@@ -153,6 +156,7 @@ function build() {
         	-DCMAKE_C_STANDARD=${C_STANDARD} \
         	-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
         	-G 'Unix Makefiles' ..
 		make -j${PARALLEL_MAKE} VERBOSE=1
@@ -171,6 +175,7 @@ function build() {
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
+		    -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 			-DCPU_BASELINE='' \
 			-DCPU_DISPATCH='' \
 			-DCMAKE_CXX_FLAGS_RELEASE=" ${FLAG_RELEASE} " \
@@ -200,7 +205,11 @@ function build() {
 	else
 		mkdir -p build/$TYPE
 		cd build/$TYPE
-		cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe -DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe -DCMAKE_CXX_FLAGS=-DNDEBUG -DCMAKE_C_FLAGS=-DNDEBUG ../../
+		cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=/mingw32/bin/g++.exe \
+			-DCMAKE_C_COMPILER=/mingw32/bin/gcc.exe \
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+			-DCMAKE_CXX_FLAGS=-DNDEBUG \
+			-DCMAKE_C_FLAGS=-DNDEBUG ../../
 		make
 	fi
 }

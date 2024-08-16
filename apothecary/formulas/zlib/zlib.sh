@@ -3,15 +3,18 @@
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
 
+FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64"  )
+FORMULA_DEPENDS=( )
+
 # define the version
 VER=1.3.1
+BUILD_ID=1
+DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
-
 GIT_TAG=v$VER
 
-FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxaarch64"  )
 
 # download the source code and unpack it into LIB_NAME
 function download() {
