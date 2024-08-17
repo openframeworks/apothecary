@@ -48,7 +48,7 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
     # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/../..
 else
     run(){
         echo "$@"
@@ -68,7 +68,7 @@ else
         run "tail -n 10 formula_${ARCH}.log"
     }
 
-    ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    ROOT=$(cd $(dirname "$0"); pwd -P)/../..
     LOCAL_ROOT=$ROOT
 fi
 
