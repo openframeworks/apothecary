@@ -9,7 +9,7 @@ FORMULA_TYPES=( "osx" "msys2" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "lin
 FORMULA_DEPENDS=( )
 
 # define the version
-VER=3.11.2
+VER=3.11.3
 BUILD_ID=2
 DEFINES=""
 
