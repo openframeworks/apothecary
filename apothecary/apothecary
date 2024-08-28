@@ -1546,7 +1546,7 @@ function frameworkFormula() {
     fi
     export XLIBS_DIR_REAL=$(realpath $XLIBSLOCAL)
 
-     if [[ $TYPE == "osx" ]]; then
+    if [[ $TYPE == "osx" ]]; then
         TYPE_OUT="macos"
     else
         TYPE_OUT=${TYPE}
@@ -1564,15 +1564,19 @@ function frameworkFormula() {
         xcframework_flags=""
 
         XDIR="${XLIBS_DIR_REAL}/"
-        X_LIBS="$XDIR/${1}/lib/${TYPE_OUT}/"
-        X_INCLUDE=$XDIR/${1}/include
-        X_LICENSE=$XDIR/${1}/license
+        X_LIBS="${XDIR}/${1}/lib/${TYPE_OUT}/"
+        X_INCLUDE=${XDIR}/${1}/include
+        X_LICENSE=${XDIR}/${1}/license
         
         mkdir -p "${X_INCLUDE}"
         mkdir -p "${X_LICENSE}"
 
+        mkdir -p "${X_LIBS}"
         if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
-             if ! command -v rsync &> /dev/null; then      
+        	if [[ $TYPE == "macos" ]]; then
+		        TYPE_OUT="osx"
+		    fi
+            if ! command -v rsync &> /dev/null; then
                 if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ]]; then
                     mkdir -p "${X_LIBS}"
                     cp -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/"* ${X_LIBS}
@@ -1585,19 +1589,20 @@ function frameworkFormula() {
                 fi
             else
                 if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${TYPE}" ]]; then
+                	echo "Copying from ${LIBS_DIR_REAL}/${1}/lib/${TYPE}/ to ${X_LIBS}"
                     mkdir -p "${X_LIBS}"
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ${X_LIBS}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/lib/${TYPE}/" ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/license/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
                 fi
             fi
             exit 0;
         fi
-        mkdir -p "${X_LIBS}"
+
         if ((BASH_VERSINFO[0] < 4)); then
             echo "The current version of Bash does not support associative arrays."
             echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
@@ -1788,9 +1793,9 @@ function frameworkFormula() {
             cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
             cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
         else
-            rsync -av --delete "${XCFRAMEWORK_PATH}" ${X_LIBS}
-            rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
-            rsync -av --delete "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
+            rsync -av "${XCFRAMEWORK_PATH}" ${X_LIBS}
+            rsync -av "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
+            rsync -av "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
         fi
 
         echo " -- cleanup merged libraries ..." 
@@ -1844,12 +1849,21 @@ function xframeworkFormula() {
         xcframework_flags=""
 
         XDIR="${XLIBS_DIR_REAL}/"
-        X_LIBS="$XDIR/${1}/lib/${X_TYPE}/"
-        X_INCLUDE=$XDIR/${1}/include
-        X_LICENSE=$XDIR/${1}/license
+        X_LIBS="${XDIR}/${1}/lib/${X_TYPE}/"
+        X_INCLUDE=${XDIR}/${1}/include
+        X_LICENSE=${XDIR}/${1}/license
         
         mkdir -p "${X_INCLUDE}"
         mkdir -p "${X_LICENSE}"
+
+        mkdir -p "${X_LIBS}"
+        if [[ $TYPE == "macos" ]]; then
+            echoSuccess "Building macOS xcframework"
+        fi
+
+		if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]]; then
+			X_TYPE=osx
+		fi
 
         if [[ $1 == "fmod" ]] || [[ $1 == "fmodex" ]] || [[ $1 == "glm" ]] || [[ $1 == "json" ]] || [[ $1 == "utf8" ]]; then
             if ! command -v rsync &> /dev/null; then      
@@ -1865,22 +1879,20 @@ function xframeworkFormula() {
                 fi
             else
                 if [[  -e "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}" ]]; then
+                	echo "Copying from ${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/ to ${X_LIBS}"
                     mkdir -p "${X_LIBS}"
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/" ${X_LIBS}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/" ${X_LIBS}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/include/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
                 fi
                 if [[  -e "${LIBS_DIR_REAL}/${1}/license/" ]]; then
-                    rsync -av --delete "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
+                    rsync -av "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
                 fi
             fi
             exit 0;
         fi
-        mkdir -p "${X_LIBS}"
-        if [[ $TYPE == "macos" ]]; then
-            echoSuccess "Building macOS xcframework"
-        fi
+
 
         XCFRAMEWORK_PATH="${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/$1.xcframework"
 
@@ -2062,9 +2074,9 @@ function xframeworkFormula() {
             cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
             cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
         else
-            rsync -av --delete "${XCFRAMEWORK_PATH}" ${X_LIBS}
-            rsync -av --delete "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
-            rsync -av --delete "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
+            rsync -av "${XCFRAMEWORK_PATH}" ${X_LIBS}
+            rsync -av "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
+            rsync -av "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
         fi
 
         echo " -- cleanup merged libraries ..." 
