@@ -163,15 +163,15 @@ jobs:
         name: libs-${{ env.TARGET }}-${{ env.ARCH }}-${{ matrix.bundle }}
         path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
         retention-days: 31
-    - name: Update Release arm64
-      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
-      uses: johnwbyrd/update-release@v1.0.0
+    - name: Update Release ARM64
+      if: startsWith(github.ref, 'refs/tags/') && github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+      uses: softprops/action-gh-release@v2.0.8
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ env.RELEASE }}
-        release: ${{ env.RELEASE }}
+        draft: false
         prerelease: ${{ env.PRERELEASE }}
         files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+
 
 
 
