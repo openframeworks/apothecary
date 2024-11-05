@@ -23,14 +23,22 @@ ARCHS=~/Library/Developer/Xcode/Archives
 function download() {
 	. "$DOWNLOADER_SCRIPT"
     git clone ${GIT_URL}
+
+    echo "Fetch Subdependancies"
+    ./ios/xcode/fetchDependencies.sh
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	echo
-	# nothing to do
 
-	cp -r $FORMULA_DIR/metalangle/ metalangle/
+	cp -r $FORMULA_DIR/metalangle/ ./
+
+	mkdir -p "src/id"
+	./src/commit_id.sh gen /Users/one/SOURCE/apothecary/apothecary/build/metalangle/src ./src/id/commit.h
+
+
+	# cp -r $FORMULA_DIR/metalangle/CMakeLists.txt metalangle/CMakeLists.txt
 }
 
 # executed inside the lib src dir
@@ -65,7 +73,7 @@ function build() {
 				-DENABLE_VISIBILITY=OFF \
 				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
 				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
-		cmake --build . --config Release
+		cmake --build . --config Release --target install
 		cd ..
 	fi
     # if [ "$TYPE" == "ios" ] ; then
@@ -80,30 +88,39 @@ function build() {
 function copy() {
 	echo
 	# headers
-	# mkdir -p $1/include/nlohmann
-	# cp -v single_include/nlohmann/json.hpp $1/include/nlohmann/json.hpp
+	mkdir -p $1/include
+    rm -rf $1/include/*
+    cp -Rv include/* $1/include
 
-	# . "$SECURE_SCRIPT"
-	# secure $1/include/nlohmann/json.hpp json.pkl
+    . "$SECURE_SCRIPT"
+    # libs
+    mkdir -p $1/lib/$TYPE
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/libmetalangle.a $1/lib/$TYPE/$PLATFORM/libmetalangle.a
+        secure $1/lib/$TYPE/$PLATFORM/libmetalangle.a metalangle.pkl
+    fi
 
-	# # copy license file
-	# if [ -d "$1/license" ]; then
-    #     rm -rf $1/license
-    # fi
-	# mkdir -p $1/license
-	# cp -v LICENSE.MIT $1/license/
+    # copy license files
+    if [ -d "$1/license" ]; then
+        rm -rf $1/license
+    fi
+    mkdir -p $1/license
+    cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-	if [ "$TYPE" == "linux" -o "$TYPE" == "linux64" ] ; then
-		rm -f *.hpp *:MIT
-	fi
+	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        rm -f build_${TYPE}_${PLATFORM}
+        rm -f CMakeCache.txt
+    fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "json" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/include/nlohmann" ${PLATFORM} )
+    LOAD_RESULT=$(loadsave ${TYPE} "metalangle" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${PLATFORM} )
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
