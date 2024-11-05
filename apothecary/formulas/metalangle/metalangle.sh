@@ -24,13 +24,15 @@ function download() {
 	. "$DOWNLOADER_SCRIPT"
     git clone ${GIT_URL}
 
-    echo "Fetch Subdependancies"
-    ./ios/xcode/fetchDependencies.sh
+
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	echo
+
+	 echo "Fetch Subdependancies"
+    ./ios/xcode/fetchDependencies.sh
 
 	cp -r $FORMULA_DIR/metalangle/ ./
 
