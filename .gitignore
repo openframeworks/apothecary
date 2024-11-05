@@ -22,3 +22,4 @@ scripts/linuxarmv6l/master.zip
 scripts/linuxarmv6l/firmware-master
 scripts/status.txt
 *.log
+*.xcuserstate
