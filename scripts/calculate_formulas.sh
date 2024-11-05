@@ -41,6 +41,7 @@ FORMULAS=(
     #"uri"
     "cairo"
     "fmt"
+    "metalangle"
 )
 
 # Seperate in bundles on osx
@@ -69,6 +70,7 @@ if [ "$BUNDLE" == "1" ]; then
             "uriparser"
             # # Formulas with depenencies in the end
             "cairo"
+            "metalangle"
 
         )
     elif [ "$BUNDLE" == "2" ]; then
