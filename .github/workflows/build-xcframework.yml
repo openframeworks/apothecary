@@ -34,26 +34,26 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: 'build-macos.yml'
-    # - name: Wait build-xros
-    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     workflow: 'build-xros.yml'
-    # - name: Wait build-catos
-    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     workflow: 'build-catos.yml'
+    - name: Wait build-xros
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-xros.yml'
+    - name: Wait build-catos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-catos.yml'
     - name: Wait build-tvos
       uses: NathanFirmo/wait-for-other-action@v1.0.4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         workflow: 'build-tvos.yml'
-    # - name: Wait build-watchos
-    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     workflow: 'build-watchos.yml'
+    - name: Wait build-watchos
+      uses: NathanFirmo/wait-for-other-action@v1.0.4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        workflow: 'build-watchos.yml'
   build-xcframework:
     runs-on: macos-14
     needs: wait-for-workflows
@@ -107,11 +107,11 @@ jobs:
             });
 
             const release = process.env.RELEASE;
-            const platforms = ["ios", "macos", "tvos"];
-            const platformTargets = { ios: "ios", macos: "osx", tvos: "tvos" };
+            const platforms = ["ios", "macos", "tvos", "catos", "xros", "watchos"];
+            const platformTargets = { ios: "ios", macos: "osx", tvos: "tvos", catos: "catos", xros: "xros", watchos: "watchos"};
             const artifactNamesToDownload = new Set();
 
-            const max = 9; // The maximum suffix number for artifacts
+            const max = 18; // The maximum suffix number for artifacts
 
             // Generate artifact names dynamically based on platforms, target mappings, and max count
             for (const platform of platforms) {
