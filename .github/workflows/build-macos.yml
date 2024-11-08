@@ -26,7 +26,7 @@ jobs:
         bundle: [1, 2, 3]
     env:
       BUNDLE: ${{ matrix.bundle }}
-      DEVELOPER_DIR: "/Applications/Xcode_16.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
     steps:
       - name: Determine Release
         id: vars
@@ -39,10 +39,10 @@ jobs:
             echo "RELEASE=nightly" >> $GITHUB_ENV
             echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           else
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4

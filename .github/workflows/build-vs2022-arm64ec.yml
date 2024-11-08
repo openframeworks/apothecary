@@ -57,19 +57,19 @@ jobs:
       id: vars
       shell: bash
       run: |
-        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "PRERELEASE=false" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "RELEASE=nightly" >> $GITHUB_ENV
-          echo "PRERELEASE=false" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "RELEASE=bleeding" >> $GITHUB_ENV
-          echo "PRERELEASE=true" >> $GITHUB_ENV
-        else
-          echo "RELEASE=bleeding" >> $GITHUB_ENV
-          echo "PRERELEASE=true" >> $GITHUB_ENV
-        fi
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "PRERELEASE=false" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+            echo "PRERELEASE=false" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "RELEASE=latest" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE=latest" >> $GITHUB_ENV
+            echo "PRERELEASE=true" >> $GITHUB_ENV
+          fi
     - name: 'Download artifacts'
       uses: actions/github-script@v7
       if: env.USE_ARTIFACT == 'true'

@@ -58,7 +58,7 @@ jobs:
     runs-on: macos-14
     needs: wait-for-workflows
     env:
-      DEVELOPER_DIR: "/Applications/Xcode_16.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
       TARGET: "macos"
     if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
     steps:
@@ -73,10 +73,10 @@ jobs:
             echo "RELEASE=nightly" >> $GITHUB_ENV
             echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           else
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4

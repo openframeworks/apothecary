@@ -64,10 +64,10 @@ jobs:
             echo "RELEASE=nightly" >> $GITHUB_ENV
             echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           else
-            echo "RELEASE=bleeding" >> $GITHUB_ENV
+            echo "RELEASE=latest" >> $GITHUB_ENV
             echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - name: Clone repository
