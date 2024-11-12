@@ -303,6 +303,7 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
+            -DHAVE_GETPASS_R=0 \
             -DCURL_DISABLE_LIBSSH2=ON \
             -DCURL_DISABLE_LIBPSL=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
