@@ -6,10 +6,11 @@
 FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
 FORMULA_DEPENDS=( "zlib" )
 
-VER=3.3.1
-VERDIR=3.3.1
-SHA1=7376042523b6a229bc697b8099c2af369d1a84c6
-SHA256=53e66b043322a606abf0087e7699a0e033a37fa13feb9742df35c3a33b18fb02
+VER=3.4.0
+VERDIR=3.4.0
+VER_TAG="3.4"
+SHA1=5c2f33c3f3601676f225109231142cdc30d44127
+SHA256=e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf
 
 BUILD_ID=1
 DEFINES=""
@@ -66,10 +67,14 @@ function download() {
 		downloader ${MIRROR}/source/$FILE_NAME.tar.gz.sha1
 	fi
 	CHECKSHA=$(shasum $FILE_NAME.tar.gz | awk '{print $1}')
-	FILESUM=$(head -1 $FILE_NAME.tar.gz.sha1)
-	if [[ " $CHECKSHA" != $FILESUM || $CHECKSHA != "$SHA1" ]] ;  then
-		echoError "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM]- Developer has not updated SHA or Man in the Middle Attack"
-    	exit
+
+	# Extract only the SHA value from the .sha1 file
+	FILESUM=$(awk '{print $1}' $FILE_NAME.tar.gz.sha1)
+
+	# Check if CHECKSHA matches both FILESUM and the expected SHA1
+	if [[ "$CHECKSHA" != "$FILESUM" || "$CHECKSHA" != "$SHA1" ]]; then
+	    echo "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM] - Developer has not updated SHA or Man in the Middle Attack"
+	    exit 1
     else
     	tar -xf "${FILE_NAME}.tar.gz"
 		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
@@ -78,7 +83,7 @@ function download() {
 		rm $FILE_NAME.tar.gz.sha1
 	fi
 	# Clone the openssl-cmake repository
-	git clone --branch "3.3" --depth=1 $GIT_URL openssl_cmake_temp
+	git clone --branch $VER_TAG --depth=1 $GIT_URL openssl_cmake_temp
 
 	# Organize directories as needed
 	mkdir -p openssl
@@ -142,6 +147,7 @@ function build() {
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             ${DEFS} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
+	        -DCMAKE_IGNORE_PATH=/opt/homebrew \
 		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
