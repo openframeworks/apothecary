@@ -148,6 +148,7 @@ function build() {
             ${DEFS} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 	        -DCMAKE_IGNORE_PATH=/opt/homebrew \
+	        -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
 		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DENABLE_BITCODE=OFF \
