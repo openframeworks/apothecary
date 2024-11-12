@@ -156,6 +156,7 @@ function build() {
             -DBROTLI_INCLUDE_DIRS="${LIBBROTLI_INCLUDE_DIR}" \
             -DUSE_RESOLVE_ON_IPS=OFF \
             -DENABLE_ARES=OFF \
+            -DHAVE__FSEEKI64=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
@@ -304,6 +305,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DHAVE__FSEEKI64=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
