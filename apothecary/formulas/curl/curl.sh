@@ -12,16 +12,15 @@ FORMULA_DEPENDS=( "openssl" "zlib" "brotli" )
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
 
-VER=8.9.1
-VER_D=8_9_1
-SHA1=9bcf387f274ae96ad591115d9f9f23700ec76ceb
+VER=8.11.0
+VER_D=8_11_0
+SHA1=9648c31756362343f1a0daba881e189d6fe8b4f4
 BUILD_ID=1
 DEFINES=""
 
 # tools for git use
 GIT_URL=https://github.com/curl/curl
 GIT_TAG=$VER
-
 
 # download the source code and unpack it into LIB_NAME
 function download() {
