@@ -308,6 +308,7 @@ function build() {
             -DCURL_DISABLE_LIBPSL=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_IGNORE_PATH=/opt/homebrew \
             -DCURL_STATICLIB=ON \
             -DBUILD_STATIC_LIBS=ON \
             -DENABLE_UNICODE=ON \
