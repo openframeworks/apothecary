@@ -59,8 +59,16 @@ function prepare() {
     apothecaryDepend prepare openssl
     apothecaryDepend build openssl
     apothecaryDepend copy openssl  
-    
 
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        patch -p1 < "$FORMULA_DIR/apple-patch.diff"
+        if [ $? -ne 0 ]; then
+            echo "Failed to apply apple-patch.diff"
+            exit 1
+        else
+            echo "apple-patch.diff applied successfully"
+        fi
+    fi 
     echo "prepared"
 
 
@@ -293,8 +301,8 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -DHAVE_GETPASS_R=0" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -DHAVE_GETPASS_R=0 -Wno-error=implicit-function-declaration" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -DHAVE_GETPASS_R=0 -Wno-error=implicit-function-declaration" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCURL_STATICLIB=ON \
