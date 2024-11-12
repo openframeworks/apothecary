@@ -107,7 +107,6 @@ function build() {
         LIBBROTLI_ENC_LIB="$LIBBROTLI_LIBRARY/brotlienc.lib"
         LIBBROTLI_DEC_LIB="$LIBBROTLI_LIBRARY/brotlidec.lib"
 
-
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig;${PKG_CONFIG_PATH};${OF_LIBS_OPENSSL}/lib/$TYPE/$PLATFORM;${ZLIB_ROOT}/lib/$TYPE/$PLATFORM;${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
 
         DEFS="-DLIBRARY_SUFFIX=${ARCH} \
@@ -295,7 +294,7 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -DHAVE_GETPASS_R=0" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCURL_STATICLIB=ON \
@@ -329,8 +328,8 @@ function build() {
             -DCURL_ENABLE_SSL=${CURL_ENABLE_SSL} \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DUSE_SECURE_TRANSPORT=${USE_SECURE_TRANSPORT} \
+            -DCURL_USE_SECTRANSP=${USE_SECURE_TRANSPORT} \
             -DUSE_NGHTTP2=OFF \
-            -DCURL_USE_SECTRANSP=OFF \
             -DCURL_DISABLE_POP3=ON \
             -DCURL_CA_FALLBACK=ON \
             -DCURL_DISABLE_IMAP=ON \
