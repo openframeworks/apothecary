@@ -68,16 +68,12 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             echo "RELEASE=nightly" >> $GITHUB_ENV
-            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
             echo "RELEASE=latest" >> $GITHUB_ENV
-            echo "PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
-            echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula
@@ -204,21 +200,21 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release macOS 1
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           files: xout_1/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_1.tar.bz2
       - name: Update Release macOS 2
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           files: xout_2/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_2.tar.bz2
       - name: Update Release macOS 3
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
