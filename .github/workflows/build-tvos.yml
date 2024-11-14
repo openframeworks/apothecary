@@ -34,16 +34,12 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             echo "RELEASE=nightly" >> $GITHUB_ENV
-            echo "PRERELEASE=false" >> $GITHUB_ENV
           elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
             echo "RELEASE=latest" >> $GITHUB_ENV
-            echo "PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
-            echo "PRERELEASE=true" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v4
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
@@ -57,43 +53,37 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            // https://api.github.com/repos/openframeworks/apothecary/actions/artifacts?per_page=250
-            // Ensure the output directory exists
             const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
             if (!fs.existsSync(outputDir)){
               fs.mkdirSync(outputDir);
             }
-
-            // List all artifacts for the repository
             const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: 'openframeworks',
               repo: 'apothecary',
               sort: 'created_at',
               direction: 'desc',
-              per_page: 50
+              per_page: 150
             });
-
             const target = process.env.TARGET;
             const bundle = process.env.MATRIX_BUNDLE;
             const release = process.env.RELEASE;
             const artifactName1 = `libs-${release}-${target}-1`;
             const artifactName2 = `libs-${release}-${target}-2`;
             const artifactName3 = `libs-${release}-${target}-3`;
-
-            const artifactNamesToDownload = [artifactName1, artifactName2, artifactName3];
+            const artifactNamesToDownload = new Set([artifactName1, artifactName2, artifactName3]);                      
             let count = 0;
-            const max=3;
-            
+            const max = 3;
             for (const artifact of artifacts.data.artifacts) {
-              if (artifactNamesToDownload.includes(artifact.name) && !artifact.expired) {
-                // Download the artifact
+              const isBranchMatch = artifact.workflow_run.head_branch === release;
+              const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
+              const isPullRequest = artifact.workflow_run.event === 'pull_request';
+              if (artifact.name === artifactName && !artifact.expired && (isBranchMatch || isTagMatch)) {
                 const download = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   artifact_id: artifact.id,
                   archive_format: 'zip',
                 });
-
                 const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
@@ -102,7 +92,7 @@ jobs:
                   break;
                 }
               }
-            }
+          }
       - name: Extract Artifacts to /out
         if: env.USE_ARTIFACT == 'true'
         run: |
@@ -191,7 +181,7 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Update Release XCFramework
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
