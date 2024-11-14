@@ -77,7 +77,7 @@ jobs:
               const isBranchMatch = artifact.workflow_run.head_branch === release;
               const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
               const isPullRequest = artifact.workflow_run.event === 'pull_request';
-              if (artifactNamesToDownload.includes(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
+               if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
                 const download = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
