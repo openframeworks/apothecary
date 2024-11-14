@@ -11,7 +11,7 @@ FORMULA_DEPENDS=( "zlib" "libpng" )
 
 # define the version
 VER=4.10.0
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -153,10 +153,18 @@ function build() {
     -DWITH_ITT=OFF "
 
     if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
-      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DWITH_CAROTENE=OFF"
-    else 
+      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DWITH_CAROTENE=ON"
+    else
       EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON "
     fi
+
+    if [[ "$TYPE" =~ ^(tvos|watchos)$ ]]; then
+	    if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
+	      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DWITH_CAROTENE=OFF"
+	    else
+	      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON "
+	    fi
+	fi
 
     if [[ "$TYPE" =~ ^(tvos)$ ]]; then
       EXTRA_DEFS="$EXTRA_DEFS -DBUILD_opencv_videoio=OFF -DBUILD_opencv_videostab=OFF"
