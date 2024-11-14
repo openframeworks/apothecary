@@ -92,7 +92,7 @@ jobs:
                   break;
                 }
               }
-          }
+            }
       - name: Extract Artifacts to /out
         if: env.USE_ARTIFACT == 'true'
         run: |
