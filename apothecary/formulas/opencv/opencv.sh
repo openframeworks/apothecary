@@ -11,8 +11,9 @@ FORMULA_DEPENDS=( "zlib" "libpng" )
 
 # define the version
 VER=4.10.0
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
+FRAMEWORKS=""
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv
@@ -150,19 +151,20 @@ function build() {
     -DWITH_IPP=OFF \
     -DWITH_IPP_A=OFF \
     -DBUILD_ZLIB=OFF \
-    -DWITH_ITT=OFF "
+    -DWITH_ITT=OFF \
+    -DBUILD_TESTS=OFF "
 
     if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
-      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DWITH_CAROTENE=ON"
+      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DWITH_CAROTENE=ON -DWITH_GTK_2_X=OFF -DCV_DISABLE_OPTIMIZATION=OFF"
     else
-      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON "
+      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DCV_DISABLE_OPTIMIZATION=OFF"
     fi
 
     if [[ "$TYPE" =~ ^(tvos|watchos)$ ]]; then
 	    if [[ "$ARCH" =~ ^(arm64|SIM_arm64|arm64_32)$ ]]; then
 	      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DWITH_CAROTENE=OFF"
 	    else
-	      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON "
+	      EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DCV_DISABLE_OPTIMIZATION=OFF"
 	    fi
 	fi
 
@@ -171,6 +173,8 @@ function build() {
     else 
       EXTRA_DEFS="-DBUILD_opencv_videoio=ON -DBUILD_opencv_videostab=ON"
     fi    
+
+    FRAMEWORKS="-framework Foundation -framework AVFoundation -framework CoreFoundation -framework CoreVideo"
 
     cmake .. ${CORE_DEFS} ${DEFS} ${EXTRA_DEFS} \
       -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
@@ -182,7 +186,7 @@ function build() {
       -DENABLE_VISIBILITY=OFF \
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
       -DENABLE_FAST_MATH=OFF \
-      -DCMAKE_EXE_LINKER_FLAGS="-framework Foundation -framework AVFoundation -framework CoreFoundation -framework CoreVideo" \
+      -DCMAKE_EXE_LINKER_FLAGS="" \
       -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration -DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
       -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -Wno-implicit-function-declaration -DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
       -DENABLE_STRICT_TRY_COMPILE=ON \

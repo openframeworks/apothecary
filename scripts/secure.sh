@@ -70,6 +70,10 @@ if [ -z "${FORMULA_DEPENDS+x}" ]; then
     FORMULA_DEPENDS=${6:-}
 fi
 
+if [ -z "${FRAMEWORKS+x}" ]; then
+    FRAMEWORKS=${8:-}
+fi
+
 secure() { 
     if [ -z "${1+x}" ]; then
         BINARY_SEC=""
@@ -109,6 +113,12 @@ secure() {
         SOURCE_SHA=""
     else
         SOURCE_SHA=$7
+    fi
+
+    if [ -z "${8+x}" ]; then
+        FRAMEWORKS=""
+    else
+        FRAMEWORKS=$8
     fi
 
     OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
@@ -175,6 +185,8 @@ binary = "$ACTUAL_FILENAME"
 binarySha = "$BINARY_SHA"
 shaType = "$HASH_TYPE"
 sourceSHA = "$SOURCE_SHA"
+defines = "$DEFINES"
+frameworks = "$FRAMEWORKS"
 EOF
 cat "$OUTPUT_PKL_FILE"
 
