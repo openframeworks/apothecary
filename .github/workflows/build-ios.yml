@@ -67,6 +67,7 @@ jobs:
             const target = process.env.TARGET;
             const bundle = process.env.MATRIX_BUNDLE;
             const release = process.env.RELEASE;
+
             const artifactName1 = `libs-${release}-${target}-1`;
             const artifactName2 = `libs-${release}-${target}-2`;
             const artifactName3 = `libs-${release}-${target}-3`;
@@ -77,7 +78,7 @@ jobs:
               const isBranchMatch = artifact.workflow_run.head_branch === release;
               const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
               const isPullRequest = artifact.workflow_run.event === 'pull_request';
-              if (artifact.name === artifactName && !artifact.expired && (isBranchMatch || isTagMatch)) {
+              if (artifactNamesToDownload.includes(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
                 const download = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
