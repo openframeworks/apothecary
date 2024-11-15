@@ -199,11 +199,11 @@ WIN11_INSTALLED_SDK_2022=10.0.22621.0
 WIN11_INSTALLED_SDK_2022_HEX=0x0A00586D
 
 
-if [ -z "${USE_CCACHE+x}" ]; then
-    export CC="ccache gcc"
-    export CXX="ccache g++"
-    export CMAKE_DEFS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
-fi
+# if [ -z "${USE_CCACHE+x}" ]; then
+#     export CC="ccache gcc"
+#     export CXX="ccache g++"
+#     export CMAKE_DEFS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+# fi
 
 # nice, detailed help message
 HELP="usage: apothecary [options] <command> [<core|addons|libName|addonName>]

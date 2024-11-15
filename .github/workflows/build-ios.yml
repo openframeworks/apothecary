@@ -19,7 +19,7 @@ env:
   USE_ARTIFACT: true
 
 jobs:
-  build-macos-platforms:
+  build-for-ios-platform:
     runs-on: macos-14
     strategy:
       matrix:
@@ -91,11 +91,11 @@ jobs:
 
                 const isBranchMatch = artifact.workflow_run.head_branch === release;
                 const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
-                const isPullRequest = artifact.workflow_run.event === 'pull_request';
+                const isPRTargetBranchMatch = artifact.workflow_run.event === 'pull_request' && artifact.workflow_run.base_branch === release;
 
-                console.log(`Branch Match: ${isBranchMatch}, Tag Match: ${isTagMatch}, Pull Request: ${isPullRequest}`);
+                console.log(`Branch Match: ${isBranchMatch}, PR Target Branch Match: ${isPRTargetBranchMatch}, Tag Match: ${isTagMatch}`);
 
-                if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
+                if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch || isPRTargetBranchMatch)) {
                   const download = await github.rest.actions.downloadArtifact({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
