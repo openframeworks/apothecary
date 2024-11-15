@@ -57,42 +57,53 @@ jobs:
             if (!fs.existsSync(outputDir)){
               fs.mkdirSync(outputDir);
             }
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: 'openframeworks',
-              repo: 'apothecary',
-              sort: 'created_at',
-              direction: 'desc',
-              per_page: 150
-            });
-            const target = process.env.TARGET;
-            const bundle = process.env.MATRIX_BUNDLE;
-            const release = process.env.RELEASE;
-
-            const artifactName1 = `libs-${release}-${target}-1`;
-            const artifactName2 = `libs-${release}-${target}-2`;
-            const artifactName3 = `libs-${release}-${target}-3`;
-            const artifactNamesToDownload = new Set([artifactName1, artifactName2, artifactName3]);                  
-            let count = 0;
-            const max = 3;
-            for (const artifact of artifacts.data.artifacts) {
-              const isBranchMatch = artifact.workflow_run.head_branch === release;
-              const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
-              const isPullRequest = artifact.workflow_run.event === 'pull_request';
-              if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
-                const download = await github.rest.actions.downloadArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                  archive_format: 'zip',
-                });
-                const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
-                fs.writeFileSync(artifactPath, Buffer.from(download.data));
-                console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
-                count++;
-                if (count >= max) {
-                  break;
+            try {
+              const artifacts = await github.rest.actions.listArtifactsForRepo({
+                owner: 'openframeworks',
+                repo: 'apothecary',
+                sort: 'created_at',
+                direction: 'desc',
+                per_page: 150
+              });
+              const target = process.env.TARGET;
+              const bundle = process.env.MATRIX_BUNDLE;
+              const release = process.env.RELEASE;
+              console.log(`Target: ${target}, Bundle: ${bundle}, Release: ${release}`);
+              const artifactName1 = `libs-${release}-${target}-1`;
+              const artifactName2 = `libs-${release}-${target}-2`;
+              const artifactName3 = `libs-${release}-${target}-3`;
+              const artifactNamesToDownload = new Set([artifactName1, artifactName2, artifactName3]);    
+              console.log(`Artifacts to download: ${Array.from(artifactNamesToDownload).join(', ')}`);              
+              let count = 0;
+              const max = 3;
+              for (const artifact of artifacts.data.artifacts) {
+                console.log(`Checking artifact: ${artifact.name} (Expired: ${artifact.expired})`);
+                const isBranchMatch = artifact.workflow_run.head_branch === release;
+                const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
+                const isPullRequest = artifact.workflow_run.event === 'pull_request';
+                console.log(`Branch Match: ${isBranchMatch}, Tag Match: ${isTagMatch}, Pull Request: ${isPullRequest}`);
+                if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
+                  const download = await github.rest.actions.downloadArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: artifact.id,
+                    archive_format: 'zip',
+                  });
+                  const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
+                  fs.writeFileSync(artifactPath, Buffer.from(download.data));
+                  console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
+                  count++;
+                  if (count >= max) {
+                    console.log("Reached maximum artifact download count.");
+                    break;
+                  }
                 }
               }
+              else {
+                console.log(`Skipping artifact: ${artifact.name} - Conditions not met.`);
+              }
+            } catch (error) {
+                console.error("An error occurred:", error);
             }
       - name: Extract Artifacts to /out
         if: env.USE_ARTIFACT == 'true'
