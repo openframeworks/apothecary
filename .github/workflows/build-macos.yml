@@ -57,6 +57,7 @@ jobs:
             if (!fs.existsSync(outputDir)){
               fs.mkdirSync(outputDir);
             }
+            // https://api.github.com/repos/openframeworks/apothecary/actions/artifacts?per_page=250
             const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: 'openframeworks',
               repo: 'apothecary',
@@ -74,10 +75,8 @@ jobs:
             let count = 0;
             const max = 3;
             for (const artifact of artifacts.data.artifacts) {
-              const isBranchMatch = artifact.workflow_run.head_branch === release;
-              const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
-              const isPullRequest = artifact.workflow_run.event === 'pull_request';
-               if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch)) {
+              const isArtifactMatch = artifact.name.includes(`libs-${release}`) && !artifact.expired;
+              if (isArtifactMatch) {
                 const download = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

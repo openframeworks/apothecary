@@ -89,13 +89,8 @@ jobs:
               for (const artifact of artifacts.data.artifacts) {
                 console.log(`Checking artifact: ${artifact.name} (Expired: ${artifact.expired})`);
 
-                const isBranchMatch = artifact.workflow_run.head_branch === release;
-                const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
-                const isPRTargetBranchMatch = artifact.workflow_run.event === 'pull_request' && artifact.workflow_run.base_branch === release;
-
-                console.log(`Branch Match: ${isBranchMatch}, PR Target Branch Match: ${isPRTargetBranchMatch}, Tag Match: ${isTagMatch}`);
-
-                if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && (isBranchMatch || isTagMatch || isPRTargetBranchMatch)) {
+                  const isArtifactMatch = artifact.name.includes(`libs-${release}`) && !artifact.expired;
+                  if (isArtifactMatch) {
                   const download = await github.rest.actions.downloadArtifact({
                     owner: context.repo.owner,
                     repo: context.repo.repo,

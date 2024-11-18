@@ -98,18 +98,14 @@ jobs:
           const max = 1;
 
           for (const artifact of artifacts.data.artifacts) {
-            const isBranchMatch = artifact.workflow_run.head_branch === release;
-            const isTagMatch = artifact.workflow_run.event === 'release' && artifact.name.includes(`libs-${release}`);
-            if (artifact.name === artifactName && !artifact.expired && (isBranchMatch || isTagMatch)) {
-        
-              // Download the artifact
+            const isArtifactMatch = artifact.name.includes(`libs-${release}`) && !artifact.expired;
+            if (isArtifactMatch) {        
               const download = await github.rest.actions.downloadArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 artifact_id: artifact.id,
                 archive_format: 'zip',
               });
-
               const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
               fs.writeFileSync(artifactPath, Buffer.from(download.data));
               console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
