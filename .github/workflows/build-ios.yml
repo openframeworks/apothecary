@@ -89,7 +89,7 @@ jobs:
               for (const artifact of artifacts.data.artifacts) {
                 console.log(`Checking artifact: ${artifact.name} (Expired: ${artifact.expired})`);
 
-                  const isArtifactMatch = artifact.name.includes(`libs-${release}`) && !artifact.expired;
+                  const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}`) && !artifact.expired;
                   if (isArtifactMatch) {
                   const download = await github.rest.actions.downloadArtifact({
                     owner: context.repo.owner,
