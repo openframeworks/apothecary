@@ -4,7 +4,7 @@
 # Update package database 
 pacman -Syuu --noconfirm
 pacman -S --noconfirm base-devel unzip dos2unix git
-pacboy -S --noconfirm gcc cmake gperf libxml2 python3
+pacboy -S --noconfirm gcc cmake gperf libxml2 python3 zlib
 
 # Additional
 pacboy -S --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja

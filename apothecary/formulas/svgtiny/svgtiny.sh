@@ -79,9 +79,18 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ]; then
+
+    if [ "$TYPE" == "msys2" ]; then
+		MINGW_PREFIX="${MINGW_PREFIX:-/mingw64}"  # Default to /mingw64 if MINGW_PREFIX is not set
+        LIBXML2_ROOT="$MINGW_PREFIX"  # Adjust for architecture
+        LIBXML2_INCLUDE_DIR="$LIBXML2_ROOT/include/libxml2"
+        LIBXML2_LIBRARY="$LIBXML2_ROOT/lib/libxml2.a"  # Adjust path for MSYS2 system libraries
+    else
         LIBXML2_ROOT="$LIBS_ROOT/libxml2/"
         LIBXML2_INCLUDE_DIR="$LIBS_ROOT/libxml2/include"
         LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/libxml2.a"
+    fi
+
 	    mkdir -p "build_${TYPE}_${ARCH}"
 	    cd "build_${TYPE}_${ARCH}"
 	    DEFS="-DLIBRARY_SUFFIX=${ARCH} \
