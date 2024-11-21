@@ -344,13 +344,13 @@ function copy() {
 		mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -f "build_${TYPE}_$PLATFORM/svgtiny_wasm.a" $1/lib/$TYPE/$PLATFORM/svgtiny.a        
         secure $1/lib/$TYPE/$PLATFORM/svgtiny.a svgtiny.pkl
-	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
+	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ] ; then
 		mkdir -p $1/lib/$TYPE/${ARCH}
         cp -f "build_${TYPE}_${ARCH}/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a
         secure $1/lib/$TYPE/libsvgtiny.a svgtiny.pkl
-    elif [ "$TYPE" == "msys2" ] ; then
-		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
-        secure $1/lib/$TYPE/libsvgtiny.a svgtiny.pkl
+#    elif [ "$TYPE" == "msys2" ] ; then
+#		cp -Rv libsvgtiny.a $1/lib/$TYPE/libsvgtiny.a
+#        secure $1/lib/$TYPE/libsvgtiny.a svgtiny.pkl
 	fi
 
 	# copy license file
