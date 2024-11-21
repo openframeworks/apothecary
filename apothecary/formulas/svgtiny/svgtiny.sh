@@ -105,7 +105,7 @@ function build() {
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"         
 	    cmake .. ${DEFS} \
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude" \
-	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude" \
+	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude -Wno-implicit-function-declaration" \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_INSTALL_LIBDIR="lib" \
 	        -DDO_XML_INSTALL=ON \
