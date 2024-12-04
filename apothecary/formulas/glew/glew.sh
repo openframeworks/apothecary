@@ -15,6 +15,7 @@ FORMULA_DEPENDS=( )
 VER=2.2.0
 BUILD_ID=1
 DEFINES=""
+SHA1=22d6e9b9e691080eb6313407dbf51cfebc3345ea
 
 # tools for git use
 GIT_URL=https://github.com/nigels-com/glew.git
@@ -24,19 +25,24 @@ URL=https://github.com/nigels-com/glew/releases/download/${GIT_TAG}
 # download the source code and unpack it into LIB_NAME
 function download() {
 	. "$DOWNLOADER_SCRIPT"
-
 	downloader "${URL}/${GIT_TAG}.tgz"
+
+	local CHECKSHA=$(shasum glew-$VER.tgz | awk '{print $1}')
+    if [ "$CHECKSHA" != "$SHA1" ] ; then
+        echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        exit 1
+    else
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+    fi
 	tar -xf glew-$VER.tgz
 	mv glew-$VER glew
 	rm glew-$VER.tgz
-
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 	. "$DOWNLOADER_SCRIPT"
-	downloader https://raw.githubusercontent.com/ORDIS-Co-Ltd/glew/a668da0183f44b550de5b37e77ba2e280b0ae8b0/build/cmake/CMakeLists.txt
-	cp -f ./CMakeLists.txt ./build/cmake/CMakeLists.txt
+	cp -f $FORMULA_DIR/CMakeLists.txt ./build/cmake/CMakeLists.txt
 }
 
 # executed inside the lib src dir
@@ -51,7 +57,7 @@ function build() {
 		rm -f CMakeCache.txt *.a *.o 
 		cmake  ../build/cmake \
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
-			-DCMAKE_C_STANDARD=${CPP_STANDARD} \
+			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -77,23 +83,24 @@ function build() {
         cd ..
 
 	elif [ "$TYPE" == "vs" ] ; then
-		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN C_FLAGS: ${VS_C_FLAGS} CONVENTION: ${CALLING_CONVENTION} SDK:${CMAKE_WIN_SDK}"
 		echo "--------------------"
 		GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+
+
 		mkdir -p "build_${TYPE}_${ARCH}"
 		cd "build_${TYPE}_${ARCH}"
 
 		rm -f CMakeCache.txt *.lib *.o 
 		DEFS="-DLIBRARY_SUFFIX=${ARCH}"
-
+		
 		cmake ../build/cmake ${DEFS} \
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
-		    -DCMAKE_C_STANDARD=${CPP_STANDARD} \
+		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+		    -DCMAKE_C_STANDARD_REQUIRED=ON \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-		    -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-		    -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-		    -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+		    -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS} ${CALLING_CONVENTION}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS} ${CALLING_CONVENTION}" \
 		    -DCMAKE_CXX_EXTENSIONS=OFF \
 		    -DBUILD_SHARED_LIBS=OFF \
 		    -DCMAKE_BUILD_TYPE=Release \

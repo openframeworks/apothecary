@@ -33,6 +33,7 @@ function download() {
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
     if [ "$CHECKSHA" != "$SHA1" ] ; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        exit 1
     else
         echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     fi
