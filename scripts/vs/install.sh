@@ -44,4 +44,5 @@ echoDots(){
 }
 
 winget install -e --id Microsoft.WindowsTerminal
-winget install Ninja-build.Ninja"
+winget install Ninja-build.Ninja
+winget install jqlang.jq
