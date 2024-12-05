@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=3.1.64
+VERSION=3.1.73
 
 if [ -z "${EMSDK+x}" ]; then
 	echo "Unix Emscripten SDK not yet found"

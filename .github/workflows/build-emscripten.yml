@@ -14,7 +14,7 @@ concurrency:
 
 env:
   TARGET: "emscripten"
-  EMSDK_VERSION: "3.1.70"
+  EMSDK_VERSION: "3.1.73"
   USE_ARTIFACT: true
 
 jobs:
@@ -76,7 +76,7 @@ jobs:
             const max = 1;
 
             for (const artifact of artifacts.data.artifacts) {
-              const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}`) && !artifact.expired;
+              const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}-${arch}-${pthreads}`) && !artifact.expired;
               if (isArtifactMatch) {
                 const download = await github.rest.actions.downloadArtifact({
                   owner: context.repo.owner,
