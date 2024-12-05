@@ -35,13 +35,6 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echo "Prepare"
-
-    apothecaryDependencies download
-    
-    apothecaryDepend prepare zlib
-    apothecaryDepend build zlib
-    apothecaryDepend copy zlib
-   
 }
 
 # executed inside the lib src dir
@@ -327,8 +320,8 @@ function build() {
             -B . \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
             $buildOpts \
-            -DCMAKE_C_FLAGS="-DNDEBUG -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE}" \
-            -DCMAKE_CXX_FLAGS="-DNDEBUG -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DNDEBUG -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE} -Wno-nontrivial-memaccess" \
+            -DCMAKE_CXX_FLAGS="-DNDEBUG -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE} -Wno-nontrivial-memaccess" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
