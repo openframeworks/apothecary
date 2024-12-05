@@ -52,7 +52,7 @@ function prepare() {
 function build() {
 	LIBS_ROOT=$(realpath $LIBS_DIR)
 
-	export DEFS="
+	DEFINES="
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -69,7 +69,7 @@ function build() {
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		rm -f CMakeCache.txt *.a *.o
-		cmake .. ${DEFS} \
+		cmake .. ${DEFINES} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
 				-DCMAKE_INSTALL_PREFIX=Release \
@@ -95,7 +95,7 @@ function build() {
 
   		env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${CALLING_CONVENTION}"
   		env CFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${CALLING_CONVENTION}"
-		cmake .. ${DEFS} \
+		cmake .. ${DEFINES} \
 			-B . \
 	    	-DCMAKE_INSTALL_PREFIX=Release \
 			-DCMAKE_BUILD_TYPE=Release \
@@ -120,7 +120,7 @@ function build() {
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
-			cmake .. ${DEFS} \
+			cmake .. ${DEFINES} \
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
 				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
 				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -151,7 +151,7 @@ function build() {
 	    cd build_$TYPE
 	    rm -f CMakeCache.txt *.a *.o
 	    cmake .. \
-	    	${DEFS} \
+	    	${DEFINES} \
 	    	-DCMAKE_SYSTEM_NAME=$TYPE \
         	-DCMAKE_SYSTEM_PROCESSOR=$ABI \
 				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -170,10 +170,10 @@ function build() {
 	    cd build_$TYPE
 	    rm -f CMakeCache.txt *.a *.o
 	    cmake .. \
-	    	${DEFS} \
+	    	${DEFINES} \
 	    	-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/aarch64-linux-gnu.toolchain.cmake \
 	    	-DCMAKE_SYSTEM_NAME=$TYPE \
-        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+        		-DCMAKE_SYSTEM_PROCESSOR=$ABI \
 				-DCMAKE_C_STANDARD=${C_STANDARD} \
 				-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 				-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -191,7 +191,7 @@ function build() {
 	    cd build_$TYPE
 	    rm -f CMakeCache.txt *.a *.o *.a
 	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	${DEFS} \
+	    	${DEFINES} \
 			-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -233,12 +233,12 @@ function copy() {
 		cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
 	elif [ "$TYPE" == "emscripten" ] ; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -v "build_${TYPE}/bin/fmt_wasm.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		cp -v "build_${TYPE}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
 		cp -R "build_${TYPE}/Release/include/" $1/include
 		secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
 	else
 		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+		cp -v "build_${TYPE}_${PLATFORM}/Release/bin/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
 		secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
 		cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include	
 	fi
