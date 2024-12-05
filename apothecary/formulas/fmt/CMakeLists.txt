@@ -427,13 +427,6 @@ if (FMT_TEST)
   add_subdirectory(test)
 endif ()
 
-if (EMSCRIPTEN)
-    add_executable(fmt ${FMT_SOURCES} ${FMT_HEADERS})
-    target_include_directories(fmt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    set_target_properties(fmt PROPERTIES LINK_FLAGS "-s WASM=1")
-    set(CMAKE_EXECUTABLE_SUFFIX ".a")
-endif()
-
 # Control fuzzing independent of the unit tests.
 if (FMT_FUZZ)
   add_subdirectory(test/fuzzing)
