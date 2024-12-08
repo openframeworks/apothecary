@@ -342,7 +342,7 @@ function copy() {
         secure $1/lib/$TYPE/$ABI/libsvgtiny.a svgtiny.pkl
 	elif [ "$TYPE" == "emscripten" ]; then
 		mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -f "build_${TYPE}_$PLATFORM/svgtiny_wasm.a" $1/lib/$TYPE/$PLATFORM/svgtiny.a        
+        cp -f "build_${TYPE}_$PLATFORM/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/svgtiny.a        
         secure $1/lib/$TYPE/$PLATFORM/svgtiny.a svgtiny.pkl
 	elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] || [ "$TYPE" == "linuxaarch64" ] || [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ] || [ "$TYPE" == "msys2" ] ; then
 		mkdir -p $1/lib/$TYPE/${ARCH}
