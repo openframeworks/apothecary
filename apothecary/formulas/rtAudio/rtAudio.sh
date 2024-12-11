@@ -16,7 +16,7 @@ FORMULA_TYPES=( "osx" "vs" "linux" "linux64" "linuxarmv6l" "linuxarmv7l" "linuxa
 
 # define the version
 VER=6.0.1
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 
 # tools for git use
@@ -33,28 +33,36 @@ function download() {
 	tar -xf ${VER}.tar.gz
 	mv rtaudio-${VER} rtaudio
 	rm ${VER}.tar.gz
+
+	rm -f ./CMakeLists.txt
+	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
 # # prepare the build environment, executed inside the lib src dir
-# function prepare() {
-# 	# nothing here
-# }
+function prepare() {
+	# nothing here
+	echo
+}
 
 # executed inside the lib src dir
 function build() {
-	DEFS="
+	DEFINES="
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include
 	    "
-
 	if [ "$TYPE" == "osx" ] ; then
 		mkdir -p "build_${TYPE}_${PLATFORM}"
 		cd "build_${TYPE}_${PLATFORM}"
 		rm -f CMakeCache.txt *.a *.o
-		cmake .. ${DEFS} \
+		DEFINES="${DEFINES} \
+				-DRTAUDIO_API_ASIO=OFF \
+				-DRTAUDIO_API_CORE=ON \
+				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+				-DHAVE_GETTIMEOFDAY=ON"
+		cmake .. ${DEFINES} \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
 				-DENABLE_BITCODE=OFF \
@@ -70,9 +78,6 @@ function build() {
 				-DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
 				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 				-DCMAKE_INSTALL_INCLUDEDIR=include \
-				-DRTAUDIO_API_ASIO=OFF \
-				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-				-DHAVE_GETTIMEOFDAY=ON \
 				-DCMAKE_INSTALL_LIBDIR=lib \
 				-DBUILD_TESTING=OFF
 		cmake --build . --config Release --target install
@@ -86,15 +91,18 @@ function build() {
 	    cd "build_${TYPE}_${PLATFORM}"
 			rm -f CMakeCache.txt *.lib *.o
 	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
-	    VS_DEFS="
-	        -DAUDIO_WINDOWS_DS=ON \
-	        -DAUDIO_WINDOWS_ASIO=ON \
-	        -DAUDIO_WINDOWS_WASAPI=ON \
-	        -DBUILD_SHARED_LIBS=OFF \
-	        -DBUILD_TESTING=OFF \
-	        -DRTAUDIO_STATIC_MSVCRT=OFF
-	        "
-	    cmake .. ${VS_DEFS} ${DEFS} \
+
+	    DEFINES="${DEFINES} \
+				-DRTAUDIO_API_DS=ON \
+				-DRTAUDIO_API_ASIO=ON \
+				-DRTAUDIO_API_WASAPI=ON \
+				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+				-DHAVE_GETTIMEOFDAY=OFF \
+				-DBUILD_TESTING=OFF \
+				-DRTAUDIO_STATIC_MSVCRT=OFF \
+				-DBUILD_SHARED_LIBS=OFF"
+
+	    cmake .. ${DEFINES} \
 	    	-UCMAKE_CXX_FLAGS \
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
 	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -109,7 +117,7 @@ function build() {
 
 	    cmake --build . --config Release --target install
 	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
-	    cmake .. ${VS_DEFS} ${DEFS}  \
+	    cmake .. ${DEFINES} \
 	    	-UCMAKE_CXX_FLAGS \
 	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
 	        -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
@@ -131,17 +139,20 @@ function build() {
 		mkdir -p build
 		cd build
 		rm -f CMakeCache.txt *.a *.o
-		cmake .. ${DEFS} \
+		DEFINES="${DEFINES} \
+				-DRTAUDIO_API_PULSE=ON \
+				-DRTAUDIO_API_ALSA=ON \
+				-DRTAUDIO_API_JACK=ON \
+				-DRTAUDIO_API_OSS=ON \
+				-DRTAUDIO_API_DS=OFF \
+				-DRTAUDIO_API_ASIO=OFF \
+				-DRTAUDIO_API_WASAPI=OFF \
+				-DBUILD_TESTING=OFF"
+
+		cmake .. ${DEFINES} \
 			-G "Unix Makefiles" \
-			-DAUDIO_WINDOWS_WASAPI=OFF \
-			-DAUDIO_WINDOWS_DS=OFF \
-			-DAUDIO_WINDOWS_ASIO=OFF \
-			-DRTAUDIO_API_OSS=ON \
-			-DRTAUDIO_API_ALSA=ON \
-			-DRTAUDIO_API_PULSE=ON \
-			-DRTAUDIO_API_JACK=ON \
-			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-			-DBUILD_TESTING=OFF
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
+
 		make
 		make install
 	
@@ -151,13 +162,18 @@ function build() {
 		mkdir -p build
 		cd build
 		rm -f CMakeCache.txt *.a *.o
-		cmake .. ${DEFS} \
+		DEFINES="${DEFINES} \
+				-DRTAUDIO_API_DS=ON \
+				-DRTAUDIO_API_ASIO=ON \
+				-DRTAUDIO_API_WASAPI=ON \
+				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+				-DHAVE_GETTIMEOFDAY=OFF \
+				-DBUILD_TESTING=OFF \
+				-DRTAUDIO_STATIC_MSVCRT=OFF \
+				-DBUILD_SHARED_LIBS=OFF"
+		cmake .. ${DEFINES} \
 			-G "Unix Makefiles" \
-			-DAUDIO_WINDOWS_WASAPI=ON \
-			-DAUDIO_WINDOWS_DS=ON \
-			-DAUDIO_WINDOWS_ASIO=ON \
-			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-			-DBUILD_TESTING=OFF
+			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
 		make
 		make install
 	fi
