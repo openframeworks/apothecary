@@ -1,4 +1,4 @@
-name: cleanup artifact caches keep latest
+name: cleanup-artifacts
 on:
   push:
     paths-ignore:
@@ -6,10 +6,10 @@ on:
   pull_request:
     paths-ignore:
       - '**/README.md'
-# on:
-#   pull_request:
-#     types:
-#       - closed
+on:
+  pull_request:
+    types:
+      - closed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

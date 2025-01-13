@@ -1,4 +1,11 @@
-name: Cleanup Caches by Branch
+name: cleanup-caches
+on:
+  push:
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
 on:
   pull_request:
     types:
@@ -27,40 +34,40 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Cleanup Caches
-        run: |
-          REPO=${{ github.repository }}
-          # Adjust branch reference if necessary
-          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
+      # - name: Cleanup Caches
+      #   run: |
+      #     REPO=${{ github.repository }}
+      #     # Adjust branch reference if necessary
+      #     BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
 
-          echo "Fetching list of cache keys for branch: $BRANCH"
-          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH --json key | jq -r '.[].key')
+      #     echo "Fetching list of cache keys for branch: $BRANCH"
+      #     cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH --json key | jq -r '.[].key')
 
-          if [ -z "$cacheKeysForPR" ]; then
-            echo "No caches found for branch: $BRANCH"
-            exit 0
-          fi
+      #     if [ -z "$cacheKeysForPR" ]; then
+      #       echo "No caches found for branch: $BRANCH"
+      #       exit 0
+      #     fi
 
-          echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR; do
-            echo "Deleting cache: $cacheKey"
-            gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-          done
-          echo "Cleanup completed."
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     echo "Deleting caches..."
+      #     for cacheKey in $cacheKeysForPR; do
+      #       echo "Deleting cache: $cacheKey"
+      #       gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+      #     done
+      #     echo "Cleanup completed."
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify Remaining Caches
-        run: |
-          echo "Checking for remaining caches in branch: $BRANCH"
-          remainingCaches=$(gh actions-cache list -R ${{ github.repository }} -B $BRANCH --json key | jq -r '.[].key')
+      # - name: Verify Remaining Caches
+      #   run: |
+      #     echo "Checking for remaining caches in branch: $BRANCH"
+      #     remainingCaches=$(gh actions-cache list -R ${{ github.repository }} -B $BRANCH --json key | jq -r '.[].key')
 
-          if [ -z "$remainingCaches" ]; then
-            echo "All caches successfully cleared."
-          else
-            echo "Remaining caches detected:"
-            echo "$remainingCaches"
-            exit 0
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     if [ -z "$remainingCaches" ]; then
+      #       echo "All caches successfully cleared."
+      #     else
+      #       echo "Remaining caches detected:"
+      #       echo "$remainingCaches"
+      #       exit 0
+      #     fi
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
