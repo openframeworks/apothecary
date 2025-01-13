@@ -16,7 +16,7 @@ env:
   TARGET: "emscripten"
   EMSDK_VERSION: "3.1.74"
   USE_ARTIFACT: true
-  DISABLE_WORKFLOW: "true"
+  DISABLE_WORKFLOW: "false"
 
 jobs:  
   pre-check:
