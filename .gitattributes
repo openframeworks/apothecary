@@ -14,6 +14,14 @@
 
 # Files with LF line endings for Unix-like systems
 *.sh text eol=lf
+apothecary/apothecary text eol=lf
+*.jam text eol=lf
+*.pkl text eol=lf
+*.pc text eol=lf
+*.patch text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+Makefile text eol=lf
 
 # Binary files (no EOL normalization)
 *.png binary
