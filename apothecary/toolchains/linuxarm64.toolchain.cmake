@@ -19,7 +19,7 @@ if(NOT DEFINED SYSROOT)
     if(DEFINED ENV{SYSROOT})
         set(SYSROOT $ENV{SYSROOT})
     else()
-        set(SYSROOT "/")
+        set(SYSROOT "")
     endif()
 endif()
 
@@ -27,7 +27,7 @@ if(NOT DEFINED TOOLCHAIN_ROOT)
     if(DEFINED ENV{TOOLCHAIN_ROOT})
         set(TOOLCHAIN_ROOT $ENV{TOOLCHAIN_ROOT})
     else()
-        set(TOOLCHAIN_ROOT "/" )
+        set(TOOLCHAIN_ROOT "" )
     endif()
 endif()
 
@@ -66,7 +66,7 @@ set(CMAKE_C_COMPILER "${GCC_PATH}/aarch64-linux-gnu-gcc")
 set(CMAKE_CXX_COMPILER "${GCC_PATH}/aarch64-linux-gnu-g++")
 
 # Paths to system libraries and includes
-set(CMAKE_SYSROOT "/")
+set(CMAKE_SYSROOT "")
 set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
@@ -94,12 +94,10 @@ if(NOT EXISTS ${CMAKE_CXX_COMPILER})
     message(WARNING "C++ Compiler not found: ${CMAKE_CXX_COMPILER}")
 endif()
 
-set(EXTRA_LINKS "-Wl,
-    -L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu \
+set(EXTRA_LINKS "-L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu \
     -Wl,-rpath-link,${CMAKE_SYSROOT}/lib/aarch64-linux-gnu")
 
-set(CFLAGS "--sysroot=${SYSROOT} \
-    -I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include \
+set(CFLAGS "-I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include \
     -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include \
     -DSTANDALONE -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
@@ -108,6 +106,7 @@ set(CFLAGS "--sysroot=${SYSROOT} \
 # Compiler and linker flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -march=armv8-a ${EXTRA_LINKS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c++${CPP_STANDARD} -march=armv8-a ${EXTRA_LINKS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+simd+crypto")
 set(CMAKE_EXE_LINKER_FLAGS "-fPIE -pie ${EXTRA_LINKS}")
 set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC")
 
