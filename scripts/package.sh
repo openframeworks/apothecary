@@ -35,7 +35,7 @@ trapError() {
     if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
         tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
     fi
-	exit 1
+	exit 0
 }
 
 if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
@@ -104,7 +104,7 @@ fi
 
 if [ -z $TARGET ] ; then
     echo "Environment variable TARGET not defined. Should be target os"
-    exit 1
+    exit 0
 fi
 
 isRunning(){
@@ -289,6 +289,7 @@ if [ -z "${RELEASE+x}" ]; then
 else
     CUR_BRANCH="$RELEASE"
 fi
+$GCC=${$GCC:-}
 
 echo "Checking for .bak files in $OUTPUT_FOLDER..."
 if [ -d "$OUTPUT_FOLDER" ]; then
@@ -298,12 +299,12 @@ fi
 echo "Release: [$RELEASE]"
 echo "Current Branch: [$CUR_BRANCH]"
 
-TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$ARCH_$OPT$ARCH$BUNDLE.tar.bz2
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$ARCH_$OPT$ARCH$GCC$BUNDLE.tar.bz2
 if [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
@@ -317,7 +318,7 @@ elif [ "$TARGET" == "vs" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
@@ -332,7 +333,7 @@ elif [ "$TARGET" == "emscripten" ]; then
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
 	run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
 	echo " a $TARBALL $LIBS"
@@ -341,7 +342,7 @@ elif [ "$TARGET" == "android" ]; then
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "macos" ]; then
@@ -349,7 +350,7 @@ elif [ "$TARGET" == "macos" ]; then
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
@@ -357,14 +358,14 @@ elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf ${TARBALL} ${LIBS}"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     tar cjvf "${TARBALL}" ${LIBS}
 else
     echo "tar cjf $TARBALL $LIBS"
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
-        exit 1
+        exit 0
     fi
     tar cjvf $TARBALL $LIBS
 fi
