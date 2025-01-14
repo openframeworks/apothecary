@@ -302,7 +302,7 @@ echo "Current Branch: [$CUR_BRANCH]"
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$GCC" ] && echo "_${GCC}").tar.bz2
-else if [ "$TARGET" == "msys2" ]; then
+elif [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
