@@ -42,6 +42,8 @@ jobs:
     strategy:
       matrix:
         ARCH: [32, 64]
+    env:
+      ARCH: ${{matrix.cfg.ARCH}}
     steps:
       - uses: actions/checkout@v4.2.2
       - name: Docker Step
@@ -70,14 +72,10 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-
-            // Ensure the output directory exists
             const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
             if (!fs.existsSync(outputDir)){
               fs.mkdirSync(outputDir);
             }
-
-            // List all artifacts for the repository
             const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: 'openframeworks',
               repo: 'apothecary',
@@ -85,15 +83,12 @@ jobs:
               direction: 'desc',
               per_page: 150
             });
-
             const target = process.env.TARGET;
             const release = process.env.RELEASE;
             const arch = process.env.ARCH;
             const artifactName = `libs-${release}-${target}-${arch}`;
-
             let count = 0;
             const max = 1;
-
             for (const artifact of artifacts.data.artifacts) {
               const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}-${arch}`) && !artifact.expired;
               if (isArtifactMatch) {
@@ -103,7 +98,6 @@ jobs:
                   artifact_id: artifact.id,
                   archive_format: 'zip',
                 });
-
                 const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
@@ -161,14 +155,13 @@ jobs:
           ARCH: ${{ matrix.ARCH }}
     
       - name: Package Binaries for Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           ARCH_SUFFIX=""
           if [[ "${{ matrix.ARCH }}" == "64" ]]; then
-            ARCH_SUFFIX="_memory64"
+            ARCH_SUFFIX="_64"
           fi
-
           FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
           scripts/artifact/artifact.sh
@@ -176,7 +169,7 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
 
       - name: Upload Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: actions/upload-artifact@v4
         with:
           name: libs-${{ env.RELEASE }}-emscripten-${{ matrix.ARCH }}
@@ -197,7 +190,7 @@ jobs:
         run: |
           ARCH_SUFFIX=""
           if [[ "${{ matrix.ARCH }}" == "64" ]]; then
-            ARCH_SUFFIX="_memory64"
+            ARCH_SUFFIX="_64"
           fi
           FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
