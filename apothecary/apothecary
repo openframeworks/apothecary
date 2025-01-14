@@ -2610,28 +2610,19 @@ BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 # set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
 
+    export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-"27"}"
+    export NDK_VERSION="${NDK_VERSION:-"27.2.12479018"}"
+    export ANDROID_API="${ANDROID_API:-"34"}"
+    export ANDROID_PLATFORM="${ANDROID_PLATFORM:-"android-${ANDROID_API}"}"
+    export ANDROID_NDK_ROOT="${ANDROID_NDK_ROOT:-"/usr/local/lib/android/sdk/ndk/${NDK_VERSION}"}"
+    export NDK_ROOT="${ANDROID_NDK_ROOT}"
+    export FLAG_RELEASE="-O3"
+    
     if [ -z "${NDK_ROOT+x}" ]; then
         NDK_ROOT=NDK_ROOT=/Users/one/Library/Android/sdk/ndk/25.2.9519653
         echoError " NDK_ROOT not defined! This is ussually /Users/{username}/Library/Android/sdk/ndk on macOS"
         exit 1
     fi
-	# if [[ -e ${APOTHECARY_DIR}/paths.make ]] ; then
-	# 	source ${APOTHECARY_DIR}/paths.make
-	# 	ANDROID_NDK_ROOT=${NDK_ROOT}
-	# 	echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	# elif [[ -e ${OF_ROOT}/libs/openFrameworksCompiled/project/android/paths.make ]] ; then
-	# 	source $OF_ROOT/libs/openFrameworksCompiled/project/android/paths.make
-	# 	ANDROID_NDK_ROOT=${NDK_ROOT}
-	# 	echoVerbose "Android NDK root: $ANDROID_NDK_ROOT"
-	# elif [[ -e ${NDK_ROOT} ]]; then
-	# 	ANDROID_NDK_ROOT=${NDK_ROOT}
-	# else
-	# 	echoError "Targeting android, but can't find the SDK. Missing"
-	# 	echoError "paths.make in apothecary folder or"
-	# 	echoError "projects/android/paths.make in OF folder"
-	# 	exit 1
-	# fi
-
 	if [ "$ARCH" == "armv7" ]; then
 	    ABI=armeabi-v7a
 	elif [ "$ARCH" == "x86" ]; then

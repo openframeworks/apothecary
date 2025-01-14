@@ -105,8 +105,8 @@ function build() {
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
-		export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -std=${CPP_STANDARD}"
-		export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -std=${C_STANDARD}"
+		export CFLAGS="$CFLAGS $FLAGS_RELEASE -DNDEBUG -std=${CPP_STANDARD}"
+		export CXXFLAGS="$CFLAGS $FLAGS_RELEASE -DNDEBUG -std=${C_STANDARD}"
 
 		cmake .. ${DEFS} \
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
