@@ -259,7 +259,7 @@ function build() {
             -DCMAKE_CXX_COMPILER_AR=${AR} \
             -DCMAKE_C_COMPILER_AR=${AR} \
             -DAI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT=OFF \
-            -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
+            -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC" \
             -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
             -DCMAKE_EXE_LINKER_FLAGS=" -Wl,--hash-style=both" \
             -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--hash-style=both" \

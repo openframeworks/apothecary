@@ -91,7 +91,7 @@ function build() {
 		CFLAGS=""
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
-        export CPPFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
+        export CPPFLAGS="-fvisibility-inlines-hidden"
         export CXXFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
         export CMAKE_LDFLAGS="$LDFLAGS"
        	export LDFLAGS=""

@@ -111,7 +111,7 @@ function build() {
 				-DCMAKE_INCLUDE_PATH="$LIBBROTLI_INCLUDE_DIR;$LIBPNG_INCLUDE_DIR;$ZLIB_INCLUDE_DIR" \
 				-DCMAKE_LIBRARY_PATH="$LIBBROTLI_DEC_LIB:${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
 				-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${LIBPNG_INCLUDE_DIR} -I${LIBBROTLI_INCLUDE_DIR}" \
-				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${LIBPNG_INCLUDE_DIR} -I${LIBBROTLI_INCLUDE_DIR}" \
+				-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC -fvisibility=hidden -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${LIBPNG_INCLUDE_DIR} -I${LIBBROTLI_INCLUDE_DIR}" \
 				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
 				-DPLATFORM=$PLATFORM \
 				-DCMAKE_BUILD_TYPE=Release \
@@ -273,7 +273,7 @@ function build() {
         	-D FT_DISABLE_HARFBUZZ=ON \
         	-D FT_DISABLE_PNG=OFF \
             -D FT_REQUIRE_PNG=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
@@ -299,7 +299,7 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
     		-DGCC_VERSION=${GCC_VERSION} \
 	        -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF \
