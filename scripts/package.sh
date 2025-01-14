@@ -299,8 +299,10 @@ fi
 echo "Release: [$RELEASE]"
 echo "Current Branch: [$CUR_BRANCH]"
 
-TARBALL=openFrameworksLibs_${CUR_BRANCH}_$TARGET$ARCH_$OPT$ARCH$GCC$BUNDLE.tar.bz2
-if [ "$TARGET" == "msys2" ]; then
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
+if [ "$TARGET" == "linux" ]; then
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$GCC" ] && echo "_${GCC}").tar.bz2
+else if [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
@@ -315,7 +317,7 @@ elif [ "$TARGET" == "vs" ]; then
             TARGET="${TARGET}_2019"
         fi
     fi
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
@@ -324,7 +326,7 @@ elif [ "$TARGET" == "vs" ]; then
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
 	if [ "$ARCH" == "64" ]; then
-			POSTFIX="_memory64"
+			POSTFIX="_64"
 	else
 			POSTFIX=""
 	fi
@@ -346,7 +348,7 @@ elif [ "$TARGET" == "android" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "macos" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").tar.bz2
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
@@ -354,7 +356,7 @@ elif [ "$TARGET" == "macos" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").tar.bz2
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf ${TARBALL} ${LIBS}"
     if [ "${EXIT_BEFORE}" == "1" ]; then
