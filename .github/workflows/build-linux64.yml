@@ -104,4 +104,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ env.RELEASE }}
         draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
+        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
