@@ -85,7 +85,7 @@ jobs:
       env:
         BUNDLE: ${{ matrix.bundle }}
     - name: Package
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
@@ -93,6 +93,9 @@ jobs:
 
     - name: List output directory
       run: ls -lah out/
+
+    - name: List output main directory
+      run: ls -lah 
       
     - name: Update Release 64
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
