@@ -970,13 +970,6 @@ if [ "$PARALLEL_MAKE" -eq 1 ]; then
     fi
 fi
 
-# Check if PLATFORM is not set or is empty
-if [ -z "${PLATFORM+x}" ]; then
-  PLATFORM="Unknown Platform"
-  echoWarning " PLATFORM missing report'."
-fi
-
-
 # get command
 if [ $# -gt 0 ] ; then
 	A_CMD=$1
@@ -2431,7 +2424,7 @@ function apothecaryDepend() {
     fi
 
     if [ -z "$1" ] || [ -z "$2" ]; then
-        echo "Error: Missing arguments. Usage: apothecaryDepend <command> <dependency>"
+        echoWarning "Error: Missing arguments. Usage: apothecaryDepend <command> <dependency>"
         return 1
     fi
 
@@ -2570,27 +2563,20 @@ if [ $typeIsValid == 0 ] ; then
 	echoError " Invalid build type: \"$TYPE\""
 	exit 1
 fi
-echoVerbose "Build type: $TYPE"
-
-# check if we have a valid arch
-# if [ $ARCH != 32 -a $ARCH != 64 $ARCH != ARM64 -a $ARCH != armv7 -a $ARCH != x86 -a $ARCH != arm64 -a $ARCH != x86_64 ] ; then
-# 	echoError " Invalid architecture: $ARCH"
-# 	exit 1
-# fi
+echoWarning "Build type: [$TYPE]"
 echoVerbose "Architecture: $ARCH"
 echoVerbose "Build dir: $BUILD_DIR"
 
-# use default libs dir?
 mkdir -p $REL_LIBS_DIR
 if [ -z "${CUSTOM_LIBS_DIR+x}" ] ; then
 	export LIBS_DIR=$REL_LIBS_DIR
     export REAL_LIBS_DIR=$REL_LIBS_DIR
     export IS_CUSTOM_LIBS_DIR=0
     echoVerbose "CUSTOM_LIBS_DIR is empty: $LIBS_DIR REL_LIBS_DIR:$REL_LIBS_DIR"
-else # manually set
+else 
 	case $CUSTOM_LIBS_DIR in
-		/*) export LIBS_DIR=$CUSTOM_LIBS_DIR ;; # absolute path
-	 	*) export LIBS_DIR=$WD/$CUSTOM_LIBS_DIR ;; # relative path
+		/*) export LIBS_DIR=$CUSTOM_LIBS_DIR ;;
+	 	*) export LIBS_DIR=$WD/$CUSTOM_LIBS_DIR ;;
 	esac
     export REAL_LIBS_DIR=$REL_LIBS_DIR
     export REAL_LIBS_DIR=$REL_LIBS_DIR
@@ -2607,7 +2593,6 @@ fi
 DEPENDS_FORMULA_DIR=$FORMULAS_DIR/$DEPENDS_SUBDIR
 BUILD_ROOT_DIR=$BUILD_DIR/$BUILDROOT_SUBDIR
 
-# set for android sdk info
 if [[ "$TYPE" == "android" ]] ; then
 
     export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-"27"}"
@@ -2659,7 +2644,7 @@ if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         export MIN_SDK_VER=${WATCHOS_MIN_SDK_VER}
     else
         export MIN_SDK_VER=${IOS_MIN_SDK_VER}
-        echo "MIN_SDK not set for $TYPE"
+        echoWarning "MIN_SDK not set for $TYPE"
     fi
 fi
 
@@ -2685,7 +2670,7 @@ if [ "$TYPE" == "linux" ]; then
         export PLATFORM="jetson"
         export ABI="aarch64"
     else
-        echo "Unsupported architecture for Linux: $ARCH"
+        echoWarning "Unsupported architecture for Linux: $ARCH"
         exit 1
     fi
         
@@ -2693,7 +2678,7 @@ if [ "$TYPE" == "linux" ]; then
         export GCC_VERSION=${BASH_REMATCH[1]}
         echo "Extracted GCC_VERSION: $GCC_VERSION"
     else
-        echo "Error: Unable to extract GCC version from variable '$GCC'"
+        echoWarning "Error: Unable to extract GCC version from variable '$GCC'"
         export GCC_VERSION=14
     fi
 
@@ -2724,7 +2709,7 @@ if [ "$TYPE" == "linux" ]; then
         if [[ -z ${SYSROOT+z} ]]; then
             echoError "Trying to cross compile but SYSROOT environment variable is not set"
             echoError "Should be set to root of target OS image"
-            export SYSROOT="/"
+            export SYSROOT=""
         fi        
     else
         if [[ -z ${TOOLCHAIN_ROOT+z} ]];  then
@@ -2734,7 +2719,7 @@ if [ "$TYPE" == "linux" ]; then
             export TOOLCHAIN_PREFIX=""
         fi
         if [[ -z ${SYSROOT+z} ]];  then
-            export SYSROOT="/"
+            export SYSROOT=""
         fi
     fi
 fi
