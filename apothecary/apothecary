@@ -862,7 +862,7 @@ if [ "$TYPE" = "emscripten" ]; then
         fi
     fi
 
-    export FLAG_RELEASE+="-O3 -DUSE_PTHREADS=1 -pthread -matomics -mbulk-memory -fPIC ${PLATFORM_FLAG} -fvisibility=hidden -Wno-implicit-function-declaration -frtti -DWASM=ON -DNDEBUG"
+    export FLAG_RELEASE+="-O3 -pthread -matomics -mbulk-memory -fPIC ${PLATFORM_FLAG} -fvisibility=hidden -Wno-implicit-function-declaration -frtti -DWASM=ON -DNDEBUG"
 	export LINK_FLAGS="-s WASM=2 -pthread -matomics -mbulk-memory -sMODULARIZE=1 -s ALLOW_MEMORY_GROWTH=1 -s MAIN_MODULE=0 -sLINKABLE=1 -s ASSERTIONS=1 -s EXPORT_ALL=1 --no-entry -s DYNAMIC_EXECUTION=0 -s NO_DYNAMIC_EXECUTION=1 -s EMBIND_AOT=1"
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
 	. "$EMSCRIPTEN_SCRIPT"
