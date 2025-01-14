@@ -31,7 +31,7 @@ jobs:
         else
           echo "::set-output name=disabled::false"
         fi
-  build-macos-platforms:
+  build-android-platforms:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
     needs: pre-check
     runs-on: ubuntu-latest
