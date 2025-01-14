@@ -289,7 +289,7 @@ if [ -z "${RELEASE+x}" ]; then
 else
     CUR_BRANCH="$RELEASE"
 fi
-$GCC=${$GCC:-}
+GCC=${GCC:-}
 
 echo "Checking for .bak files in $OUTPUT_FOLDER..."
 if [ -d "$OUTPUT_FOLDER" ]; then
