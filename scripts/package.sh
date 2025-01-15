@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-set -e
-set -x
+# set -e
+# set -x
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 LOCAL_ROOT=$ROOT
