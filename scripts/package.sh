@@ -20,6 +20,7 @@ if [ -z "$2" ]; then
 else
     BUNDLE=$2
 fi
+ARCH=${ARCH:-64}
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
@@ -98,6 +99,8 @@ echo "   from [$OUTPUT_FOLDER]"
 echo "Release: [$RELEASE]"
 echo "TARGET: [$TARGET]"
 echo "Current Branch: [$CUR_BRANCH]"
+echo "Current ARCH: [$ARCH]"
+
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
