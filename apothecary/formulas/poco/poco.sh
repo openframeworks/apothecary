@@ -7,11 +7,11 @@
 # uses an autotools build system,
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
-FORMULA_TYPES=( "osx" "vs"  )
+FORMULA_TYPES=( "osx" "vs" "linux" )
 FORMULA_DEPENDS=( "openssl" )
 
 # define the version
-VER=1.12.5p2-release
+VER=1.14.0
 BUILD_ID=1
 DEFINES=""
 
@@ -89,6 +89,16 @@ function prepare() {
 
 
     elif [ "$TYPE" == "vs" ] ; then
+      
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib  
+
+        apothecaryDepend prepare openssl
+        apothecaryDepend build openssl
+        apothecaryDepend copy openssl  
+
+    elif [ "$TYPE" == "linux" ] ; then
       
         apothecaryDepend prepare zlib
         apothecaryDepend build zlib
@@ -237,11 +247,57 @@ function build() {
         cmake -G 'Unix Makefiles' -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" $BUILD_OPTS -DANDROID_ABI=$ABI -DCMAKE_C_FLAGS_RELEASE="-g0 -O3" -DCMAKE_CXX_FLAGS_RELEASE="-g0 -O3" -DCMAKE_BUILD_TYPE=RELEASE $OPENSSL_OPTS ..
         make -j${PARALLEL_MAKE} VERBOSE=1
 
-    elif [ "$TYPE" == "linux" ] || [ "$TYPE" == "linux64" ] ; then
-        ./configure $BUILD_OPTS
-        make -j${PARALLEL_MAKE}
-        # delete debug builds
-        rm -f lib/Linux/$(uname -m)/*d.a
+    elif [ "$TYPE" == "linux" ]; then
+
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+        fi
+        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+        cmake .. ${DEFS} \
+            ${BUILD_OPTS} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCURL_USE_OPENSSL=ON \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DOPENSSL_USE_STATIC_LIBS=YES 
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+        # ./configure $BUILD_OPTS
+        # make -j${PARALLEL_MAKE}
+        # # delete debug builds
+        # rm -f lib/Linux/$(uname -m)/*d.a
     elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh

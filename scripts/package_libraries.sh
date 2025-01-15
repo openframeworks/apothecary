@@ -10,7 +10,15 @@ ROOT=$(cd $(dirname "$0"); pwd -P)/..
 LOCAL_ROOT=$ROOT
 APOTHECARY_PATH=$ROOT/apothecary
 
-OUTPUT_FOLDER=${OUTPUT_FOLDER:-"${APOTHECARY_PATH}/out"}
+if [ -z "${OUTPUT_FOLDER+x}" ]; then
+    export OUTPUT_FOLDER="$ROOT/out"
+fi
+if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    export OUTPUT_FOLDER="$ROOT/xout"
+fi
+if [[ "$TARGET" =~ ^(macos)$ ]]; then
+    export OUTPUT_FOLDER="$ROOT/xout_${BUNDLE}"
+fi
 
 if [ -z "$TARGET" ]; then
     echo "Error: TARGET not specified. Usage: $0 <target> <arch> [opt]"
