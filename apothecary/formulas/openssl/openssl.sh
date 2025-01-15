@@ -13,14 +13,13 @@ SHA1=5c2f33c3f3601676f225109231142cdc30d44127
 SHA256=e15dda82fe2fe8139dc2ac21a36d4ca01d5313c75f99f46c4e8a27709b7294bf
 
 BUILD_ID=1
-DEFINES=""
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
 MIRROR=https://www.openssl.org
 GIT_URL=https://github.com/danoli3/openssl-cmake
 
-DEFS=" -DOPENSSL_NO_DEPRECATED=ON \
+DEFINES=" -DOPENSSL_NO_DEPRECATED=ON \
 	-DOPENSSL_NO_COMP=ON \
 	-DOPENSSL_NO_EC_NISTP_64_GCC_128=ON \
 	-DOPENSSL_NO_ENGINE=ON \
@@ -145,7 +144,7 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
-            ${DEFS} \
+            ${DEFINES} \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include \
 	        -DCMAKE_IGNORE_PATH=/opt/homebrew \
 	        -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
@@ -174,7 +173,9 @@ function build() {
 	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
 	    if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
-			DEFS="$DEFS -DOPENSSL_ASM=OFF"
+			DEFS="-DOPENSSL_ASM=OFF"
+		else
+			DEFS="-DOPENSSL_ASM=ON"
 	    fi
 
         mkdir -p "build_${TYPE}_${ARCH}"
@@ -193,6 +194,7 @@ function build() {
      
         cmake .. ${DEFS} \
 			${CUSTOM_DEFS} \
+			${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
