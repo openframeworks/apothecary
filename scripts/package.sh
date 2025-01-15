@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-set -o pipefail
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 LOCAL_ROOT=$ROOT
@@ -12,7 +11,9 @@ else
     export FORCE=""
 fi
 if [ -z "$1" ]; then
-   echo " TARGET: $1"
+   echo " no TARGET: $1"
+   TARGET=${TARGET:-$1}
+   exit 1
 else
     TARGET=$1
 fi
@@ -70,7 +71,6 @@ else
 	fi
 fi
 
-echo "Compressing libraries from $OUTPUT_FOLDER"
 cd $OUTPUT_FOLDER;
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
@@ -86,13 +86,19 @@ else
 fi
 GCC=${GCC:-}
 
-echo "Compressing Libraries : [$LIBS ] ..."
 echo "Checking for .bak files in $OUTPUT_FOLDER..."
 if [ -d "$OUTPUT_FOLDER" ]; then
     find "$OUTPUT_FOLDER" -type f -name "*.bak" -exec rm -v {} \;
 fi
+if [ -z "$LIBS" ]; then
+    echo "Error: LIBS is empty. Nothing to package."
+    exit 1
+fi
+echo "Compressing Libraries : [$LIBS ] ... to "
+echo "   from [$OUTPUT_FOLDER]"
 
 echo "Release: [$RELEASE]"
+echo "TARGET: [$TARGET]"
 echo "Current Branch: [$CUR_BRANCH]"
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
@@ -102,7 +108,7 @@ if [ "$TARGET" == "linux" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    tar -cjvf "$TARBALL" $LIBS
+    tar -cjvf "$TARBALL $LIBS"
     if [ $? -eq 0 ]; then
         echo "Successfully created tarball: $TARBALL"
     else
