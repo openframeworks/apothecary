@@ -87,7 +87,7 @@ jobs:
 
     - name: Build Poco
       shell: bash
-      run: ./apothecary/apothecary -tvs -a${{ env.ARCH }} update poco
+      run: ./apothecary/apothecary -tlinux -a${{ env.ARCH }} update poco
 
     - name: Package
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')

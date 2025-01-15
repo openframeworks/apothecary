@@ -161,7 +161,7 @@ jobs:
         run: ls -lah out/
 
       - name: Build Poco
-        run: ./apothecary/apothecary -tvs -a${{ env.ARCH }} update poco
+        run: ./apothecary/apothecary -tosx -a${{ env.ARCH }} update poco
 
       - name: Package Binaries for Artifact
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
