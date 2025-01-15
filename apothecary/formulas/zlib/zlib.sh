@@ -217,8 +217,8 @@ function build() {
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DBUILD_SHARED_LIBS=OFF"
 	    cmake .. ${DEFINES} \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
+	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
     		-DGCC_VERSION=${GCC_VERSION} \
