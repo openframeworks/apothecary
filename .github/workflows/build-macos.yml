@@ -160,8 +160,8 @@ jobs:
       - name: List output directory2
         run: ls -lah out/
 
-      - name: Build Poco
-        run: ./apothecary/apothecary -tosx -a${{ env.ARCH }} update poco
+      # - name: Build Poco
+      #   run: ./apothecary/apothecary -tosx -ax86_64 update poco
 
       - name: Package Binaries for Artifact
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
