@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 ROOT=$(cd $(dirname "$0"); pwd -P)/..
 LOCAL_ROOT=$ROOT
@@ -42,7 +43,7 @@ if [ -z "$FORMULAS" ]; then
 fi
 
 CUR_BRANCH="master";
-EXIT_BEFORE=0;
+EXIT_BEFORE=0
 
 if [ -n "${ALWAYS_BUILD+x}" ]; then
     echo "ALWAYS_BUILD is set - proceeding with build regardless of branch/tag"
@@ -62,7 +63,6 @@ else
 	        CUR_BRANCH="latest"
 	        RELEASE="latest"
 	    fi
-
 	else
 	    echo "This is a PR or not on master/bleeding branch; exiting build before compressing."
 	    # Exit early if this is a PR or a branch we don't want to build
