@@ -291,6 +291,7 @@ else
 fi
 GCC=${GCC:-}
 
+echo "Compressing Libraries : [$LIBS ] ..."
 echo "Checking for .bak files in $OUTPUT_FOLDER..."
 if [ -d "$OUTPUT_FOLDER" ]; then
     find "$OUTPUT_FOLDER" -type f -name "*.bak" -exec rm -v {} \;
@@ -303,7 +304,7 @@ TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$GCC" ] && echo "_${GCC}").tar.bz2
 elif [ "$TARGET" == "msys2" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM,,}.zip
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$MSYSTEM" ] && echo "_${MSYSTEM}").zip
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
@@ -374,3 +375,6 @@ fi
 
 echo "Packaged libs to upload $TARBALL"
 echo "done "
+cd ../
+
+find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec ls -lh {} \;

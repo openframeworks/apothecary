@@ -38,13 +38,10 @@ format_scripts() {
         return 1
     fi
 
-    echo "Formatting shell scripts in [$directory]..."
-
-    # Find and format all .sh files recursively within the directory
-    # find "$directory" -type f -name "*.sh" -exec {} \;
-
-    # echo "Listing all .sh files without 755 permissions in $directory:"
+    echo "Formatting shell scripts in [$directory]... listing all with 755"
 	find "$directory" -type f -name "*.sh" ! -perm 755 -exec ls -l {} \;
+    echo "Listing shell scripts in [$directory] without +x ..."
+    find "$directory" -type f -name "*.sh" ! -perm /a+x -exec ls -l {} \;
 
     sh_files=$(find "$directory" -type f -name "*.sh")
     if [ -z "$sh_files" ]; then
@@ -59,10 +56,14 @@ format_scripts() {
     for file in $sh_files; do
         echo " Processing: [$file]"
 
-        # shfmt -i 4 -ci -w "$file"
+        # Format TAB to spaces
+        expand -t 4 "$file" | shfmt -i 4 -ci -w - > "$file"
+
+        # Format Spaces to TAB
+        unexpand -t 4 "$file" | shfmt -i 4 -ci -w - > "$file"
 
         # Fix line endings with dos2unix
-        # dos2unix "$file" && echo "Converted to Unix line endings: [$file]"
+        dos2unix "$file" && echo "Converted to Unix line endings: [$file]"
 
         # Set permissions to 755
         chmod +x "$file" && echo "Set permissions to +x: [$file]"

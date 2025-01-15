@@ -159,7 +159,7 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           ARCH_SUFFIX=""
-          if [[ "${{ matrix.ARCH }}" == "64" ]]; then
+          if [[ "${{ env.ARCH }}" == "64" ]]; then
             ARCH_SUFFIX="_64"
           fi
           FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
@@ -172,7 +172,7 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: actions/upload-artifact@v4
         with:
-          name: libs-${{ env.RELEASE }}-emscripten-${{ matrix.ARCH }}
+          name: libs-${{ env.RELEASE }}-emscripten-${{ env.ARCH }}
           path: out/${{ env.FILENAME }}
           retention-days: 31
 
@@ -189,7 +189,7 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           ARCH_SUFFIX=""
-          if [[ "${{ matrix.ARCH }}" == "64" ]]; then
+          if [[ "${{ env.ARCH }}" == "64" ]]; then
             ARCH_SUFFIX="_64"
           fi
           FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
@@ -197,10 +197,12 @@ jobs:
           scripts/package.sh
         env:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-          ARCH: ${{ matrix.ARCH }}
 
       - name: List output directory final
         run: ls -lah out/
+
+      - name: List packaged file
+        run: find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec ls -lh {} \;
 
       - name: Update Release emscripten
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
