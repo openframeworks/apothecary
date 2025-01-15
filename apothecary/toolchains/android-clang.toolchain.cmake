@@ -47,8 +47,8 @@ if(ANDROID_ABI STREQUAL "armeabi-v7a")
     set(CMAKE_ANDROID_ARM_MODE ON)
     set(CMAKE_ANDROID_ARM_NEON ON)
     set(CMAKE_SYSTEM_PROCESSOR "arm")
-    set(CMAKE_C_FLAGS "-mcpu=cortex-a7 -mfpu=neon -mfloat-abi=hard")
-    set(CMAKE_CXX_FLAGS "-mcpu=cortex-a7 -mfpu=neon -mfloat-abi=hard")
+    set(CMAKE_C_FLAGS "-mfpu=neon -mfloat-abi=hard")
+    set(CMAKE_CXX_FLAGS "-mfpu=neon -mfloat-abi=hard")
 elseif(ANDROID_ABI STREQUAL "arm64-v8a")
     set(MACHINE "arm64")
     set(ANDROID_PREFIX "aarch64-linux-android")
@@ -86,6 +86,19 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # Include and library paths
 set(CMAKE_INCLUDE_PATH "${SYSROOT}/usr/include")
 set(CMAKE_LIBRARY_PATH "${SYSROOT}/usr/lib/${ANDROID_PREFIX}/${CMAKE_ANDROID_API}")
+
+# Compiler Binary
+set(BIN_PREFIX "${TOOLCHAIN_ROOT}/bin/")
+
+find_program(CMAKE_C_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-gcc PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_CXX_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-g++ PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_LINKER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ld PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_AR ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_NM ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-nm PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_RANLIB ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ranlib PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_STRIP ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-strip PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_OBJCOPY ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-objcopy PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_OBJDUMP ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
 
 # Toolchain Debug Output
 message(STATUS "NDK Root: ${NDK_ROOT}")
