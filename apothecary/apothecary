@@ -867,7 +867,7 @@ if [ "$TYPE" = "ios" ]; then
     else
         echoVerbose "iOS SDK version: $IOS_LATEST_SDK"
     fi
-    export FLAG_RELEASE="-Os"
+    export FLAG_RELEASE="-Os -fvisibility=hidden"
     if [ $ARCH == "armv7" ] ; then
         export PLATFORM="OS"
     elif [ $ARCH == "x86_64" ] || [ $ARCH == 64 ]; then
@@ -886,7 +886,7 @@ if [ "$TYPE" = "tvos" ]; then
     else
         echoVerbose "tvOS SDK version: $TVOS_LATEST_SDK"
     fi
-    export FLAG_RELEASE="-Os"
+    export FLAG_RELEASE="-Os -fvisibility=hidden"
     if [ $ARCH == "x86_64" ] || [ $ARCH == 64 ]; then
         export PLATFORM="SIMULATOR_TVOS"
     elif [ $ARCH == "arm64" ] ; then
@@ -897,7 +897,7 @@ if [ "$TYPE" = "tvos" ]; then
 fi
 
 if [ "$TYPE" = "watchos" ]; then
-    export FLAG_RELEASE="-Os"
+    export FLAG_RELEASE="-Os -fvisibility=hidden"
     if [ $ARCH == "arm64_32" ] || [ $ARCH == "arm64" ]; then
         export PLATFORM="WATCHOS"
     elif [ $ARCH == "x86_64" ] ; then
@@ -910,7 +910,7 @@ if [ "$TYPE" = "watchos" ]; then
 fi
 
 if [ "$TYPE" = "xros" ]; then
-    export FLAG_RELEASE="-O3"
+    export FLAG_RELEASE="-O3 -fvisibility=hidden"
     if [ $ARCH == "arm64" ] ; then
         export PLATFORM="VISIONOS"
     elif [ $ARCH == "x86_64" ] || [ $ARCH == 64 ]; then
@@ -921,7 +921,7 @@ if [ "$TYPE" = "xros" ]; then
 fi
 
 if [ "$TYPE" = "catos" ]; then
-    export FLAG_RELEASE="-Os"
+    export FLAG_RELEASE="-Os -fvisibility=hidden"
     if [ $ARCH == "arm64" ]; then
         export PLATFORM="MAC_CATALYST_ARM64"
     elif [ $ARCH == "x86_64" ] || [ $ARCH == 64 ]; then
@@ -930,7 +930,7 @@ if [ "$TYPE" = "catos" ]; then
 fi
 
 if [ "$TYPE" = "osx" ]; then
-    export FLAG_RELEASE="-O3"
+    export FLAG_RELEASE="-O3 -fvisibility=hidden"
     if [ $ARCH == "x86_64" ] || [ $ARCH == 64 ] ; then
         export PLATFORM="MAC"
     elif [ $ARCH == "arm64" ] ; then

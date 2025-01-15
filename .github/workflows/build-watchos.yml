@@ -44,7 +44,7 @@ jobs:
         bundle: [1, 2, 3]
     env:
       BUNDLE: ${{ matrix.bundle }}
-      DEVELOPER_DIR: "/Applications/Xcode.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
     steps:
       - name: Determine Release
         id: vars

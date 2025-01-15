@@ -86,6 +86,7 @@ jobs:
         BUNDLE: ${{ matrix.bundle }}
 
     - name: Build Poco
+      shell: bash
       run: ./apothecary/apothecary -tvs -a${{ env.ARCH }} update poco
 
     - name: Package
