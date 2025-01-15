@@ -5,7 +5,7 @@ set -o pipefail
 TARGET=${TARGET:-""}
 ARCH=${ARCH:-""}
 OPT=${OPT:-""}
-OUTPUT_FOLDER=${OUTPUT_FOLDER:-"./out"}
+OUTPUT_FOLDER=${OUTPUT_FOLDER:-"/out"}
 PARALLEL=${PARALLEL:-2}
 
 if [ -z "$TARGET" ]; then
@@ -78,10 +78,12 @@ for library in $LIBS; do
     package_library "$library" "$TARGET" "$ARCH" "$OPTS"
 done
 
-echo "All libraries packaged successfully."
-cd ../
 pwd
 find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
+
+echo "All libraries packaged successfully."
+cd ../
+
 
 
 

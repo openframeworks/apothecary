@@ -373,9 +373,11 @@ else
     tar cjvf $TARBALL $LIBS
 fi
 
-echo "Packaged libs to upload $TARBALL"
-echo "done "
-cd ../
 
+echo "Packaged libs to upload [$TARBALL]"
+echo "done "
 pwd
 find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
+cd ../
+
+
