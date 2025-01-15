@@ -358,13 +358,14 @@ function copy() {
 	elif [ "$TYPE" == "msys2" ] ; then
 		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
 		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
-	elif [ "$TYPE" == "linux" ] ; then
-		cp -v lib/Linux/$(uname -m)/*.a $1/lib/$TYPE
-	elif [ "$TYPE" == "linux64" ] ; then
-		cp -v lib/Linux/x86_64/*.a $1/lib/$TYPE
-	elif [ "$TYPE" == "linuxarmv6l" ] ; then
-		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
-	elif [ "$TYPE" == "linuxarmv7l" ] ; then
+	elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+		mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
 		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "android" ] ; then
 		rm -rf $1/lib/$TYPE/$ABI
@@ -396,7 +397,7 @@ function clean() {
         if [ -d "build_${TYPE}_${ABI}" ]; then
             rm -r build_${TYPE}_${ABI}     
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}  
         fi   
