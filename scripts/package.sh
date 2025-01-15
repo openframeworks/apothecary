@@ -11,9 +11,7 @@ else
     export FORCE=""
 fi
 if [ -z "$1" ]; then
-   echo " no TARGET: $1"
    TARGET=${TARGET:-$1}
-   exit 1
 else
     TARGET=$1
 fi
