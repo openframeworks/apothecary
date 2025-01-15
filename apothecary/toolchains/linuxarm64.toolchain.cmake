@@ -98,8 +98,6 @@ set(EXTRA_LINKS "-Wl,-rpath-link,${CMAKE_SYSROOT}/lib/ \
     -L${CMAKE_SYSROOT}/lib/ \
     -Wl,-rpath-link,${CMAKE_SYSROOT}/lib64/ \
     -L${CMAKE_SYSROOT}/lib64/ \
-    -L${CMAKE_SYSROOT}/lib/x86_64-linux-gnu \
-    -Wl,-rpath-link,${CMAKE_SYSROOT}/lib/x86_64-linux-gnu \
     -L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu \
     -Wl,-rpath-link,${CMAKE_SYSROOT}/lib/aarch64-linux-gnu")
 
