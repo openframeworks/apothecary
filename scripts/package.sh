@@ -106,6 +106,8 @@ if [ "$TARGET" == "linux" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
+    echo "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     tar -cjvf "$TARBALL $LIBS"
     if [ $? -eq 0 ]; then
         echo "Successfully created tarball: $TARBALL"
