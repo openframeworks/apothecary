@@ -98,6 +98,11 @@ echo "Current Branch: [$CUR_BRANCH]"
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$GCC" ] && echo "_${GCC}").tar.bz2
+    echo "TARBALL: [$TARBALL]"
+    if [ "${EXIT_BEFORE}" == "1" ]; then
+        exit 0
+    fi
+    tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$MSYSTEM" ] && echo "_${MSYSTEM}").zip
     echo "TARBALL: [$TARBALL]"
