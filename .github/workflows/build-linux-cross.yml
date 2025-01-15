@@ -38,7 +38,7 @@ jobs:
   build-linux-aarch64:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
     needs: pre-check
-    runs-on: ubuntu-24.04-arm64
+    runs-on: ubuntu-latest
     strategy:
         matrix:
           cfg:
