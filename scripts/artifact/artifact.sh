@@ -3,82 +3,23 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+ROOT=$(cd $(dirname "$0"); pwd -P)/../../
+LOCAL_ROOT=$ROOT
+APOTHECARY_PATH=$ROOT/apothecary
+if [ -z "${OUTPUT_FOLDER+x}" ]; then
+    export OUTPUT_FOLDER="$ROOT/out"
+fi
+
+echo "ROOT: $ROOT"
+echo "APOTHECARY_PATH: $APOTHECARY_PATH"
+echo "OUTPUT_FOLDER: $OUTPUT_FOLDER"
+
 if [ -z "${NO_FORCE+x}" ]; then
     export FORCE="-f"
 else
     export FORCE=""
 fi
 
-
-# trap any script errors and exit
-# trap "trapError" ERR
-
-trapError() {
-	echo
-	echo " ^ Received error building $formula_name ^"
-	cat "formula_${ARCH}.log"
-	if [ "$formula_name" == "boost" ]; then
-	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
-	fi
-    if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
-        tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
-    fi
-	exit 1
-}
-
-if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    run(){
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
-    }
-
-    run_bg(){
-        trap "trapError" ERR
-
-        #PATH=\"$DOCKER_HOME/bin:\$PATH\"
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> "formula_${ARCH}.log" 2>&1 &
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        run "tail -n 100 formula_${ARCH}.log"
-    }
-
-    # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
-    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
-    ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/../..
-else
-    run(){
-        echo "$@"
-        eval "$@"
-    }
-
-    run_bg(){
-        trap "trapError" ERR
-
-        echo "$@"
-        eval "$@" >> "formula_${ARCH}.log" 2>&1 &
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        run "tail -n 100 formula_${ARCH}.log"
-    }
-
-    ROOT=$(cd $(dirname "$0"); pwd -P)/../..
-    LOCAL_ROOT=$ROOT
-fi
-
-APOTHECARY_PATH=$ROOT/apothecary
-
-if [ -z "${OUTPUT_FOLDER+x}" ]; then
-    export OUTPUT_FOLDER="$ROOT/out"
-fi
-#OUTPUT_FOLDER=$ROOT/out
 
 
 # VERBOSE=true
