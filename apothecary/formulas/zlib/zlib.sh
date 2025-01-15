@@ -101,7 +101,7 @@ function build() {
 		 cd ..
     elif [ "$TYPE" == "android" ] ; then
 
-		source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
+		# source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
@@ -117,7 +117,7 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF"
 	    cmake .. ${DEFINES} \
-			-DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
+			-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
 			-DPLATFORM=$PLATFORM \
 			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
 			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
