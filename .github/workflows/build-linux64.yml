@@ -90,6 +90,7 @@ jobs:
       run: scripts/package.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
+        ALWAYS_BUILD: 1
 
     - name: List output directory
       run: ls -lah out/
