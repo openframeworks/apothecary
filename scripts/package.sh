@@ -114,7 +114,6 @@ if [ "$TARGET" == "linux" ]; then
         exit 0
     fi
     echo "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     tar -cjvf "$TARBALL $LIBS"
     if [ $? -eq 0 ]; then
         echo "Successfully created tarball: $TARBALL"
@@ -165,8 +164,7 @@ elif [ "$TARGET" == "emscripten" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-	run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-	echo " a $TARBALL $LIBS"
+    tar -cjvf "$TARBALL $LIBS"
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
