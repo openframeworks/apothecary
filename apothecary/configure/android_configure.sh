@@ -140,9 +140,9 @@ fi
 
 
 
-export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} -std=c17 -fno-short-enums ${MAKE_INCLUDES_CFLAGS}" 
-export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}" #-I${NDK_ROOT}/sources/cxx-stl/llvm-libc++/include"  #-DANDROID_STL=c++_static -  #
-export CXXFLAGS="-std=c++17"
+export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CFLAGS}"
+export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}"
+export CXXFLAGS=""
 #export CPPFLAGS="-v" # verbose output to test issues
 
 export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
