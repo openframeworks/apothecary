@@ -6,8 +6,6 @@ on:
   pull_request:
     paths-ignore:
       - '**/README.md'
-on:
-  pull_request:
     types:
       - closed
 
