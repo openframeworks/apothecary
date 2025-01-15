@@ -5,8 +5,12 @@ set -o pipefail
 TARGET=${TARGET:-""}
 ARCH=${ARCH:-""}
 OPT=${OPT:-""}
-OUTPUT_FOLDER=${OUTPUT_FOLDER:-"/out"}
-PARALLEL=${PARALLEL:-2}
+
+ROOT=$(cd $(dirname "$0"); pwd -P)/..
+LOCAL_ROOT=$ROOT
+APOTHECARY_PATH=$ROOT/apothecary
+
+OUTPUT_FOLDER=${OUTPUT_FOLDER:-"${APOTHECARY_PATH}/out"}
 
 if [ -z "$TARGET" ]; then
     echo "Error: TARGET not specified. Usage: $0 <target> <arch> [opt]"
@@ -26,8 +30,12 @@ package_library() {
 
     echo "Packaging library: $LIB for target: $TARGET arch: $ARCH opts: $OPTS"
 
-    local package_name="${LIB}_${TARGET}_${ARCH}$( [ -n "$OPTS" ] && echo "_${OPTS}")"    
-    #local library_path="${OUTPUT_FOLDER}/${LIB}"
+    if [ -n "$OPTS" ]; then
+        package_name="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${OPTS}"
+    else
+        package_name="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}"
+    fi
+    
     local library_path="${LIB}"
     local TARBALL
 

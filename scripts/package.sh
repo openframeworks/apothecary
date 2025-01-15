@@ -168,7 +168,7 @@ elif [ "$TARGET" == "emscripten" ]; then
 	run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
 	echo " a $TARBALL $LIBS"
 elif [ "$TARGET" == "android" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
@@ -177,9 +177,9 @@ elif [ "$TARGET" == "android" ]; then
     tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "macos" ]; then
     if [ -n "$BUNDLE" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2"
     else
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
     fi
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
@@ -189,9 +189,9 @@ elif [ "$TARGET" == "macos" ]; then
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     if [ -n "$BUNDLE" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2"
     else
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
     fi
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf ${TARBALL} ${LIBS}"
