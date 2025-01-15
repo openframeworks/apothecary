@@ -94,21 +94,28 @@ if(NOT EXISTS ${CMAKE_CXX_COMPILER})
     message(WARNING "C++ Compiler not found: ${CMAKE_CXX_COMPILER}")
 endif()
 
-set(EXTRA_LINKS "-L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu \
+set(EXTRA_LINKS "-Wl,-rpath-link,${CMAKE_SYSROOT}/lib/ \
+    -L${CMAKE_SYSROOT}/lib/ \
+    -Wl,-rpath-link,${CMAKE_SYSROOT}/lib64/ \
+    -L${CMAKE_SYSROOT}/lib64/ \
+    -L${CMAKE_SYSROOT}/lib/x86_64-linux-gnu \
+    -Wl,-rpath-link,${CMAKE_SYSROOT}/lib/x86_64-linux-gnu \
+    -L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu \
     -Wl,-rpath-link,${CMAKE_SYSROOT}/lib/aarch64-linux-gnu")
 
 set(CFLAGS "-I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include \
     -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include \
+    -I/usr/include \
     -DSTANDALONE -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST")
 
 # Compiler and linker flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -march=armv8-a ${EXTRA_LINKS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c++${CPP_STANDARD} -march=armv8-a ${EXTRA_LINKS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${CMAKE_SYSROOT} ${CFLAGS} -fPIC -O3 -Wall -Wextra -march=armv8-a ${EXTRA_LINKS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=${CMAKE_SYSROOT} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c++${CPP_STANDARD} -march=armv8-a ${EXTRA_LINKS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+simd+crypto")
 set(CMAKE_EXE_LINKER_FLAGS "-fPIE -pie ${EXTRA_LINKS}")
-set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC")
+set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC ${EXTRA_LINKS}")
 
 message(STATUS "Using GCC Version: ${GCC_VERSION}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
