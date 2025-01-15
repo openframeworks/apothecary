@@ -2,13 +2,13 @@
 set -e
 set -o pipefail
 
-TARGET=${1:-"unknown"}
-ARCH=${2:-"unknown"}
-OPT=${3:-""}
+TARGET=${TARGET:-""}
+ARCH=${ARCH:-""}
+OPT=${OPT:-""}
 OUTPUT_FOLDER=${OUTPUT_FOLDER:-"./out"}
 PARALLEL=${PARALLEL:-2}
 
-if [ -z "$TARGET" ] || [ "$TARGET" == "unknown" ]; then
+if [ -z "$TARGET" ]; then
     echo "Error: TARGET not specified. Usage: $0 <target> <arch> [opt]"
     exit 1
 fi
@@ -80,8 +80,9 @@ done
 
 echo "All libraries packaged successfully."
 cd ../
+pwd
+find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 
-find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec ls -lh {} \;
 
 
 
