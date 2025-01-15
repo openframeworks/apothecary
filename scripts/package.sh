@@ -104,7 +104,11 @@ echo "Current ARCH: [$ARCH]"
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$GCC" ] && echo "_${GCC}").tar.bz2
+    if [ -n "$GCC" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${GCC}.tar.bz2"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2"
+    fi
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
@@ -119,7 +123,11 @@ if [ "$TARGET" == "linux" ]; then
         exit 1
     fi
 elif [ "$TARGET" == "msys2" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$MSYSTEM" ] && echo "_${MSYSTEM}").zip
+    if [ -n "$MSYSTEM" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM}.zip"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
+    fi
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
@@ -133,7 +141,11 @@ elif [ "$TARGET" == "vs" ]; then
             TARGET="${TARGET}_2019"
         fi
     fi
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").zip
+    if [ -n "$BUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip"
+    fi
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
@@ -142,9 +154,9 @@ elif [ "$TARGET" == "vs" ]; then
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
 	if [ "$ARCH" == "64" ]; then
-			POSTFIX="_64"
-	else
-			POSTFIX=""
+		POSTFIX="_64"
+    else
+		POSTFIX=""
 	fi
     rm -f *.pc
 	TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}${POSTFIX}.tar.bz2
@@ -164,7 +176,11 @@ elif [ "$TARGET" == "android" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "macos" ]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").tar.bz2
+    if [ -n "$BUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
+    fi
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
@@ -172,7 +188,11 @@ elif [ "$TARGET" == "macos" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$BUNDLE" ] && echo "_${BUNDLE}").tar.bz2
+    if [ -n "$BUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.zip"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
+    fi
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf ${TARBALL} ${LIBS}"
     if [ "${EXIT_BEFORE}" == "1" ]; then
