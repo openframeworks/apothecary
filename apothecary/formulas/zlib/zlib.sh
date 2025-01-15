@@ -106,8 +106,8 @@ function build() {
 		mkdir -p "build_${TYPE}_${ABI}"
 		cd "build_${TYPE}_${ABI}"
 		rm -f CMakeCache.txt *.a *.o
-		export CFLAGS="$CFLAGS $FLAG_RELEASE -DNDEBUG"
-		export CXXFLAGS="$CFLAGS $FLAG_RELEASE -DNDEBUG"
+		export CFLAGS="$CFLAGS $FLAG_RELEASE"
+		export CXXFLAGS="$CFLAGS $FLAG_RELEASE"
 
 		DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 			-DCMAKE_BUILD_TYPE=Release \
