@@ -377,7 +377,7 @@ fi
 echo "Packaged libs to upload [$TARBALL]"
 echo "done "
 pwd
-find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
+find ./ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 cd ../
 
 

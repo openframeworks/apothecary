@@ -79,7 +79,7 @@ for library in $LIBS; do
 done
 
 pwd
-find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
+find ./ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 
 echo "All libraries packaged successfully."
 cd ../

@@ -44,6 +44,7 @@ echoDots(){
 }
 
 echo "GCC Version: [$GCC]"
+ACTIONS_CACHE=${ACTIONS_CACHE:-"0"}
 
 if [ "$GCC" == "gcc4" ]; then
     sudo add-apt-repository -y ppa:dns/gnu
@@ -162,20 +163,12 @@ else
     echo "GCC version not specified on OPT env var, set one of gcc14, gcc6 or gcc13"
 fi
 
-sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
 
-sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
-sudo apt-get update && sudo apt-get install -y cmake build-essential
-sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
-sudo apt-get install -y ccache
-
-# Download the installer script
-# CMAKE_VERSION=3.30.0
-# wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh
-# chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh
-# sudo ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --prefix=/usr/local
-# export PATH="/usr/local/bin:$PATH"
-
-# Verify the installation
-cmake --version
+if [ "$ACTIONS_CACHE" -eq 0 ]; then
+    sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
+    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix ccache cmake build-essential
+    sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
+    sudo apt-get install -y 
+    cmake --version
+fi
 
