@@ -154,7 +154,7 @@ elif [ "$TARGET" == "vs" ]; then
 elif [ "$TARGET" == "emscripten" ]; then
 	if [ "$ARCH" == "64" ]; then
 		POSTFIX="_64"
-    else
+	else
 		POSTFIX=""
 	fi
     rm -f *.pc

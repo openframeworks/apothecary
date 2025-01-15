@@ -105,12 +105,12 @@ jobs:
     - name: List packaged file
       run: find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 
-    - name: Package
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: scripts/package_libraries.sh
-      env:
-        BUNDLE: ${{ matrix.bundle }}
+    # - name: Package
+    #   if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+    #   working-directory: ${{ env.GITHUB_WORKSPACE }}
+    #   run: scripts/package_libraries.sh
+    #   env:
+    #     BUNDLE: ${{ matrix.bundle }}
       
     - name: Update Release 64
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
