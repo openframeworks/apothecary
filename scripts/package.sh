@@ -102,7 +102,13 @@ if [ "$TARGET" == "linux" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    tar cjvf $TARBALL $LIBS
+    tar -cjvf "$TARBALL" $LIBS
+    if [ $? -eq 0 ]; then
+        echo "Successfully created tarball: $TARBALL"
+    else
+        echo "Error: Failed to create tarball."
+        exit 1
+    fi
 elif [ "$TARGET" == "msys2" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}$( [ -n "$MSYSTEM" ] && echo "_${MSYSTEM}").zip
     echo "TARBALL: [$TARBALL]"
