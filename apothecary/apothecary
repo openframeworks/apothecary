@@ -2593,7 +2593,7 @@ if [[ "$TYPE" == "android" ]] ; then
     export ANDROID_PLATFORM="${ANDROID_PLATFORM:-"android-${ANDROID_API}"}"
     export ANDROID_NDK_ROOT="${ANDROID_NDK_ROOT:-"/usr/local/lib/android/sdk/ndk/${NDK_VERSION}"}"
     export NDK_ROOT="${ANDROID_NDK_ROOT}"
-    export FLAG_RELEASE="-O3"
+    export FLAG_RELEASE=""
     
     if [ -z "${NDK_ROOT+x}" ]; then
         NDK_ROOT=NDK_ROOT=/Users/one/Library/Android/sdk/ndk/25.2.9519653

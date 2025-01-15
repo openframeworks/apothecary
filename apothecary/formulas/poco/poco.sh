@@ -366,7 +366,6 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
-		cp -v install/$TYPE/lib/*.a $1/lib/$TYPE
 	elif [ "$TYPE" == "android" ] ; then
 		rm -rf $1/lib/$TYPE/$ABI
 		mkdir -p $1/lib/$TYPE/$ABI
