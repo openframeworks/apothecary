@@ -73,6 +73,10 @@ fi
 cd $OUTPUT_FOLDER;
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
+if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
+    LIBS=${LIBSX//[$'\t\r\n']/ }
+else
 
 if [ -z "${RELEASE+x}" ]; then
     if [ "$GITHUB_ACTIONS" = true ]; then
@@ -161,7 +165,11 @@ elif [ "$TARGET" == "emscripten" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    tar cjvf $TARBALL $LIBS
+    if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ]; then
+    	run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    else
+    	tar cjvf $TARBALL $LIBS
+	fi
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
