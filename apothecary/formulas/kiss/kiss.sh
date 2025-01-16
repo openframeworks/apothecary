@@ -82,7 +82,12 @@ function copy() {
 	cp -v tools/kiss_fftr.h $1/include
 
 	mkdir -p $1/lib/$TYPE
-	cp -v lib/$TYPE/libkiss.a $1/lib/$TYPE/libkiss.a
+	if [ "$TYPE" == "linux" ]; then
+		mkdir -p $1/lib/$TYPE/$PLATFORM
+		cp -v lib/$TYPE/libkiss.a $1/lib/$TYPE/$PLATFORM/libkiss.a
+	else
+		cp -v lib/$TYPE/libkiss.a $1/lib/$TYPE/libkiss.a
+	fi
 
 	# copy license file
 	if [ -d "$1/license" ]; then
