@@ -15,7 +15,7 @@ concurrency:
 env:
   TARGET: "emscripten"
   EMSDK_VERSION: "4.0.0"
-  USE_ARTIFACT: true
+  USE_ARTIFACT: false
   PTHREADS_ENABLED: 1
   DISABLE_WORKFLOW: "false"
 
@@ -155,7 +155,7 @@ jobs:
           ARCH: ${{ matrix.ARCH }}
     
       - name: Package Binaries for Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           ARCH_SUFFIX=""
@@ -170,7 +170,7 @@ jobs:
           ARCH: ${{ matrix.ARCH }}
 
       - name: Upload Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: libs-${{ env.RELEASE }}-emscripten-${{ env.ARCH }}
@@ -178,7 +178,7 @@ jobs:
           retention-days: 31
 
       - name: Remove .tar.bz2 files
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))  && env.USE_ARTIFACT == 'true'
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
