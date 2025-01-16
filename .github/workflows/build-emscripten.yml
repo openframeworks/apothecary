@@ -178,7 +178,7 @@ jobs:
           retention-days: 31
 
       - name: Remove .tar.bz2 files
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))  && env.USE_ARTIFACT == 'true'
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
@@ -202,9 +202,6 @@ jobs:
 
       - name: List output directory final
         run: ls -lah out/
-
-      - name: List packaged file
-        run: find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec ls -lh {} \;
 
       - name: Update Release emscripten
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
