@@ -14,13 +14,15 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
       - name: Setup GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           # Ensure the latest version of GitHub CLI is installed
           sudo apt-get update && sudo apt-get install -y gh
@@ -30,7 +32,7 @@ jobs:
       - name: Check Token Permissions
         run: gh auth status
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           
       # - name: Cleanup Caches
       #   run: |
