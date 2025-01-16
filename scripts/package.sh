@@ -114,7 +114,7 @@ if [ "$TARGET" == "linux" ]; then
         exit 0
     fi
     echo "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    tar -cjvf $TARBALL $LIBS
+    tar cjvf $TARBALL $LIBS
     if [ $? -eq 0 ]; then
         echo "Successfully created tarball: $TARBALL"
     else
@@ -152,19 +152,16 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
-	if [ "$ARCH" == "64" ]; then
-		POSTFIX="_64"
-	else
-		POSTFIX=""
-	fi
-    rm -f *.pc
-	TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}${POSTFIX}.tar.bz2
+	if [ -n "$GCC" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_64.tar.bz2"
+    else
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
+    fi
     echo "TARBALL: [$TARBALL]"
-    echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    tar -cjvf $TARBALL $LIBS
+    tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
