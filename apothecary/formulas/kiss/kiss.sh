@@ -38,7 +38,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "linux" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
@@ -47,6 +47,10 @@ function build() {
         echo "--------------------"
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
+
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
 
         echo "TOOLCHAIN_ROOT is set to: ${TOOLCHAIN_ROOT}"
         rm -f CMakeCache.txt *.a *.o *.so
@@ -68,6 +72,10 @@ function build() {
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_SYSTEM_NAME=$TYPE \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DPNG_ROOT=${LIBPNG_ROOT} \
+            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
@@ -96,6 +104,7 @@ function build() {
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_SYSTEM_NAME=$TYPE \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
