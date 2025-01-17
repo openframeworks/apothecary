@@ -158,7 +158,7 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
-    if [ -n "$GCC" ]; then
+    if [ -n "$ARCH" ]; then
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_64.tar.bz2"
     else
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"

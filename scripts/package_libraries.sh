@@ -60,6 +60,16 @@ package_library() {
         TARBALL="${OUTPUT_FOLDER}/${package_name}.zip"
         echo "Creating ZIP: $package_file_path"
         "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$library_path"
+    elif [ "$TARGET" == "emscripten" ]; then
+        echo "TARBALL: [$TARBALL]"
+        if [ "${EXIT_BEFORE}" == "1" ]; then
+            exit 0
+        fi
+        if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
+            run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+        else
+            tar cjvf $TARBALL $LIBS
+        fi
     elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         TARBALL="${OUTPUT_FOLDER}/${package_name}.tar.bz2"
         echo "Creating TAR.BZ2: $TARBALL"
@@ -87,6 +97,10 @@ LIBS=$(echo "$LIBS" | tr '\n' ' ')
 if [ -z "$LIBRARIES" ]; then
     echo "No libraries found to package."
     exit 0
+fi
+if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
+    LIBS=${LIBSX//[$'\t\r\n']/ }
 fi
 
 # Process each library
