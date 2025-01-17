@@ -72,6 +72,7 @@ jobs:
             wget2:p
             libpng:p
             fftw3:p
+            zlib:p
       - name: Determine Release
         id: vars
         shell: bash

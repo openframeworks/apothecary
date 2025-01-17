@@ -34,6 +34,12 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echo ""
+
+    apothecaryDepend download zlib
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+
     apothecaryDepend download libpng
     apothecaryDepend prepare libpng
     apothecaryDepend build libpng
@@ -61,9 +67,13 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
         rm -f CMakeCache.txt *.a *.o *.so
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
 
         DEFINES="${DEFINES} -DLIBRARY_SUFFIX=${ARCH} \
 			-DCMAKE_BUILD_TYPE=Release \
@@ -85,6 +95,9 @@ function build() {
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
