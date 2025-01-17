@@ -179,18 +179,21 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlidec.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlienc.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
     elif [ "$TYPE" == "vs" ]; then
         cp -v -r c/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -206,18 +209,21 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlidec.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlienc.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
     elif [ "$TYPE" == "linux" ]; then
 
         mkdir -p $1/lib/$TYPE/${PLATFORM}/
@@ -234,18 +240,21 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlidec.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlienc.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
     fi
 
     if [ -d "$1/license" ]; then

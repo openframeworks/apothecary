@@ -242,6 +242,7 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "vs" ]; then
@@ -257,6 +258,7 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
@@ -275,6 +277,7 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "linux" ]; then
@@ -290,6 +293,7 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "msys2" ]; then

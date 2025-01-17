@@ -362,18 +362,21 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
@@ -401,18 +404,21 @@ function copy() {
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${1}/lib/$TYPE/$PLATFORM"
 

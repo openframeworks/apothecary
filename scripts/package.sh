@@ -76,10 +76,6 @@ fi
 cd $OUTPUT_FOLDER
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
-if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
-    LIBS=${LIBSX//[$'\t\r\n']/ }
-fi
 
 if [ -z "${RELEASE+x}" ]; then
     if [ "$GITHUB_ACTIONS" = true ]; then
@@ -91,11 +87,6 @@ else
     CUR_BRANCH="$RELEASE"
 fi
 GCC=${GCC:-}
-
-echo "Checking for .bak files in $OUTPUT_FOLDER..."
-if [ -d "$OUTPUT_FOLDER" ]; then
-    find "$OUTPUT_FOLDER" -type f -name "*.bak" -exec rm -v {} \;
-fi
 if [ -z "$LIBS" ]; then
     echo "Error: LIBS is empty. Nothing to package."
     exit 1
@@ -158,6 +149,7 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
+    export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
     if [ -n "$ARCH" ]; then
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_64.tar.bz2"
     else
@@ -167,11 +159,12 @@ elif [ "$TARGET" == "emscripten" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
-        run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    else
-        tar cjvf $TARBALL $LIBS
-    fi
+    # if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
+    #     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
+    # else
+    tar cvf $TARBALL $LIBS --dry-run
+    sudo tar cjvf $TARBALL $LIBS
+    # fi
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"

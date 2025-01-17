@@ -291,11 +291,8 @@ elif [ "$TARGET" == "emscripten" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
-        run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    else
-        tar cjvf $TARBALL $LIBS
-    fi
+    tar cvf $TARBALL $LIBS --dry-run
+    sudo tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
