@@ -308,45 +308,42 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kissfft
 )
 
-# Install the CMake Targets
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-
 # Install the CMake Config files
 include(CMakePackageConfigHelpers)
 
 # Generate the CMake package configuration file
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/kissfft-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    ${CMAKE_CURRENT_BINARY_DIR}/kissfft-config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kissfft
 )
-# Generate the CMake version configuration file
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/kissfft-config-version.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
-# Install the generated CMake configuration files
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/kissfft-config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/kissfft-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}version.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 )
-
 message(STATUS "CMAKE_INSTALL_LIBDIR: ${CMAKE_INSTALL_LIBDIR}")
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
 message(STATUS "PROJECT_NAME: ${PROJECT_NAME}")
 
-
 # Install pkg-config files for compatibility
-if (KISSFFT_PKGCONFIG)
-    configure_file(kissfft.pc.in "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc" @ONLY)
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif
+if(KISSFFT_PKGCONFIG)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/kissfft.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc
+    @ONLY
+)
+install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+endif()
+
+
 
