@@ -321,14 +321,10 @@ function build() {
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
         fi
 
-
-
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        export CFLAGS="-DTRIO_FPCLASSIFY=fpclassify"
-        sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
         rm -f *.o
@@ -347,7 +343,6 @@ function build() {
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DTRIO_FPCLASSIFY=fpclassify \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
