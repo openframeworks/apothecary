@@ -58,7 +58,6 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
 
-        echo "TOOLCHAIN_ROOT is set to: ${TOOLCHAIN_ROOT}"
         rm -f CMakeCache.txt *.a *.o *.so
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM"
