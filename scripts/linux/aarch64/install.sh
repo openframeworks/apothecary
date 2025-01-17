@@ -52,6 +52,7 @@ sudo apt-get install \
     librtaudio-dev:arm64 \
     gdb:arm64 \
     libglfw3-dev:arm64 \
+    libfftw3-dev:arm64 \
     liburiparser-dev:arm64 \
     libpugixml-dev:arm64 \
     libgconf-2-4:arm64 \
