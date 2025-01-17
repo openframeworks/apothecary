@@ -31,10 +31,9 @@ jobs:
       run: |
         if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
           echo "disabled=true" >> $GITHUB_ENV
-          echo "{disabled}={true}" >> $GITHUB_STATE
+          echo "::set-output name=disabled::true"
         else
           echo "::set-output name=disabled::false"
-          echo "{disabled}={false}" >> $GITHUB_STATE
         fi
   build-linux64:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
