@@ -287,9 +287,11 @@ function(add_kissfft_executable NAME)
 endfunction()
 
 #
-# Perform installation of kissfft library and development files
-## Install targets for the kissfft library
-install(TARGETS kissfft EXPORT ${PROJECT_NAME}Targets
+# Perform installation of kissfft library and development file
+# Install targets for the kissfft library
+# Install the kissfft target (binary, library, archive, and headers)
+install(TARGETS kissfft
+    EXPORT ${PROJECT_NAME}Targets
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -315,16 +317,22 @@ install(EXPORT ${PROJECT_NAME}Targets
 
 # Install the CMake Config files
 include(CMakePackageConfigHelpers)
+
+# Generate the CMake package configuration file
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
-    ${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
     INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
 )
+
+# Generate the CMake version configuration file
 write_basic_package_version_file(
-    ${PROJECT_NAME}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
+
+# Install the generated CMake configuration files
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
@@ -333,7 +341,8 @@ install(FILES
 
 # Install pkg-config files for compatibility
 if (KISSFFT_PKGCONFIG)
-    configure_file(kissfft.pc.in "kissfft-${KISSFFT_DATATYPE}.pc" @ONLY)
+    configure_file(kissfft.pc.in "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc" @ONLY)
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc"
         DESTINATION lib/pkgconfig)
 endif
+
