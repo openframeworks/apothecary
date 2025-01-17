@@ -7,7 +7,7 @@
 # Makefile build system,
 # some Makefiles are out of date so patching/modification may be required
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
 # define the version
 
@@ -109,6 +109,63 @@ function build() {
 
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
+      elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+        fi
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        DEFS="
+                -DBUILD_SHARED_LIBS=OFF \
+                -DCMAKE_INSTALL_INCLUDEDIR=include \
+                -DBUILD_LIBRAWLITE=OFF \
+                -DBUILD_OPENEXR=OFF \
+                -DBUILD_WEBP=ON \
+                -DBUILD_JXR=OFF \
+                -DENABLE_ARC=OFF \
+                -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                -DENABLE_VISIBILITY=OFF \
+                -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+                "
+        cmake .. ${DEFS} \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DPNG_ROOT=${LIBPNG_ROOT} \
+            -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
+            -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
+            -DBUILD_LIBPNG=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DBUILD_ZLIB=OFF \
+            -DBUILD_TESTS=OFF \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DPLATFORM=$PLATFORM
+
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+    elif [ "$TYPE" == "android" ]; then
     elif [ "$TYPE" == "android" ]; then
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
@@ -336,6 +393,12 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
         cp Source/FreeImage.h $1/include
         secure $1/lib/$TYPE/$PLATFORM/FreeImage.a FreeImage.pkl
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
+        cp Source/FreeImage.h $1/include
+        secure $1/lib/$TYPE/$PLATFORM/FreeImage.a FreeImage.pkl
     elif [ "$TYPE" == "vs" ]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
@@ -381,7 +444,7 @@ function clean() {
         if [ -d $1/lib/$TYPE/$PLATFORM/ ]; then
             rm -r $1/lib/$TYPE/$PLATFORM/
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi

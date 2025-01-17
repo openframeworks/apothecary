@@ -59,6 +59,8 @@ function build() {
         echo "TOOLCHAIN_ROOT is set to: ${TOOLCHAIN_ROOT}"
         rm -f CMakeCache.txt *.a *.o *.so
 
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM"
+
         DEFINES="${DEFINES} -DLIBRARY_SUFFIX=${ARCH} \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
