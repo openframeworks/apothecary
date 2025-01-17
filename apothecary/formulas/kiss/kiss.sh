@@ -85,7 +85,8 @@ function build() {
             -DKISSFFT_STATIC=ON \
             -DKISSFFT_TEST=OFF \
             -DKISSFFT_TOOLS=OFF \
-            -DKISSFFT_OPENMP=OFF"
+            -DKISSFFT_OPENMP=OFF \
+            -DKISSFFT_PKGCONFIG=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DGCC_VERSION=${GCC_VERSION} \
