@@ -15,6 +15,7 @@ BUILD_ID=1
 GIT_URL=https://github.com/mborgerding/kissfft.git
 GIT_TAG=v$VER
 URL=https://github.com/mborgerding/kissfft/archive/refs/tags/${VER}
+DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -33,7 +34,6 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echo ""
-    # cp -Rv $FORMULA_DIR/Makefile .
 }
 
 # executed inside the lib src dir
@@ -103,11 +103,6 @@ function build() {
             -DCMAKE_VERBOSE_MAKEFILE=true
         cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
-    else
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
-        fi
-        make -j${PARALLEL_MAKE} TARGET_DIR=$TYPE
     fi
 }
 
@@ -144,16 +139,16 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-
-    if [ "$TYPE" == "linux" ]; then
-        make clean
-        rm -f *.a
-    fi
+    if [[ "$TYPE" =~ ^(linux|msys2)$ ]]; then
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}
+        fi
+    else
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "glfw3" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    LOAD_RESULT=$(loadsave ${TYPE} "kiss" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
