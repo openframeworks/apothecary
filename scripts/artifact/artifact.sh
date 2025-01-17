@@ -291,7 +291,7 @@ elif [ "$TARGET" == "emscripten" ]; then
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    tar cvf $TARBALL $LIBS --dry-run
+
     sudo tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2

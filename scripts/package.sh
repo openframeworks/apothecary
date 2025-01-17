@@ -162,7 +162,7 @@ elif [ "$TARGET" == "emscripten" ]; then
     # if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
     #     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
     # else
-    tar cvf $TARBALL $LIBS --dry-run
+
     sudo tar cjvf $TARBALL $LIBS
     # fi
 elif [ "$TARGET" == "android" ]; then
