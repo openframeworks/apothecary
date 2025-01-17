@@ -65,8 +65,8 @@ function prepare() {
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
 
-    rm -f ./CMakeLists.txt
-    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
+    # rm -f ./CMakeLists.txt
+    # cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 
 }
 
