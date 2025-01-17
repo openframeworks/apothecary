@@ -16,7 +16,7 @@ FORMULA_TYPES=("osx" "vs" "linux")
 
 # define the version
 VER=6.0.1
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 # tools for git use
@@ -34,34 +34,35 @@ function download() {
     mv rtaudio-${VER} rtAudio
     rm ${VER}.tar.gz
 
-    rm -f ./CMakeLists.txt
-    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
+
 }
 
 # # prepare the build environment, executed inside the lib src dir
 function prepare() {
     # nothing here
     echo
+    rm -f ./CMakeLists.txt
+    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
 # executed inside the lib src dir
 function build() {
     DEFINES="
-			-DCMAKE_C_STANDARD=${C_STANDARD} \
-	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include
-	    "
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_INCLUDEDIR=include
+        "
     if [ "$TYPE" == "osx" ]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
         DEFINES="${DEFINES} \
-				-DRTAUDIO_API_ASIO=OFF \
-				-DRTAUDIO_API_CORE=ON \
-				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-				-DHAVE_GETTIMEOFDAY=ON"
+                -DRTAUDIO_API_ASIO=OFF \
+                -DRTAUDIO_API_CORE=ON \
+                -DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+                -DHAVE_GETTIMEOFDAY=ON"
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
@@ -93,14 +94,14 @@ function build() {
         env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
 
         DEFINES="${DEFINES} \
-				-DRTAUDIO_API_DS=ON \
-				-DRTAUDIO_API_ASIO=ON \
-				-DRTAUDIO_API_WASAPI=ON \
-				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-				-DHAVE_GETTIMEOFDAY=OFF \
-				-DBUILD_TESTING=OFF \
-				-DRTAUDIO_STATIC_MSVCRT=OFF \
-				-DBUILD_SHARED_LIBS=OFF"
+                -DRTAUDIO_API_DS=ON \
+                -DRTAUDIO_API_ASIO=ON \
+                -DRTAUDIO_API_WASAPI=ON \
+                -DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+                -DHAVE_GETTIMEOFDAY=OFF \
+                -DBUILD_TESTING=OFF \
+                -DRTAUDIO_STATIC_MSVCRT=OFF \
+                -DBUILD_SHARED_LIBS=OFF"
 
         cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
@@ -144,14 +145,14 @@ function build() {
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
         DEFINES="${DEFINES} \
-				-DRTAUDIO_API_PULSE=ON \
-				-DRTAUDIO_API_ALSA=ON \
-				-DRTAUDIO_API_JACK=ON \
-				-DRTAUDIO_API_OSS=ON \
-				-DRTAUDIO_API_DS=OFF \
-				-DRTAUDIO_API_ASIO=OFF \
-				-DRTAUDIO_API_WASAPI=OFF \
-				-DBUILD_TESTING=OFF"
+                -DRTAUDIO_API_PULSE=ON \
+                -DRTAUDIO_API_ALSA=ON \
+                -DRTAUDIO_API_JACK=ON \
+                -DRTAUDIO_API_OSS=ON \
+                -DRTAUDIO_API_DS=OFF \
+                -DRTAUDIO_API_ASIO=OFF \
+                -DRTAUDIO_API_WASAPI=OFF \
+                -DBUILD_TESTING=OFF"
 
         cmake .. \
             ${DEFINES} \
@@ -177,14 +178,14 @@ function build() {
         cd build
         rm -f CMakeCache.txt *.a *.o
         DEFINES="${DEFINES} \
-				-DRTAUDIO_API_DS=ON \
-				-DRTAUDIO_API_ASIO=ON \
-				-DRTAUDIO_API_WASAPI=ON \
-				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-				-DHAVE_GETTIMEOFDAY=OFF \
-				-DBUILD_TESTING=OFF \
-				-DRTAUDIO_STATIC_MSVCRT=OFF \
-				-DBUILD_SHARED_LIBS=OFF"
+                -DRTAUDIO_API_DS=ON \
+                -DRTAUDIO_API_ASIO=ON \
+                -DRTAUDIO_API_WASAPI=ON \
+                -DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+                -DHAVE_GETTIMEOFDAY=OFF \
+                -DBUILD_TESTING=OFF \
+                -DRTAUDIO_STATIC_MSVCRT=OFF \
+                -DBUILD_SHARED_LIBS=OFF"
         cmake .. ${DEFINES} \
             -G "Unix Makefiles" \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
