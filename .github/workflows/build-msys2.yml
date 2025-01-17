@@ -71,6 +71,7 @@ jobs:
             python3:p
             wget2:p
             libpng:p
+            fftw3:p
       - name: Determine Release
         id: vars
         shell: bash
