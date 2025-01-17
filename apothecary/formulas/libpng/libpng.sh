@@ -3,7 +3,7 @@
 # the official PNG reference library
 # http://libpng.org/pub/png/libpng.html
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux" )
 FORMULA_DEPENDS=("zlib")
 
 # define the version
@@ -105,6 +105,11 @@ function build() {
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+        fi
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
@@ -124,12 +129,9 @@ function build() {
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
-            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DPNG_HARDWARE_OPTIMIZATIONS=ON \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE

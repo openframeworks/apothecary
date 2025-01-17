@@ -44,6 +44,8 @@ function prepare() {
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "linux" ]; then
+        echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
         fi
