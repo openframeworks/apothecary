@@ -38,6 +38,9 @@ function prepare() {
     apothecaryDepend prepare libpng
     apothecaryDepend build libpng
     apothecaryDepend copy libpng
+
+    rm -f ./CMakeLists.txt
+    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
 # executed inside the lib src dir
