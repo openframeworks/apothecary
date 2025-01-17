@@ -84,9 +84,9 @@ function build() {
 			-DBUILD_SHARED_LIBS=OFF\
             -DKISSFFT_STATIC=ON \
             -DKISSFFT_TEST=OFF \
-            -DKISSFFT_TOOLS=OFF \
+            -DKISSFFT_TOOLS=ON \
             -DKISSFFT_OPENMP=OFF \
-            -DKISSFFT_PKGCONFIG=OFF"
+            -DKISSFFT_PKGCONFIG=ON"
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DGCC_VERSION=${GCC_VERSION} \
@@ -148,18 +148,18 @@ function copy() {
     # headers
     mkdir -p $1/include
     cp -v kiss_fft.h $1/include
-    cp -v tools/kiss_fftr.h $1/include
+    # cp -v tools/kiss_fftr.h $1/include
     . "$SECURE_SCRIPT"
 
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -v "build_${TYPE}_${PLATFORM}/Release/libkiss.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/kissfft.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "mysys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -v "build_${TYPE}_${PLATFORM}/Release/libkiss.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/kissfft.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     else
