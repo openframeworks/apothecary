@@ -1596,7 +1596,7 @@ function frameworkFormula() {
 	export XLIBS_DIR_REAL=$(realpath $XLIBSLOCAL)
 
 	if [[ $TYPE == "osx" ]]; then
-		TYPE_OUT="osx"
+		TYPE_OUT="macos"
 	else
 		TYPE_OUT=${TYPE}
 	fi
