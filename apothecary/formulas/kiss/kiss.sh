@@ -157,7 +157,7 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
-    elif [ "$TYPE" == "mysys2" ]; then
+    elif [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
