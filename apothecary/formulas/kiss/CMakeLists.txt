@@ -288,84 +288,52 @@ endfunction()
 
 #
 # Perform installation of kissfft library and development files
-#
+## Install targets for the kissfft library
+install(TARGETS kissfft EXPORT ${PROJECT_NAME}Targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    INCLUDES DESTINATION include/kissfft
+)
 
-install(TARGETS kissfft EXPORT kissfft
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+# Install header files to the include directory
+install(FILES
+    kiss_fft.h
+    kissfft.hh
+    kiss_fftnd.h
+    kiss_fftndr.h
+    kiss_fftr.h
+    DESTINATION include/kissfft
+)
 
-install(FILES kiss_fft.h
-              kissfft.hh
-              kiss_fftnd.h
-              kiss_fftndr.h
-              kiss_fftr.h
-        DESTINATION "${PKGINCLUDEDIR}")
+# Install the CMake Targets
+install(EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION lib/cmake/${PROJECT_NAME}
+)
 
-set(KISSFFT_INSTALL_CMAKE "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}"
-    CACHE FILEPATH "Install destination of kissfft cmake modules")
-mark_as_advanced(KISSFFT_INSTALL_CMAKE)
-
-install(EXPORT kissfft DESTINATION "${KISSFFT_INSTALL_CMAKE}"
-        NAMESPACE "kissfft::"
-        FILE "${PROJECT_NAME}-${KISSFFT_DATATYPE}${KISSFFT_EXPORT_SUFFIX}-targets.cmake")
+# Install the CMake Config files
 include(CMakePackageConfigHelpers)
-configure_package_config_file(kissfft-config.cmake.in kissfft-config.cmake
-    INSTALL_DESTINATION "${KISSFFT_INSTALL_CMAKE}")
-write_basic_package_version_file(kissfft-config-version.cmake COMPATIBILITY AnyNewerVersion)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-config.cmake" "${CMAKE_CURRENT_BINARY_DIR}/kissfft-config-version.cmake"
-        DESTINATION "${KISSFFT_INSTALL_CMAKE}")
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+    ${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
+)
+write_basic_package_version_file(
+    ${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION lib/cmake/${PROJECT_NAME}
+)
 
-set(PKG_KISSFFT_DEFS)
-foreach(_def ${KISSFFT_COMPILE_DEFINITIONS})
-    set(PKG_KISSFFT_DEFS "${PKG_KISSFFT_DEFS} -D${_def}")
-endforeach()
+# Install pkg-config files for compatibility
 if (KISSFFT_PKGCONFIG)
-    include(JoinPaths)
-    set(PKGCONFIG_KISSFFT_PKGINCLUDEDIR "\${includedir}/kissfft")
-    set(PKGCONFIG_KISSFFT_PREFIX "${CMAKE_INSTALL_PREFIX}")
-    set(PKGCONFIG_KISSFFT_VERSION "${kissfft_VERSION}")
-    join_paths(PKGCONFIG_KISSFFT_LIBDIR "\${prefix}" "${CMAKE_INSTALL_LIBDIR}")
-    join_paths(PKGCONFIG_KISSFFT_INCLUDEDIR "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
-    if(KISSFFT_DATATYPE MATCHES "^simd$")
-       list(APPEND KISSFFT_COMPILE_DEFINITIONS USE_SIMD)
-       if (NOT MSVC)
-           set(PKG_KISSFFT_DEFS "${PKG_KISSFFT_DEFS} -msse")
-       else()
-           set(PKG_KISSFFT_DEFS "${PKG_KISSFFT_DEFS} /ARCH:SSE")
-       endif()
-    endif()
-    if (NOT KISSFFT_OPENMP)
-        configure_file(kissfft.pc.in "kissfft-${KISSFFT_DATATYPE}.pc" @ONLY)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc"
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-    else()
-        if (NOT MSVC)
-            set(PKG_OPENMP "-fopenmp")
-            set(PKG_KISSFFT_DEFS "${PKG_KISSFFT_DEFS} -fopenmp")
-        else()
-            set(PKG_KISSFFT_DEFS "${PKG_KISSFFT_DEFS} /openmp")
-            set(PKG_OPENMP "/openmp")
-        endif()
-        configure_file(kissfft.pc.in "kissfft-${KISSFFT_DATATYPE}-openmp.pc" @ONLY)
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}-openmp.pc"
-                DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-    endif()
-endif()
-
-#
-# Build and install tools if requested by user
-#
-
-if(KISSFFT_TOOLS)
-    add_subdirectory(tools)
-endif()
-
-#
-# Build and run tests if requested by user
-#
-
-if(KISSFFT_TEST)
-    enable_testing()
-    add_subdirectory(test)
-endif()
+    configure_file(kissfft.pc.in "kissfft-${KISSFFT_DATATYPE}.pc" @ONLY)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/kissfft-${KISSFFT_DATATYPE}.pc"
+        DESTINATION lib/pkgconfig)
+endif
