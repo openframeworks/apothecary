@@ -154,12 +154,12 @@ function copy() {
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -v "build_${TYPE}_${PLATFORM}/Release/kissfft.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "mysys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -v "build_${TYPE}_${PLATFORM}/Release/kissfft.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
         secure $1/lib/$TYPE/$PLATFORM/libkiss.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     else
