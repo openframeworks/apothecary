@@ -3,9 +3,9 @@
 # libssh2
 
 # Define the version
-FORMULA_TYPES=( )
+FORMULA_TYPES=()
 
-FORMULA_DEPENDS=( "zlib" "openssl" )
+FORMULA_DEPENDS=("zlib" "openssl")
 
 VER=1.11.0-dev
 GIT_URL=https://github.com/libssh2/libssh2.git
@@ -34,14 +34,14 @@ function prepare() {
 
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
-    
+
     mkdir -p "build_${TYPE}_${PLATFORM}"
     cd "build_${TYPE}_${PLATFORM}"
 
     cmake .. \
         -DCMAKE_C_FLAGS="${DEFINES}" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=Release 
+        -DCMAKE_INSTALL_PREFIX=Release
 
     cmake --build . --config Release -j${PARALLEL_MAKE} --target install
     cd ..
@@ -49,7 +49,7 @@ function build() {
 }
 
 function copy() {
-    mkdir -p $1/include    
+    mkdir -p $1/include
     mkdir -p $1/lib/$TYPE
     mkdir -p $1/lib/$TYPE/$PLATFORM/
 
@@ -65,13 +65,13 @@ function clean() {
 }
 
 function save() {
-    . "$SAVE_SCRIPT" 
+    . "$SAVE_SCRIPT"
     savestatus ${TYPE} "libssh2" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "libssh2" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "libssh2" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

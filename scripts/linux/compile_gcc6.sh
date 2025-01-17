@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-set -e 
+set -e
 
 # trap any script errors and exit
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    exit 1
 }
 
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -21,20 +21,20 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 2
         done
@@ -72,14 +72,11 @@ export LC_PAPER=C
 export LANG=C
 
 sed -i "s/libstdcxx_abi = gcc4-compatible/libstdcxx_abi = new/g" debian/rules.defs
-debian/rules -j20 >> formula.log 2>&1 &
+debian/rules -j20 >>formula.log 2>&1 &
 apothecaryPID=$!
 echoDots $apothecaryPID
 wait $apothecaryPID
-fakeroot debian/rules binary >> formula.log 2>&1 &
+fakeroot debian/rules binary >>formula.log 2>&1 &
 apothecaryPID=$!
 echoDots $apothecaryPID
 wait $apothecaryPID
-
-
-

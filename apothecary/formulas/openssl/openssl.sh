@@ -3,8 +3,8 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=( "vs" "osx" "ios" "xros" )
-FORMULA_DEPENDS=( "zlib" )
+FORMULA_TYPES=("vs" "osx" "ios" "xros")
+FORMULA_DEPENDS=("zlib")
 
 VER=3.4.0
 VERDIR=3.4.0
@@ -55,44 +55,44 @@ DEFINES=" -DOPENSSL_NO_DEPRECATED=ON \
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	. "$DOWNLOADER_SCRIPT"
-	FILE_NAME=openssl-$VER
+    . "$DOWNLOADER_SCRIPT"
+    FILE_NAME=openssl-$VER
 
-	if ! [ -f $FILE_NAME ]; then
-		downloader "${MIRROR}/source/${FILE_NAME}.tar.gz" 
-	fi
+    if ! [ -f $FILE_NAME ]; then
+        downloader "${MIRROR}/source/${FILE_NAME}.tar.gz"
+    fi
 
-	if ! [ -f $FILE_NAME.sha1 ]; then
-		downloader ${MIRROR}/source/$FILE_NAME.tar.gz.sha1
-	fi
-	CHECKSHA=$(shasum $FILE_NAME.tar.gz | awk '{print $1}')
+    if ! [ -f $FILE_NAME.sha1 ]; then
+        downloader ${MIRROR}/source/$FILE_NAME.tar.gz.sha1
+    fi
+    CHECKSHA=$(shasum $FILE_NAME.tar.gz | awk '{print $1}')
 
-	# Extract only the SHA value from the .sha1 file
-	FILESUM=$(awk '{print $1}' $FILE_NAME.tar.gz.sha1)
+    # Extract only the SHA value from the .sha1 file
+    FILESUM=$(awk '{print $1}' $FILE_NAME.tar.gz.sha1)
 
-	# Check if CHECKSHA matches both FILESUM and the expected SHA1
-	if [[ "$CHECKSHA" != "$FILESUM" || "$CHECKSHA" != "$SHA1" ]]; then
-	    echo "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM] - Developer has not updated SHA or Man in the Middle Attack"
-	    exit 1
+    # Check if CHECKSHA matches both FILESUM and the expected SHA1
+    if [[ "$CHECKSHA" != "$FILESUM" || "$CHECKSHA" != "$SHA1" ]]; then
+        echo "SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] FILESUM=[$FILESUM] - Developer has not updated SHA or Man in the Middle Attack"
+        exit 1
     else
-    	tar -xf "${FILE_NAME}.tar.gz"
-		echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-		mv $FILE_NAME openssl_temp
-		rm $FILE_NAME.tar.gz
-		rm $FILE_NAME.tar.gz.sha1
-	fi
-	# Clone the openssl-cmake repository
-	git clone --branch $VER_TAG --depth=1 $GIT_URL openssl_cmake_temp
+        tar -xf "${FILE_NAME}.tar.gz"
+        echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
+        mv $FILE_NAME openssl_temp
+        rm $FILE_NAME.tar.gz
+        rm $FILE_NAME.tar.gz.sha1
+    fi
+    # Clone the openssl-cmake repository
+    git clone --branch $VER_TAG --depth=1 $GIT_URL openssl_cmake_temp
 
-	# Organize directories as needed
-	mkdir -p openssl
-	mkdir -p openssl/openssl
-	mv openssl_temp/* openssl/openssl
+    # Organize directories as needed
+    mkdir -p openssl
+    mkdir -p openssl/openssl
+    mv openssl_temp/* openssl/openssl
 
-	rm -rf openssl_cmake_temp/openssl
-	mv openssl_cmake_temp/* openssl/
+    rm -rf openssl_cmake_temp/openssl
+    mv openssl_cmake_temp/* openssl/
 
-	rm -rf openssl_temp openssl_cmake_temp
+    rm -rf openssl_temp openssl_cmake_temp
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -101,82 +101,81 @@ function prepare() {
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
-	echo "prepare"
+    echo "prepare"
 }
 
 # executed inside the lib src dir
 function build() {
 
-	LIBS_ROOT=$(realpath $LIBS_DIR)
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		ZLIB_ROOT="$LIBS_ROOT/zlib/"
-	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
-		echo "building $TYPE | $PLATFORM"
+    LIBS_ROOT=$(realpath $LIBS_DIR)
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        echo "building $TYPE | $PLATFORM"
         echo "--------------------"
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
 
+        # if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
+        # 	# LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./openssl/apps/speed.c"
+        # 	# Patch Configure to build for tvOS, not iOS
+        # 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./openssl/Configure"
+        # fi
 
-		# if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
-		# 	# LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./openssl/apps/speed.c"
-		# 	# Patch Configure to build for tvOS, not iOS
-		# 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./openssl/Configure"
-		# fi
-
-		rm -f CMakeCache.txt *.a *.o
-		cmake  .. \
-			-DCMAKE_C_STANDARD=${C_STANDARD} \
-			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DBUILD_TESTING=OFF \
-			-DCMAKE_BUILD_TYPE=Release \
-			-DNO_FORK=ON \
-			-DOPENSSL_OCSP=OFF \
-			-DOPENSSL_CMP=OFF \
-			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+        rm -f CMakeCache.txt *.a *.o
+        cmake .. \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_TESTING=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DNO_FORK=ON \
+            -DOPENSSL_OCSP=OFF \
+            -DOPENSSL_CMP=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             ${DEFINES} \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include \
-	        -DCMAKE_IGNORE_PATH=/opt/homebrew \
-	        -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
-		    -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-			-DPLATFORM=$PLATFORM \
-			-DENABLE_BITCODE=OFF \
-			-DCMAKE_MACOSX_BUNDLE=OFF \
-			-DENABLE_ARC=OFF \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-			-DENABLE_VISIBILITY=OFF
-		cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_IGNORE_PATH=/opt/homebrew \
+            -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DCMAKE_MACOSX_BUNDLE=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DENABLE_VISIBILITY=OFF
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
-	elif [ "$TYPE" == "vs" ] ; then
+    elif [ "$TYPE" == "vs" ]; then
 
-		echo "building openssl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "building openssl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-        pwd 
+        pwd
         if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    rm -rf "build_${TYPE}_${ARCH}"
-		fi
+            rm -rf "build_${TYPE}_${ARCH}"
+        fi
 
-		ZLIB_ROOT="$LIBS_ROOT/zlib/"
-	    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-	    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-	    if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
-			DEFS="-DOPENSSL_ASM=OFF"
-		else
-			DEFS="-DOPENSSL_ASM=ON"
-	    fi
+        if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
+            DEFS="-DOPENSSL_ASM=OFF"
+        else
+            DEFS="-DOPENSSL_ASM=ON"
+        fi
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -191,10 +190,10 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
-     
+
         cmake .. ${DEFS} \
-			${CUSTOM_DEFS} \
-			${DEFINES} \
+            ${CUSTOM_DEFS} \
+            ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -215,256 +214,253 @@ function build() {
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
         cd ..
-	elif [ "$TYPE" == "android" ]; then
+    elif [ "$TYPE" == "android" ]; then
 
-		if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
-	    	echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
-	    	return
-		fi
-		source $APOTHECARY_DIR/configure/android_configure.sh $ABI make
-		#wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
-		# source ./setenv-android.sh
-		echo "NDK_ROOT: $NDK_ROOT"
+        if [ -f "$LIBS_DIR/openssl/$TYPE/$ABI/libssl.a" ]; then
+            echo "Build Already exists at $LIBS_DIR/openssl/$TYPE/ skipping"
+            return
+        fi
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI make
+        #wget -nv https://wiki.openssl.org/images/7/70/Setenv-android.sh
+        # source ./setenv-android.sh
+        echo "NDK_ROOT: $NDK_ROOT"
 
-		export RELEASE=2.6.37
-		export SYSTEM=android
-		export ARCH=arm
-		export CROSS_COMPILE="arm-linux-androideabi-"
-		export ANDROID_SYSROOT="$SYSROOT"
-		#export SYSROOT="$ANDROID_SYSROOT"
-		export NDK_SYSROOT="$ANDROID_SYSROOT"
-		export ANDROID_NDK_SYSROOT="$ANDROID_SYSROOT"
-		#export ANDROID_API="$ANDROID_API"
+        export RELEASE=2.6.37
+        export SYSTEM=android
+        export ARCH=arm
+        export CROSS_COMPILE="arm-linux-androideabi-"
+        export ANDROID_SYSROOT="$SYSROOT"
+        #export SYSROOT="$ANDROID_SYSROOT"
+        export NDK_SYSROOT="$ANDROID_SYSROOT"
+        export ANDROID_NDK_SYSROOT="$ANDROID_SYSROOT"
+        #export ANDROID_API="$ANDROID_API"
 
-		# CROSS_COMPILE and ANDROID_DEV are DFW (Don't Fiddle With). Its used by OpenSSL build system.
-		# export CROSS_COMPILE="arm-linux-androideabi-"
-		export ANDROID_DEV="$ANDROID_NDK_ROOT/platforms/$ANDROID_API/$ABI/usr"
-		export HOSTCC=clang
+        # CROSS_COMPILE and ANDROID_DEV are DFW (Don't Fiddle With). Its used by OpenSSL build system.
+        # export CROSS_COMPILE="arm-linux-androideabi-"
+        export ANDROID_DEV="$ANDROID_NDK_ROOT/platforms/$ANDROID_API/$ABI/usr"
+        export HOSTCC=clang
 
-		export ANDROID_TOOLCHAIN="$TOOLCHAIN"
+        export ANDROID_TOOLCHAIN="$TOOLCHAIN"
 
-		# Fix NDK 23 Issue with sysroot for old make
-		cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
-		cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
-		cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
-		cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
-		
+        # Fix NDK 23 Issue with sysroot for old make
+        cp $DEEP_TOOLCHAIN_PATH/crtbegin_dynamic.o $SYSROOT/usr/lib/crtbegin_dynamic.o
+        cp $DEEP_TOOLCHAIN_PATH/crtbegin_so.o $SYSROOT/usr/lib/crtbegin_so.o
+        cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
+        cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
 
-		VERBOSE=1
-		if [ ! -z "$VERBOSE" ] && [ "$VERBOSE" != "0" ]; then
-		  echo "ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
-		  echo "ANDROID_ARCH: $ABI"
-		  # echo "ANDROID_EABI: $_ANDROID_EABI"
-		  echo "ANDROID_API: $ANDROID_API"
-		  echo "ANDROID_SYSROOT: $ANDROID_SYSROOT"
-		  echo "ANDROID_TOOLCHAIN: $ANDROID_TOOLCHAIN"
-		  #echo "FIPS_SIG: $FIPS_SIG"
-		  #echo "CROSS_COMPILE: $CROSS_COMPILE"
-		  echo "ANDROID_DEV: $ANDROID_DEV"
-		fi
+        VERBOSE=1
+        if [ ! -z "$VERBOSE" ] && [ "$VERBOSE" != "0" ]; then
+            echo "ANDROID_NDK_ROOT: $ANDROID_NDK_ROOT"
+            echo "ANDROID_ARCH: $ABI"
+            # echo "ANDROID_EABI: $_ANDROID_EABI"
+            echo "ANDROID_API: $ANDROID_API"
+            echo "ANDROID_SYSROOT: $ANDROID_SYSROOT"
+            echo "ANDROID_TOOLCHAIN: $ANDROID_TOOLCHAIN"
+            #echo "FIPS_SIG: $FIPS_SIG"
+            #echo "CROSS_COMPILE: $CROSS_COMPILE"
+            echo "ANDROID_DEV: $ANDROID_DEV"
+        fi
 
-		#cp $FORMULA_DIR/Setenv-android.sh ./Setenv-android.sh
-		#chmod 755 ./Setenv-android.sh
-		#./setenv-android.sh
+        #cp $FORMULA_DIR/Setenv-android.sh ./Setenv-android.sh
+        #chmod 755 ./Setenv-android.sh
+        #./setenv-android.sh
 
-		perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
+        perl -pi -e 's/install: all install_docs install_sw/install: install_docs install_sw/g' Makefile.org
 
-		export BUILD_TO_DIR=build_$ABI
-		CURRENTPATH=`pwd`
-		mkdir -p BUILD_TO_DIR
-		rm -f CMakeCache.txt *.a *.o 
-		echo "Build Dir $BUILD_TO_DIR"
-		export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
-		# echo "./Config:"
-		# ./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
-		#./Configure android-arm64
-		
+        export BUILD_TO_DIR=build_$ABI
+        CURRENTPATH=$(pwd)
+        mkdir -p BUILD_TO_DIR
+        rm -f CMakeCache.txt *.a *.o
+        echo "Build Dir $BUILD_TO_DIR"
+        export PATH="$TOOLCHAIN_PATH:$DEEP_TOOLCHAIN_PATH:$PATH"
+        # echo "./Config:"
+        # ./config --prefix=$CURRENTPATH/$BUILD_TO_DIR --openssldir=$CURRENTPATH/$BUILD_TO_DIR no-ssl2 no-ssl3 no-comp no-hw no-engine shared
+        #./Configure android-arm64
 
-		# cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
-		# cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
-		# mkdir -p $CURRENTPATH/cmake/
-		# cp $FORMULA_DIR/openssl-cmake/cmake/* $CURRENTPATH/cmake/
-		# cp $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt $CURRENTPATH/ssl/
+        # cp $FORMULA_DIR/openssl-cmake/CMakeLists.txt $CURRENTPATH/
+        # cp $FORMULA_DIR/openssl-cmake/crypto/* $CURRENTPATH/crypto/
+        # mkdir -p $CURRENTPATH/cmake/
+        # cp $FORMULA_DIR/openssl-cmake/cmake/* $CURRENTPATH/cmake/
+        # cp $FORMULA_DIR/openssl-cmake/ssl/CMakeLists.txt $CURRENTPATH/ssl/
 
-		echo `pwd`
-		# cp crypto/comp/comp.h include/openssl/
-		# cp crypto/engine/engine.h include/
+        echo $(pwd)
+        # cp crypto/comp/comp.h include/openssl/
+        # cp crypto/engine/engine.h include/
 
-		BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
-		
-		if [ "$ABI" = "armeabi-v7a" ]; then
-			KERNEL_BITS=32
-		    export CONFIGURE="android-arm"
-		    #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$HOST_PLATFORM/bin:$PATH
-		elif [ "$ABI" = "armeabi" ]; then
-			KERNEL_BITS=32
-		    export CONFIGURE="android-arm"
-		    #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
-		elif [ $ABI = "arm64-v8a" ]; then
-			KERNEL_BITS=64
-		    export CONFIGURE="android-arm64"
-		    #PATH=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/aarch64-$HOST_PLATFORM/bin:$PATH
-		elif [ "$ABI" = "x86_64" ]; then
-			KERNEL_BITS=32
-		    export CONFIGURE="android-x86_64"
-		elif [ "$ABI" = "x86" ]; then
-			KERNEL_BITS=32
-		    export CONFIGURE="android-x86"
-		fi
-		
-		echo "PATH:$PATH"
-		#export PATH=-I${SYSROOT}/usr/lib/
-		export OUTPUT_DIR=
-		echo "./Configure: $DEEP_TOOLCHAIN_PATH/usr/lib/"
-		FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -std=c${C_STANDARD} -ldl -shared -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/"
-		./Configure $CONFIGURE  -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix="$CURRENTPATH/$BUILD_TO_DIR" --openssldir="$CURRENTPATH/$BUILD_TO_DIR"
- 
- 
-		#perl configdata.pm --dump
-		#make
-		 
-		make clean
-		make AR=$AR depend 
-		echo "Make Depend Complete"
-		make all
+        BUILD_OPTS="-DOPENSSL_NO_DEPRECATED -DOPENSSL_NO_COMP -DOPENSSL_NO_EC_NISTP_64_GCC_128 -DOPENSSL_NO_ENGINE -DOPENSSL_NO_GMP -DOPENSSL_NO_JPAKE -DOPENSSL_NO_LIBUNBOUND -DOPENSSL_NO_MD2 -DOPENSSL_NO_RC5 -DOPENSSL_NO_RFC3779 -DOPENSSL_NO_SCTP -DOPENSSL_NO_SSL_TRACE -DOPENSSL_NO_SSL2 -DOPENSSL_NO_SSL3 -DOPENSSL_NO_STORE -DOPENSSL_NO_UNIT_TEST -DOPENSSL_NO_WEAK_SSL_CIPHERS"
 
-		mkdir -p build/$TYPE/$ABI
-		cp -rv *.a build/$TYPE/$ABI
+        if [ "$ABI" = "armeabi-v7a" ]; then
+            KERNEL_BITS=32
+            export CONFIGURE="android-arm"
+            #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$HOST_PLATFORM/bin:$PATH
+        elif [ "$ABI" = "armeabi" ]; then
+            KERNEL_BITS=32
+            export CONFIGURE="android-arm"
+            #PATH=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin:$PATH
+        elif [ $ABI = "arm64-v8a" ]; then
+            KERNEL_BITS=64
+            export CONFIGURE="android-arm64"
+            #PATH=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/aarch64-$HOST_PLATFORM/bin:$PATH
+        elif [ "$ABI" = "x86_64" ]; then
+            KERNEL_BITS=32
+            export CONFIGURE="android-x86_64"
+        elif [ "$ABI" = "x86" ]; then
+            KERNEL_BITS=32
+            export CONFIGURE="android-x86"
+        fi
 
-		rm $SYSROOT/usr/lib/crtbegin_dynamic.o
-		rm $SYSROOT/usr/lib/crtbegin_so.o
-		rm $SYSROOT/usr/lib/crtend_android.o
-		rm $SYSROOT/usr/lib/crtend_so.o
+        echo "PATH:$PATH"
+        #export PATH=-I${SYSROOT}/usr/lib/
+        export OUTPUT_DIR=
+        echo "./Configure: $DEEP_TOOLCHAIN_PATH/usr/lib/"
+        FLAGS="no-asm  no-async shared no-dso no-comp no-deprecated no-md2 no-rc5 no-rfc3779 no-unit-test no-sctp no-ssl-trace no-ssl2 no-ssl3 no-engine no-weak-ssl-ciphers -w -std=c${C_STANDARD} -ldl -shared -lc -L$DEEP_TOOLCHAIN_PATH -L$TOOLCHAIN/lib/gcc/$ANDROID_POSTFIX/4.9.x/"
+        ./Configure $CONFIGURE -D__ANDROID_API__=$ANDROID_API $FLAGS --prefix="$CURRENTPATH/$BUILD_TO_DIR" --openssldir="$CURRENTPATH/$BUILD_TO_DIR"
 
-	else
-		echoWarning "TODO: build $TYPE lib"
-	fi
+        #perl configdata.pm --dump
+        #make
+
+        make clean
+        make AR=$AR depend
+        echo "Make Depend Complete"
+        make all
+
+        mkdir -p build/$TYPE/$ABI
+        cp -rv *.a build/$TYPE/$ABI
+
+        rm $SYSROOT/usr/lib/crtbegin_dynamic.o
+        rm $SYSROOT/usr/lib/crtbegin_so.o
+        rm $SYSROOT/usr/lib/crtend_android.o
+        rm $SYSROOT/usr/lib/crtend_so.o
+
+    else
+        echoWarning "TODO: build $TYPE lib"
+    fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
-		mkdir -p $1/include    
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+
+        mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
-		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
-		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
-		. "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$PLATFORM/libssl.a openssl.pkl
-		secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libssl.a openssl.pkl
+        secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
 
-		cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
-		cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
-		cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/openssl.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-		PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-		PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
-	elif [ "$TYPE" == "vs" ]; then
-		mkdir -p $1/include    
+    elif [ "$TYPE" == "vs" ]; then
+        mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         FILE_POSTFIX=-x64
         if [ ${ARCH} == "32" ]; then
-        	FILE_POSTFIX=""
+            FILE_POSTFIX=""
         fi
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib
         . "$SECURE_SCRIPT"
-		secure $1/lib/$TYPE/$PLATFORM/libssl.lib openssl.pkl
-		secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
+        secure $1/lib/$TYPE/$PLATFORM/libssl.lib openssl.pkl
+        secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
 
-		cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
-		cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
-		cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
-		
+        cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
+        cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
+        cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
+
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/openssl.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-		PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-		PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
-		
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${1}/lib/$TYPE/$PLATFORM"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
 
-	elif [ "$TYPE" == "android" ] ; then
-		if [ -d $1/lib/$TYPE/$ABI ]; then
-			rm -r $1/lib/$TYPE/$ABI
-		fi
-		mkdir -p $1/lib/$TYPE/$ABI
-		cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
-	fi
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${1}/lib/$TYPE/$PLATFORM"
 
-	# copy license file
-	if [ -d "$1/license" ]; then
+    elif [ "$TYPE" == "android" ]; then
+        if [ -d $1/lib/$TYPE/$ABI ]; then
+            rm -r $1/lib/$TYPE/$ABI
+        fi
+        mkdir -p $1/lib/$TYPE/$ABI
+        cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
+    fi
+
+    # copy license file
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v LICENSE $1/license/
+    mkdir -p $1/license
+    cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-	
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
-		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-		    rm -r build_${TYPE}_${PLATFORM}
-		fi
-	elif [ "$TYPE" == "vs" ] ; then
-		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    rm -r build_${TYPE}_${ARCH}
-		fi
-	elif [ "$TYPE" == "android" ] ; then
-		if [ -d "build_${TYPE}_${ABI}" ]; then
-		    rm -r build_${TYPE}_${ABI}
-		fi
-	else
-		echoWarning "TODO: clean $TYPE lib"
-		make clean
-	fi
+
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}
+        fi
+    elif [ "$TYPE" == "vs" ]; then
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            rm -r build_${TYPE}_${ARCH}
+        fi
+    elif [ "$TYPE" == "android" ]; then
+        if [ -d "build_${TYPE}_${ABI}" ]; then
+            rm -r build_${TYPE}_${ABI}
+        fi
+    else
+        echoWarning "TODO: clean $TYPE lib"
+        make clean
+    fi
 }
 
 function save() {
-    . "$SAVE_SCRIPT" 
+    . "$SAVE_SCRIPT"
     savestatus ${TYPE} "openssl" ${ARCH} ${VER} true "${SAVE_FILE}"
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "openssl" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "openssl" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

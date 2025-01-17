@@ -9,20 +9,19 @@ else
     export FORCE=""
 fi
 
-
 #!/bin/bash
 
 # Configuration
 mkdir -p out
 for zip in out/*.zip; do
-  echo "Extracting $zip..."
-  unzip -o "$zip" -d out/
+    echo "Extracting $zip..."
+    unzip -o "$zip" -d out/
 done
 echo "Extraction complete."
 rm out/*.zip
 for tarball in out/*.tar.bz2; do
-  echo "Extracting $tarball..."
-  tar -xjf "$tarball" -C out/
+    echo "Extracting $tarball..."
+    tar -xjf "$tarball" -C out/
 done
 echo ".tar.bz2 extraction complete."
-rm -f out/*.tar.bz2 
+rm -f out/*.tar.bz2

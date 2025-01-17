@@ -1,9 +1,9 @@
 #!/bin/bash
 # set -x
 echo " Format Bash Scripts all nice"
-printHelp(){
+printHelp() {
     echo "Help"
-cat << EOF
+    cat <<EOF
     Usage:
     ."$SCRIPT_DIR/format.sh"
     format_scripts [DIRECTORY]
@@ -16,7 +16,7 @@ format_scripts() {
     local directory="$1"
 
     if [ -z "$1" ]; then
-        printHelp;
+        printHelp
     fi
 
     # Check if shfmt is installed
@@ -59,18 +59,20 @@ format_scripts() {
             continue
         fi
 
-        temp_file=$(mktemp)
+        # temp_file=$(mktemp)
+
+        shfmt -i 4 -ci -w "$file"
 
         # Safely expand tabs and format the script
-        expand -t 4 "$file" | shfmt -i 4 -ci -w - > "$temp_file"
+        # expand -t 4 "$file" | shfmt -i 4 -ci -w - > "$temp_file"
 
-        # Replace the original file only if the operation was successful
-        if [ $? -eq 0 ]; then
-            mv "$temp_file" "$file"
-        else
-            echo "An error occurred. Original file remains unchanged."
-            rm -f "$temp_file"
-        fi
+        # # Replace the original file only if the operation was successful
+        # if [ $? -eq 0 ]; then
+        #     mv "$temp_file" "$file"
+        # else
+        #     echo "An error occurred. Original file remains unchanged."
+        #     rm -f "$temp_file"
+        # fi
 
         # Format TAB to spaces
         # expand -t 4 "$file" | shfmt -i 4 -ci -w - > "$file"

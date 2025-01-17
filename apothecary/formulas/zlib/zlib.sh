@@ -3,8 +3,8 @@
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
 
-FORMULA_TYPES=( "vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" )
-FORMULA_DEPENDS=( )
+FORMULA_TYPES=("vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "android")
+FORMULA_DEPENDS=()
 
 # define the version
 VER=1.3.1
@@ -15,34 +15,33 @@ DEFINES=""
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 GIT_TAG=v$VER
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
-	. "$DOWNLOADER_SCRIPT"
+    . "$DOWNLOADER_SCRIPT"
 
-	downloader ${GIT_URL}
-	tar -xf zlib-$VER.tar.gz
-	mv zlib-$VER zlib
-	rm -f zlib-$VER.tar.gz
+    downloader ${GIT_URL}
+    tar -xf zlib-$VER.tar.gz
+    mv zlib-$VER zlib
+    rm -f zlib-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: #noop
-	# . "$DOWNLOADER_SCRIPT"
-	# downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
-	cp -v "$FORMULA_DIR"/*.txt ./
+    : #noop
+    # . "$DOWNLOADER_SCRIPT"
+    # downloader https://github.com/danoli3/zlib/raw/patch-1/CMakeLists.txt
+    cp -v "$FORMULA_DIR"/*.txt ./
 
 }
 
 # executed inside the lib src dir
 function build() {
-	LIBS_ROOT=$(realpath $LIBS_DIR)
-	if [ "$TYPE" == "vs" ] ; then
+    LIBS_ROOT=$(realpath $LIBS_DIR)
+    if [ "$TYPE" == "vs" ]; then
 
-		echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
@@ -52,9 +51,9 @@ function build() {
             -G "${GENERATOR_NAME}" \
             -A "${PLATFORM}" \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-		    -D BUILD_SHARED_LIBS=ON \
-		    -DZLIB_BUILD_EXAMPLES=OFF \
-		    -DSKIP_EXAMPLE=ON \
+            -D BUILD_SHARED_LIBS=ON \
+            -DZLIB_BUILD_EXAMPLES=OFF \
+            -DSKIP_EXAMPLE=ON \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -66,20 +65,20 @@ function build() {
             -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-		    ${CMAKE_WIN_SDK} 
+            ${CMAKE_WIN_SDK}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		mkdir -p "build_${TYPE}_${PLATFORM}"
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
-        rm -f CMakeCache.txt *.a *.o 
-		cmake .. \
-			-DCMAKE_INSTALL_PREFIX=Release \
+        rm -f CMakeCache.txt *.a *.o
+        cmake .. \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-		    -D BUILD_SHARED_LIBS=OFF \
-		    -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-		    -DZLIB_BUILD_EXAMPLES=OFF \
-		    -DSKIP_EXAMPLE=ON \
+            -D BUILD_SHARED_LIBS=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_BUILD_EXAMPLES=OFF \
+            -DSKIP_EXAMPLE=ON \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -95,240 +94,240 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-            -DENABLE_VISIBILITY=OFF 
+            -DENABLE_VISIBILITY=OFF
 
-		 cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-		 cd ..
-    elif [ "$TYPE" == "android" ] ; then
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+    elif [ "$TYPE" == "android" ]; then
 
-		# source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
+        # source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
-		mkdir -p "build_${TYPE}_${ABI}"
-		cd "build_${TYPE}_${ABI}"
-		rm -f CMakeCache.txt *.a *.o
-		# export CFLAGS="$CFLAGS $FLAG_RELEASE"
-		# export CXXFLAGS="$CFLAGS $FLAG_RELEASE"
+        mkdir -p "build_${TYPE}_${ABI}"
+        cd "build_${TYPE}_${ABI}"
+        rm -f CMakeCache.txt *.a *.o
+        # export CFLAGS="$CFLAGS $FLAG_RELEASE"
+        # export CXXFLAGS="$CFLAGS $FLAG_RELEASE"
 
-		DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DBUILD_SHARED_LIBS=OFF"
-	    cmake .. ${DEFINES} \
-			-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
-			-DPLATFORM=$PLATFORM \
-			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-			-D ANDROID_ABI=${ABI} \
-			-D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-			-D ANDROID_TOOLCHAIN=clang \
-			-DENABLE_VISIBILITY=OFF \
-			-DCMAKE_VERBOSE_MAKEFILE=ON \
-			-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
-			cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-		cd ..
-	elif [ "$TYPE" == "emscripten" ] ; then
-		mkdir -p build_${TYPE}_${PLATFORM}
-	    cd build_${TYPE}_${PLATFORM}
-	    rm -f CMakeCache.txt *.a *.o  *.js
-	    $EMSDK/upstream/emscripten/emcmake cmake .. \
-	    	-DCMAKE_INSTALL_LIBDIR="lib" \
-	    	-DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
-	    	-DLINK_FLAGS="${LINK_FLAGS}" \
-	    	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-	    	-D BUILD_SHARED_LIBS=OFF \
-		    -DZLIB_BUILD_EXAMPLES=OFF \
-		    -DSKIP_EXAMPLE=ON \
-		    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-	    	-DCMAKE_C_STANDARD=${C_STANDARD} \
-			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}" \
-			-DCMAKE_C_FLAGS="${FLAG_RELEASE}" \
-			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF \
-			-DCMAKE_INSTALL_PREFIX=Release \
+        cmake .. ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -D ANDROID_ABI=${ABI} \
+            -D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+            -D ANDROID_TOOLCHAIN=clang \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+    elif [ "$TYPE" == "emscripten" ]; then
+        mkdir -p build_${TYPE}_${PLATFORM}
+        cd build_${TYPE}_${PLATFORM}
+        rm -f CMakeCache.txt *.a *.o *.js
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+            -DLINK_FLAGS="${LINK_FLAGS}" \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -D BUILD_SHARED_LIBS=OFF \
+            -DZLIB_BUILD_EXAMPLES=OFF \
+            -DSKIP_EXAMPLE=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="${FLAG_RELEASE}" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -G 'Unix Makefiles'
-        #     -DCMAKE_INSTALL_INCLUDEDIR=include 
+        #     -DCMAKE_INSTALL_INCLUDEDIR=include
         # $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
         # $EMSDK/upstream/emscripten/emmake make install
-	 	# cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-	 	$EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
-	 	$EMSDK/upstream/emscripten/emmake make install
-	    cd ..
+        # cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
+        $EMSDK/upstream/emscripten/emmake make install
+        cd ..
     elif [ "$TYPE" == "msys2" ]; then
-		echoVerbose "building $TYPE | $ARCH "
+        echoVerbose "building $TYPE | $ARCH "
         echoVerbose "--------------------"
-	    mkdir -p "build_${TYPE}_${ARCH}"
-	    cd "build_${TYPE}_${ARCH}"
-	    rm -f CMakeCache.txt *.a *.o *.so
-	    DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.a *.o *.so
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DBUILD_SHARED_LIBS=OFF"
-	    cmake .. ${DEFINES} \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-		    -DZLIB_BUILD_EXAMPLES=OFF \
-		    -DSKIP_EXAMPLE=ON \
-	        -DCMAKE_SYSTEM_NAME=$TYPE \
-	        -DCMAKE_INSTALL_PREFIX=Release \
-    		-DCMAKE_SYSTEM_PROCESSOR=$ARCH \
-    		-DCMAKE_INSTALL_PREFIX=Release \
+        cmake .. ${DEFINES} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DZLIB_BUILD_EXAMPLES=OFF \
+            -DSKIP_EXAMPLE=ON \
+            -DCMAKE_SYSTEM_NAME=$TYPE \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_SYSTEM_PROCESSOR=$ARCH \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include
-	    cmake --build . --target install --config Release -j${PARALLEL_MAKE}
-	    cd ..
-	elif [ "$TYPE" == "linux" ]; then
-	    if [ $CROSSCOMPILING -eq 1 ]; then
+        cmake --build . --target install --config Release -j${PARALLEL_MAKE}
+        cd ..
+    elif [ "$TYPE" == "linux" ]; then
+        if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
         fi
-		echoVerbose "building $TYPE | $ARCH "
+        echoVerbose "building $TYPE | $ARCH "
         echoVerbose "--------------------"
-	    mkdir -p "build_${TYPE}_${ARCH}"
-	    cd "build_${TYPE}_${ARCH}"
-	    rm -f CMakeCache.txt *.a *.o *.so
-	    DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt *.a *.o *.so
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DBUILD_SHARED_LIBS=OFF"
-	    cmake .. ${DEFINES} \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
-    		-DGCC_VERSION=${GCC_VERSION} \
-	        -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-		    -DZLIB_BUILD_EXAMPLES=OFF \
-		    -DSKIP_EXAMPLE=ON \
-    		-DCMAKE_INSTALL_PREFIX=Release \
+        cmake .. ${DEFINES} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DZLIB_BUILD_EXAMPLES=OFF \
+            -DSKIP_EXAMPLE=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include
-	    cmake --build . --target install --config Release -j${PARALLEL_MAKE}
-	    cd ..
-	fi
+        cmake --build . --target install --config Release -j${PARALLEL_MAKE}
+        cd ..
+    fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	mkdir -p $1/include
-	. "$SECURE_SCRIPT"
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ > /dev/null 2>&1
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
+    mkdir -p $1/include
+    . "$SECURE_SCRIPT"
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ >/dev/null 2>&1
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
-        secure $1/lib/$TYPE/$PLATFORM/zlib.a 
+        secure $1/lib/$TYPE/$PLATFORM/zlib.a
 
-		cp -vR "build_${TYPE}_${PLATFORM}/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/
-       
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/
+
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
-	elif [ "$TYPE" == "vs" ] ; then    
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ > /dev/null 2>&1
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib > /dev/null 2>&1
+    elif [ "$TYPE" == "vs" ]; then
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ >/dev/null 2>&1
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib >/dev/null 2>&1
         secure $1/lib/$TYPE/$PLATFORM/zlib.lib
 
         cp -vR "build_${TYPE}_${ARCH}/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/
-       
+
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
-    elif [ "$TYPE" == "android" ] ; then
-		mkdir -p $1/lib/$TYPE/$ABI/
-		cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
-		cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+    elif [ "$TYPE" == "android" ]; then
+        mkdir -p $1/lib/$TYPE/$ABI/
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
+        cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
         secure $1/lib/$TYPE/$ABI/zlib.a
-	elif [ "$TYPE" == "emscripten" ] ; then
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
-		mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -v "build_${TYPE}_$PLATFORM/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
+    elif [ "$TYPE" == "emscripten" ]; then
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -v "build_${TYPE}_$PLATFORM/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
         secure $1/lib/$TYPE/$PLATFORM/zlib.a
         cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
-        
-        PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
-	elif [ "$TYPE" == "linux" ]; then
-		mkdir -p $1/include    
-	    mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ > /dev/null 2>&1
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+
+    elif [ "$TYPE" == "linux" ]; then
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ >/dev/null 2>&1
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a >/dev/null 2>&1
         secure $1/lib/$TYPE/$PLATFORM/zlib.a
-         cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
+        cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
-		sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
-		sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-		sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
-		export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "msys2" ]; then
-		mkdir -p $1/include    
-	    mkdir -p $1/lib/$TYPE/$PLATFORM
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ > /dev/null 2>&1
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a > /dev/null 2>&1
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ >/dev/null 2>&1
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a >/dev/null 2>&1
         secure $1/lib/$TYPE/$PLATFORM/zlib.a
-	else
-		make install
-	fi
+    else
+        make install
+    fi
 
-	# copy license file
-	if [ -d "$1/license" ]; then
+    # copy license file
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v LICENSE $1/license/
+    mkdir -p $1/license
+    cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-	if [[ "$TYPE" =~ ^(vs|osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
-		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-            rm -r build_${TYPE}_${PLATFORM}     
+    if [[ "$TYPE" =~ ^(vs|osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}
         fi
-    elif [ "$TYPE" == "android" ] ; then
-		if [ -d "build_${TYPE}_${ABI}" ]; then
-			rm -r build_${TYPE}_${ABI}     
-		fi
+    elif [ "$TYPE" == "android" ]; then
+        if [ -d "build_${TYPE}_${ABI}" ]; then
+            rm -r build_${TYPE}_${ABI}
+        fi
     elif [ "$TYPE" == "msys2" ]; then
-		if [ -d "build_${TYPE}_${ARCH}" ]; then
-			rm -r build_${TYPE}_${ARCH}
-		fi
-	else
-		make uninstall
-		make clean
-	fi
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            rm -r build_${TYPE}_${ARCH}
+        fi
+    else
+        make uninstall
+        make clean
+    fi
 }
 
 function load() {

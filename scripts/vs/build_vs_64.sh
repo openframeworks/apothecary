@@ -3,8 +3,14 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
-ROOT=$(cd $(dirname "$0"); pwd -P)/../../
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../
 APOTHECARY_PATH=$ROOT/apothecary
 
 BUNDLE_NO="$1"

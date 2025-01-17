@@ -5,15 +5,15 @@ set -e
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    exit 1
 }
 
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -21,20 +21,20 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 2
         done

@@ -2,13 +2,22 @@
 
 # Apothecary ROOT dir relative
 
-SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
-ROOT=$(cd $(dirname "${SCRIPT_DIR}/../../../"); pwd -P)
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "${SCRIPT_DIR}/../../../")
+    pwd -P
+)
 APOTHECARY_PATH=${ROOT}/apothecary
 
 # Set OF_ROOT directory
 if [ -z "${OF_ROOT+x}" ]; then
-    export OF_ROOT=$(cd "$(dirname "$ROOT/../../../")"; pwd -P)
+    export OF_ROOT=$(
+        cd "$(dirname "$ROOT/../../../")"
+        pwd -P
+    )
 fi
 
 # openFrameworks libs directory
@@ -16,23 +25,23 @@ OF_LIBS=${OF_ROOT}/libs
 OF_ADDONS=${OF_ROOT}/addons
 
 if [ -z "${MULTITHREADED_TYPE+x}" ]; then # MD (MutliDynamic) # MT (Multi)
-    MULTITHREADED_TYPE=MD 
+    MULTITHREADED_TYPE=MD
 fi
 
 if [ -z ${CALLING_CONVENTION+x} ]; then # Gz (__stdcall) # Gd (__cdecl) # Gr (__fastcall) # Gv ( __vectorcall )
-    CALLING_CONVENTION="Gz" #these changes effect how libraries are bound/loaded and called 
+    CALLING_CONVENTION="Gz"             #these changes effect how libraries are bound/loaded and called
 fi
 
 if [ -z "${VS_TYPE+x}" ]; then # Professional # Enterprise # Community
-    VS_TYPE=Community 
+    VS_TYPE=Community
 fi
 
-if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM 
-    VS_COMPILER=MSVC 
+if [ -z "${VS_COMPILER+x}" ]; then # MSVC / # Clang LLVM
+    VS_COMPILER=MSVC
 fi
 
 if [ -z "${VS_HOST+x}" ]; then
-    VS_HOST=amd64 
+    VS_HOST=amd64
 fi
 
 if [ -z "${PLATFORM+x}" ]; then

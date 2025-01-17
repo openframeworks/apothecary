@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd $APOTHECARY_LEVEL
 
 export MAKE_TARGET="${MAKE_TARGET:-"cmake"}"
@@ -24,7 +24,7 @@ fi
 export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
 
-if  [ -z "$2" ]; then
+if [ -z "$2" ]; then
     export BUILD_SYSTEM=make
     echo "android_configure: make config"
 else
@@ -54,7 +54,7 @@ export TOOLCHAIN_TYPE=llvm${CLANG_VERSION}
 export TOOLCHAIN=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}
 
 # if [[ "$NDK_VERSION_MAJOR" = "23"  || "$NDK_VERSION_MAJOR" = "24" ]]; then
-     export SYSROOT="${TOOLCHAIN}/sysroot"
+export SYSROOT="${TOOLCHAIN}/sysroot"
 #     echo "NDK_VESION_MAJOR: ${NDK_VERSION_MAJOR}"
 # fi
 
@@ -93,9 +93,8 @@ if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
 fi
 
 # if [ "$NDK_VERSION_MAJOR" = "22" ]; then
-    # export LIB_SYSROOT="${SYSROOT}/usr/lib/$ANDROID_POSTFIX/arch-arm"
+# export LIB_SYSROOT="${SYSROOT}/usr/lib/$ANDROID_POSTFIX/arch-arm"
 # fi
-
 
 export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
 
@@ -114,14 +113,13 @@ export LD=$TOOLCHAIN/bin/llvm-ld
 export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
 
-
 if [ "$BUILD_SYSTEM" = "cmake" ]; then
     export ANDROID_FIX_API="" # defined by default in cmake
     export MAKE_TARGET=""
     export MAKE_INCLUDES_CFLAGS=""
     export MAKE_INCLUDES_CPPFLAGS=""
     export OPTIMISE=""
-else 
+else
     export OPTIMISE="-Oz "
     export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
     export MAKE_INCLUDES_CFLAGS=" -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
@@ -129,16 +127,13 @@ else
     if [ "$ABI" = "armeabi-v7a" ]; then
         export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a"
     elif [ $ABI = "arm64-v8a" ]; then
-        export MAKE_TARGET="-target aarch64-linux-android" 
+        export MAKE_TARGET="-target aarch64-linux-android"
     elif [ "$ABI" = "x86-64" ]; then
         export MAKE_TARGET="-target x86_64-linux-android "
     elif [ "$ABI" = "x86" ]; then
-        export MAKE_TARGET="-target i686-linux-android -mfpmath=sse  -fno-stack-protector -msse3 -mstackrealign " 
+        export MAKE_TARGET="-target i686-linux-android -mfpmath=sse  -fno-stack-protector -msse3 -mstackrealign "
     fi
 fi
-
-
-
 
 export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CFLAGS}"
 export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}"
@@ -162,7 +157,7 @@ if [ "$ABI" = "armeabi-v7a" ]; then
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/arm-linux-androideabi"
     export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ $ABI = "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET " 
+    export CFLAGS="$CFLAGS $MAKE_TARGET "
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET"
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/aarch64-linux-android" # for ASM includes
     export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -Wl,--no-undefined"
@@ -172,7 +167,7 @@ elif [ "$ABI" = "x86-64" ]; then
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/x86_64-linux-android" # for ASM includes
     export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
 elif [ "$ABI" = "x86" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET"  #march=i686  -target i686-linux-android 
+    export CFLAGS="$CFLAGS $MAKE_TARGET"     #march=i686  -target i686-linux-android
     export CPPFLAGS="$CPPFLAGS $MAKE_TARGET" #  -target i686-none-linux-android
     #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/i686-linux-android"
     export LDFLAGS="$LDFLAGS  "

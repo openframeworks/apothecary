@@ -6,8 +6,8 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "osx" "vs" "linux" "linux64")
-FORMULA_DEPENDS=( )
+FORMULA_TYPES=("osx" "vs" "linux" "linux64")
+FORMULA_DEPENDS=()
 
 GIT_URL=https://github.com/glfw/glfw
 VER=3.4
@@ -17,40 +17,40 @@ DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	 # echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
-     # git clone --branch ${GIT_BRANCH} ${GIT_URL} --depth 1
-     . "$DOWNLOADER_SCRIPT"
+    # echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
+    # git clone --branch ${GIT_BRANCH} ${GIT_URL} --depth 1
+    . "$DOWNLOADER_SCRIPT"
 
-	if [ "$TYPE" == "vs" ] ; then
-		downloader "${GIT_URL}/archive/refs/tags/${VER}.zip"
-		unzip -q "${VER}.zip"
-		mv "glfw-${VER}" glfw
-		rm "${VER}.zip"
-	else 
-		downloader "${GIT_URL}/archive/refs/tags/${VER}.tar.gz"
-		tar -xf "${VER}.tar.gz"
-		mv "glfw-${VER}" glfw
-		rm "${VER}.tar.gz"
-	fi
+    if [ "$TYPE" == "vs" ]; then
+        downloader "${GIT_URL}/archive/refs/tags/${VER}.zip"
+        unzip -q "${VER}.zip"
+        mv "glfw-${VER}" glfw
+        rm "${VER}.zip"
+    else
+        downloader "${GIT_URL}/archive/refs/tags/${VER}.tar.gz"
+        tar -xf "${VER}.tar.gz"
+        mv "glfw-${VER}" glfw
+        rm "${VER}.tar.gz"
+    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	: # noop
+    : # noop
 }
 
 # executed inside the lib src dir
 function build() {
-	
-	LIBS_ROOT=$(realpath $LIBS_DIR)
 
-	if [ "$TYPE" == "vs" ] ; then
-		echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+    LIBS_ROOT=$(realpath $LIBS_DIR)
+
+    if [ "$TYPE" == "vs" ]; then
+        echo "building glfw $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        rm -f CMakeCache.txt *.o *.lib      
+        rm -f CMakeCache.txt *.o *.lib
 
         DEFINES="
         	-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
@@ -67,9 +67,9 @@ function build() {
             -DGLFW_BUILD_TESTS=OFF \
             -DGLFW_BUILD_DOCS=OFF \
             -DGLFW_VULKAN_STATIC=OFF"
-     
+
         cmake .. ${DEFINES} \
-        	-DLIBRARY_SUFFIX=${ARCH} \
+            -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -85,152 +85,152 @@ function build() {
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
         cd ..
-	elif [ "$TYPE" == "osx" ] ; then
-		
-		DEFINES="${DEFINES} -DGLFW_BUILD_DOCS=OFF \
+    elif [ "$TYPE" == "osx" ]; then
+
+        DEFINES="${DEFINES} -DGLFW_BUILD_DOCS=OFF \
 				-DGLFW_BUILD_TESTS=OFF \
 				-DGLFW_BUILD_EXAMPLES=OFF"
 
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		rm -f CMakeCache.txt *.o *.a
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.o *.a
 
-		cmake .. -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-				-DPLATFORM=$PLATFORM \
-				-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-				-DENABLE_BITCODE=OFF \
-				-DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
-				-DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
-				-DCMAKE_C_FLAGS="-fPIC ${FLAG_RELEASE}" \
-				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF \
-				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_BUILD_TYPE=Release \
-			    -DCMAKE_C_STANDARD=${C_STANDARD} \
-			    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			    -DCMAKE_CXX_EXTENSIONS=OFF \
-			    -DCMAKE_INSTALL_PREFIX=Release \
-				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-				-DCMAKE_INSTALL_INCLUDEDIR=include \
-				-DCMAKE_INSTALL_LIBDIR=lib \
-				$DEFINES
-		cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-		cd ..
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DENABLE_BITCODE=OFF \
+            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
+            -DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            $DEFINES
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
 
-	elif [[ "$TYPE" =~ ^(linux)$ ]]; then
-		if [ $CROSSCOMPILING -eq 1 ]; then
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
             DEFINES="-DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2 -DCMAKE_LIBRARY_PATH=$SYSROOT/usr/lib -DCMAKE_INCLUDE_PATH=$SYSROOT/usr/include -DGLFW_BUILD_WAYLAND=OFF"
         else
             DEFINES="-DGLFW_BUILD_WAYLAND=OFF"
         fi
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		rm -f CMakeCache.txt *.o *.a
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.o *.a
 
-		cmake .. -DGLFW_BUILD_DOCS=OFF \
-				-DGLFW_BUILD_TESTS=OFF \
-				-DGLFW_BUILD_EXAMPLES=OFF \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-				-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-				-DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
-				-DGCC_VERSION=${GCC_VERSION} \
-				-DCMAKE_C_FLAGS="-fPIC ${FLAG_RELEASE}" \
-				-DENABLE_VISIBILITY=OFF \
-				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_BUILD_TYPE=Release \
-			    -DCMAKE_C_STANDARD=${C_STANDARD} \
-			    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			    -DCMAKE_CXX_EXTENSIONS=OFF \
-			    -DCMAKE_INSTALL_PREFIX=Release \
-				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-				-DCMAKE_INSTALL_INCLUDEDIR=include \
-				-DCMAKE_INSTALL_LIBDIR=lib \
-				$DEFINES
-		cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-		cd ..
-	else
+        cmake .. -DGLFW_BUILD_DOCS=OFF \
+            -DGLFW_BUILD_TESTS=OFF \
+            -DGLFW_BUILD_EXAMPLES=OFF \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_C_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            $DEFINES
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+    else
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
             DEFINES="-DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2 -DCMAKE_LIBRARY_PATH=$SYSROOT/usr/lib -DCMAKE_INCLUDE_PATH=$SYSROOT/usr/include"
         else
             DEFINES=" "
         fi
-		mkdir -p build
-		cd build
-		cmake .. -DGLFW_BUILD_DOCS=OFF \
-				-DGLFW_BUILD_TESTS=OFF \
-				-DGLFW_BUILD_EXAMPLES=OFF \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_BUILD_TYPE=Release \
-			    -DCMAKE_C_STANDARD=${C_STANDARD} \
-			    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			    -DCMAKE_CXX_EXTENSIONS=OFF \
-				$DEFINES
+        mkdir -p build
+        cd build
+        cmake .. -DGLFW_BUILD_DOCS=OFF \
+            -DGLFW_BUILD_TESTS=OFF \
+            -DGLFW_BUILD_EXAMPLES=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            $DEFINES
 
- 		make clean
- 		make -j${PARALLEL_MAKE}
-	fi
+        make clean
+        make -j${PARALLEL_MAKE}
+    fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	mkdir -p $1/include/GLFW
-	mkdir -p $1/lib/$TYPE
-	if [ "$TYPE" == "vs" ] ; then
+    mkdir -p $1/include/GLFW
+    mkdir -p $1/lib/$TYPE
+    if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/glfw3.lib" $1/lib/$TYPE/$PLATFORM/glfw3.lib
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/glfw3.lib glfw3.pkl
-	elif [ "$TYPE" == "osx" ]; then 
+    elif [ "$TYPE" == "osx" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libglfw3.a glfw3.pkl
-    elif [ "$TYPE" == "linux" ]; then 
+    elif [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libglfw3.a glfw3.pkl
-	fi
-	# copy license file
-	if [ -d "$1/license" ]; then
+    fi
+    # copy license file
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v LICENSE.md $1/license/
+    mkdir -p $1/license
+    cp -v LICENSE.md $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-	if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${ARCH}" ]; then
             # Delete the folder and its contents
-            rm -r build_${TYPE}_${ARCH}     
+            rm -r build_${TYPE}_${ARCH}
         fi
-    elif [ "$TYPE" == "osx" ] ; then
+    elif [ "$TYPE" == "osx" ]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             # Delete the folder and its contents
-            rm -r build_${TYPE}_${PLATFORM}     
+            rm -r build_${TYPE}_${PLATFORM}
         fi
-	else
-		make clean
-	fi
+    else
+        make clean
+    fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "glfw3" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "glfw3" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

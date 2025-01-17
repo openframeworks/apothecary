@@ -25,18 +25,18 @@ trapError() {
     exit 1
 }
 
-if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    run(){
+if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    run() {
         echo "TARGET=\"emscripten\" $@"
         docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         #PATH=\"$DOCKER_HOME/bin:\$PATH\"
         echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> "formula_${ARCH}.log" 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -48,18 +48,21 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
     # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/../..
+    LOCAL_ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/../..
 else
-    run(){
+    run() {
         echo "$@"
         eval "$@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         echo "$@"
-        eval "$@" >> "formula_${ARCH}.log" 2>&1 &
+        eval "$@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -68,7 +71,10 @@ else
         run "tail -n 10 formula_${ARCH}.log"
     }
 
-    ROOT=$(cd $(dirname "$0"); pwd -P)/../..
+    ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/../..
     LOCAL_ROOT=$ROOT
 fi
 
@@ -79,13 +85,13 @@ if [ -z "${OUTPUT_FOLDER+x}" ]; then
 fi
 
 if [ -z "$1" ]; then
-   echo " TARGET: $1"
+    echo " TARGET: $1"
 else
     TARGET=$1
 fi
 
 if [ -z "$2" ]; then
-   echo " Bundle: $2"
+    echo " Bundle: $2"
 else
     BUNDLE=$2
 fi
@@ -93,7 +99,7 @@ fi
 #OUTPUT_FOLDER=$ROOT/out
 # VERBOSE=true
 
-if [ -z $TARGET ] ; then
+if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
 fi
@@ -129,7 +135,7 @@ mkdir -p "$OUT_BUNDLE_DIR"
 # Iterate over the folders in the library base directory
 for LIBRARY_DIR in "$OUTPUT_FOLDER"/*; do
     LIBRARY_NAME=$(basename "$LIBRARY_DIR")
-    
+
     # Check if the library name is in the keep list
     if [ -n "${KEEP_LIBRARIES[$LIBRARY_NAME]}" ]; then
         echo "Moving library folder: $LIBRARY_DIR to $OUT_BUNDLE_DIR"

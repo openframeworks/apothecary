@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set +e
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Function to calculate SHA for security
 calculate_hash() {
@@ -74,7 +74,7 @@ if [ -z "${FRAMEWORKS+x}" ]; then
     FRAMEWORKS=${8:-}
 fi
 
-secure() { 
+secure() {
     if [ -z "${1+x}" ]; then
         BINARY_SEC=""
     else
@@ -139,7 +139,7 @@ secure() {
     fi
 
     HASH_TYPE=$(hash_type "$BINARY_SEC")
-    
+
     if [ -n "$NAME" ]; then
         FILENAME="$NAME"
     else
@@ -169,8 +169,8 @@ secure() {
     # EOF
     # cat "$OUTPUT_FILE"
     OUTPUT_PKL_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.pkl"
-# Create or overwrite the .pkl file - Pkl simple Key = Value
-cat <<EOF > "$OUTPUT_PKL_FILE"
+    # Create or overwrite the .pkl file - Pkl simple Key = Value
+    cat <<EOF >"$OUTPUT_PKL_FILE"
 name = "$NAME"
 version = "$VER"
 buildTime = "$BUILD_TIME"
@@ -188,6 +188,6 @@ sourceSHA = "$SOURCE_SHA"
 defines = "$DEFINES"
 frameworks = "$FRAMEWORKS"
 EOF
-cat "$OUTPUT_PKL_FILE"
+    cat "$OUTPUT_PKL_FILE"
 
 }

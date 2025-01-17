@@ -9,7 +9,10 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-APOTH=$(cd $(dirname "$0"); pwd -P)/../..
+APOTH=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../..
 APOTHECARY_PATH=$APOTH/apothecary
 cd $APOTHECARY_PATH
 

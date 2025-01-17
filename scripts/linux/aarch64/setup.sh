@@ -5,15 +5,15 @@ set -o pipefail
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	cat formula.log
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    cat formula.log
+    exit 1
 }
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd $APOTHECARY_LEVEL
 
 CROSS_COMPILER=${CROSS_COMPILER:-raspbian}

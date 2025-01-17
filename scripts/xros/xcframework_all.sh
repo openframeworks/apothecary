@@ -2,20 +2,29 @@
 
 # Apothecary ROOT dir relative
 
-SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
-ROOT=$(cd $(dirname "${SCRIPT_DIR}/../../../"); pwd -P)
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "${SCRIPT_DIR}/../../../")
+    pwd -P
+)
 APOTHECARY_PATH=${ROOT}/apothecary
 
 # Set OF_ROOT directory
 if [ -z "${OF_ROOT+x}" ]; then
-    export OF_ROOT=$(cd "$(dirname "$ROOT/../../../")"; pwd -P)
+    export OF_ROOT=$(
+        cd "$(dirname "$ROOT/../../../")"
+        pwd -P
+    )
 fi
 
 # openFrameworks libs directory
 OF_LIBS=${OF_ROOT}/libs
 OF_ADDONS=${OF_ROOT}/addons
 
-# control 
+# control
 if [ -z "${BUILD_LIBRARIES+x}" ]; then
     BUILD_LIBRARIES=1
 fi
@@ -40,8 +49,6 @@ if [ -z "${XCFRAMEWORK+x}" ]; then
     XCFRAMEWORK=1
 fi
 
-
-
 # Set OUTPUT_FOLDER for the build
 export OUTPUT_FOLDER="${ROOT}/out"
 
@@ -58,22 +65,20 @@ move_libraries() {
 
     echo "moving libraries from apothecary out to $OF_LIBS"
 
+    echo "Source Folder: ${OUTPUT_FOLDER}"
+    echo "Destination Folder: ${OF_LIBS}"
 
-        echo "Source Folder: ${OUTPUT_FOLDER}"
-        echo "Destination Folder: ${OF_LIBS}"
-
-        if ! command -v rsync &> /dev/null; then
-            echo "Using cp to move libraries..."
-            for file in "${OUTPUT_FOLDER}"/*; do
-                cp -av "$file" "${OF_LIBS}/"
-            done
-        else
-            echo "Using rsync to move libraries..."
-            for file in "${OUTPUT_FOLDER}"/*; do
-                rsync -av "$file" "${OF_LIBS}/"
-            done
-        fi
-
+    if ! command -v rsync &>/dev/null; then
+        echo "Using cp to move libraries..."
+        for file in "${OUTPUT_FOLDER}"/*; do
+            cp -av "$file" "${OF_LIBS}/"
+        done
+    else
+        echo "Using rsync to move libraries..."
+        for file in "${OUTPUT_FOLDER}"/*; do
+            rsync -av "$file" "${OF_LIBS}/"
+        done
+    fi
 
     echo "Libraries moved to openFrameworks libs directory."
 }
@@ -82,12 +87,12 @@ build_xcframework() {
     echo "build_xcframework"
     for BUNDLE_NO in {1..3}; do
         echo "Building bundle $BUNDLE_NO"
-            echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-            ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
-            if [ $? -ne 0 ]; then
-                echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
-                exit 1
-            fi
+        echo "Building $PLATFORM $ARCHE bundle $BUNDLE_NO"
+        ${SCRIPT_DIR}/build_xcframework.sh ${BUNDLE_NO}
+        if [ $? -ne 0 ]; then
+            echo "Error building $PLATFORM $ARCHE bundle $BUNDLE_NO"
+            exit 1
+        fi
     done
 }
 
@@ -107,7 +112,7 @@ sort_libraries() {
         addons=("ofxOpenCv" "ofxOpenCv" "ofxAssimpModelLoader" "ofxSvg" "ofxSvg" "ofxPoco")
     fi
 
-    for ((i=0;i<${#addonslibs[@]};++i)); do
+    for ((i = 0; i < ${#addonslibs[@]}; ++i)); do
         if [ -e ${OF_LIBS}/${addonslibs[i]} ]; then
             echo "Copying ${addonslibs[i]} to ${addons[i]}"
             addon_path="${OF_ADDONS}/${addons[i]}/libs/${addonslibs[i]}"
@@ -116,7 +121,7 @@ sort_libraries() {
                 rm -rf ${addon_path}
             fi
             mkdir -p $addon_path
-            if ! command -v rsync &> /dev/null; then      
+            if ! command -v rsync &>/dev/null; then
                 cp -av ${OF_LIBS}/${addonslibs[i]}/* ${addon_path}
             else
                 rsync -av ${OF_LIBS}/${addonslibs[i]}/ ${addon_path}/
@@ -128,25 +133,23 @@ sort_libraries() {
     done
 }
 
-
 if [ ${XCFRAMEWORK} == 1 ]; then
-   build_xcframework
+    build_xcframework
 fi
 
 if [ ${MOVE_LIBRARIES} == 1 ]; then
 
-   echo "========================"
+    echo "========================"
 
-   echo "Moving Latest Libraries to openFrameworks core libs directory"
-   move_libraries
+    echo "Moving Latest Libraries to openFrameworks core libs directory"
+    move_libraries
 
-   echo "========================"
+    echo "========================"
 
-   echo "Updating and moving addons to correct directories from libs directory"
-   sort_libraries
+    echo "Updating and moving addons to correct directories from libs directory"
+    sort_libraries
 
-   echo "========================"
+    echo "========================"
 fi
 
 echo "Apothecary openFrameworks Build and installation complete."
-

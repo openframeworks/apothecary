@@ -5,15 +5,15 @@ set -e
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    exit 1
 }
 
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -21,20 +21,20 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 2
         done
@@ -72,7 +72,7 @@ elif [ "$GCC" == "gcc5" ]; then
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
     g++ -v
 elif [ "$GCC" == "gcc6" ]; then
-    
+
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
     sudo apt-get update
     sudo add-apt-repository -y "deb http://cz.archive.ubuntu.com/ubuntu bionic main universe"
@@ -99,7 +99,7 @@ elif [ "$GCC" == "gcc7" ]; then
     sudo add-apt-repository -r "deb http://cz.archive.ubuntu.com/ubuntu bionic main universe"
     g++ -v
 elif [[ "$GCC" =~ ^gcc(8|9|10|11|12|13)$ ]]; then
-    GCC_VERSION=${BASH_REMATCH[1]} 
+    GCC_VERSION=${BASH_REMATCH[1]}
     sudo apt update
     sudo apt install software-properties-common
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -121,8 +121,8 @@ elif [ "$GCC" == "gcc14" ]; then
     sudo apt install -y --allow-unauthenticated gcc-14 g++-14
     # Configure alternatives to set GCC 14 as default
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 14 \
-                             --slave /usr/bin/g++ g++ /usr/bin/g++-14
-    sudo update-alternatives --config gcc  # GCC 14 as the default
+        --slave /usr/bin/g++ g++ /usr/bin/g++-14
+    sudo update-alternatives --config gcc # GCC 14 as the default
     gcc --version
     g++ -v
 elif [ "$GCC" == "gcc15" ]; then
@@ -144,7 +144,7 @@ elif [ "$GCC" == "gcc15" ]; then
     make -j
     sudo make install
 
-    echo "export PATH=/usr/local/gcc-15/bin:\$PATH" >> ~/.bashrc
+    echo "export PATH=/usr/local/gcc-15/bin:\$PATH" >>~/.bashrc
     source ~/.bashrc
     # sudo apt update
     # sudo apt install -y software-properties-common
@@ -163,12 +163,10 @@ else
     echo "GCC version not specified on OPT env var, set one of gcc14, gcc6 or gcc13"
 fi
 
-
 if [ "$ACTIONS_CACHE" -eq 0 ]; then
     sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
     sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix ccache cmake build-essential
     sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
-    sudo apt-get install -y 
+    sudo apt-get install -y
     cmake --version
 fi
-

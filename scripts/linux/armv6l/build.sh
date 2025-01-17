@@ -5,10 +5,10 @@ set -o pipefail
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	cat formula.log
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    cat formula.log
+    exit 1
 }
 
 export ARCH=armv6l

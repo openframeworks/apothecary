@@ -5,15 +5,15 @@ set -e
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    exit 1
 }
 
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -21,20 +21,20 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 2
         done
@@ -49,8 +49,8 @@ sudo apt-get update
 sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 sudo apt-get update
 sudo apt-get install -y qemu-user-static binfmt-support
-if  command -v docker &> /dev/null; then
-	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+if command -v docker &>/dev/null; then
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 fi
 if [[ "$GCC" =~ ^gcc(8|9|10|11|12|13)$ ]]; then
     GCC_VERSION=${BASH_REMATCH[1]}
@@ -75,8 +75,8 @@ elif [ "$GCC" == "gcc14" ]; then
     sudo apt install -y --allow-unauthenticated gcc-14 g++-14
     # Configure alternatives to set GCC 14 as default
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 14 \
-                             --slave /usr/bin/g++ g++ /usr/bin/g++-14
-    sudo update-alternatives --config gcc  # GCC 14 as the default
+        --slave /usr/bin/g++ g++ /usr/bin/g++-14
+    sudo update-alternatives --config gcc # GCC 14 as the default
     gcc --version
     g++ -v
 elif [ "$GCC" == "gcc15" ]; then
@@ -98,7 +98,7 @@ elif [ "$GCC" == "gcc15" ]; then
     make -j
     sudo make install
 
-    echo "export PATH=/usr/local/gcc-15/bin:\$PATH" >> ~/.bashrc
+    echo "export PATH=/usr/local/gcc-15/bin:\$PATH" >>~/.bashrc
     source ~/.bashrc
     # sudo apt update
     # sudo apt install -y software-properties-common
@@ -126,7 +126,7 @@ sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev 
 sudo apt-get install -y aptitude build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev cmake unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils libtool dos2unix
 sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev ccache
 sudo aptitude install -y gperf
-\
+
 dpkg -L gcc-aarch64-linux-gnu
 
 # Download the installer script
@@ -138,4 +138,3 @@ dpkg -L gcc-aarch64-linux-gnu
 
 # Verify the installation
 cmake --version
-

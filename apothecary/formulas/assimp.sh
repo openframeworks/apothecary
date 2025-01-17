@@ -6,8 +6,8 @@
 #
 # uses CMake
 
-FORMULA_TYPES=( "osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "vs" )
-FORMULA_DEPENDS=( "zlib" )
+FORMULA_TYPES=("osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "vs")
+FORMULA_DEPENDS=("zlib")
 
 # define the version
 VER=5.3.1
@@ -42,10 +42,10 @@ function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         echo "building $TYPE | $ARCH $PLATFORM"
-        echo "--------------------" 
+        echo "--------------------"
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"   
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -81,21 +81,21 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
 
         cmake --build . --config Release -j${PARALLEL_MAKE}
-        cd ..      
+        cd ..
         #cleanup to not fail if the other platform is called
         rm -f CMakeCache.txt
 
-    elif [ "$TYPE" == "vs" ] ; then
-        
+    elif [ "$TYPE" == "vs" ]; then
+
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"     
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/${PLATFORM}/zlib.lib"   
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/${PLATFORM}/zlib.lib"
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -147,23 +147,22 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-        cmake --build . --config Debug -j${PARALLEL_MAKE} 
+        cmake --build . --config Debug -j${PARALLEL_MAKE}
         rm -f CMakeCache.txt || true
-        cd .. 
+        cd ..
         echo "--------------------"
         echo "Completed Assimp for $TYPE | $ARCH | $VS_VER"
 
-    elif [ "$TYPE" == "msys2" ] ; then
+    elif [ "$TYPE" == "msys2" ]; then
         echoWarning "TODO: msys2 build"
 
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
 
         ANDROID_API=24
         ANDROID_PLATFORM=android-${ANDROID_API}
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
-								
         #stuff to remove when we upgrade android
         #android complains about abs being ambigious - pfffft
         #sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
@@ -237,9 +236,7 @@ function build() {
                 -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
                 -DCMAKE_INSTALL_PREFIX=install"
         fi
-        
-        
-        
+
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
         find ./ -name "*.o" -type f -delete
@@ -248,7 +245,7 @@ function build() {
         export CPPFLAGS=""
         export LDFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
-        
+
         cmake -S .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
             ${DEFINES} \
             -DCMAKE_C_COMPILER=${CC} \
@@ -296,9 +293,9 @@ function build() {
         make clean
         make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
-    
-    elif [ "$TYPE" == "emscripten" ] ; then
-    
+
+    elif [ "$TYPE" == "emscripten" ]; then
+
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
@@ -364,14 +361,14 @@ function copy() {
     . "$SECURE_SCRIPT"
     # libs
     mkdir -p $1/lib/$TYPE
-    if [ "$TYPE" == "vs" ] ; then            
+    if [ "$TYPE" == "vs" ]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
         mkdir -p $1/lib/$TYPE/$PLATFORM/Release
         cp -v "build_${TYPE}_${PLATFORM}/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
         cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
-        cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib 
+        cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
         cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
         secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
@@ -402,18 +399,18 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
-    if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
         rm -f build_${TYPE}_${PLATFORM}
         rm -f CMakeCache.txt
         echo "Assimp VS | $TYPE | $ARCH cleaned"
 
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         if [ -d "build" ]; then
-            cd  "build_${TYPE}_${ABI}"
+            cd "build_${TYPE}_${ABI}"
             make clean
             cd ..
         fi
-        rm -f CMakeCache.txt  2> /dev/null
+        rm -f CMakeCache.txt 2>/dev/null
 
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         rm -f build_${TYPE}_${PLATFORM}
@@ -421,13 +418,13 @@ function clean() {
     else
         make clean
         make rebuild_cache
-        rm -f CMakeCache.txt 2> /dev/null
+        rm -f CMakeCache.txt 2>/dev/null
     fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "assimp" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "assimp" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

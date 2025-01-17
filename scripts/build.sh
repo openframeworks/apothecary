@@ -33,30 +33,30 @@ fi
 # trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error building $formula_name ^"
-	cat "formula_${ARCH}.log"
-	if [ "$formula_name" == "boost" ]; then
-	    cat $APOTHECARY_PATH/build/boost/bootstrap.log
-	fi
+    echo
+    echo " ^ Received error building $formula_name ^"
+    cat "formula_${ARCH}.log"
+    if [ "$formula_name" == "boost" ]; then
+        cat $APOTHECARY_PATH/build/boost/bootstrap.log
+    fi
     if [ -f $APOTHECARY_PATH/build/$formula_name/config.log ]; then
         tail -n1000 $APOTHECARY_PATH/build/$formula_name/config.log
     fi
-	exit 1
+    exit 1
 }
 
-if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    run(){
+if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    run() {
         echo "TARGET=\"emscripten\" $@"
         docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         #PATH=\"$DOCKER_HOME/bin:\$PATH\"
         echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> "formula_${ARCH}.log" 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -68,18 +68,21 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
     # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    LOCAL_ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/..
 else
-    run(){
+    run() {
         echo "$@"
         eval "$@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         echo "$@"
-        eval "$@" >> "formula_${ARCH}.log" 2>&1 &
+        eval "$@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -88,7 +91,10 @@ else
         run "tail -n 10 formula_${ARCH}.log"
     }
 
-    ROOT=$(cd $(dirname "$0"); pwd -P)/..
+    ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/..
     LOCAL_ROOT=$ROOT
 fi
 
@@ -99,10 +105,9 @@ if [ -z "${OUTPUT_FOLDER+x}" ]; then
 fi
 #OUTPUT_FOLDER=$ROOT/out
 
-
 # VERBOSE=true
 
-if [ -z $TARGET ] ; then
+if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
 fi
@@ -114,11 +119,10 @@ echo "Bundle: $BUNDLE"
 echo "Apothecary path: $APOTHECARY_PATH"
 echo "Output folder is: $OUTPUT_FOLDER"
 
-
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -126,21 +130,21 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 1
         done
@@ -149,41 +153,40 @@ echoDots(){
     done
 }
 
-
 travis_fold_start() {
-  echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
+    echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
 }
 
 travis_fold_end() {
-  echo -e "\ntravis_fold:end:$1\r"
+    echo -e "\ntravis_fold:end:$1\r"
 }
 
 travis_time_start() {
-  travis_timer_id=$(printf %08x $(( RANDOM * RANDOM )))
-  travis_start_time=$(travis_nanoseconds)
-  echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
+    travis_timer_id=$(printf %08x $((RANDOM * RANDOM)))
+    travis_start_time=$(travis_nanoseconds)
+    echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
 }
 
 travis_time_finish() {
-  local result=$?
-  travis_end_time=$(travis_nanoseconds)
-  local duration=$(($travis_end_time-$travis_start_time))
-  echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
-  return $result
+    local result=$?
+    travis_end_time=$(travis_nanoseconds)
+    local duration=$(($travis_end_time - $travis_start_time))
+    echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
+    return $result
 }
 
 function travis_nanoseconds() {
-  local cmd="date"
-  local format="+%s%N"
-  local os=$(uname)
+    local cmd="date"
+    local format="+%s%N"
+    local os=$(uname)
 
-  if hash gdate > /dev/null 2>&1; then
-    cmd="gdate" # use gdate if available
-  elif [[ "$os" = Darwin ]]; then
-    format="+%s000000000" # fallback to second precision on darwin (does not support %N)
-  fi
+    if hash gdate >/dev/null 2>&1; then
+        cmd="gdate" # use gdate if available
+    elif [[ "$os" = Darwin ]]; then
+        format="+%s000000000" # fallback to second precision on darwin (does not support %N)
+    fi
 
-  $cmd -u $format
+    $cmd -u $format
 }
 
 if [ -z ${PARALLEL+x} ]; then
@@ -202,10 +205,10 @@ fi
 
 echo "Parallel builds: $PARALLEL"
 
-if  type "ccache" > /dev/null; then
+if type "ccache" >/dev/null; then
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-       export PATH="/usr/local/opt/ccache/libexec:$PATH";
-       export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        export PATH="/usr/local/opt/ccache/libexec:$PATH"
+        export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     fi
 
     # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
@@ -229,29 +232,29 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
-function build(){
+function build() {
     trap "trapError" ERR
 
     echo "Build $formula_name $FORCE"
 
     local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
-	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
-		ARGS="-e $ARGS"
-	fi
+    if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
+        ARGS="-e $ARGS"
+    fi
 
     if [ "$PTHREADS_ENABLED" -eq 1 ]; then
         ARGS="$ARGS -y "
     fi
 
-    if [ "$ARCH" != "" ] ; then
+    if [ "$ARCH" != "" ]; then
         ARGS="$ARGS -a$ARCH"
     fi
 
-    if [ "$VERBOSE" = true ] ; then
+    if [ "$VERBOSE" = true ]; then
         echo "./apothecary $ARGS update $formula_name"
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
-        echo "./apothecary $ARGS update $formula_name" >> "formula_${ARCH}.log" 2>&1
+        echo "./apothecary $ARGS update $formula_name" >>"formula_${ARCH}.log" 2>&1
         run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
@@ -269,17 +272,17 @@ fi
 run "mkdir -p $OUTPUT_FOLDER"
 
 ITER=0
-for formula in "${FORMULAS[@]}" ; do
+for formula in "${FORMULAS[@]}"; do
     formula_name="${formula%.*}"
 
-    if [ "$TRAVIS" = true ] ; then
+    if [ "$TRAVIS" = true ]; then
         travis_fold_start "build.$ITER" "Build $formula_name"
         travis_time_start
     fi
 
     build
 
-    if [ "$TRAVIS" = true ] ; then
+    if [ "$TRAVIS" = true ]; then
         travis_time_finish
         travis_fold_end "build.$ITER"
         ITER=$(expr $ITER + 1)
@@ -288,4 +291,3 @@ done
 
 echo ""
 echo ""
-

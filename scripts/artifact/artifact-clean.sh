@@ -9,9 +9,6 @@ else
     export FORCE=""
 fi
 
-
-
-
 # trap any script errors and exit
 # trap "trapError" ERR
 
@@ -28,18 +25,18 @@ trapError() {
     exit 1
 }
 
-if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    run(){
+if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
+    run() {
         echo "TARGET=\"emscripten\" $@"
         docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         #PATH=\"$DOCKER_HOME/bin:\$PATH\"
         echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"  >> "formula_${ARCH}.log" 2>&1 &
+        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -51,18 +48,21 @@ if [ "$TRAVIS" = true  -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscript
     # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
     # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
     ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(cd $(dirname "$0"); pwd -P)/../..
+    LOCAL_ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/../..
 else
-    run(){
+    run() {
         echo "$@"
         eval "$@"
     }
 
-    run_bg(){
+    run_bg() {
         trap "trapError" ERR
 
         echo "$@"
-        eval "$@" >> "formula_${ARCH}.log" 2>&1 &
+        eval "$@" >>"formula_${ARCH}.log" 2>&1 &
         apothecaryPID=$!
         echoDots $apothecaryPID
         wait $apothecaryPID
@@ -71,7 +71,10 @@ else
         run "tail -n 10 formula_${ARCH}.log"
     }
 
-    ROOT=$(cd $(dirname "$0"); pwd -P)/../..
+    ROOT=$(
+        cd $(dirname "$0")
+        pwd -P
+    )/../..
     LOCAL_ROOT=$ROOT
 fi
 
@@ -82,10 +85,9 @@ if [ -z "${OUTPUT_FOLDER+x}" ]; then
 fi
 #OUTPUT_FOLDER=$ROOT/out
 
-
 # VERBOSE=true
 
-if [ -z $TARGET ] ; then
+if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
 fi
@@ -118,7 +120,7 @@ done
 # Iterate over the folders in the library base directory
 for library_dir in "$OUTPUT_FOLDER"/*; do
     library_name=$(basename "$library_dir")
-    
+
     # Check if the library name is not in the keep list
     if [ -z "${KEEP_LIBRARIES[$library_name]}" ]; then
         echo "Deleting library folder: $library_dir"
@@ -127,7 +129,6 @@ for library_dir in "$OUTPUT_FOLDER"/*; do
         echo "Keeping library folder: $library_dir"
     fi
 done
-
 
 echo ""
 echo ""

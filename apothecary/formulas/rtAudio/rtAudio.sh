@@ -6,7 +6,7 @@
 #
 # uses an autotools build system
 
-FORMULA_TYPES=( "osx" "vs" "linux" )
+FORMULA_TYPES=("osx" "vs" "linux")
 
 #FORMULA_DEPENDS=( "pkg-config" )
 
@@ -26,73 +26,73 @@ URL=https://www.music.mcgill.ca/~gary/rtaudio/release/
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-	#curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
-	. "$DOWNLOADER_SCRIPT"
-	# downloader ${URL}/rtaudio-${VER}.tar.gz 
-	downloader ${GIT_URL}/archive/refs/tags/$VER.tar.gz
-	tar -xf ${VER}.tar.gz
-	mv rtaudio-${VER} rtAudio
-	rm ${VER}.tar.gz
+    #curl -O https://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-$VER.tar.gz
+    . "$DOWNLOADER_SCRIPT"
+    # downloader ${URL}/rtaudio-${VER}.tar.gz
+    downloader ${GIT_URL}/archive/refs/tags/$VER.tar.gz
+    tar -xf ${VER}.tar.gz
+    mv rtaudio-${VER} rtAudio
+    rm ${VER}.tar.gz
 
-	rm -f ./CMakeLists.txt
-	cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
+    rm -f ./CMakeLists.txt
+    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
 # # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	# nothing here
-	echo
+    # nothing here
+    echo
 }
 
 # executed inside the lib src dir
 function build() {
-	DEFINES="
+    DEFINES="
 			-DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include
 	    "
-	if [ "$TYPE" == "osx" ] ; then
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		rm -f CMakeCache.txt *.a *.o
-		DEFINES="${DEFINES} \
+    if [ "$TYPE" == "osx" ]; then
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o
+        DEFINES="${DEFINES} \
 				-DRTAUDIO_API_ASIO=OFF \
 				-DRTAUDIO_API_CORE=ON \
 				-DRTAUDIO_BUILD_SHARED_LIBS=OFF \
 				-DHAVE_GETTIMEOFDAY=ON"
-		cmake .. ${DEFINES} \
-				-DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-				-DPLATFORM=$PLATFORM \
-				-DENABLE_BITCODE=OFF \
-				-DENABLE_ARC=OFF \
-				-DENABLE_VISIBILITY=OFF \
-				-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
-				-DBUILD_SHARED_LIBS=OFF \
-				-DCMAKE_BUILD_TYPE=Release \
-				-DCMAKE_CXX_FLAGS="-fPIC -DUSE_PTHREADS=1" \
-				-DCMAKE_C_FLAGS="-fPIC -DUSE_PTHREADS=1" \
-				-DCMAKE_INSTALL_PREFIX=Release \
-				-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-				-DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
-				-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-				-DCMAKE_INSTALL_INCLUDEDIR=include \
-				-DCMAKE_INSTALL_LIBDIR=lib \
-				-DBUILD_TESTING=OFF
-		cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-		cd ..
+        cmake .. ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_BITCODE=OFF \
+            -DENABLE_ARC=OFF \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-fPIC -DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-fPIC -DUSE_PTHREADS=1" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            -DBUILD_TESTING=OFF
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
 
-	elif [ "$TYPE" == "vs" ] ; then
-		echo "building rtAudio $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
-	    echo "--------------------"
-	    GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-	    mkdir -p "build_${TYPE}_${PLATFORM}"
-	    cd "build_${TYPE}_${PLATFORM}"
-			rm -f CMakeCache.txt *.lib *.o
-	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
+    elif [ "$TYPE" == "vs" ]; then
+        echo "building rtAudio $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "--------------------"
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.lib *.o
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}"
 
-	    DEFINES="${DEFINES} \
+        DEFINES="${DEFINES} \
 				-DRTAUDIO_API_DS=ON \
 				-DRTAUDIO_API_ASIO=ON \
 				-DRTAUDIO_API_WASAPI=ON \
@@ -102,48 +102,48 @@ function build() {
 				-DRTAUDIO_STATIC_MSVCRT=OFF \
 				-DBUILD_SHARED_LIBS=OFF"
 
-	    cmake .. ${DEFINES} \
-	    	-UCMAKE_CXX_FLAGS \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-	        -DCMAKE_INSTALL_PREFIX=Release \
-	        -DRTAUDIO_BUILD_SHARED_LIBS=OFF \
-	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-	        ${CMAKE_WIN_SDK} \
-	        -A "${PLATFORM}" \
-	        -G "${GENERATOR_NAME}"
+        cmake .. ${DEFINES} \
+            -UCMAKE_CXX_FLAGS \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DRTAUDIO_BUILD_SHARED_LIBS=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            ${CMAKE_WIN_SDK} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
 
-	    cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-	    env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
-	    cmake .. ${DEFINES} \
-	    	-UCMAKE_CXX_FLAGS \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-	        -DCMAKE_BUILD_TYPE=Debug \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-	        -DCMAKE_INSTALL_PREFIX=Debug \
-	        -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-	        ${CMAKE_WIN_SDK} \
-	        -A "${PLATFORM}" \
-	        -G "${GENERATOR_NAME}"
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}"
+        cmake .. ${DEFINES} \
+            -UCMAKE_CXX_FLAGS \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            ${CMAKE_WIN_SDK} \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
 
-	    cmake --build . --config Debug -j${PARALLEL_MAKE} --target install
+        cmake --build . --config Debug -j${PARALLEL_MAKE} --target install
 
-	    unset CXXFLAGS
+        unset CXXFLAGS
 
-	    cd ..
+        cd ..
 
-	elif [[ "$TYPE" =~ ^(linux)$ ]]; then
-		# Compile the program
-		if [ $CROSSCOMPILING -eq 1 ]; then
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        # Compile the program
+        if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
         fi
-		mkdir -p "build_${TYPE}_${PLATFORM}"
-		cd "build_${TYPE}_${PLATFORM}"
-		rm -f CMakeCache.txt *.a *.o
-		DEFINES="${DEFINES} \
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o
+        DEFINES="${DEFINES} \
 				-DRTAUDIO_API_PULSE=ON \
 				-DRTAUDIO_API_ALSA=ON \
 				-DRTAUDIO_API_JACK=ON \
@@ -153,30 +153,30 @@ function build() {
 				-DRTAUDIO_API_WASAPI=OFF \
 				-DBUILD_TESTING=OFF"
 
-		cmake  .. \
-	 		${DEFINES} \
-	        -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-	        -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_SYSTEM_PROCESSOR=$ABI \
-    		-DGCC_VERSION=${GCC_VERSION} \
-	        -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-	        -DCMAKE_INSTALL_LIBDIR="lib" \
-	        -DCMAKE_INSTALL_PREFIX=Release \
-	        -DBUILD_SHARED_LIBS=OFF \
-    		-DCMAKE_INSTALL_PREFIX=Release \
+        cmake .. \
+            ${DEFINES} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_INSTALL_INCLUDEDIR=include 
-	    cmake --build . --target install --config Release -j${PARALLEL_MAKE}
+            -DCMAKE_INSTALL_INCLUDEDIR=include
+        cmake --build . --target install --config Release -j${PARALLEL_MAKE}
 
-	elif [ "$TYPE" == "msys2" ] ; then
-		# Compile the program
-		mkdir -p build
-		cd build
-		rm -f CMakeCache.txt *.a *.o
-		DEFINES="${DEFINES} \
+    elif [ "$TYPE" == "msys2" ]; then
+        # Compile the program
+        mkdir -p build
+        cd build
+        rm -f CMakeCache.txt *.a *.o
+        DEFINES="${DEFINES} \
 				-DRTAUDIO_API_DS=ON \
 				-DRTAUDIO_API_ASIO=ON \
 				-DRTAUDIO_API_WASAPI=ON \
@@ -185,77 +185,77 @@ function build() {
 				-DBUILD_TESTING=OFF \
 				-DRTAUDIO_STATIC_MSVCRT=OFF \
 				-DBUILD_SHARED_LIBS=OFF"
-		cmake .. ${DEFINES} \
-			-G "Unix Makefiles" \
-			-DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
-		make
-		make install
-	fi
+        cmake .. ${DEFINES} \
+            -G "Unix Makefiles" \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
+        make
+        make install
+    fi
 
-	# clean up env vars
-	# unset PKG_CONFIG PKG_CONFIG_PATH
+    # clean up env vars
+    # unset PKG_CONFIG PKG_CONFIG_PATH
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 
-	# headers
-	mkdir -p $1/include
-	cp -v RtAudio.h $1/include
-	#cp -v RtError.h $1/include #no longer a part of rtAudio
-	. "$SECURE_SCRIPT"
-	# libs
-	mkdir -p $1/lib/$TYPE
-	if [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
-    	cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
-    	#cp -vf "build_${TYPE}_${PLATFORM}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
-    	cp -vf "build_${TYPE}_${PLATFORM}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
-		secure $1/lib/$TYPE/$PLATFORM/rtaudio.lib rtaudio
-	elif [ "$TYPE" == "msys2" ] ; then
-		cd build
-		ls
-		cd ../
-		cp -v build/librtaudio.dll.a $1/lib/$TYPE/librtaudio.dll.a
+    # headers
+    mkdir -p $1/include
+    cp -v RtAudio.h $1/include
+    #cp -v RtError.h $1/include #no longer a part of rtAudio
+    . "$SECURE_SCRIPT"
+    # libs
+    mkdir -p $1/lib/$TYPE
+    if [ "$TYPE" == "vs" ]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
+        cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
+        #cp -vf "build_${TYPE}_${PLATFORM}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
+        cp -vf "build_${TYPE}_${PLATFORM}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
+        secure $1/lib/$TYPE/$PLATFORM/rtaudio.lib rtaudio
+    elif [ "$TYPE" == "msys2" ]; then
+        cd build
+        ls
+        cd ../
+        cp -v build/librtaudio.dll.a $1/lib/$TYPE/librtaudio.dll.a
 
-	elif [ "$TYPE" == "osx" ] ; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
-    	cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
-    	secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
-	elif [[ "$TYPE" =~ ^(linux)$ ]]; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
-    	cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
-    	secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
-	fi
+    elif [ "$TYPE" == "osx" ]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
+        cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
+        secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
+        cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
+        secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
+    fi
 
-	# copy license file
-	if [ -d "$1/license" ]; then
+    # copy license file
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v LICENSE $1/license/
+    mkdir -p $1/license
+    cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
 
-	if [ "$TYPE" == "vs" ] ; then
-		if [ -d "build_${TYPE}_${ARCH}" ]; then
-		    rm -r build_${TYPE}_${ARCH}	    
-		fi
-	else
-		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-			rm -r build_${TYPE}_${PLATFORM}	
-		fi  
-	fi
+    if [ "$TYPE" == "vs" ]; then
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            rm -r build_${TYPE}_${ARCH}
+        fi
+    else
+        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+            rm -r build_${TYPE}_${PLATFORM}
+        fi
+    fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "rtaudio" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "rtaudio" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

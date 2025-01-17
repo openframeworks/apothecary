@@ -12,8 +12,8 @@
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
-FORMULA_TYPES=( "osx" "vs" )
-FORMULA_DEPENDS=( "zlib" "libpng" "pixman" "freetype" )
+FORMULA_TYPES=("osx" "vs")
+FORMULA_DEPENDS=("zlib" "libpng" "pixman" "freetype")
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
@@ -32,132 +32,131 @@ URL=https://www.cairographics.org/releases/
 
 GIT_LAB=https://gitlab.freedesktop.org/cairo/cairo/-/archive/${VER}/cairo-${VER}
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
 
-	. "$DOWNLOADER_SCRIPT"
+    . "$DOWNLOADER_SCRIPT"
 
-	downloader ${URL}/cairo-$VER.tar.xz
-	tar -xJf cairo-$VER.tar.xz
+    downloader ${URL}/cairo-$VER.tar.xz
+    tar -xJf cairo-$VER.tar.xz
 
-	local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
-	rm cairo-$VER.tar.xz
-	if [ "$CHECKSHA" != "$SHA1" ] ; then
-    	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    	exit
+    local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
+    rm cairo-$VER.tar.xz
+    if [ "$CHECKSHA" != "$SHA1" ]; then
+        echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
+        exit
     else
         echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     fi
 
-	mv "cairo-$VER" cairo
+    mv "cairo-$VER" cairo
 
-	# if [ "$TYPE" == "vs" ] ; then
-	# 	downloader ${GIT_LAB}.zip
-	# 	unzip -qq "cairo-$VER.zip"
+    # if [ "$TYPE" == "vs" ] ; then
+    # 	downloader ${GIT_LAB}.zip
+    # 	unzip -qq "cairo-$VER.zip"
     #     rm -f "cairo-$VER.zip"
-	# 	mv cairo-$VER cairo
-	# else
-	# 	downloader ${GIT_LAB}.tar.bz2
-	# 	tar -xf cairo-$VER.tar.bz2
-	# 	mv cairo-$VER cairo
-	# 	rm cairo-$VER.tar.bz2
-	# fi
-	#downloader https://cairographics.org/releases/cairo-$VER.tar.xz
-	
+    # 	mv cairo-$VER cairo
+    # else
+    # 	downloader ${GIT_LAB}.tar.bz2
+    # 	tar -xf cairo-$VER.tar.bz2
+    # 	mv cairo-$VER cairo
+    # 	rm cairo-$VER.tar.bz2
+    # fi
+    #downloader https://cairographics.org/releases/cairo-$VER.tar.xz
+
 }
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-	# manually download dependencies
+    # manually download dependencies
 
-	echo
-	#echoInfo " Current PATH set to: $PATH"
-	echo
+    echo
+    #echoInfo " Current PATH set to: $PATH"
+    echo
 
-	apothecaryDependencies download
+    apothecaryDependencies download
 
-	if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
 
-		apothecaryDepend prepare zlib
-		apothecaryDepend build zlib
-		apothecaryDepend copy zlib
-		apothecaryDepend prepare libpng
-		apothecaryDepend build libpng
-		apothecaryDepend copy libpng
-		apothecaryDepend prepare pixman
-		apothecaryDepend build pixman
-		apothecaryDepend copy pixman
-		apothecaryDepend prepare freetype
-		apothecaryDepend build freetype
-		apothecaryDepend copy freetype
-		echo ""
-	
-		cp -RvT $FORMULA_DIR/ ./
-	else
-		# generate the configure script if it's not there
-		
-		# Build and copy all dependencies in preparation
-		# apothecaryDepend download pkg-config
-		# apothecaryDepend prepare pkg-config
-		# apothecaryDepend build pkg-config
-		apothecaryDepend copy pkg-config
-		apothecaryDepend download zlib
-		apothecaryDepend prepare zlib
-		apothecaryDepend build zlib
-		apothecaryDepend copy zlib
-		apothecaryDepend download libpng
-		apothecaryDepend prepare libpng
-		apothecaryDepend build libpng
-		apothecaryDepend copy libpng
-		apothecaryDepend download pixman
-		apothecaryDepend build pixman
-		apothecaryDepend copy pixman
-		apothecaryDepend download freetype
-		apothecaryDepend prepare freetype
-		apothecaryDepend build freetype
-		apothecaryDepend copy freetype
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib
+        apothecaryDepend prepare libpng
+        apothecaryDepend build libpng
+        apothecaryDepend copy libpng
+        apothecaryDepend prepare pixman
+        apothecaryDepend build pixman
+        apothecaryDepend copy pixman
+        apothecaryDepend prepare freetype
+        apothecaryDepend build freetype
+        apothecaryDepend copy freetype
+        echo ""
 
-		cp -Rv $FORMULA_DIR/ ./
-	fi
+        cp -RvT $FORMULA_DIR/ ./
+    else
+        # generate the configure script if it's not there
+
+        # Build and copy all dependencies in preparation
+        # apothecaryDepend download pkg-config
+        # apothecaryDepend prepare pkg-config
+        # apothecaryDepend build pkg-config
+        apothecaryDepend copy pkg-config
+        apothecaryDepend download zlib
+        apothecaryDepend prepare zlib
+        apothecaryDepend build zlib
+        apothecaryDepend copy zlib
+        apothecaryDepend download libpng
+        apothecaryDepend prepare libpng
+        apothecaryDepend build libpng
+        apothecaryDepend copy libpng
+        apothecaryDepend download pixman
+        apothecaryDepend build pixman
+        apothecaryDepend copy pixman
+        apothecaryDepend download freetype
+        apothecaryDepend prepare freetype
+        apothecaryDepend build freetype
+        apothecaryDepend copy freetype
+
+        cp -Rv $FORMULA_DIR/ ./
+    fi
 }
 
 # executed inside the lib src dir
 function build() {
 
-	export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
-	if [ "$TYPE" == "vs" ] ; then
+    export OF_LIBS_ABS_PATH=$(realpath ${LIBS_DIR}/)
+    if [ "$TYPE" == "vs" ]; then
 
-		echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
+        echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"    
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
 
-        ROOT=$(realpath ${PWD}/..) 
+        ROOT=$(realpath ${PWD}/..)
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
-		CAIRO_HAS_PNG_FUNCTIONS=1
+        CAIRO_HAS_PNG_FUNCTIONS=1
 
-		echoInfo "If any issue with LNK1104: cannot open file 'LIBCMT.lib make sure to install Spectre Mitigated VS C++Libs'"
-		
-		ZLIB_ROOT="$LIBS_ROOT/zlib/"
-		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
+        echoInfo "If any issue with LNK1104: cannot open file 'LIBCMT.lib make sure to install Spectre Mitigated VS C++Libs'"
 
-		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
-		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
-		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-		PIXMAN_ROOT="$LIBS_ROOT/pixman/"
-		PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
-		PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.lib"
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
 
-		FREETYPE_ROOT="$LIBS_ROOT/freetype/"
-		FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
-		FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/freetype.lib"
-		FREETYPE_LIBRARIES="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/freetype.lib"
+        PIXMAN_ROOT="$LIBS_ROOT/pixman/"
+        PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
+        PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.lib"
 
-		LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
+        FREETYPE_ROOT="$LIBS_ROOT/freetype/"
+        FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
+        FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/freetype.lib"
+        FREETYPE_LIBRARIES="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/freetype.lib"
+
+        LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
         LIBBROTLI_LIBRARY="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/brotlicommon.lib"
         LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/brotlienc.lib"
@@ -206,48 +205,46 @@ function build() {
             -DCMAKE_LIBRARY_PATH="${LIBBROTLI_LIBRARY};${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB};${FREETYPE_LIBRARY};${LIBPNG_LIBRARY};${ZLIB_LIBRARY};${PIXMAN_LIBRARY}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-		    -D CAIRO_WIN32_STATIC_BUILD=ON \
-		    -DNO_FONTCONFIG=OFF \
-		    -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -D CAIRO_WIN32_STATIC_BUILD=ON \
+            -DNO_FONTCONFIG=OFF \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-		    -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-		    -DENABLE_VISIBILITY=OFF \
-		    ${CMAKE_WIN_SDK}
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DENABLE_VISIBILITY=OFF \
+            ${CMAKE_WIN_SDK}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-	elif [ "$TYPE" == "osx" ] ; then
+    elif [ "$TYPE" == "osx" ]; then
 
-	    LIBS_ROOT=$(realpath $LIBS_DIR)
+        LIBS_ROOT=$(realpath $LIBS_DIR)
 
+        CAIRO_HAS_PNG_FUNCTIONS=1
 
-		CAIRO_HAS_PNG_FUNCTIONS=1
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
 
-		ZLIB_ROOT="$LIBS_ROOT/zlib/"
-		ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-		ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        PIXMAN_ROOT="$LIBS_ROOT/pixman/"
+        PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
+        PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.a"
 
-		LIBPNG_ROOT="$LIBS_ROOT/libpng/"
-		LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
-		LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"	
+        FREETYPE_ROOT="$LIBS_ROOT/freetype/"
+        FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
+        FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/libfreetype.a"
 
-		PIXMAN_ROOT="$LIBS_ROOT/pixman/"
-		PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
-		PIXMAN_LIBRARY="$LIBS_ROOT/pixman/lib/$TYPE/$PLATFORM/libpixman-1.a"
-
-		FREETYPE_ROOT="$LIBS_ROOT/freetype/"
-		FREETYPE_INCLUDE_DIR="$LIBS_ROOT/freetype/include"
-		FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/$TYPE/$PLATFORM/libfreetype.a"
-
-		LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
+        LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
         LIBBROTLI_LIBRARY="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlicommon.a"
         LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlienc.a"
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
-	    mkdir -p "build_${TYPE}_${PLATFORM}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
-        rm -f CMakeCache.txt *.a *.o 
+        rm -f CMakeCache.txt *.a *.o
         DEFS="
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -293,68 +290,67 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DNO_FONTCONFIG=OFF \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} 
+            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
         cmake --build . --config Release -j${PARALLEL_MAKE}
         cmake --install . --config Release
-	    cd ..
-	else
-		./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
-					PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
-					LDFLAGS="-arch i386 -arch x86_64" \
-					CFLAGS="-Os -arch i386 -arch x86_64" \
-					--prefix=$BUILD_ROOT_DIR \
-					--disable-gtk-doc \
-					--disable-gtk-doc-html \
-					--disable-gtk-doc-pdf \
-					--disable-full-testing \
-					--disable-dependency-tracking \
-					--disable-xlib \
-					--disable-qt
-		make -j${PARALLEL_MAKE}
-		make install
-	fi
+        cd ..
+    else
+        ./configure PKG_CONFIG="$BUILD_ROOT_DIR/bin/pkg-config" \
+            PKG_CONFIG_PATH="$BUILD_ROOT_DIR/lib/pkgconfig" \
+            LDFLAGS="-arch i386 -arch x86_64" \
+            CFLAGS="-Os -arch i386 -arch x86_64" \
+            --prefix=$BUILD_ROOT_DIR \
+            --disable-gtk-doc \
+            --disable-gtk-doc-html \
+            --disable-gtk-doc-pdf \
+            --disable-full-testing \
+            --disable-dependency-tracking \
+            --disable-xlib \
+            --disable-qt
+        make -j${PARALLEL_MAKE}
+        make install
+    fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	mkdir -p $1/include
-	. "$SECURE_SCRIPT"
-	if [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/include/cairo	
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
-    	cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib 
-		secure $1/lib/$TYPE/$PLATFORM/libcairo.lib cairo.pkl
-	elif [ "$TYPE" == "osx" ] ; then
-		mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
-		secure $1/lib/$TYPE/$PLATFORM/libcairo.a cairo.pkl
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
-	fi
-	# copy license files
-	if [ -d "$1/license" ]; then
+    mkdir -p $1/include
+    . "$SECURE_SCRIPT"
+    if [ "$TYPE" == "vs" ]; then
+        mkdir -p $1/include/cairo
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib
+        secure $1/lib/$TYPE/$PLATFORM/libcairo.lib cairo.pkl
+    elif [ "$TYPE" == "osx" ]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
+        secure $1/lib/$TYPE/$PLATFORM/libcairo.a cairo.pkl
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
+    fi
+    # copy license files
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v COPYING $1/license/
-	cp -v COPYING-LGPL-2.1 $1/license/
-	cp -v COPYING-MPL-1.1 $1/license/
+    mkdir -p $1/license
+    cp -v COPYING $1/license/
+    cp -v COPYING-LGPL-2.1 $1/license/
+    cp -v COPYING-MPL-1.1 $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
 
-	# manually clean dependencies
-	apothecaryDependencies clean
+    # manually clean dependencies
+    apothecaryDependencies clean
 
-	# cairo
-	make clean
+    # cairo
+    make clean
 }
 
-
 function load() {
-     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "cairo" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "cairo" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

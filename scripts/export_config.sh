@@ -26,7 +26,7 @@ export_paths() {
             sed -i.bak "s|^exec_prefix=.*|exec_prefix=../../../|" "$PKG_FILE"
             sed -i.bak "s|^libdir=.*|libdir=../|" "$PKG_FILE"
             sed -i.bak "s|^includedir=.*|includedir=../../../include|" "$PKG_FILE"
-            rm "${PKG_FILE}.bak"  # Clean up backup file
+            rm "${PKG_FILE}.bak" # Clean up backup file
         done
     fi
 
@@ -37,7 +37,7 @@ export_paths() {
         for CMAKE_FILE in "$TARGET_DIR/lib/$PLATFORM/$ARCH"/*.cmake; do
             [ -f "$CMAKE_FILE" ] || continue
             sed -i.bak "s|${TARGET_DIR}|../../../|" "$CMAKE_FILE"
-            rm "${CMAKE_FILE}.bak"  # Clean up backup file
+            rm "${CMAKE_FILE}.bak" # Clean up backup file
         done
     fi
 
@@ -49,5 +49,3 @@ if [ "$#" -lt 3 ]; then
     echo "Usage: $0 <TARGET_DIR> <PLATFORM> <ARCH>"
     exit 1
 fi
-
-

@@ -1,20 +1,19 @@
 #!/bin/bash
 set -e
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 set -o pipefail
 # trap any script errors and exit
 trap "trapError" ERR
 
 trapError() {
-	echo
-	echo " ^ Received error ^"
-	cat formula.log
-	exit 1
+    echo
+    echo " ^ Received error ^"
+    cat formula.log
+    exit 1
 }
-
 
 echo $APOTHECARY_LEVEL
 cd $APOTHECARY_LEVEL

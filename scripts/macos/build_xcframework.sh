@@ -3,8 +3,14 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-SCRIPT_DIR=$(cd $(dirname "$0"); pwd -P)
-ROOT=$(cd $(dirname "$0"); pwd -P)/../../
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../
 APOTHECARY_PATH=$ROOT/apothecary
 
 BUNDLE_NO="$1"
@@ -33,11 +39,11 @@ if [ -z "$FORMULAS" ]; then
     exit 0
 fi
 
-for formula in "${FORMULAS[@]}" ; do
+for formula in "${FORMULAS[@]}"; do
     formula_name="${formula%.*}"
     ARGS="$FORCE -t$TARGET -d$OUTPUT_FOLDER -a$ARCH"
     echo "[${formula_name}] ./apothecary $ARGS framework $formula_name"
-    eval "cd $APOTHECARY_PATH";
+    eval "cd $APOTHECARY_PATH"
     echo "---------"
     eval "./apothecary -x $ARGS framework $formula_name"
 done

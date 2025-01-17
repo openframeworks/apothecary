@@ -6,11 +6,10 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=( "vs" "osx" "ios" "xros" "tvos" "catos")
-FORMULA_DEPENDS=( "openssl" "zlib" "brotli" )
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos")
+FORMULA_DEPENDS=("openssl" "zlib" "brotli")
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
-
 
 VER=8.11.0
 VER_D=8_11_0
@@ -31,14 +30,14 @@ function download() {
     tar -xf curl-$VER.tar.gz
     mv curl-$VER curl
     local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
-    if [ "$CHECKSHA" != "$SHA1" ] ; then
+    if [ "$CHECKSHA" != "$SHA1" ]; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
         exit 1
     else
         echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
     fi
     rm curl*.tar.gz
-	
+
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -52,26 +51,25 @@ function prepare() {
     apothecaryDepend prepare brotli
     apothecaryDepend build brotli
     apothecaryDepend copy brotli
-  
+
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
-    apothecaryDepend copy zlib  
+    apothecaryDepend copy zlib
 
     apothecaryDepend prepare openssl
     apothecaryDepend build openssl
-    apothecaryDepend copy openssl  
+    apothecaryDepend copy openssl
 
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-        patch -p1 < "$FORMULA_DIR/apple-patch.diff"
+        patch -p1 <"$FORMULA_DIR/apple-patch.diff"
         if [ $? -ne 0 ]; then
             echo "Failed to apply apple-patch.diff"
             exit 1
         else
             echo "apple-patch.diff applied successfully"
         fi
-    fi 
+    fi
     echo "prepared"
-
 
 }
 
@@ -82,17 +80,17 @@ function build() {
     if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
         export OF_LIBS_OPENSSL_ABS_PATH=$(realpath ${LIBS_DIR}/)
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
-         export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
+        local OF_LIBS_OPENSSL_ABS_PATH=$(realpath $OF_LIBS_OPENSSL)
+        export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
     fi
-	
-	if [ "$TYPE" == "vs" ] ; then
-		export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
-		export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works! 
+    if [ "$TYPE" == "vs" ]; then
+        export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
+        export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
+
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works!
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.lib ${OPENSSL_PATH}/lib/libcrypto.lib
-	        
+
         echo "building curl $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
@@ -127,7 +125,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFS} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -178,7 +176,7 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libssl.lib
         rm ${OPENSSL_PATH}/lib/libcrypto.lib
 
-	elif [ "$TYPE" == "android" ]; then
+    elif [ "$TYPE" == "android" ]; then
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI make
 
@@ -196,9 +194,9 @@ function build() {
             export HOST=x86_64-linux-android
         fi
 
-        export NDK=$ANDROID_PLATFORM 
+        export NDK=$ANDROID_PLATFORM
         export HOST_TAG=$HOST_PLATFORM
-        export MIN_SDK_VERSION=21 
+        export MIN_SDK_VERSION=21
         export SSL_DIR=$OPENSSL_LIBRARIES
 
         export OUTPUT_DIR=$OPENSSL_LIBRARIES
@@ -217,15 +215,14 @@ function build() {
         cp $DEEP_TOOLCHAIN_PATH/crtend_android.o $SYSROOT/usr/lib/crtend_android.o
         cp $DEEP_TOOLCHAIN_PATH/crtend_so.o $SYSROOT/usr/lib/crtend_so.o
 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works! 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libssl.a ${OPENSSL_PATH}/lib/libssl.a # this works!
         cp ${OPENSSL_PATH}/lib/${TYPE}/${ABI}/libcrypto.a ${OPENSSL_PATH}/lib/libcrypto.a
 
         echo "OPENSSL_PATH: $OPENSSL_PATH"
-       
 
         PATH="${PATH};${OPENSSL_PATH}/lib/${TYPE}"
 
-         ./configure \
+        ./configure \
             --host=$HOST \
             --with-openssl=$OPENSSL_PATH \
             --with-pic \
@@ -238,7 +235,7 @@ function build() {
             --without-libidn2 \
             --disable-ldap \
             --disable-ldaps \
-            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI \
+            --prefix=$BUILD_DIR/curl/build/$TYPE/$ABI
 
         # sed -i "s/#define HAVE_GETPWUID_R 1/\/\* #undef HAVE_GETPWUID_R \*\//g" lib/curl_config.h
         make -j${PARALLEL_MAKE}
@@ -252,15 +249,14 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libssl.a
         rm ${OPENSSL_PATH}/lib/libcrypto.a
 
-	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
         if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
             export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
             OPENSSL_ROOT="$LIBS_ROOT/openssl/"
             OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
-            OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a" 
-            OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a" 
+            OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a"
+            OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a"
             USE_SECURE_TRANSPORT=OFF
             CURL_ENABLE_SSL=ON
             SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
@@ -270,7 +266,7 @@ function build() {
             # disabled for tvOS SSL
             OPENSSL_ROOT="$LIBS_ROOT"
             OPENSSL_INCLUDE_DIR=""
-            OPENSSL_LIBRARY="" 
+            OPENSSL_LIBRARY=""
             OPENSSL_LIBRARY_CRYPT=""
             USE_SECURE_TRANSPORT=ON
             OPENSSL_PATH=""
@@ -298,7 +294,7 @@ function build() {
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.lib
-        cmake  .. \
+        cmake .. \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -373,69 +369,75 @@ function build() {
 
         local OPENSSL_DIR=$BUILD_DIR/openssl/build/$TYPE
         ./buildconf
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
-        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD
-		./configure --with-openssl=$OPENSSL_DIR --enable-static --disable-shared
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git
+        a=blob_plain
+        f=config.guess
+        hb=HEAD
+        wget -nv http://git.savannah.gnu.org/gitweb/?p=config.git
+        a=blob_plain
+        f=config.sub
+        hb=HEAD
+        ./configure --with-openssl=$OPENSSL_DIR --enable-static --disable-shared
         make clean
-	    make -j${PARALLEL_MAKE}
-	fi
+        make -j${PARALLEL_MAKE}
+    fi
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-	# prepare headers directory if needed
-	mkdir -p $1/include/curl
-	# prepare libs directory if needed
-	mkdir -p $1/lib/$TYPE
+    # prepare headers directory if needed
+    mkdir -p $1/include/curl
+    # prepare libs directory if needed
+    mkdir -p $1/lib/$TYPE
     mkdir -p $1/include
     . "$SECURE_SCRIPT"
 
-	if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include
         mkdir -p $1/bin
         cp -Rv "build_${TYPE}_${ARCH}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib
         secure $1/lib/$TYPE/$PLATFORM/libcurl.lib curl.pkl
-	elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-		cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
         mkdir -p $1/bin
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         secure $1/lib/$TYPE/$PLATFORM/curl.a curl.pkl
-	elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv build/$TYPE/$ABI/include/* $1/include/curl/
         cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
         secure $1/lib/$TYPE/$ABI/libcurl.a curl.pkl
-	fi
-	# copy license file
+    fi
+    # copy license file
     if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	mkdir -p $1/license
-	cp -v COPYING $1/license/
+    mkdir -p $1/license
+    cp -v COPYING $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
-    elif [ "$TYPE" == "vs" ] ; then
+    elif [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${ARCH}" ]; then
             rm -r build_${TYPE}_${ARCH}
         fi
-	else
-		make clean
-	fi
+    else
+        make clean
+    fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "curl" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "curl" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

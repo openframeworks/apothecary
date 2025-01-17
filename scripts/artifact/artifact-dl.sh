@@ -34,12 +34,12 @@ echo "${ARTIFACTS}" | jq -r '.artifacts[] | "\(.id) \(.name)"' | while read -r i
     echo "Attempting to download artifact ${name} with id ${id} with auth token..."
     DOWNLOAD_URL="https://api.github.com/repos/${OWNER}/${REPO}/actions/artifacts/${id}/zip"
     OUTPUT_FILE="${OUTPUT_DIR}/${name}.zip"
-    
+
     if [[ -f "$OUTPUT_FILE" ]]; then
         echo "File ${name}.zip already exists in ${OUTPUT_DIR}. Skipping download."
     else
         curl -L -o "${OUTPUT_DIR}/${name}.zip" -H "Authorization: token ${TOKEN}" -H "Accept: application/vnd.github.v3+json" "${DOWNLOAD_URL}"
-        
+
         echo "Attempted download of ${name} to ${OUTPUT_DIR}/${name}.zip"
     fi
 done

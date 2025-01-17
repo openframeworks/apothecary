@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# 
+#
 # SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # cd $SCRIPT_DIR
 # APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
 # cd $APOTHECARY_LEVEL
-# 
+#
 # CROSS_COMPILER=""
 # CROSS_SYSROOT=""
 # CROSS_ARCH="aarch64"
@@ -37,7 +37,7 @@
 # export RANLIB="${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ranlib"
 # export FC="${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-gfortran"
 # export LD="${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-ld"
-# 
+#
 # export CFLAGS=""
 #  # \
 #  #    -I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include \
@@ -56,7 +56,6 @@
 #     # -L${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/lib \
 #     # -L${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/lib64 \
 #     # -L${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}"
-
 
 # tools=("gcc" "g++" "cpp" "ar" "as" "ranlib" "gfortran" "ld")
 

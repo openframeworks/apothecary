@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd $APOTHECARY_LEVEL
 CROSSCOMPILE=${CROSSCOMPILE:-0}
 if [ "${CROSSCOMPILE}" -eq 0 ]; then
@@ -18,14 +18,14 @@ export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
 
 if [[ "$HOST_ARCH" == "arm64" ]]; then
-  echo "Running on M1 (ARM) processor"
-  M1_PROCESS=1
-   if [ "${IOS_ARCH}" == "x86_64" ]; then
-    IOS_ARCH="arm64-simulator"
-   fi
+    echo "Running on M1 (ARM) processor"
+    M1_PROCESS=1
+    if [ "${IOS_ARCH}" == "x86_64" ]; then
+        IOS_ARCH="arm64-simulator"
+    fi
 else
-  M1_PROCESS=0
-  echo "Running on Intel (x86) processor"
+    M1_PROCESS=0
+    echo "Running on Intel (x86) processor"
 fi
 
 if [ "${TYPE}" == "tvos" ]; then
@@ -97,10 +97,10 @@ elif [ "$TYPE" == "ios" ]; then
 fi
 export PLATFORM=$CSDK
 #export CROSS_COMPILE=`xcode-select --print-path`/Toolchains/XcodeDefault.xctoolchain/usr/bin/
-export CROSS_TOP=`xcode-select --print-path`/Platforms/${CSDK}.platform/Developer
+export CROSS_TOP=$(xcode-select --print-path)/Platforms/${CSDK}.platform/Developer
 export CROSS_SDK=${CSDK}.sdk
 
-export SDKVERSION=`xcrun -sdk ${OS} --show-sdk-version`
+export SDKVERSION=$(xcrun -sdk ${OS} --show-sdk-version)
 export MIN_IOS_VERSION=$IOS_MIN_SDK_VER
 
 export CC="$(xcrun -find -sdk ${SDK} clang)"

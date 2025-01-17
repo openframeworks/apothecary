@@ -6,8 +6,8 @@
 #
 # uses an automake build system
 
-FORMULA_TYPES=( "osx" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" )
-FORMULA_DEPENDS=( "zlib" )
+FORMULA_TYPES=("osx" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
+FORMULA_DEPENDS=("zlib")
 
 # define the version by sha
 VER=2.12.7
@@ -22,19 +22,18 @@ ICU_VER_U=74_2
 
 DEPEND_URL=https://github.com/unicode-org/icu/releases/download/release-${ICU_VER}/icu4c-${ICU_VER_U}-src
 
-
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
 
-    if [ "$TYPE" == "vs" ]; then  # fix for tar symbol link privildge errors 
+    if [ "$TYPE" == "vs" ]; then # fix for tar symbol link privildge errors
         DOWNLOAD_TYPE="zip"
         git clone $GIT_URL
         cd libxml2
         git checkout -b v${VER} tags/v${VER}
         cd ../
 
-        if [ ! -d "icu" ] ; then                  
+        if [ ! -d "icu" ]; then
             downloader "${DEPEND_URL}.${DOWNLOAD_TYPE}"
             unzip -qq "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
             rm -f "icu4c-${ICU_VER_U}-src.${DOWNLOAD_TYPE}"
@@ -45,16 +44,14 @@ function download() {
         cd libxml2
         git checkout -b v${VER} tags/v${VER}
         cd ../
-        if [ ! -d "icu" ] ; then    
+        if [ ! -d "icu" ]; then
             downloader "${DEPEND_URL}.zip"
             unzip -qq "icu4c-${ICU_VER_U}-src.zip"
             rm -f "icu4c-${ICU_VER_U}-src.zip"
         fi
 
     fi
-       
 
-    
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -63,7 +60,7 @@ function prepare() {
         cp -fr $FORMULA_DIR/glob.h .
     fi
 
-    apothecaryDepend download zlib  
+    apothecaryDepend download zlib
     apothecaryDepend prepare zlib
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
@@ -103,10 +100,10 @@ function build() {
             -DLIBXML2_WITH_TESTS=OFF \
             -DLIBXML2_WITH_SCHEMATRON=OFF"
 
-    if [ "$TYPE" == "vs" ] ; then 
+    if [ "$TYPE" == "vs" ]; then
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echoVerbose "--------------------"
-        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}" 
+        GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
 
@@ -121,7 +118,7 @@ function build() {
         rm -f CMakeCache.txt *.lib *.o
         EXTRA_DEFS="
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"         
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFINES} \
             ${EXTRA_DEFS} \
             -DBUILD_SHARED_LIBS=ON \
@@ -161,7 +158,7 @@ function build() {
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-            
+
     elif [ "$TYPE" == "android" ]; then
 
         cp $FORMULA_DIR/config.h .
@@ -173,14 +170,13 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-            # ./autogen.sh
+        # ./autogen.sh
 
         mkdir -p "build_${TYPE}_$PLATFORM"
         cd "build_${TYPE}_$PLATFORM"
         rm -f CMakeCache.txt *.a *.o
-        
-        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
         export CMAKE_CFLAGS="$CFLAGS"
         export CFLAGS=""
@@ -222,7 +218,7 @@ function build() {
         cd "build_${TYPE}_$PLATFORM"
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
-             ${DEFINES} \
+            ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
@@ -243,7 +239,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DZLIB_ROOT="$LIBS_ROOT/zlib/" \
             -DZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include" \
-            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a" 
+            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
@@ -280,45 +276,45 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DCMAKE_CXX_FLAGS="-std=c++${CPP_STANDARD} ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-std=c${C_STANDARD} ${FLAG_RELEASE}"
-        # cmake --build . --config Release -j${PARALLEL_MAKE} 
+        # cmake --build . --config Release -j${PARALLEL_MAKE}
         $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
         $EMSDK/upstream/emscripten/emmake make install
         cd ..
     elif [ "$TYPE" == "msys2" ]; then
-            #./autogen.sh
-            find . -name "test*.c" | xargs -r rm
-            find . -name "run*.c" | xargs -r rm
+        #./autogen.sh
+        find . -name "test*.c" | xargs -r rm
+        find . -name "run*.c" | xargs -r rm
 
-            ZLIB_ROOT="$LIBS_ROOT/zlib/"
-            ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-            ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/zlib.a"
 
-            mkdir -p "build_${TYPE}_$PLATFORM"
-            cd "build_${TYPE}_$PLATFORM"
-            rm -f CMakeCache.txt *.a *.o
-            cmake .. \
-                ${DEFINES} \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_C_STANDARD=${C_STANDARD} \
-                -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-                -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-                -DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
-                -DGCC_VERSION=${GCC_VERSION} \
-                -DZLIB_ROOT=${ZLIB_ROOT} \
-                -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-                -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-                -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-                -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_INSTALL_PREFIX=Release \
-                -DCMAKE_INSTALL_LIBDIR="lib" \
-                -DCMAKE_CXX_EXTENSIONS=OFF \
-                -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-                -DCMAKE_INSTALL_INCLUDEDIR=include \
-                -DCMAKE_SYSTEM_NAME=$TYPE \
-                -DCMAKE_SYSTEM_PROCESSOR=$ABI
-                
-            cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-            cd ..
+        mkdir -p "build_${TYPE}_$PLATFORM"
+        cd "build_${TYPE}_$PLATFORM"
+        rm -f CMakeCache.txt *.a *.o
+        cmake .. \
+            ${DEFINES} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_SYSTEM_NAME=$TYPE \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI
+
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
     elif [ "$TYPE" == "linux" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
@@ -327,7 +323,7 @@ function build() {
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
-            
+
         export CFLAGS="-DTRIO_FPCLASSIFY=fpclassify"
         sed -i "s/#if defined.STANDALONE./#if 0/g" trionan.c
         find . -name "test*.c" | xargs -r rm
@@ -376,9 +372,9 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/"* $1/include/
         cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
-        cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.dll" $1/lib/$TYPE/$PLATFORM/libxml2.dll     
+        cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.dll" $1/lib/$TYPE/$PLATFORM/libxml2.dll
         secure $1/lib/$TYPE/$PLATFORM/libxml2.lib
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv include/libxml/* $1/include/libxml/
         cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
@@ -436,16 +432,15 @@ function copy() {
     cp -v Copyright $1/license/
 }
 
-
 # executed inside the lib src dir
 function clean() {
-    if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-            rm -r build_${TYPE}_${PLATFORM}     
+            rm -r build_${TYPE}_${PLATFORM}
         fi
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-            rm -r build_${TYPE}_${PLATFORM}     
+            rm -r build_${TYPE}_${PLATFORM}
         fi
     else
         make clean
@@ -454,7 +449,7 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "libxml2" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "libxml2" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
@@ -462,4 +457,3 @@ function load() {
         echo 0
     fi
 }
-

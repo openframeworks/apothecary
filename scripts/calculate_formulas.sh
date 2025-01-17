@@ -46,42 +46,42 @@ FORMULAS=(
 # Seperate in bundles on osx
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
     FORMULAS=(
-            "pkg-config"
-            "glm"
-            "json"
-            "utf8"
-            "brotli"
-            "zlib"
-            "glew"
-            "glfw"
-            "libxml2"
-            "svgtiny"
-            "tess2"
-            "kiss"
-            "fmt"
-            "uriparser"
-        )
+        "pkg-config"
+        "glm"
+        "json"
+        "utf8"
+        "brotli"
+        "zlib"
+        "glew"
+        "glfw"
+        "libxml2"
+        "svgtiny"
+        "tess2"
+        "kiss"
+        "fmt"
+        "uriparser"
+    )
 elif [[ "$TARGET" =~ ^(android)$ ]]; then
     FORMULAS=(
-            "pkg-config"
-            "glm"
-            "json"
-            "utf8"
-            "brotli"
-            "zlib"
-            "libxml2"
-            "svgtiny"
-            "tess2"
-            "kiss"
-            "fmt"
-            "pugixml"
-            "uriparser"
-            "freetype"
-            "FreeImage"
-            "assimp"
-        )
+        "pkg-config"
+        "glm"
+        "json"
+        "utf8"
+        "brotli"
+        "zlib"
+        "libxml2"
+        "svgtiny"
+        "tess2"
+        "kiss"
+        "fmt"
+        "pugixml"
+        "uriparser"
+        "freetype"
+        "FreeImage"
+        "assimp"
+    )
 elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
-if [ "$BUNDLE" == "1" ]; then
+    if [ "$BUNDLE" == "1" ]; then
 
         FORMULAS=(
             # Dependencies for other formulas (cairo)
@@ -116,7 +116,7 @@ if [ "$BUNDLE" == "1" ]; then
                 "opencv"
                 "portaudio"
                 "libusb"
-               # "fmod"
+                # "fmod"
             )
         else
             FORMULAS=(
@@ -132,9 +132,9 @@ if [ "$BUNDLE" == "1" ]; then
             "curl"
             # "poco"
         )
-    else 
-         FORMULAS=(
-        	"pixman"
+    else
+        FORMULAS=(
+            "pixman"
             "pkg-config"
             "zlib"
             "utf8"
@@ -167,7 +167,7 @@ if [ "$BUNDLE" == "1" ]; then
             "curl"
             "metalangle"
             # "poco"
-            )
+        )
     fi
 
 elif [ "$TARGET" == "vs" ]; then
@@ -218,7 +218,7 @@ elif [ "$TARGET" == "vs" ]; then
     fi
 fi
 
-array_contains () {
+array_contains() {
     local array="$1[@]"
     local seeking=$2
     local in=0
@@ -238,7 +238,7 @@ if [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothec
 fi
 if [[ ! -z "${TRAVIS_BRANCH+x}" && "$TRAVIS_BRANCH" != "master" && "$TRAVIS_PULL_REQUEST" != "false" ]] || [[ ! -z "${APPVEYOR+x}" && "${APPVEYOR_REPO_NAME}" != "openframeworks/apothecary" ]]; then
     echo "DETECTED PULL REQUEST OR NOT MASTER BRANCH, CHECKING FILTERS"
-    COMMIT_MESSAGE="$(git log  --no-decorate -n1 --no-merges)"
+    COMMIT_MESSAGE="$(git log --no-decorate -n1 --no-merges)"
     echo "COMMIT_MESSAGE $COMMIT_MESSAGE"
     FORMULAS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[build_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
     PLATFORMS_FROM_COMMIT=($(echo $COMMIT_MESSAGE | sed -n "s/.*\[platforms_only:\([^]]*\)\]/\1/p" | sed "s/\[.*\]//g"))
@@ -274,4 +274,3 @@ if [ ! -z "$PLATFORMS_FROM_COMMIT" ]; then
         exit 1
     fi
 fi
-

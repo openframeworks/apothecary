@@ -7,8 +7,8 @@
 # uses an autotools build system,
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
-FORMULA_TYPES=( "osx" "vs" "linux" )
-FORMULA_DEPENDS=( "openssl" )
+FORMULA_TYPES=("osx" "vs" "linux")
+FORMULA_DEPENDS=("openssl")
 
 # define the version
 VER=1.14.0
@@ -18,7 +18,6 @@ DEFINES=""
 # tools for git use
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
-
 
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
@@ -32,7 +31,7 @@ SHA=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    if [ "$SHA" == "" ] ; then
+    if [ "$SHA" == "" ]; then
         echo "SHA=="" Using $GIT_URL with GIT_TAG=$GIT_TAG"
         curl -Lk $GIT_URL/archive/$GIT_TAG.tar.gz -o poco-$GIT_TAG.tar.gz
         tar -xf poco-$GIT_TAG.tar.gz
@@ -47,7 +46,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
 
-    if [ "$SHA" != "" ] ; then
+    if [ "$SHA" != "" ]; then
         echo "Setting git repo to SHA=$SHA"
         git reset --hard $SHA
     fi
@@ -62,7 +61,7 @@ function prepare() {
     fi
 
     # make backups of the ios config files since we need to edit them
-    if [[ "$TYPE" == "ios" ||  "$TYPE" == "tvos" ]] ; then
+    if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
         mkdir -p lib/$TYPE
         mkdir -p lib/iPhoneOS
 
@@ -87,34 +86,33 @@ function prepare() {
         # Fix for making debug and release, making just release
         sed -i "" "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
 
+    elif [ "$TYPE" == "vs" ]; then
 
-    elif [ "$TYPE" == "vs" ] ; then
-      
         apothecaryDepend prepare zlib
         apothecaryDepend build zlib
-        apothecaryDepend copy zlib  
+        apothecaryDepend copy zlib
 
         apothecaryDepend prepare openssl
         apothecaryDepend build openssl
-        apothecaryDepend copy openssl  
+        apothecaryDepend copy openssl
 
-    elif [ "$TYPE" == "linux" ] ; then
-      
+    elif [ "$TYPE" == "linux" ]; then
+
         apothecaryDepend prepare zlib
         apothecaryDepend build zlib
-        apothecaryDepend copy zlib  
+        apothecaryDepend copy zlib
 
         apothecaryDepend prepare openssl
         apothecaryDepend build openssl
-        apothecaryDepend copy openssl  
+        apothecaryDepend copy openssl
 
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         installAndroidToolchain
-        if patch -p0 -u -N --dry-run --silent < $FORMULA_DIR/android.patch 2>/dev/null ; then
-            patch -p0 -u < $FORMULA_DIR/android.patch
+        if patch -p0 -u -N --dry-run --silent <$FORMULA_DIR/android.patch 2>/dev/null; then
+            patch -p0 -u <$FORMULA_DIR/android.patch
         fi
         cp $FORMULA_DIR/Android build/config/Android
-    elif [ "$TYPE" == "linux" -o "$TYPE" == "linux64" ] ; then
+    elif [ "$TYPE" == "linux" -o "$TYPE" == "linux64" ]; then
         cp $FORMULA_DIR/Linux build/config/Linux
     fi
 
@@ -126,7 +124,7 @@ function build() {
     local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
-       
+
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
 
@@ -143,7 +141,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFS} \
             ${BUILD_OPTS} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
@@ -167,26 +165,24 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DOPENSSL_USE_STATIC_LIBS=YES 
+            -DOPENSSL_USE_STATIC_LIBS=YES
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
-
-    elif [ "$TYPE" == "vs" ] ; then
+    elif [ "$TYPE" == "vs" ]; then
 
         BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
-       
-          
+
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
-        local OF_LIBS_OPENSSL_ABS_PATH=`realpath $OF_LIBS_OPENSSL`
+        local OF_LIBS_OPENSSL_ABS_PATH=$(realpath $OF_LIBS_OPENSSL)
 
         export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
         export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
         export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 
-        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works! 
+        cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libssl.lib ${OPENSSL_PATH}/lib/libssl.lib # this works!
         cp ${OPENSSL_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.lib ${OPENSSL_PATH}/lib/libcrypto.lib
-            
+
         echo "building poco $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
@@ -208,7 +204,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFS} \
             ${BUILD_OPTS} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
@@ -238,7 +234,7 @@ function build() {
         rm ${OPENSSL_PATH}/lib/libssl.lib
         rm ${OPENSSL_PATH}/lib/libcrypto.lib
 
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
         OPENSSL_OPTS="-DOPENSSL_USE_STATIC_LIBS=YES -DOPENSSL_ROOT_DIR=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local -DOPENSSL_INCLUDE_DIR=${BUILD_DIR}/openssl/include -DOPENSSL_LIBRARIES=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/ -DOPENSSL_CRYPTO_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libcrypto.a -DOPENSSL_SSL_LIBRARY=${BUILD_DIR}/openssl/build_$ABI/inst/usr/local/lib/libssl.a"
 
@@ -269,7 +265,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"              
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFS} \
             ${BUILD_OPTS} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
@@ -291,7 +287,7 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DOPENSSL_USE_STATIC_LIBS=YES 
+            -DOPENSSL_USE_STATIC_LIBS=YES
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
         # ./configure $BUILD_OPTS
@@ -338,76 +334,76 @@ function copy() {
     rm -rf $1/lib/$TYPE
     mkdir -p $1/lib/$TYPE
 
-	# libs
-	if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-		mkdir -p $1/include    
-        mkdir -p $1/lib/$TYPE
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/ 
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
-	elif [ "$TYPE" == "vs" ] ; then
-		mkdir -p $1/include    
-        mkdir -p $1/lib/$TYPE
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/ 
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
-        # poco needs some dlls 
-        cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/lib/$TYPE/$PLATFORM/ 
-	elif [ "$TYPE" == "msys2" ] ; then
-		cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
-		#cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
-	elif [[ "$TYPE" =~ ^(linux)$ ]]; then
-		mkdir -p $1/include
+    # libs
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
-	elif [ "$TYPE" == "android" ] ; then
-		rm -rf $1/lib/$TYPE/$ABI
-		mkdir -p $1/lib/$TYPE/$ABI
-		cp -v build_$ABI/lib/*.a $1/lib/$TYPE/$ABI
-	else
-		echoWarning "TODO: copy $TYPE lib"
-	fi
+    elif [ "$TYPE" == "vs" ]; then
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
+        cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
+        # poco needs some dlls
+        cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll $1/lib/$TYPE/$PLATFORM/
+    elif [ "$TYPE" == "msys2" ]; then
+        cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
+        #cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
+    elif [ "$TYPE" == "android" ]; then
+        rm -rf $1/lib/$TYPE/$ABI
+        mkdir -p $1/lib/$TYPE/$ABI
+        cp -v build_$ABI/lib/*.a $1/lib/$TYPE/$ABI
+    else
+        echoWarning "TODO: copy $TYPE lib"
+    fi
 
-	# copy license file
-	echo "remove license"
-	if [ -d "$1/license" ]; then
+    # copy license file
+    echo "remove license"
+    if [ -d "$1/license" ]; then
         rm -rf $1/license
     fi
-	echo "create license dir"
-	mkdir -p $1/license
-	echo "copy license"
-	cp -v LICENSE $1/license/
+    echo "create license dir"
+    mkdir -p $1/license
+    echo "copy license"
+    cp -v LICENSE $1/license/
 }
 
 # executed inside the lib src dir
 function clean() {
 
-    if [ "$TYPE" == "vs" ] ; then
+    if [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${ARCH}" ]; then
-            rm -r build_${TYPE}_${ARCH}     
+            rm -r build_${TYPE}_${ARCH}
         fi
-    elif [ "$TYPE" == "android" ] ; then
+    elif [ "$TYPE" == "android" ]; then
         if [ -d "build_${TYPE}_${ABI}" ]; then
-            rm -r build_${TYPE}_${ABI}     
+            rm -r build_${TYPE}_${ABI}
         fi
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-            rm -r build_${TYPE}_${PLATFORM}  
-        fi   
-	else
-		make clean
-	fi
+            rm -r build_${TYPE}_${PLATFORM}
+        fi
+    else
+        make clean
+    fi
 }
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "poco" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID} )
+    LOAD_RESULT=$(loadsave ${TYPE} "poco" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
@@ -415,4 +411,3 @@ function load() {
         echo 0
     fi
 }
-

@@ -6,7 +6,10 @@ TARGET=${TARGET:-""}
 ARCH=${ARCH:-""}
 OPT=${OPT:-""}
 
-ROOT=$(cd $(dirname "$0"); pwd -P)/..
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/..
 LOCAL_ROOT=$ROOT
 APOTHECARY_PATH=$ROOT/apothecary
 
@@ -43,7 +46,7 @@ package_library() {
     else
         package_name="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}"
     fi
-    
+
     local library_path="${LIB}"
     local TARBALL
 
@@ -78,7 +81,7 @@ fi
 
 # Get list of libraries
 LIBRARIES=$(ls "$OUTPUT_FOLDER")
-cd $OUTPUT_FOLDER;
+cd $OUTPUT_FOLDER
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
 if [ -z "$LIBRARIES" ]; then
@@ -99,8 +102,3 @@ find ./ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 
 echo "All libraries packaged successfully."
 cd ../
-
-
-
-
-

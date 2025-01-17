@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 set -e
-APOTHECARY_PATH=$(cd $(dirname "$0"); pwd -P)/../../apothecary
+APOTHECARY_PATH=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../apothecary
 
 # Check for predefined Android environment variables
 
 if [ -n "$NDK" ]; then
-	NDK_VERSION=${NDK}
-	echo "Using ANDROID_NDK_VERSION: $NDK"
+    NDK_VERSION=${NDK}
+    echo "Using ANDROID_NDK_VERSION: $NDK"
 fi
 
 if [ -n "$SDK" ]; then
-	SDK_VERSION=${SDK}
-	echo "Using ANDROID_SDK: $SDK"
+    SDK_VERSION=${SDK}
+    echo "Using ANDROID_SDK: $SDK"
 fi
 
 if [ -n "$ANDROID_NDK_ROOT" ]; then
@@ -41,11 +44,10 @@ else
         echo "Downloading NDK $NDK_VERSION"
         wget -q --no-check-certificate https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux.zip
         echo "Uncompressing NDK"
-        unzip android-ndk-${NDK_VERSION}-linux.zip > /dev/null 2>&1
+        unzip android-ndk-${NDK_VERSION}-linux.zip >/dev/null 2>&1
         rm android-ndk-${NDK_VERSION}-linux.zip
         echo "NDK installed at $NDK_ROOT"
         cd -
     fi
-    echo "NDK_ROOT=${NDK_ROOT};" > "${APOTHECARY_PATH}/paths.make"
+    echo "NDK_ROOT=${NDK_ROOT};" >"${APOTHECARY_PATH}/paths.make"
 fi
-

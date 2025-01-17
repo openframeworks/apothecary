@@ -3,7 +3,10 @@ set -e
 # capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
-ROOT=$(cd $(dirname "$0"); pwd -P)/../../
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../
 LOCAL_ROOT=$ROOT
 APOTHECARY_PATH=$ROOT/apothecary
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
@@ -20,19 +23,17 @@ else
     export FORCE=""
 fi
 
-
-
 # VERBOSE=true
 
-if [ -z $TARGET ] ; then
+if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 1
 fi
 
-isRunning(){
+isRunning() {
     if [ “$(uname)” == “Linux” ]; then
-		if [ -d /proc/$1 ]; then
-	    	return 0
+        if [ -d /proc/$1 ]; then
+            return 0
         else
             return 1
         fi
@@ -40,21 +41,21 @@ isRunning(){
         number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
 
         if [ $number -gt 0 ]; then
-            return 0;
+            return 0
         else
-            return 1;
+            return 1
         fi
     fi
 }
 
-echoDots(){
+echoDots() {
     sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
     while isRunning $1; do
         for i in $(seq 1 10); do
             echo -ne .
             if ! isRunning $1; then
                 printf "\r"
-                return;
+                return
             fi
             sleep 1
         done
@@ -63,41 +64,40 @@ echoDots(){
     done
 }
 
-
 travis_fold_start() {
-  echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
+    echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
 }
 
 travis_fold_end() {
-  echo -e "\ntravis_fold:end:$1\r"
+    echo -e "\ntravis_fold:end:$1\r"
 }
 
 travis_time_start() {
-  travis_timer_id=$(printf %08x $(( RANDOM * RANDOM )))
-  travis_start_time=$(travis_nanoseconds)
-  echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
+    travis_timer_id=$(printf %08x $((RANDOM * RANDOM)))
+    travis_start_time=$(travis_nanoseconds)
+    echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
 }
 
 travis_time_finish() {
-  local result=$?
-  travis_end_time=$(travis_nanoseconds)
-  local duration=$(($travis_end_time-$travis_start_time))
-  echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
-  return $result
+    local result=$?
+    travis_end_time=$(travis_nanoseconds)
+    local duration=$(($travis_end_time - $travis_start_time))
+    echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
+    return $result
 }
 
 function travis_nanoseconds() {
-  local cmd="date"
-  local format="+%s%N"
-  local os=$(uname)
+    local cmd="date"
+    local format="+%s%N"
+    local os=$(uname)
 
-  if hash gdate > /dev/null 2>&1; then
-    cmd="gdate" # use gdate if available
-  elif [[ "$os" = Darwin ]]; then
-    format="+%s000000000" # fallback to second precision on darwin (does not support %N)
-  fi
+    if hash gdate >/dev/null 2>&1; then
+        cmd="gdate" # use gdate if available
+    elif [[ "$os" = Darwin ]]; then
+        format="+%s000000000" # fallback to second precision on darwin (does not support %N)
+    fi
 
-  $cmd -u $format
+    $cmd -u $format
 }
 
 if [ -z ${PARALLEL+x} ]; then
@@ -116,10 +116,10 @@ fi
 
 echo "Parallel builds: $PARALLEL"
 
-if  type "ccache" > /dev/null; then
+if type "ccache" >/dev/null; then
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-       export PATH="/usr/local/opt/ccache/libexec:$PATH";
-       export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+        export PATH="/usr/local/opt/ccache/libexec:$PATH"
+        export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
     fi
 
     # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
@@ -148,25 +148,25 @@ if [ "$TARGET" == "linux" ]; then
     fi
 fi
 
-function build(){
+function build() {
     trap "trapError" ERR
 
     echo Build $formula_name
 
     local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
-	if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
-		ARGS="-e $ARGS"
-	fi
-    
-    if [ "$ARCH" != "" ] ; then
+    if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
+        ARGS="-e $ARGS"
+    fi
+
+    if [ "$ARCH" != "" ]; then
         ARGS="$ARGS -a$ARCH"
     fi
 
-    if [ "$VERBOSE" = true ] ; then
+    if [ "$VERBOSE" = true ]; then
         echo "./apothecary $ARGS update $formula_name"
         run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     else
-        echo "./apothecary $ARGS update $formula_name" >> "formula_${ARCH}.log" 2>&1
+        echo "./apothecary $ARGS update $formula_name" >>"formula_${ARCH}.log" 2>&1
         run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
     fi
 
@@ -178,39 +178,39 @@ if [ -z "$FORMULAS" ]; then
     exit 0
 fi
 
-if  type "ccache" > /dev/null; then
+if type "ccache" >/dev/null; then
     echo $(ccache -s)
 fi
 
-CUR_BRANCH="master";
+CUR_BRANCH="master"
 if [ -n "${ALWAYS_BUILD+x}" ]; then
     echo "ALWAYS_BUILD is set - proceeding with build regardless of branch/tag"
     CUR_BRANCH="latest"
-	RELEASE="latest"
+    RELEASE="latest"
 else
-	if [[ ( "${GITHUB_REF##*/}" == "master" || "${GITHUB_REF##*/}" == "bleeding" || "${GITHUB_REF##*/}" == "latest" ) && -z "${GITHUB_HEAD_REF}" ]] \
-	    || [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+    if [[ ("${GITHUB_REF##*/}" == "master" || "${GITHUB_REF##*/}" == "bleeding" || "${GITHUB_REF##*/}" == "latest") && -z "${GITHUB_HEAD_REF}" ]] ||
+        [[ "${GITHUB_REF}" == refs/tags/* ]]; then
 
-	    # Check if we are on a tag
-	    if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-	        echo "On a tag - proceeding with tag-specific build steps"
-	        RELEASE="${GITHUB_REF##*/}"  # Use tag name as the release
-	        CUR_BRANCH="$RELEASE"
-	    else
-	        echo "On Master, Bleeding, or Latest branch - proceeding with branch-specific build steps"
-	        CUR_BRANCH="latest"
-	        RELEASE="latest"
-	    fi
+        # Check if we are on a tag
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            echo "On a tag - proceeding with tag-specific build steps"
+            RELEASE="${GITHUB_REF##*/}" # Use tag name as the release
+            CUR_BRANCH="$RELEASE"
+        else
+            echo "On Master, Bleeding, or Latest branch - proceeding with branch-specific build steps"
+            CUR_BRANCH="latest"
+            RELEASE="latest"
+        fi
 
-	else
-	    echo "This is a PR or not on master/bleeding branch; exiting build before compressing."
-	    # Exit early if this is a PR or a branch we don't want to build
-	    exit 0
-	fi
+    else
+        echo "This is a PR or not on master/bleeding branch; exiting build before compressing."
+        # Exit early if this is a PR or a branch we don't want to build
+        exit 0
+    fi
 fi
 
 echo "Compressing libraries from $OUTPUT_FOLDER"
-cd $OUTPUT_FOLDER;
+cd $OUTPUT_FOLDER
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
 
@@ -274,13 +274,13 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
-	if [ "$ARCH" == "64" ]; then
-		POSTFIX="_64"
-	else
-		POSTFIX=""
-	fi
+    if [ "$ARCH" == "64" ]; then
+        POSTFIX="_64"
+    else
+        POSTFIX=""
+    fi
     rm -f *.pc
-	TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}${POSTFIX}.tar.bz2
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}${POSTFIX}.tar.bz2
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
