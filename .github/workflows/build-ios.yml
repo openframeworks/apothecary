@@ -238,11 +238,11 @@ jobs:
     needs: build-ios-platforms
     # if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
     steps:
-    - name: Wait build-ios
-      uses: NathanFirmo/wait-for-other-action@v1.0.4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: 'build-ios.yml'
+    # - name: Wait build-ios
+    #   uses: NathanFirmo/wait-for-other-action@v1.0.4
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     workflow: 'build-ios.yml'
     - name: Wait build-macos
       uses: NathanFirmo/wait-for-other-action@v1.0.4
       with:
