@@ -81,7 +81,11 @@ function build() {
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_EXTENSIONS=OFF
-			-DBUILD_SHARED_LIBS=OFF"
+			-DBUILD_SHARED_LIBS=OFF\
+            -DKISSFFT_STATIC=ON \
+            -DKISSFFT_TEST=OFF \
+            -DKISSFFT_TOOLS=OFF \
+            -DKISSFFT_OPENMP=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DGCC_VERSION=${GCC_VERSION} \
