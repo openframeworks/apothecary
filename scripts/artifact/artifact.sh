@@ -279,19 +279,12 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
-    if [ "$ARCH" == "64" ]; then
-        POSTFIX="_64"
-    else
-        POSTFIX=""
-    fi
-    rm -f *.pc
-    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}${POSTFIX}.tar.bz2
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
     echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-
     sudo tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "android" ]; then
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2

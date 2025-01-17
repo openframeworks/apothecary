@@ -65,11 +65,7 @@ package_library() {
         if [ "${EXIT_BEFORE}" == "1" ]; then
             exit 0
         fi
-        if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
-            run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-        else
-            tar cjvf $TARBALL $LIBS
-        fi
+        sudo tar cjvf "$TARBALL" -C "$library_path"
     elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         TARBALL="${OUTPUT_FOLDER}/${package_name}.tar.bz2"
         echo "Creating TAR.BZ2: $TARBALL"

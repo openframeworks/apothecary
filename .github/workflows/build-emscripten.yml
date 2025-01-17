@@ -158,12 +158,6 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
-          ARCH_SUFFIX=""
-          if [[ "${{ env.ARCH }}" == "64" ]]; then
-            ARCH_SUFFIX="_64"
-          fi
-          FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
           scripts/artifact/artifact.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
@@ -189,12 +183,6 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
-          ARCH_SUFFIX=""
-          if [[ "${{ env.ARCH }}" == "64" ]]; then
-            ARCH_SUFFIX="_64"
-          fi
-          FILENAME="openFrameworksLibs_${{ env.RELEASE }}_emscripten${ARCH_SUFFIX}.tar.bz2"
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
           scripts/package.sh
         env:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -209,4 +197,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
-          files: out/${{ env.FILENAME }}
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_emscripten_${{ env.ARCH }}.tar.bz2

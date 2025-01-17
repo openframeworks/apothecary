@@ -150,19 +150,11 @@ elif [ "$TARGET" == "vs" ]; then
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
     export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
-    if [ -n "$ARCH" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_64.tar.bz2"
-    else
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
-    fi
+    TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    # if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ]; then
-    #     run "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    # else
-
     sudo tar cjvf $TARBALL $LIBS
     # fi
 elif [ "$TARGET" == "android" ]; then
