@@ -10,7 +10,7 @@ FORMULA_TYPES=("osx" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" "android
 FORMULA_DEPENDS=("zlib")
 
 # define the version by sha
-VER=2.12.7
+VER=2.13.5
 BUILD_ID=1
 DEFINES=""
 
@@ -73,32 +73,32 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
-    DEFINES="  -DCMAKE_C_STANDARD=${C_STANDARD} \
-            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include\
-            -DLIBXML2_WITH_UNICODE=ON \
-            -DLIBXML2_WITH_LZMA=OFF \
-            -DLIBXML2_WITH_ZLIB=ON \
-            -DLIBXML2_WITH_FTP=OFF \
-            -DLIBXML2_WITH_HTTP=OFF \
-            -DLIBXML2_WITH_HTML=ON \
-            -DLIBXML2_WITH_ICONV=OFF \
-            -DLIBXML2_WITH_LEGACY=OFF \
-            -DLIBXML2_WITH_UNICODE=ON \
-            -DLIBXML2_WITH_MODULES=OFF \
-            -DLIBXML2_WITH_OUTPUT=ON \
-            -DLIBXML2_WITH_PYTHON=OFF \
-            -DLIBXML2_WITH_PROGRAMS=OFF \
-            -DLIBXML2_WITH_DEBUG=OFF \
-            -DLIBXML2_WITH_THREADS=ON \
-            -DLIBXML2_WITH_THREAD_ALLOC=OFF \
-            -DLIBXML2_WITH_TESTS=OFF \
-            -DLIBXML2_WITH_SCHEMATRON=OFF"
+    DEFINES="-DCMAKE_C_STANDARD=${C_STANDARD} \
+-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+-DCMAKE_CXX_STANDARD_REQUIRED=ON \
+-DCMAKE_CXX_EXTENSIONS=OFF \
+-DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
+-DBUILD_SHARED_LIBS=OFF \
+-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+-DCMAKE_INSTALL_INCLUDEDIR=include\
+-DLIBXML2_WITH_UNICODE=ON \
+-DLIBXML2_WITH_LZMA=OFF \
+-DLIBXML2_WITH_ZLIB=ON \
+-DLIBXML2_WITH_FTP=OFF \
+-DLIBXML2_WITH_HTTP=OFF \
+-DLIBXML2_WITH_HTML=OFF \
+-DLIBXML2_WITH_ICONV=OFF \
+-DLIBXML2_WITH_LEGACY=OFF \
+-DLIBXML2_WITH_UNICODE=ON \
+-DLIBXML2_WITH_MODULES=OFF \
+-DLIBXML2_WITH_OUTPUT=ON \
+-DLIBXML2_WITH_PYTHON=OFF \
+-DLIBXML2_WITH_PROGRAMS=OFF \
+-DLIBXML2_WITH_DEBUG=OFF \
+-DLIBXML2_WITH_THREADS=ON \
+-DLIBXML2_WITH_THREAD_ALLOC=OFF \
+-DLIBXML2_WITH_TESTS=OFF \
+-DLIBXML2_WITH_SCHEMATRON=OFF"
 
     if [ "$TYPE" == "vs" ]; then
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
@@ -239,7 +239,8 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DZLIB_ROOT="$LIBS_ROOT/zlib/" \
             -DZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include" \
-            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+            -DZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a" \
+            -GXcode
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [ "$TYPE" == "emscripten" ]; then
@@ -319,6 +320,8 @@ function build() {
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
         fi
+
+
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
