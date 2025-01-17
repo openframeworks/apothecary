@@ -143,7 +143,7 @@ function clean() {
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
-    else
+    fi
 }
 
 function load() {
