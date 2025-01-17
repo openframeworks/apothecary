@@ -109,7 +109,7 @@ function build() {
 
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-      elif [[ "$TYPE" =~ ^(linux)$ ]]; then
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         echo "building $TYPE | $PLATFORM"
         echo "--------------------"
         if [ $CROSSCOMPILING -eq 1 ]; then
@@ -165,7 +165,6 @@ function build() {
 
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-    elif [ "$TYPE" == "android" ]; then
     elif [ "$TYPE" == "android" ]; then
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
