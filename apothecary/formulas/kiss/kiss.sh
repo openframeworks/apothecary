@@ -5,7 +5,7 @@
 # http://sourceforge.net/projects/kissfft/
 
 FORMULA_TYPES=("linux" "msys2")
-FORMULA_DEPENDS=()
+FORMULA_DEPENDS=("libpng")
 
 # define the version
 VER=131.1.0
@@ -34,6 +34,10 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echo ""
+    apothecaryDepend download libpng
+    apothecaryDepend prepare libpng
+    apothecaryDepend build libpng
+    apothecaryDepend copy libpng
 }
 
 # executed inside the lib src dir
