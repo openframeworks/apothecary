@@ -18,20 +18,10 @@ objdump = 'x86_64-linux-gnu-objdump'
 
 [properties]
 sys_root = '/'
-c_args = [
-    '--sysroot=/', '-fPIC', '-O3', '-Wall', '-Wextra', '-march=x86-64', '-mtune=generic',
-    '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu'
-]
-cpp_args = [
-    '--sysroot=/', '-fPIC', '-O3', '-Wall', '-Wextra', '-std=c++17', '-march=x86-64', '-mtune=generic',
-    '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu'
-]
-c_link_args = [
-    '-fPIE', '-pie', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu'
-]
-cpp_link_args = [
-    '-fPIE', '-pie', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu'
-]
+c_args = ['--sysroot=/', '-fPIC', '-O3', '-Wall', '-Wextra', '-march=x86-64', '-mtune=generic', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu']
+cpp_args = ['--sysroot=/', '-fPIC', '-O3', '-Wall', '-Wextra', '-std=c++17', '-march=x86-64', '-mtune=generic', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu']
+c_link_args = ['-fPIE', '-pie', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu']
+cpp_link_args = ['-fPIE', '-pie', '-Wl,-rpath-link,/', '-L/lib/', '-L/lib64/', '-L/lib/x86_64-linux-gnu']
 
 [build_options]
 c_std = 'c17'
