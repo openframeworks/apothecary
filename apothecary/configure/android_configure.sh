@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
-cd $APOTHECARY_LEVEL
+# cd $APOTHECARY_LEVEL
 
 export MAKE_TARGET="${MAKE_TARGET:-"cmake"}"
 export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-"27"}"
@@ -103,7 +103,8 @@ export DEEP_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${H
 export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOST_PLATFORM}
 export TOOLCHAIN_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/include
 export TOOLCHAIN_LOCAL_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/local/include
-export PATH=${PATH}:${TOOLCHAIN_PATH}
+# export PATH=${PATH}:${TOOLCHAIN_PATH}
+export PATH=$(echo "${TOOLCHAIN_PATH}:${TOOLCHAIN}:${PATH}" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':')
 # Configure and build.
 export AR=$TOOLCHAIN/bin/llvm-ar
 export CC=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang
@@ -112,6 +113,11 @@ export AS=$TOOLCHAIN/bin/llvm-as
 export LD=$TOOLCHAIN/bin/llvm-ld
 export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
 export STRIP=$TOOLCHAIN/bin/llvm-strip
+
+echo "NDK_ROOT: ${NDK_ROOT}"
+echo "TOOLCHAIN_TYPE: ${TOOLCHAIN_TYPE}"
+echo "HOST_PLATFORM: ${HOST_PLATFORM}"
+echo "TOOLCHAIN_INCLUDE_PATH: ${TOOLCHAIN_INCLUDE_PATH}"
 
 if [ "$BUILD_SYSTEM" = "cmake" ]; then
     export ANDROID_FIX_API="" # defined by default in cmake
@@ -148,8 +154,6 @@ export ANDROID_SYSROOT=${SYSROOT}
 
 echo "Toolchain: ${TOOLCHAIN_INCLUDE_PATH}"
 
-export PATH=${TOOLCHAIN}:$PATH
-
 echo "AR: ${AR}"
 if [ "$ABI" = "armeabi-v7a" ]; then
     export CFLAGS="$CFLAGS $MAKE_TARGET "
@@ -174,3 +178,20 @@ elif [ "$ABI" = "x86" ]; then
 fi
 
 export CXXFLAGS="$CXXFLAGS $CPPFLAGS"
+
+# Debugging output
+echo "--------------------"
+# echo "openFrameworks apothecary Cross Compiler: $GCC_PREFIX"
+# echo "Using GCC Version: $GCC_VERSION"
+# echo "Library Path: $LIBRARY_PATH"
+# echo "ROOTFS Path: $ROOTFS"
+# echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
+# echo "CROSS_ARCH: $CROSS_ARCH"
+echo "ANDROID_SYSROOT: $ANDROID_SYSROOT"
+# echo "HOST_ARCH: $HOST_ARCH"
+# echo "HOST_PLATFORM: $HOST_PLATFORM"
+# echo "GCC Path: $GCCPATH"
+echo "LDFLAGS : [$LDFLAGS]"
+echo "CFLAGS : [$CFLAGS]"
+echo "Path: [$PATH]"
+echo "--------------------"

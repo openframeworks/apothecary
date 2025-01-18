@@ -132,6 +132,15 @@ dpkg -L gcc-aarch64-linux-gnu
 sudo apt-get install -y ccache
 sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
+dpkg -L gcc-aarch64-linux-gnu
+
+if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+fi
+if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+fi
+
 # Download the installer script
 # CMAKE_VERSION=3.30.0
 # wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh

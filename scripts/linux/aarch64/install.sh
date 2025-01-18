@@ -10,3 +10,12 @@ sudo aptitude install -y gperf
 sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
 sudo apt-get install -y ccache
 sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
+dpkg -L gcc-aarch64-linux-gnu
+
+if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+fi
+if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
+    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+fi
