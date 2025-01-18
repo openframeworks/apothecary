@@ -54,12 +54,13 @@ function build() {
     # cd "build_${TYPE}_${PLATFORM}"
     # using Menson build system
 
-    meson setup .. \
+    meson setup \
         --prefix="build_${TYPE}_${PLATFORM}" \
         --cross-file ${TYPE}.meson.txt \
         --buildtype=release \
         --default-library=static \
-        -Dgst-full-libraries=app,video
+        -Dgst-full-libraries=app,video \
+        "build_${TYPE}_${PLATFORM}"
 
     # meson compile -C build/Release
     # meson install -C build/Release
