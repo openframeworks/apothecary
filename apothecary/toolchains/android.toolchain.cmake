@@ -20,24 +20,37 @@ if(NOT DEFINED ANDROID_ABI)
     message(FATAL_ERROR "ANDROID_ABI must be specified (e.g., armeabi-v7a, arm64-v8a, x86, x86_64)")
 endif()
 
-if(NOT DEFINED NDK_ROOT)
-    message(FATAL_ERROR "NDK_ROOT must be specified as the path to the Android NDK")
+if(NOT DEFINED ANDROID_NDK_ROOT)
+    message(FATAL_ERROR "ANDROID_NDK_ROOT must be specified as the path to the Android NDK")
 endif()
 
 # Detect Host Platform
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(HOST_PLATFORM "darwin-x86_64")
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set(HOST_PLATFORM "windows-x86_64")
-else()
-    set(HOST_PLATFORM "linux-x86_64")
+if(NOT DEFINED HOST_PLATFORM)
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Darwin")
+        if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64")
+            set(HOST_PLATFORM "darwin-arm64")
+        else()
+            set(HOST_PLATFORM "darwin-x86_64")
+        endif()
+    elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
+        set(HOST_PLATFORM "windows-x86_64") # Windows ARM64 is rare, adjust if needed
+    elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
+        if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
+            set(HOST_PLATFORM "linux-arm64")
+        else()
+            set(HOST_PLATFORM "linux-x86_64")
+        endif()
+    else()
+        message(FATAL_ERROR "Unsupported host platform: ${CMAKE_HOST_SYSTEM_NAME} (${CMAKE_HOST_SYSTEM_PROCESSOR})")
+    endif()
 endif()
 
 message(STATUS "Detected Host Platform: ${HOST_PLATFORM}")
 
 # NDK Configuration
 set(TOOLCHAIN_TYPE "llvm")
-set(TOOLCHAIN "${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
+
+set(TOOLCHAIN "${ANDROID_NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
 set(SYSROOT "${TOOLCHAIN}/sysroot")
 
 # ABI-specific configuration
@@ -90,15 +103,24 @@ set(CMAKE_LIBRARY_PATH "${SYSROOT}/usr/lib/${ANDROID_PREFIX}/${CMAKE_ANDROID_API
 # Compiler Binary
 set(BIN_PREFIX "${TOOLCHAIN_ROOT}/bin/")
 
-find_program(CMAKE_C_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-gcc PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_CXX_COMPILER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-g++ PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_LINKER ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ld PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_AR ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_NM ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-nm PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_RANLIB ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-ranlib PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_STRIP ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-strip PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_OBJCOPY ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-objcopy PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_OBJDUMP ${CMAKE_SYSTEM_PROCESSOR}-linux-gnu-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_C_COMPILER clang PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_CXX_COMPILER clang++ PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_LINKER ld.lld PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_AR llvm-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_NM llvm-nm PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_RANLIB llvm-ranlib PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_STRIP llvm-strip PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_OBJCOPY llvm-objcopy PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_OBJDUMP llvm-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
+
+if(NOT CMAKE_C_COMPILER)
+    message(FATAL_ERROR "C Compiler not found!")
+endif()
+
+if(NOT CMAKE_CXX_COMPILER)
+    message(FATAL_ERROR "C++ Compiler not found!")
+endif()
+
 
 # Toolchain Debug Output
 message(STATUS "NDK Root: ${NDK_ROOT}")
