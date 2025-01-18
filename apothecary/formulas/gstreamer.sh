@@ -3,7 +3,7 @@
 # GStreamer
 
 # Define the version
-FORMULA_TYPES=("linux")
+FORMULA_TYPES=("linux" "osx" )
 
 FORMULA_DEPENDS=()
 
@@ -28,6 +28,7 @@ function download() {
 }
 
 function prepare() {
+    echo "prepare gstreamer install apts"
     sudo apt-get update
     sudo apt-get install -y \
         git \
@@ -46,6 +47,7 @@ function prepare() {
 }
 
 function build() {
+    echo "build gstreamer"
     LIBS_ROOT=$(realpath $LIBS_DIR)
 
     mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -58,7 +60,7 @@ function build() {
         -Dgst-full-libraries=app,video\
         build_${TYPE}_${PLATFORM}
 
-                meson -Dauto_features=disabled -Dgstreamer:tools=enabled -Dbad=enabled -Dgst-plugins-bad:openh264=enabled
+                # meson -Dauto_features=disabled -Dgstreamer:tools=enabled -Dbad=enabled -Dgst-plugins-bad:openh264=enabled
 
 
     ninja
