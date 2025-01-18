@@ -131,10 +131,10 @@ sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
 dpkg -L gcc-aarch64-linux-gnu
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
-    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+    find /usr/lib/x86_64-linux-gnu -name "libGL*" -print
 fi
-if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
-    find /usr/lib/x86_64-linux-gnu -name "libGL*"
+if [ -d "/usr/lib/aarch64-linux-gnu" ]; then
+    find /usr/lib/aarch64-linux-gnu -name "libGL*" -print
 fi
 
 # Download the installer script
