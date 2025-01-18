@@ -109,12 +109,12 @@ function build() {
         # export CXXFLAGS="$CFLAGS $FLAG_RELEASE"
 
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
-			-DCMAKE_BUILD_TYPE=Release \
-			-DCMAKE_C_STANDARD=${C_STANDARD} \
-			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
-			-DCMAKE_CXX_EXTENSIONS=OFF \
-			-DBUILD_SHARED_LIBS=OFF"
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
@@ -166,12 +166,12 @@ function build() {
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.a *.o *.so
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_C_STANDARD=${C_STANDARD} \
-	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF \
-	        -DBUILD_SHARED_LIBS=OFF"
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
@@ -195,16 +195,16 @@ function build() {
         fi
         echoVerbose "building $TYPE | $ARCH "
         echoVerbose "--------------------"
-        mkdir -p "build_${TYPE}_${ARCH}"
-        cd "build_${TYPE}_${ARCH}"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.so
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
-	        -DCMAKE_BUILD_TYPE=Release \
-	        -DCMAKE_C_STANDARD=${C_STANDARD} \
-	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-	        -DCMAKE_CXX_EXTENSIONS=OFF \
-	        -DBUILD_SHARED_LIBS=OFF"
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
