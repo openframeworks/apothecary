@@ -1,0 +1,57 @@
+[host_machine]
+system = 'linux'
+cpu_family = 'aarch64'
+cpu = 'cortex-a53'  # Change this if a different CPU target is needed
+endian = 'little'
+
+[binaries]
+c = '/path/to/your/toolchain/bin/aarch64-linux-gnu-gcc'
+cpp = '/path/to/your/toolchain/bin/aarch64-linux-gnu-g++'
+ar = '/path/to/your/toolchain/bin/aarch64-linux-gnu-ar'
+strip = '/path/to/your/toolchain/bin/aarch64-linux-gnu-strip'
+pkgconfig = '/path/to/your/toolchain/bin/aarch64-linux-gnu-pkg-config'
+ld = '/path/to/your/toolchain/bin/aarch64-linux-gnu-ld'
+
+[properties]
+sys_root = '/path/to/raspbian_rootfs'
+c_args = [
+    '--sysroot=/path/to/raspbian_rootfs',
+    '-I/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/include',
+    '-I/path/to/your/toolchain/lib/gcc/aarch64-linux-gnu/14.2.0/include',
+    '-DSTANDALONE', '-DPIC', '-D_REENTRANT', '-D_LARGEFILE64_SOURCE',
+    '-D_FILE_OFFSET_BITS=64', '-DHAVE_LIBBCM_HOST', '-DUSE_EXTERNAL_LIBBCM_HOST',
+    '-mcpu=cortex-a53', '-march=armv8-a+fp+simd', '-fPIC'
+]
+cpp_args = [
+    '--sysroot=/path/to/raspbian_rootfs',
+    '-I/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/include',
+    '-I/path/to/your/toolchain/lib/gcc/aarch64-linux-gnu/14.2.0/include',
+    '-DSTANDALONE', '-DPIC', '-D_REENTRANT', '-D_LARGEFILE64_SOURCE',
+    '-D_FILE_OFFSET_BITS=64', '-DHAVE_LIBBCM_HOST', '-DUSE_EXTERNAL_LIBBCM_HOST',
+    '-mcpu=cortex-a53', '-march=armv8-a+fp+simd', '-fPIC'
+]
+c_link_args = [
+    '-Wl,-rpath-link,/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu',
+    '-L/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/lib64',
+    '-Wl,-rpath-link,/path/to/your/toolchain/aarch64-linux-gnu/lib64',
+    '-L/path/to/your/toolchain/lib/gcc/aarch64-linux-gnu/14.2.0',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/libc/lib64',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/lib64',
+    '-Wl,-rpath-link,/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/lib64'
+]
+cpp_link_args = [
+    '-Wl,-rpath-link,/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu',
+    '-L/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/lib64',
+    '-Wl,-rpath-link,/path/to/your/toolchain/aarch64-linux-gnu/lib64',
+    '-L/path/to/your/toolchain/lib/gcc/aarch64-linux-gnu/14.2.0',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/libc/lib64',
+    '-L/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/lib64',
+    '-Wl,-rpath-link,/path/to/your/toolchain/aarch64-linux-gnu/libc/usr/lib64'
+]
+
+[build_options]
+c_std = 'c17'
+cpp_std = 'c++17'
+default_library = 'static'

@@ -53,15 +53,16 @@ function build() {
     mkdir -p "build_${TYPE}_${PLATFORM}"
     # cd "build_${TYPE}_${PLATFORM}"
     # using Menson build system
+
     meson setup .. \
-        --prefix="${LIBS_ROOT}/gstreamer/Release" \
+        --prefix="build_${TYPE}_${PLATFORM}" \
+        --cross-file ${TYPE}.meson.txt \
         --buildtype=release \
         --default-library=static \
-        -Dgst-full-libraries=app,video\
-        build_${TYPE}_${PLATFORM}
+        -Dgst-full-libraries=app,video
 
-                # meson -Dauto_features=disabled -Dgstreamer:tools=enabled -Dbad=enabled -Dgst-plugins-bad:openh264=enabled
-
+    # meson compile -C build/Release
+    # meson install -C build/Release
 
     ninja
     ninja install
