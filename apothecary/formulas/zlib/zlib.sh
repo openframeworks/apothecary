@@ -100,7 +100,7 @@ function build() {
         cd ..
     elif [ "$TYPE" == "android" ]; then
 
-        # source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"

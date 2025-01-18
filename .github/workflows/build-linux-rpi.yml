@@ -44,10 +44,10 @@ jobs:
           echo "::set-output name=RELEASE=latest"
         fi
 
-build-linux-aarch64:
-  if: needs.pre-check.outputs.workflow_disabled != 'true'
-  needs: pre-check
-  runs-on: ubuntu-latest
+  build-linux-aarch64:
+    if: needs.pre-check.outputs.workflow_disabled != 'true'
+    needs: pre-check
+    runs-on: ubuntu-latest
 
   strategy:
     matrix:
@@ -58,82 +58,82 @@ build-linux-aarch64:
         - ARCH: armv8
           CROSS_CPU: cortex-a72 # Example exclusion, customize as needed
 
-  env:
-    CROSS_COMPILER: raspbian
-    CROSS_OS: ${{ matrix.CROSS_OS }}
-    ARCH: ${{ matrix.ARCH }}
-    WORKDIR: "/home/runner/work/apothecary/apothecary"
-    SYSROOT: "${WORKDIR}/${{ matrix.CROSS_OS }}_sysroot"
-    TOOLCHAIN_ROOT: "${WORKDIR}/${CROSS_COMPILER}"
+    env:
+      CROSS_COMPILER: raspbian
+      CROSS_OS: ${{ matrix.CROSS_OS }}
+      ARCH: ${{ matrix.ARCH }}
+      WORKDIR: "/home/runner/work/apothecary/apothecary"
+      SYSROOT: "${WORKDIR}/${{ matrix.CROSS_OS }}_sysroot"
+      TOOLCHAIN_ROOT: "${WORKDIR}/${CROSS_COMPILER}"
 
-  steps:
-    - uses: actions/checkout@v4.2.2
+    steps:
+      - uses: actions/checkout@v4.2.2
 
-    - name: Setup Environment
-      run: |
-        echo "Setting up environment for ${CROSS_OS} ${ARCH}"
-        echo "CROSS_CPU: ${matrix.CROSS_CPU}"
-        echo "SYSROOT: ${SYSROOT}"
-        echo "TOOLCHAIN_ROOT: ${TOOLCHAIN_ROOT}"
+      - name: Setup Environment
+        run: |
+          echo "Setting up environment for ${CROSS_OS} ${ARCH}"
+          echo "CROSS_CPU: ${matrix.CROSS_CPU}"
+          echo "SYSROOT: ${SYSROOT}"
+          echo "TOOLCHAIN_ROOT: ${TOOLCHAIN_ROOT}"
 
-    - name: Determine Release
-      id: vars
-      shell: bash
-      run: |
-        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "RELEASE=nightly" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "RELEASE=latest" >> $GITHUB_ENV
-        else
-          echo "RELEASE=latest" >> $GITHUB_ENV
-        fi
+      - name: Determine Release
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "RELEASE=latest" >> $GITHUB_ENV
+          else
+            echo "RELEASE=latest" >> $GITHUB_ENV
+          fi
 
-    - name: Update and Upgrade System Packages
-      run: |
-        sudo apt update && sudo apt dist-upgrade -y
-        sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
+      - name: Update and Upgrade System Packages
+        run: |
+          sudo apt update && sudo apt dist-upgrade -y
+          sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
 
-    - name: Setup Cross Compiler and Target Local File System
-      run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/setup.sh
-      env:
-        CROSS_CPU: ${{ matrix.cross_cpu }}
-        CROSS_OS: ${{ matrix.cross_os }}
+      - name: Setup Cross Compiler and Target Local File System
+        run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/setup.sh
+        env:
+          CROSS_CPU: ${{ matrix.cross_cpu }}
+          CROSS_OS: ${{ matrix.cross_os }}
 
-    - name: Script Install and Build
-      run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/install.sh
-      env:
-        CROSS_CPU: ${{ matrix.cross_cpu }}
-        CROSS_OS: ${{ matrix.cross_os }}
+      - name: Script Install and Build
+        run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/install.sh
+        env:
+          CROSS_CPU: ${{ matrix.cross_cpu }}
+          CROSS_OS: ${{ matrix.cross_os }}
 
-    - name: Script Install and Build
-      run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/build.sh
-      env:
-        CROSS_CPU: ${{ matrix.cross_cpu }}
-        CROSS_OS: ${{ matrix.cross_os }}
+      - name: Script Install and Build
+        run: ./scripts/${{ env.TARGET }}/${{ matrix.arch }}/build.sh
+        env:
+          CROSS_CPU: ${{ matrix.cross_cpu }}
+          CROSS_OS: ${{ matrix.cross_os }}
 
-    - name: Package
-      #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: scripts/package.sh
-      env:
-        BUNDLE: ${{ matrix.bundle }}
-        GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
+      - name: Package
+        #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
 
-    - name: List output directory
-      run: ls -lah out/
+      - name: List output directory
+        run: ls -lah out/
 
-    - name: Update Release
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-      uses: softprops/action-gh-release@v2.1.0
-      env: 
-        GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: ${{ env.RELEASE }}
-        draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
+      - name: Update Release
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v2.1.0
+        env:
+          GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE }}
+          draft: false
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
 
   build-linux-armv6l-pi-1zero:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
