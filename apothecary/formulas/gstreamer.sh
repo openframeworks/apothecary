@@ -56,7 +56,7 @@ function build() {
 
     meson setup \
         --prefix="build_${TYPE}_${PLATFORM}" \
-        --cross-file ${TYPE}${PLATFORM}.meson.txt \
+        --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
         --buildtype=release \
         --default-library=static \
         -Dgst-full-libraries=app,video \
