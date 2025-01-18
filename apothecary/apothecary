@@ -79,6 +79,8 @@ LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
 SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
 SECURE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/secure.sh")"
 FORMAT_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/format.sh")"
+OSTYPE_SCRIPT="$(realpath "$APOTHECARY_DIR/ostype.sh")"
+APOTHECARY_SCRIPT="$(realpath "$APOTHECARY_DIR/apothecary")"
 
 USE_SAVE=1
 
@@ -1042,7 +1044,7 @@ function installAndroidToolchain() {
 
 	cd $ANDROID_NDK_ROOT/build/tools
 
-	local HOST=$(${BUILD_DIR}/../ostype.sh)
+	local HOST=$(${APOTHECARY_DIR}/ostype.sh)
 
 	if [ "${HOST}" == "linux" ]; then
 		ANDROID_HOST="linux-x86"
@@ -2525,11 +2527,11 @@ WD=$(pwd)
 
 # change to the dir of this script
 cd $(dirname $0)
-APOTHECARY_DIR=$(pwd)
-APOTHECARY_SCRIPT=$APOTHECARY_DIR/apothecary
+# APOTHECARY_DIR=$(pwd)
+#
 
 # set OS & build types
-HOST_OS=`./ostype.sh`
+HOST_OS=$(${APOTHECARY_DIR}/ostype.sh)
 if [ "$TYPE" == "" ] ; then
 	case "$HOST_OS" in
 		windows)
