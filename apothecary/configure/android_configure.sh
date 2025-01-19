@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Set script directory
+ORIGINAL_DIR="$(pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -77,3 +78,5 @@ echo "Toolchain Path   : $TOOLCHAIN_PATH"
 # echo "CFLAGS           : $CFLAGS"
 # echo "LDFLAGS          : $LDFLAGS"
 echo -e "=========================================\n"
+
+cd "$ORIGINAL_DIR"
