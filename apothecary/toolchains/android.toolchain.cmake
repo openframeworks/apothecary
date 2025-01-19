@@ -119,17 +119,8 @@ find_program(CMAKE_STRIP llvm-strip PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_OBJCOPY llvm-objcopy PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_OBJDUMP llvm-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
 
-if(NOT CMAKE_C_COMPILER)
-    message(FATAL_ERROR "C Compiler not found!")
-endif()
-
-if(NOT CMAKE_CXX_COMPILER)
-    message(FATAL_ERROR "C++ Compiler not found!")
-endif()
-
-
 # Toolchain Debug Output
-message(STATUS "---Android TOOLCHAIN CONFIGURATION"
+message(STATUS "---Android TOOLCHAIN CONFIGURATION")
 message(STATUS "Host Platform: ${HOST_PLATFORM}")
 message(STATUS "NDK Root: ${ANDROID_NDK_HOME}")
 message(STATUS "Sysroot: ${SYSROOT}")
