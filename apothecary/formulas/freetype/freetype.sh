@@ -322,7 +322,7 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include
             cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
     elif [ "$TYPE" == "android" ]; then
