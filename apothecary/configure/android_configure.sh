@@ -18,7 +18,7 @@ export ABI=$1
 export BUILD_SYSTEM=${2:-make}
 
 export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
-export NDK_ROOT="${NDK_ROOT:-$ANDROID_NDK_ROOT}"
+export NDK_ROOT="${ANDROID_NDK_ROOT}"
 
 export HOST_ARCH=$(uname -m)
 case "$(uname)" in
