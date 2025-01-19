@@ -1,197 +1,79 @@
 #!/usr/bin/env bash
 
+# Set script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
 APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
-# cd $APOTHECARY_LEVEL
 
-export MAKE_TARGET="${MAKE_TARGET:-"cmake"}"
-export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-"27"}"
-export ANDROID_API="${ANDROID_API:-"34"}"
+export MAKE_TARGET="${MAKE_TARGET:-cmake}"
+export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-27}"
+export ANDROID_API="${ANDROID_API:-34}"
 
-CROSS_COMPILER="android"
-CROSS_SYSROOT="android_ndk"
-CROSSCOMPILE=${CROSSCOMPILE:-1}
-CROSS_ARCH="$1"
+if [ -z "$1" ]; then
+    echo "Error: ABI is not specified. Usage: $0 <ABI> [BUILD_SYSTEM]" >&2
+    exit 1
+fi
 export ABI=$1
-if [ "${CROSSCOMPILE}" -eq 0 ]; then
-    export ROOTFS="/"
-    export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
-else
-    export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
-    export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
-fi
+export BUILD_SYSTEM=${2:-make}
+
+export ROOTFS="${APOTHECARY_LEVEL}/android_ndk"
+export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
+export NDK_ROOT="${ANDROID_NDK_HOME:-$NDK_ROOT}"
+
 export HOST_ARCH=$(uname -m)
-export HOST_PLATFORM=$(uname)
+case "$(uname)" in
+    Darwin) HOST_PLATFORM="darwin-x86_64" ;;
+    Linux)  HOST_PLATFORM="linux-x86_64" ;;
+    Windows) HOST_PLATFORM="windows-x86_64" ;;
+    *) echo "Error: Unsupported host platform." >&2; exit 1 ;;
+esac
 
-if [ -z "$2" ]; then
-    export BUILD_SYSTEM=make
-    echo "android_configure: make config"
-else
-    export BUILD_SYSTEM=$2 #make / cmake
-    echo "android_configure: cmake config"
-fi
-export HOST_ARCH=$(uname -m)
-export HOST_PLATFORM=$(uname)
-if [ "${HOST_PLATFORM}" = "Darwin" ]; then
-    export HOST_PLATFORM=darwin-x86_64
-    export ANDROID_TOOLHOST="linux-android"
-elif [ "${HOST_PLATFORM}" == "windows" ]; then
-    export ANDROID_HOST="windows-x86_64"
-    export ANDROID_TOOLHOST="windows-android"
-else
-    export HOST_PLATFORM=linux-x86_64
-    export ANDROID_TOOLHOST="linux-android"
-fi
+case "$ABI" in
+    armeabi-v7a)
+        MACHINE=armv7
+        ANDROID_PREFIX=arm-linux-androideabi
+        MAKE_TARGET="-target armv7-linux-androideabi -march=armv7-a"
+        ;;
+    arm64-v8a)
+        MACHINE=arm64
+        ANDROID_PREFIX=aarch64-linux-android
+        MAKE_TARGET="-target aarch64-linux-android"
+        ;;
+    x86)
+        MACHINE=i686
+        ANDROID_PREFIX=i686-linux-android
+        MAKE_TARGET="-target i686-linux-android -march=i686"
+        ;;
+    x86_64)
+        MACHINE=x86_64
+        ANDROID_PREFIX=x86_64-linux-android
+        MAKE_TARGET="-target x86_64-linux-android"
+        ;;
+    *)
+        echo "Error: Unsupported ABI '$ABI'." >&2
+        exit 1
+        ;;
+esac
 
-export HOST_TAG=$HOST_PLATFORM
-export LIBSPATH=android/$ABI
-export TOOLCHAIN_VERSION=4.9
-export CLANG_VERSION=
-export ANDROID_NDK_HOME=$NDK_ROOT
+# Toolchain
+export SYSROOT="${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/sysroot"
+export TOOLCHAIN_PATH="${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin"
+# export PATH="$TOOLCHAIN_PATH:$PATH"
 
-export TOOLCHAIN_TYPE=llvm${CLANG_VERSION}
-export TOOLCHAIN=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}
+# Compiler
+# export AR="$TOOLCHAIN_PATH/llvm-ar"
+# export CC="$TOOLCHAIN_PATH/${ANDROID_PREFIX}${ANDROID_API}-clang"
+# export CXX="$TOOLCHAIN_PATH/${ANDROID_PREFIX}${ANDROID_API}-clang++"
+# export LDFLAGS="-pie -L${SYSROOT}/usr/lib/$ANDROID_PREFIX/$ANDROID_API"
 
-# if [[ "$NDK_VERSION_MAJOR" = "23"  || "$NDK_VERSION_MAJOR" = "24" ]]; then
-export SYSROOT="${TOOLCHAIN}/sysroot"
-#     echo "NDK_VESION_MAJOR: ${NDK_VERSION_MAJOR}"
-# fi
-
-echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
-echo "SYSROOT: $SYSROOT"
-
-if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
-    export MACHINE=armv7
-    export ANDROID_PREFIX=arm-${ANDROID_TOOLHOST}eabi
-    export ANDROID_POSTFIX=${ANDROID_PREFIX}
-    export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
-
-elif [ "$ABI" = "arm64-v8a" ]; then
-    export MACHINE=arm64
-    export ANDROID_PREFIX=aarch64-${ANDROID_TOOLHOST}
-    export ANDROID_POSTFIX=${ANDROID_PREFIX}
-    export GCC_TOOLCHAIN=$ANDROID_PREFIX-${TOOLCHAIN_VERSION}
-
-elif [ "$ABI" = "x86" ]; then
-    export MACHINE=i686
-    export ANDROID_PREFIX=x86
-    export ANDROID_POSTFIX=i686-${ANDROID_TOOLHOST}
-    export GCC_TOOLCHAIN=x86-${TOOLCHAIN_VERSION}
-
-elif [ "$ABI" = "x86_64" ]; then
-    export MACHINE=x86_64
-    export ANDROID_PREFIX=x86_64
-    export ANDROID_POSTFIX=x86_64-${ANDROID_TOOLHOST}
-    export GCC_TOOLCHAIN=x86_64-${TOOLCHAIN_VERSION}
-
-fi
-export TARGET_HOST=$ANDROID_POSTFIX
-export TARGET=${ANDROID_POSTFIX}
-if [ "$ABI" = "armeabi-v7a" ] || [ "$ABI" = "armeabi" ]; then
-    export TARGET=armv7a-${ANDROID_TOOLHOST}eabi #special fix for armv7
-fi
-
-# if [ "$NDK_VERSION_MAJOR" = "22" ]; then
-# export LIB_SYSROOT="${SYSROOT}/usr/lib/$ANDROID_POSTFIX/arch-arm"
-# fi
-
-export ANDROID_CMAKE_TOOLCHAIN=${NDK_ROOT}/build/cmake/android.toolchain.cmake
-
-export TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/bin
-export DEEP_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/lib/$ANDROID_POSTFIX/$ANDROID_API
-export GCC_TOOLCHAIN_PATH=${NDK_ROOT}/toolchains/${GCC_TOOLCHAIN}/prebuilt/${HOST_PLATFORM}
-export TOOLCHAIN_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/include
-export TOOLCHAIN_LOCAL_INCLUDE_PATH=${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}/sysroot/usr/local/include
-# export PATH=${PATH}:${TOOLCHAIN_PATH}
-export PATH=$(echo "${TOOLCHAIN_PATH}:${TOOLCHAIN}:${PATH}" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':')
-# Configure and build.
-export AR=$TOOLCHAIN/bin/llvm-ar
-export CC=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang
-export CXX=$TOOLCHAIN/bin/${TARGET}${ANDROID_API}-clang++
-export AS=$TOOLCHAIN/bin/llvm-as
-export LD=$TOOLCHAIN/bin/llvm-ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
-
-echo "NDK_ROOT: ${NDK_ROOT}"
-echo "TOOLCHAIN_TYPE: ${TOOLCHAIN_TYPE}"
-echo "HOST_PLATFORM: ${HOST_PLATFORM}"
-echo "TOOLCHAIN_INCLUDE_PATH: ${TOOLCHAIN_INCLUDE_PATH}"
-
-if [ "$BUILD_SYSTEM" = "cmake" ]; then
-    export ANDROID_FIX_API="" # defined by default in cmake
-    export MAKE_TARGET=""
-    export MAKE_INCLUDES_CFLAGS=""
-    export MAKE_INCLUDES_CPPFLAGS=""
-    export OPTIMISE=""
-else
-    export OPTIMISE="-Oz "
-    export ANDROID_FIX_API="-D__ANDROID__ -D__ANDROID_API__=${ANDROID_API}" # fixes missing stderr/api calls when linking
-    export MAKE_INCLUDES_CFLAGS=" -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -fPIC -fPIE -frtti"
-    export MAKE_INCLUDES_CPPFLAGS="-stdlib=libc++ -I${SYSROOT}/usr/include/ -I${SYSROOT}/usr/include/${ANDROID_POSTFIX} -I${NDK_ROOT}/sources/android/support/include -I${NDK_ROOT}/sources/android/cpufeatures -I${TOOLCHAIN_INCLUDE_PATH} -I${TOOLCHAIN_INCLUDE_PATH}/${ANDROID_POSTFIX} -I${TOOLCHAIN_LOCAL_INCLUDE_PATH} -frtti"
-    if [ "$ABI" = "armeabi-v7a" ]; then
-        export MAKE_TARGET="-target armv7-linux-androideabi -mfloat-abi=softfp -mfloat-abi=softfp -march=armv7-a"
-    elif [ $ABI = "arm64-v8a" ]; then
-        export MAKE_TARGET="-target aarch64-linux-android"
-    elif [ "$ABI" = "x86-64" ]; then
-        export MAKE_TARGET="-target x86_64-linux-android "
-    elif [ "$ABI" = "x86" ]; then
-        export MAKE_TARGET="-target i686-linux-android -mfpmath=sse  -fno-stack-protector -msse3 -mstackrealign "
-    fi
-fi
-
-export CFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CFLAGS}"
-export CPPFLAGS="${OPTIMISE} ${ANDROID_FIX_API} ${MAKE_INCLUDES_CPPFLAGS}"
-export CXXFLAGS=""
-#export CPPFLAGS="-v" # verbose output to test issues
-
-export LDFLAGS="-pie -L${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI} -L$DEEP_TOOLCHAIN_PATH "
-export LIBS="" #"-lz -lc -lm -ldl -lgcc -lc++ -lc++abi"
-#export LDFLAGS="$LDFLAGS $LIBS"
-# -ldl -lm -lc "
-export ANDROID_SYSROOT=${SYSROOT}
-
-echo "Toolchain: ${TOOLCHAIN_INCLUDE_PATH}"
-
-echo "AR: ${AR}"
-if [ "$ABI" = "armeabi-v7a" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET "
-    export CPPFLAGS="$CPPFLAGS $MAKE_TARGET  "
-    #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/arm-linux-androideabi"
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
-elif [ $ABI = "arm64-v8a" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET "
-    export CPPFLAGS="$CPPFLAGS $MAKE_TARGET"
-    #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/aarch64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS -Wl,--fix-cortex-a8 -Wl,--no-undefined"
-elif [ "$ABI" = "x86-64" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET"
-    export CPPFLAGS="$CPPFLAGS $MAKE_TARGET "
-    #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/x86_64-linux-android" # for ASM includes
-    export LDFLAGS="$LDFLAGS $MAKE_TARGET -Wl,--fix-cortex-a8 -Wl,--no-undefined"
-elif [ "$ABI" = "x86" ]; then
-    export CFLAGS="$CFLAGS $MAKE_TARGET"     #march=i686  -target i686-linux-android
-    export CPPFLAGS="$CPPFLAGS $MAKE_TARGET" #  -target i686-none-linux-android
-    #export CPPFLAGS="$CPPFLAGS -isystem ${SYSROOT}/usr/include/i686-linux-android"
-    export LDFLAGS="$LDFLAGS  "
-fi
-
-export CXXFLAGS="$CXXFLAGS $CPPFLAGS"
-
-# Debugging output
-echo "--------------------"
-# echo "openFrameworks apothecary Cross Compiler: $GCC_PREFIX"
-# echo "Using GCC Version: $GCC_VERSION"
-# echo "Library Path: $LIBRARY_PATH"
-# echo "ROOTFS Path: $ROOTFS"
-# echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
-# echo "CROSS_ARCH: $CROSS_ARCH"
-echo "ANDROID_SYSROOT: $ANDROID_SYSROOT"
-# echo "HOST_ARCH: $HOST_ARCH"
-# echo "HOST_PLATFORM: $HOST_PLATFORM"
-# echo "GCC Path: $GCCPATH"
-echo "LDFLAGS : [$LDFLAGS]"
-echo "CFLAGS : [$CFLAGS]"
-echo "Path: [$PATH]"
-echo "--------------------"
+# Debug output
+echo -e "\n\033[1;32m==== Android Toolchain Configuration ====\033[0m"
+echo "NDK Root         : $NDK_ROOT"
+echo "Toolchain Type   : llvm"
+echo "Host Platform    : $HOST_PLATFORM"
+echo "ABI              : $ABI"
+echo "Sysroot          : $SYSROOT"
+echo "Toolchain Path   : $TOOLCHAIN_PATH"
+echo "CFLAGS           : $CFLAGS"
+echo "LDFLAGS          : $LDFLAGS"
+echo -e "=========================================\n"
