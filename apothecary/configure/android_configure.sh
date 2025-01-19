@@ -17,9 +17,8 @@ fi
 export ABI=$1
 export BUILD_SYSTEM=${2:-make}
 
-export ROOTFS="${APOTHECARY_LEVEL}/android_ndk"
 export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
-export NDK_ROOT="${ANDROID_NDK_HOME:-$NDK_ROOT}"
+export NDK_ROOT="${NDK_ROOT:-$ANDROID_NDK_ROOT}"
 
 export HOST_ARCH=$(uname -m)
 case "$(uname)" in
@@ -70,6 +69,7 @@ export TOOLCHAIN_PATH="${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin
 # Debug output
 echo -e "\n\033[1;32m==== Android Toolchain Configuration ====\033[0m"
 echo "NDK Root         : $NDK_ROOT"
+echo "ANDROID_NDK_ROOT : $ANDROID_NDK_ROOT"
 echo "Toolchain Type   : llvm"
 echo "Host Platform    : $HOST_PLATFORM"
 echo "ABI              : $ABI"

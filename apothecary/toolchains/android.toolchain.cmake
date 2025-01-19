@@ -20,9 +20,22 @@ if(NOT DEFINED ANDROID_ABI)
     message(FATAL_ERROR "ANDROID_ABI must be specified (e.g., armeabi-v7a, arm64-v8a, x86, x86_64)")
 endif()
 
-if(NOT DEFINED ANDROID_NDK_HOME)
-    message(FATAL_ERROR "ANDROID_NDK_HOME must be specified as the path to the Android NDK")
+if(NOT DEFINED ANDROID_NDK_ROOT)
+    if(DEFINED ENV{ANDROID_NDK_ROOT})
+        set(ANDROID_NDK_ROOT $ENV{ANDROID_NDK_ROOT})
+    else()
+        message(FATAL_ERROR "ANDROID_NDK_ROOT must be specified as the path to the Android NDK")
+    endif()
 endif()
+
+if(NOT DEFINED ANDROID_API)
+    if(DEFINED ENV{ANDROID_API})
+        set(ANDROID_API $ENV{ANDROID_API})
+    else()
+        message(FATAL_ERROR "ANDROID_API must be specified as the path to the ANDROID_API")
+    endif()
+endif()
+
 
 # Detect Host Platform
 if(NOT DEFINED HOST_PLATFORM)
@@ -50,7 +63,7 @@ message(STATUS "Detected Host Platform: ${HOST_PLATFORM}")
 # NDK Configuration
 set(TOOLCHAIN_TYPE "llvm")
 
-set(TOOLCHAIN "${ANDROID_NDK_HOME}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
+set(TOOLCHAIN "${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
 set(SYSROOT "${TOOLCHAIN}/sysroot")
 
 # ABI-specific configuration
@@ -122,7 +135,7 @@ find_program(CMAKE_OBJDUMP llvm-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
 # Toolchain Debug Output
 message(STATUS "---Android TOOLCHAIN CONFIGURATION")
 message(STATUS "Host Platform: ${HOST_PLATFORM}")
-message(STATUS "NDK Root: ${ANDROID_NDK_HOME}")
+message(STATUS "NDK Root: ${ANDROID_NDK_ROOT}")
 message(STATUS "Sysroot: ${SYSROOT}")
 message(STATUS "Toolchain: ${TOOLCHAIN}")
 message(STATUS "ABI: ${ANDROID_ABI}")
@@ -133,7 +146,7 @@ message(STATUS "Linker: ${CMAKE_LINKER}")
 # Finalize toolchain settings
 set(CMAKE_SYSTEM_NAME "Android")
 set(CMAKE_SYSTEM_VERSION ${CMAKE_ANDROID_API})
-set(CMAKE_ANDROID_NDK ${ANDROID_NDK_HOME})
+set(CMAKE_ANDROID_NDK ${ANDROID_NDK_ROOT})
 
 if(NOT EXISTS ${CMAKE_C_COMPILER})
     message(FATAL_ERROR "C Compiler not found: ${CMAKE_C_COMPILER}")

@@ -62,7 +62,6 @@ function build() {
     # using Menson build system
 
     meson setup \
-        --prefix="build_${TYPE}_${PLATFORM}" \
         --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
         --buildtype=release \
         --default-library=static \
