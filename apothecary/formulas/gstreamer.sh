@@ -32,7 +32,6 @@ function prepare() {
     sudo apt-get update
     sudo apt-get install -y \
         git \
-        meson \
         ninja-build \
         gcc \
         g++ \
@@ -44,9 +43,17 @@ function prepare() {
         libgstreamer1.0-dev \
         libgstreamer-plugins-base1.0-dev
     echo "Preparation complete"
+    pip install --user --upgrade meson --break-system-packages
+    export PATH="$HOME/.local/bin:$PATH"
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+    meson --version
+
+
 }
 
 function build() {
+    git clone https://github.com/mesonbuild/meson.git
+    cd meson
     echo "build gstreamer"
     LIBS_ROOT=$(realpath $LIBS_DIR)
 
