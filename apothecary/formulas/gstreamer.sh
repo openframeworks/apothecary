@@ -5,7 +5,7 @@
 # Define the version
 FORMULA_TYPES=("linux" "osx" )
 
-FORMULA_DEPENDS=()
+FORMULA_DEPENDS=( "freetype" "libpng" "zlib" )
 
 VER=1.24.0
 GIT_URL=https://gitlab.freedesktop.org/gstreamer/gstreamer.git
@@ -25,9 +25,7 @@ function download() {
     else
         git clone --depth=1 --branch main $GIT_URL $FILE_NAME
     fi
-}
 
-function prepare() {
     echo "prepare gstreamer install apts"
     sudo apt-get update
     sudo apt-get install -y \
@@ -46,16 +44,37 @@ function prepare() {
     pip install --user --upgrade meson --break-system-packages
     export PATH="$HOME/.local/bin:$PATH"
     echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+}
+
+function prepare() {
+    echo "prepare meson"
     meson --version
 
 
 }
 
 function build() {
-    git clone https://github.com/mesonbuild/meson.git
-    cd meson
     echo "build gstreamer"
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
+
+    ZLIB_ROOT="$LIBS_ROOT/zlib/"
+    ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+    ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+    LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
+    LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
+    LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+
+    FREETYPE_ROOT="${LIBS_ROOT}/freetype/"
+    FREETYPE_INCLUDE_DIR="${LIBS_ROOT}/freetype/include"
+    FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/${TYPE}/${PLATFORM}/freetype.a"
+
+    export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${FREETYPE_ROOT}/lib/$TYPE/$PLATFORM"
+
+    pkg-config --modversion libpng
+    pkg-config --modversion zlib
+    pkg-config --modversion freetype
 
     mkdir -p "build_${TYPE}_${PLATFORM}"
     # cd "build_${TYPE}_${PLATFORM}"

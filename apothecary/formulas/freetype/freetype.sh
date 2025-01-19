@@ -6,7 +6,7 @@
 #
 # an autotools project
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten")
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "emscripten" "linux" )
 FORMULA_DEPENDS=("zlib" "libpng" "brotli")
 
 # define the version
@@ -283,6 +283,21 @@ function build() {
             cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
     elif [ "$TYPE" == "linux" ]; then
+
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
+        fi
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
+        LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
+
         mkdir -p build_$TYPE
         cd build_$TYPE
         rm -f CMakeCache.txt *.a *.o
@@ -301,6 +316,8 @@ function build() {
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -309,6 +326,16 @@ function build() {
             cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
     elif [ "$TYPE" == "android" ]; then
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
+        LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
         rm -rf "build_${ABI}/"
@@ -344,6 +371,8 @@ function build() {
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -D ANDROID_ABI=${ABI} \
             -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
             -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
@@ -470,6 +499,20 @@ function copy() {
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libfreetype.lib freetype.pkl
         # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libfreetype.pc" $1/lib/${TYPE}/${PLATFORM}/libfreetype.pc
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
 
     elif [ "$TYPE" == "msys2" ]; then
         # cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
