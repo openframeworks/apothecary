@@ -520,7 +520,7 @@ function copy() {
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
         rm -v "$PKG_FILE.bak"
-    elif [ "$TYPE" == "linux" ]; ; then
+    elif [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
