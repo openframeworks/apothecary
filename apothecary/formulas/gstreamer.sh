@@ -85,6 +85,7 @@ function build() {
         --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
         --buildtype=release \
         --default-library=static \
+        --backend=ninja \
         -Dgst-full-libraries=app,video \
         -Dc_args="-I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${FREETYPE_INCLUDE_DIR}" \
         -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}" \
