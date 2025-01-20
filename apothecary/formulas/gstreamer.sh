@@ -31,6 +31,7 @@ function download() {
     sudo apt-get install -y \
         git \
         ninja-build \
+        pkg-config \
         gcc \
         g++ \
         python3 \
@@ -89,11 +90,11 @@ function build() {
         -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}" \
         "build_${TYPE}_${PLATFORM}"
 
-    meson compile -C "build_${TYPE}_${PLATFORM}"
-    meson install -C "build_${TYPE}_${PLATFORM}"
+    # meson compile -C "build_${TYPE}_${PLATFORM}"
+    # meson install -C "build_${TYPE}_${PLATFORM}"
 
-    # ninja
-    # ninja install
+    ninja
+    ninja install
     cd ..
 }
 
