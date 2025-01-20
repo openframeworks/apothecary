@@ -71,7 +71,7 @@ ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/
 echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/"
 ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/
 echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin"
-ls -a${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/
+ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/
 
 # Debug output
 echo -e "\n\033[1;32m==== Android Toolchain Configuration ====\033[0m"
