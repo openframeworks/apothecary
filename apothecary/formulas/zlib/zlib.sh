@@ -105,8 +105,6 @@ function build() {
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
         rm -f CMakeCache.txt *.a *.o
-        # export CFLAGS="$CFLAGS $FLAG_RELEASE"
-        # export CXXFLAGS="$CFLAGS $FLAG_RELEASE"
 
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
@@ -123,6 +121,7 @@ function build() {
             -D ANDROID_ABI=${ABI} \
             -D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
             -D ANDROID_TOOLCHAIN=clang \
+            -D ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE

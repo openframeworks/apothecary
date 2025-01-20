@@ -130,7 +130,7 @@ sudo aptitude install -y gperf
 dpkg -L gcc-aarch64-linux-gnu
 
 sudo apt-get install -y ccache
-sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
 dpkg -L gcc-aarch64-linux-gnu
 

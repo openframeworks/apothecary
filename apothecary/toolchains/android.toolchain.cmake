@@ -122,9 +122,9 @@ set(CMAKE_LIBRARY_PATH "${SYSROOT}/usr/lib/${ANDROID_PREFIX}/${CMAKE_ANDROID_API
 # Compiler Binary
 set(BIN_PREFIX "${TOOLCHAIN_ROOT}/bin/")
 
-find_program(CMAKE_C_COMPILER clang PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_CXX_COMPILER clang++ PATHS "${TOOLCHAIN_ROOT}/bin/")
-find_program(CMAKE_LINKER ld.lld PATHS "${TOOLCHAIN_ROOT}/bin/")
+#find_program(CMAKE_C_COMPILER clang PATHS "${TOOLCHAIN_ROOT}/bin/")
+##find_program(CMAKE_CXX_COMPILER clang++ PATHS "${TOOLCHAIN_ROOT}/bin/")
+#find_program(CMAKE_LINKER ld.lld PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_AR llvm-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_NM llvm-nm PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_RANLIB llvm-ranlib PATHS "${TOOLCHAIN_ROOT}/bin/")

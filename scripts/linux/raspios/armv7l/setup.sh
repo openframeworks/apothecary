@@ -21,11 +21,14 @@ CROSS_SYSROOT=${CROSS_SYSROOT:-rpi_rootfs}
 CROSS_OS="${CROSS_OS:-bookworm}"
 NATIVE="${NATIVE:-"false"}"
 
-if [ "$CROSS_OS" == "bookworm" ] && [ "$NATIVE" == "0" ]; then; then
+
+
+
+if [ "$CROSS_OS" == "bookworm" ] && [ "$NATIVE" == "0" ]; then
     CROSS_URL="https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Buster/GCC%2014.2.0/Raspberry%20Pi%203A%2B%2C%203B%2B%2C%204%2C%205/cross-gcc-14.2.0-pi_3%2B.tar.gz/download"
     CROSS_NAME="cross-gcc-14.2.0-pi_3+"
     CROSS_EXTRACT="cross-pi-gcc-14.2.0-2"
-if [ "$CROSS_OS" == "bookworm" ] && [ "$NATIVE" == "1" ]; then; then
+if [ "$CROSS_OS" == "bookworm" ] && [ "$NATIVE" == "1" ]; then
     CROSS_URL="https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Native-Compiler%20Toolchains/Bookworm/GCC%2014.2.0/Raspberry%20Pi%203A%2B%2C%203B%2B%2C%204%2C%205/native-gcc-14.2.0-pi_3%2B.tar.gz/download"
     CROSS_NAME="native-gcc-14.2.0-pi_3%2B"
     CROSS_EXTRACT="cross-pi-gcc-14.2.0-2"
@@ -43,11 +46,15 @@ fi
 
 wget "${CROSS_URL}" -O ${CROSS_NAME}.tar.gz && tar xf ${CROSS_NAME}.tar.gz && rm ${CROSS_NAME}.tar.gz && mv ${CROSS_EXTRACT} ${CROSS_COMPILER}
 
-git clone https://github.com/danoli3/rpi_rootfs.git
-cd $CROSS_SYSROOT
 
-sudo chmod +x ./build_rootfs.sh
-./build_rootfs.sh download
-./build_rootfs.sh create
+if [ "$NATIVE" == "0" ]; then
+    git clone https://github.com/danoli3/rpi_rootfs.git
+    cd $CROSS_SYSROOT
+    sudo chmod +x ./build_rootfs.sh
+    ./build_rootfs.sh download
+    ./build_rootfs.sh create
+fi
 
 echo "setup complete"
+
+cd $SCRIPT_DIR
