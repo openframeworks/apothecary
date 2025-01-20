@@ -298,8 +298,8 @@ function build() {
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
 
-        mkdir -p build_$TYPE
-        cd build_$TYPE
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
             ${DEFINES} \
@@ -315,7 +315,7 @@ function build() {
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -std=c${C_STANDARD} -Wno-implicit-function-declaration ${FLAG_RELEASE}" \
             -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -520,6 +520,20 @@ function copy() {
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
         rm -v "$PKG_FILE.bak"
+    if [[ "$TYPE" =~ ^(linux)$ ]]; then
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
+        . "$SECURE_SCRIPT"
+        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libfreetype.pc" $1/lib/${TYPE}/${PLATFORM}/libfreetype.pc
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+    elif [ "$TYPE" == "vs" ]; then
 
     elif [ "$TYPE" == "msys2" ]; then
         # cp -v lib/$TYPE/libfreetype.a $1/lib/$TYPE/libfreetype.a
