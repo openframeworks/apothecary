@@ -87,11 +87,11 @@ function build() {
         -Dgst-full-libraries=app,video \
         "build_${TYPE}_${PLATFORM}"
 
-    # meson compile -C build/Release
-    # meson install -C build/Release
+    meson compile -C "build_${TYPE}_${PLATFORM}"
+    meson install -C "build_${TYPE}_${PLATFORM}"
 
-    ninja
-    ninja install
+    # ninja
+    # ninja install
     cd ..
 }
 
