@@ -526,8 +526,8 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
         . "$SECURE_SCRIPT"
         secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/freetype.pc" $1/lib/${TYPE}/${PLATFORM}/freetype.pc
-        PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/freetype2.pc" $1/lib/${TYPE}/${PLATFORM}/freetype2.pc
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype2.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
