@@ -63,7 +63,7 @@ message(STATUS "Detected Host Platform: ${HOST_PLATFORM}")
 # NDK Configuration
 set(TOOLCHAIN_TYPE "llvm")
 
-set(TOOLCHAIN "${NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
+set(TOOLCHAIN "${ANDROID_NDK_ROOT}/toolchains/${TOOLCHAIN_TYPE}/prebuilt/${HOST_PLATFORM}")
 set(SYSROOT "${TOOLCHAIN}/sysroot")
 
 # ABI-specific configuration
@@ -135,7 +135,7 @@ find_program(CMAKE_OBJDUMP llvm-objdump PATHS "${TOOLCHAIN_ROOT}/bin/")
 # Toolchain Debug Output
 message(STATUS "---Android TOOLCHAIN CONFIGURATION")
 message(STATUS "Host Platform: ${HOST_PLATFORM}")
-message(STATUS "NDK Root: ${ANDROID_NDK_ROOT}")
+message(STATUS "ANDROID_NDK_ROOT : ${ANDROID_NDK_ROOT}")
 message(STATUS "Sysroot: ${SYSROOT}")
 message(STATUS "Toolchain: ${TOOLCHAIN}")
 message(STATUS "ABI: ${ANDROID_ABI}")
