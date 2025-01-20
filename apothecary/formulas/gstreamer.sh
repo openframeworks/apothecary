@@ -85,6 +85,8 @@ function build() {
         --buildtype=release \
         --default-library=static \
         -Dgst-full-libraries=app,video \
+        -Dc_args="-I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${FREETYPE_INCLUDE_DIR}" \
+        -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}" \
         "build_${TYPE}_${PLATFORM}"
 
     meson compile -C "build_${TYPE}_${PLATFORM}"
