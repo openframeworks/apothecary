@@ -6,6 +6,8 @@ function lowercase() {
 }
 
 OS=$(lowercase $(uname))
+DISTRO=""
+DEVICE=""
 
 if [ "$OS" == "darwin" ]; then
     OS="osx"
@@ -34,7 +36,6 @@ elif [ "$OS" == "linux" ]; then
             *)
                 export DISTRO="$ID"
                 ;;
-            echo "$ID"
         esac
     fi
     if [[ "$DISTRO" == "raspios" ]]; then
@@ -63,4 +64,4 @@ elif [ "$OS" == "linux" ]; then
     fi
 fi
 
-echo "$OS"
+echo "$OS ${DISTRO} ${DEVICE}"

@@ -68,7 +68,7 @@ function build() {
 
     FREETYPE_ROOT="${LIBS_ROOT}/freetype/"
     FREETYPE_INCLUDE_DIR="${LIBS_ROOT}/freetype/include"
-    FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/${TYPE}/${PLATFORM}/freetype.a"
+    FREETYPE_LIBRARY="$LIBS_ROOT/freetype/lib/${TYPE}/${PLATFORM}/libfreetype.a"
 
     export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${FREETYPE_ROOT}/lib/$TYPE/$PLATFORM"
 
