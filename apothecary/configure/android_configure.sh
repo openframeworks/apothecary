@@ -15,6 +15,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 export ABI=$1
+export ANDROID_ABI=$1
 export BUILD_SYSTEM=${2:-make}
 
 export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
@@ -79,7 +80,7 @@ echo "NDK Root         : $NDK_ROOT"
 echo "ANDROID_NDK_ROOT : $ANDROID_NDK_ROOT"
 echo "Toolchain Type   : llvm"
 echo "Host Platform    : $HOST_PLATFORM"
-echo "ABI              : $ABI"
+echo "ANDROID_ABI      : $ABI"
 echo "Sysroot          : $SYSROOT"
 echo "Toolchain Path   : $TOOLCHAIN_PATH"
 # echo "CFLAGS           : $CFLAGS"
