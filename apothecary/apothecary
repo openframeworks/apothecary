@@ -84,39 +84,7 @@ APOTHECARY_SCRIPT="$(realpath "$APOTHECARY_DIR/apothecary")"
 
 USE_SAVE=1
 
-### Xcode/ios specific settings
-
-# xcode Developer root
-if [ "$(${APOTHECARY_DIR}/ostype.sh)" == "osx" ]; then
-	XS="xcode-select -print-path"
-	XCODE_DEV_ROOT=
-
-	# used when building some libs for osx
-	OSX_LATEST_SDK="xcrun -sdk macosx --show-sdk-version"
-	OSX_SDK_VER=15.0
-	OSX_MIN_SDK_VER=10.15
-
-	# used when building for ios, the sdks you have installed are found in:
-	IOS_SDK_VER=18.1
-	IOS_LATEST_SDK=$(xcrun -sdk iphoneos --show-sdk-version 2>/dev/null || echo "SDKNotInstalled")
-	IOS_MIN_SDK_VER=15.0
-	TVOS_MIN_SDK_VER=17.0
-	TVOS_LATEST_SDK=$(xcrun -sdk appletvos --show-sdk-version 2>/dev/null || echo "SDKNotInstalled")
-	XROS_MIN_SDK_VER=1.1
-	WATCHOS_MIN_SDK_VER=6.0
-	if ! which realpath >&/dev/null; then
-	  if ! which brew >&/dev/null; then
-		msg="ERROR: This script requires brew. See https://brew.sh for installation instructions."
-		echo "$(tput setaf 1)$msg$(tput sgr0)" >&2
-		exit 1
-	fi
-	echo "Installing coreutils/realpath"
-	brew install coreutils >&/dev/null
-fi
-
 thisDir=$( dirname "`realpath "$0"`" )
-# echo "This script is run from \"$thisDir\""
-fi
 
 BUILD_MACHINE_ARCH=`uname -m`
 
@@ -861,6 +829,26 @@ if [ "$TYPE" = "emscripten" ]; then
 	EMSCRIPTEN_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/emscripten/setup.sh")"
 	. "$EMSCRIPTEN_SCRIPT"
 fi
+
+if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+	XS="xcode-select -print-path"
+	XCODE_DEV_ROOT=
+
+	# used when building some libs for osx
+	OSX_LATEST_SDK="xcrun -sdk macosx --show-sdk-version"
+	OSX_SDK_VER=15.0
+	OSX_MIN_SDK_VER=10.15
+
+	# used when building for ios, the sdks you have installed are found in:
+	IOS_SDK_VER=18.1
+	IOS_LATEST_SDK=$(xcrun -sdk iphoneos --show-sdk-version >/dev/null || echo "SDKNotInstalled")
+	IOS_MIN_SDK_VER=15.0
+	TVOS_MIN_SDK_VER=17.0
+	TVOS_LATEST_SDK=$(xcrun -sdk appletvos --show-sdk-version >/dev/null || echo "SDKNotInstalled")
+	XROS_MIN_SDK_VER=1.1
+	WATCHOS_MIN_SDK_VER=6.0
+fi
+
 
 if [ "$TYPE" = "ios" ]; then
 	if [[ "$IOS_LATEST_SDK" == "SDKNotInstalled" ]]; then

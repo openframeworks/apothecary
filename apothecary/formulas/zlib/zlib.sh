@@ -1,4 +1,4 @@
-#!/usr/bin/env /bash
+#!/usr/bin/env bash
 #
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
