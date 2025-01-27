@@ -50,9 +50,9 @@ function download() {
     # sed -i -e 's/restrict//g' libwapcaplet/src/libwapcaplet.c
     #fi
 
-    # cd libparserutils
-    # patch -up1 < $FORMULA_DIR/libparseutils.patch
-    # cd ..
+    cd libparserutils
+    patch -up1 < $FORMULA_DIR/libparseutils.patch
+    cd ..
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -244,12 +244,20 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
+        DEFINES="
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
+
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBXML2_ROOT}/lib/$TYPE/$PLATFORM"
 
         mkdir -p build_${TYPE}_${ABI}
         cd build_${TYPE}_${ABI}
         rm -f CMakeCache.txt *.a *.o
-        cmake .. \
+        cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
@@ -259,10 +267,6 @@ function build() {
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DDO_XML_INSTALL=ON \
-            -DCMAKE_C_STANDARD=${C_STANDARD} \
-            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
