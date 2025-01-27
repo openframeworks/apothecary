@@ -170,18 +170,12 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        # ./autogen.sh
-
         mkdir -p "build_${TYPE}_$PLATFORM"
         cd "build_${TYPE}_$PLATFORM"
         rm -f CMakeCache.txt *.a *.o
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
-        export CMAKE_CFLAGS="$CFLAGS"
-        export CFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
         cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
