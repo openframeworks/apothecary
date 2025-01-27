@@ -4,6 +4,10 @@ set -e
 echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
 sudo dpkg --add-architecture arm64
+
+dpkg --print-architecture
+dpkg --print-foreign-architectures
+
 sudo apt update
 sudo apt-get install -y aptitude build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev cmake unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
 sudo aptitude install -y gperf
@@ -12,7 +16,7 @@ sudo apt-get install -y ccache
 sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
 dpkg -L gcc-aarch64-linux-gnu
-sudo apt install libgl1-mesa-dev:arm64 libgles2-mesa-dev:arm64
+sudo apt install libgl1-mesa-dev libgles2-mesa-dev
 
 
 
