@@ -8,7 +8,7 @@ APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 export MAKE_TARGET="${MAKE_TARGET:-cmake}"
 export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-27}"
-export ANDROID_API="${ANDROID_API:-34}"
+export ANDROID_API="${ANDROID_API:-34}" #minimum Android API supported. 21 default
 
 if [ -z "$1" ]; then
     echo "Error: ABI is not specified. Usage: $0 <ABI> [BUILD_SYSTEM]" >&2

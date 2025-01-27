@@ -221,6 +221,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include
         cmake --build . --target install --config Release -j${PARALLEL_MAKE}
