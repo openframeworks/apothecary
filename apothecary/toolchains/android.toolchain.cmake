@@ -104,9 +104,9 @@ message(STATUS "Machine: ${MACHINE}")
 message(STATUS "Android Prefix: ${ANDROID_PREFIX}")
 
 # Set compilers
-set(CMAKE_C_COMPILER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}-clang")
-set(CMAKE_CXX_COMPILER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}-clang++")
-set(CMAKE_LINKER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}-ld")
+set(CMAKE_C_COMPILER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-clang")
+set(CMAKE_CXX_COMPILER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-clang++")
+#set(CMAKE_LINKER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-ld")
 
 # Paths
 set(CMAKE_SYSROOT ${SYSROOT})
@@ -124,7 +124,7 @@ set(BIN_PREFIX "${TOOLCHAIN_ROOT}/bin/")
 
 #find_program(CMAKE_C_COMPILER clang PATHS "${TOOLCHAIN_ROOT}/bin/")
 ##find_program(CMAKE_CXX_COMPILER clang++ PATHS "${TOOLCHAIN_ROOT}/bin/")
-#find_program(CMAKE_LINKER ld.lld PATHS "${TOOLCHAIN_ROOT}/bin/")
+find_program(CMAKE_LINKER ld.lld PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_AR llvm-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_NM llvm-nm PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_RANLIB llvm-ranlib PATHS "${TOOLCHAIN_ROOT}/bin/")
