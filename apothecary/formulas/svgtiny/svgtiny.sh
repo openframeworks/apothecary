@@ -97,7 +97,7 @@ function build() {
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -107,7 +107,7 @@ function build() {
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude -Wno-implicit-function-declaration" \
             -DCMAKE_BUILD_TYPE=Release \
@@ -138,7 +138,7 @@ function build() {
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -148,7 +148,7 @@ function build() {
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE} -I${LIBXML2_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude -Wno-implicit-function-declaration ${FLAG_RELEASE} -I${LIBXML2_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_BUILD_TYPE=Release \
@@ -183,14 +183,14 @@ function build() {
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.lib *.o
         env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
-        DEFS="
+        DEFINES="
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -211,7 +211,7 @@ function build() {
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -240,6 +240,12 @@ function build() {
         LIBXML2_INCLUDE_DIR=$(realpath "$LIBS_ROOT/libxml2/include")
         LIBXML2_LIBRARY="$LIBS_ROOT/libxml2/lib/$TYPE/$ABI/libxml2.a"
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBXML2_ROOT}/lib/$TYPE/$PLATFORM"
+
         mkdir -p build_${TYPE}_${ABI}
         cd build_${TYPE}_${ABI}
         rm -f CMakeCache.txt *.a *.o
@@ -247,29 +253,32 @@ function build() {
         export CFLAGS=""
         export CMAKE_LDFLAGS="$LDFLAGS"
         export LDFLAGS=""
-        cmake .. -DCMAKE_TOOLCHAIN_FILE="${NDK_ROOT}/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI=$ABI \
-            -DCMAKE_ANDROID_ARCH_ABI=$ABI \
-            -DANDROID_TOOLCHAIN=clang++ \
-            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti " \
+        cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DCMAKE_SYSROOT=$SYSROOT \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DDO_XML_INSTALL=ON \
-            -DANDROID_NDK=$NDK_ROOT \
-            -DANDROID_ABI=$ABI \
-            -DANDROID_STL=c++_shared \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
             -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE} -I${LIBXML2_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${LIBXML2_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \

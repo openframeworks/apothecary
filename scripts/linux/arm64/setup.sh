@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+echo "=== Linux ARM64 cross setup ==="
+lsb_release -a
 sudo dpkg --add-architecture arm64
 sudo apt update
 sudo apt-get install -y aptitude build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev cmake unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils

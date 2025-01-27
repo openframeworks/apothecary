@@ -269,6 +269,17 @@ function copy() {
         cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
         cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
         secure $1/lib/$TYPE/$ABI/zlib.a
+
+        cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
+
     elif [ "$TYPE" == "emscripten" ]; then
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
         mkdir -p $1/lib/$TYPE/$PLATFORM
