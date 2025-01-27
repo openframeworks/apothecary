@@ -15,9 +15,13 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD ${CPP_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# User-defined inputs for ABI and NDK path
+
 if(NOT DEFINED ANDROID_ABI)
-    message(FATAL_ERROR "ANDROID_ABI must be specified (e.g., armeabi-v7a, arm64-v8a, x86, x86_64)")
+    if(DEFINED ENV{ANDROID_ABI})
+        set(ANDROID_ABI $ENV{ANDROID_ABI})
+    else()
+        message(FATAL_ERROR "ANDROID_ABI must be specified (e.g., armeabi-v7a, arm64-v8a, x86, x86_64)")
+    endif()
 endif()
 
 if(NOT DEFINED ANDROID_NDK_ROOT)
@@ -58,6 +62,7 @@ if(NOT DEFINED HOST_PLATFORM)
     endif()
 endif()
 
+message(STATUS "Android ABI: ${ANDROID_ABI}")
 message(STATUS "Detected Host Platform: ${HOST_PLATFORM}")
 
 # NDK Configuration
@@ -72,7 +77,7 @@ if(ANDROID_ABI STREQUAL "armeabi-v7a")
     set(ANDROID_PREFIX "armv7a-linux-androideabi")
     set(CMAKE_ANDROID_ARM_MODE ON)
     set(CMAKE_ANDROID_ARM_NEON ON)
-    set(CMAKE_SYSTEM_PROCESSOR "arm")
+    set(CMAKE_SYSTEM_PROCESSOR "armv7-a")
     set(CMAKE_C_FLAGS "-mfpu=neon -mfloat-abi=hard -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
     set(CMAKE_CXX_FLAGS "-mfpu=neon -mfloat-abi=hard -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
 elseif(ANDROID_ABI STREQUAL "arm64-v8a")
