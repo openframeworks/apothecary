@@ -119,10 +119,14 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DANDROID_ABI=${ABI} \
-            -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
+            -DANDROID_API=${ANDROID_API} \
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install

@@ -1,5 +1,5 @@
 # Android Toolchain CMake Configuration
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 # Add additional flags or settings if needed
 set(CMAKE_ANDROID_STL_TYPE "c++_shared") # Adjust STL type if needed
@@ -39,7 +39,7 @@ if(NOT DEFINED ANDROID_API)
         message(FATAL_ERROR "ANDROID_API must be specified as the path to the ANDROID_API")
     endif()
 endif()
-
+set(ANDROID_NATIVE_API_LEVEL ${ANDROID_API})
 
 # Detect Host Platform
 if(NOT DEFINED HOST_PLATFORM)
@@ -78,8 +78,8 @@ if(ANDROID_ABI STREQUAL "armeabi-v7a")
     set(CMAKE_ANDROID_ARM_MODE ON)
     set(CMAKE_ANDROID_ARM_NEON ON)
     set(CMAKE_SYSTEM_PROCESSOR "armv7-a")
-    set(CMAKE_C_FLAGS "-mfpu=neon -mfloat-abi=hard -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
-    set(CMAKE_CXX_FLAGS "-mfpu=neon -mfloat-abi=hard -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
+    set(CMAKE_C_FLAGS "-mfpu=neon -mfloat-abi=softfp -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
+    set(CMAKE_CXX_FLAGS "-mfpu=neon -mfloat-abi=softfp -O3 -ffast-math -funroll-loops -funsafe-math-optimizations")
 elseif(ANDROID_ABI STREQUAL "arm64-v8a")
     set(MACHINE "arm64")
     set(ANDROID_PREFIX "aarch64-linux-android")
@@ -105,6 +105,9 @@ endif()
 message(STATUS "Configuring for ABI: ${ANDROID_ABI}")
 message(STATUS "Machine: ${MACHINE}")
 message(STATUS "Android Prefix: ${ANDROID_PREFIX}")
+
+message(STATUS "CMAKE_C_COMPILER: ${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-clang")
+message(STATUS "CMAKE_CXX_COMPILER: ${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-clang++")
 
 # Set compilers
 set(CMAKE_C_COMPILER "${TOOLCHAIN}/bin/${ANDROID_PREFIX}${CMAKE_ANDROID_API}${ANDROID_API}-clang")
