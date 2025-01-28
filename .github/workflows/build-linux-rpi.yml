@@ -48,15 +48,14 @@ jobs:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
     needs: pre-check
     runs-on: ubuntu-latest
-
-  strategy:
-    matrix:
-      CROSS_CPU: [cortex-a53, cortex-a72, cortex-a76]
-      CROSS_OS: [bookworm]
-      ARCH: [aarch64, armv8]
-      exclude:
-        - ARCH: armv8
-          CROSS_CPU: cortex-a72 # Example exclusion, customize as needed
+    strategy:
+      matrix:
+        CROSS_CPU: [cortex-a53, cortex-a72, cortex-a76]
+        CROSS_OS: [bookworm]
+        ARCH: [aarch64, armv8]
+        exclude:
+          - ARCH: armv8
+            CROSS_CPU: cortex-a72
 
     env:
       CROSS_COMPILER: raspbian

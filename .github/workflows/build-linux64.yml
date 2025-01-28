@@ -106,9 +106,9 @@ jobs:
       run: find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
 
     - name: Generate Summary
-        run: |
-          chmod +x ./scripts/summary.sh
-          ./scripts/summary.sh
+      run: |
+        chmod +x ./scripts/summary.sh
+        ./scripts/summary.sh
 
     # - name: Package
     #   if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
