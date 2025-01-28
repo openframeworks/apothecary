@@ -1,25 +1,37 @@
 #!/usr/bin/env bash
-#
-# SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# cd $SCRIPT_DIR
-# APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
-# cd $APOTHECARY_LEVEL
-#
-# CROSS_COMPILER=""
-# CROSS_SYSROOT=""
-# CROSS_ARCH="aarch64"
-# CROSSCOMPILE=${CROSSCOMPILE:-0}
-# if [ "${CROSSCOMPILE}" -eq 0 ]; then
-#     export ROOTFS="/"
-#     export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
-# else
-#     export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
-#     export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
-# fi
-# export HOST_ARCH=$(uname -m)
-# export HOST_PLATFORM=$(uname)
-# export SYSROOT=${ROOTFS}
-# export GCC_PREFIX="${CROSS_ARCH}-linux-gnu"
+
+ORIGINAL_DIR="$(pwd)"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SCRIPT_DIR
+APOTHECARY_LEVEL="$( cd "$SCRIPT_DIR/../.." && pwd )"
+cd $APOTHECARY_LEVEL
+
+CROSS_ARCH="aarch64"
+CROSSCOMPILE=${CROSSCOMPILE:-0} # Default to native compilation
+SYSROOT_PATH="/usr/${CROSS_ARCH}-linux-gnu"
+
+# Initialize toolchain variables
+export GCC_PREFIX="${CROSS_ARCH}-linux-gnu"
+export CROSS_COMPILER=""
+export ROOTFS=""
+export TOOLCHAIN_ROOT=""
+
+# Determine if cross-compilation is needed
+if [ -d "${SYSROOT_PATH}" ]; then
+    CROSSCOMPILE=1
+    ROOTFS="${SYSROOT_PATH}"
+    TOOLCHAIN_ROOT="${SYSROOT_PATH}"
+    echo "Cross-compiling detected. Using sysroot at ${SYSROOT_PATH}"
+else
+    CROSSCOMPILE=0
+    ROOTFS="/"
+    TOOLCHAIN_ROOT="/usr"
+    echo "Native compilation detected. Using rootfs at ${ROOTFS}"
+fi
+export HOST_ARCH=$(uname -m)
+export HOST_PLATFORM=$(uname)
+export SYSROOT=${ROOTFS}
+
 # if [ "${GCC_VERSION}" -eq 0 ]; then
 #     export GCC_VERSION="14.2.0"
 # fi
@@ -69,17 +81,18 @@
 #     fi
 # done
 
-# # Debugging output
-# echo "--------------------"
-# echo "openFrameworks apothecary Cross Compiler: $GCC_PREFIX"
+# Debugging output
+echo "--------------------"
+echo "openFrameworks apothecary Cross Compiler: $GCC_PREFIX"
 # echo "Using GCC Version: $GCC_VERSION"
 # echo "Library Path: $LIBRARY_PATH"
-# echo "ROOTFS Path: $ROOTFS"
+echo "ROOTFS Path: $ROOTFS"
 # echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
 # echo "CROSS_ARCH: $CROSS_ARCH"
-# echo "HOST_ARCH: $HOST_ARCH"
-# echo "HOST_PLATFORM: $HOST_PLATFORM"
+echo "HOST_ARCH: $HOST_ARCH"
+echo "HOST_PLATFORM: $HOST_PLATFORM"
 # echo "LDFLAGS : $LDFLAGS"
 # echo "CFLAGS : $CFLAGS"
 # echo "Path: [$PATH]"
 # echo "--------------------"
+cd "$ORIGINAL_DIR"

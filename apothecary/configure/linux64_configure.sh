@@ -95,3 +95,4 @@ echo "LDFLAGS : $LDFLAGS"
 echo "CFLAGS : $CFLAGS"
 echo "Path: [$PATH]"
 echo "--------------------"
+cd $SCRIPT_DIR

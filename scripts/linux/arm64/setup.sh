@@ -49,6 +49,24 @@ EOF
 
 # Output the result
 echo "Generated ARM64 .sources file at $OUTPUT_FILE"
+
+
+SOURCE_FILE="/etc/apt/sources.list.d/ubuntu.sources"
+awk '
+/^Types: deb/ {
+    print $0
+    getline nextLine
+    if (nextLine !~ /^Architectures:/) {
+        print "Architectures: amd64"
+    }
+    print nextLine
+    next
+}
+{ print $0 }
+' "$SOURCE_FILE" > "${SOURCE_FILE}.tmp"
+mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
+echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_FILE."
+
 dpkg --add-architecture arm64
 dpkg --print-architecture
 dpkg --print-foreign-architectures
@@ -57,8 +75,6 @@ echo "Updating APT package lists..."
 sudo apt-get update
 
 echo "Done! ARM64 and ARMHF architectures are ready."
-
-
 
 echo "Installing ARM64 packages..."
 apt-get install -y \
@@ -77,7 +93,6 @@ apt-get install -y \
     pigz:arm64 \
     autoconf:arm64 \
     automake:arm64 \
-    tar:arm64 \
     figlet:arm64 \
     xz-utils:arm64 \
     gperf:arm64 \
@@ -91,7 +106,7 @@ apt-get install -y \
     libxcursor-dev:arm64 \
     libxi-dev:arm64 \
     ccache:arm64 \
-    binutils-aarch64-linux-gnu \
+    binutils-aarch64-linux-gnu:arm64 \
     libgles2-mesa-dev:arm64
 
 
