@@ -32,47 +32,45 @@ if [[ -z "$UBUNTU_VERSION" ]]; then
     echo "Error: Could not detect Ubuntu version. Ensure lsb-release is installed."
     exit 1
 fi
-
 if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
-    # Define output file path
-    OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
-    echo "making sources file arm64"
+# Define output file path
+OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
+echo "making sources file arm64"
 
-    # Generate the .sources content
-    cat <<EOF > $OUTPUT_FILE
-    Types: deb
-    URIs: http://ports.ubuntu.com/ubuntu-ports/
-    Suites: $UBUNTU_VERSION $UBUNTU_VERSION-updates $UBUNTU_VERSION-backports $UBUNTU_VERSION-security
-    Components: main restricted universe multiverse
-    Architectures: arm64 armhf
-    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
-    EOF
+# Generate the .sources content
+cat <<EOF > $OUTPUT_FILE
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: $UBUNTU_VERSION $UBUNTU_VERSION-updates $UBUNTU_VERSION-backports $UBUNTU_VERSION-security
+Components: main restricted universe multiverse
+Architectures: arm64 armhf
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+EOF
 
-    # Output the result
-    echo "Generated ARM64 .sources file at $OUTPUT_FILE"
+# Output the result
+echo "Generated ARM64 .sources file at $OUTPUT_FILE"
 
 
-    SOURCE_FILE="/etc/apt/sources.list.d/ubuntu.sources"
-    awk '
-    /^Types: deb/ {
-        print $0
-        getline nextLine
-        if (nextLine !~ /^Architectures:/) {
-            print "Architectures: amd64"
-        }
-        print nextLine
-        next
+SOURCE_FILE="/etc/apt/sources.list.d/ubuntu.sources"
+awk '
+/^Types: deb/ {
+    print $0
+    getline nextLine
+    if (nextLine !~ /^Architectures:/) {
+        print "Architectures: amd64"
     }
-    { print $0 }
-    ' "$SOURCE_FILE" > "${SOURCE_FILE}.tmp"
-    mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
-    echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_FILE."
-
-    dpkg --add-architecture arm64
+    print nextLine
+    next
+}
+{ print $0 }
+' "$SOURCE_FILE" > "${SOURCE_FILE}.tmp"
+mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
+echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_FILE."
 
 fi
+dpkg --add-architecture arm64
 dpkg --print-architecture
 dpkg --print-foreign-architectures
 # Update package lists

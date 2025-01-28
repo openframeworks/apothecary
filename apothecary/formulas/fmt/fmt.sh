@@ -121,28 +121,23 @@ function build() {
         cd "build_${TYPE}_${ABI}"
         rm -f CMakeCache.txt *.a *.o
         cmake .. ${DEFINES} \
-            -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 " \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_COMPILER=${CC} \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
-            -D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_CXX_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER=${CC} \
-            -D CMAKE_CXX_COMPILER=${CXX} \
-            -D CMAKE_C_FLAGS=${CFLAGS} \
-            -D CMAKE_CXX_FLAGS=${CXXFLAGS} \
-            -D ANDROID_ABI=${ABI} \
-            -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-            -D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -D ANDROID_TOOLCHAIN=clang \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
