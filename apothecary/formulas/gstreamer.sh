@@ -76,10 +76,12 @@ function build() {
     pkg-config --modversion libpng
     pkg-config --modversion zlib
     pkg-config --modversion freetype
+    pkg-config --modversion gstreamer-1.0
+    pkg-config --modversion gstreamer-app-1.0
+    pkg-config --modversion gstreamer-video-1.0
 
     mkdir -p "build_${TYPE}_${PLATFORM}"
-    # cd "build_${TYPE}_${PLATFORM}"
-    # using Menson build system
+    cd "build_${TYPE}_${PLATFORM}"
 
     meson setup \
         --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
@@ -89,10 +91,7 @@ function build() {
         -Dgst-full-libraries=app,video \
         -Dc_args="-I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${FREETYPE_INCLUDE_DIR}" \
         -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}" \
-        "build_${TYPE}_${PLATFORM}"
-
-    # meson compile -C "build_${TYPE}_${PLATFORM}"
-    # meson install -C "build_${TYPE}_${PLATFORM}"
+        .
 
     ninja
     ninja install
