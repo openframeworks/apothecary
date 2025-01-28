@@ -111,7 +111,7 @@ else
 fi
 
 echo "--- Installing extra depends --- "
-sudo apt-get -y install libasound-dev:arm64 libjack-dev:arm64 libpulse-dev:arm64 oss4-dev:arm64
+sudo apt-get -y install libasound-dev:arm64 libjack-dev:arm64 libpulse-dev:arm64 #oss4-dev:arm64
 # sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
 # sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix
 # sudo apt-get update && sudo apt-get install -y cmake build-essential
