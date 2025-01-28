@@ -35,6 +35,7 @@ fi
 
 # Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
+echo "making sources file arm64"
 
 # Generate the .sources content
 cat <<EOF > $OUTPUT_FILE
@@ -42,33 +43,22 @@ Types: deb
 URIs: http://ports.ubuntu.com/ubuntu-ports/
 Suites: $UBUNTU_VERSION $UBUNTU_VERSION-updates $UBUNTU_VERSION-backports $UBUNTU_VERSION-security
 Components: main restricted universe multiverse
-Architectures: arm64
+Architectures: arm64 armhf
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
 
 # Output the result
 echo "Generated ARM64 .sources file at $OUTPUT_FILE"
-if grep -q "http://ports.ubuntu.com/ubuntu-ports" /etc/apt/sources.list; then
-    echo "ARM sources are already added to /etc/apt/sources.list."
-else
-    echo "Adding ARM sources to /etc/apt/sources.list..."
-    echo "$ARM_SOURCES" >> /etc/apt/sources.list
-    echo "ARM sources added successfully."
-fi
-
-# Enable ARM64 and ARMHF architectures
-echo "Adding ARM64 and ARMHF architectures..."
 dpkg --add-architecture arm64
-# dpkg --add-architecture armhf
-
+dpkg --print-architecture
+dpkg --print-foreign-architectures
 # Update package lists
 echo "Updating APT package lists..."
 sudo apt-get update
 
 echo "Done! ARM64 and ARMHF architectures are ready."
 
-dpkg --print-architecture
-dpkg --print-foreign-architectures
+
 
 echo "Installing ARM64 packages..."
 apt-get install -y \
