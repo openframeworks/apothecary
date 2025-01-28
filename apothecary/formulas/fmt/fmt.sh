@@ -232,7 +232,7 @@ function copy() {
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.lib" $1/lib/$TYPE/$ABI/libfmt.a
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.a" $1/lib/$TYPE/$ABI/libfmt.a
         secure $1/lib/$TYPE/$ABI/libfmt.a fmt.pkl
         cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
     elif [ "$TYPE" == "emscripten" ]; then
