@@ -197,7 +197,7 @@ function copy() {
         secure $1/lib/$TYPE/$PLATFORM/libpugixml.a pugixml.pkl
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build_${TYPE}_${ABI}/Release/lib/libpugixml.a $s1/lib/$TYPE/$ABI/libpugixml.a
+        cp -Rv build_${TYPE}_${ABI}/Release/lib/libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
         cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
         secure $1/lib/$TYPE/$ABI/libpugixml.a pugixml.pkl
     elif [ "$TYPE" == "emscripten" ]; then
