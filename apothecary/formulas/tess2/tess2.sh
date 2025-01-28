@@ -251,8 +251,6 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
         cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
         secure $1/lib/$TYPE/$ABI/libtess2.a tess2
-         ls -a "build_${TYPE}_${PLATFORM}"
-        cp -Rv "build_${TYPE}_${PLATFORM}/include/" $1/include
     else
         cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
         secure $1/lib/$TYPE/libtess2.a tess2
