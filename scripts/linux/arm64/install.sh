@@ -45,9 +45,6 @@ echoDots() {
 
 echo "GCC Version: [$GCC]"
 
-if command -v docker &>/dev/null; then
-    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-fi
 if [[ "$GCC" =~ ^gcc(8|9|10|11|12|13)$ ]]; then
     GCC_VERSION=${BASH_REMATCH[1]}
     sudo apt update

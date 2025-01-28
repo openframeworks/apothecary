@@ -134,12 +134,12 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_BUILD_TYPE="Release" \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE}
@@ -193,7 +193,6 @@ function build() {
         cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DZLIB_BUILD_EXAMPLES=OFF \
             -DSKIP_EXAMPLE=ON \
@@ -202,7 +201,6 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
@@ -253,8 +251,8 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
         cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
         secure $1/lib/$TYPE/$ABI/libtess2.a tess2
-        ls -a build_${TYPE}_${PLATFORM}/Release
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
+         ls -a "build_${TYPE}_${PLATFORM}"
+        cp -Rv "build_${TYPE}_${PLATFORM}/include/" $1/include
     else
         cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
         secure $1/lib/$TYPE/libtess2.a tess2
