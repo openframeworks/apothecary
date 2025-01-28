@@ -128,7 +128,6 @@ function build() {
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DANDROID_ABI=${ABI} \
             -DANDROID_API=${ANDROID_API} \
             -DANDROID_TOOLCHAIN=clang \
