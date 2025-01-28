@@ -52,7 +52,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    DEFINES="
+    export DEFINES="
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \

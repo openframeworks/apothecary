@@ -74,6 +74,12 @@ jobs:
           NDK: ${{ matrix.NDK }}
       - name: List output directory
         run: ls -lah out/
+
+      - name: Generate Summary
+        run: |
+          chmod +x ./scripts/summary.sh
+          ./scripts/summary.sh
+
       - name: Package
         if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
