@@ -1,24 +1,53 @@
 [host_machine]
 system = 'linux'
-cpu_family = 'aarch64'
-cpu = 'cortex-a53'  # Change this if a different CPU target is needed
+cpu_family = 'native'  # Use 'native' for automatic detection
 endian = 'little'
 
 [binaries]
-c = 'aarch64-linux-gnu-gcc'
-cpp = 'aarch64-linux-gnu-g++'
-ar = 'aarch64-linux-gnu-ar'
-strip = 'aarch64-linux-gnu-strip'
-pkgconfig = 'aarch64-linux-gnu-pkg-config'
-ld = 'aarch64-linux-gnu-ld'
-
+c = 'gcc'
+cpp = 'g++'
+ar = 'ar'
+strip = 'strip'
+pkg-config = 'pkg-config'
+ld = 'ld'
+nm = 'nm'
+ranlib = 'ranlib'
+objcopy = 'objcopy'
+objdump = 'objdump'
 
 [properties]
-sys_root = '/path/to/raspbian_rootfs'
-c_args = ['--sysroot=/path/to/raspbian_rootfs', '-I/aarch64-linux-gnu/libc/usr/include', '-I/lib/gcc/aarch64-linux-gnu/14.2.0/include', '-DSTANDALONE', '-DPIC', '-D_REENTRANT', '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64', '-DHAVE_LIBBCM_HOST', '-DUSE_EXTERNAL_LIBBCM_HOST', '-mcpu=cortex-a53', '-march=armv8-a+fp+simd', '-fPIC']
-cpp_args = ['--sysroot=/path/to/raspbian_rootfs', '-I/aarch64-linux-gnu/libc/usr/include', '-I/lib/gcc/aarch64-linux-gnu/14.2.0/include', '-DSTANDALONE', '-DPIC', '-D_REENTRANT', '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64', '-DHAVE_LIBBCM_HOST', '-DUSE_EXTERNAL_LIBBCM_HOST', '-mcpu=cortex-a53', '-march=armv8-a+fp+simd', '-fPIC']
-c_link_args = ['-Wl,-rpath-link,/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu', '-L/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu', '-L/aarch64-linux-gnu/lib64', '-Wl,-rpath-link,/aarch64-linux-gnu/lib64', '-L/lib/gcc/aarch64-linux-gnu/14.2.0', '-L/aarch64-linux-gnu/libc/lib64', '-L/aarch64-linux-gnu/libc/usr/lib64', '-Wl,-rpath-link,/aarch64-linux-gnu/libc/usr/lib64']
-cpp_link_args = ['-Wl,-rpath-link,/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu', '-L/path/to/raspbian_rootfs/usr/lib/aarch64-linux-gnu', '-L/aarch64-linux-gnu/lib64', '-Wl,-rpath-link,/aarch64-linux-gnu/lib64', '-L/lib/gcc/aarch64-linux-gnu/14.2.0', '-L/aarch64-linux-gnu/libc/lib64', '-L/aarch64-linux-gnu/libc/usr/lib64', '-Wl,-rpath-link,/aarch64-linux-gnu/libc/usr/lib64']
+sys_root = '/'  # Use the root filesystem
+
+# Compiler flags for native build
+c_args = [
+    '-I/usr/include',
+    '-fPIC',
+    '-O3',
+    '-Wall',
+    '-Wextra',
+]
+
+cpp_args = [
+    '-I/usr/include',
+    '-fPIC',
+    '-O3',
+    '-Wall',
+    '-Wextra',
+    '-std=c++17',
+]
+
+# Linker flags for native build
+c_link_args = [
+    '-fPIE',
+    '-pie',
+    '-L/usr/lib',
+]
+
+cpp_link_args = [
+    '-fPIE',
+    '-pie',
+    '-L/usr/lib',
+]
 
 [build_options]
 c_std = 'c17'
