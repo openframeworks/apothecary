@@ -74,10 +74,10 @@ jobs:
       run: ./scripts/calculate_formulas.sh
 
     - name: Scripts Setup
-      run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/setup.sh
+      run: sudo ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/setup.sh
 
     - name: Scripts Install
-      run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/install.sh
+      run: sudo ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/install.sh
       
     - name: BuildLinux64
       working-directory: ${{env.GITHUB_WORKSPACE}}

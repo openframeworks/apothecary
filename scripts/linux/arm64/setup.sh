@@ -3,20 +3,114 @@ set -e
 
 echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
-sudo dpkg --add-architecture arm64
+
+sudo apt update -y
+sudo apt install -y \
+    git \
+    cmake \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    crossbuild-essential-armhf \
+    crossbuild-essential-arm64
+
+sudo apt install -y \
+    python3-minimal \
+    python3-numpy
+
+# Ensure the script is run as root
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root."
+    exit 1
+fi
+
+# Ubuntu version detection
+UBUNTU_VERSION=$(lsb_release -cs)  # e.g., "lunar" for Ubuntu 23.04
+
+# Check for valid Ubuntu version
+if [[ -z "$UBUNTU_VERSION" ]]; then
+    echo "Error: Could not detect Ubuntu version. Ensure lsb-release is installed."
+    exit 1
+fi
+
+ARM_SOURCES=$(cat <<EOF
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION main restricted
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates main restricted
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION universe
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates universe
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-backports main restricted universe multiverse
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security main restricted
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security universe
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security multiverse
+EOF
+)
+if grep -q "http://ports.ubuntu.com/ubuntu-ports" /etc/apt/sources.list; then
+    echo "ARM sources are already added to /etc/apt/sources.list."
+else
+    echo "Adding ARM sources to /etc/apt/sources.list..."
+    echo "$ARM_SOURCES" >> /etc/apt/sources.list
+    echo "ARM sources added successfully."
+fi
+
+# Enable ARM64 and ARMHF architectures
+echo "Adding ARM64 and ARMHF architectures..."
+dpkg --add-architecture arm64
+# dpkg --add-architecture armhf
+
+# Update package lists
+echo "Updating APT package lists..."
+sudo apt-get update
+
+echo "Done! ARM64 and ARMHF architectures are ready."
 
 dpkg --print-architecture
 dpkg --print-foreign-architectures
 
-sudo apt update
-sudo apt-get install -y aptitude build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev cmake unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
-sudo aptitude install -y gperf
-sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
-sudo apt-get install -y ccache
-sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+echo "Installing ARM64 packages..."
+apt-get install -y \
+    aptitude:arm64 \
+    gawk:arm64 \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    gfortran:arm64 \
+    texinfo:arm64 \
+    bison:arm64 \
+    libncurses-dev:arm64 \
+    unzip:arm64 \
+    pkg-config:arm64 \
+    flex:arm64 \
+    openssl:arm64 \
+    pigz:arm64 \
+    autoconf:arm64 \
+    automake:arm64 \
+    tar:arm64 \
+    figlet:arm64 \
+    xz-utils:arm64 \
+    gperf:arm64 \
+    libgl1-mesa-dev:arm64 \
+    libglu1-mesa-dev:arm64 \
+    freeglut3-dev:arm64 \
+    libxrandr-dev:arm64 \
+    libxinerama-dev:arm64 \
+    libx11-dev:arm64 \
+    libxext-dev:arm64 \
+    libxcursor-dev:arm64 \
+    libxi-dev:arm64 \
+    ccache:arm64 \
+    binutils-aarch64-linux-gnu \
+    libgles2-mesa-dev:arm64
 
-dpkg -L gcc-aarch64-linux-gnu
-sudo apt install libgl1-mesa-dev libgles2-mesa-dev
+
+# sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
+# sudo aptitude install -y gperf
+# sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
+# sudo apt-get install -y ccache
+# sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
+# dpkg -L gcc-aarch64-linux-gnu
+# sudo apt install libgl1-mesa-dev libgles2-mesa-dev
 
 
 
@@ -40,3 +134,8 @@ if [ -d "/usr/lib/aarch64-linux-gnu" ]; then
 else
     echo "Directory /usr/lib/aarch64-linux-gnu does not exist."
 fi
+
+PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
+    PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu \
+    PKG_CONFIG_SYSROOT_DIR=/ \
+      pkg-config --list-all
