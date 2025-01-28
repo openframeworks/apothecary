@@ -59,8 +59,7 @@ function build() {
 	        -DCMAKE_CXX_EXTENSIONS=OFF
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-	        -DCMAKE_INSTALL_INCLUDEDIR=include
-	     "
+	        -DCMAKE_INSTALL_INCLUDEDIR=include"
 
     cp -v $FORMULA_DIR/CMakeLists.txt .
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
@@ -138,8 +137,6 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -185,7 +182,8 @@ function build() {
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.so
-        DEFINES="-DLIBRARY_SUFFIX=${ABI} \
+        export DEFINES="${DEFINES} \
+            -DLIBRARY_SUFFIX=${ABI} \
 	        -DCMAKE_BUILD_TYPE=Release \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -205,7 +203,6 @@ function build() {
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
@@ -256,6 +253,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$ABI
         cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
         secure $1/lib/$TYPE/$ABI/libtess2.a tess2
+        ls -a build_${TYPE}_${PLATFORM}/Release
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     else
         cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
