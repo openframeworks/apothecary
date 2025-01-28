@@ -80,21 +80,20 @@ function build() {
     pkg-config --modversion gstreamer-app-1.0
     pkg-config --modversion gstreamer-video-1.0
 
-    mkdir -p "build_${TYPE}_${PLATFORM}"
-    cd "build_${TYPE}_${PLATFORM}"
+    BUILD_DIR="build_${TYPE}_${PLATFORM}"
+    mkdir -p "$BUILD_DIR"
 
-    meson setup \
-        --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
-        --buildtype=release \
-        --default-library=static \
-        --backend=ninja \
-        -Dgst-full-libraries=app,video \
-        -Dc_args="-I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${FREETYPE_INCLUDE_DIR}" \
-        -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}" \
-        .
+    meson setup "$BUILD_DIR" \
+    --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
+    --buildtype=release \
+    --default-library=static \
+    --backend=ninja \
+    -Dgst-full-libraries=app,video \
+    -Dc_args="-I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${FREETYPE_INCLUDE_DIR}" \
+    -Dc_link_args="${LIBPNG_LIBRARY} ${ZLIB_LIBRARY} ${FREETYPE_LIBRARY}"
 
-    ninja
-    ninja install
+    ninja -C "$BUILD_DIR"
+    ninja install -C "$BUILD_DIR"
     cd ..
 }
 
