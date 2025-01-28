@@ -11,6 +11,10 @@ sudo apt install -y \
     pkgconf \
     build-essential \
     ninja-build \
+    gawk \
+    automake \
+    autoconf \
+    flex \
     crossbuild-essential-armhf \
     crossbuild-essential-arm64
 
