@@ -84,7 +84,7 @@ function build() {
     mkdir -p "$BUILD_DIR"
 
     meson setup "$BUILD_DIR" \
-    --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.txt" \
+    --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.ini" \
     --buildtype=release \
     --default-library=static \
     --backend=ninja \
