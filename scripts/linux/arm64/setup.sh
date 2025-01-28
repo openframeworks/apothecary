@@ -33,19 +33,21 @@ if [[ -z "$UBUNTU_VERSION" ]]; then
     exit 1
 fi
 
-ARM_SOURCES=$(cat <<EOF
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION main restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates main restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION universe
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates universe
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-updates multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-backports main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security main restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security universe
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $UBUNTU_VERSION-security multiverse
+# Define output file path
+OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
+
+# Generate the .sources content
+cat <<EOF > $OUTPUT_FILE
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: $UBUNTU_VERSION $UBUNTU_VERSION-updates $UBUNTU_VERSION-backports $UBUNTU_VERSION-security
+Components: main restricted universe multiverse
+Architectures: arm64
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
-)
+
+# Output the result
+echo "Generated ARM64 .sources file at $OUTPUT_FILE"
 if grep -q "http://ports.ubuntu.com/ubuntu-ports" /etc/apt/sources.list; then
     echo "ARM sources are already added to /etc/apt/sources.list."
 else
