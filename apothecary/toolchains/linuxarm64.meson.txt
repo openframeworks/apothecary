@@ -1,6 +1,6 @@
 [host_machine]
 system = 'linux'
-cpu_family = 'native'  # Use 'native' for automatic detection
+cpu_family = 'native'
 endian = 'little'
 
 [binaries]
@@ -16,38 +16,11 @@ objcopy = 'objcopy'
 objdump = 'objdump'
 
 [properties]
-sys_root = '/'  # Use the root filesystem
-
-# Compiler flags for native build
-c_args = [
-    '-I/usr/include',
-    '-fPIC',
-    '-O3',
-    '-Wall',
-    '-Wextra',
-]
-
-cpp_args = [
-    '-I/usr/include',
-    '-fPIC',
-    '-O3',
-    '-Wall',
-    '-Wextra',
-    '-std=c++17',
-]
-
-# Linker flags for native build
-c_link_args = [
-    '-fPIE',
-    '-pie',
-    '-L/usr/lib',
-]
-
-cpp_link_args = [
-    '-fPIE',
-    '-pie',
-    '-L/usr/lib',
-]
+sys_root = '/'
+c_args = ['-I/usr/include', '-fPIC', '-O3', '-Wall', '-Wextra']
+cpp_args = ['-I/usr/include', '-fPIC', '-O3', '-Wall', '-Wextra', '-std=c++17']
+c_link_args = ['-fPIE', '-pie', '-L/usr/lib']
+cpp_link_args = ['-fPIE', '-pie', '-L/usr/lib']
 
 [build_options]
 c_std = 'c17'
