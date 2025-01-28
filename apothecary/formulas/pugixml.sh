@@ -33,7 +33,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    export DEFS="  -DCMAKE_C_STANDARD=${C_STANDARD} \
+    export DEFINES="-DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
@@ -45,7 +45,7 @@ function build() {
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.a *.js
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DPLATFORM=$PLATFORM \
@@ -84,7 +84,7 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_RELEASE} ${VS_C_FLAGS}" \
@@ -99,7 +99,7 @@ function build() {
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAGS_DEBUG} ${VS_C_FLAGS}" \
@@ -117,22 +117,38 @@ function build() {
         cd ..
 
     elif [ "$TYPE" == "android" ]; then
-        source $APOTHECARY_DIR/configure/android_configure.sh $ABI make
-        #export CFLAGS="$CFLAGS -I${NDK_ROOT}/sysroot/usr/include/${ANDROID_PREFIX} -I${NDK_ROOT}/sysroot/usr/include/"
-        # Compile the program
-        $CXX -Oz $CPPFLAGS $CXXFLAGS \
-            -Wall \
-            -fPIC \
-            -std=c++${CPP_STANDARD} \
-            -Iinclude \
-            -c src/pugixml.cpp \
-            -o src/pugixml.o $LDFLAGS -shared -v
-        $AR ruv libpugixml.a src/pugixml.o
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
+
+        mkdir -p "build_${TYPE}_${ABI}"
+        cd "build_${TYPE}_${ABI}"
+        rm -f CMakeCache.txt *.a *.o
+        cmake .. ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DPLATFORM=$PLATFORM \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
@@ -181,7 +197,8 @@ function copy() {
         secure $1/lib/$TYPE/$PLATFORM/libpugixml.a pugixml.pkl
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
+        cp -Rv build_${TYPE}_${ABI}/Release/lib/libpugixml.a $s1/lib/$TYPE/$ABI/libpugixml.a
+        cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
         secure $1/lib/$TYPE/$ABI/libpugixml.a pugixml.pkl
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
