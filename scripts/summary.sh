@@ -15,42 +15,68 @@ fi
 OUT_DIR="$(cd "$APOTHECARY_LEVEL/out" && pwd)"
 cd $OUT_DIR
 
+SUMMARY_FILE="Manifesto.md"
 
-SUMMARY_FILE="manifesto.md"
-
-# Initialize the summary file with a table header
+# Initialize Manifesto file with a Markdown table
 echo "# Manifesto for All Libraries" > "$SUMMARY_FILE"
 echo "" >> "$SUMMARY_FILE"
 echo "| Library | Version | Build Time | Build Number | Git URL | C++ Standard | C Standard | Linker Flags | Dependencies | Binary | Binary SHA | SHA Type | Source SHA | Defines | Frameworks |" >> "$SUMMARY_FILE"
 echo "|---------|---------|------------|--------------|---------|--------------|------------|--------------|-------------|--------|------------|----------|------------|---------|-----------|" >> "$SUMMARY_FILE"
 
-# Find all .pkl files and process them
+# Function to safely extract values (removes quotes & spaces)
+extract_value() {
+    local key="$1"
+    awk -F' *= *' -v key="$key" '$1 == key {gsub(/"/, "", $2); print $2}' "$pkl_file" | tr -d '\n'
+}
+
+# Process all .pkl files
 find "$OUT_DIR" -type f -name "*.pkl" | while read -r pkl_file; do
-  # Extract library name and information
   LIB_NAME=$(basename "$(dirname "$pkl_file")")
-  LIB_INFO=$(parse_pkl "$pkl_file")
 
-  # Extracting individual values safely
-  version=$(echo "$LIB_INFO" | grep "Version" | cut -d '|' -f3 | xargs)
-  build_time=$(echo "$LIB_INFO" | grep "Build Time" | cut -d '|' -f3 | xargs)
-  build_number=$(echo "$LIB_INFO" | grep "Build Number" | cut -d '|' -f3 | xargs)
-  git_url=$(echo "$LIB_INFO" | grep "Git URL" | cut -d '|' -f3 | xargs)
-  cpp_standard=$(echo "$LIB_INFO" | grep "C++ Standard" | cut -d '|' -f3 | xargs)
-  c_standard=$(echo "$LIB_INFO" | grep "C Standard" | cut -d '|' -f3 | xargs)
-  linker_flags=$(echo "$LIB_INFO" | grep "Linker Flags" | cut -d '|' -f3 | xargs)
-  dependencies=$(echo "$LIB_INFO" | grep "Dependencies" | cut -d '|' -f3 | xargs)
-  binary=$(echo "$LIB_INFO" | grep "Binary" | cut -d '|' -f3 | xargs)
-  binary_sha=$(echo "$LIB_INFO" | grep "Binary SHA" | cut -d '|' -f3 | xargs)
-  sha_type=$(echo "$LIB_INFO" | grep "SHA Type" | cut -d '|' -f3 | xargs)
-  source_sha=$(echo "$LIB_INFO" | grep "Source SHA" | cut -d '|' -f3 | xargs)
-  defines=$(echo "$LIB_INFO" | grep "Defines" | cut -d '|' -f3 | xargs)
-  frameworks=$(echo "$LIB_INFO" | grep "Frameworks" | cut -d '|' -f3 | xargs)
+  echo "Processing $LIB_NAME ($pkl_file)..."
 
-  # Append row to the table
-  echo "| $LIB_NAME | $version | $build_time | $build_number | $git_url | $cpp_standard | $c_standard | $linker_flags | $dependencies | $binary | $binary_sha | $sha_type | $source_sha | $defines | $frameworks |" >> "$SUMMARY_FILE"
+  # Extract values correctly
+  name=$(extract_value "name")
+  version=$(extract_value "version")
+  build_time=$(extract_value "buildTime")
+  build_number=$(extract_value "buildNumber")
+  git_url=$(extract_value "gitUrl")
+  cpp_standard=$(extract_value "cppStandard")
+  c_standard=$(extract_value "cStandard")
+  linker_flags=$(extract_value "linkerFlags")
+  dependencies=$(extract_value "dependencies")
+  binary=$(extract_value "binary")
+  binary_sha=$(extract_value "binarySha")
+  sha_type=$(extract_value "shaType")
+  source_sha=$(extract_value "sourceSHA")
+  defines=$(extract_value "defines")
+  frameworks=$(extract_value "frameworks")
+
+  # Ensure empty values are replaced with `-`
+  version=${version:-"-"}
+  build_time=${build_time:-"-"}
+  build_number=${build_number:-"-"}
+  git_url=${git_url:-"-"}
+  cpp_standard=${cpp_standard:-"-"}
+  c_standard=${c_standard:-"-"}
+  linker_flags=${linker_flags:-"-"}
+  dependencies=${dependencies:-"-"}
+  binary=${binary:-"-"}
+  binary_sha=${binary_sha:-"-"}
+  sha_type=${sha_type:-"-"}
+  source_sha=${source_sha:-"-"}
+  defines=${defines:-"-"}
+  frameworks=${frameworks:-"-"}
+
+  # **Fix Binary & SHA merging by wrapping each properly**
+  binary="\`$binary\`"
+  binary_sha="\`$binary_sha\`"
+
+  # Append properly formatted row
+  echo "| $name | $version | $build_time | $build_number | $git_url | $cpp_standard | $c_standard | $linker_flags | $dependencies | $binary | $binary_sha | $sha_type | $source_sha | $defines | $frameworks |" >> "$SUMMARY_FILE"
 done
 
-# Post the summary to GitHub Actions
+# Post summary to GitHub Actions
 if [ "${GITHUB_ACTIONS}" == "true" ]; then
     echo "## Build Summary" >> "$GITHUB_STEP_SUMMARY"
     cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"

@@ -303,9 +303,17 @@ function copy() {
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16_static.a" $1/lib/$TYPE/$ABI/libpng.a
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16.a" $1/lib/$TYPE/$ABI/libpng.a
         secure $1/lib/$TYPE/$ABI/libpng.a
         cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/${TYPE}/${PLATFORM}/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
