@@ -116,7 +116,6 @@ apt-get install -y \
     binutils-aarch64-linux-gnu:arm64 \
     libgles2-mesa-dev:arm64
 
-sudo apt install gawk:amd64 gawk:arm64
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
 # sudo aptitude install -y gperf
 # sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
@@ -126,6 +125,13 @@ sudo apt install gawk:amd64 gawk:arm64
 # dpkg -L gcc-aarch64-linux-gnu
 # sudo apt install libgl1-mesa-dev libgles2-mesa-dev
 
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
+    tar -xf gawk-5.3.1.tar.xz
+    cd gawk-5.3.1
+    ./configure
+    make
+fi
 
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
