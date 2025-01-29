@@ -185,7 +185,7 @@ function copy() {
     elif [ "$TYPE" == "android" ]; then
         cp -R include/uriparser/* $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build/$TYPE/$ABI/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
+        cp -Rv build_${TYPE}_${ABI}/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
         secure $1/lib/$TYPE/$ABI/liburiparser.a
     fi
     if [ -d "$1/license" ]; then
