@@ -349,12 +349,6 @@ function build() {
         rm -rf "build_${ABI}/CMakeCache.txt"
         mkdir -p "build_$ABI"
         cd "./build_$ABI"
-        CFLAGS=""
-        export CMAKE_CFLAGS="$CFLAGS"
-        export CPPFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
-
         NO_LINK_BROTLI=OFF
         if [ "$PLATFORM" == "ARM64" ]; then
             NO_LINK_BROTLI=ON
@@ -363,48 +357,39 @@ function build() {
         EXTRA_DEFS="
             -DFT_DISABLE_BROTLI=${NO_LINK_BROTLI} 
             "
-        cmake ${DEFINES} \
-            -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-            -D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-            -D CMAKE_C_COMPILER=${CC} \
-            -D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_CXX_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER=${CC} \
-            -D CMAKE_CXX_COMPILER=${CXX} \
-            -D CMAKE_C_FLAGS=${CFLAGS} \
-            -D CMAKE_CXX_FLAGS=${CXXFLAGS} \
+        cmake .. ${DEFINES} \
+            ${EXTRA_DEFS} \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
-            -D ANDROID_ABI=${ABI} \
-            -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-            -D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -D ANDROID_TOOLCHAIN=clang \
-            -D CMAKE_BUILD_TYPE=Release \
-            -D FT_REQUIRE_ZLIB=ON \
-            -D FT_DISABLE_BZIP2=ON \
-            -D FT_REQUIRE_HARFBUZZ=OFF \
-            -D FT_DISABLE_HARFBUZZ=ON \
-            -D FT_DISABLE_PNG=OFF \
-            -D FT_REQUIRE_PNG=ON \
-            -DCMAKE_SYSROOT=$SYSROOT \
-            -DANDROID_NDK=$NDK_ROOT \
-            -DANDROID_ABI=$ABI \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DFT_REQUIRE_ZLIB=ON \
+            -DFT_DISABLE_BZIP2=ON \
+            -DFT_REQUIRE_HARFBUZZ=OFF \
+            -DFT_DISABLE_HARFBUZZ=ON \
+            -DFT_DISABLE_PNG=OFF \
+            -DFT_REQUIRE_PNG=ON \
             -DCMAKE_ANDROID_ARCH_ABI=$ABI \
-            -DANDROID_STL=c++_shared \
-            -DCMAKE_C_STANDARD=${C_STANDARD} \
-            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DURIPARSER_ENABLE_INSTALL=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -G 'Unix Makefiles' ..
-
-        make -j${PARALLEL_MAKE} VERBOSE=1
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
     elif [ "$TYPE" == "emscripten" ]; then
