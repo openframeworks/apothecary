@@ -22,6 +22,14 @@ sudo apt install -y \
     python3-minimal \
     python3-numpy
 
+if [[ "$(uname -m)" == "x86_64" ]]; then
+    wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
+    tar --xz -xf gawk-5.3.1.tar.xz  # Explicitly tell tar to handle xz
+    cd gawk-5.3.1
+    ./configure
+    make
+fi
+
 # Ensure the script is run as root
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root."
@@ -125,13 +133,7 @@ apt-get install -y \
 # dpkg -L gcc-aarch64-linux-gnu
 # sudo apt install libgl1-mesa-dev libgles2-mesa-dev
 
-if [[ "$(uname -m)" == "x86_64" ]]; then
-    wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
-    tar -xf gawk-5.3.1.tar.xz
-    cd gawk-5.3.1
-    ./configure
-    make
-fi
+
 
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
