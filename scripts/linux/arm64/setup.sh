@@ -28,6 +28,7 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
     cd gawk-5.3.1
     ./configure
     make
+    sudo make install
 fi
 
 # Ensure the script is run as root
