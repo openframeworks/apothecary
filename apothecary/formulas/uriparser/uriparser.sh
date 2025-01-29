@@ -48,7 +48,7 @@ function build() {
 			-DURIPARSER_ENABLE_INSTALL=OFF \
 			-DURIPARSER_WARNINGS_AS_ERRORS=OFF
 	   "
-    DEFINES+="$DEFS "
+    export DEFINES="$DEFS "
     if [ "$TYPE" == "vs" ]; then
         echo "building uriparser $TYPE | $ARCH | $VS_VER | vs: Visual Studio ${VS_VER_GEN} -A ${PLATFORM}"
         echo "--------------------"
@@ -76,57 +76,32 @@ function build() {
     elif [ "$TYPE" == "android" ]; then
         echo "Android "
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
-        echo "Mkdir build"
-        mkdir -p build
-        echo "Mkdir build/${ABI}"
-        local BUILD_TO_DIR="build/${ABI}"
 
-        cd build
-        mkdir -p ${TYPE}
-        cd ${TYPE}
-        mkdir -p ${ABI}
+        mkdir -p "build_${TYPE}_${ABI}"
+        cd "build_${TYPE}_${ABI}"
         rm -f CMakeCache.txt *.a *.o
-        CFLAGS=""
-        export CMAKE_CFLAGS="$CFLAGS"
-        export CFLAGS=""
-        export CPPFLAGS="-fvisibility-inlines-hidden"
-        export CXXFLAGS="-fvisibility-inlines-hidden -Wno-implicit-function-declaration"
-        export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
-
-        cmake \ 
-        ${DEFS} \
-            -DCMAKE_TOOLCHAIN_FILE="$NDK_ROOT/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI=${ABI} \
-            -DANDROID_NDK=${NDK_ROOT} \
-            -DANDROID_STL=c++_shared \
-            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_C_COMPILER=${CC} \
-            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_CXX_COMPILER_AR=${AR} \
-            -DCMAKE_C_COMPILER_AR=${AR} \
-            -DCMAKE_C_COMPILER=${CC} \
-            -DCMAKE_CXX_COMPILER=${CXX} \
-            -DCMAKE_C_FLAGS=${CFLAGS} \
-            -DCMAKE_CXX_FLAGS=${CXXFLAGS} \
-            -DANDROID_ABI=${ABI} \
-            -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-            -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DANDROID_TOOLCHAIN=clang++ \
+        cmake .. ${DEFINES} \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_SYSROOT=$SYSROOT \
-            -B${ABI} \
-            -G 'Unix Makefiles' ../..
-        cd ${ABI}
-        make -j${PARALLEL_MAKE} VERBOSE=1
-        make VERBOSE=1
-
-        cd ../../..
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DURIPARSER_ENABLE_INSTALL=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
 
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         echo "int main(){return 0;}" >tool/uriparse.c
