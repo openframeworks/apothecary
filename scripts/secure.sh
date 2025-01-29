@@ -8,13 +8,13 @@ calculate_hash() {
     local file=$1
     if [[ -f "$file" ]]; then
         if command -v sha256sum &>/dev/null; then
-            sha256sum "$file" | awk '{print $1}'
+            sha256sum "$file" | cut -d ' ' -f 1
         elif command -v sha1sum &>/dev/null; then
-            sha1sum "$file" | awk '{print $1}'
+            sha1sum "$file" | cut -d ' ' -f 1
         elif command -v sha512sum &>/dev/null; then
-            sha512sum "$file" | awk '{print $1}'
+            sha512sum "$file" | cut -d ' ' -f 1
         elif command -v md5sum &>/dev/null; then
-            md5sum "$file" | awk '{print $1}'
+            md5sum "$file" | cut -d ' ' -f 1
         elif command -v md5 &>/dev/null; then
             md5 -q "$file"
         else
