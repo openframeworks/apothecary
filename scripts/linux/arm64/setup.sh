@@ -29,6 +29,8 @@ if [[ "$(uname -m)" == "x86_64" ]]; then
     ./configure
     make
     sudo make install
+    echo 'export LD_LIBRARY_PATH=/usr/local/lib/gawk:$LD_LIBRARY_PATH' >> ~/.zshrc
+    source ~/.zshrc
 fi
 
 # Ensure the script is run as root
