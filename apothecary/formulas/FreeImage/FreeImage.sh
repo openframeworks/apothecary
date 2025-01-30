@@ -168,57 +168,44 @@ function build() {
     elif [ "$TYPE" == "android" ]; then
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
-        local BUILD_TO_DIR=$BUILD_DIR/FreeImage/build/$TYPE/$ABI
 
-        export EXTRA_LINK_FLAGS="-fmessage-length=0 -fdiagnostics-show-note-include-stack -fmacro-backtrace-limit=0 -Wno-trigraphs -fpascal-strings -Wno-missing-field-initializers -Wno-missing-prototypes -Wno-return-type -Wno-non-virtual-dtor -Wno-overloaded-virtual -Wno-exit-time-destructors -Wno-missing-braces -Wparentheses -Wswitch -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wno-unused-variable -Wunused-value -Wno-empty-body -Wno-uninitialized -Wno-unknown-pragmas -Wno-shadow -Wno-four-char-constants -Wno-conversion -Wno-constant-conversion -Wno-int-conversion -Wno-bool-conversion -Wno-enum-conversion -Wno-shorten-64-to-32 -Wno-newline-eof -Wno-c++11-extensions 
-        -DHAVE_UNISTD_H=1 -DOPJ_STATIC -DNO_LCMS -D__ANSI__ -DDISABLE_PERF_MEASUREMENT -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB
-         -fexceptions -fasm-blocks -fstrict-aliasing -Wdeprecated-declarations -Winvalid-offsetof -Wno-sign-conversion -Wmost -Wno-four-char-constants -Wno-unknown-pragmas -DNDEBUG -fPIC -fexceptions -fvisibility=hidden"
-        export CFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c${C_STANDARD}"
-        export CXXFLAGS="$CFLAGS $EXTRA_LINK_FLAGS -DNDEBUG -ffast-math -DPNG_ARM_NEON_OPT=0 -DDISABLE_PERF_MEASUREMENT -frtti -std=c++${CPP_STANDARD}"
-        export LDFLAGS="$LDFLAGS $EXTRA_LINK_FLAGS -shared"
-
-        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
         rm -rf "build_${ABI}/"
-        rm -rf "build_${ABI}/CMakeCache.txt"
         mkdir -p "build_$ABI"
         cd "./build_$ABI"
         rm -f CMakeCache.txt *.a *.o
-        CFLAGS=""
-        export CMAKE_CFLAGS="$CFLAGS"
-        #export CFLAGS=""
-        export CPPFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
-        export LDFLAGS=""
 
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$ABI/libpng.a"
 
-        cmake -D CMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-            -D CMAKE_OSX_SYSROOT:PATH=${SYSROOT} \
-            -D CMAKE_C_COMPILER=${CC} \
-            -D CMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_C_COMPILER_RANLIB=${RANLIB} \
-            -D CMAKE_CXX_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER_AR=${AR} \
-            -D CMAKE_C_COMPILER=${CC} \
-            -D CMAKE_CXX_COMPILER=${CXX} \
-            -D CMAKE_C_FLAGS=${CFLAGS} \
-            -D CMAKE_CXX_FLAGS=${CXXFLAGS} \
-            -D ANDROID_ABI=${ABI} \
-            -D CMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -D CMAKE_STATIC_LINKER_FLAGS=${LDFLAGS} \
-            -D ANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -D ANDROID_TOOLCHAIN=clang \
-            -D CMAKE_BUILD_TYPE=Release \
-            -D FT_REQUIRE_HARFBUZZ=FALSE \
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        cmake .. ${DEFINES} \
+            -DCMAKE_ANDROID_ARCH_ABI=$ABI \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DURIPARSER_ENABLE_INSTALL=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
+            -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DBUILD_LIBPNG=OFF \
             -DDISABLE_PERF_MEASUREMENT=ON \
-            -DLIBRAW_LIBRARY_BUILD=ON -DLIBRAW_NODLL=ON \
+            -DLIBRAW_LIBRARY_BUILD=ON \
+            -DLIBRAW_NODLL=ON \
             -DENABLE_VISIBILITY=OFF \
             -DDHAVE_UNISTD_H=OFF \
             -DPNG_ARM_NEON_OPT=OFF \
@@ -236,9 +223,16 @@ function build() {
             -DBUILD_OPENEXR=OFF \
             -DBUILD_WEBP=OFF \
             -DBUILD_JXR=OFF \
-            -G 'Unix Makefiles' ..
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
-        make -j${PARALLEL_MAKE} VERBOSE=1
         cd ..
 
     elif [ "$TYPE" == "vs" ]; then

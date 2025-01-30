@@ -127,7 +127,7 @@ apt-get install -y \
     binutils-aarch64-linux-gnu:arm64 \
     libgles2-mesa-dev:arm64
 
-apt-get install -y gawk:arm64 --no
+apt-get install -y gawk:arm64 --no-remove
 
 
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
