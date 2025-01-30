@@ -22,16 +22,16 @@ sudo apt install -y \
     python3-minimal \
     python3-numpy
 
-if [[ "$(uname -m)" == "x86_64" ]]; then
-    wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
-    tar --xz -xf gawk-5.3.1.tar.xz  # Explicitly tell tar to handle xz
-    cd gawk-5.3.1
-    ./configure
-    make
-    sudo make install
-    echo 'export LD_LIBRARY_PATH=/usr/local/lib/gawk:$LD_LIBRARY_PATH' >> ~/.zshrc
-    source ~/.zshrc
-fi
+# if [[ "$(uname -m)" == "x86_64" ]]; then
+#     wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
+#     tar --xz -xf gawk-5.3.1.tar.xz  # Explicitly tell tar to handle xz
+#     cd gawk-5.3.1
+#     ./configure
+#     make
+#     sudo make install
+#     echo 'export LD_LIBRARY_PATH=/usr/local/lib/gawk:$LD_LIBRARY_PATH' >> ~/.zshrc
+#     source ~/.zshrc
+# fi
 
 # Ensure the script is run as root
 if [[ $EUID -ne 0 ]]; then
@@ -125,7 +125,8 @@ apt-get install -y \
     libxi-dev:arm64 \
     ccache:arm64 \
     binutils-aarch64-linux-gnu:arm64 \
-    libgles2-mesa-dev:arm64
+    libgles2-mesa-dev:arm64 \
+    --no-remove
 
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
 # sudo aptitude install -y gperf
