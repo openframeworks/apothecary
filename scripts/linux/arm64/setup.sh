@@ -128,8 +128,8 @@ apt-get install -y \
     libgles2-mesa-dev:arm64
 
 # apt-get install -y gawk:arm64 --no-remove
-wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.3.1-2_arm64.deb
-sudo dpkg -i --force-architecture --force-depends gawk_5.3.1-2_arm64.deb
+wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.2.1-2+b2_arm64.deb
+sudo dpkg -i --force-architecture --force-depends gawk_5.2.1-2+b2_arm64.deb
 
 
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils

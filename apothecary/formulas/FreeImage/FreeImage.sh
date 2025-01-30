@@ -213,6 +213,8 @@ function build() {
             -DCMAKE_SYSROOT=$SYSROOT \
             -DANDROID_NDK=$NDK_ROOT \
             -DANDROID_ABI=$ABI \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_ANDROID_ARCH_ABI=$ABI \
             -DANDROID_STL=c++_shared \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
