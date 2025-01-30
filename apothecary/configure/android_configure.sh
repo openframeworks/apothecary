@@ -66,13 +66,13 @@ export TOOLCHAIN_PATH="${NDK_ROOT}/toolchains/llvm/prebuilt/${HOST_PLATFORM}/bin
 # export CC="$TOOLCHAIN_PATH/${ANDROID_PREFIX}${ANDROID_API}-clang"
 # export CXX="$TOOLCHAIN_PATH/${ANDROID_PREFIX}${ANDROID_API}-clang++"
 # export LDFLAGS="-pie -L${SYSROOT}/usr/lib/$ANDROID_PREFIX/$ANDROID_API
-echo "debug paths"
-echo "${NDK_ROOT}/toolchains/llvm/prebuilt/"
-ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/
-echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/"
-ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/
-echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin"
-ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/
+# echo "debug paths"
+# echo "${NDK_ROOT}/toolchains/llvm/prebuilt/"
+# ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/
+# echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/"
+# ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/
+# echo "${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin"
+# ls -a ${NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin/
 
 # Debug output
 echo -e "\n\033[1;32m==== Android Toolchain Configuration ====\033[0m"

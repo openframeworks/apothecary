@@ -94,19 +94,19 @@ jobs:
           sudo apt update && sudo apt dist-upgrade -y
           sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
 
+      - name: Script Install
+        run: ./scripts/${{ env.TARGET }}/raspios/install.sh
+        env:
+          CROSS_CPU: ${{ matrix.cross_cpu }}
+          CROSS_OS: ${{ matrix.cross_os }}
+
       - name: Setup Cross Compiler and Target Local File System
         run: ./scripts/${{ env.TARGET }}/raspios/${{ matrix.arch }}/setup.sh
         env:
           CROSS_CPU: ${{ matrix.cross_cpu }}
           CROSS_OS: ${{ matrix.cross_os }}
 
-      - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ matrix.arch }}/install.sh
-        env:
-          CROSS_CPU: ${{ matrix.cross_cpu }}
-          CROSS_OS: ${{ matrix.cross_os }}
-
-      - name: Script Install and Build
+      - name: Build
         run: ./scripts/${{ env.TARGET }}/raspios/${{ matrix.arch }}/build.sh
         env:
           CROSS_CPU: ${{ matrix.cross_cpu }}
