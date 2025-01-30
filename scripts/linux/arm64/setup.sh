@@ -125,14 +125,15 @@ apt-get install -y \
     libxi-dev:arm64 \
     ccache:arm64 \
     binutils-aarch64-linux-gnu:arm64 \
-    libgles2-mesa-dev:arm64
+    libgles2-mesa-dev:arm64 \
+    gawk:arm64
 
 # apt-get install -y gawk:arm64 --no-remove
-if [[ "$(uname -m)" == "x86_64" ]]; then
-    # issues with apt packages install manually
-wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.2.1-2+b2_arm64.deb
-sudo dpkg -i --force-architecture --force-depends gawk_5.2.1-2+b2_arm64.deb
-fi
+# if [[ "$(uname -m)" == "x86_64" ]]; then
+#     # issues with apt packages install manually
+# wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.2.1-2+b2_arm64.deb
+# sudo dpkg -i --force-architecture --force-depends gawk_5.2.1-2+b2_arm64.deb
+# fi
 
 
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
@@ -143,8 +144,6 @@ fi
 
 # dpkg -L gcc-aarch64-linux-gnu
 # sudo apt install libgl1-mesa-dev libgles2-mesa-dev
-
-
 
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then

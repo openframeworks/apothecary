@@ -39,8 +39,7 @@ function download() {
 
     downloader ${URL}/cairo-$VER.tar.xz
     tar -xJf cairo-$VER.tar.xz
-
-    local CHECKSHA=$(shasum cairo-$VER.tar.xz | awk '{print $1}')
+    CHECKSHA=$(shasum -a 1 cairo-$VER.tar.xz | cut -d ' ' -f1)
     rm cairo-$VER.tar.xz
     if [ "$CHECKSHA" != "$SHA1" ]; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"

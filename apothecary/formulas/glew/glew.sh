@@ -27,7 +27,7 @@ function download() {
     . "$DOWNLOADER_SCRIPT"
     downloader "${URL}/${GIT_TAG}.tgz"
 
-    local CHECKSHA=$(shasum glew-$VER.tgz | awk '{print $1}')
+    CHECKSHA=$(shasum -a 1 glew-$VER.tgz | cut -d ' ' -f1)
     if [ "$CHECKSHA" != "$SHA1" ]; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
         exit 1

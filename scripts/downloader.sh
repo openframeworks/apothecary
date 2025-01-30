@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=4.5.0
+VERSION=4.5.1
 printDownloaderHelp() {
     cat <<EOF
     
@@ -85,8 +85,8 @@ check_remote_vs_local() {
     #REMOTE_CALL="wget2 --spider --max-redirect=${MAX_REDIRECTS} ${EXTRA_ARGS}"
     REMOTE_CALL=""
     headers=$(curl -L -I --retry ${RETRY_MAX} --max-redirs ${MAX_REDIRECTS} ${EXTRA_ARGS} --retry-connrefused --silent --head $REMOTE_URL)
-    RemoteSize=$(echo "$headers" | awk '/[cC]ontent-[lL]ength/ {print $2}' | tr -d '\r' | tail -n 1)
-    modified=$(echo "$headers" | awk '/[lL]ast-[mM]odified/ {print $0}' | sed 's/^[lL]ast-[mM]odified: //')
+    RemoteSize=$(echo "$headers" | grep -i "content-length" | cut -d ' ' -f2 | tr -d '\r' | tail -n 1)
+    modified=$(echo "$headers" | grep -i "last-modified" | sed -E 's/[lL]ast-[mM]odified: //g' | tail -n 1)
     LocalSizeMB=$(convert_bytes_to_mb $LocalSize)
     RemoteSizeMB=$(convert_bytes_to_mb $RemoteSize)
 
@@ -266,7 +266,7 @@ downloader() {
     # [cURL]
     if command -v curl >/dev/null 2>&1; then
         CURL_INSTALLED=1
-        CURL_VERSION=$(curl -V | head -n 1 | awk '{print $2}')
+        CURL_VERSION=$(curl -V | head -n 1 | cut -d ' ' -f2)
         CURL_MIN=7.71.0
         if [ "$(printf '%s\n' "$CURL_MIN" "$CURL_VERSION" | sort -V | head -n1)" = "$CURL_MIN" ] && [ "$CURL_VERSION" != "$CURL_MIN" ]; then
             if [[ $CURL == 1 && $CURL_INSTALLED == 1 ]] && [[ $WGET2 == 0 ]]; then

@@ -29,7 +29,7 @@ function download() {
     downloader $GIT_URL/releases/download/curl-$VER_D/curl-$VER.tar.gz
     tar -xf curl-$VER.tar.gz
     mv curl-$VER curl
-    local CHECKSHA=$(shasum curl-$VER.tar.gz | awk '{print $1}')
+    CHECKSHA=$(shasum -a 1 curl-$VER.tar.gz | cut -d ' ' -f1)
     if [ "$CHECKSHA" != "$SHA1" ]; then
         echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
         exit 1

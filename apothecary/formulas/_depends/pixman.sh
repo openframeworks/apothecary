@@ -25,8 +25,7 @@ function download() {
     downloader ${URL}/pixman-$VER.tar.gz
     tar -xzf pixman-$VER.tar.gz
     mv "pixman-$VER" pixman
-
-    local CHECKSHA=$(shasum pixman-$VER.tar.gz | awk '{print $1}')
+    CHECKSHA=$(shasum -a 1 pixman-$VER.tar.gz | cut -d ' ' -f1)
     # if [ "$CHECKSHA" != "$SHA1" ] ; then
     # 	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
     # 	exit
