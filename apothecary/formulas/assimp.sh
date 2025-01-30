@@ -185,10 +185,6 @@ function build() {
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
         find ./ -name "*.o" -type f -delete
-        rm -f CMakeCache.txt || true
-
-        mkdir -p "build_${TYPE}_${ABI}"
-        cd "build_${TYPE}_${ABI}"
         rm -f CMakeCache.txt *.a *.o
 
         cmake .. ${DEFINES} \
