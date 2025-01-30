@@ -169,9 +169,9 @@ function build() {
 
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
-        rm -rf "build_${ABI}/"
-        mkdir -p "build_$ABI"
-        cd "./build_$ABI"
+        rm -rf "build__${TYPE}_${ABI}/"
+        mkdir -p "build__${TYPE}_$ABI"
+        cd "./build__${TYPE}_$ABI"
         rm -f CMakeCache.txt *.a *.o
 
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
@@ -180,7 +180,7 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$ABI/zlib.a"
 
         cmake .. ${DEFINES} \
             -DCMAKE_ANDROID_ARCH_ABI=$ABI \
@@ -232,7 +232,6 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
-
         cd ..
 
     elif [ "$TYPE" == "vs" ]; then
@@ -404,7 +403,7 @@ function copy() {
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -v build_$ABI/libFreeImage.a $1/lib/$TYPE/$ABI/libFreeImage.a
+        cp -v build__${TYPE}_$ABI/Release/lib/libFreeImage.a $1/lib/$TYPE/$ABI/libFreeImage.a
         secure $1/lib/$TYPE/$ABI/libFreeImage.a FreeImage.pkl
     elif [ "$TYPE" == "emscripten" ]; then
         cp Source/FreeImage.h $1/include
@@ -430,8 +429,8 @@ function copy() {
 function clean() {
 
     if [ "$TYPE" == "android" ]; then
-        if [ -d "build_${ABI}" ]; then
-            rm -r build_${ABI}
+        if [ -d "build__${TYPE}_${ABI}" ]; then
+            rm -r build__${TYPE}_${ABI}
         fi
     elif [ "$TYPE" == "emscripten" ]; then
         if [ -d $1/lib/$TYPE/$PLATFORM/ ]; then
