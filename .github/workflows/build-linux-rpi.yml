@@ -52,15 +52,10 @@ jobs:
       matrix:
         CROSS_CPU: [cortex-a53] #cortex-a72, cortex-a76
         CROSS_OS: [bookworm]
-        ARCH: [aarch64, armv8]
-        exclude:
-          - ARCH: armv8
-            CROSS_CPU: cortex-a72
+        ARCH: [aarch64]
 
     env:
       CROSS_COMPILER: raspbian
-      CROSS_OS: ${{ matrix.CROSS_OS }}
-      ARCH: ${{ matrix.ARCH }}
       WORKDIR: "/home/runner/work/apothecary/apothecary"
       SYSROOT: "${WORKDIR}/${{ matrix.CROSS_OS }}_sysroot"
       TOOLCHAIN_ROOT: "${WORKDIR}/${CROSS_COMPILER}"
@@ -74,6 +69,8 @@ jobs:
           echo "CROSS_CPU: ${matrix.CROSS_CPU}"
           echo "SYSROOT: ${SYSROOT}"
           echo "TOOLCHAIN_ROOT: ${TOOLCHAIN_ROOT}"
+          echo "CROSS_OS=${{ matrix.CROSS_OS }}" >> $GITHUB_ENV
+          echo "ARCH=${{ matrix.ARCH }}" >> $GITHUB_ENV
 
       - name: Determine Release
         id: vars

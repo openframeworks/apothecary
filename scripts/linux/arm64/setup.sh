@@ -86,7 +86,6 @@ echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_F
 
 fi
 sudo dpkg --add-architecture arm64
-sudo dpkg --add-architecture amd64
 dpkg --print-architecture
 dpkg --print-foreign-architectures
 # Update package lists
