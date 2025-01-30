@@ -158,140 +158,64 @@ function build() {
 
     elif [ "$TYPE" == "android" ]; then
 
-        ANDROID_API=24
-        ANDROID_PLATFORM=android-${ANDROID_API}
-
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
-        #stuff to remove when we upgrade android
-        #android complains about abs being ambigious - pfffft
-        #sed -i -e 's/abs(/(int)fabs(/g' include/assimp/Hash.h
-        #sed -i -e '/string_view/d' code/AssetLib/Obj/ObjFileParser.cpp
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        if [ "$ABI" == "armeabi-v7a" ]; then
-            export HOST=armv7a-linux-android
-            DEFINES="
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_ZLIB=1
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DANDROID_FORCE_ARM_BUILD=TRUE
-                -DCMAKE_INSTALL_PREFIX=install"
-
-        elif [ "$ABI" == "arm64-v8a" ]; then
-            export HOST=aarch64-linux-android
-            DEFINES="
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_ZLIB=1
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DANDROID_FORCE_ARM_BUILD=TRUE
-                -DCMAKE_INSTALL_PREFIX=install"
-        elif [ "$ABI" == "x86" ]; then
-            export HOST=x86-linux-android
-            DEFINES="
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_ZLIB=1
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DCMAKE_ANDROID_ARCH_ABI=$ABI 
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DCMAKE_INSTALL_PREFIX=install"
-        elif [ "$ABI" == "x86_64" ]; then
-            export HOST=x86_64-linux-android
-            DEFINES="
-                -DBUILD_SHARED_LIBS=OFF
-                -DASSIMP_BUILD_TESTS=0
-                -DASSIMP_BUILD_SAMPLES=0
-                -DASSIMP_BUILD_3MF_IMPORTER=0
-                -DASSIMP_BUILD_ZLIB=1
-                -DANDROID_NDK=$NDK_ROOT
-                -DCMAKE_TOOLCHAIN_FILE=$ANDROID_CMAKE_TOOLCHAIN
-                -DCMAKE_BUILD_TYPE=Release
-                -DANDROID_ABI=$ABI
-                -DCMAKE_ANDROID_ARCH_ABI=$ABI
-                -DANDROID_STL=c++_static
-                -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM
-                -DCMAKE_INSTALL_PREFIX=install"
-        fi
+        DEFINES="
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
+            -DASSIMP_BUILD_TESTS=0 \
+            -DASSIMP_BUILD_SAMPLES=0 \
+            -DASSIMP_BUILD_3MF_IMPORTER=0 \
+            -DAI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT=OFF \
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF \
+            -DASSIMP_BUILD_STATIC_LIB=1 \
+            -DASSIMP_BUILD_STL_IMPORTER=0 \
+            -DASSIMP_BUILD_BLEND_IMPORTER=0 \
+            -DASSIMP_BUILD_3MF_IMPORTER=0 \
+            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
+            -DBUILD_WITH_STATIC_CRT=OFF"
 
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
         find ./ -name "*.o" -type f -delete
         rm -f CMakeCache.txt || true
-        export CFLAGS=""
-        export CPPFLAGS=""
-        export LDFLAGS=""
-        export CMAKE_LDFLAGS="$LDFLAGS"
 
-        cmake -S .. -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake \
-            ${DEFINES} \
-            -DCMAKE_C_COMPILER=${CC} \
-            -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
-            -DANDROID_STL=c++_shared \
-            -DCMAKE_CXX_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_C_COMPILER_RANLIB=${RANLIB} \
-            -DCMAKE_CXX_COMPILER_AR=${AR} \
-            -DCMAKE_C_COMPILER_AR=${AR} \
-            -DAI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT=OFF \
-            -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC" \
-            -DCMAKE_C_FLAGS="-fvisibility-inlines-hidden -O3 -fPIC -Wno-implicit-function-declaration" \
-            -DCMAKE_EXE_LINKER_FLAGS=" -Wl,--hash-style=both" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--hash-style=both" \
-            -DCMAKE_MODULE_LINKER_FLAGS=" -Wl,--hash-style=both" \
-            -DCMAKE_CXX_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_C_STANDARD_LIBRARIES=${LIBS} \
-            -DCMAKE_STATIC_LINKER_FLAGS="${LDFLAGS} ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++_shared.so ${NDK_ROOT}/sources/cxx-stl/llvm-libc++/libs/${ABI}/libc++abi.a " \
-            -DANDROID_NATIVE_API_LEVEL=${ANDROID_API} \
-            -DCMAKE_SYSROOT=$SYSROOT \
-            -DCMAKE_C_STANDARD=${C_STANDARD} \
-            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DANDROID_TOOLCHAIN=clang++ \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DASSIMP_BUILD_STATIC_LIB=1 \
-            -DASSIMP_BUILD_TESTS=0 \
-            -DASSIMP_BUILD_SAMPLES=0 \
-            -DASSIMP_BUILD_STL_IMPORTER=0 \
-            -DASSIMP_BUILD_BLEND_IMPORTER=0 \
-            -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
-            -DCMAKE_SYSROOT=$SYSROOT \
-            -DANDROID_NDK=$NDK_ROOT \
+        mkdir -p "build_${TYPE}_${ABI}"
+        cd "build_${TYPE}_${ABI}"
+        rm -f CMakeCache.txt *.a *.o
+
+        cmake .. ${DEFINES} \
+            -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
-            -DANDROID_ABI=$ABI \
-            -DCMAKE_ANDROID_ARCH_ABI=$ABI \
-            -DANDROID_STL=c++_shared \
-            -DANDROID_PLATFORM=$ANDROID_PLATFORM \
-            -DANDROID_NATIVE_API_LEVEL=$ANDROID_PLATFORM \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="build_$ABI" \
-            -G 'Unix Makefiles' .
-        make clean
-        make -j${PARALLEL_MAKE} VERBOSE=1
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DPNG_HARDWARE_OPTIMIZATIONS=OFF \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR}
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
     elif [ "$TYPE" == "emscripten" ]; then

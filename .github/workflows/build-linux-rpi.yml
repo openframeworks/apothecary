@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        CROSS_CPU: [cortex-a53, cortex-a72, cortex-a76]
+        CROSS_CPU: [cortex-a53] #cortex-a72, cortex-a76
         CROSS_OS: [bookworm]
         ARCH: [aarch64, armv8]
         exclude:
@@ -96,21 +96,12 @@ jobs:
 
       - name: Script Install
         run: ./scripts/${{ env.TARGET }}/raspios/install.sh
-        env:
-          CROSS_CPU: ${{ matrix.cross_cpu }}
-          CROSS_OS: ${{ matrix.cross_os }}
 
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ matrix.arch }}/setup.sh
-        env:
-          CROSS_CPU: ${{ matrix.cross_cpu }}
-          CROSS_OS: ${{ matrix.cross_os }}
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
 
       - name: Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ matrix.arch }}/build.sh
-        env:
-          CROSS_CPU: ${{ matrix.cross_cpu }}
-          CROSS_OS: ${{ matrix.cross_os }}
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
 
       - name: Package
         #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
@@ -169,13 +160,13 @@ jobs:
           sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
       
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/setup.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/setup.sh
       
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/install.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/build.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
 
       - name: Update Release armv6l
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
@@ -244,13 +235,13 @@ jobs:
       #     fi
 
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/setup.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/setup.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/install.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/build.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
 
       - name: Update Release armv7l
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
