@@ -85,7 +85,8 @@ mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
 echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_FILE."
 
 fi
-dpkg --add-architecture arm64
+sudo dpkg --add-architecture arm64
+sudo dpkg --add-architecture amd64
 dpkg --print-architecture
 dpkg --print-foreign-architectures
 # Update package lists
@@ -97,7 +98,6 @@ echo "Done! ARM64 and ARMHF architectures are ready."
 echo "Installing ARM64 packages..."
 apt-get install -y \
     aptitude:arm64 \
-    gawk:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
     gfortran:arm64 \
@@ -125,8 +125,10 @@ apt-get install -y \
     libxi-dev:arm64 \
     ccache:arm64 \
     binutils-aarch64-linux-gnu:arm64 \
-    libgles2-mesa-dev:arm64 \
-    --no-remove
+    libgles2-mesa-dev:arm64
+
+apt-get install -y gawk:arm64 --no
+
 
 # sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
 # sudo aptitude install -y gperf
