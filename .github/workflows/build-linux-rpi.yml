@@ -65,8 +65,8 @@ jobs:
 
       - name: Setup Environment
         run: |
-          echo "Setting up environment for ${CROSS_OS} ${ARCH}"
-          echo "CROSS_CPU: ${matrix.CROSS_CPU}"
+          echo "Setting up environment for ${{ matrix.CROSS_OS }} ${{ matrix.CROSS_CPU }} ${ARCH}"
+          echo "CROSS_CPU: ${{ matrix.CROSS_CPU }}"
           echo "SYSROOT: ${SYSROOT}"
           echo "TOOLCHAIN_ROOT: ${TOOLCHAIN_ROOT}"
           echo "CROSS_OS=${{ matrix.CROSS_OS }}" >> $GITHUB_ENV
@@ -89,7 +89,7 @@ jobs:
       - name: Update and Upgrade System Packages
         run: |
           sudo apt update && sudo apt dist-upgrade -y
-          sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
+          sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
 
       - name: Script Install
         run: ./scripts/${{ env.TARGET }}/raspios/install.sh
@@ -106,7 +106,7 @@ jobs:
         run: scripts/package.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
-          GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
+          GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
 
       - name: List output directory
         run: ls -lah out/
@@ -115,7 +115,7 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.1.0
         env:
-          GCC: "_${{ matrix.cross_cpu }}_${{ matrix.cross_os }}"
+          GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
@@ -154,7 +154,7 @@ jobs:
       - name: Update and Upgrade System Packages
         run: |
           sudo apt update && sudo apt dist-upgrade -y
-          sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
+          sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
       
       - name: Setup Cross Compiler and Target Local File System
         run: ./scripts/${{ env.TARGET }}/raspios/setup.sh
@@ -213,7 +213,7 @@ jobs:
       - name: Update and Upgrade System Packages
         run: |
           sudo apt update && sudo apt dist-upgrade -y
-          sudo apt-get install -y build-essential gawk gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
+          sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
       
       # - name: Cache raspbian folder
       #   uses: actions/cache@v4.2.0

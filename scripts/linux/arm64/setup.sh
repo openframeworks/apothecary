@@ -11,7 +11,6 @@ sudo apt install -y \
     pkgconf \
     build-essential \
     ninja-build \
-    gawk \
     automake \
     autoconf \
     flex \
@@ -97,6 +96,7 @@ echo "Done! ARM64 and ARMHF architectures are ready."
 echo "Installing ARM64 packages..."
 apt-get install -y \
     aptitude:arm64 \
+    gawk:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
     gfortran:arm64 \
@@ -124,8 +124,7 @@ apt-get install -y \
     libxi-dev:arm64 \
     ccache:arm64 \
     binutils-aarch64-linux-gnu:arm64 \
-    libgles2-mesa-dev:arm64 \
-    gawk:arm64
+    libgles2-mesa-dev:arm64
 
 # apt-get install -y gawk:arm64 --no-remove
 # if [[ "$(uname -m)" == "x86_64" ]]; then
