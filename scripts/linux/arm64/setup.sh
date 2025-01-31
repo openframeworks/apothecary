@@ -8,6 +8,7 @@ sudo apt update -y
 sudo apt install -y \
     git \
     cmake \
+    gawk \
     pkgconf \
     build-essential \
     ninja-build \
@@ -96,7 +97,6 @@ echo "Done! ARM64 and ARMHF architectures are ready."
 echo "Installing ARM64 packages..."
 apt-get install -y \
     aptitude:arm64 \
-    gawk:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
     gfortran:arm64 \
