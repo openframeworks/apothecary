@@ -19,6 +19,20 @@ sudo apt install -y \
     crossbuild-essential-armhf \
     crossbuild-essential-arm64
 
+sudo apt-mark hold \
+    git \
+    cmake \
+    gawk \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    automake \
+    autoconf \
+    flex \
+    xz-utils \
+    crossbuild-essential-armhf \
+    crossbuild-essential-arm64
+
 sudo apt install -y \
     python3-minimal \
     python3-numpy
@@ -96,7 +110,7 @@ sudo apt-get update
 echo "Done! ARM64 and ARMHF architectures are ready."
 
 echo "Installing ARM64 packages..."
-apt-get install -y \
+apt-get install -y --no-install-recommends \
     aptitude:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
