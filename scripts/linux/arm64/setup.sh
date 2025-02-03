@@ -122,7 +122,7 @@ apt-get install -y --allow-downgrades --allow-change-held-packages \
     flex \
     xz-utils \
     crossbuild-essential-armhf \
-    crossbuild-essential \
+    crossbuild-essential-arm64 \
     aptitude:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
