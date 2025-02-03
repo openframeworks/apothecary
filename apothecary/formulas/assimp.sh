@@ -162,7 +162,7 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$ABI/zlib.a"
 
         DEFINES="
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -180,6 +180,7 @@ function build() {
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
+            -DASSIMP_BUILD_ZLIB=OFF \
             -DBUILD_WITH_STATIC_CRT=OFF"
 
         mkdir -p "build_${TYPE}_${ABI}"
@@ -197,6 +198,7 @@ function build() {
             -DANDROID_API=${ANDROID_API} \
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
@@ -208,6 +210,7 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DPNG_HARDWARE_OPTIMIZATIONS=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR}
