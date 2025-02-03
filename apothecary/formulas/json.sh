@@ -32,7 +32,7 @@ function download() {
     else
         downloader "${GIT_URL}/releases/download/v$VER/json.tar.xz"
         # Extract the tar.xz file
-        tar -xvf json.tar.xz --strip-components=1
+        tar --strip-components=1 --use-compress-program=unzstd -xvf "json.tar.xz"
         # Clean up the tar.xz file after extraction
         rm json.tar.xz
     fi

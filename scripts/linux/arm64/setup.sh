@@ -15,6 +15,7 @@ sudo apt install -y \
     automake \
     autoconf \
     flex \
+    xz-utils \
     crossbuild-essential-armhf \
     crossbuild-essential-arm64
 
