@@ -5,33 +5,33 @@ echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
 
 sudo apt update -y
-sudo apt install -y \
-    git \
-    cmake \
-    gawk \
-    pkgconf \
-    build-essential \
-    ninja-build \
-    automake \
-    autoconf \
-    flex \
-    xz-utils \
-    crossbuild-essential-armhf \
-    crossbuild-essential-arm64
+# sudo apt install -y \
+    # git \
+    # cmake \
+    # gawk \
+    # pkgconf \
+    # build-essential \
+    # ninja-build \
+    # automake \
+    # autoconf \
+    # flex \
+    # xz-utils \
+    # crossbuild-essential-armhf \
+    # crossbuild-essential-arm64
 
-sudo apt-mark hold \
-    git \
-    cmake \
-    gawk \
-    pkgconf \
-    build-essential \
-    ninja-build \
-    automake \
-    autoconf \
-    flex \
-    xz-utils \
-    crossbuild-essential-armhf \
-    crossbuild-essential-arm64
+# sudo apt-mark hold \
+#     git \
+#     cmake \
+#     gawk \
+#     pkgconf \
+#     build-essential \
+#     ninja-build \
+#     automake \
+#     autoconf \
+#     flex \
+#     xz-utils \
+#     crossbuild-essential-armhf \
+#     crossbuild-essential-arm64
 
 sudo apt install -y \
     python3-minimal \
@@ -110,7 +110,19 @@ sudo apt-get update
 echo "Done! ARM64 and ARMHF architectures are ready."
 
 echo "Installing ARM64 packages..."
-apt-get install -y --no-install-recommends \
+apt-get install -y --allow-downgrades --allow-change-held-packages \
+    git \
+    cmake \
+    gawk \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    automake \
+    autoconf \
+    flex \
+    xz-utils \
+    crossbuild-essential-armhf \
+    crossbuild-essential \
     aptitude:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
