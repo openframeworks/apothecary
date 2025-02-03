@@ -5,19 +5,19 @@ echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
 
 sudo apt update -y
-# sudo apt install -y \
-    # git \
-    # cmake \
-    # gawk \
-    # pkgconf \
-    # build-essential \
-    # ninja-build \
-    # automake \
-    # autoconf \
-    # flex \
-    # xz-utils \
-    # crossbuild-essential-armhf \
-    # crossbuild-essential-arm64
+sudo apt install -y \
+    git \
+    cmake \
+    gawk \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    automake \
+    autoconf \
+    flex \
+    xz-utils \
+    crossbuild-essential-armhf \
+    crossbuild-essential-arm64
 
 # sudo apt-mark hold \
 #     git \
@@ -110,19 +110,7 @@ sudo apt-get update
 echo "Done! ARM64 and ARMHF architectures are ready."
 
 echo "Installing ARM64 packages..."
-apt-get install -y --allow-downgrades --allow-change-held-packages \
-    git \
-    cmake \
-    gawk \
-    pkgconf \
-    build-essential \
-    ninja-build \
-    automake \
-    autoconf \
-    flex \
-    xz-utils \
-    crossbuild-essential-armhf \
-    crossbuild-essential-arm64 \
+apt-get install -y --no-install-recommends \
     aptitude:arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
@@ -138,7 +126,6 @@ apt-get install -y --allow-downgrades --allow-change-held-packages \
     autoconf:arm64 \
     automake:arm64 \
     figlet:arm64 \
-    xz-utils:arm64 \
     gperf:arm64 \
     libgl1-mesa-dev:arm64 \
     libglu1-mesa-dev:arm64 \
