@@ -20,7 +20,7 @@ GIT_TAG=
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-
+    . "$DOWNLOADER_SCRIPT"
     echo "Downloading Assimp $VER"
     # stable release from GitHub
     # echo "From $GIT_URL/archive/refs/tags/v$VER.zip"
