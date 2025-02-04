@@ -7,9 +7,9 @@ FORMULA_TYPES=("osx" "msys2" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" 
 FORMULA_DEPENDS=()
 
 # define the version
-VER=4.0.5
-VER_=4_0_5
-BUILD_ID=1
+VER=4.0.6
+VER_=4_0_6
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -20,10 +20,17 @@ GIT_TAG=v$VER
 function download() {
 
     . "$DOWNLOADER_SCRIPT"
-    downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
-    unzip -q v${VER}.zip
-    mv utfcpp-${VER} utf8
-    rm v${VER}.zip
+    if [ "$TYPE" == "vs" ]; then
+        downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
+        unzip -q v${VER}.zip
+        mv utfcpp-${VER} utf8
+        rm v${VER}.zip
+    else
+        downloader ${GIT_URL}
+        tar -xf v${VER}.tar.gz
+        mv utfcpp-${VER} utf8
+        rm -f v${VER}.tar.gz
+    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
