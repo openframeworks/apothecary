@@ -26,7 +26,7 @@ function download() {
         mv utfcpp-${VER} utf8
         rm v${VER}.zip
     else
-        downloader ${GIT_URL}
+        downloader ${GIT_URL}//archive/refs/tags/v${VER}.tar.gz
         tar -xf v${VER}.tar.gz
         mv utfcpp-${VER} utf8
         rm -f v${VER}.tar.gz
