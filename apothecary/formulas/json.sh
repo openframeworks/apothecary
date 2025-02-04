@@ -16,25 +16,23 @@ DEFINES=""
 # tools for git use
 GIT_URL=https://github.com/nlohmann/json
 GIT_TAG=v$VER
+URL=${GIT_URL}/archive/refs/tags/v$VER.tar.gz
 
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
-    mkdir json
-    cd json
 
     if [ "$PLATFORM" == "msys2" ] || [ "$PLATFORM" == "vs" ]; then
+        mkdir json
+        cd json
         downloader "${GIT_URL}/releases/download/v$VER/include.zip"
-        # Extract the zip file
         unzip include.zip
-        # Clean up the zip file after extraction
         rm include.zip
     else
-        downloader "${GIT_URL}/releases/download/v$VER/json.tar.xz"
-        # Extract the tar.xz file
-        tar --strip-components=1 --use-compress-program=xz -xvf "json.tar.xz"
-        # Clean up the tar.xz file after extraction
-        rm json.tar.xz
+        downloader "${URL}"
+        tar -xf "v${VER}.tar.gz"
+        mv "json-${VER}" json
+        rm v$VER.tar.gz
     fi
 }
 
