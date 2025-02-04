@@ -216,6 +216,7 @@ function build() {
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
             ${DEFINES} \
+            -DHAVE_GETENTROPY=OFF \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
