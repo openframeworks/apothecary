@@ -6,6 +6,7 @@ if ! which realpath >&/dev/null; then
     msg="ERROR: This script requires brew. See https://brew.sh for installation instructions."
     echo "$(tput setaf 1)$msg$(tput sgr0)" >&2
     exit 1
+  fi
 fi
 
 brew update >/dev/null
