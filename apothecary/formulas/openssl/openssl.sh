@@ -66,7 +66,7 @@ function download() {
         downloader ${MIRROR}/source/$FILE_NAME.tar.gz.sha1
     fi
 
-    CHECKSHA=$(shasum -a 1 $FILE_NAME-$VER.tgz | cut -d ' ' -f1)
+    CHECKSHA=$(shasum -a 1 $FILE_NAME.tgz | cut -d ' ' -f1)
 
     # Extract only the SHA value from the .sha1 file
     FILESUM=$(cut -d ' ' -f1 "$FILE_NAME.tar.gz.sha1")
