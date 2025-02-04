@@ -10,7 +10,7 @@ FORMULA_TYPES=("osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten
 FORMULA_DEPENDS=("zlib")
 
 # define the version
-VER=5.3.1
+VER=5.4.3
 BUILD_ID=1
 DEFINES=""
 
@@ -23,12 +23,25 @@ function download() {
 
     echo "Downloading Assimp $VER"
     # stable release from GitHub
-    echo "From $GIT_URL/archive/refs/tags/v$VER.zip"
-    curl -LO "$GIT_URL/archive/refs/tags/v$VER.zip"
+    # echo "From $GIT_URL/archive/refs/tags/v$VER.zip"
+    # curl -LO "$GIT_URL/archive/refs/tags/v$VER.zip"
 
-    unzip -oq "v$VER.zip"
-    mv "assimp-$VER" assimp
-    rm "v$VER.zip"
+    # unzip -oq "v$VER.zip"
+    # mv "assimp-$VER" assimp
+    # rm "v$VER.zip"
+
+
+    if [ "$TYPE" == "vs" ]; then
+        downloader "$GIT_URL/archive/refs/tags/v$VER.zip"
+        unzip -oq v${VER}.zip
+        mv assimp-$VER assimp
+        rm v${VER}.zip
+    else
+        downloader "${GIT_URL}/archive/refs/tags/v$VER.tar.gz"
+        tar -xf v${VER}.tar.gz
+        mv assimp-${VER} assimp
+        rm -f v${VER}.tar.gz
+    fi
 
 }
 
@@ -169,19 +182,19 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
-            -DASSIMP_BUILD_TESTS=0 \
-            -DASSIMP_BUILD_SAMPLES=0 \
-            -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DAI_CONFIG_ANDROID_JNI_ASSIMP_MANAGER_SUPPORT=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DASSIMP_BUILD_TESTS=OFF \
+            -DASSIMP_BUILD_SAMPLES=OFF \
+            -DASSIMP_BUILD_3MF_IMPORTER=OFF \
             -DASSIMP_WARNINGS_AS_ERRORS=OFF \
-            -DASSIMP_BUILD_STATIC_LIB=1 \
+            -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+            -DASSIMP_BUILD_DOCS=OFF \
             -DASSIMP_BUILD_STL_IMPORTER=0 \
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
-            -DASSIMP_BUILD_ZLIB=OFF \
-            -DBUILD_WITH_STATIC_CRT=OFF"
+            -D_LARGEFILE64_SOURCE=1 \
+            -DASSIMP_BUILD_ZLIB=OFF"
 
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
@@ -193,10 +206,8 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
-            -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
             -DANDROID_ABI=${ABI} \
             -DANDROID_API=${ANDROID_API} \
-            -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DBUILD_SHARED_LIBS=OFF \
@@ -209,9 +220,9 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DPNG_HARDWARE_OPTIMIZATIONS=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DZLIB_LIBRARIES=${ZLIB_LIBRARY} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
