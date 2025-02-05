@@ -211,10 +211,33 @@ jobs:
       - name: List output directory final
         run: ls -lah out/
 
-      - name: Update Release emscripten
+      - name: Update Release
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
-          files: out/openFrameworksLibs_${{ env.RELEASE }}_emscripten_${{ env.ARCH }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
+
+      - name: Clean for Split
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        run: |
+          rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
+
+      - name: Package Split
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          scripts/package-split.sh
+        env:
+          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
+          ARCH: ${{ env.ARCH }}
+
+      - name: Upload to GitHub Release
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: "latest-modular"
+          files: out/*.tar.bz2 out/*.zip
+
