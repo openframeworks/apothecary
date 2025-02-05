@@ -1,23 +1,33 @@
 #!/bin/bash
 
-VERSION=4.0.0
+VERSION="latest"
 
-if [ -z "${EMSDK+x}" ]; then
-    echo "Unix Emscripten SDK not yet found"
-    echo "Emscripten Download SRC"
-    cd ../../
-    git clone https://github.com/emscripten-core/emsdk.git
+# Check if EMSDK is set and valid
+if [[ -z "$EMSDK" || ! -d "$EMSDK/upstream/emscripten" ]]; then
+    echo "🔹 Emscripten SDK not found or invalid. Installing the latest version..."
+    cd $HOME
+    if [ ! -d "emsdk" ]; then
+        git clone https://github.com/emscripten-core/emsdk.git
+    fi
+
     cd emsdk
     git pull
 
-    echo "if any issues with python - make sure to add python paths to bash environment Variables:"
-    python -m pip install --upgrade pip setuptools virtualenv
-    ./emsdk install latest
-    ./emsdk activate latest --permanent
+    echo "Installing/updating Python dependencies..."
+    python3 -m pip install --upgrade pip setuptools virtualenv
+
+    ./emsdk install "$VERSION"
+    ./emsdk activate "$VERSION" --permanent
+
+    echo "EMSDK=$HOME/emsdk" >> $HOME/.bashrc
+    echo 'export PATH="$HOME/emsdk:$HOME/emsdk/upstream/emscripten:$PATH"' >> $HOME/.bashrc
+    source $HOME/.bashrc
 else
-    echo "Emscripten SDK found at $EMSDK"
-    cd ${EMSDK}
-    ./emsdk install latest
-    ./emsdk activate latest --permanent
-    source "$EMSDK/emsdk_env.sh"
+    echo "Emscripten SDK found at $EMSDK. Updating to the latest version..."
+    cd "$EMSDK"
+    ./emsdk install "$VERSION"
+    ./emsdk activate "$VERSION" --permanent
 fi
+
+source "$HOME/emsdk/emsdk_env.sh"
+echo "Emscripten version: $(emcc --version)"
