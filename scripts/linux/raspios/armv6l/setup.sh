@@ -13,8 +13,11 @@ trapError() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-cd $APOTHECARY_LEVEL
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../../../../
+APOTHECARY_PATH=$ROOT/apothecary
 
 CROSS_COMPILER=${CROSS_COMPILER:-raspbian}
 CROSS_SYSROOT=${CROSS_SYSROOT:-rpi_rootfs}

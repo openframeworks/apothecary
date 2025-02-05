@@ -96,7 +96,7 @@ jobs:
           sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
 
       - name: Script Install
-        run: ./scripts/${{ env.TARGET }}/raspios/install.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
 
       - name: Setup Cross Compiler and Target Local File System
         run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
@@ -161,7 +161,7 @@ jobs:
           sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
       
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/raspios/setup.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
       
       - name: Script Install and Build
         run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
@@ -236,7 +236,7 @@ jobs:
       #     fi
 
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/raspios/setup.sh
+        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
 
       - name: Script Install and Build
         run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh

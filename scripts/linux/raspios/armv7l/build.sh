@@ -14,14 +14,12 @@ trapError() {
 export ARCH=armv7l
 export TYPE=linux
 
-SCRIPT_DIR=$(
-    cd $(dirname "$0")
-    pwd -P
-)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd $SCRIPT_DIR
 ROOT=$(
     cd $(dirname "$0")
     pwd -P
-)/../../../../
+)/../../../../../
 APOTHECARY_PATH=$ROOT/apothecary
 
 # export GCC_PREFIX=arm-linux-gnueabihf
