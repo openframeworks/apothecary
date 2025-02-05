@@ -11,18 +11,8 @@ CROSS_ARCH="arm"
 CROSS_CPU=${CROSS_CPU:-"cortex-a7"}
 CROSSCOMPILE=${CROSSCOMPILE:-1}
 
-if [ "${CROSSCOMPILE}" -eq 0 ]; then
-    export ROOTFS="/"
-    export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
-else
-    export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
-    export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
-fi
 export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
-export SYSROOT=${ROOTFS}
-export GCC_PREFIX="${CROSS_ARCH}-linux-gnueabihf"
-export GCC_VERSION="1.0"
 
 if [[ "$HOST_ARCH" != "$CROSS_MARCH" ]]; then
     CROSSCOMPILE=1
@@ -31,6 +21,18 @@ else
     CROSSCOMPILE=0
     echo "Native compilation detected. No cross-compilation needed."
 fi
+
+if [ "${CROSSCOMPILE}" -eq 0 ]; then
+    export ROOTFS="/"
+    export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
+else
+    export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
+    export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
+fi
+
+export SYSROOT=${ROOTFS}
+export GCC_PREFIX="${CROSS_ARCH}-linux-gnueabihf"
+export GCC_VERSION="1.0"
 
 CMAKE_LIBRARY_ARCHITECTURE=${GCC_PREFIX}
 export LIBRARY_PATH=${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/lib:${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/lib:${TOOLCHAIN_ROOT}/lib
