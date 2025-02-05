@@ -43,6 +43,7 @@ jobs:
       matrix:
         ARCH: [32, 64]
     steps:
+      - uses: actions/checkout@v4.2.2
       - name: Install Emscripten SDK (emsdk)
         run: |
           git clone https://github.com/emscripten-core/emsdk.git $HOME/emsdk
@@ -62,6 +63,7 @@ jobs:
         run: |
           source $HOME/emsdk/emsdk_env.sh
           emcc --version
+
       - name: Setup Environment
         run: |
           echo "Setting up environment for Emscripten ${{ matrix.ARCH }} "
