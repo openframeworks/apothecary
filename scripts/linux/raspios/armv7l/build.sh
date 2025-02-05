@@ -14,6 +14,16 @@ trapError() {
 export ARCH=armv7l
 export TYPE=linux
 
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../../../
+APOTHECARY_PATH=$ROOT/apothecary
+
 # export GCC_PREFIX=arm-linux-gnueabihf
 # export GCC_VERSION="14.2.0" # UPDATE THIS AS NEEDED /libexec/gcc/arm-linux-gnueabihf/*/
 # LD_LIBRARY_PATH=${RASP}/${GCC_PREFIX}/libc/usr/lib:${RASP}/${GCC_PREFIX}/libc/lib:${RASP}/lib
@@ -63,3 +73,6 @@ $APOTHECARY_LEVEL/scripts/calculate_formulas.sh
 
 echo "building"
 $APOTHECARY_LEVEL/scripts/build.sh
+
+echo "===build complete==="
+cd $SCRIPT_DIR

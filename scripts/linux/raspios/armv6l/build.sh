@@ -14,10 +14,15 @@ trapError() {
 export ARCH=armv6l
 export TYPE=linux
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-cd $APOTHECARY_LEVEL
+SCRIPT_DIR=$(
+    cd $(dirname "$0")
+    pwd -P
+)
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/../../../../
+APOTHECARY_PATH=$ROOT/apothecary
 
 # echo $ROOT
 # cd $ROOT
