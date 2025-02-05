@@ -22,7 +22,9 @@ sudo apt install -y \
     autoconf \
     flex \
     crossbuild-essential-armhf \
-    crossbuild-essential-arm64
+    crossbuild-essential-arm64 \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu
 
 sudo apt install -y \
     python3-minimal \
@@ -93,8 +95,6 @@ echo "Done! ARM64 and ARMHF architectures are ready."
 echo "Installing ARM64 packages..."
 apt-get install -y \
     aptitude:arm64 \
-    gcc-aarch64-linux-gnu \
-    g++-aarch64-linux-gnu \
     gfortran:arm64 \
     texinfo:arm64 \
     bison:arm64 \
