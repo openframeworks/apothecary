@@ -219,16 +219,16 @@ jobs:
           tag_name: ${{ env.RELEASE }}
           files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
 
-      - name: Clean for Split
+      - name: Clean for
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
         run: |
           rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
 
-      - name: Package Split
+      - name: Package
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
-          scripts/package-split.sh
+          scripts/package-individual.sh
         env:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
           ARCH: ${{ env.ARCH }}
