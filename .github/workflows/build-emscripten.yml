@@ -43,7 +43,6 @@ jobs:
       matrix:
         ARCH: [32, 64]
     steps:
-      - uses: actions/checkout@v4.2.2
       - name: Install Emscripten SDK (emsdk)
         run: |
           git clone https://github.com/emscripten-core/emsdk.git $HOME/emsdk
@@ -51,12 +50,18 @@ jobs:
           ./emsdk install ${{ env.EMSDK_VERSION }}
           ./emsdk activate ${{ env.EMSDK_VERSION }}
           echo "EMSDK_PATH=$HOME/emsdk" >> $GITHUB_ENV
-          echo "EMSDK=$HOME/emsdk" >> $GITHUB_ENV
-          echo "source $HOME/emsdk/emsdk_env.sh" >> $GITHUB_ENV
+          echo "EMSCRIPTEN=$HOME/emsdk/upstream/emscripten" >> $GITHUB_ENV
+          echo 'export PATH="$HOME/emsdk:$HOME/emsdk/upstream/emscripten:$PATH"' >> $HOME/.bashrc
+
+      - name: Setup Emscripten Environment
+        run: |
+          source $HOME/emsdk/emsdk_env.sh
+          echo "Emscripten version: $(emcc --version)"
 
       - name: Verify Emscripten Version
-        run: emcc --version
-
+        run: |
+          source $HOME/emsdk/emsdk_env.sh
+          emcc --version
       - name: Setup Environment
         run: |
           echo "Setting up environment for Emscripten ${{ matrix.ARCH }} "
