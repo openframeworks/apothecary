@@ -14,6 +14,11 @@ trapError() {
 export ARCH=armv6l
 export TYPE=linux
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd $SCRIPT_DIR
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+cd $APOTHECARY_LEVEL
+
 # echo $ROOT
 # cd $ROOT
 # export RASP="$ROOT/raspbian"
@@ -74,3 +79,6 @@ $APOTHECARY_LEVEL/scripts/calculate_formulas.sh
 
 echo "building"
 $APOTHECARY_LEVEL/scripts/build.sh
+
+echo "===build complete==="
+cd $SCRIPT_DIR

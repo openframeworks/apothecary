@@ -13,7 +13,7 @@ trapError() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd $APOTHECARY_LEVEL
 
 if grep -q "Raspbian" /etc/os-release 2>/dev/null && [[ "$(uname -m)" == "aarch64" ]]; then
@@ -63,5 +63,5 @@ if [ "$NATIVE" == "0" ]; then
     ./build_rootfs_arm64.sh create
 fi
 
-echo "setup complete"
+echo "===setup complete==="
 cd $SCRIPT_DIR

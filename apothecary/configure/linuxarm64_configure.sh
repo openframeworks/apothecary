@@ -9,6 +9,8 @@ cd $APOTHECARY_LEVEL
 CROSS_ARCH="aarch64"
 CROSSCOMPILE=${CROSSCOMPILE:-0} # Default to native compilation
 SYSROOT_PATH="/usr/${CROSS_ARCH}-linux-gnu"
+export HOST_ARCH=$(uname -m)
+export HOST_PLATFORM=$(uname)
 
 # Initialize toolchain variables
 export GCC_PREFIX="${CROSS_ARCH}-linux-gnu"
@@ -16,9 +18,9 @@ export CROSS_COMPILER=""
 export ROOTFS=""
 export TOOLCHAIN_ROOT=""
 
-if [[ "$HOST_ARCH" == "x86_64" ]]; then
+if [[ "$HOST_ARCH" != "$CROSS_MARCH" ]]; then
     CROSSCOMPILE=1
-    echo "Detected x86_64 host. Enabling cross-compilation for ${CROSS_ARCH}."
+    echo "Detected different host ($HOST_ARCH) and target ($CROSS_MARCH). Enabling cross-compilation."
 else
     CROSSCOMPILE=0
     echo "Native compilation detected. No cross-compilation needed."
@@ -33,9 +35,6 @@ else
     export TOOLCHAIN_ROOT="/usr"
     echo "Using native rootfs at ${ROOTFS}"
 fi
-
-export HOST_ARCH=$(uname -m)
-export HOST_PLATFORM=$(uname)
 export SYSROOT=${ROOTFS}
 
 # if [ "${GCC_VERSION}" -eq 0 ]; then

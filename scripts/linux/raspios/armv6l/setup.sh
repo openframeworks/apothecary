@@ -13,12 +13,19 @@ trapError() {
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 cd $APOTHECARY_LEVEL
 
 CROSS_COMPILER=${CROSS_COMPILER:-raspbian}
 CROSS_SYSROOT=${CROSS_SYSROOT:-rpi_rootfs}
 CROSS_OS="${CROSS_OS:-bookworm}"
+
+if grep -q "Raspbian" /etc/os-release 2>/dev/null && [[ "$(uname -m)" == "armv6l" ]]; then
+    NATIVE="true"
+    echo "Detected Raspberry Pi OS (Raspbian) on armv6l. Setting NATIVE=true"
+else
+    NATIVE="false"
+fi
 
 if [ "$CROSS_OS" == "bookworm" ]; then
     CROSS_URL="https://sourceforge.net/projects/raspberry-pi-cross-compilers/files/Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Bookworm/GCC%2014.2.0/Raspberry%20Pi%201%2C%20Zero/cross-gcc-14.2.0-pi_0-1.tar.gz/download"
@@ -46,3 +53,6 @@ sudo chmod +x ./build_rootfs.sh
 ./build_rootfs.sh create
 
 echo "setup complete"
+
+echo "setup complete"
+cd $SCRIPT_DIR

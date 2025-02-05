@@ -24,6 +24,14 @@ export SYSROOT=${ROOTFS}
 export GCC_PREFIX="${CROSS_ARCH}-linux-gnueabihf"
 export GCC_VERSION="1.0"
 
+if [[ "$HOST_ARCH" != "$CROSS_MARCH" ]]; then
+    CROSSCOMPILE=1
+    echo "Detected different host ($HOST_ARCH) and target ($CROSS_MARCH). Enabling cross-compilation."
+else
+    CROSSCOMPILE=0
+    echo "Native compilation detected. No cross-compilation needed."
+fi
+
 CMAKE_LIBRARY_ARCHITECTURE=${GCC_PREFIX}
 export LIBRARY_PATH=${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/lib:${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/lib:${TOOLCHAIN_ROOT}/lib
 export LD_LIBRARY_PATH=${TOOLCHAIN_ROOT}/lib
