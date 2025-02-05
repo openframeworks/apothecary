@@ -9,6 +9,7 @@ CROSS_COMPILER="raspbian"
 CROSS_SYSROOT="rpi_rootfs"
 CROSS_ARCH="aarch64"
 CROSSCOMPILE=${CROSSCOMPILE:-1}
+SYSROOT_PATH="/usr/${CROSS_ARCH}-linux-gnu"
 export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
 
@@ -22,7 +23,7 @@ fi
 
 if [ "${CROSSCOMPILE}" -eq 0 ]; then
     export ROOTFS="/"
-    export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
+    export TOOLCHAIN_ROOT="/usr"
 else
     export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
     export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"

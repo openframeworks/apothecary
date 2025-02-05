@@ -25,7 +25,7 @@ fi
 
 if [ "${CROSSCOMPILE}" -eq 0 ]; then
     export ROOTFS="/"
-    export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
+    export TOOLCHAIN_ROOT="/usr"
 else
     export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
     export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
