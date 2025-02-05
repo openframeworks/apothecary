@@ -45,58 +45,30 @@ trapError() {
     exit 1
 }
 
-if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    run() {
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@"
-    }
+run() {
+    echo "$@"
+    eval "$@"
+}
 
-    run_bg() {
-        trap "trapError" ERR
+run_bg() {
+    trap "trapError" ERR
 
-        #PATH=\"$DOCKER_HOME/bin:\$PATH\"
-        echo "TARGET=\"emscripten\" $@"
-        docker exec -i emscripten sh -c "TARGET=\"emscripten\" $@" >>"formula_${ARCH}.log" 2>&1 &
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
+    echo "$@"
+    eval "$@" >>"formula_${ARCH}.log" 2>&1 &
+    apothecaryPID=$!
+    echoDots $apothecaryPID
+    wait $apothecaryPID
 
-        echo "Tail of log for $formula_name"
-        run "tail -n 100 formula_${ARCH}.log"
-    }
+    echo "Tail of log for $formula_name"
+    run "tail -n 10 formula_${ARCH}.log"
+}
 
-    # DOCKER_HOME=$(docker exec -i emscripten echo '$HOME')
-    # CCACHE_DOCKER=$(docker exec -i emscripten ccache -p | grep "cache_dir =" | sed "s/(default) cache_dir = \(.*\)/\1/")
-    ROOT=$(docker exec -i emscripten pwd)
-    LOCAL_ROOT=$(
-        cd $(dirname "$0")
-        pwd -P
-    )/..
-else
-    run() {
-        echo "$@"
-        eval "$@"
-    }
+ROOT=$(
+    cd $(dirname "$0")
+    pwd -P
+)/..
+LOCAL_ROOT=$ROOT
 
-    run_bg() {
-        trap "trapError" ERR
-
-        echo "$@"
-        eval "$@" >>"formula_${ARCH}.log" 2>&1 &
-        apothecaryPID=$!
-        echoDots $apothecaryPID
-        wait $apothecaryPID
-
-        echo "Tail of log for $formula_name"
-        run "tail -n 10 formula_${ARCH}.log"
-    }
-
-    ROOT=$(
-        cd $(dirname "$0")
-        pwd -P
-    )/..
-    LOCAL_ROOT=$ROOT
-fi
 
 APOTHECARY_PATH=$ROOT/apothecary
 

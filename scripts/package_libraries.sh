@@ -94,10 +94,6 @@ if [ -z "$LIBRARIES" ]; then
     echo "No libraries found to package."
     exit 0
 fi
-if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
-    LIBS=${LIBSX//[$'\t\r\n']/ }
-fi
 
 # Process each library
 echo "Libraries found: [$LIBS]"
