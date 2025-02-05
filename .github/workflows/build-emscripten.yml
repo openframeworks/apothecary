@@ -53,10 +53,15 @@ jobs:
           echo "EMSDK_PATH=$HOME/emsdk" >> $GITHUB_ENV
           echo "EMSDK=$HOME/emsdk" >> $GITHUB_ENV
           echo "source $HOME/emsdk/emsdk_env.sh" >> $GITHUB_ENV
+
+      - name: Verify Emscripten Version
+        run: emcc --version
+
       - name: Setup Environment
         run: |
           echo "Setting up environment for Emscripten ${{ matrix.ARCH }} "
           echo "ARCH=${{ matrix.ARCH }}" >> $GITHUB_ENV
+
       - name: Scripts Calc Formula
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
