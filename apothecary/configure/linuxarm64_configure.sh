@@ -16,18 +16,24 @@ export CROSS_COMPILER=""
 export ROOTFS=""
 export TOOLCHAIN_ROOT=""
 
-# Determine if cross-compilation is needed
-if [ -d "${SYSROOT_PATH}" ]; then
+if [[ "$HOST_ARCH" == "x86_64" ]]; then
     CROSSCOMPILE=1
-    ROOTFS="${SYSROOT_PATH}"
-    TOOLCHAIN_ROOT="${SYSROOT_PATH}"
-    echo "Cross-compiling detected. Using sysroot at ${SYSROOT_PATH}"
+    echo "Detected x86_64 host. Enabling cross-compilation for ${CROSS_ARCH}."
 else
     CROSSCOMPILE=0
-    ROOTFS="/"
-    TOOLCHAIN_ROOT="/usr"
-    echo "Native compilation detected. Using rootfs at ${ROOTFS}"
+    echo "Native compilation detected. No cross-compilation needed."
 fi
+
+if [[ "$CROSSCOMPILE" -eq 1 ]]; then
+    export ROOTFS="${SYSROOT_PATH}"
+    export TOOLCHAIN_ROOT="${SYSROOT_PATH}"
+    echo "Using sysroot at ${SYSROOT_PATH}"
+else
+    export ROOTFS="/"
+    export TOOLCHAIN_ROOT="/usr"
+    echo "Using native rootfs at ${ROOTFS}"
+fi
+
 export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
 export SYSROOT=${ROOTFS}
@@ -87,8 +93,8 @@ echo "openFrameworks apothecary Cross Compiler: $GCC_PREFIX"
 # echo "Using GCC Version: $GCC_VERSION"
 # echo "Library Path: $LIBRARY_PATH"
 echo "ROOTFS Path: $ROOTFS"
-# echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
-# echo "CROSS_ARCH: $CROSS_ARCH"
+echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
+echo "CROSS_ARCH: $CROSS_ARCH"
 echo "HOST_ARCH: $HOST_ARCH"
 echo "HOST_PLATFORM: $HOST_PLATFORM"
 # echo "LDFLAGS : $LDFLAGS"
