@@ -114,9 +114,7 @@ function build() {
         cd ..
     elif [ "$TYPE" == "android" ]; then
 
-        # setup android paths / variables
         source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
-
         cp -v $FORMULA_DIR/CMakeLists.txt .
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -166,6 +164,7 @@ function build() {
             -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}"
         $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}${PARALLEL_MAKE}
     elif [ "$TYPE" == "msys2" ]; then
+        cp -v $FORMULA_DIR/CMakeLists.txt .
         mkdir -p build_${TYPE}_${PLATFORM}
         cd build_${TYPE}_${PLATFORM}
         rm -f CMakeCache.txt *.a *.o
@@ -191,6 +190,7 @@ function build() {
         cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
     elif [ "$TYPE" == "linux" ]; then
+        cp -v $FORMULA_DIR/CMakeLists.txt .
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
         fi
@@ -255,15 +255,17 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$PLATFORM/libtess2.a
+        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
         secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
     elif [ "$TYPE" == "msys2" ]; then
-        cp -v build_${TYPE}_${PLATFORM}/Release/lib/libtess2.a $1/lib/$TYPE/$PLATFORM/libtess2.a
-        secure $1/lib/$TYPE/libtess2.a tess2
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
+        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
+        secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
     elif [ "$TYPE" == "android" ]; then
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$ABI/libtess2.a
+        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$ABI/libtess2.a
         secure $1/lib/$TYPE/$ABI/libtess2.a tess2
     else
         cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
