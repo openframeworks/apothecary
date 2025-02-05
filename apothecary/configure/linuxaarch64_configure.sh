@@ -20,7 +20,6 @@ else
     echo "Native compilation detected. No cross-compilation needed."
 fi
 
-
 if [ "${CROSSCOMPILE}" -eq 0 ]; then
     export ROOTFS="/"
     export TOOLCHAIN_ROOT="/${CROSS_COMPILER}"
@@ -76,18 +75,6 @@ export LDFLAGS="--sysroot=${SYSROOT} \
 [ -d "${TOOLCHAIN_ROOT}/lib/gcc/${CMAKE_LIBRARY_ARCHITECTURE}/${GCC_VERSION}" ] && ls -la "${TOOLCHAIN_ROOT}/lib/gcc/${CMAKE_LIBRARY_ARCHITECTURE}/${GCC_VERSION}" || echo "Directory not found: ${TOOLCHAIN_ROOT}/lib/gcc/${CMAKE_LIBRARY_ARCHITECTURE}/${GCC_VERSION}"
 
 export HOST="${GCC_PREFIX}"
-
-tools=("gcc" "g++" "cpp" "ar" "as" "ranlib" "gfortran" "ld")
-
-# Check each tool
-for tool in "${tools[@]}"; do
-    filepath="${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-${tool}"
-    if [[ -f "$filepath" ]]; then
-        echo "Found: $filepath"
-    else
-        echo "Missing: [$tool] - [$filepath]"
-    fi
-done
 
 # Debugging output
 echo "--------------------"

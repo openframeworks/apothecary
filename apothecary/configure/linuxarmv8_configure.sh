@@ -9,7 +9,7 @@ CROSS_COMPILER="raspbian"
 CROSS_SYSROOT="rpi_rootfs"
 CROSS_ARCH="arm"
 CROSS_CPU=${CROSS_CPU:-"cortex-a53"}
-CROSS_MARCH=${CROSS_CPU:-"armv8"}
+CROSS_MARCH=${CROSS_CPU:-"armv8l"}
 CROSSCOMPILE=${CROSSCOMPILE:-1}
 
 export HOST_ARCH=$(uname -m)
@@ -72,18 +72,6 @@ export LDFLAGS="--sysroot=${SYSROOT} \
     -L${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/lib"
 
 export HOST="${GCC_PREFIX}"
-
-tools=("gcc" "g++" "cpp" "ar" "as" "ranlib" "gfortran" "ld")
-
-# Check each tool
-for tool in "${tools[@]}"; do
-    filepath="${TOOLCHAIN_ROOT}/bin/${GCC_PREFIX}-${tool}"
-    if [[ -f "$filepath" ]]; then
-        echo "Found: $filepath"
-    else
-        echo "Missing: [$tool] - [$filepath]"
-    fi
-done
 
 # Debugging output
 echo "--------------------"
