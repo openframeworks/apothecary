@@ -166,12 +166,26 @@ function build() {
             -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE}"
         $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}${PARALLEL_MAKE}
     elif [ "$TYPE" == "msys2" ]; then
-        mkdir -p build
-        cd build
+        mkdir -p build_${TYPE}_${PLATFORM}
+        cd build_${TYPE}_${PLATFORM}
         rm -f CMakeCache.txt *.a *.o
-        cp -v $FORMULA_DIR/Makefile .
-        cp -v $FORMULA_DIR/tess2.make .
-        make config=release tess2
+        export DEFINES="${DEFINES} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF"
+
+        cmake .. ${DEFINES} \
+            -G "MinGW Makefiles" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_VERBOSE_MAKEFILE=TRUE
+
+        cmake --build . --target install --config Release -j${PARALLEL_MAKE}
+        cd ..
     elif [ "$TYPE" == "linux" ]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh $ABI
@@ -220,13 +234,10 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-
-    # headers
     rm -rf $1/include
     mkdir -p $1/include
     cp -Rv Include/* $1/include/
     . "$SECURE_SCRIPT"
-    # lib
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -243,7 +254,7 @@ function copy() {
         cp -v build_${TYPE}_${PLATFORM}/libtess2.a $1/lib/$TYPE/$PLATFORM/libtess2.a
         secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
     elif [ "$TYPE" == "msys2" ]; then
-        cp -v build/libtess2.a $1/lib/$TYPE/libtess2.a
+        cp -v build_${TYPE}_${PLATFORM}/Release/lib/libtess2.a $1/lib/$TYPE/$PLATFORM/libtess2.a
         secure $1/lib/$TYPE/libtess2.a tess2
     elif [ "$TYPE" == "android" ]; then
         rm -rf $1/lib/$TYPE/$ABI
