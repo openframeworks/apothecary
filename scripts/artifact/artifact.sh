@@ -39,16 +39,12 @@ if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
 if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    export OUTPUT_FOLDER="$ROOT/xout"
-fi
-if [[ "$TARGET" =~ ^(macos)$ ]]; then
-    export OUTPUT_FOLDER="$ROOT/xout_${BUNDLE}"
+    export OUTPUT_FOLDER="$ROOT/out"
 fi
 if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 0
 fi
-
 
 CUR_BRANCH="master"
 if [ -n "${ALWAYS_BUILD+x}" ]; then
