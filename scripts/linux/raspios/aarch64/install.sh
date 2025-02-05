@@ -48,21 +48,25 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
 # Define output file path
-OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
-echo "making sources file arm64"
-
-# Generate the .sources content
+OUTPUT_FILE="/etc/apt/sources.list.d/raspberrypi-arm64.sources"
+echo "Creating sources file for Raspberry Pi (ARM64) at $OUTPUT_FILE"
 cat <<EOF > $OUTPUT_FILE
 Types: deb
-URIs: http://ports.ubuntu.com/ubuntu-ports/
-Suites: $UBUNTU_VERSION $UBUNTU_VERSION-updates $UBUNTU_VERSION-backports $UBUNTU_VERSION-security
-Components: main restricted universe multiverse
-Architectures: arm64 armhf
-Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+URIs: http://deb.debian.org/debian
+Suites: bookworm bookworm-updates bookworm-backports bookworm-security
+Components: main contrib non-free-firmware
+Architectures: arm64
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: http://archive.raspberrypi.com/debian
+Suites: bookworm
+Components: main
+Architectures: arm64
+Signed-By: /usr/share/keyrings/raspberrypi-archive-keyring.gpg
 EOF
 
-# Output the result
-echo "Generated ARM64 .sources file at $OUTPUT_FILE"
+echo "Generated Raspberry Pi sources file at $OUTPUT_FILE"
 
 
 SOURCE_FILE="/etc/apt/sources.list.d/ubuntu.sources"
@@ -93,8 +97,10 @@ sudo apt-get update
 echo "Done! ARM64 and ARMHF architectures are ready."
 
 echo "Installing ARM64 packages..."
-apt-get install -y \
+apt-get install -y --no-install-recommends \
     aptitude:arm64 \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
     gfortran:arm64 \
     texinfo:arm64 \
     bison:arm64 \
@@ -107,7 +113,6 @@ apt-get install -y \
     autoconf:arm64 \
     automake:arm64 \
     figlet:arm64 \
-    xz-utils:arm64 \
     gperf:arm64 \
     libgl1-mesa-dev:arm64 \
     libglu1-mesa-dev:arm64 \
@@ -121,13 +126,6 @@ apt-get install -y \
     ccache:arm64 \
     binutils-aarch64-linux-gnu:arm64 \
     libgles2-mesa-dev:arm64
-
-# apt-get install -y gawk:arm64 --no-remove
-if [[ "$(uname -m)" == "x86_64" ]]; then
-    # issues with apt packages install manually
-    wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.2.1-2+b2_arm64.deb
-    sudo dpkg -i --force-architecture --force-depends gawk_5.2.1-2+b2_arm64.deb
-fi
 
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then

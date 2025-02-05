@@ -19,20 +19,6 @@ sudo apt install -y \
     crossbuild-essential-armhf \
     crossbuild-essential-arm64
 
-# sudo apt-mark hold \
-#     git \
-#     cmake \
-#     gawk \
-#     pkgconf \
-#     build-essential \
-#     ninja-build \
-#     automake \
-#     autoconf \
-#     flex \
-#     xz-utils \
-#     crossbuild-essential-armhf \
-#     crossbuild-essential-arm64
-
 sudo apt install -y \
     python3-minimal \
     python3-numpy
