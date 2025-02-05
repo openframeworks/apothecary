@@ -41,6 +41,7 @@ jobs:
         script: |
           console.log(`Token: ${process.env.GH_TOKEN ? "Present" : "Missing"}`);
           console.log(`GA_CI_SECRET: ${process.env.GA_CI_SECRET ? "Present" : "Missing"}`);
+
           const artifacts = await github.rest.actions.listArtifactsForRepo({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -75,22 +76,30 @@ jobs:
             const type = `${release}-${platform}-${arch}-${bundle}`;
             if (!artifact.expired && keepLatestArtifacts[type].id !== artifact.id) {
               console.log(`DISABLED - WOULD delete older artifact: ${artifact.name} (${artifact.created_at} | ${artifact.size_in_bytes} bytes)`);
-             
-              # await github.rest.actions.deleteArtifact({
-              #   owner: context.repo.owner,
-              #   repo: context.repo.repo,
-              #   artifact_id: artifact.id
-              # });
-              
+
+              // Uncomment the next lines to actually delete old artifacts
+              /*
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+              */
+
               console.log(`Deleted older artifact: ${artifact.name} (${artifact.created_at} | ${artifact.size_in_bytes} bytes)`);
             } else if (/^v\d+/i.test(release)) {
               console.log(`DISABLED - WOULD: Deleting artifact with "v*" in release: ${artifact.name} (${artifact.created_at} | ${artifact.size_in_bytes} bytes)`);
-              # await github.rest.actions.deleteArtifact({
-              #   owner: context.repo.owner,
-              #   repo: context.repo.repo,
-              #   artifact_id: artifact.id
-              # });
-              console.log(`Deleted artifact with "v*": ${artifact.name}`);          
+
+              // Uncomment to enable artifact deletion
+              /*
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id
+              });
+              */
+
+              console.log(`Deleted artifact with "v*": ${artifact.name}`);
             } else {
               console.log(`Keeping artifact: ${artifact.name} (${artifact.created_at} | ${artifact.size_in_bytes} bytes)`);
             }
