@@ -44,8 +44,15 @@ jobs:
         ARCH: [32, 64]
     steps:
       - uses: actions/checkout@v4.2.2
-      - name: Docker Step
-        run: docker run -di --name emscripten -v $PWD:/src emscripten/emsdk:${{ env.EMSDK_VERSION }} bash
+      - name: Install Emscripten SDK (emsdk)
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git $HOME/emsdk
+          cd $HOME/emsdk
+          ./emsdk install ${{ env.EMSDK_VERSION }}
+          ./emsdk activate ${{ env.EMSDK_VERSION }}
+          echo "EMSDK_PATH=$HOME/emsdk" >> $GITHUB_ENV
+          echo "EMSDK=$HOME/emsdk" >> $GITHUB_ENV
+          echo "source $HOME/emsdk/emsdk_env.sh" >> $GITHUB_ENV
       - name: Setup Environment
         run: |
           echo "Setting up environment for Emscripten ${{ matrix.ARCH }} "

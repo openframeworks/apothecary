@@ -23,164 +23,32 @@ else
     export FORCE=""
 fi
 
-# VERBOSE=true
+if [ -z "$1" ]; then
+    TARGET=${TARGET:-$1}
+else
+    TARGET=$1
+fi
 
+if [ -z "$2" ]; then
+    echo " Bundle: $2"
+else
+    BUNDLE=$2
+fi
+ARCH=${ARCH:-64}
+if [ -z "${OUTPUT_FOLDER+x}" ]; then
+    export OUTPUT_FOLDER="$ROOT/out"
+fi
+if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    export OUTPUT_FOLDER="$ROOT/xout"
+fi
+if [[ "$TARGET" =~ ^(macos)$ ]]; then
+    export OUTPUT_FOLDER="$ROOT/xout_${BUNDLE}"
+fi
 if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
-    exit 1
-fi
-
-isRunning() {
-    if [ “$(uname)” == “Linux” ]; then
-        if [ -d /proc/$1 ]; then
-            return 0
-        else
-            return 1
-        fi
-    else
-        number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
-
-        if [ $number -gt 0 ]; then
-            return 0
-        else
-            return 1
-        fi
-    fi
-}
-
-echoDots() {
-    sleep 0.1 # Waiting for a brief period first, allowing jobs returning immediatly to finish
-    while isRunning $1; do
-        for i in $(seq 1 10); do
-            echo -ne .
-            if ! isRunning $1; then
-                printf "\r"
-                return
-            fi
-            sleep 1
-        done
-        printf "\r                    "
-        printf "\r"
-    done
-}
-
-travis_fold_start() {
-    echo -e "travis_fold:start:$1\033[33;1m$2\033[0m"
-}
-
-travis_fold_end() {
-    echo -e "\ntravis_fold:end:$1\r"
-}
-
-travis_time_start() {
-    travis_timer_id=$(printf %08x $((RANDOM * RANDOM)))
-    travis_start_time=$(travis_nanoseconds)
-    echo -en "travis_time:start:$travis_timer_id\r${ANSI_CLEAR}"
-}
-
-travis_time_finish() {
-    local result=$?
-    travis_end_time=$(travis_nanoseconds)
-    local duration=$(($travis_end_time - $travis_start_time))
-    echo -en "\ntravis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration\r${ANSI_CLEAR}"
-    return $result
-}
-
-function travis_nanoseconds() {
-    local cmd="date"
-    local format="+%s%N"
-    local os=$(uname)
-
-    if hash gdate >/dev/null 2>&1; then
-        cmd="gdate" # use gdate if available
-    elif [[ "$os" = Darwin ]]; then
-        format="+%s000000000" # fallback to second precision on darwin (does not support %N)
-    fi
-
-    $cmd -u $format
-}
-
-if [ -z ${PARALLEL+x} ]; then
-    if [ "$TARGET" == "osx" ]; then
-        PARALLEL=4
-    elif [ "$TARGET" == "ios" ] || [ "$TARGET" == "tvos" ]; then
-        PARALLEL=2
-    elif [ "$TARGET" == "android" ]; then
-        PARALLEL=2
-    elif [ "$TARGET" == "vs" ] || [ "$TARGET" == "msys2" ]; then
-        PARALLEL=4
-    else
-        PARALLEL=2
-    fi
-fi
-
-echo "Parallel builds: $PARALLEL"
-
-if type "ccache" >/dev/null; then
-    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-        export PATH="/usr/local/opt/ccache/libexec:$PATH"
-        export SDKROOT="$DEVELOPER_DIR/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-    fi
-
-    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    #     docker exec -it emscripten sh -c 'echo $HOME'
-    #     docker cp /home/travis/.ccache emscripten:$CCACHE_DOCKER
-    # fi
-
-    ccache -z
-    ccache -s
-    # if [ "$TRAVIS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    #     run "ccache -z"
-    #     run "ccache -s"
-    # fi
-fi
-
-if [ "$TARGET" == "linux" ]; then
-    TARGET="linux64"
-    if [ "$OPT" == "gcc5" ]; then
-        export CC="gcc-5"
-        export CXX="g++-5 -std=c++11"
-        export COMPILER="g++5 -std=c++11"
-    elif [ "$OPT" == "gcc6" ]; then
-        export CC="gcc-6 -fPIE"
-        export CXX="g++-6 -std=c++14 -fPIE"
-        export COMPILER="g++6 -std=c++14 -fPIE"
-    fi
-fi
-
-function build() {
-    trap "trapError" ERR
-
-    echo Build $formula_name
-
-    local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
-    if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
-        ARGS="-e $ARGS"
-    fi
-
-    if [ "$ARCH" != "" ]; then
-        ARGS="$ARGS -a$ARCH"
-    fi
-
-    if [ "$VERBOSE" = true ]; then
-        echo "./apothecary $ARGS update $formula_name"
-        run "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
-    else
-        echo "./apothecary $ARGS update $formula_name" >>"formula_${ARCH}.log" 2>&1
-        run_bg "cd $APOTHECARY_PATH;./apothecary $ARGS update $formula_name"
-    fi
-
-}
-source $LOCAL_ROOT/scripts/calculate_formulas.sh
-
-if [ -z "$FORMULAS" ]; then
-    echo "No formulas to build"
     exit 0
 fi
 
-if type "ccache" >/dev/null; then
-    echo $(ccache -s)
-fi
 
 CUR_BRANCH="master"
 if [ -n "${ALWAYS_BUILD+x}" ]; then
@@ -213,10 +81,6 @@ echo "Compressing libraries from $OUTPUT_FOLDER"
 cd $OUTPUT_FOLDER
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
-if [ "$TRAVIS" = true -o "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "emscripten" ]; then
-    LIBSX=$(docker exec -i emscripten sh -c "cd $OUTPUT_FOLDER; ls")
-    LIBS=${LIBSX//[$'\t\r\n']/ }
-fi
 
 if [ -z "${RELEASE+x}" ]; then
     if [ "$GITHUB_ACTIONS" = true ]; then
@@ -229,7 +93,7 @@ else
 fi
 
 
-TTARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
+TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
     if [ -n "$GCC" ]; then
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${GCC}.tar.bz2"
@@ -279,9 +143,9 @@ elif [ "$TARGET" == "vs" ]; then
     "C:\Program Files\7-Zip\7z.exe" a $TARBALL $LIBS
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "emscripten" ]; then
+    export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
     TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
     echo "TARBALL: [$TARBALL]"
-    echo "tar cjf $TARBALL $LIBS"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
@@ -329,3 +193,7 @@ fi
 
 echo "Artefact Package libs to upload $TARBALL"
 echo "done "
+
+pwd
+find ./ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
+cd ../
