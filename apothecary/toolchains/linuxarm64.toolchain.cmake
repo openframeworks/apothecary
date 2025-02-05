@@ -82,19 +82,8 @@ set(CMAKE_C_COMPILER "${GCC_PATH}/aarch64-linux-gnu-gcc")
 set(CMAKE_CXX_COMPILER "${GCC_PATH}/aarch64-linux-gnu-g++")
 
 
-find_program(CMAKE_C_COMPILER aarch64-linux-gnu-gcc PATHS
-    "${TOOLCHAIN_ROOT}/bin"
-    "/usr/bin"
-    "/usr/aarch64-linux-gnu/bin"
-    "/opt/aarch64-linux-gnu/bin"
-    NO_DEFAULT_PATH)
-
-find_program(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++ PATHS
-    "${TOOLCHAIN_ROOT}/bin"
-    "/usr/bin"
-    "/usr/aarch64-linux-gnu/bin"
-    "/opt/aarch64-linux-gnu/bin"
-    NO_DEFAULT_PATH)
+find_program(CMAKE_C_COMPILER aarch64-linux-gnu-gcc PATHS "${TOOLCHAIN_ROOT}/bin" "/usr/bin" "/usr/aarch64-linux-gnu/bin" "/opt/aarch64-linux-gnu/bin" NO_DEFAULT_PATH)
+find_program(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++ PATHS "${TOOLCHAIN_ROOT}/bin" "/usr/bin" "/usr/aarch64-linux-gnu/bin" "/opt/aarch64-linux-gnu/bin" NO_DEFAULT_PATH)
 
 find_program(CMAKE_LINKER aarch64-linux-gnu-ld PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_AR aarch64-linux-gnu-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
@@ -127,19 +116,7 @@ if (EXISTS "${CMAKE_SYSROOT}/lib/aarch64-linux-gnu/")
     list(APPEND EXTRA_LINKS "-Wl,-rpath-link,${CMAKE_SYSROOT}/lib/aarch64-linux-gnu" "-L${CMAKE_SYSROOT}/lib/aarch64-linux-gnu")
 endif()
 
-set(CFLAGS "")
-list(APPEND CFLAGS
-    "-I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include"
-    "-I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include"
-    "-I/usr/include"
-    "-DSTANDALONE"
-    "-DPIC"
-    "-D_REENTRANT"
-    "-D_LARGEFILE64_SOURCE"
-    "-D_FILE_OFFSET_BITS=64"
-    "-DHAVE_LIBBCM_HOST"
-    "-DUSE_EXTERNAL_LIBBCM_HOST"
-)
+set(CFLAGS "--sysroot=${SYSROOT} -I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include -I/usr/include -DSTANDALONE -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST")
 
 # Compiler and linker flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -march=armv8-a")
