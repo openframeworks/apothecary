@@ -12,9 +12,9 @@ CROSSCOMPILE=${CROSSCOMPILE:-1}
 export HOST_ARCH=$(uname -m)
 export HOST_PLATFORM=$(uname)
 
-if [[ "$HOST_ARCH" != "$CROSS_MARCH" ]]; then
+if [[ "$HOST_ARCH" != "$CROSS_ARCH" ]]; then
     CROSSCOMPILE=1
-    echo "Detected different host ($HOST_ARCH) and target ($CROSS_MARCH). Enabling cross-compilation."
+    echo "Detected different host ($HOST_ARCH) and target ($CROSS_ARCH). Enabling cross-compilation."
 else
     CROSSCOMPILE=0
     echo "Native compilation detected. No cross-compilation needed."
