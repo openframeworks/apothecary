@@ -20,7 +20,9 @@ sudo apt install -y \
     crossbuild-essential-arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
-    binutils-aarch64-linux-gnu
+    binutils-aarch64-linux-gnu \
+    qemu-user-static \
+    binfmt-support
 
 sudo apt install -y \
     python3-minimal \
@@ -54,6 +56,15 @@ fi
 if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
+
+sudo debootstrap --arch=arm64 stable ./arm64-rootfs http://deb.debian.org/debian/
+sudo cp /usr/bin/qemu-aarch64-static arm64-rootfs/usr/bin/
+
+sudo mount --bind /dev arm64-rootfs/dev
+sudo mount --bind /proc arm64-rootfs/proc
+sudo mount --bind /sys arm64-rootfs/sys
+sudo chroot arm64-rootfs /bin/bash
+
 # Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
 echo "making sources file arm64"
