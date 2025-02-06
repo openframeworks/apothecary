@@ -76,31 +76,91 @@ cd $OUTPUT_FOLDER
 
 echo "Compressing individual libraries from [$OUTPUT_FOLDER]..."
 
-for LIB in $FORMULAS; do
-    if [ -d "$LIB" ]; then
-        if [[ "$TARGET" == "msys2" || "$TARGET" == "vs" ]]; then
-            # ZIP format for Windows (msys2 / vs)
-            TARBALL="oF_${LIB}_${TARGET}_${ARCH}.zip"
-            echo "Packaging $LIB -> $TARBALL"
-            if [[ "$TARGET" == "msys2" ]]; then
-                "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$LIB"
-            else
-                "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$LIB"
+for LIB_PATH in "$OUTPUT_FOLDER"/*/; do
+    LIB=$(basename "$LIB_PATH")
+
+    if [[ -d "$LIB_PATH" ]]; then
+        # Set up base package name
+        TARBALL="$OUTPUT_FOLDER/oF_${LIB}_${TARGET}_${ARCH}"
+
+        # Linux (add GCC postfix if available)
+        if [[ "$TARGET" == "linux" ]]; then
+            if [[ -n "$GCC" ]]; then
+                TARBALL="${TARBALL}_${GCC}"
             fi
-        else
-            # TAR format for Linux/macOS/Emscripten
-            TARBALL="oF_${LIB}_${TARGET}_${ARCH}.tar.bz2"
+            TARBALL="${TARBALL}.tar.bz2"
             echo "Packaging $LIB -> $TARBALL"
-            tar cjvf "$TARBALL" "$LIB"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
+
+        # Windows MSYS2 (add MSYSTEM postfix if available)
+        elif [[ "$TARGET" == "msys2" ]]; then
+            if [[ -n "$MSYSTEM" ]]; then
+                TARBALL="${TARBALL}_${MSYSTEM}"
+            fi
+            TARBALL="${TARBALL}.zip"
+            echo "Packaging $LIB -> $TARBALL"
+
+            pushd "$OUTPUT_FOLDER" > /dev/null
+            "/c/Program Files/7-Zip/7z.exe" a "$TARBALL" "$LIB"
+            popd > /dev/null
+
+        # Windows Visual Studio (add VS version if available)
+        elif [[ "$TARGET" == "vs" ]]; then
+            if [[ -n "$VS_VER" ]]; then
+                TARBALL="${TARBALL}_VS${VS_VER}"
+            fi
+            TARBALL="${TARBALL}.zip"
+            echo "Packaging $LIB -> $TARBALL"
+
+            pushd "$OUTPUT_FOLDER" > /dev/null
+            "/c/Program Files/7-Zip/7z.exe" a "$TARBALL" "$LIB"
+            popd > /dev/null
+
+        # Emscripten
+        elif [[ "$TARGET" == "emscripten" ]]; then
+            TARBALL="${TARBALL}.tar.bz2"
+            echo "Packaging $LIB -> $TARBALL"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
+
+        # Android
+        elif [[ "$TARGET" == "android" ]]; then
+            TARBALL="${TARBALL}.tar.bz2"
+            echo "Packaging $LIB -> $TARBALL"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
+
+        # macOS (add bundle postfix if available)
+        elif [[ "$TARGET" == "macos" ]]; then
+            if [[ -n "$BUNDLE" ]]; then
+                TARBALL="${TARBALL}_${BUNDLE}"
+            fi
+            TARBALL="${TARBALL}.tar.bz2"
+            echo "Packaging $LIB -> $TARBALL"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
+
+        # Apple Platforms (iOS, tvOS, etc.)
+        elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+            if [[ -n "$BUNDLE" ]]; then
+                TARBALL="${TARBALL}_${BUNDLE}"
+            fi
+            TARBALL="${TARBALL}.tar.bz2"
+            echo "Packaging $LIB -> $TARBALL"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
+
+        # Default fallback
+        else
+            TARBALL="${TARBALL}.tar.bz2"
+            echo "Packaging $LIB -> $TARBALL"
+            tar cjvf "$TARBALL" -C "$OUTPUT_FOLDER" "$LIB"
         fi
 
-        if [ $? -eq 0 ]; then
-            echo "Successfully created package: $TARBALL"
+        # Check if packaging was successful
+        if [[ $? -eq 0 ]]; then
+            echo "✅ Successfully created package: $TARBALL"
         else
-            echo "Error: Failed to package $LIB"
+            echo "❌ Error: Failed to package $LIB"
         fi
     else
-        echo "Warning: Skipping $LIB as it does not exist in $OUTPUT_FOLDER"
+        echo "⚠️ Warning: Skipping $LIB_PATH as it is not a directory"
     fi
 done
 
