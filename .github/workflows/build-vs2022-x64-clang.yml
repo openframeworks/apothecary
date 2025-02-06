@@ -1,0 +1,219 @@
+name: build-vs2022-64-clang
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  TARGET: "vs"
+  ARCH: 64
+  NO_FORCE: 1
+  VS_VER: 17
+  GA_CI_SECRET: ${{ secrets.CI_CI_SECRET }}
+  USE_ARTIFACT: true
+  DISABLE_WORKFLOW: "false"
+
+jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_disabled: ${{ steps.check-disabled.outputs.disabled }}
+    steps:
+      - name: Check if Workflow is disabled
+        id: check-disabled
+        shell: bash
+        run: |
+          if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
+            echo "disabled=true" >> $GITHUB_ENV
+            echo "::set-output name=disabled::true"
+          else
+            echo "::set-output name=disabled::false"
+          fi
+
+  build-vs2022-64:
+    if: needs.pre-check.outputs.workflow_disabled != 'true'
+    needs: pre-check
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        bundle: [1, 2]
+        compiler: [LLVM]
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Check if Workflow is disabled
+        shell: bash
+        run: |
+          if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
+            echo "Workflow is disabled. Exiting."
+            exit 78
+          fi
+
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            base-devel
+            unzip
+            dos2unix
+            gperf
+            git
+            python3
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-gcc-libs
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gdb
+            mingw-w64-x86_64-make
+
+      - name: Clone repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Determine Release
+        id: vars
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            echo "RELEASE=nightly" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
+            echo "RELEASE=latest" >> $GITHUB_ENV
+          else
+            echo "RELEASE=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Download artifacts
+        uses: actions/github-script@v7
+        if: env.USE_ARTIFACT == 'true'
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            // Ensure the output directory exists
+            const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
+            if (!fs.existsSync(outputDir)){
+              fs.mkdirSync(outputDir);
+            }
+            // List all artifacts for the repository
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: 'openframeworks',
+              repo: 'apothecary',
+              sort: 'created_at',
+              direction: 'desc',
+              per_page: 150
+            });
+            const target = process.env.TARGET;
+            const arch = process.env.ARCH;
+            const bundle = process.env.MATRIX_BUNDLE;
+            const release = process.env.RELEASE;
+            const artifactName = `libs-${release}-${target}-${arch}-${bundle}`;
+            let count = 0;
+            const max = 1;
+            for (const artifact of artifacts.data.artifacts) {
+              const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}`) && !artifact.expired;
+              if (isArtifactMatch) {
+                const download = await github.rest.actions.downloadArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                  archive_format: 'zip',
+                });
+                const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
+                fs.writeFileSync(artifactPath, Buffer.from(download.data));
+                console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
+                count++;
+                if (count >= max) {
+                  break;
+                }
+              }
+            }
+
+      - name: Extract Artifacts to /out
+        if: env.USE_ARTIFACT == 'true'
+        run: |
+          mkdir -p out
+          if ls out/*.zip 1> /dev/null 2>&1; then
+            for zip in out/*.zip; do
+                echo "Extracting $zip..."
+                unzip -o "$zip" -d out/
+                echo "Removing $zip..."
+                rm "$zip"
+            done
+            echo "First-level extraction and cleanup complete."
+            # Check and extract second-level zip files and remove them
+            if ls out/*.zip 1> /dev/null 2>&1; then
+                for nested_zip in out/*.zip; do
+                    echo "Extracting nested zip $nested_zip..."
+                    unzip -o "$nested_zip" -d out/
+                    echo "Removing $nested_zip..."
+                    rm "$nested_zip"
+                done
+                echo "Second-level extraction and cleanup complete."
+            else
+                echo "No nested zip files found."
+            fi
+          else
+              echo "No zip files to extract."
+          fi
+          if ls out/*.tar.bz2 1> /dev/null 2>&1; then
+            for tarball in out/*.tar.bz2; do
+                echo "Extracting $tarball..."
+                tar -xjf "$tarball" -C out/
+            done
+            echo ".tar.bz2 extraction complete."
+            rm -f out/*.tar.bz2
+          else
+            echo "No .tar.bz2 files to extract."
+          fi
+
+      - name: List output directory
+        run: ls -lah out/
+
+      - name: Build64
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/build.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          VS_COMPILER: ${{ matrix.compiler }}
+
+      - name: Package
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          VS_COMPILER: ${{ matrix.compiler }}
+
+      - name: Upload binaries as Artifact
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' )
+        uses: actions/upload-artifact@v4
+        env:
+          release: ${{ env.RELEASE }}
+        with:
+          name: libs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ env.ARCH }}-${{ matrix.bundle }}-${{ matrix.compiler }}
+          path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
+          retention-days: 31
+
+      - name: Update Release x64
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v2.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE }}
+          draft: false
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
