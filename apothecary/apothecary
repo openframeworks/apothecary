@@ -343,8 +343,9 @@ trapError() {
 while getopts t:a:b:d:s:j:m:c:hgvxfpewy opt ; do
 	case "$opt" in
 		t) # set the library build type
+			export TARGET=$TYPE
 			export TYPE="$OPTARG";;
-			#export TARGET=$TYPE
+
 		a) # set the architecture
 			export ARCH=$OPTARG
 			if [ -z "${ARCH+x}" ]; then
@@ -1216,7 +1217,6 @@ function doCommand() {
 		        echo "No formulas to build"
 		        exit 0
 		    fi
-		    ITER=0
 		    for FORMUL in "${FORMULAS[@]}"; do
 		        FORMULA_NAME="${FORMUL%.*}"
 		        doCommand $shouldSource $cmd $FORMULA_NAME
