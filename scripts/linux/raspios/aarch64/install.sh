@@ -32,7 +32,6 @@ sudo apt install -y \
     g++-aarch64-linux-gnu \
     binutils-aarch64-linux-gnu \
     debootstrap \
-    qemu \
     qemu-user-static \
     binfmt-support
 
