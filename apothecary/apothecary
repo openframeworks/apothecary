@@ -1211,10 +1211,16 @@ function doCommand() {
 
 		# process all formulas in formulas dir, ignore depends subdir
 		if [ "$1" == "core" ] ; then
-			local formula
-			for formula in $( ls -1 $FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
-				doCommand $shouldSource $cmd "${formula%.*}"
-			done
+			source $APOTHECARY_DIR/../scripts/calculate_formulas.sh
+		    if [ -z "$FORMULAS" ] || [ ${#FORMULAS[@]} -eq 0 ]; then
+		        echo "No formulas to build"
+		        exit 0
+		    fi
+		    ITER=0
+		    for FORMUL in "${FORMULAS[@]}"; do
+		        FORMULA_NAME="${FORMUL%.*}"
+		        doCommand $shouldSource $cmd $FORMULA_NAME
+		    done
 			echoInfo " ----- Apothecary Core Build Sucessfully completed for $TYPE -----"
 		# process all addons in the addons dir
 		elif [ "$1" == "addons" ] ; then
@@ -1224,7 +1230,6 @@ function doCommand() {
 					doCommand $shouldSource $cmd $addon
 				fi
 			done
-
 		# process all formulas in the dependencies dir
 		elif [ "$1" == "depends" ] ; then
 			local depend
