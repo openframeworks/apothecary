@@ -6,7 +6,7 @@ APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd $APOTHECARY_LEVEL
 
 CROSS_COMPILER="raspbian"
-CROSS_SYSROOT="rpi_rootfs"
+CROSS_SYSROOT="rpi-arm64-rootfs"
 CROSS_ARCH="aarch64"
 CROSSCOMPILE=${CROSSCOMPILE:-1}
 SYSROOT_PATH="/usr/${CROSS_ARCH}-linux-gnu"
@@ -25,8 +25,8 @@ if [ "${CROSSCOMPILE}" -eq 0 ]; then
     export ROOTFS="/"
     export TOOLCHAIN_ROOT="/usr"
 else
-    export ROOTFS="${APOTHECARY_LEVEL}/${CROSS_SYSROOT}"
-    export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/${CROSS_COMPILER}"
+    export ROOTFS="/rpi-arm64-rootfs/"
+    export TOOLCHAIN_ROOT="/usr/aarch64-linux-gnu/"
 fi
 
 export SYSROOT=${ROOTFS}

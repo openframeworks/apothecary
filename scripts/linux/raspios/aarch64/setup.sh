@@ -11,11 +11,6 @@ trapError() {
     exit 1
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-cd $APOTHECARY_LEVEL
-
 if grep -q "Raspbian" /etc/os-release 2>/dev/null && [[ "$(uname -m)" == "aarch64" ]]; then
     NATIVE="true"
     echo "Detected Raspberry Pi OS (Raspbian) on arm64. Setting NATIVE=true"
@@ -53,14 +48,9 @@ fi
 
 
 if [ "$NATIVE" == "0" ]; then
-
-    git clone https://github.com/danoli3/rpi_rootfs.git
-    cd $CROSS_SYSROOT
-
-    sudo chmod +x ./build_rootfs_arm64.sh
-
-    ./build_rootfs_arm64.sh download
-    ./build_rootfs_arm64.sh create
+    wget https://downloads.raspberrypi.com/raspios_lite_arm64/root.tar.xz
+    mkdir -p rpi-arm64-rootfs
+    sudo tar -xJpf raspios_lite_arm64/root.tar.xz -C rpi-arm64-rootfs
 fi
 
 echo "===setup complete==="

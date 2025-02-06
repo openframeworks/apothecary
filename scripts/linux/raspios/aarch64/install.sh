@@ -30,7 +30,12 @@ sudo apt install -y \
     crossbuild-essential-arm64 \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
-    binutils-aarch64-linux-gnu
+    binutils-aarch64-linux-gnu \
+    debootstrap \
+    qemu \
+    qemu-user-static \
+    binfmt-support
+
 
 sudo apt install -y \
     python3-minimal \
@@ -53,6 +58,14 @@ fi
 if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
+
+sudo mount --bind /dev rpi-arm64-rootfs/dev
+sudo mount --bind /proc rpi-arm64-rootfs/proc
+sudo mount --bind /sys rpi-arm64-rootfs/sys
+
+sudo chroot rpi-arm64-rootfs /bin/bash
+
+
 # Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/raspberrypi-arm64.sources"
 echo "Creating sources file for Raspberry Pi (ARM64) at $OUTPUT_FILE"
@@ -108,6 +121,17 @@ echo "Installing ARM64 packages..."
 ARCH_SUFFIX=":arm64"
 if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
+fi
+
+
+if [ -d "/raspbian/" ]; then
+    sudo mkdir -p /usr/aarch64-linux-gnu
+    sudo ln -s /raspbian/toolchain/bin/aarch64-linux-gnu-* /usr/aarch64-linux-gnu/
+    sudo ln -s /raspbian/toolchain/lib /usr/aarch64-linux-gnu/lib
+    sudo ln -s /raspbian/toolchain/include /usr/aarch64-linux-gnu/include
+else
+    echo "Error: /raspbian/ folder not found. Please check your installation."
+    exit 1
 fi
 
 echo "Installing ARM64 packages..."
