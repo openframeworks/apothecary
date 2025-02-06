@@ -21,6 +21,7 @@ sudo apt install -y \
     gcc-aarch64-linux-gnu \
     g++-aarch64-linux-gnu \
     binutils-aarch64-linux-gnu \
+    debootstrap \
     qemu-user-static \
     binfmt-support
 
@@ -57,7 +58,14 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
 
-sudo debootstrap --arch=arm64 stable ./arm64-rootfs http://deb.debian.org/debian/
+# sudo debootstrap --arch=arm64 stable ./arm64-rootfs http://deb.debian.org/debian/
+
+IMAGE="ubuntu-base-24.04.1-base-arm64"
+wget https://cdimage.ubuntu.com/ubuntu-base/releases/noble/release/${IMAGE}.tar.gz
+mkdir arm64-rootfs
+sudo tar -xpf ${IMAGE}.tar.gz -C arm64-rootfs
+
+
 sudo cp /usr/bin/qemu-aarch64-static arm64-rootfs/usr/bin/
 
 sudo mount --bind /dev arm64-rootfs/dev
