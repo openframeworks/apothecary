@@ -603,9 +603,10 @@ if [ "$TYPE" = "vs" ]; then
 	if [ $VS_COMPILER == "LLVM" ]; then
 		export VS_C_FLAGS="-Wno-error" # warnings will not be treated as errors
 		export EXCEPTION_FLAGS=""
-		export FLAGS_RELEASE="-O3 -DUNICODE -D_UNICODE"
+		export FLAGS_RELEASE="/O2 /DNDEBUG -DUNICODE -D_UNICODE -Xclang -fms-compatibility-version=19.30"
 		export FLAGS_DEBUG="-O0 -DUNICODE -D_UNICODE"
 		export EXE_FLAGS=""
+		export CMAKE_COMPILER="clang-cl"
 	else
 		if [ $ARCH == "arm64ec" ]; then
 			export VS_C_FLAGS="/Gy /GL- /guard:cf"
@@ -616,6 +617,7 @@ if [ "$TYPE" = "vs" ]; then
 		export FLAGS_DEBUG="${MT_TYPE}d ${CALLING_CONVENTION} /Od /DDEBUG -DUNICODE -D_UNICODE"
 		export EXCEPTION_FLAGS="/EHsc"
 		export EXE_FLAGS="/NODEFAULTLIB:libvcruntime.lib /DEFAULTLIB:ucrt.lib /DEFAULTLIB:msvcrt.lib"
+		export CMAKE_COMPILER="msvc"
 	fi
 
 	VS_BAT="vcvarsall.bat"
