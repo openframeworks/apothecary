@@ -127,6 +127,23 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
 fi
 
+if [ -d "/arm64-rootfs/" ]; then
+    echo "Setting up Linux aarch64 toolchain inside rootfs..."
+
+    sudo mkdir -p /usr/aarch64-linux-gnu
+    sudo mkdir -p /arm64-rootfs/usr/aarch64-linux-gnu
+
+    # Link the toolchain inside rootfs (Linux aarch64)
+    sudo ln -s /arm64-rootfs/usr/bin/aarch64-linux-gnu-* /usr/aarch64-linux-gnu/
+    sudo ln -s /arm64-rootfs/usr/lib /usr/aarch64-linux-gnu/lib
+    sudo ln -s /arm64-rootfs/usr/include /usr/aarch64-linux-gnu/include
+
+    echo "Toolchain linked for Linux aarch64 at /usr/aarch64-linux-gnu/"
+else
+    echo "Error: /arm64-rootfs/ does not exist. Ensure rootfs is extracted."
+    exit 1
+fi
+
 echo "Installing ARM64 packages..."
 apt-get install -y --no-install-recommends \
     aptitude$ARCH_SUFFIX \
