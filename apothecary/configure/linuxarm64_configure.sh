@@ -37,6 +37,8 @@ else
 fi
 export SYSROOT=${ROOTFS}
 
+
+
 # if [ "${GCC_VERSION}" -eq 0 ]; then
 #     export GCC_VERSION="14.2.0"
 # fi
@@ -96,6 +98,8 @@ echo "Toolchain ROOT: $TOOLCHAIN_ROOT"
 echo "CROSS_ARCH: $CROSS_ARCH"
 echo "HOST_ARCH: $HOST_ARCH"
 echo "HOST_PLATFORM: $HOST_PLATFORM"
+echo "GCC Arch:"
+file ${SYSROOT_PATH}-gcc
 # echo "LDFLAGS : $LDFLAGS"
 # echo "CFLAGS : $CFLAGS"
 # echo "Path: [$PATH]"
