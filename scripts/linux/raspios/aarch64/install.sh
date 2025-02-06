@@ -134,7 +134,7 @@ else
 fi
 
 echo "Installing ARM64 packages..."
-apt-get install -y --no-install-recommends \
+sudo apt-get install -y --no-install-recommends \
     aptitude$ARCH_SUFFIX \
     gfortran$ARCH_SUFFIX \
     texinfo$ARCH_SUFFIX \

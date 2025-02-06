@@ -60,20 +60,26 @@ else
 
 # sudo debootstrap --arch=arm64 stable ./arm64-rootfs http://deb.debian.org/debian/
 
+echo "downloading aarch64 linux base"
 IMAGE="ubuntu-base-24.04.1-base-arm64"
 wget https://cdimage.ubuntu.com/ubuntu-base/releases/noble/release/${IMAGE}.tar.gz
 mkdir arm64-rootfs
 sudo tar -xpf ${IMAGE}.tar.gz -C arm64-rootfs
 
+echo "base location"
+ls
+pwd
 
-sudo cp /usr/bin/qemu-aarch64-static arm64-rootfs/usr/bin/
+echo "setup qemu"
+if [ ! -f "/arm64-rootfs/usr/bin/qemu-aarch64-static" ]; then
+    echo "Copying qemu-aarch64-static into rootfs..."
+    sudo cp /usr/bin/qemu-aarch64-static arm64-rootfs/usr/bin/
+fi
 
 sudo mount --bind /dev arm64-rootfs/dev
 sudo mount --bind /proc arm64-rootfs/proc
 sudo mount --bind /sys arm64-rootfs/sys
 sudo chroot arm64-rootfs /bin/bash
-
-
 
 # Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
@@ -127,7 +133,7 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
 fi
 
-if [ -d "/arm64-rootfs/" ]; then
+if [ -d "arm64-rootfs/" ]; then
     echo "Setting up Linux aarch64 toolchain inside rootfs..."
 
     sudo mkdir -p /usr/aarch64-linux-gnu
@@ -145,7 +151,7 @@ else
 fi
 
 echo "Installing ARM64 packages..."
-apt-get install -y --no-install-recommends \
+sudo apt-get install -y --no-install-recommends \
     aptitude$ARCH_SUFFIX \
     gfortran$ARCH_SUFFIX \
     texinfo$ARCH_SUFFIX \
