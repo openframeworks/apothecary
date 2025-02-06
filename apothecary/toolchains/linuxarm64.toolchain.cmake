@@ -30,8 +30,13 @@ if(NOT DEFINED SYSROOT)
     if(DEFINED ENV{SYSROOT})
         set(SYSROOT $ENV{SYSROOT})
     else()
-        set(SYSROOT "/usr/aarch64-linux-gnu")
-        message(WARNING "SYSROOT not specified. Defaulting to SYSROOT=${SYSROOT}")
+        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+            set(SYSROOT "/")  # Use native root
+            message(STATUS "Host is AArch64. Using native SYSROOT=${SYSROOT}")
+        else()
+            set(SYSROOT "/arm64-rootfs")  # Use cross-compilation root
+            message(WARNING "SYSROOT not specified. Defaulting to SYSROOT=${SYSROOT} for cross-compilation")
+        endif()
     endif()
 endif()
 
@@ -40,8 +45,13 @@ if(NOT DEFINED TOOLCHAIN_ROOT)
     if(DEFINED ENV{TOOLCHAIN_ROOT})
         set(TOOLCHAIN_ROOT $ENV{TOOLCHAIN_ROOT})
     else()
-        set(TOOLCHAIN_ROOT "/usr")
-        message(WARNING "TOOLCHAIN_ROOT not specified. Defaulting to TOOLCHAIN_ROOT=${TOOLCHAIN_ROOT}")
+        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+            set(TOOLCHAIN_ROOT "/usr")  # Native AArch64 toolchain
+            message(STATUS "Host is AArch64. Using native TOOLCHAIN_ROOT=${TOOLCHAIN_ROOT}")
+        else()
+            set(TOOLCHAIN_ROOT "/usr/aarch64-linux-gnu/")  # Cross-compilation toolchain
+            message(WARNING "TOOLCHAIN_ROOT not specified. Defaulting to TOOLCHAIN_ROOT=${TOOLCHAIN_ROOT} for cross-compilation")
+        endif()
     endif()
 endif()
 

@@ -27,7 +27,7 @@ else
 fi
 
 if [[ "$CROSSCOMPILE" -eq 1 ]]; then
-    export ROOTFS="${SYSROOT_PATH}"
+    export ROOTFS="/arm64-rootfs"
     export TOOLCHAIN_ROOT="${SYSROOT_PATH}"
     echo "Using sysroot at ${SYSROOT_PATH}"
 else

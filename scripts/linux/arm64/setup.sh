@@ -73,6 +73,8 @@ sudo mount --bind /proc arm64-rootfs/proc
 sudo mount --bind /sys arm64-rootfs/sys
 sudo chroot arm64-rootfs /bin/bash
 
+
+
 # Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
 echo "making sources file arm64"
