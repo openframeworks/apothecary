@@ -71,6 +71,7 @@ jobs:
             python3:p
             libpng:p
             zlib:p
+            curl:p
       - name: Determine Release
         id: vars
         shell: bash
