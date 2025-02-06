@@ -74,7 +74,7 @@ function build() {
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -144,7 +144,7 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include
         cmake --build . --target install --config Release -j${PARALLEL_MAKE}

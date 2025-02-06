@@ -154,7 +154,7 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DCMAKE_MACOSX_BUNDLE=OFF \
             -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..

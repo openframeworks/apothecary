@@ -98,7 +98,8 @@ function build() {
                 -DENABLE_ARC=ON \
                 -DENABLE_VISIBILITY=OFF \
                 -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-                -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
+                -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+                -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22
             cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
         fi

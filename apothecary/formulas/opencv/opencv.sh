@@ -185,6 +185,7 @@ function build() {
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_FAST_MATH=OFF \
             -DCMAKE_EXE_LINKER_FLAGS="${FRAMEWORKS}" \
             -DCMAKE_CXX_FLAGS="-fvisibility-inlines-hidden -stdlib=libc++ -fPIC -DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
@@ -330,6 +331,8 @@ function build() {
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -D BUILD_SHARED_LIBS=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_SYSTEM_PROCESSOR="${PLATFORM}" \
             ${EXTRA_DEFS} \
             ${CMAKE_WIN_SDK} \
@@ -364,6 +367,8 @@ function build() {
             -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DBUILD_WITH_STATIC_CRT=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             ${CMAKE_WIN_SDK}
         cmake --build . --target install --config Release -j${PARALLEL_MAKE}
         cd ..
@@ -485,6 +490,8 @@ function build() {
             -DENABLE_NEON=ON \
             -DENABLE_VFPV3=ON \
             ${EXTRA_DEFS} \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DBUILD_TESTS=OFF \
             -DANDROID_NDK=${NDK_ROOT} \
             -DCMAKE_BUILD_TYPE=Release \
@@ -636,6 +643,7 @@ function build() {
             -DWASM=ON \
             -DBUILD_TESTS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCV_ENABLE_INTRINSICS=OFF \
             -DBUILD_WASM_INTRIN_TESTS=OFF \
             -DBUILD_PERF_TESTS=OFF \

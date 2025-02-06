@@ -116,6 +116,8 @@ function build() {
             -DCMAKE_SYSTEM_NAME=$TYPE \
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY
         cmake --build . --config Release -j${PARALLEL_MAKE}
@@ -157,13 +159,15 @@ function build() {
             -DSKIP_EXAMPLE=1 \
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_SYSTEM_NAME=$TYPE \
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DLIBXML2_ROOT=${LIBXML2_ROOT} \
             -DLIBXML2_INCLUDE_DIR=${LIBXML2_INCLUDE_DIR} \
             -DLIBXML2_LIBRARY=${LIBXML2_LIBRARY} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_VERBOSE_MAKEFILE=ON \
             -DBUILD_SHARED_LIBS=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE}
         cd ..
@@ -206,6 +210,8 @@ function build() {
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
             -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
             -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=. \
             -A "${PLATFORM}" \
@@ -227,6 +233,8 @@ function build() {
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
             -DCMAKE_PREFIX_PATH="${ZLIB_ROOT} ${LIBXML2_ROOT}" \
             -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_PREFIX=. \
             -A "${PLATFORM}" \
@@ -268,7 +276,7 @@ function build() {
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DDO_XML_INSTALL=ON \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
@@ -328,7 +336,8 @@ function build() {
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF
 
         cmake --build . --config Release -j${PARALLEL_MAKE}
@@ -365,6 +374,8 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DUSE_XML2=ON \
             -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY

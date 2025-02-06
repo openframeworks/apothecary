@@ -43,6 +43,8 @@ function build() {
  			-DURIPARSER_BUILD_TOOLS=OFF \
  			-DURIPARSER_BUILD_WCHAR_T=ON \
  			-DURIPARSER_SHARED_LIBS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
  			-DDBUILD_SHARED_LIBS=OFF \
 			-DURIPARSER_BUILD_CHAR=ON \
 			-DURIPARSER_ENABLE_INSTALL=OFF \
@@ -92,7 +94,7 @@ function build() {
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DURIPARSER_ENABLE_INSTALL=ON \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
@@ -124,7 +126,7 @@ function build() {
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DHAVE_REALLOCARRAY=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \

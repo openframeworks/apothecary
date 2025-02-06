@@ -82,7 +82,9 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=ON \
-            -Dgtest_disable_pthreads=ON -DSHADERC_SKIP_TESTS=ON -DSHADERC_ENABLE_SHARED_CRT=ON"
+            -Dgtest_disable_pthreads=ON \
+            -DSHADERC_SKIP_TESTS=ON \
+            -DSHADERC_ENABLE_SHARED_CRT=ON"
 
         cmake .. ${DEFS} \
             -A "${PLATFORM}" \
@@ -91,6 +93,8 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} " \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -109,9 +113,23 @@ function build() {
         mkdir -p build
         cd build
 
-        cmake .. -Dgtest_disable_pthreads=ON -DSHADERC_SKIP_TESTS=ON -DSHADERC_ENABLE_SHARED_CRT=ON
-        #cmake --build . --config Debug -j${PARALLEL_MAKE} -- -j$PARALLEL_MAKE
-        cmake --build . --config Release -j${PARALLEL_MAKE} -- -j$PARALLEL_MAKE
+        DEFS="
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=ON \
+            -Dgtest_disable_pthreads=ON \
+            -DSHADERC_SKIP_TESTS=ON"
+
+        cmake ..${DEFS} \
+            -A "${PLATFORM}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}"
+        cmake --build . --config Release -j${PARALLEL_MAKE}
 
     fi
 }

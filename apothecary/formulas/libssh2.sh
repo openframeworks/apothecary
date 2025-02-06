@@ -41,6 +41,8 @@ function build() {
     cmake .. \
         -DCMAKE_C_FLAGS="${DEFINES}" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+        -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
         -DCMAKE_INSTALL_PREFIX=Release
 
     cmake --build . --config Release -j${PARALLEL_MAKE} --target install
