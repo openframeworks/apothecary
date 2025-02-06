@@ -55,6 +55,7 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
         "libpng"
         "glew"
         "glfw"
+        "freetype"
         "libxml2"
         "svgtiny"
         "tess2"
