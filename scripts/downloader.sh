@@ -86,12 +86,12 @@ check_remote_vs_local() {
     REMOTE_CALL=""
     headers=$(curl -L -I --retry ${RETRY_MAX} --max-redirs ${MAX_REDIRECTS} ${EXTRA_ARGS} --retry-connrefused --silent --head $REMOTE_URL)
     RemoteSize=$(echo "$headers" | grep -i "content-length" | cut -d ' ' -f2 | tr -d '\r' | tail -n 1)
-    modified=$(echo "$headers" | grep -i "last-modified" | sed -E 's/[lL]ast-[mM]odified: //g' | tail -n 1)
+    modified=$(echo "$headers" | grep -i "last-modified" | sed -E 's/[lL]ast-[mM]odified: //g' | tail -n 1 || echo "Unknown")
     LocalSizeMB=$(convert_bytes_to_mb $LocalSize)
     RemoteSizeMB=$(convert_bytes_to_mb $RemoteSize)
 
     echo "  [downloader] Remote size:[${RemoteSizeMB}] | Local size:[${LocalSizeMB}]"
-    if [ -z "$modified" ]; then
+    if [ -z "$modified" ] || [[ "$modified" == "Unknown" ]]; then
         echo "  [downloader] failed to retrieve last-modified header from remote ["$REMOTE_URL"] ... Proceeding with download"
         CHECK_RESULT=0
         rm -f $LOCAL_FILE
