@@ -20,14 +20,17 @@ GIT_TAG=v$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
-    #downloader ${GIT_URL}/archive/refs/tags/v$VER.tar.gz
-    #tar -xf v$VER.tar.gz
-    #mv brotli-$VER brotli
-    #rm v$VER.tar.gz
-    downloader ${GIT_URL}/archive/refs/heads/master.tar.gz
-    tar -xf master.tar.gz
-    mv brotli-master brotli
-    rm master.tar.gz
+    if [ "$TYPE" == "vs" ]; then
+        downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
+        unzip -q v${VER}.zip
+        mv brotli-${VER} brotli
+        rm -f v${VER}.zip
+    else
+        downloader ${GIT_URL}/archive/refs/tags/v${VER}.tar.gz
+        tar -xf v${VER}.tar.gz
+        mv brotli-${VER} brotli
+        rm -f v${VER}.tar.gz
+    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -39,7 +42,6 @@ function prepare() {
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "vs" ]; then
-        find ./ -name "*.o" -type f -delete
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
@@ -50,7 +52,6 @@ function build() {
         #   echo "ARM64EC platform detected, exiting build function."
         #   return
         # fi
-
         DEFINES="
           -DCMAKE_C_STANDARD=${C_STANDARD} \
           -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
