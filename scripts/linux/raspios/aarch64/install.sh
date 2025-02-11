@@ -1,16 +1,5 @@
 #!/bin/bash
-# set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd $SCRIPT_DIR
-ROOT=$(
-    cd $(dirname "$0")
-    pwd -P
-)/../../../../../
-APOTHECARY_PATH=$ROOT/apothecary
-
 set -e
-
 echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
 
@@ -121,7 +110,6 @@ ARCH_SUFFIX=":arm64"
 if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
 fi
-
 
 if [ -d "/raspbian/" ]; then
     sudo mkdir -p /usr/aarch64-linux-gnu
