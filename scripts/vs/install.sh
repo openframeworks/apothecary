@@ -1,48 +1,26 @@
 #!/usr/bin/env bash
 set -e
 
-# trap any script errors and exit
-trap "trapError" ERR
-
-trapError() {
-    echo
-    echo " ^ Received error ^"
-    exit 1
-}
-
-isRunning() {
-    if [ “$(uname)” == “Linux” ]; then
-        if [ -d /proc/$1 ]; then
-            return 0
+if ! command -v winget &>/dev/null; then
+    REQUIRED_WINGET=("Microsoft.WindowsTerminal" "Ninja-build.Ninja" "jqlang.jq")
+    for pkg in "${REQUIRED_WINGET[@]}"; do
+        if winget list --id "$pkg" &>/dev/null; then
+            INST=true
+            #echo "$pkg is already installed."
         else
-            return 1
+            winget install -e --id "$pkg"
         fi
-    else
-        number=$(ps aux | sed -E "s/[^ ]* +([^ ]*).*/\1/g" | grep ^$1$ | wc -l)
-
-        if [ $number -gt 0 ]; then
-            return 0
-        else
-            return 1
-        fi
-    fi
-}
-
-echoDots() {
-    while isRunning $1; do
-        for i in $(seq 1 10); do
-            echo -ne .
-            if ! isRunning $1; then
-                printf "\r"
-                return
-            fi
-            sleep 2
-        done
-        printf "\r                    "
-        printf "\r"
     done
-}
+fi
 
-winget install -e --id Microsoft.WindowsTerminal
-winget install Ninja-build.Ninja
-winget install jqlang.jq
+# BASH / WASL setup:
+is_installed() {
+    dpkg -s "$1" &>/dev/null
+}
+if grep -qi microsoft /proc/version; then
+    REQUIRED_PKGS=("shasum" "unzip" "autoconf" "libtool" "automake" "dos2unix" "ccache" "cmake" "build-essential")
+    sudo apt update
+    for pkg in "${REQUIRED_PKGS[@]}"; do
+        is_installed "$pkg" || sudo apt install -y "$pkg"
+    done
+fi
