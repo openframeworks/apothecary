@@ -2,7 +2,6 @@
 # pipe commands to core apothecary
 APOTHE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APOTHE_DIR="$(realpath "$APOTHE_DIR/apothecary")"
-SECURE_SCRIPT="$(realpath "$APOTHE_DIR/scripts/secure.sh")"
 APOTHE_SCRIPT="$(realpath "$APOTHE_DIR/apothecary")"
 echo "$(date): [apothecary do my Command: $@]"
 source "$APOTHE_SCRIPT" $@

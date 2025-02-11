@@ -56,6 +56,9 @@ fi
 
 # full path to this script's dir
 APOTHECARY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APOTHECARY_ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+RUN_DIR="$(pwd)"
 
 # full path to the dir of the current formula
 FORMULA_DIR=
@@ -73,19 +76,26 @@ DEPEND_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
-DOWNLOADER_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/downloader.sh")"
-SAVE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/save.sh")"
-LOAD_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/load.sh")"
-SAVE_FILE="$(realpath "$APOTHECARY_DIR/../scripts")/status.txt"
-SECURE_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/secure.sh")"
-FORMAT_SCRIPT="$(realpath "$APOTHECARY_DIR/../scripts/format.sh")"
+if command -v cygpath &> /dev/null; then
+    CONVERT_PATH_CMD="cygpath -wa"
+elif grep -q Microsoft /proc/version; then
+    CONVERT_PATH_CMD="wslpath -w"
+else
+    CONVERT_PATH_CMD="realpath"
+fi
+
+DOWNLOADER_SCRIPT="$(realpath "$APOTHECARY_ROOT_DIR/scripts/downloader.sh")"
+SAVE_SCRIPT="$(realpath "$APOTHECARY_ROOT_DIR/scripts/save.sh")"
+LOAD_SCRIPT="$(realpath "$APOTHECARY_ROOT_DIR/scripts/load.sh")"
+SAVE_FILE="$(realpath "$APOTHECARY_ROOT_DIR/scripts")/status.txt"
+SECURE_SCRIPT="$(realpath "$APOTHECARY_ROOT_DIR/scripts/secure.sh")"
+FORMAT_SCRIPT="$(realpath "$APOTHECARY_ROOT_DIR/scripts/format.sh")"
 OSTYPE_SCRIPT="$(realpath "$APOTHECARY_DIR/ostype.sh")"
 APOTHECARY_SCRIPT="$(realpath "$APOTHECARY_DIR/apothecary")"
 
 USE_SAVE=1
 
 thisDir=$( dirname "`realpath "$0"`" )
-
 BUILD_MACHINE_ARCH=`uname -m`
 
 ################################################################################
@@ -106,7 +116,7 @@ mkdir -p ${APOTHECARY_DIR}/build
 FORMULAS_DIR=$(realpath ${APOTHECARY_DIR}/formulas)
 BUILD_DIR=$(realpath ${APOTHECARY_DIR}/build)
 OF_ROOT=$(realpath ${APOTHECARY_DIR}/../../..)
-REL_LIBS_DIR=${APOTHECARY_DIR}/../out
+REL_LIBS_DIR=$(realpath ${APOTHECARY_ROOT_DIR}/out)
 ADDONS_DIR=$OF_ROOT/addons
 REL_ADDONS_DIR=$OF_ROOT/addons
 # echo "OF: $OF_ROOT/"
@@ -686,9 +696,9 @@ if [ "$TYPE" = "vs" ]; then
 		exit;
 	fi
 	if [ $ARCH == "arm64" ] || [ $ARCH == "arm64ec" ] || [ $ARCH == "ARM" ]; then
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+		VS_VARS_PATH=$($CONVERT_PATH_CMD -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
 	else
-		VS_VARS_PATH=$(cygpath -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
+		VS_VARS_PATH=$($CONVERT_PATH_CMD -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 	fi
 	echoVerbose "VS_VARS_PATH: $VS_VARS_PATH"
 	if [ -z ${VS_BIN_PATH+x} ]; then
