@@ -696,9 +696,9 @@ if [ "$TYPE" = "vs" ]; then
 		exit;
 	fi
 	if [ $ARCH == "arm64" ] || [ $ARCH == "arm64ec" ] || [ $ARCH == "ARM" ]; then
-		VS_VARS_PATH=$($CONVERT_PATH_CMD -wa "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
+		VS_VARS_PATH=$($CONVERT_PATH_CMD "$VS_BASE_PATH/VC/Auxiliary/Build/vcvarsall.bat")
 	else
-		VS_VARS_PATH=$($CONVERT_PATH_CMD -wa "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
+		VS_VARS_PATH=$($CONVERT_PATH_CMD "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 	fi
 	echoVerbose "VS_VARS_PATH: $VS_VARS_PATH"
 	if [ -z ${VS_BIN_PATH+x} ]; then
