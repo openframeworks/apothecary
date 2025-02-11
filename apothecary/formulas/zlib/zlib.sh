@@ -19,7 +19,7 @@ GIT_TAG=v$VER
 function download() {
     . "$DOWNLOADER_SCRIPT"
 
-    if [ "$TYPE" == "vs" ]; then
+    if [ "$TYPE" == "vs" ] && ! command -v unzip >/dev/null 2>&1; then
         downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
         unzip -q v${VER}.zip
         mv zlib-${VER} zlib

@@ -20,7 +20,7 @@ GIT_TAG=v$VER
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
-    if [ "$TYPE" == "vs" ]; then
+    if [ "$TYPE" == "vs" ] && ! command -v unzip >/dev/null 2>&1; then
         downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
         unzip -q v${VER}.zip
         mv brotli-${VER} brotli
