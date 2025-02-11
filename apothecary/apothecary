@@ -398,7 +398,13 @@ while getopts t:a:b:d:s:j:m:c:hgvxfpewy opt ; do
 			echo "$HELP" ; exit 0 ;;
 	esac
 done
-shift $(expr $OPTIND - 1)
+# Ensure OPTIND is set and valid before shifting
+if [[ -n "$OPTIND" && "$OPTIND" -gt 1 ]]; then
+    shift $((OPTIND - 1))
+else
+    echo "WARNING: No arguments to shift. Skipping..."
+fi
+
 
 
 if [ -z "${ARCH+x}" ]; then
