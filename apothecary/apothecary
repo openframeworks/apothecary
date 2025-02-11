@@ -512,6 +512,15 @@ function setup_vs_vars(){
 
 }
 
+add_to_path() {
+    local new_path="$1"
+    if [ -d "$new_path" ] && [[ ":$PATH:" != *":$new_path:"* ]]; then
+        export PATH="$new_path:$PATH"
+        # echo "Skipping: $new_path (already in PATH or does not exist)"
+    fi
+}
+
+
 function with_vs_env(){
 
 	#2019 and onwards we need to pass the platform as the arg
@@ -714,22 +723,24 @@ if [ "$TYPE" = "vs" ]; then
 		fi
 
 		echoVerbose "VS_BIN_PATH was not set - setting to $VS_BIN_PATH"
-		export PATH=$VS_BIN_PATH:$PATH
-		(
-			# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
-			# set input field separator to colon (:) for current scope
-			IFS=:
-			for vs_bin_directory in ${VS_BIN_PATH}; do
-				# we must make sure each given directory exists
-				if [ ! -d ${vs_bin_directory} ]; then
-					echo "Couldn't confirm Visual Studio path exists: '$vs_bin_directory', probably installed on a non standard location?"
-					exit 1
-				else
-					echoVerbose "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'"
-				fi
+        if [ -d "$VS_BIN_PATH" ]; then
+    		export PATH=$VS_BIN_PATH:$PATH
+    		(
+    			# with parentheses we open a new sub-shell scope to make sure we're not overwriting any presets for IFS
+    			# set input field separator to colon (:) for current scope
+    			IFS=:
+    			for vs_bin_directory in ${VS_BIN_PATH}; do
+    				# we must make sure each given directory exists
+    				if [ ! -d ${vs_bin_directory} ]; then
+    					echo "Couldn't confirm Visual Studio path exists: '$vs_bin_directory', probably installed on a non standard location?"
+    					exit 1
+    				else
+    					echoVerbose "Confirmed VS_BIN_PATH element exists: '${vs_bin_directory}'"
+    				fi
 
-			done
-		)
+    			done
+    		)
+        fi
 		# Test for existence of directory where cmake should live
 		# then prepend cmake path to PATH
 		if [ -d "/c/Program Files/CMake/bin/" ]; then
@@ -769,6 +780,21 @@ if [ "$TYPE" = "vs" ]; then
 	#echo "PATH: $PATH"
 	#PATH="/c/Program Files/CMake/bin:/c/windows;/c/windows/system32:/c/windows/system32/Wbem:$VS_BIN_PATH:/c/Program Files/Git/cmd:/c/Windows/System32/WindowsPowerShell/v1.0:/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/mingw32/bin:/usr/bin:/"
 	#echo "NEW PATH: $PATH"
+
+    add_to_path "/c/Program Files/CMake/bin"
+
+    # Ensure Windows essential paths are added
+    add_to_path "/c/windows"
+    add_to_path "/c/windows/system32"
+    add_to_path "/c/windows/system32/Wbem"
+    add_to_path "/c/Windows/System32/WindowsPowerShell/v1.0"
+
+    #Ensure Git Bash/Mingw paths are added
+    add_to_path "/c/Program Files/Git/cmd"
+    add_to_path "/mingw32/bin"
+    add_to_path "/usr/local/bin"
+    add_to_path "/usr/bin"
+    add_to_path "/bin"
 fi
 
 ####  Platform Determination for Targets
