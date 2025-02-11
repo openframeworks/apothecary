@@ -716,6 +716,12 @@ if [ "$TYPE" = "vs" ]; then
 	else
 		VS_VARS_PATH=$($CONVERT_PATH_CMD "$VS_BASE_PATH/VC/Auxiliary/Build/$VS_BAT")
 	fi
+    
+
+    if [ -d "$VS_BASE_PATH/VC/Auxiliary/Build" ]; then
+        export PATH="$VS_BASE_PATH/VC/Auxiliary/Build:$PATH"
+    fi
+
 	echoVerbose "VS_VARS_PATH: $VS_VARS_PATH"
 	if [ -z ${VS_BIN_PATH+x} ]; then
 		VS_VER_DIR=$(ls "$VS_BASE_PATH/VC/Tools/${VS_COMPILER}/" | tail -1)
@@ -750,9 +756,11 @@ if [ "$TYPE" = "vs" ]; then
         fi
 		# Test for existence of directory where cmake should live
 		# then prepend cmake path to PATH
-		if [ -d "/c/Program Files/CMake/bin/" ]; then
-			export PATH="/c/Program Files/CMake/bin/:$PATH"
+		if [ -d "${DRIVE}/Program Files/CMake/bin/" ]; then
+			export PATH="${DRIVE}/Program Files/CMake/bin/:$PATH"
 		fi
+
+
 	fi
 	if [ $VS_VER == "17" ]; then
 		export VS_YEAR=2022
@@ -784,20 +792,17 @@ if [ "$TYPE" = "vs" ]; then
 	fi
 	echoVerbose "PLATFORM set to ${PLATFORM} Visual Studio ${VS_VER_GEN} - ${CROSS_TOOL} - ${VS_HOST}"
 
-	#echo "PATH: $PATH"
-	#PATH="/c/Program Files/CMake/bin:/c/windows;/c/windows/system32:/c/windows/system32/Wbem:$VS_BIN_PATH:/c/Program Files/Git/cmd:/c/Windows/System32/WindowsPowerShell/v1.0:/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/mingw32/bin:/usr/bin:/"
-	#echo "NEW PATH: $PATH"
 
-    add_to_path "/c/Program Files/CMake/bin"
+    add_to_path "${DRIVE}/Program Files/CMake/bin"
 
     # Ensure Windows essential paths are added
-    add_to_path "/c/windows"
-    add_to_path "/c/windows/system32"
-    add_to_path "/c/windows/system32/Wbem"
-    add_to_path "/c/Windows/System32/WindowsPowerShell/v1.0"
+    add_to_path "${DRIVE}/windows"
+    add_to_path "${DRIVE}/windows/system32"
+    add_to_path "${DRIVE}/windows/system32/Wbem"
+    add_to_path "${DRIVE}/Windows/System32/WindowsPowerShell/v1.0"
 
     #Ensure Git Bash/Mingw paths are added
-    add_to_path "/c/Program Files/Git/cmd"
+    add_to_path "${DRIVE}/Program Files/Git/cmd"
     add_to_path "/mingw32/bin"
     add_to_path "/usr/local/bin"
     add_to_path "/usr/bin"
