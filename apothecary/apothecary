@@ -76,7 +76,7 @@ DEPEND_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
-if grep -qi microsoft /proc/version; then
+if grep -qi microsoft /proc/version && command -v wsl.exe &> /dev/null; then
     IS_WSL=true
     DRIVE="/mnt/c"
     CONVERT_PATH_CMD="wslpath -w"
