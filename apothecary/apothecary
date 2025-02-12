@@ -814,7 +814,7 @@ if [ "$TYPE" = "vs" ]; then
     add_to_path "/usr/bin"
     add_to_path "/bin"
 fi
-if [ -n "$NO_COLOR" ] && [ "${NO_COLOR}" == "1" ]; then
+if [ -n "${NO_COLOR:-}" ] && [ "${NO_COLOR:-}" == "1" ]; then
     CON_DEFAULT=""
     CON_WHITE=""
     CON_LIGHT_GRAY=""
@@ -824,6 +824,7 @@ if [ -n "$NO_COLOR" ] && [ "${NO_COLOR}" == "1" ]; then
     CON_YELLOW_GREEN=""
     CON_GREEN=""
 fi
+
 
 ####  Platform Determination for Targets
 export VERBOSE_MAKEFILE=NO
