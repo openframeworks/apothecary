@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+LINUX_RELEASE=24.04.1
+
 echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
 
@@ -8,9 +10,7 @@ sudo apt update -y
 sudo apt install -y \
     debootstrap \
     qemu-user-static \
-    binfmt-support
-
-sudo apt install -y \
+    binfmt-support \
     python3-minimal \
     python3-numpy
 
@@ -31,10 +31,7 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Ubuntu version detection
-UBUNTU_VERSION=$(lsb_release -cs)  # e.g., "lunar" for Ubuntu 23.04
-
-# Check for valid Ubuntu version
+UBUNTU_VERSION=$(lsb_release -cs) 
 if [[ -z "$UBUNTU_VERSION" ]]; then
     echo "Error: Could not detect Ubuntu version. Ensure lsb-release is installed."
     exit 1
@@ -43,30 +40,21 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
 else
 
-# sudo debootstrap --arch=arm64 stable ./arm64-rootfs http://deb.debian.org/debian/
-
 echo "downloading aarch64 linux base"
-IMAGE="ubuntu-base-24.04.1-base-arm64"
+IMAGE="ubuntu-base-$LINUX_RELEASE-base-arm64"
 wget https://cdimage.ubuntu.com/ubuntu-base/releases/noble/release/${IMAGE}.tar.gz
 mkdir arm64-rootfs
 sudo tar -xpf ${IMAGE}.tar.gz -C arm64-rootfs
-
-echo "base location"
-ls
-pwd
-
-echo "setup qemu"
+echo "===setup qemu==="
 if [ ! -f "/arm64-rootfs/usr/bin/qemu-aarch64-static" ]; then
     echo "Copying qemu-aarch64-static into rootfs..."
     sudo cp /usr/bin/qemu-aarch64-static arm64-rootfs/usr/bin/
 fi
-
 sudo mount --bind /dev arm64-rootfs/dev
 sudo mount --bind /proc arm64-rootfs/proc
 sudo mount --bind /sys arm64-rootfs/sys
 sudo chroot arm64-rootfs /bin/bash
 
-# Define output file path
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
 echo "making sources file arm64"
 
@@ -82,7 +70,6 @@ EOF
 
 # Output the result
 echo "Generated ARM64 .sources file at $OUTPUT_FILE"
-
 
 SOURCE_FILE="/etc/apt/sources.list.d/ubuntu.sources"
 awk '
@@ -117,13 +104,10 @@ ARCH_SUFFIX=":arm64"
 if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
 fi
-
 if [ -d "arm64-rootfs/" ]; then
     echo "Setting up Linux aarch64 toolchain inside rootfs..."
-
     sudo mkdir -p /usr/aarch64-linux-gnu
     sudo mkdir -p /arm64-rootfs/usr/aarch64-linux-gnu
-
     # Link the toolchain inside rootfs (Linux aarch64)
     sudo ln -s /arm64-rootfs/usr/bin/aarch64-linux-gnu-* /usr/aarch64-linux-gnu/
     sudo ln -s /arm64-rootfs/usr/lib /usr/aarch64-linux-gnu/lib
@@ -134,7 +118,6 @@ else
     echo "Error: /arm64-rootfs/ does not exist. Ensure rootfs is extracted."
     exit 1
 fi
-
 echo "Installing ARM64 packages..."
 sudo apt-get install -y --no-install-recommends \
     aptitude$ARCH_SUFFIX \
@@ -161,10 +144,7 @@ sudo apt-get install -y --no-install-recommends \
     libxcursor-dev$ARCH_SUFFIX \
     libxi-dev$ARCH_SUFFIX \
     ccache$ARCH_SUFFIX \
-    libgles2-mesa-dev$ARCH_SUFFIX
-
-sudo apt update
-sudo apt install -y \
+    libgles2-mesa-dev$ARCH_SUFFIX \
     git \
     cmake \
     gawk \
@@ -179,26 +159,11 @@ sudo apt install -y \
     g++-aarch64-linux-gnu \
     binutils-aarch64-linux-gnu \
     python3-minimal \
-    python3-numpy
-
-
-# apt-get install -y gawk:arm64 --no-remove
-# if [[ "$(uname -m)" == "x86_64" ]]; then
-#     # issues with apt packages install manually
-# wget http://ftp.us.debian.org/debian/pool/main/g/gawk/gawk_5.2.1-2+b2_arm64.deb
-# sudo dpkg -i --force-architecture --force-depends gawk_5.2.1-2+b2_arm64.deb
-# fi
-
-
-# sudo apt-get install -y aptitude gawk gcc g++ gfortran texinfo bison libncurses-dev unzip pkg-config flex openssl pigz autoconf automake tar figlet xz-utils
-# sudo aptitude install -y gperf
-# sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
-# sudo apt-get install -y ccache
-# sudo apt-get install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
-
-# dpkg -L gcc-aarch64-linux-gnu
-# sudo apt install libgl1-mesa-dev libgles2-mesa-dev
-
+    python3-numpy \
+    libasound-dev \
+    libjack-dev \
+    libpulse-dev \
+    oss4-dev 
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
     find /usr/lib/x86_64-linux-gnu -name "libGL*"
@@ -209,9 +174,9 @@ if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
         echo "No libGL* files found in /usr/lib/x86_64-linux-gnu"
         exit 1
     fi
-    echo -e "\n\033[1;32m==== Running ldd on libGL* files ====\033[0m"
+    echo -e "=== Running ldd on libGL* files ===="
     for file in $lib_files; do
-        echo -e "\n\033[1;34mFile: $file\033[0m"
+        echo -e "File: $file"
         ldd "$file" || echo "Error: Could not run ldd on $file"
     done
 fi
