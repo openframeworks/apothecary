@@ -6,21 +6,6 @@ lsb_release -a
 
 sudo apt update -y
 sudo apt install -y \
-    git \
-    cmake \
-    gawk \
-    pkgconf \
-    build-essential \
-    ninja-build \
-    automake \
-    autoconf \
-    flex \
-    xz-utils \
-    crossbuild-essential-armhf \
-    crossbuild-essential-arm64 \
-    gcc-aarch64-linux-gnu \
-    g++-aarch64-linux-gnu \
-    binutils-aarch64-linux-gnu \
     debootstrap \
     qemu-user-static \
     binfmt-support
@@ -178,6 +163,25 @@ sudo apt-get install -y --no-install-recommends \
     ccache$ARCH_SUFFIX \
     libgles2-mesa-dev$ARCH_SUFFIX
 
+sudo apt update
+sudo apt install -y \
+    git \
+    cmake \
+    gawk \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    automake \
+    autoconf \
+    flex \
+    xz-utils \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    binutils-aarch64-linux-gnu \
+    python3-minimal \
+    python3-numpy
+
+
 # apt-get install -y gawk:arm64 --no-remove
 # if [[ "$(uname -m)" == "x86_64" ]]; then
 #     # issues with apt packages install manually
@@ -216,6 +220,8 @@ if [ -d "/usr/lib/aarch64-linux-gnu" ]; then
 else
     echo "Directory /usr/lib/aarch64-linux-gnu does not exist."
 fi
+
+dpkg -l | grep g++-aarch64-linux-gnu
 
 PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu \
