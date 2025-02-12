@@ -253,6 +253,10 @@ options:
 
   -h    print this usage guide
 
+  -c    compiler
+
+  -k    no colours
+
   -x xcframework all
 
 examples:
@@ -396,6 +400,8 @@ while getopts t:a:b:d:s:j:m:c:hgvxfpewy opt ; do
 		   export TARGET_WIN_11=1 ;;
 		c) # host compiler
 		   export VS_COMPILER="$OPTARG" ;;
+		k) # host compiler
+		   export NO_COLOR=1;;
 		m) # set the -m parameter for make
 		   export MULTITHREADED_TYPE="$OPTARG" ;;
 		x) # set the -x xcframeworks build
@@ -809,9 +815,19 @@ if [ "$TYPE" = "vs" ]; then
     add_to_path "/bin"
 fi
 
+if [ "${NO_COLOR}" == "1" ]; then
+    CON_DEFAULT=""
+    CON_WHITE=""
+    CON_LIGHT_GRAY=""
+    CON_BOLD=""
+    CON_RED=""
+    CON_YELLOW=""
+    CON_YELLOW_GREEN=""
+    CON_GREEN=""
+fi
+
 ####  Platform Determination for Targets
 export VERBOSE_MAKEFILE=NO
-
 if [ "$TYPE" = "msys2" ]; then
 	export FLAG_RELEASE="-O3"
 
