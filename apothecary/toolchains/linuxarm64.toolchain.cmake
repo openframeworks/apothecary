@@ -136,6 +136,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c
 set(CMAKE_EXE_LINKER_FLAGS "-fPIE -pie ${EXTRA_LINKS}")
 set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC ${EXTRA_LINKS}")
 
+set(OPENGL_FOUND TRUE)
+set(OPENGL_gl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
+set(OPENGL_opengl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
+set(OPENGL_glx_LIBRARY "/usr/lib/aarch64-linux-gnu/libGLX.so")
+
+set(GLES_LIBRARY "/usr/lib/aarch64-linux-gnu/libGLESv2.so")
+set(EGL_LIBRARY "/usr/lib/aarch64-linux-gnu/libEGL.so")
+
 
 message(STATUS "Using GCC Version: ${GCC_VERSION}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
