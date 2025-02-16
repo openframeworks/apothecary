@@ -27,7 +27,8 @@ sudo apt install -y \
     g++-aarch64-linux-gnu \
     binutils-aarch64-linux-gnu \
     python3-minimal \
-    python3-numpy
+    python3-numpy \
+    mesa-utils mesa-common-dev libgl1-mesa-dev libegl1-mesa-dev
 
 # if [[ "$(uname -m)" == "x86_64" ]]; then
 #     wget https://ftp.gnu.org/gnu/gawk/gawk-5.3.1.tar.xz
@@ -159,11 +160,11 @@ sudo apt-get install -y --no-install-recommends \
     libxcursor-dev$ARCH_SUFFIX \
     libxi-dev$ARCH_SUFFIX \
     ccache$ARCH_SUFFIX \
-    libgles2-mesa-dev$ARCH_SUFFIX
+    libgles2-mesa-dev$ARCH_SUFFIX \
+    libgl1-mesa-dev$ARCH_SUFFIX \
+    libegl1-mesa-dev$ARCH_SUFFIX
 
 sudo apt install -y \
-    debootstrap \
-    qemu-user-static \
     binfmt-support \
     python3-minimal \
     python3-numpy \
