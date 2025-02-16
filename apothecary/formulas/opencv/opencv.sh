@@ -26,15 +26,27 @@ VER_CONTRIB=$VER
 function download() {
 
     . "$DOWNLOADER_SCRIPT"
-    downloader $GIT_URL/archive/refs/tags/$VER.tar.gz
-    tar -xzf $VER.tar.gz
-    mv opencv-$VER opencv
-    rm $VER.tar.gz
+    if [ "$TYPE" == "vs" ]; then
+        downloader $GIT_URL/archive/refs/tags/$VER.zip
+        unzip $VER.zip
+        mv opencv-$VER opencv
+        rm $VER.zip
 
-    downloader $GIT_CONTRIB_URL/archive/refs/tags/$VER.tar.gz
-    tar -xzf $VER.tar.gz
-    mv opencv_contrib-$VER opencv/opencv_contrib
-    rm $VER.tar.gz
+        downloader $GIT_CONTRIB_URL/archive/refs/tags/$VER.zip
+        unzip $VER.zip
+        mv opencv_contrib-$VER opencv/opencv_contrib
+        rm $VER.zip
+    else
+        downloader $GIT_URL/archive/refs/tags/$VER.tar.gz
+        tar -xzf $VER.tar.gz
+        mv opencv-$VER opencv
+        rm $VER.tar.gz
+
+        downloader $GIT_CONTRIB_URL/archive/refs/tags/$VER.tar.gz
+        tar -xzf $VER.tar.gz
+        mv opencv_contrib-$VER opencv/opencv_contrib
+        rm $VER.tar.gz
+    fi
 }
 
 # prepare the build environment, executed inside the lib src dir
