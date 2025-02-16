@@ -12,6 +12,21 @@ sudo apt install -y \
     qemu-user-static \
     binfmt-support \
     python3-minimal \
+    python3-numpy \
+    git \
+    cmake \
+    gawk \
+    pkgconf \
+    build-essential \
+    ninja-build \
+    automake \
+    autoconf \
+    flex \
+    xz-utils \
+    gcc-aarch64-linux-gnu \
+    g++-aarch64-linux-gnu \
+    binutils-aarch64-linux-gnu \
+    python3-minimal \
     python3-numpy
 
 # if [[ "$(uname -m)" == "x86_64" ]]; then
@@ -144,26 +159,23 @@ sudo apt-get install -y --no-install-recommends \
     libxcursor-dev$ARCH_SUFFIX \
     libxi-dev$ARCH_SUFFIX \
     ccache$ARCH_SUFFIX \
-    libgles2-mesa-dev$ARCH_SUFFIX \
+    libgles2-mesa-dev$ARCH_SUFFIX
+
+sudo apt install -y \
+    debootstrap \
+    qemu-user-static \
+    binfmt-support \
+    python3-minimal \
+    python3-numpy \
     git \
     cmake \
-    gawk \
     pkgconf \
     build-essential \
     ninja-build \
-    automake \
-    autoconf \
-    flex \
     xz-utils \
     gcc-aarch64-linux-gnu \
-    g++-aarch64-linux-gnu \
-    binutils-aarch64-linux-gnu \
-    python3-minimal \
-    python3-numpy \
-    libasound-dev \
-    libjack-dev \
-    libpulse-dev \
-    oss4-dev 
+    g++-aarch64-linux-gnu
+    
 
 if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
     find /usr/lib/x86_64-linux-gnu -name "libGL*"

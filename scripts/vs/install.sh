@@ -17,7 +17,7 @@ fi
 is_installed() {
     dpkg -s "$1" &>/dev/null
 }
-if grep -qi microsoft /proc/version; then
+if grep -qi microsoft /proc/version && command -v wsl.exe &> /dev/null; then
     REQUIRED_PKGS=("shasum" "unzip" "autoconf" "libtool" "automake" "dos2unix" "ccache" "cmake" "build-essential")
     sudo apt update
     for pkg in "${REQUIRED_PKGS[@]}"; do
