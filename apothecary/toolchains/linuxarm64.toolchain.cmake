@@ -60,7 +60,11 @@ if(NOT DEFINED GCC_PATH)
     if(DEFINED ENV{GCC_PATH})
         set(GCC_PATH $ENV{GCC_PATH}) # Use GCC_PATH from env
     else()
-        set(GCC_PATH "/usr/bin")
+        if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+            set(GCC_PATH "/usr/bin")  # Native AArch64 GCC
+        else()
+            set(GCC_PATH "/usr/bin/aarch64-linux-gnu")  # Cross-compilation GCC
+        endif()
         message(WARNING "GCC_PATH not specified. Defaulting to GCC_PATH=${GCC_PATH}")
     endif()
 endif()
@@ -140,9 +144,15 @@ set(OPENGL_FOUND TRUE)
 set(OPENGL_gl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
 set(OPENGL_opengl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
 set(OPENGL_glx_LIBRARY "/usr/lib/aarch64-linux-gnu/libGLX.so")
-
 set(GLES_LIBRARY "/usr/lib/aarch64-linux-gnu/libGLESv2.so")
 set(EGL_LIBRARY "/usr/lib/aarch64-linux-gnu/libEGL.so")
+
+set(X11_INCLUDE_DIR "/usr/aarch64-linux-gnu/include")
+set(X11_X11_LIB "/usr/aarch64-linux-gnu/lib/libX11.so")
+set(X11_Xext_LIB "/usr/aarch64-linux-gnu/lib/libXext.so")
+set(X11_Xrandr_LIB "/usr/aarch64-linux-gnu/lib/libXrandr.so")
+set(X11_Xinerama_LIB "/usr/aarch64-linux-gnu/lib/libXinerama.so")
+set(X11_Xcursor_LIB "/usr/aarch64-linux-gnu/lib/libXcursor.so")
 
 
 message(STATUS "Using GCC Version: ${GCC_VERSION}")
