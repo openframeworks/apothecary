@@ -156,9 +156,17 @@ function build() {
             HARDWARE_OPTIMIZATIONS="ON"
         fi
 
+        if [[ ${ARCH} == "arm64ec" || "${ARCH}" == "arm64" ]]; then
+            EXTRA_DEFS="-DPNG_ARM_NEON=ON"
+        else
+            EXTRA_DEFS="-DPNG_ARM_NEON=OFF"
+        fi
+
+
         env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${CALLING_CONVENTION}"
         env CFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${CALLING_CONVENTION}"
         cmake .. ${DEFINES} \
+            ${EXTRA_DEFS} \
             -B . \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \

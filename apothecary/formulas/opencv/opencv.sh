@@ -314,9 +314,9 @@ function build() {
                 -DCV_DISABLE_OPTIMIZATION=OFF"
 
         if [[ ${ARCH} == "arm64ec" || "${ARCH}" == "arm64" ]]; then
-            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DBUILD_opencv_rgbd=OFF"
+            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DBUILD_opencv_rgbd=OFF -DPNG_ARM_NEON=ON"
         else
-            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON"
+            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DPNG_ARM_NEON=OFF"
         fi
 
         cmake .. ${DEFINES} \
