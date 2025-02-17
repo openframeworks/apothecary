@@ -10,8 +10,8 @@ FORMULA_TYPES=("osx" "ios" "catos" "xros" "tvos" "vs" "android" "emscripten")
 FORMULA_DEPENDS=("zlib" "libpng")
 
 # define the version
-VER=4.10.0
-BUILD_ID=3
+VER=4.11.0
+BUILD_ID=4
 DEFINES=""
 FRAMEWORKS=""
 

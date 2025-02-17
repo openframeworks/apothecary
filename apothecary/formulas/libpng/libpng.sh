@@ -9,7 +9,7 @@ FORMULA_DEPENDS=("zlib")
 # define the version
 MAJOR_VER=16
 VER=1.6.43
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
