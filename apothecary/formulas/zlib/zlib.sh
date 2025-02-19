@@ -12,24 +12,17 @@ BUILD_ID=2
 DEFINES=""
 
 # tools for git use
-GIT_URL=https://github.com/madler/zlib
+GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
 GIT_TAG=v$VER
 
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
 
-    if [ "$TYPE" == "vs" ]; then
-        downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
-        unzip -q v${VER}.zip
-        mv zlib-${VER} zlib
-        rm v${VER}.zip
-    else
-        downloader ${GIT_URL}//archive/refs/tags/v${VER}.tar.gz
-        tar -xf v${VER}.tar.gz
-        mv zlib-${VER} zlib
-        rm -f v${VER}.tar.gz
-    fi
+    downloader ${GIT_URL}
+    tar -xf zlib-$VER.tar.gz
+    mv zlib-$VER zlib
+    rm -f zlib-$VER.tar.gz
 }
 
 # prepare the build environment, executed inside the lib src dir
@@ -43,6 +36,7 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
+    LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "vs" ]; then
 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
