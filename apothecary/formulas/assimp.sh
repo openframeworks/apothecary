@@ -128,7 +128,11 @@ function build() {
         if [ -n "${ASSIMP_STATIC}" ] && [ "${ASSIMP_STATIC}" = "1" ]; then
             DEFINES="${DEFINES} \
             -DBUILD_WITH_STATIC_CRT=ON \
+            -DUSE_STATIC_CRT=ON \
             -DBUILD_SHARED_LIBS=OFF"
+            if [ $MULTITHREADED_TYPE == "MD" ]; then
+                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
+            fi
         else
             DEFINES="${DEFINES} \
             -DBUILD_WITH_STATIC_CRT=OFF \
