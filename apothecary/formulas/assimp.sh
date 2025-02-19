@@ -125,7 +125,7 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
             -DASSIMP_WARNINGS_AS_ERRORS=OFF"
 
-        if [ -n "${ASSIMP_STATIC}" ] && [ "${ASSIMP_STATIC}" = "1" ]; then
+        if [ "${ASSIMP_STATIC:-0}" = "1" ]; then
             DEFINES="${DEFINES} \
             -DBUILD_WITH_STATIC_CRT=ON \
             -DUSE_STATIC_CRT=ON \
@@ -316,7 +316,7 @@ function copy() {
     if [ "$TYPE" == "vs" ]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        if [ -n "${ASSIMP_STATIC}" ] && [ "${ASSIMP_STATIC}" = "1" ]; then
+       if [ "${ASSIMP_STATIC:-0}" = "1" ]; then
             cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib
             secure $1/lib/$TYPE/$PLATFORM/libassimp.lib assimp.pkl
         else
