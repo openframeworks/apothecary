@@ -43,7 +43,6 @@ function prepare() {
 
 # executed inside the lib src dir
 function build() {
-    LIBS_ROOT=$(realpath $LIBS_DIR)
     if [ "$TYPE" == "vs" ]; then
 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
