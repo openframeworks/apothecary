@@ -88,7 +88,8 @@ function build() {
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
@@ -119,12 +120,40 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
             -DASSIMP_BUILD_TESTS=0 \
             -DASSIMP_BUILD_SAMPLES=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DASSIMP_WARNINGS_AS_ERRORS=OFF \
-            -DBUILD_WITH_STATIC_CRT=OFF"
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
+
+        if [ -n "${ASSIMP_STATIC}" ] && [ "${ASSIMP_STATIC}" = "1" ]; then
+            DEFINES="${DEFINES} \
+            -DBUILD_WITH_STATIC_CRT=ON \
+            -DBUILD_SHARED_LIBS=OFF"
+        else
+            DEFINES="${DEFINES} \
+            -DBUILD_WITH_STATIC_CRT=OFF \
+            -DBUILD_SHARED_LIBS=ON"
+            cmake .. ${DEFINES} \
+            -A "${PLATFORM}" \
+            ${CMAKE_WIN_SDK} \
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DASSIMP_BUILD_ZLIB=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+            cmake --build . --config Debug -j${PARALLEL_MAKE}
+            rm -f CMakeCache.txt || true
+        fi
 
         cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
@@ -138,30 +167,14 @@ function build() {
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DASSIMP_BUILD_ZLIB=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build . --config Release -j${PARALLEL_MAKE}
 
-        cmake .. ${DEFINES} \
-            -A "${PLATFORM}" \
-            ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}" \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_INSTALL_PREFIX=Debug \
-            -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DASSIMP_BUILD_ZLIB=OFF \
-            -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-        cmake --build . --config Debug -j${PARALLEL_MAKE}
-        rm -f CMakeCache.txt || true
         cd ..
         echo "--------------------"
         echo "Completed Assimp for $TYPE | $ARCH | $VS_VER"
@@ -211,14 +224,14 @@ function build() {
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
@@ -257,6 +270,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
