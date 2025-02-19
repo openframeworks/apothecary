@@ -76,11 +76,7 @@ DEPEND_DIR=""
 # formulas should pass this as -j${PARALLEL_MAKE} to make
 PARALLEL_MAKE=1
 
-if [ -z "${WSL_DISTRO_NAME+x}" ]; then
-    IS_WSL=true
-    DRIVE="/mnt/c"
-    CONVERT_PATH_CMD="wslpath -w"
-elif command -v cygpath &> /dev/null; then
+if command -v cygpath &> /dev/null; then
     CONVERT_PATH_CMD="cygpath -wa"
     IS_WSL=false
     DRIVE="/c"
