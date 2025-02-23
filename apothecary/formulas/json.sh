@@ -55,7 +55,8 @@ function copy() {
     cp -v single_include/nlohmann/json.hpp $1/include/nlohmann/json.hpp
 
     . "$SECURE_SCRIPT"
-    secure $1/include/nlohmann/json.hpp json.pkl
+
+    secure "$1/include/nlohmann/json.hpp" "json.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
     # copy license file
     if [ -d "$1/license" ]; then
@@ -74,7 +75,7 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "json" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/include/nlohmann" ${PLATFORM})
+    LOAD_RESULT=$(loadsave ${TYPE} "json" ${ARCH} ${VER} "$LIBS_DIR_REAL/json/include/nlohmann" ${PLATFORM})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

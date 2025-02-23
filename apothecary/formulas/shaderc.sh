@@ -19,6 +19,7 @@ VER=ff84893dd52d28f0b1737d2635733d952013bd9c
 # tools for git use
 GIT_URL=https://github.com/google/shaderc
 GIT_TAG=$VER
+DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -141,10 +142,11 @@ function copy() {
 
     # prepare libs directory if needed
     mkdir -p $1/lib/$TYPE
-
+    . "$SECURE_SCRIPT"
     if [ "$TYPE" == "vs" ]; then
         cp -Rv libshaderc/include/* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/lib/Release/libshaderc_combined.lib" $1/lib/$TYPE/$PLATFORM/shaderc.lib
+        secure "$1/lib/$TYPE/$PLATFORM/shaderc.lib" "shaderc.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
     else
         pwd
@@ -153,6 +155,7 @@ function copy() {
         cp -Rv libshaderc/include/* $1/include
         # copy lib
         cp -v "build_${TYPE}_${PLATFORM}/lib/Release/libshaderc_combined.a" $1/lib/$TYPE/$PLATFORM/shaderc.a
+        secure "$1/lib/$TYPE/$PLATFORM/shaderc.a" "shaderc.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license file

@@ -42,9 +42,35 @@ function prepare() {
     cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 }
 
+function load() {
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "freetype" ${ARCH} ${VER} "$LIBS_DIR_REAL/freetype/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
+    if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
+        result=$(load "freetype2" | tail -n 1)
+        echoInfo "===Build $1 - Checking if Precompiled binary :[$result]==="
+        if [ $result -eq 1 ]; then
+            echoInfo "===Build \"$1\" Precompiled binary validated. Skipping updateFormula==="
+            return 0
+        else
+            echoInfo "===Build Precompiled not found or outdated. Continue updateFormula for \"$1\"=== "
+        fi
+    else
+        echoInfo "===Build  Not using cache : [FORCE_DOWNLOAD=$FORCE_DOWNLOAD] [USE_SAVE=$USE_SAVE == 1] for updateFormula \"$1\" ==="
+    fi
+
+
     DEFINES="	
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -503,13 +529,13 @@ function copy() {
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.a" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/include/" $1/
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libfreetype.lib freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.lib" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -517,7 +543,7 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/freetype2.pc" $1/lib/${TYPE}/${PLATFORM}/freetype.pc
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.a" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -530,7 +556,7 @@ function copy() {
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/freetype2/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.a" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/freetype2.pc" $1/lib/${TYPE}/${PLATFORM}/freetype.pc
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -544,14 +570,14 @@ function copy() {
     elif [ "$TYPE" == "android" ]; then
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$ABI/libfreetype.a
+        cp -v build_$ABI/libfreetype.a $1/lib/$TYPE/$PLATFORM/libfreetype.a
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$ABI/libfreetype.a freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.a" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/libfreetype.a" $1/lib/$TYPE/$PLATFORM/libfreetype.a
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libfreetype.a freetype.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.a" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -v "build_${TYPE}_$PLATFORM/freetype2.pc" $1/lib/$TYPE/$PLATFORM/freetype.pc
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/freetype.pc"
@@ -598,13 +624,4 @@ function clean() {
     fi
 }
 
-function load() {
-    . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "freetype" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
-    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
+

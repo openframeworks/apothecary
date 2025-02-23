@@ -247,29 +247,29 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         cp -f "build_${TYPE}_${PLATFORM}/Release/lib/tess2.lib" $1/lib/$TYPE/$PLATFORM/tess2.lib
-        secure $1/lib/$TYPE/$PLATFORM/tess2.lib tess2
+        secure "$1/lib/$TYPE/$PLATFORM/tess2.lib" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
-        secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
+        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
-        secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
+        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
-        secure $1/lib/$TYPE/$PLATFORM/libtess2.a tess2
+        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         rm -rf $1/lib/$TYPE/$ABI
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$ABI/libtess2.a
-        secure $1/lib/$TYPE/$ABI/libtess2.a tess2
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     else
         cp -v build/$TYPE/libtess2.a $1/lib/$TYPE/libtess2.a
-        secure $1/lib/$TYPE/libtess2.a tess2
+        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license files

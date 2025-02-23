@@ -194,22 +194,22 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
-        secure $1/lib/$TYPE/$PLATFORM/pugixml.lib
+        secure "$1/lib/$TYPE/$PLATFORM/pugixml.lib" "pugixml.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
-        secure $1/lib/$TYPE/$PLATFORM/libpugixml.a pugixml.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libpugixml.a" "pugixml.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build_${TYPE}_${ABI}/Release/lib/libpugixml.a $1/lib/$TYPE/$ABI/libpugixml.a
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -Rv build_${TYPE}_${ABI}/Release/lib/libpugixml.a $1/lib/$TYPE/$PLATFORM/libpugixml.a
         cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
-        secure $1/lib/$TYPE/$ABI/libpugixml.a pugixml.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libpugixml.a" "pugixml.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/libpugixml.a" $1/lib/$TYPE/$PLATFORM/libpugixml.a
-        secure $1/lib/$TYPE/$PLATFORM/libpugixml.a
+        secure "$1/lib/$TYPE/$PLATFORM/libpugixml.a" "pugixml.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     # copy license file
     if [ -d "$1/license" ]; then

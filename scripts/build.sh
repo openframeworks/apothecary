@@ -210,7 +210,7 @@ function build() {
     echo "Build $formula_name $FORCE"
 
     local ARGS="$FORCE -j$PARALLEL -t$TARGET -d$OUTPUT_FOLDER "
-    if [ "$GITHUB_ACTIONS" = true ] && [ "$TARGET" == "vs" ]; then
+    if [ "${GITHUB_ACTIONS:-0}" = true ] && [ "$TARGET" == "vs" ]; then
         ARGS="-e $ARGS"
     fi
 

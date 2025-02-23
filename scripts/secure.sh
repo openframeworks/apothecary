@@ -55,51 +55,24 @@ BUILD_TIME=$(date -u +"%Y-%m-%d T%H:%M:%SZ")
 #     GIT_BRANCH="N/A"
 # fi
 
-if [ -z "${BINARY_SEC+x}" ]; then
-    BINARY_SEC=${1:-}
-fi
-if [ -z "${VERSION+x}" ]; then
-    VERSION=${3:-}
-fi
+: "${BINARY_SEC:=${1:-}}"
+: "${VERSION:=${3:-}}"
+: "${DEFS:=${4:-}}"
+: "${BUILD_ID:=1}"
+: "${FORMULA_DEPENDS:=${6:-}}"
+: "${FRAMEWORKS:=${8:-}}"
 
-if [ -z "${DEFINES+x}" ]; then
-    DEFS=${4:-}
-fi
-
-if [ -z "${FORMULA_DEPENDS+x}" ]; then
-    FORMULA_DEPENDS=${6:-}
-fi
-
-if [ -z "${FRAMEWORKS+x}" ]; then
-    FRAMEWORKS=${8:-}
-fi
 
 secure() {
-    if [ -z "${1+x}" ]; then
-        BINARY_SEC=""
-    else
-        BINARY_SEC=$1
-    fi
 
-    if [ -z "${4+x}" ]; then
-        DEFS=""
-    else
-        DEFS=$4
-    fi
-
-    if [ -z "${5+x}" ]; then
-        BUILD_NUMBER=1
-    else
-        BUILD_NUMBER=$5
-    fi
-
-    if [ -z "${FORMULA_DEPENDS+x}" ]; then
-        if [ -z "${6+x}" ]; then
-            FORMULA_DEPENDS=""
-        else
-            FORMULA_DEPENDS=$6
-        fi
-    fi
+    local BINARY_SEC="${1:-}"
+    local NAME="${2:-$(basename "$BINARY_SEC")}"
+    local VERSION="${3:-}"
+    local DEFINES="${4:-}"
+    local BUILD_ID="${5:-1}"
+    local FORMULA_DEPENDS="${6:-}"
+    local SOURCE_SHA="${7:-}"
+    local FRAMEWORKS="${8:-}"
 
     if [[ ! -z "${VS_C_FLAGS+x}" && ! -z "${FLAGS_RELEASE+x}" && ! -z "${EXCEPTION_FLAGS+x}" ]]; then
         FLAGS="${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
@@ -109,50 +82,26 @@ secure() {
         FLAGS=""
     fi
 
-    if [ -z "${7+x}" ]; then
-        SOURCE_SHA=""
-    else
-        SOURCE_SHA=$7
-    fi
+    NAME="${NAME%.*}"
 
-    if [ -z "${8+x}" ]; then
-        FRAMEWORKS=""
-    else
-        FRAMEWORKS=$8
-    fi
 
     OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
     ACTUAL_FILENAME=$(basename "$BINARY_SEC")
-    ACTUAL_FILENAME_WITHOUT_EXT="${ACTUAL_FILENAME%.*}"
+    FILENAME_WITHOUT_EXT="${NAME:-${ACTUAL_FILENAME%.*}}"
 
-    if [ -z "${2+x}" ]; then NAME=$ACTUAL_FILENAME_WITHOUT_EXT; else
-        NAME=$2
-        NAME="${NAME%.*}"
-    fi
-
-    if [ -z "${DEFS+x}" ]; then DEFINES=""; else
-        DEFINES=$DEFS
-    fi
-
-    if [ -z "${TYPE+x}" ]; then TARGET=""; else
-        TARGET=$TYPE
-    fi
-
+    TARGET="${TYPE:-}"
     HASH_TYPE=$(hash_type "$BINARY_SEC")
+    BINARY_SHA=$(calculate_hash "$BINARY_SEC")
 
-    if [ -n "$NAME" ]; then
-        FILENAME="$NAME"
-    else
-        FILENAME="$ACTUAL_FILENAME"
-    fi
+    # Ensure the output directory exists
+    mkdir -p "$OUTPUT_LOCATION"
+
+    # Output file
+    OUTPUT_PKL_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.pkl"
 
     CPP_STD="$CPP_STANDARD"
     C_STD="$C_STANDARD"
 
-    FILENAME_WITHOUT_EXT="${FILENAME%.*}"
-
-    # Calculate SHA hash for the provided binary, if available
-    BINARY_SHA=$(calculate_hash "$BINARY_SEC")
     # OUTPUT_FILE="${OUTPUT_LOCATION:-.}/$FILENAME_WITHOUT_EXT.json"
     #
     # Create or overwrite the .json file
@@ -174,7 +123,7 @@ secure() {
 name = "$NAME"
 version = "$VER"
 buildTime = "$BUILD_TIME"
-buildNumber = "$BUILD_NUMBER"
+buildNumber = "$BUILD_ID"
 type = "$TARGET"
 gitUrl = "$GIT_URL"
 cppStandard = "$CPP_STD"

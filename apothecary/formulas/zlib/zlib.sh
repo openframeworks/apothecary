@@ -10,6 +10,7 @@ FORMULA_DEPENDS=()
 VER=1.3.1
 BUILD_ID=2
 DEFINES=""
+FRAMEWORKS=""
 
 # tools for git use
 GIT_URL=https://github.com/madler/zlib/releases/download/v$VER/zlib-$VER.tar.gz
@@ -34,9 +35,43 @@ function prepare() {
 
 }
 
+function load() {
+    if [ -f "$LOAD_SCRIPT" ]; then
+        source "$LOAD_SCRIPT"
+    else
+        return 0
+    fi
+    # Call the actual loadsave function
+    LOAD_RESULT=$(loadsave "${TYPE}" "zlib" "${ARCH}" "${VER}" "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" "${BUILD_ID}")
+
+    # Extract last line to get result
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
+    if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
+        result=$(load "zlib" | tail -n 1)
+        echoInfo "===Build $1 - Checking if Precompiled binary :[$result]==="
+        if [ $result -eq 1 ]; then
+            echoInfo "===Build \"$1\" Precompiled binary validated. Skipping updateFormula==="
+            return 0
+        else
+            echoInfo "===Build Precompiled not found or outdated. Continue updateFormula for \"$1\"=== "
+        fi
+    else
+        echoInfo "===Build  Not using cache : [FORCE_DOWNLOAD=$FORCE_DOWNLOAD] [USE_SAVE=$USE_SAVE == 1] for updateFormula \"$1\" ==="
+    fi
+
+
     if [ "$TYPE" == "vs" ]; then
 
         echoVerbose "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
@@ -243,7 +278,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ >/dev/null 2>&1
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
-        secure $1/lib/$TYPE/$PLATFORM/zlib.a
+        secure "$1/lib/$TYPE/$PLATFORM/zlib.a" "zlib.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/
 
@@ -259,8 +294,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ >/dev/null 2>&1
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/z.lib" $1/lib/$TYPE/$PLATFORM/zlib.lib >/dev/null 2>&1
-        secure $1/lib/$TYPE/$PLATFORM/zlib.lib
-
+        secure "$1/lib/$TYPE/$PLATFORM/zlib.lib" "zlib.lib" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -vR "build_${TYPE}_${ARCH}/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
@@ -272,11 +306,11 @@ function copy() {
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/$ABI/zlib.a
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libz.a" $1/lib/$TYPE/${PLATFORM}/zlib.a
         cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
-        secure $1/lib/$TYPE/$ABI/zlib.a
+        secure "$1/lib/$TYPE/${PLATFORM}/zlib.a" "zlib.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
-        cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$ABI/zlib.pc
+        cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/${PLATFORM}/zlib.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -290,7 +324,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_$PLATFORM/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a
-        secure $1/lib/$TYPE/$PLATFORM/zlib.a
+        secure "$1/lib/$TYPE/$PLATFORM/zlib.a" "zlib.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
@@ -306,7 +340,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/ >/dev/null 2>&1
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a >/dev/null 2>&1
-        secure $1/lib/$TYPE/$PLATFORM/zlib.a
+        secure "$1/lib/$TYPE/$PLATFORM/zlib.a" "zlib.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -v "build_${TYPE}_$PLATFORM/Release/share/pkgconfig/zlib.pc" $1/lib/$TYPE/$PLATFORM/zlib.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/zlib.pc"
@@ -322,7 +356,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/ >/dev/null 2>&1
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libz.a" $1/lib/$TYPE/$PLATFORM/zlib.a >/dev/null 2>&1
-        secure $1/lib/$TYPE/$PLATFORM/zlib.a
+        secure "$1/lib/$TYPE/$PLATFORM/zlib.a" "zlib.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     else
         make install
     fi
@@ -355,13 +389,4 @@ function clean() {
     fi
 }
 
-function load() {
-    . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "zlib" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
-    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
+

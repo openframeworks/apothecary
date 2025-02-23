@@ -171,24 +171,24 @@ function copy() {
         cp -R "build_${TYPE}_${ARCH}/Release/include/" $1/
         cp -Rv "build_${TYPE}_${ARCH}/UriConfig.h" $1/include/uriparser/
         cp -f "build_${TYPE}_${ARCH}/Release/lib/uriparser.lib" $1/lib/$TYPE/$PLATFORM/uriparser.lib
-        secure $1/lib/$TYPE/$PLATFORM/uriparser.lib
+        secure "$1/lib/$TYPE/$PLATFORM/uriparser.lib" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         cp -R include/uriparser/* $1/include/uriparser/
         cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/liburiparser.a $1/lib/$TYPE/$PLATFORM/uriparser.a
-        secure $1/lib/$TYPE/$PLATFORM/uriparser.lib
+        secure "$1/lib/$TYPE/$PLATFORM/uriparser.a" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/${PLATFORM}
         cp -R include/uriparser/* $1/include/uriparser/
         cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         cp -Rv "build_${TYPE}_${PLATFORM}/liburiparser.a" $1/lib/$TYPE/${PLATFORM}/uriparser.a
-        secure $1/lib/$TYPE/${PLATFORM}/uriparser.a
+        secure "$1/lib/$TYPE/$PLATFORM/uriparser.a" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         cp -R include/uriparser/* $1/include/uriparser/
-        mkdir -p $1/lib/$TYPE/$ABI/
-        cp -Rv build_${TYPE}_${ABI}/liburiparser.a $1/lib/$TYPE/$ABI/liburiparser.a
-        secure $1/lib/$TYPE/$ABI/liburiparser.a
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv build_${TYPE}_${ABI}/liburiparser.a $1/lib/$TYPE/$PLATFORM/liburiparser.a
+        secure "$1/lib/$TYPE/$PLATFORM/liburiparser.a" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     if [ -d "$1/license" ]; then
         rm -rf $1/license

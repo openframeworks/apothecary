@@ -216,7 +216,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v -r c/include/* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/"*.a $1/lib/$TYPE/$PLATFORM/
-        secure $1/lib/$TYPE/$PLATFORM/libbrotlidec.a brotli.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libbrotlidec.a" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlicommon.pc" $1/lib/$TYPE/$PLATFORM/libbrotlicommon.pc
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlidec.pc" $1/lib/$TYPE/$PLATFORM/libbrotlidec.pc
@@ -246,7 +246,7 @@ function copy() {
         cp -v -r c/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/"*.lib $1/lib/$TYPE/$PLATFORM/
-        secure $1/lib/$TYPE/$PLATFORM/brotlidec.lib brotli.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/brotlidec.lib" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libbrotlicommon.pc" $1/lib/$TYPE/$PLATFORM/libbrotlicommon.pc
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libbrotlidec.pc" $1/lib/$TYPE/$PLATFORM/libbrotlidec.pc
@@ -277,7 +277,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/${PLATFORM}/
         cp -v -r c/include/* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/"*.a $1/lib/$TYPE/${PLATFORM}/
-        secure $1/lib/$TYPE/${PLATFORM}/libbrotlidec.a brotli.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libbrotlidec.a" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlicommon.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlicommon.pc
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlidec.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlidec.pc
@@ -308,7 +308,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/${PLATFORM}/
         cp -v -r c/include/* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/"*.a $1/lib/$TYPE/${PLATFORM}/
-        secure $1/lib/$TYPE/${PLATFORM}/libbrotlidec.a brotli.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libbrotlidec.a" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlicommon.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlicommon.pc
         cp -vR "build_${TYPE}_${PLATFORM}/libbrotlidec.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlidec.pc

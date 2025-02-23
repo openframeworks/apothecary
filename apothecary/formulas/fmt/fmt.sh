@@ -226,31 +226,31 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/fmt.lib" $1/lib/$TYPE/$PLATFORM/fmt.lib
         cp -RT "build_${TYPE}_${ARCH}/Release/include/" $1/include
-        secure $1/lib/$TYPE/$PLATFORM/fmt.lib fmt.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/fmt.lib" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
-        secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfmt.a" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
-        secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfmt.a" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.a" $1/lib/$TYPE/$ABI/libfmt.a
-        secure $1/lib/$TYPE/$ABI/libfmt.a fmt.pkl
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
+       secure "$1/lib/$TYPE/$PLATFORM/libfmt.a" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${ABI}/Release/include/" $1/include
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
-        secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfmt.a" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     else
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/bin/libfmt.a" $1/lib/$TYPE/$PLATFORM/libfmt.a
-        secure $1/lib/$TYPE/$PLATFORM/libfmt.a fmt.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfmt.a" "fmt.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     fi
 
@@ -287,7 +287,7 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "fmt" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    LOAD_RESULT=$(loadsave ${TYPE} "fmt" ${ARCH} ${VER} "$LIBS_DIR_REAL/fmt/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

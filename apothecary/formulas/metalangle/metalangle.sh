@@ -272,7 +272,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         if [[ $BUILD_STATIC == true ]] || [[ $BUILD_CMAKE == true ]]; then
             cp -Rv build_${TYPE}_${PLATFORM}/Release/lib/libmetalangle.a $1/lib/$TYPE/$PLATFORM/MetalANGLE.a
-            secure $1/lib/$TYPE/$PLATFORM/metalangle.a metalangle.pkl
+            secure "$1/lib/$TYPE/$PLATFORM/metalangle.a" "metalangle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         fi
         if [[ $BUILD_XCARCHIVE == true ]]; then
             cp -Rv build_${TYPE}_${PLATFORM}/Release/MetalANGLE.xcarchive $1/lib/$TYPE/$PLATFORM/MetalANGLE.xcarchive
@@ -297,7 +297,7 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "metalangle" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    LOAD_RESULT=$(loadsave ${TYPE} "metalangle" ${ARCH} ${VER} "$LIBS_DIR_REAL/metalangle/lib/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1

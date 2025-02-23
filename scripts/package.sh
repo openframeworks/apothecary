@@ -78,7 +78,7 @@ LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
 
 if [ -z "${RELEASE+x}" ]; then
-    if [ "$GITHUB_ACTIONS" = true ]; then
+    if [ "${GITHUB_ACTIONS:-0}" = true ]; then
         CUR_BRANCH="${GITHUB_REF##*/}"
     elif [ "$TRAVIS" = true ]; then
         CUR_BRANCH="$TRAVIS_BRANCH"

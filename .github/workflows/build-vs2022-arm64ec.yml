@@ -95,6 +95,8 @@ jobs:
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
+    - name: Scripts Install
+      run: ./scripts/vs/install.sh
     - name: 'Download artifacts'
       uses: actions/github-script@v7
       if: env.USE_ARTIFACT == 'true'

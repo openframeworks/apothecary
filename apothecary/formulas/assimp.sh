@@ -50,6 +50,17 @@ function prepare() {
     echo "Prepare"
 }
 
+function load() {
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "assimp" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
@@ -70,6 +81,13 @@ function build() {
             -DASSIMP_BUILD_3MF_IMPORTER=0
             -DASSIMP_BUILD_ZLIB=OFF 
             -DASSIMP_WARNINGS_AS_ERRORS=OFF"
+
+        if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
+        fi
+        if [ "${ASSIMP_NO_EXPORT:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
+        fi
 
         cmake .. ${DEFINES} \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -99,7 +117,6 @@ function build() {
 
         cmake --build . --config Release -j${PARALLEL_MAKE}
         cd ..
-        #cleanup to not fail if the other platform is called
         rm -f CMakeCache.txt
 
     elif [ "$TYPE" == "vs" ]; then
@@ -120,12 +137,51 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=ON \
             -DASSIMP_BUILD_TESTS=0 \
             -DASSIMP_BUILD_SAMPLES=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DASSIMP_WARNINGS_AS_ERRORS=OFF \
-            -DBUILD_WITH_STATIC_CRT=OFF"
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
+
+        if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
+        fi
+        if [ "${ASSIMP_NO_EXPORT:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
+        fi
+
+        if [ "${ASSIMP_STATIC:-0}" = "1" ]; then
+            DEFINES="${DEFINES} \
+            -DBUILD_WITH_STATIC_CRT=ON \
+            -DUSE_STATIC_CRT=ON \
+            -DBUILD_SHARED_LIBS=OFF"
+            if [ $MULTITHREADED_TYPE == "MD" ]; then
+                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
+            fi
+        else
+            DEFINES="${DEFINES} \
+            -DBUILD_WITH_STATIC_CRT=OFF \
+            -DBUILD_SHARED_LIBS=ON"
+            cmake .. ${DEFINES} \
+            -A "${PLATFORM}" \
+            ${CMAKE_WIN_SDK} \
+            -G "${GENERATOR_NAME}" \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DASSIMP_BUILD_ZLIB=OFF \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+            cmake --build . --config Debug -j${PARALLEL_MAKE}
+            rm -f CMakeCache.txt || true
+        fi
 
         cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
@@ -147,32 +203,51 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build . --config Release -j${PARALLEL_MAKE}
 
-        cmake .. ${DEFINES} \
-            -A "${PLATFORM}" \
-            ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}" \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_INSTALL_PREFIX=Debug \
-            -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DASSIMP_BUILD_ZLIB=OFF \
-            -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-        cmake --build . --config Debug -j${PARALLEL_MAKE}
-        rm -f CMakeCache.txt || true
         cd ..
         echo "--------------------"
         echo "Completed Assimp for $TYPE | $ARCH | $VS_VER"
 
     elif [ "$TYPE" == "msys2" ]; then
-        echoWarning "TODO: msys2 build"
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$ARCH/zlib.a"
+
+        DEFINES="
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DASSIMP_BUILD_TESTS=OFF \
+            -DASSIMP_BUILD_SAMPLES=OFF \
+            -DASSIMP_BUILD_3MF_IMPORTER=OFF \
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF \
+            -DASSIMP_BUILD_ZLIB=OFF"
+
+        if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
+        fi
+        if [ "${ASSIMP_NO_EXPORT:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
+        fi
+
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt *.a *.o || true
+
+        cmake .. ${DEFINES} \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_C_FLAGS="-fPIC -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE} -Wno-implicit-function-declaration" \
+            -DCMAKE_CXX_FLAGS="-fPIC -I${ZLIB_INCLUDE_DIR} ${FLAG_RELEASE}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
     elif [ "$TYPE" == "android" ]; then
 
@@ -200,6 +275,13 @@ function build() {
             -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
             -D_LARGEFILE64_SOURCE=1 \
             -DASSIMP_BUILD_ZLIB=OFF"
+
+        if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
+        fi
+        if [ "${ASSIMP_NO_EXPORT:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
+        fi
 
         mkdir -p "build_${TYPE}_${ABI}"
         cd "build_${TYPE}_${ABI}"
@@ -238,18 +320,23 @@ function build() {
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
-        # warning, assimp on github uses the ASSIMP_ prefix for CMake options ...
-        # these may need to be updated for a new release
+
         DEFINES="
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
             -DASSIMP_BUILD_3MF_IMPORTER=0"
 
+        if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
+        fi
+        if [ "${ASSIMP_NO_EXPORT:-0}" == "1" ]; then
+            DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
+        fi
+
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
         mkdir -p build_${TYPE}_${PLATFORM}
         cd build_${TYPE}_${PLATFORM}
-        find ./ -name "*.o" -type f -delete
         rm -f CMakeCache.txt *.a *.o *.a *.js
         rm -f CMakeCache.txt || true
         $EMSDK/upstream/emscripten/emcmake cmake .. \
@@ -268,24 +355,60 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DASSIMP_BUILD_ZLIB=OFF \
-            -DASSIMP_BUILD_STATIC_LIB=1 \
             -DASSIMP_BUILD_STL_IMPORTER=0 \
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
-            -DASSIMP_BUILD_ZLIB=OFF \
-            -DASSIMP_ENABLE_BOOST_WORKAROUND=1 \
-            -DENABLE_VISIBILITY=OFF \
+            -DENABLE_VISIBILITY=ON \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DASSIMP_BUILD_ZLIB=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -G 'Unix Makefiles'
-        $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
-        $EMSDK/upstream/emscripten/emmake make install
-        # cmake --build . --config Release -j${PARALLEL_MAKE}
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+            # -G 'Unix Makefiles'
+        # $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
+        # $EMSDK/upstream/emscripten/emmake make install
+        cmake --build . --config Release -j${PARALLEL_MAKE}
         cd ..
+    elif [[ "$TYPE" =~ ^(linux)$ ]]; then
 
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        DEFINES="
+            -DBUILD_SHARED_LIBS=OFF
+            -DASSIMP_BUILD_TESTS=0
+            -DASSIMP_BUILD_SAMPLES=0
+            -DASSIMP_BUILD_3MF_IMPORTER=0"
+
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+        fi
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.o *.a
+
+        cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_CXX_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_C_FLAGS="-fPIC ${FLAG_RELEASE}" \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            $DEFINES
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
     fi
 }
 
@@ -304,28 +427,34 @@ function copy() {
     if [ "$TYPE" == "vs" ]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
-        mkdir -p $1/lib/$TYPE/$PLATFORM/Release
-        cp -v "build_${TYPE}_${PLATFORM}/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
-        cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
-        cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
-        cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
-        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+        if [ "${ASSIMP_STATIC:-0}" = "1" ]; then
+            cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib
+            secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        else
+            mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
+            mkdir -p $1/lib/$TYPE/$PLATFORM/Release
+            cp -v "build_${TYPE}_${PLATFORM}/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
+            cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
+            cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
+            cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
+            secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        fi
+
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux|msys2)$ ]]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/lib/libassimp.a $1/lib/$TYPE/$PLATFORM/assimp.a
-        secure $1/lib/$TYPE/$PLATFORM/assimp.a assimp.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libassimp.a" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
         cp -Rv build_${TYPE}_${ABI}/include/* $1/include
         cp -Rv build_${TYPE}_${ABI}/lib/libassimp.a $1/lib/$TYPE/$ABI/libassimp.a
-        secure $1/lib/$TYPE/$PLATFORM/libassimp.a assimp.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libassimp.a" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/${TYPE}/${PLATFORM}
         cp -Rv build_${TYPE}_${PLATFORM}/include/* $1/include
         cp -v "build_${TYPE}_${PLATFORM}/lib/libassimp.a" $1/lib/$TYPE/${PLATFORM}/libassimp.a
-        secure $1/lib/$TYPE/${PLATFORM}/libassimp.a assimp.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libassimp.a" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license files
@@ -352,7 +481,7 @@ function clean() {
         fi
         rm -f CMakeCache.txt 2>/dev/null
 
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux|msys2)$ ]]; then
         rm -f build_${TYPE}_${PLATFORM}
         rm -f CMakeCache.txt
     else
@@ -362,13 +491,4 @@ function clean() {
     fi
 }
 
-function load() {
-    . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "assimp" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
-    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
+

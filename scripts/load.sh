@@ -3,7 +3,7 @@
 # usage
 # ."$SCRIPT_DIR/save.sh"
 # load "ios" "freeimage" "arm64" "true" "v9.1.0" "v9.1.0"
-# set +e
+#set +e
 
 function loadsave() {
     if [ -z "$2" ]; then

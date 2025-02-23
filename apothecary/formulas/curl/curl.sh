@@ -401,19 +401,19 @@ function copy() {
         mkdir -p $1/bin
         cp -Rv "build_${TYPE}_${ARCH}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libcurl.lib" $1/lib/$TYPE/$PLATFORM/libcurl.lib
-        secure $1/lib/$TYPE/$PLATFORM/libcurl.lib curl.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libcurl.lib" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
         mkdir -p $1/bin
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/bin/"* $1/bin
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
-        secure $1/lib/$TYPE/$PLATFORM/curl.a curl.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/curl.a" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv build/$TYPE/$ABI/include/* $1/include/curl/
-        cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$ABI/libcurl.a
-        secure $1/lib/$TYPE/$ABI/libcurl.a curl.pkl
+        cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$PLATFORM/libcurl.a
+        secure "$1/lib/$TYPE/$PLATFORM/libcurl.a" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     # copy license file
     if [ -d "$1/license" ]; then

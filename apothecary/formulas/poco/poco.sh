@@ -346,7 +346,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/poco.a" "poco.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "vs" ]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
@@ -365,11 +365,12 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/poco.a poco.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/poco.a" "poco.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
-        rm -rf $1/lib/$TYPE/$ABI
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -v build_$ABI/lib/*.a $1/lib/$TYPE/$ABI
+        rm -rf $1/lib/$TYPE/$PLATFORM
+        mkdir -p $1/lib/$TYPE/$PLATFORM
+        cp -v build_$ABI/lib/*.a $1/lib/$TYPE/$PLATFORM
+        secure "$1/lib/$TYPE/$PLATFORM/poco.a" "poco.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     else
         echoWarning "TODO: copy $TYPE lib"
     fi

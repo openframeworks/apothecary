@@ -380,18 +380,18 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/"* $1/include/
         cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.lib" $1/lib/$TYPE/$PLATFORM/libxml2.lib
         cp -v "build_${TYPE}_${PLATFORM}/Release/libxml2.dll" $1/lib/$TYPE/$PLATFORM/libxml2.dll
-        secure $1/lib/$TYPE/$PLATFORM/libxml2.lib
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.lib" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
         cp -Rv include/libxml/* $1/include/libxml/
-        cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$ABI/libxml2.a
-        secure $1/lib/$TYPE/$ABI/libxml2.a
+        cp -Rv build_${TYPE}_${ABI}/libxml2.a $1/lib/$TYPE/$PLATFORM/libxml2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.a" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -Rv build_${TYPE}_${ABI}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv include/libxml/* $1/include/libxml/
         cp -v "build_${TYPE}_$PLATFORM/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        secure $1/lib/$TYPE/$PLATFORM/libxml2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.a" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -Rv build_${TYPE}_${PLATFORM}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
         cp -v "build_${TYPE}_${PLATFORM}/libxml-2.0.pc" $1/lib/$TYPE/$PLATFORM/libxml-2.0.pc
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libxml-2.0.pc"
@@ -405,18 +405,18 @@ function copy() {
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        secure $1/lib/$TYPE/$PLATFORM/libxml2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.a" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/libxml/" $1/include/libxml
         cp -Rv build_${TYPE}_${PLATFORM}/libxml/xmlversion.h $1/include/libxml/xmlversion.h
 
     elif [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        secure $1/lib/$TYPE/$PLATFORM/libxml2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.a" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libxml2.a" $1/lib/$TYPE/$PLATFORM/libxml2.a
-        secure $1/lib/$TYPE/$PLATFORM/libxml2.a
+        secure "$1/lib/$TYPE/$PLATFORM/libxml2.a" "libxml2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libxml2/libxml/" $1/include
         cp -Rv build_${TYPE}_${PLATFORM}/libxml/xmlversion.h $1/include/libxml/xmlversion.h

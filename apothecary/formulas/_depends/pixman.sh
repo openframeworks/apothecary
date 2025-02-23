@@ -134,17 +134,16 @@ function copy() {
     fi
     mkdir -p $1/license
     if [ "$TYPE" == "vs" ]; then
-
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/pixman-1_static.lib" $1/lib/$TYPE/$PLATFORM/libpixman-1.lib
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1/"* $1/include
-        secure $1/lib/$TYPE/$PLATFORM/libpixman-1.lib pixman.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libpixman-1.lib" "pixman.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     else # osx
         # lib
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/pixman/lib/libpixman-1.a" $1/lib/$TYPE/$PLATFORM/libpixman-1.a
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/pixman-1/"* $1/include
-        secure $1/lib/$TYPE/$PLATFORM/libpixman-1.a pixman.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libpixman-1.a" "pixman.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     cp -v COPYING $1/license/LICENSE
 

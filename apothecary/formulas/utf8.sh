@@ -51,6 +51,9 @@ function copy() {
     mkdir -p $1/include
     cp -vr source/* $1/include
 
+    . "$SECURE_SCRIPT"
+    secure "$1/include/utf8.h" "glm.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+
     # copy license file
     if [ -d "$1/license" ]; then
         rm -rf $1/license
@@ -63,4 +66,15 @@ function copy() {
 function clean() {
     echo
     #nothing to do header ony lib
+}
+
+function load() {
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "utf8" ${ARCH} ${VER} "$LIBS_DIR_REAL/utf8/include" ${BUILD_ID})
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
 }

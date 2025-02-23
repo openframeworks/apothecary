@@ -52,6 +52,17 @@ function prepare() {
     fi
 }
 
+function load() {
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "FreeImage" ${ARCH} ${VER} "$LIBS_DIR_REAL/FreeImage/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
@@ -417,8 +428,8 @@ function copy() {
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -v build__${TYPE}_$ABI/Release/lib/libFreeImage.a $1/lib/$TYPE/$ABI/libFreeImage.a
-        secure $1/lib/$TYPE/$ABI/libFreeImage.a FreeImage.pkl
+        cp -v build__${TYPE}_$ABI/Release/lib/libFreeImage.a $1/lib/$TYPE/$PLATFORM/libFreeImage.a
+        secure $1/lib/$TYPE/$PLATFORM/libFreeImage.a FreeImage.pkl
     elif [ "$TYPE" == "emscripten" ]; then
         cp Source/FreeImage.h $1/include
         if [ -d $1/lib/$TYPE/$PLATFORM/ ]; then
@@ -467,13 +478,4 @@ function clean() {
     fi
 }
 
-function load() {
-    . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "FreeImage" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
-    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
+

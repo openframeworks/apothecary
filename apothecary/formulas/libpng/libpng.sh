@@ -9,7 +9,7 @@ FORMULA_DEPENDS=("zlib")
 # define the version
 MAJOR_VER=16
 VER=1.6.43
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 
 # tools for git use
@@ -58,9 +58,33 @@ function prepare() {
 
 }
 
+function load() {
+    . "$LOAD_SCRIPT"
+    LOAD_RESULT=$(loadsave ${TYPE} "libpng" ${ARCH} ${VER} "$LIBS_DIR_REAL/libpng/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
+    if [ "$PREBUILT" -eq 1 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
+    if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
+        result=$(load "libpng" | tail -n 1)
+        echoInfo "===Build $1 - Checking if Precompiled binary :[$result]==="
+        if [ $result -eq 1 ]; then
+            echoInfo "===Build \"$1\" Precompiled binary validated. Skipping updateFormula==="
+            return 0
+        else
+            echoInfo "===Build Precompiled not found or outdated. Continue updateFormula for \"$1\"=== "
+        fi
+    else
+        echoInfo "===Build  Not using cache : [FORCE_DOWNLOAD=$FORCE_DOWNLOAD] [USE_SAVE=$USE_SAVE == 1] for updateFormula \"$1\" ==="
+    fi
 
     export DEFINES="
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -97,12 +121,11 @@ function build() {
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DPNG_HARDWARE_OPTIMIZATIONS=ON \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_BITCODE=OFF \
             -DENABLE_ARC=OFF \
             -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
@@ -135,8 +158,7 @@ function build() {
             -DPNG_HARDWARE_OPTIMIZATIONS=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [ "$TYPE" == "vs" ]; then
@@ -153,14 +175,14 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
         HARDWARE_OPTIMIZATIONS=on
-        # if [ "$PLATFORM" == "ARM64EC" ]; then
-        #     HARDWARE_OPTIMIZATIONS="OFF"
-        # else
-        #     HARDWARE_OPTIMIZATIONS="ON"
-        # fi
+        if [ "$PLATFORM" == "ARM64EC" ]; then
+            HARDWARE_OPTIMIZATIONS="off"
+        else
+            HARDWARE_OPTIMIZATIONS="on"
+        fi
 
         if [[ ${ARCH} == "arm64ec" || "${ARCH}" == "arm64" ]]; then
-            EXTRA_DEFS="-DPNG_ARM_NEON=on"
+            EXTRA_DEFS="-DPNG_ARM_NEON=on -DPNG_INTEL_SS=off"
         else
             EXTRA_DEFS="-DPNG_ARM_NEON=off -DPNG_INTEL_SS=on"
         fi
@@ -176,8 +198,6 @@ function build() {
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DPNG_HARDWARE_OPTIMIZATIONS=${HARDWARE_OPTIMIZATIONS} \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
             -A "${PLATFORM}" \
@@ -217,14 +237,14 @@ function build() {
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c${C_STANDARD} -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DPNG_HARDWARE_OPTIMIZATIONS=OFF \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
@@ -256,7 +276,6 @@ function build() {
             -DCMAKE_C_FLAGS="-std=c${C_STANDARD} ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -282,7 +301,6 @@ function build() {
             -DCMAKE_C_FLAGS="-std=c${C_STANDARD} ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -310,16 +328,17 @@ function copy() {
         mkdir -p $1/include
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libpng16_static.lib" $1/lib/$TYPE/$PLATFORM/libpng.lib
         secure $1/lib/$TYPE/$PLATFORM/libpng.lib
+        secure "$1/lib/$TYPE/$PLATFORM/libpng.lib" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -RT "build_${TYPE}_${ARCH}/Release/include/" $1/include
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng.a
-        secure $1/lib/$TYPE/$PLATFORM/libpng.a
+        secure "$1/lib/$TYPE/$PLATFORM/libpng.a" "libpng.a" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI/
-        cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16.a" $1/lib/$TYPE/$ABI/libpng.a
-        secure $1/lib/$TYPE/$ABI/libpng.a
+        cp -v "build_${TYPE}_${ABI}/Release/lib/libpng16.a" $1/lib/$TYPE/${PLATFORM}/libpng.a
+        secure "$1/lib/$TYPE/${PLATFORM}/libpng.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -RT "build_${TYPE}_${ABI}/Release/include/" $1/include
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
@@ -336,7 +355,7 @@ function copy() {
         # cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/" $1/lib/${TYPE}/${PLATFORM}
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
-        secure $1/lib/$TYPE/$PLATFORM/libpng16.a
+        secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -353,7 +372,7 @@ function copy() {
         # cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/" $1/lib/${TYPE}/${PLATFORM}
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
-        secure $1/lib/$TYPE/$PLATFORM/libpng16.a
+        secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -367,7 +386,7 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
         cp -v "build_${TYPE}_${PLATFORM}/Release/libpng.a" $1/lib/$TYPE/$PLATFORM/libpng.a
-        secure $1/lib/$TYPE/$PLATFORM/libpng.a
+        secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     fi
 
@@ -399,13 +418,4 @@ function clean() {
     fi
 }
 
-function load() {
-    . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "libpng" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
-    PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
+

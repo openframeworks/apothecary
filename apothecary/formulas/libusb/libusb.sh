@@ -146,13 +146,13 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libusb-1.0/" $1/
         cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
         cp -f "build_${TYPE}_${PLATFORM}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb.lib
-        secure $1/lib/$TYPE/$PLATFORM/libusb.lib libusb
+        secure "$1/lib/$TYPE/$PLATFORM/libusb.lib" "libusb.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     if [ "$TYPE" == "osx" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libusb-1.0/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libusb-1.0.a" $1/lib/$TYPE/$PLATFORM/libusb.a
-        secure $1/lib/$TYPE/$PLATFORM/libusb.a libusb.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libusb.a" "libusb.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license file

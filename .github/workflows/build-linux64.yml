@@ -142,4 +142,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: "latest-modular"
-        files: out/*.tar.bz2 out/*.zip
+        files: out/*.tar.bz2

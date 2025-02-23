@@ -155,37 +155,29 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-
-    # headers
     rm -rf $1/include
     mkdir -p $1/include
-
-    # libs
+    . "$SECURE_SCRIPT"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
         cp -v -r build_${TYPE}_${PLATFORM}/Release/lib/libGLEW.a $1/lib/$TYPE/$PLATFORM/libGLEW.a
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libGLEW.a glew.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libGLEW.a" "glew.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v -r build_${TYPE}_${PLATFORM}/Release/include/* $1/include
         cp -v -r build_${TYPE}_${PLATFORM}/Release/lib/libGLEW.a $1/lib/$TYPE/$PLATFORM/libGLEW.a
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libGLEW.a glew.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libGLEW.a" "glew.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "vs" ]; then
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         # cp -v "build_${TYPE}_${ARCH}/Release/bin/glew32.dll" $1/lib/$TYPE/$PLATFORM/glew32_s.dll
         cp -v "build_${TYPE}_${ARCH}/Release/lib/libglew32.lib" $1/lib/$TYPE/$PLATFORM/libglew32.lib
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libglew32.lib glew.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libglew32.lib" "glew.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "msys2" ]; then
-        # TODO: add cb formula
         mkdir -p $1/lib/$TYPE
         cp -v lib/libglew32.a $1/lib/$TYPE
     fi
-
     # copy license files
     if [ -d "$1/license" ]; then
         rm -rf $1/license

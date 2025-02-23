@@ -14,7 +14,7 @@ concurrency:
 
 env:
   TARGET: "emscripten"
-  EMSDK_VERSION: "4.0.2"
+  EMSDK_VERSION: "4.0.3"
   USE_ARTIFACT: true
   PTHREADS_ENABLED: 1
   DISABLE_WORKFLOW: "true"

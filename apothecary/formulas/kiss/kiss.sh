@@ -162,12 +162,12 @@ function copy() {
     if [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
-        secure $1/lib/$TYPE/$PLATFORM/libkiss.a
+        secure "$1/lib/$TYPE/$PLATFORM/libkiss.a" "libkiss.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
-        secure $1/lib/$TYPE/$PLATFORM/libkiss.a
+        secure "$1/lib/$TYPE/$PLATFORM/libkiss.a" "libkiss.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     else
         cp -v lib/$TYPE/libkiss.a $1/lib/$TYPE/libkiss.a

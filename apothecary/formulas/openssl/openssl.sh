@@ -341,7 +341,7 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-
+    . "$SECURE_SCRIPT"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
         mkdir -p $1/include
@@ -351,9 +351,9 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libssl.a openssl.pkl
-        secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
+
+        secure "$1/lib/$TYPE/$PLATFORM/libssl.a" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/libcrypto.a" "crypto.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
@@ -393,9 +393,9 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib
-        . "$SECURE_SCRIPT"
-        secure $1/lib/$TYPE/$PLATFORM/libssl.lib openssl.pkl
-        secure $1/lib/$TYPE/$PLATFORM/libcrypto.a crypto.pkl
+
+        secure "$1/lib/$TYPE/$PLATFORM/libssl.lib" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/libcrypto.lib" "crypto.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
         cp -vR "build_${TYPE}_${ARCH}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc

@@ -402,27 +402,27 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/include/" $1/
         cp -v "build_${TYPE}_${ARCH}/Release/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
         cp -v "build_${TYPE}_${ARCH}/Debug/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtinyD.lib
-        secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a svgtiny.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.lib" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
-        secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a svgtiny.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.a" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         mkdir -p $1/lib/$TYPE/$ABI
-        cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$ABI/libsvgtiny.a
-        secure $1/lib/$TYPE/$ABI/libsvgtiny.a svgtiny.pkl
+        cp -f "build_${TYPE}_${ABI}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
+        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.a" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -f "build_${TYPE}_$PLATFORM/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/svgtiny.a
-        secure $1/lib/$TYPE/$PLATFORM/svgtiny.a svgtiny.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/svgtiny.a" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "msys2" ]; then
         mkdir -p $1/lib/$TYPE/${ARCH}
         cp -f "build_${TYPE}_${ARCH}/libsvgtiny.a" $1/lib/$TYPE/libsvgtiny.a
-        secure $1/lib/$TYPE/libsvgtiny.a svgtiny.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.a" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/${PLATFORM}/
         cp -f "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
-        secure $1/lib/$TYPE/$PLATFORM/libsvgtiny.a svgtiny.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.a" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license file

@@ -205,13 +205,9 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-
-    # headers
     mkdir -p $1/include
     cp -v RtAudio.h $1/include
-    #cp -v RtError.h $1/include #no longer a part of rtAudio
     . "$SECURE_SCRIPT"
-    # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -219,23 +215,21 @@ function copy() {
         cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/rtaudio.lib" $1/lib/$TYPE/$PLATFORM/rtaudio.lib
         #cp -vf "build_${TYPE}_${PLATFORM}/Release/bin/rtaudio.dll" $1/lib/$TYPE/$PLATFORM/rtaudio.dll
         cp -vf "build_${TYPE}_${PLATFORM}/Debug/lib/rtaudiod.lib" $1/lib/$TYPE/$PLATFORM/rtaudioD.lib
-        secure $1/lib/$TYPE/$PLATFORM/rtaudio.lib rtaudio
+        secure "$1/lib/$TYPE/$PLATFORM/rtaudio.lib" "rtaudio" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "msys2" ]; then
         cd build
-        ls
         cd ../
         cp -v build/librtaudio.dll.a $1/lib/$TYPE/librtaudio.dll.a
-
     elif [ "$TYPE" == "osx" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
         cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
-        secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
+        secure "$1/lib/$TYPE/$PLATFORM/librtaudio.a" "rtaudio" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv build_${TYPE}_${PLATFORM}/Release/include/rtaudio/* $1/include/
         cp -vf "build_${TYPE}_${PLATFORM}/Release/lib/librtaudio.a" $1/lib/$TYPE/$PLATFORM/librtaudio.a
-        secure $1/lib/$TYPE/$PLATFORM/librtaudio.a rtaudio
+        secure "$1/lib/$TYPE/$PLATFORM/librtaudio.a" "rtaudio" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license file

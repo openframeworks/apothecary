@@ -323,11 +323,11 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib
-        secure $1/lib/$TYPE/$PLATFORM/libcairo.lib cairo.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libcairo.lib" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "osx" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
-        secure $1/lib/$TYPE/$PLATFORM/libcairo.a cairo.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libcairo.a" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include/
     fi
     # copy license files
