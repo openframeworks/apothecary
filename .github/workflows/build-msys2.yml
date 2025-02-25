@@ -64,7 +64,6 @@ jobs:
             dos2unix
             git
             curl
-            wget2
           pacboy: >-
             gcc:p
             cmake:p
