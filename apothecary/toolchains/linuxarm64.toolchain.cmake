@@ -148,11 +148,11 @@ set(GLES_LIBRARY "/usr/lib/aarch64-linux-gnu/libGLESv2.so")
 set(EGL_LIBRARY "/usr/lib/aarch64-linux-gnu/libEGL.so")
 
 set(X11_INCLUDE_DIR "/usr/aarch64-linux-gnu/include")
-set(X11_X11_LIB "/usr/aarch64-linux-gnu/lib/libX11.so")
-set(X11_Xext_LIB "/usr/aarch64-linux-gnu/lib/libXext.so")
-set(X11_Xrandr_LIB "/usr/aarch64-linux-gnu/lib/libXrandr.so")
-set(X11_Xinerama_LIB "/usr/aarch64-linux-gnu/lib/libXinerama.so")
-set(X11_Xcursor_LIB "/usr/aarch64-linux-gnu/lib/libXcursor.so")
+set(X11_X11_LIB "/usr/lib/aarch64-linux-gnu/libX11.so")
+set(X11_Xext_LIB "/usr/lib/aarch64-linux-gnu/libXext.so")
+set(X11_Xrandr_LIB "/usr/lib/aarch64-linux-gnu/libXrandr.so")
+set(X11_Xinerama_LIB "/usr/lib/aarch64-linux-gnu/libXinerama.so")
+set(X11_Xcursor_LIB "/usr/lib/aarch64-linux-gnu/libXcursor.so")
 
 
 message(STATUS "Using GCC Version: ${GCC_VERSION}")

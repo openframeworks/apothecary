@@ -156,6 +156,7 @@ sudo apt-get install -y --no-install-recommends \
     libxrandr-dev$ARCH_SUFFIX \
     libxinerama-dev$ARCH_SUFFIX \
     libx11-dev$ARCH_SUFFIX \
+    libwayland-dev$ARCH_SUFFIX \
     libxext-dev$ARCH_SUFFIX \
     libxcursor-dev$ARCH_SUFFIX \
     libxi-dev$ARCH_SUFFIX \
@@ -200,6 +201,8 @@ else
 fi
 
 dpkg -l | grep g++-aarch64-linux-gnu
+dpkg -L libx11-dev:arm64 | grep libX11.so
+dpkg -L libxext-dev:arm64 | grep libXext.so
 
 PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
     PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu \
