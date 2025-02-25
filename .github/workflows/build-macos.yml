@@ -85,7 +85,7 @@ jobs:
             });
             const target = process.env.TARGET;
             const bundle = process.env.MATRIX_BUNDLE;
-            const release = startsWith('${{ github.ref }}', 'refs/tags/') ? 'latest' : process.env.RELEASE;
+            const release = '${{ github.ref }}'.startsWith('refs/tags/') ? 'latest' : process.env.RELEASE;
             const artifactName1 = `libs-${release}-${target}-1`;
             const artifactName2 = `libs-${release}-${target}-2`;
             const artifactName3 = `libs-${release}-${target}-3`;
