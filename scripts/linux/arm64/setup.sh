@@ -163,7 +163,8 @@ sudo apt-get install -y --no-install-recommends \
     ccache$ARCH_SUFFIX \
     libgles2-mesa-dev$ARCH_SUFFIX \
     libgl1-mesa-dev$ARCH_SUFFIX \
-    libegl1-mesa-dev$ARCH_SUFFIX
+    libegl1-mesa-dev$ARCH_SUFFIX \
+    libxkbcommon-dev$ARCH_SUFFIX
 
 sudo apt install -y \
     binfmt-support \
