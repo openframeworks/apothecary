@@ -1,6 +1,6 @@
 #!/bin/bash
 VERSION=4.5.2
-if [[ -n "$MSYSTEM" ]]; then
+if [[ -n "${MSYSTEM:-}" ]]; then
   export PATH="/usr/bin:$PATH"
   echo "Running on MSYS2, using system curl at: $(which curl)"
 fi
