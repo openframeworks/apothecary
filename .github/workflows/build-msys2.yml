@@ -71,6 +71,8 @@ jobs:
             python3:p
             libpng:p
             zlib:p
+            wget2:p
+            wget:p
             curl:p
       - name: Determine Release
         id: vars

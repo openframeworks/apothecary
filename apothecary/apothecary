@@ -1107,7 +1107,7 @@ function isValidType() {
 function isFormulaType() {
   local i
   if [ -z "${FORMULA_TYPES+x}" ]; then
-    echo "FORMULA_TYPES is undefined. Initializing with default values..."
+    echoVerbose "FORMULA_TYPES is undefined. Initializing with default values..."
   else
     for i in "${FORMULA_TYPES[@]}" ; do
       if [ "$i" == "$1" ] ; then
@@ -2688,16 +2688,16 @@ if [ "$TYPE" == "linux" ]; then
 
   if [[ ${CROSSCOMPILING} == 1 ]];  then
     if [[ -z ${TOOLCHAIN_ROOT+z} ]];  then
-      echoWarning "Trying to cross compile but TOOLCHAIN_ROOT not set"
-      echoWarning "Trying to continue in case PATH is set to correct toolchain"
-      echoWarning "If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain"
+      echoVerbose "Trying to cross compile but TOOLCHAIN_ROOT not set"
+      echoVerbose "Trying to continue in case PATH is set to correct toolchain"
+      echoVerbose "If compiling fails try setting TOOLCHAIN_ROOT to root of cross compiler toolchain"
       if [[ -z ${TOOLCHAIN_PREFIX+z} ]]; then
         export TOOLCHAIN_PREFIX="aarch64-linux-gnu"
       fi
     fi
     if [[ -z ${SYSROOT+z} ]]; then
-      echoError "Trying to cross compile but SYSROOT environment variable is not set"
-      echoError "Should be set to root of target OS image"
+      echoWarning "Trying to cross compile but SYSROOT environment variable is not set"
+      echoWarning "Should be set to root of target OS image"
       export SYSROOT=""
     fi
   else
