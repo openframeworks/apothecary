@@ -95,6 +95,12 @@ jobs:
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
+
+       - name: Setup Environment
+        run: |
+          echo "Setting up environment for ${{ matrix.flavor }}"
+          echo "ARCH=${{ matrix.flavor }}" >> $GITHUB_ENV
+
       - run: git config --global core.autocrlf input
       - name: Clone repository
         uses: actions/checkout@v4.2.2
