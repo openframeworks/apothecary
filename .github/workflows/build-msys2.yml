@@ -44,7 +44,7 @@ jobs:
           - mingw64
           - ucrt64
           - clang64
-          - clangarm64
+         # - clangarm64
     name: ${{ matrix.flavor }}
     runs-on: windows-latest
     defaults:
@@ -96,7 +96,7 @@ jobs:
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
 
-       - name: Setup Environment
+      - name: Setup Environment
         run: |
           echo "Setting up environment for ${{ matrix.flavor }}"
           echo "ARCH=${{ matrix.flavor }}" >> $GITHUB_ENV
