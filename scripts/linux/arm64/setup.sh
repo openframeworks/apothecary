@@ -202,9 +202,18 @@ if [ -d "/usr/lib/x86_64-linux-gnu" ]; then
 fi
 if [ -d "/usr/lib/aarch64-linux-gnu" ]; then
     find /usr/lib/aarch64-linux-gnu -name "libGL*"
+    find /usr/lib/aarch64-linux-gnu -name "libwayland*"
 else
     echo "Directory /usr/lib/aarch64-linux-gnu does not exist."
 fi
+
+if [ -d "/usr/aarch64-linux-gnu/bin/pkg-config" ]; then
+    echo "Directory /usr/aarch64-linux-gnu/bin/pkg-config exists"
+     find /usr/aarch64-linux-gnu/bin/pkg-config -name "pkg-config*"
+else
+    echo "Directory /usr/aarch64-linux-gnu/bin/pkg-config does not exist."
+fi
+
 
 dpkg -l | grep g++-aarch64-linux-gnu
 dpkg -L libx11-dev:arm64 | grep libX11.so
@@ -212,6 +221,6 @@ dpkg -L libxext-dev:arm64 | grep libXext.so
 
 export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH
 export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
-export PKG_CONFIG_SYSROOT_DIR=/
+export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
 pkg-config --list-all
 

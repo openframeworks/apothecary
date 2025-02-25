@@ -126,6 +126,9 @@ function build() {
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+            export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH
+            export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
+            export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
             if [[ "$PLATFORM" =~ ^arm64$ ]] && [ "$TYPE" = "linux" ]; then
                 echoInfo "Building GLFW for ARM64 Linux - Using Wayland/X11, skipping EGL/OpenGL ES"
                 export GLFW_WAYLAND=1
