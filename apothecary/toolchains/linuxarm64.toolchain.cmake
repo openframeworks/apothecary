@@ -64,6 +64,10 @@ if(NOT DEFINED GCC_PATH)
             set(GCC_PATH "/usr/bin")  # Native AArch64 GCC
         else()
             set(GCC_PATH "/usr/bin/aarch64-linux-gnu")  # Cross-compilation GCC
+            set(ENV{PKG_CONFIG_PATH} "/usr/aarch64-linux-gnu/lib/pkgconfig")
+            set(ENV{PKG_CONFIG_LIBDIR} "/usr/aarch64-linux-gnu/lib/pkgconfig")
+            set(PKG_CONFIG_PATH "/usr/aarch64-linux-gnu/lib/pkgconfig")
+            set(PKG_CONFIG_LIBDIR "/usr/aarch64-linux-gnu/lib/pkgconfig")
         endif()
         message(STATUS "GCC_PATH not specified. Defaulting to GCC_PATH=${GCC_PATH}")
     endif()
@@ -145,8 +149,6 @@ set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC ${EXTRA_LINKS}")
 
 set(CMAKE_LIBRARY_PATH /usr/aarch64-linux-gnu/lib)
 set(CMAKE_INCLUDE_PATH /usr/aarch64-linux-gnu/include)
-set(ENV{PKG_CONFIG_PATH} "/usr/aarch64-linux-gnu/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-set(ENV{PKG_CONFIG_LIBDIR} "/usr/aarch64-linux-gnu/lib/pkgconfig")
 
 set(OPENGL_FOUND TRUE)
 set(OPENGL_gl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
