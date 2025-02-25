@@ -25,6 +25,8 @@ else
     BUNDLE=$2
 fi
 ARCH=${ARCH:-64}
+GCC="_${GCC:-latest}"
+OPT="_${OPT:-}"
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
@@ -84,7 +86,7 @@ for LIB in "${FORMULAS[@]}"; do
     if [ -d "$LIB" ]; then
         if [[ "$TARGET" == "msys2" || "$TARGET" == "vs" ]]; then
             # ZIP format for Windows (msys2 / vs)
-            TARBALL="oF_${LIB}_${TARGET}_${ARCH}.zip"
+            TARBALL="oF_${LIB}_${TARGET}_${ARCH}${OPT}.zip"
             echo "Packaging $LIB -> $TARBALL"
             if [[ "$TARGET" == "msys2" ]]; then
                 "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$LIB"
@@ -93,7 +95,7 @@ for LIB in "${FORMULAS[@]}"; do
             fi
         else
             # TAR format for Linux/macOS/Emscripten
-            TARBALL="oF_${LIB}_${TARGET}_${ARCH}.tar.bz2"
+            TARBALL="oF_${LIB}_${TARGET}_${ARCH}${GCC}${OPT}.tar.bz2"
             echo "Packaging $LIB -> $TARBALL"
             tar cjvf "$TARBALL" "$LIB"
         fi
