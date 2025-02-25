@@ -44,7 +44,6 @@ sudo apt install -y \
 # Ensure the script is run as root
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root."
-    exit 1
 fi
 
 UBUNTU_VERSION=$(lsb_release -cs) 
@@ -103,7 +102,22 @@ awk '
 mv "${SOURCE_FILE}.tmp" "$SOURCE_FILE"
 echo "'Architectures: amd64' added where missing after 'Types: deb' in $SOURCE_FILE."
 
+if [ -d "arm64-rootfs/" ]; then
+    echo "Setting up Linux aarch64 toolchain inside rootfs..."
+    sudo mkdir -p /usr/aarch64-linux-gnu
+    sudo mkdir -p /arm64-rootfs/usr/aarch64-linux-gnu
+    # Link the toolchain inside rootfs (Linux aarch64)
+    sudo ln -s /arm64-rootfs/usr/bin/aarch64-linux-gnu-* /usr/aarch64-linux-gnu/
+    sudo ln -s /arm64-rootfs/usr/lib /usr/lib/aarch64-linux-gnu/
+    sudo ln -s /arm64-rootfs/usr/include /usr/aarch64-linux-gnu/include
+
+    echo "Toolchain linked for Linux aarch64 at /usr/aarch64-linux-gnu/"
+else
+    echo "Error: /arm64-rootfs/ does not exist. Ensure rootfs is extracted."
+    exit 1
 fi
+
+fi #end if arm64 / cross
 
 if ! dpkg --print-foreign-architectures | grep -q "arm64"; then
     sudo dpkg --add-architecture arm64
@@ -120,20 +134,7 @@ ARCH_SUFFIX=":arm64"
 if [[ "$(uname -m)" == "aarch64" ]]; then
     ARCH_SUFFIX=""
 fi
-if [ -d "arm64-rootfs/" ]; then
-    echo "Setting up Linux aarch64 toolchain inside rootfs..."
-    sudo mkdir -p /usr/aarch64-linux-gnu
-    sudo mkdir -p /arm64-rootfs/usr/aarch64-linux-gnu
-    # Link the toolchain inside rootfs (Linux aarch64)
-    sudo ln -s /arm64-rootfs/usr/bin/aarch64-linux-gnu-* /usr/aarch64-linux-gnu/
-    sudo ln -s /arm64-rootfs/usr/lib /usr/aarch64-linux-gnu/lib
-    sudo ln -s /arm64-rootfs/usr/include /usr/aarch64-linux-gnu/include
 
-    echo "Toolchain linked for Linux aarch64 at /usr/aarch64-linux-gnu/"
-else
-    echo "Error: /arm64-rootfs/ does not exist. Ensure rootfs is extracted."
-    exit 1
-fi
 echo "Installing ARM64 packages..."
 sudo apt-get install -y --no-install-recommends \
     aptitude$ARCH_SUFFIX \
