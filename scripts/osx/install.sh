@@ -10,7 +10,7 @@ if ! which realpath >&/dev/null; then
 fi
 
 brew update >/dev/null
-brew install cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig bash shfmt wget2 curl
+brew install --formula cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig bash shfmt wget2 curl
 
 ls -n /Applications/ | grep Xcode
 
