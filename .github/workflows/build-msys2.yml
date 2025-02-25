@@ -44,7 +44,7 @@ jobs:
           - mingw64
           - ucrt64
           - clang64
-          - clangarm64
+         # - clangarm64
     name: ${{ matrix.flavor }}
     runs-on: windows-latest
     defaults:
@@ -52,7 +52,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Setup msys2
-        uses: msys2/setup-msys2@v2.26.0
+        uses: msys2/setup-msys2@v2.27.0
         with:
           update: true
           release : false
@@ -64,6 +64,7 @@ jobs:
             dos2unix
             git
           pacboy: >-
+            qemu-user
             gcc:p
             cmake:p
             gperf:p
@@ -71,9 +72,11 @@ jobs:
             python3:p
             libpng:p
             zlib:p
-            wget2:p
-            wget:p
-            curl:p
+            wget2
+            wget
+            curl
+
+
       - name: Determine Release
         id: vars
         shell: bash
@@ -87,8 +90,10 @@ jobs:
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
+      - run: git config --global core.autocrlf input
       - name: Clone repository
         uses: actions/checkout@v4.2.2
+
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
