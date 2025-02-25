@@ -64,7 +64,6 @@ jobs:
             dos2unix
             git
           pacboy: >-
-            qemu-user
             gcc:p
             cmake:p
             gperf:p
@@ -75,7 +74,6 @@ jobs:
             wget2
             wget
             curl
-
 
       - name: Determine Release
         id: vars
