@@ -93,7 +93,9 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DBROTLI_EMSCRIPTEN=OFF \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_MACOSX_BUNDLE=OFF \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
