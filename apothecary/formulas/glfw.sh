@@ -66,7 +66,8 @@ function build() {
             -DGLFW_BUILD_EXAMPLES=OFF \
             -DGLFW_BUILD_TESTS=OFF \
             -DGLFW_BUILD_DOCS=OFF \
-            -DGLFW_VULKAN_STATIC=OFF"
+            -DGLFW_VULKAN_STATIC=OFF \
+            -DGLFW_USE_HYBRID_HPG=ON"
 
         cmake .. ${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
@@ -125,10 +126,39 @@ function build() {
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
-            DEFINES="-DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2 -DCMAKE_LIBRARY_PATH=$SYSROOT/usr/lib -DCMAKE_INCLUDE_PATH=$SYSROOT/usr/include -DGLFW_BUILD_WAYLAND=OFF"
+            if [[ "$PLATFORM" =~ ^arm64$ ]] && [ "$TYPE" = "linux" ]; then
+                echoInfo "Building GLFW for ARM64 Linux - Using Wayland/X11, skipping EGL/OpenGL ES"
+                export GLFW_WAYLAND=1
+                export GLFW_X11=1
+            else
+                echoInfo "Building GLFW for cross-compiled target - Using EGL/OpenGL ES"
+                DEFINES="$DEFINES -DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2"
+                export GLFW_WAYLAND=0
+                export GLFW_X11=0
+            fi
         else
-            DEFINES="-DGLFW_BUILD_WAYLAND=OFF"
+            export GLFW_WAYLAND=${GLFW_WAYLAND:-1}
+            export GLFW_X11=${GLFW_X11:-1}
         fi
+
+        if [ "${GLFW_WAYLAND:-0}" == "1" ]; then
+            echoInfo "Building GLFW with WAYLAND"
+            export DEFINES="$DEFINES \
+                -DGLFW_BUILD_WAYLAND=ON"
+        else
+            export DEFINES="$DEFINES \
+                -DGLFW_BUILD_WAYLAND=OFF"
+        fi
+
+        if [ "${GLFW_X11:-0}" == "1" ]; then
+            echoInfo "Building GLFW with X11"
+            export DEFINES="$DEFINES \
+                -DGLFW_BUILD_X11=ON"
+        else
+            export DEFINES="$DEFINES \
+                -DGLFW_BUILD_X11=OFF"
+        fi
+
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.o *.a
