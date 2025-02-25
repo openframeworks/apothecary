@@ -771,6 +771,7 @@ if [ "$TYPE" = "msys2" ]; then
         export ARCH=mingw64
       elif [ "$MSYSTEM" == "CLANGARM64" ] || [ "$MSYSTEM" == "clangarm64" ]; then
         export ARCH=clangarm64
+        export CROSSCOMPILING=1
       elif [ "$MSYSTEM" == "UCRT64" ]; then
         export ARCH=ucrt64
       elif [ "$MSYSTEM" == "CLANG64" ]; then
@@ -2637,8 +2638,7 @@ if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
   fi
 fi
 
-CROSSCOMPILING=0
-
+export CROSSCOMPILING=${CROSSCOMPILING:-0}
 
 if [ "$TYPE" == "linux" ]; then
   export FLAG_RELEASE="-O3"
@@ -2683,7 +2683,7 @@ if [ "$TYPE" == "linux" ]; then
   fi
 
   if [[ "$ABI" =~ ^(armv7l|aarch64|armv6l)$ ]]; then
-    CROSSCOMPILING=1
+    export CROSSCOMPILING=1
   fi
 
   if [[ ${CROSSCOMPILING} == 1 ]];  then

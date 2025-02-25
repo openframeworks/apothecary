@@ -115,9 +115,13 @@ function build() {
     elif [ "$TYPE" == "msys2" ]; then
         echo "building $TYPE | $PLATFORM"
         echo "--------------------"
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            DEFINES="${DEFINES} -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake"
+        fi
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.so
+
 
         DEFINES="${DEFINES} -DLIBRARY_SUFFIX=${ARCH} \
 			-DCMAKE_BUILD_TYPE=Release \
