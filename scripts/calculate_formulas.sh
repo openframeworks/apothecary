@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 set -e
-# capture failing exits in commands obscured behind a pipe
 set -o pipefail
 
+if [ -z "${TARGET:-}" ]; then
+    if [ -n "${TYPE:-}" ]; then
+        export TARGET="$TYPE"
+    else
+        echo "Environment variable TARGET not defined. Should be target os"
+        exit 1
+    fi
+fi
+FORMULAS=("${FORMULAS[@]:-}")
+BUNDLE=${BUNDLE:-0}
+
 FORMULAS=(
-    # Dependencies for other formulas (cairo)
+    # sub Dependencies at top
     "pixman"
     "brotli"
     "pkg-config"
     "zlib"
-
-    # All formulas
     "assimp"
     # "boost"
     "libpng"
@@ -33,8 +41,6 @@ FORMULAS=(
     "rtAudio"
     "tess2"
     "uriparser"
-
-    # Formulas with depenencies in the end
     "curl"
     # "poco"
     "svgtiny"
@@ -43,7 +49,6 @@ FORMULAS=(
     "metalangle"
 )
 
-# Seperate in bundles on osx
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
     FORMULAS=(
         "pkg-config"
@@ -84,10 +89,8 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "assimp"
     )
 elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
-    if [ "$BUNDLE" == "1" ]; then
-
+    if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
-            # Dependencies for other formulas (cairo)
             "pixman"
             "pkg-config"
             "zlib"
@@ -96,7 +99,6 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "brotli"
             "pugixml"
             "freetype"
-            # All formulas
             "libxml2"
             "svgtiny"
             "FreeImage"
@@ -109,9 +111,10 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "metalangle"
             "cairo"
         )
-    elif [ "$BUNDLE" == "2" ]; then
+    fi
+    if [ "$BUNDLE" == "2" ] || [ "$BUNDLE" == "0" ]; then
         if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
-            FORMULAS=(
+            FORMULAS+=(
                 "glm"
                 "json"
                 "zlib"
@@ -122,59 +125,23 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
                 # "fmod"
             )
         else
-            FORMULAS=(
+            FORMULAS+=(
                 "glm"
                 "json"
                 "opencv"
             )
         fi
-    elif [ "$BUNDLE" == "3" ]; then
-        FORMULAS=(
+    fi
+    if [ "$BUNDLE" == "3" ] || [ "$BUNDLE" == "0" ]; then
+        FORMULAS+=(
             "fmt"
             "openssl"
             "curl"
-            # "poco"
-        )
-    else
-        FORMULAS=(
-            "pixman"
-            "pkg-config"
-            "zlib"
-            "utf8"
-            "libpng"
-            "brotli"
-            "pugixml"
-            "freetype"
-            "libxml2"
-            "svgtiny"
-            "FreeImage"
-            "assimp"
-            "glew"
-            "json"
-            "zlib"
-            "glfw"
-            "opencv"
-            "portaudio"
-            "libusb"
-            #"fmod"
-            "glm"
-            "json"
-            "opencv"
-            "videoInput"
-            "rtAudio"
-            "tess2"
-            "uriparser"
-            "cairo"
-            "fmt"
-            "openssl"
-            "curl"
-            "metalangle"
             # "poco"
         )
     fi
-
 elif [ "$TARGET" == "vs" ]; then
-    if [ "$BUNDLE" == "1" ]; then
+    if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
             "pixman"
@@ -183,15 +150,10 @@ elif [ "$TARGET" == "vs" ]; then
             "libpng"
             "brotli"
             "freetype"
-
             "libxml2"
             "svgtiny"
             "assimp"
-
-            # All formulas
-            #"boost"
             "FreeImage"
-            #"fmod"
             "glew"
             "glfw"
             "glm"
@@ -206,13 +168,11 @@ elif [ "$TARGET" == "vs" ]; then
             "tess2"
             "uriparser"
             "opencv"
-
-            # # Formulas with depenencies in the end
             "cairo"
-            #"uri"
         )
-    elif [ "$BUNDLE" == "2" ]; then
-        FORMULAS=(
+    fi
+    if [ "$BUNDLE" == "2" ] || [ "$BUNDLE" == "0" ]; then
+        FORMULAS+=(
             "fmt"
             "openssl"
             "curl"
@@ -234,9 +194,9 @@ array_contains() {
     return $in
 }
 
-echo "FORMULAS: ${FORMULAS[@]}"
+echo "Potions to Brew with formulas: [${FORMULAS[@]}]"
 if [ -z ${FORMULAS} ]; then
-    echo "No formulas to build, failing"
+    echo "===No formulas to build, failing==="
     exit 1
 fi
 
