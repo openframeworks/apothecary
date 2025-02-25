@@ -143,6 +143,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c
 set(CMAKE_EXE_LINKER_FLAGS "-fPIE -pie ${EXTRA_LINKS}")
 set(CMAKE_SHARED_LINKER_FLAGS "-shared -fPIC ${EXTRA_LINKS}")
 
+set(CMAKE_LIBRARY_PATH /usr/aarch64-linux-gnu/lib)
+set(CMAKE_INCLUDE_PATH /usr/aarch64-linux-gnu/include)
+set(ENV{PKG_CONFIG_PATH} "/usr/aarch64-linux-gnu/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+set(ENV{PKG_CONFIG_LIBDIR} "/usr/aarch64-linux-gnu/lib/pkgconfig")
+
 set(OPENGL_FOUND TRUE)
 set(OPENGL_gl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
 set(OPENGL_opengl_LIBRARY "/usr/lib/aarch64-linux-gnu/libGL.so")
