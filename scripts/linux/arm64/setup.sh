@@ -122,7 +122,7 @@ if [[ "$(uname -m)" == "aarch64" ]]; then
 fi
 
 echo "Installing ARM64 packages..."
-sudo apt-get install -y --no-install-recommends \
+sudo apt-get install -y \
     aptitude$ARCH_SUFFIX \
     gfortran$ARCH_SUFFIX \
     texinfo$ARCH_SUFFIX \
