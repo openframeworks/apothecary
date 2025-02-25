@@ -1,5 +1,10 @@
 #!/bin/bash
-VERSION=4.5.1
+VERSION=4.5.2
+if [[ -n "$MSYSTEM" ]]; then
+  export PATH="/usr/bin:$PATH"
+  echo "Running on MSYS2, using system curl at: $(which curl)"
+fi
+
 printDownloaderHelp() {
     cat <<EOF
     
