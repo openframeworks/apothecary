@@ -104,7 +104,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include"
 
         cmake ../libs/videoInput ${DEFS} \
-            -G "MSYS Makefiles" \
+            -G "Unix Makefiles" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \
