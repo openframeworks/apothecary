@@ -208,7 +208,10 @@ dpkg -l | grep g++-aarch64-linux-gnu
 dpkg -L libx11-dev:arm64 | grep libX11.so
 dpkg -L libxext-dev:arm64 | grep libXext.so
 
-PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig \
-    PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu \
-    PKG_CONFIG_SYSROOT_DIR=/ \
-      pkg-config --list-all
+PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH \
+PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig \
+PKG_CONFIG_SYSROOT_DIR=/ \
+pkg-config --list-all
+ls /usr/lib/aarch64-linux-gnu/libwayland-client.so
+ls /usr/lib/aarch64-linux-gnu/pkgconfig/wayland-client.pc
+pkg-config --modversion wayland-client
