@@ -63,6 +63,8 @@ jobs:
             unzip
             dos2unix
             git
+            curl
+            wget2
           pacboy: >-
             gcc:p
             cmake:p
@@ -71,9 +73,6 @@ jobs:
             python3:p
             libpng:p
             zlib:p
-            wget2
-            wget
-            curl
 
       - name: Determine Release
         id: vars
