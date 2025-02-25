@@ -73,6 +73,23 @@ jobs:
             libpng:p
             zlib:p
 
+      - name: Setup msys2
+        uses: msys2/setup-msys2@v2.27.0
+        with:
+          update: true
+          release : false
+          install: >-
+            wget
+            curl
+            
+      - name: Use system curl for clangarm64
+        if: matrix.flavor == 'clangarm64'
+        run: |
+          # Prepend the system binary directory so that the native curl is found first
+          export PATH="/usr/bin:$PATH"
+          echo "Using system curl at: $(which curl)"
+          # You might also want to remove or rename the problematic clangarm64 curl if necessary
+
       - name: Determine Release
         id: vars
         shell: bash
