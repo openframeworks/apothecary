@@ -53,6 +53,7 @@ if [[ -z "$UBUNTU_VERSION" ]]; then
 fi
 if [[ "$(uname -m)" == "aarch64" ]]; then
     echo "Native aarch64 detected. No need to generate ARM64 /apt/sources. edits"
+    SYSROOT="/"
 else
 
 echo "downloading aarch64 linux base"
@@ -69,6 +70,7 @@ sudo mount --bind /dev arm64-rootfs/dev
 sudo mount --bind /proc arm64-rootfs/proc
 sudo mount --bind /sys arm64-rootfs/sys
 sudo chroot arm64-rootfs /bin/bash
+SYSROOT="arm64-rootfs"
 
 OUTPUT_FILE="/etc/apt/sources.list.d/arm64.sources"
 echo "making sources file arm64"
@@ -208,10 +210,8 @@ dpkg -l | grep g++-aarch64-linux-gnu
 dpkg -L libx11-dev:arm64 | grep libX11.so
 dpkg -L libxext-dev:arm64 | grep libXext.so
 
-PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH \
-PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig \
-PKG_CONFIG_SYSROOT_DIR=/ \
+PKG_CONFIG_PATH=${SYSROOT}/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH \
+PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/aarch64-linux-gnu/pkgconfig \
+PKG_CONFIG_SYSROOT_DIR=${SYSROOT} \
 pkg-config --list-all
-ls /usr/lib/aarch64-linux-gnu/libwayland-client.so
-ls /usr/lib/aarch64-linux-gnu/pkgconfig/wayland-client.pc
-pkg-config --modversion wayland-client
+
