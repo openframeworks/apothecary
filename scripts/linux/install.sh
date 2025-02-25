@@ -165,7 +165,7 @@ fi
 
 if [ "$ACTIONS_CACHE" -eq 0 ]; then
     sudo apt-get -y install libasound-dev libjack-dev libpulse-dev oss4-dev #rtaudio
-    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix ccache cmake build-essential libfftw3-dev
+    sudo apt-get update && sudo apt-get install -y autoconf libtool automake dos2unix ccache cmake build-essential libfftw3-dev libwayland-dev libxkbcommon-dev xorg-dev
     sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libxrandr-dev libxinerama-dev libx11-dev libxext-dev libxcursor-dev libxi-dev
     sudo apt-get install -y
     cmake --version
