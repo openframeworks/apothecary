@@ -5,7 +5,7 @@
 # It is similar in speed with deflate but offers more dense compression.
 # https://github.com/google/brotli
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux")
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" )
 FORMULA_DEPENDS=()
 
 # define the version
