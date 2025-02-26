@@ -489,7 +489,7 @@ function build() {
             -DFT_REQUIRE_BROTLI=ON \
             -DFT_DISABLE_BROTLI=OFF"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${XLIBPNG_ROOT}"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${XLIBPNG_ROOT}:${XLIBPNG_LIBRARY}:${XLIBPNG_INCLUDE_DIR}"
         export C_INCLUDE_PATH="${XLIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}"
 
         export PATH="${XLIBPNG_INCLUDE_DIR}:${PATH}"
