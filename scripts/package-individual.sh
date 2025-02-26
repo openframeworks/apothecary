@@ -25,8 +25,10 @@ else
     BUNDLE=$2
 fi
 ARCH=${ARCH:-64}
-GCC="_${GCC:-latest}"
-OPT="_${OPT:-}"
+GCC="${GCC:-}"
+OPT="${OPT:-}"
+GCC="${GCC:+_$GCC}"
+OPT="${OPT:+_$OPT}"
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi

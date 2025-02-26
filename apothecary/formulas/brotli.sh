@@ -163,9 +163,7 @@ function build() {
         cd ..
     elif [[ "$TYPE" =~ ^(android)$ ]]; then
 
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
-        fi
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -181,6 +179,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DCMAKE_ANDROID_ARCH_ABI=$ABI \
             -DPLATFORM=$PLATFORM \
             -DANDROID_PLATFORM=${ANDROID_PLATFORM} \
             -DANDROID_ABI=${ABI} \
