@@ -92,6 +92,8 @@ if [ -z "$FORMULAS" ]; then
     exit 0
 fi
 
+echo "Split Bundle Libs: $LIBRARY_DIR to $OUT_BUNDLE_DIR"
+
 # Define the base directory where the library folders are located
 LIBRARY_BASE_DIR="$LOCAL_ROOT/libraries"
 
@@ -108,13 +110,12 @@ mkdir -p "$OUT_BUNDLE_DIR"
 # Iterate over the folders in the library base directory
 for LIBRARY_DIR in "$OUTPUT_FOLDER"/*; do
     LIBRARY_NAME=$(basename "$LIBRARY_DIR")
-
     # Check if the library name is in the keep list
     if [ -n "${KEEP_LIBRARIES[$LIBRARY_NAME]}" ]; then
-        echo "Moving library folder: $LIBRARY_DIR to $OUT_BUNDLE_DIR"
+        echo "Moving library folder: [$LIBRARY_DIR] to [$OUT_BUNDLE_DIR]"
         mv "$LIBRARY_DIR" "$OUT_BUNDLE_DIR/"
     else
-        echo "Keeping library folder: $LIBRARY_DIR in $OUTPUT_FOLDER"
+        echo "Keeping library folder: [$LIBRARY_DIR] in [$OUTPUT_FOLDER]"
     fi
 done
 

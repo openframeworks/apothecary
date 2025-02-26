@@ -89,9 +89,8 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "assimp"
     )
 elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
-    if [ "$BUNDLE" == "0" ]; then
-        FORMULAS=()
-    fi
+
+    FORMULAS=()
 
     if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
@@ -145,9 +144,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
         )
     fi
 elif [ "$TARGET" == "vs" ]; then
-    if [ "$BUNDLE" == "0" ]; then
-        FORMULAS=()
-    fi
+    FORMULAS=()
     if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
