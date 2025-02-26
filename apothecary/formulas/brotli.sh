@@ -220,7 +220,7 @@ function build() {
 
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-    elif elif [ "$TYPE" == "emscripten" ]; then
+    elif [ "$TYPE" == "emscripten" ]; then
 
         DEFINES="
           -DCMAKE_C_STANDARD=${C_STANDARD} \
