@@ -356,7 +356,7 @@ function copy() {
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
-        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
@@ -372,7 +372,7 @@ function copy() {
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
-        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
