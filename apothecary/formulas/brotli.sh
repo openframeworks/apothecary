@@ -21,10 +21,12 @@ GIT_TAG=v$VER
 function download() {
     . "$DOWNLOADER_SCRIPT"
     if [ "$TYPE" == "vs" ]; then
-        downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
-        unzip -q v${VER}.zip
-        mv brotli-${VER} brotli
-        rm -f v${VER}.zip
+        # downloader ${GIT_URL}/archive/refs/tags/v${VER}.zip
+        # unzip -q v${VER}.zip
+        # mv brotli-${VER} brotli
+        # rm -f v${VER}.zip
+        git clone "$GIT_URL.git" brotli
+        # https://github.com/google/brotli/issues/1105 # using git for VS due to my report fix on upstream
     else
         downloader ${GIT_URL}/archive/refs/tags/v${VER}.tar.gz
         tar -xf v${VER}.tar.gz
