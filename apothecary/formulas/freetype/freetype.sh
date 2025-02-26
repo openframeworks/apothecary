@@ -504,9 +504,9 @@ function build() {
             ${BROTLI} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DPNG_INCLUDE_DIRS=${XLIBPNG_INCLUDE_DIR} \
+            -DPNG_INCLUDE_DIR=${XLIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${XLIBPNG_LIBRARY} \
             -DPNG_LIBRARIES=${XLIBPNG_LIBRARY} \
             -DPNG_LIBRARY=${XLIBPNG_LIBRARY} \
@@ -521,7 +521,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_C_FLAGS="-fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${XLIBPNG_INCLUDE_DIR}" \
+            -DCMAKE_C_FLAGS="-fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${XLIBPNG_INCLUDE_DIR} -I${XLIBPNG_INCLUDE_DIR}/libpng" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
