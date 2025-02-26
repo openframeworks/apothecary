@@ -1220,37 +1220,34 @@ function doCommand() {
         local formula
         #for formula in $( ls -1 $FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
         for formula in "${FORMULAS[@]}"; do
-        doCommand $shouldSource $cmd "${formula%.*}"
+            doCommand $shouldSource $cmd "${formula%.*}"
         done
         echoInfo " ----- Apothecary All Build Sucessfully completed for $TYPE -----"
-
     elif [ "$1" == "all" ] ; then
-
         local formula
         for formula in $( ls -1 $FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
-        for formula in "${FORMULAS[@]}"; do
-        doCommand $shouldSource $cmd "${formula%.*}"
+            doCommand $shouldSource $cmd "${formula%.*}"
         done
         echoInfo " ----- Apothecary All Build Sucessfully completed for $TYPE -----"
     # process all addons in the addons dir
     elif [ "$1" == "addons" ] ; then
         local addon
         for addon in $(ls -1 $REL_ADDONS_DIR) ; do
-        if [ -d $REL_ADDONS_DIR/$addon ] ; then
-          doCommand $shouldSource $cmd $addon
-        fi
+            if [ -d $REL_ADDONS_DIR/$addon ] ; then
+                doCommand $shouldSource $cmd $addon
+            fi
         done
 
     # process all formulas in the dependencies dir
     elif [ "$1" == "depends" ] ; then
         local depend
         for depends in $( ls -1 $FORMULAS_DIR/$DEPENDS_SUBDIR) ; do
-        OUTPUT_DEPEND=$(realpath ${LIBS_DIR}/)/${depends}/${TYPE}
-        echoInfo "Making Dependencies to [${OUTPUT_DEPEND}]"
-        # if [ -f "$LIBS_DIR/${depends}/$TYPE/$ABI/lib.a" ]; then
-        #      echo "Build Already exists at $LIBS_DIR/${depends}/$TYPE/ skipping"
-        # fi
-        doCommand $shouldSource $cmd "${depend%.*}"
+            OUTPUT_DEPEND=$(realpath ${LIBS_DIR}/)/${depends}/${TYPE}
+            echoInfo "Making Dependencies to [${OUTPUT_DEPEND}]"
+            # if [ -f "$LIBS_DIR/${depends}/$TYPE/$ABI/lib.a" ]; then
+            #      echo "Build Already exists at $LIBS_DIR/${depends}/$TYPE/ skipping"
+            # fi
+            doCommand $shouldSource $cmd "${depend%.*}"
         done
 
     else # process given lib, addon, or dependency
