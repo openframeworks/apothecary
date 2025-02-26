@@ -5,7 +5,7 @@
 # It is similar in speed with deflate but offers more dense compression.
 # https://github.com/google/brotli
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" )
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" "emscripten")
 FORMULA_DEPENDS=()
 
 # define the version
@@ -191,6 +191,9 @@ function build() {
           -DCMAKE_CXX_STANDARD_REQUIRED=ON \
           -DCMAKE_CXX_EXTENSIONS=OFF \
           -DBUILD_SHARED_LIBS=OFF \
+          -DBROTLI_DISABLE_TESTS=ON \
+          -DBROTLI_BUILD_TOOLS=OFF \
+          -DBROTLI_BUNDLED_MODE=OFF \
           -DBUILD_TESTING=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -212,14 +215,50 @@ function build() {
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_SYSTEM_NAME=$TYPE \
-            -DBROTLI_DISABLE_TESTS=ON \
-            -DBROTLI_BUILD_TOOLS=OFF \
-            -DBROTLI_BUNDLED_MODE=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF
 
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
+    elif elif [ "$TYPE" == "emscripten" ]; then
+
+        DEFINES="
+          -DCMAKE_C_STANDARD=${C_STANDARD} \
+          -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+          -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+          -DCMAKE_CXX_EXTENSIONS=OFF \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DBROTLI_DISABLE_TESTS=ON \
+          -DBROTLI_BUILD_TOOLS=OFF \
+          -DBROTLI_BUNDLED_MODE=OFF \
+          -DBUILD_TESTING=OFF"
+
+
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        rm -f CMakeCache.txt *.a *.o *.a
+
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            cmake .. ${DEFINES} \
+            ${BROTLI} \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_C_FLAGS=" -fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-fPIC -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DBUILD_SHARED_LIBS=OFF
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd .
     fi
 }
 
@@ -350,6 +389,37 @@ function copy() {
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
         rm -v "$PKG_FILE.bak"
+    elif [ "$TYPE" == "emscripten" ]; then
+
+        mkdir -p $1/lib/$TYPE/${PLATFORM}/
+        cp -v -r c/include/* $1/include
+        cp -v "build_${TYPE}_${PLATFORM}/"*.a $1/lib/$TYPE/${PLATFORM}/
+        secure "$1/lib/$TYPE/$PLATFORM/libbrotlidec.a" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+
+        cp -vR "build_${TYPE}_${PLATFORM}/libbrotlicommon.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlicommon.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/libbrotlidec.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlidec.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/libbrotlienc.pc" $1/lib/$TYPE/${PLATFORM}/libbrotlienc.pc
+
+        PKG_FILE="$1/lib/$TYPE/${PLATFORM}/libbrotlicommon.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlidec.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libbrotlienc.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
     fi
 
     if [ -d "$1/license" ]; then
@@ -365,7 +435,7 @@ function clean() {
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux|emscripten)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
