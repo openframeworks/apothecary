@@ -353,15 +353,14 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
         cp -vR "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         # cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/" $1/lib/${TYPE}/${PLATFORM}
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
-        sed -i.bak "s|^includedir=.*|includedir=${1}/include/libpng16|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
         rm -v "$PKG_FILE.bak"
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
         pkg-config --modversion libpng
@@ -370,7 +369,7 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
         cp -vR "build_${TYPE}_${PLATFORM}/Release/include/" $1/
         # cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/" $1/lib/${TYPE}/${PLATFORM}
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng16.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
         secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng16.pc"
