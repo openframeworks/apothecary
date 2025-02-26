@@ -34,11 +34,26 @@ function download() {
     # fi
     rm pixman-$VER.tar.gz
 
+}
+
+function prepare() {
+
     echo "copying cmake files to dir"
-    cp -v $FORMULA_DIR/_depends/pixman/CMakeLists.txt pixman/CMakeLists.txt
-    cp -v $FORMULA_DIR/_depends/pixman/pixman/CMakeLists.txt pixman/pixman/CMakeLists.txt
-    mkdir -p pixman/cmake
-    cp -vr $FORMULA_DIR/_depends/pixman/cmake/* pixman/cmake/
+    if [ -f "${FORMULA_DIR}/CMakeLists.txt" ]; then
+        echo "File exists: ${FORMULA_DIR}/CMakeLists.txt"
+        cp -v "${FORMULA_DIR}/CMakeLists.txt" CMakeLists.txt
+    else
+        echo "File not found: ${FORMULA_DIR}/CMakeLists.txt"
+    fi
+
+    if [ -f "${FORMULA_DIR}/pixman/CMakeLists.txt" ]; then
+        echo "File exists: ${FORMULA_DIR}/pixman/CMakeLists.txt"
+        cp -v "${FORMULA_DIR}/pixman/CMakeLists.txt" pixman/CMakeLists.txt
+    else
+        echo "File not found: ${FORMULA_DIR}/pixman/CMakeLists.txt"
+    fi
+    mkdir -p cmake
+    cp -vr $FORMULA_DIR/cmake/* cmake/
 }
 
 # executed inside the lib src dir
