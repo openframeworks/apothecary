@@ -605,7 +605,7 @@ if [ "$TYPE" = "vs" ]; then
     export EXE_FLAGS=""
   else
     if [ $ARCH == "arm64ec" ]; then
-      export VS_C_FLAGS="/Gy /GL- /guard:cf"
+      export VS_C_FLAGS="/Gy /GL- /guard:cf -D_M_ARM64EC"
     else
       export VS_C_FLAGS="/GL-"
     fi
