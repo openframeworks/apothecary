@@ -489,8 +489,10 @@ function build() {
             -DFT_REQUIRE_BROTLI=ON \
             -DFT_DISABLE_BROTLI=OFF"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${XLIBPNG_ROOT}/lib/$TYPE/$PLATFORM"
-        export C_INCLUDE_PATH="${XLIBPNG_INCLUDE_DIR};${ZLIB_INCLUDE_DIR}"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${XLIBPNG_ROOT}"
+        export C_INCLUDE_PATH="${XLIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}"
+
+        export PATH="${XLIBPNG_INCLUDE_DIR}:${PATH}"
         pkg-config --modversion libpng
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -502,31 +504,27 @@ function build() {
             ${BROTLI} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DPNG_INCLUDE_DIR=${XLIBPNG_INCLUDE_DIR} \
+            -DPNG_INCLUDE_DIRS=${XLIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${XLIBPNG_LIBRARY} \
             -DPNG_LIBRARIES=${XLIBPNG_LIBRARY} \
-            -DPNG_INCLUDE_DIR=${XLIBPNG_INCLUDE_DIR} \
-            -DPNG_PNG_INCLUDE_DIR=${XLIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${XLIBPNG_LIBRARY} \
             -DPNG_ROOT=${XLIBPNG_ROOT} \
             -DBROTLI_ROOT=${LIBBROTLI_ROOT} \
             -DCMAKE_INCLUDE_PATH="$XLIBPNG_INCLUDE_DIR" \
             -DCMAKE_LIBRARY_PATH="${LIBS_ROOT}" \
             -DBROTLIDEC_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
-            -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
-            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY};${LIBBROTLI_ENC_LIB};${LIBBROTLI_DEC_LIB}" \
+            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY}:${LIBBROTLI_ENC_LIB}:${LIBBROTLI_DEC_LIB}" \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_C_FLAGS=" -fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${XLIBPNG_INCLUDE_DIR}" \
+            -DCMAKE_C_FLAGS="-fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${XLIBPNG_INCLUDE_DIR}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
