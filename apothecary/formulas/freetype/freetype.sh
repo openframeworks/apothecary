@@ -476,13 +476,13 @@ function build() {
             -DFT_DISABLE_BROTLI=OFF"
 
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
-
+        export C_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}:${C_INCLUDE_PATH}"
         pkg-config --modversion libpng
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o *.a
-        export PATH="${PATH}:${LIBPNG_INCLUDE_DIR}"
+
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             ${DEFINES} \
             ${BROTLI} \
@@ -527,16 +527,15 @@ function build() {
             -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
             -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -DBUILD_SHARED_LIBS=OFF \
-            -B . \
-            -G 'Unix Makefiles'
+            -B .
 
         # cat CMakeCache.txt
         # cat Makefile
 
-        $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
-        $EMSDK/upstream/emscripten/emmake make install
+        # $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
+        # $EMSDK/upstream/emscripten/emmake make install
 
-        # cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     fi
 }
