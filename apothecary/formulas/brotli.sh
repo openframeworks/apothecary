@@ -240,7 +240,6 @@ function build() {
 
         $EMSDK/upstream/emscripten/emcmake cmake .. \
             cmake .. ${DEFINES} \
-            ${BROTLI} \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
