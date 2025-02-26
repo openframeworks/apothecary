@@ -104,7 +104,7 @@ function build() {
         -DBUILD_opencv_stitching=ON \
         -DBUILD_opencv_calib3d=ON \
         -DBUILD_opencv_objdetect=ON \
-        -BUILD_opencv_world=ON \
+        -DBUILD_opencv_world=ON \
         -DOPENCV_ENABLE_NONFREE=OFF \
         -DWITH_PNG=ON \
         -DBUILD_PNG=OFF \
@@ -263,7 +263,7 @@ function build() {
                 -DBUILD_opencv_stitching=ON \
                 -DBUILD_opencv_calib3d=ON \
                 -DBUILD_PERF_TESTS=OFF \
-                -BUILD_opencv_world=ON \
+                -DBUILD_opencv_world=ON \
                 -DBUILD_JASPER=OFF \
                 -DBUILD_DOCS=OFF \
                 -DWITH_TIFF=OFF \
@@ -511,7 +511,7 @@ function build() {
             -DBUILD_opencv_ts=OFF \
             -DBUILD_opencv_videostab=OFF \
             -DBUILD_opencv_calib3d=ON \
-            -BUILD_opencv_world=ON \
+            -DBUILD_opencv_world=ON \
             -DWITH_MATLAB=OFF \
             -DWITH_CUDA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
@@ -671,19 +671,7 @@ function build() {
         rm -f CMakeCache.txt || true
         rm -f CMakeCache.txt *.a *.o *.a
 
-        $EMSDK/upstream/emscripten/emcmake cmake .. \
-            -B build \
-            -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
-            -DCMAKE_C_STANDARD=${C_STANDARD} \
-            -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ ${FLAG_RELEASE} -msimd128" \
-            -DCMAKE_C_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ ${FLAG_RELEASE} -msimd128" \
-            -DCMAKE_CXX_EXTENSIONS=ON \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_BUILD_TYPE="Release" \
-            -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCPU_BASELINE='WASM_SIMD' \
+        DEFINES="-DCPU_BASELINE='WASM_SIMD' \
             -DCPU_DISPATCH='' \
             -DCV_ENABLE_INTRINSICS=ON \
             -DCV_TRACE=OFF \
@@ -727,7 +715,7 @@ function build() {
             -DBUILD_opencv_superres=OFF \
             -DBUILD_opencv_ts=OFF \
             -DBUILD_opencv_calib3d=ON \
-            -BUILD_opencv_world=ON \
+            -DBUILD_opencv_world=ON \
             -BUILD_JPEG=OFF \
             -DBUILD_IPP_IW=OFF \
             -DWITH_MATLAB=OFF \
@@ -782,7 +770,21 @@ function build() {
             -DWASM=ON \
             -DBUILD_TESTS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DBUILD_WASM_INTRIN_TESTS=OFF \
+            -DBUILD_WASM_INTRIN_TESTS=OFF"
+
+        $EMSDK/upstream/emscripten/emcmake cmake .. \
+            -B build \
+            ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ ${FLAG_RELEASE} -msimd128" \
+            -DCMAKE_C_FLAGS="-I/${EMSDK}/upstream/emscripten/system/lib/libcxxabi/include/ ${FLAG_RELEASE} -msimd128" \
+            -DCMAKE_CXX_EXTENSIONS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_BUILD_TYPE="Release" \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -793,11 +795,8 @@ function build() {
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY}
-        # -G 'Unix Makefiles'
 
         cmake --build build --target install --config Release
-        # $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
-        # $EMSDK/upstream/emscripten/emmake make install
     fi
 
 }
