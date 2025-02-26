@@ -187,7 +187,6 @@ function build() {
             -DANDROID_API=${ANDROID_API} \
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
-            -DURIPARSER_ENABLE_INSTALL=ON \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
@@ -196,7 +195,6 @@ function build() {
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_SYSTEM_NAME=$TYPE \
             -DBROTLI_DISABLE_TESTS=ON \
             -DBROTLI_BUILD_TOOLS=OFF \
