@@ -484,6 +484,12 @@ function build() {
         LIBBROTLI_ENC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlienc.a"
         LIBBROTLI_DEC_LIB="$LIBS_ROOT/brotli/lib/$TYPE/$PLATFORM/libbrotlidec.a"
 
+        echo "Contents of ${LIBS_ROOT}/libpng/include:"
+        ls "${LIBS_ROOT}/libpng/include"
+
+        echo "Contents of ${LIBS_ROOT}/libpng/include/libpng16:"
+        ls "${LIBS_ROOT}/libpng/include/libpng16"
+
         BROTLI="
             -DFT_REQUIRE_BROTLI=ON \
             -DFT_DISABLE_BROTLI=OFF"
