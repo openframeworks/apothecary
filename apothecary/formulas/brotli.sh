@@ -43,6 +43,21 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+
+    if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
+        result=$(load "brotli" | tail -n 1)
+        echoInfo "===Build $1 - Checking if Precompiled binary :[$result]==="
+        if [ $result -eq 1 ]; then
+            echoInfo "===Build \"$1\" Precompiled binary validated. Skipping updateFormula==="
+            return 0
+        else
+            echoInfo "===Build Precompiled not found or outdated. Continue updateFormula for \"$1\"=== "
+        fi
+    else
+        echoInfo "===Build  Not using cache : [FORCE_DOWNLOAD=$FORCE_DOWNLOAD] [USE_SAVE=$USE_SAVE == 1] for updateFormula \"$1\" ==="
+    fi
+
+
     if [ "$TYPE" == "vs" ]; then
         echo "building $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"

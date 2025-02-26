@@ -40,6 +40,21 @@ function prepare() {
 
     rm -f ./CMakeLists.txt
     cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
+
+    apothecaryDepend download zlib
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+
+    apothecaryDepend download libpng
+    apothecaryDepend prepare libpng
+    apothecaryDepend build libpng
+    apothecaryDepend copy libpng
+
+    apothecaryDepend download brotli
+    apothecaryDepend prepare brotli
+    apothecaryDepend build brotli
+    apothecaryDepend copy brotli
 }
 
 function load() {
@@ -58,7 +73,7 @@ function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
 
     if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
-        result=$(load "freetype2" | tail -n 1)
+        result=$(load "freetype" | tail -n 1)
         echoInfo "===Build $1 - Checking if Precompiled binary :[$result]==="
         if [ $result -eq 1 ]; then
             echoInfo "===Build \"$1\" Precompiled binary validated. Skipping updateFormula==="
@@ -462,7 +477,7 @@ function build() {
 
         LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
         LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng.a"
 
         LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
@@ -499,8 +514,8 @@ function build() {
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DBROTLI_ROOT=${LIBBROTLI_ROOT} \
-            -DCMAKE_INCLUDE_PATH="$LIBBROTLI_INCLUDE_DIR:$LIBPNG_INCLUDE_DIR:$ZLIB_INCLUDE_DIR" \
-            -DCMAKE_LIBRARY_PATH="${LIBBROTLI_LIBRARY}:${LIBBROTLI_DEC_LIB}:${LIBBROTLI_ENC_LIB}:${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
+            -DCMAKE_INCLUDE_PATH="$LIBPNG_INCLUDE_DIR:$ZLIB_INCLUDE_DIR:$LIBBROTLI_INCLUDE_DIR" \
+            -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${LIBBROTLI_LIBRARY}:${LIBBROTLI_DEC_LIB}:${LIBBROTLI_ENC_LIB}:${ZLIB_LIBRARY}" \
             -DBROTLIDEC_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
@@ -524,8 +539,6 @@ function build() {
             -D FT_DISABLE_HARFBUZZ=ON \
             -D FT_DISABLE_PNG=OFF \
             -D FT_REQUIRE_PNG=ON \
-            -DCMAKE_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}" \
-            -DCMAKE_LIBRARY_PATH="${LIBPNG_LIBRARY}:${ZLIB_LIBRARY}" \
             -DBUILD_SHARED_LIBS=OFF \
             -B .
 

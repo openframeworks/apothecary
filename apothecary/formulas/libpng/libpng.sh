@@ -350,11 +350,11 @@ function copy() {
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/${TYPE}/${PLATFORM}/
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng16.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libpng16.a" $1/lib/$TYPE/$PLATFORM/libpng.a
         cp -vR "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
         # cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/" $1/lib/${TYPE}/${PLATFORM}
         cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libpng16.pc" $1/lib/${TYPE}/${PLATFORM}/libpng.pc
-        secure "$1/lib/$TYPE/$PLATFORM/libpng16.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/libpng.a" "libpng.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/libpng.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
