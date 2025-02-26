@@ -14,7 +14,7 @@ concurrency:
 
 env:
   TARGET: "emscripten"
-  EMSDK_VERSION: "4.0.3"
+  EMSDK_VERSION: "4.0.4"
   USE_ARTIFACT: true
   PTHREADS_ENABLED: 1
   DISABLE_WORKFLOW: "false"
@@ -239,5 +239,5 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: "latest-modular"
-          files: out/*.tar.bz2 out/*.zip
+          files: out/*.tar.bz2
 

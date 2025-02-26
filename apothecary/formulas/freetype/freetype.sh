@@ -494,7 +494,7 @@ function build() {
             -DFT_REQUIRE_BROTLI=ON \
             -DFT_DISABLE_BROTLI=OFF"
 
-        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM"
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${LIBPNG_ROOT}/lib/$TYPE/$PLATFORM:${ZLIB_ROOT}/lib/$TYPE/$PLATFORM:${LIBBROTLI_ROOT}/lib/$TYPE/$PLATFORM"
         export C_INCLUDE_PATH="${LIBPNG_INCLUDE_DIR}:${ZLIB_INCLUDE_DIR}"
         pkg-config --modversion libpng
 
@@ -526,7 +526,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_C_FLAGS=" -fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${LIBPNG_INCLUDE_DIR}" \
+            -DCMAKE_C_FLAGS=" -fPIC -std=c${C_STANDARD} -fvisibility=hidden -Wno-implicit-function-declaration -frtti ${FLAG_RELEASE} -I${ZLIB_INCLUDE_DIR} -I${LIBPNG_INCLUDE_DIR} -I${LIBBROTLI_INCLUDE_DIR}" \
             -DCMAKE_CXX_FLAGS="-fPIC -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE} -I${LIBPNG_INCLUDE_DIR} -I${ZLIB_INCLUDE_DIR} -I${LIBBROTLI_INCLUDE_DIR}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
