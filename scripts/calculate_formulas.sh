@@ -89,6 +89,10 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "assimp"
     )
 elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
+    if [ "$BUNDLE" == "0" ]; then
+        FORMULAS=()
+    fi
+
     if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
             "pixman"
@@ -141,6 +145,9 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
         )
     fi
 elif [ "$TARGET" == "vs" ]; then
+    if [ "$BUNDLE" == "0" ]; then
+        FORMULAS=()
+    fi
     if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
@@ -194,7 +201,7 @@ array_contains() {
     return $in
 }
 
-echo "Potions to Brew with formulas: [${FORMULAS[@]}]"
+echo "Potions to Brew - formulas: [${FORMULAS[@]}]"
 if [ -z ${FORMULAS} ]; then
     echo "===No formulas to build, failing==="
     exit 1

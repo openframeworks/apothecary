@@ -82,7 +82,7 @@ jobs:
       env:
         BUNDLE: ${{ matrix.bundle }}
     - name: Package
-      # if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
+      if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
@@ -98,4 +98,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ env.RELEASE }}
         draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
+        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_$github{{ env.GCC }}.tar.bz2
