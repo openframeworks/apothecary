@@ -137,7 +137,8 @@ jobs:
       run: ls -lah out/
 
     - name: Upload to GitHub Release
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
+      env.GCC == 'gcc14'
       uses: softprops/action-gh-release@v2.1.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
