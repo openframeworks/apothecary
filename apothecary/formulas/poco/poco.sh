@@ -51,14 +51,15 @@ function prepare() {
         git reset --hard $SHA
     fi
 
-    if [ "$TYPE" != "linux" ] && [ "$TYPE" != "ios" ] && [ "$TYPE" != "tvos" ] && [ $FORMULA_DEPENDS_MANUAL -ne 1 ]; then
-        # manually prepare dependencies
-        apothecaryDependencies download
-        apothecaryDependencies prepare
-        # Build and copy all dependencies in preparation
-        apothecaryDepend build openssl
-        apothecaryDepend copy openssl
-    fi
+    apothecaryDepend download zlib
+    apothecaryDepend prepare zlib
+    apothecaryDepend build zlib
+    apothecaryDepend copy zlib
+
+    apothecaryDepend download openssl
+    apothecaryDepend prepare openssl
+    apothecaryDepend build openssl
+    apothecaryDepend copy openssl
 
     # make backups of the ios config files since we need to edit them
     if [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
@@ -85,26 +86,6 @@ function prepare() {
         # cp build/rules/compile build/rules/compile.orig
         # Fix for making debug and release, making just release
         sed -i "" "s|all_static: static_debug static_release|all_static: static_release|" build/rules/compile
-
-    elif [ "$TYPE" == "vs" ]; then
-
-        apothecaryDepend prepare zlib
-        apothecaryDepend build zlib
-        apothecaryDepend copy zlib
-
-        apothecaryDepend prepare openssl
-        apothecaryDepend build openssl
-        apothecaryDepend copy openssl
-
-    elif [ "$TYPE" == "linux" ]; then
-
-        apothecaryDepend prepare zlib
-        apothecaryDepend build zlib
-        apothecaryDepend copy zlib
-
-        apothecaryDepend prepare openssl
-        apothecaryDepend build openssl
-        apothecaryDepend copy openssl
 
     elif [ "$TYPE" == "android" ]; then
         installAndroidToolchain
