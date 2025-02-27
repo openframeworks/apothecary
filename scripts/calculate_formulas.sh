@@ -72,7 +72,7 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
     )
     if [[ "$TARCH" =~ ^(64|arm64|x86_64)$ ]]; then
         FORMULAS+=(
-            "poco"
+           # "poco"
         )
     fi
 
