@@ -8,7 +8,7 @@
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
 FORMULA_TYPES=("osx" "vs" "linux")
-FORMULA_DEPENDS=("openssl")
+FORMULA_DEPENDS=("openssl" "zlib" )
 
 # define the version
 VER=1.14.4
@@ -132,7 +132,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="${BUILD_OPTS} \
+            -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -142,8 +143,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
-            ${BUILD_OPTS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_BITCODE=OFF \
@@ -196,7 +196,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="${BUILD_OPTS} \
+            -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -206,12 +207,10 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
-            ${BUILD_OPTS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCURL_USE_OPENSSL=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
@@ -259,7 +258,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="${BUILD_OPTS} \
+            -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -269,8 +269,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFS} \
-            ${BUILD_OPTS} \
+        cmake .. ${DEFINES} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
             -DPLATFORM=$PLATFORM \
             -DENABLE_VISIBILITY=OFF \
@@ -283,7 +282,6 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DGCC_VERSION=${GCC_VERSION} \
             -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DCURL_USE_OPENSSL=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
