@@ -116,8 +116,6 @@ function build() {
         -DENABLE_PAGECOMPILER_FILE2PAGE=OFF \
         -DENABLE_POCODOC=OFF \
         -DENABLE_PROGEN=OFF \
-        -DENABLE_NETSSL_WIN=OFF \
-        -DENABLE_CRYPTO=OFF \
         -DENABLE_DATA_SQLITE=OFF \
         -DENABLE_DATA_ODBC=OFF \
         -DENABLE_PDF=ON \
@@ -277,6 +275,8 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DENABLE_NETSSL_WIN=OFF \
+            -DENABLE_CRYPTO=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFINES} \
             -DPLATFORM=$PLATFORM \
