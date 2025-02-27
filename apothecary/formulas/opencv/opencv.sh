@@ -727,6 +727,7 @@ function build() {
             -DWITH_1394=OFF \
             -DWITH_ADE=OFF \
             -DWITH_JPEG=OFF \
+            -DWITH_OPENJPEG=OFF \
             -DWITH_PNG=OFF \
             -DWITH_FFMPEG=OFF \
             -DWITH_GIGEAPI=OFF \
@@ -757,7 +758,7 @@ function build() {
             -DWITH_LAPACK=OFF \
             -DWITH_ITT=OFF \
             -DBUILD_ZLIB=OFF \
-            -DWITH_ZLIB=ON \
+            -DWITH_ZLIB=OFF \
             -DBUILD_PNG=OFF \
             -DWITH_WEBP=ON \
             -DWITH_VTK=OFF \
@@ -903,8 +904,8 @@ function copy() {
         cp -R modules/*/include/opencv2/* $1/include/opencv2/
         cp -v build_${TYPE}_${PLATFORM}/Release/lib/*.a $1/lib/$TYPE/$PLATFORM
         cp -v build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/*.a $1/lib/$TYPE/$PLATFORM
+        rm $1/lib/$TYPE/$PLATFORM/libzlib.a
         secure "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-
     fi
     cp -v LICENSE $1/license/
 
