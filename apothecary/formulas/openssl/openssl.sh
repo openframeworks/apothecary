@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=("vs" "osx" "ios" "xros")
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "linux")
 FORMULA_DEPENDS=("zlib")
 
 VER=3.4.1
@@ -124,9 +124,14 @@ function build() {
         # 	# Patch Configure to build for tvOS, not iOS
         # 	# LANG=C sed -i -- 's/D\_REENTRANT\:iOS/D\_REENTRANT\:tvOS/' "./openssl/Configure"
         # fi
-
+        DEFINES="${DEFINES} \
+            -DNO_FORK=ON \
+            -DOPENSSL_OCSP=OFF \
+            -DOPENSSL_CMP=OFF \
+            "
         rm -f CMakeCache.txt *.a *.o
         cmake .. \
+            ${DEFINES} \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -136,16 +141,12 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_TESTING=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DNO_FORK=ON \
-            -DOPENSSL_OCSP=OFF \
-            -DOPENSSL_CMP=OFF \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
-            ${DEFINES} \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_IGNORE_PATH=/opt/homebrew \
             -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
@@ -214,15 +215,15 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
         if [ "$ARCH" == "arm64" ] || [ "$ARCH" == "arm64ec" ] || [ "$ARCH" == "arm" ]; then
-            DEFS="-DOPENSSL_ASM=OFF"
+            DEFINES="${DEFINES} -DOPENSSL_ASM=OFF"
         else
-            DEFS="-DOPENSSL_ASM=ON"
+            DEFINES="${DEFINES} -DOPENSSL_ASM=ON"
         fi
 
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
         rm -f CMakeCache.txt *.a *.o *.lib
-        CUSTOM_DEFS="
+        DEFINES="${DEFINES} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -233,8 +234,7 @@ function build() {
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
 
-        cmake .. ${DEFS} \
-            ${CUSTOM_DEFS} \
+        cmake .. \
             ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
@@ -244,6 +244,8 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
             -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -374,6 +376,53 @@ function build() {
         rm $SYSROOT/usr/lib/crtend_android.o
         rm $SYSROOT/usr/lib/crtend_so.o
 
+    elif [ "$TYPE" == "linux" ]; then
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        echo "building $TYPE | $PLATFORM"
+
+        if [ $CROSSCOMPILING -eq 1 ]; then
+            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
+        fi
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+
+        DEFINES="${DEFINES} \
+            -DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
+        cmake .. ${DEFINES} \
+            -DPLATFORM=$PLATFORM \
+            -DENABLE_VISIBILITY=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
+            -DCMAKE_SYSTEM_PROCESSOR=$ABI \
+            -DGCC_VERSION=${GCC_VERSION} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCURL_USE_OPENSSL=ON \
+            -DCMAKE_IGNORE_PATH=${TOOLCHAIN_ROOT}/lib \
+            -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
+            -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
+
     else
         echoWarning "TODO: build $TYPE lib"
     fi
@@ -382,7 +431,7 @@ function build() {
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
     . "$SECURE_SCRIPT"
-    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
 
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
@@ -483,7 +532,7 @@ function copy() {
 # executed inside the lib src dir
 function clean() {
 
-    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
