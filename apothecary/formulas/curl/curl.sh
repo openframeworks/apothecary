@@ -360,6 +360,33 @@ function build() {
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+
+         cd "Release/lib/"
+
+            # Rename with prefixes (including library origin to avoid duplicates)
+            mkdir -p curl
+
+
+            mv libcurl.a curl/libcurl.a
+
+            cd curl
+            ar -x libcurl.a
+            for f in *.o; do mv "$f" "curl_${ARCH}_$f"; done
+            for obj in *.o; do
+                if [ -z "$(nm "$obj")" ]; then
+                    echo "Removing empty object file: $obj"
+                    rm -f "$obj"
+                fi
+            done
+            ar rcs "../libcurl.a" curl_${ARCH}_*.o
+
+
+
+            echo "Verifying libcurl.a.:"
+            lipo -info "libcurl.a"
+
+            rm -rf curl
+
         cd ..
 
     else
