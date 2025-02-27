@@ -102,9 +102,28 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     LIBS_ROOT=$(realpath $LIBS_DIR)
+    DEFINES="-DPOCO_STATIC=YES \
+        -DENABLE_DATA=OFF \
+        -DPOCO_ENABLE_TESTS=OFF \
+        -DPOCO_ENABLE_SAMPLES=OFF \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DENABLE_CPPUNIT=OFF \
+        -DENABLE_DATA=OFF \
+        -DENABLE_DATA_SQLITE=OFF \
+        -DENABLE_DATA_ODBC=OFF \
+        -DENABLE_DATA_MYSQL=OFF \
+        -DENABLE_PAGECOMPILER=OFF \
+        -DENABLE_PAGECOMPILER_FILE2PAGE=OFF \
+        -DENABLE_POCODOC=OFF \
+        -DENABLE_PROGEN=OFF \
+        -DENABLE_NETSSL_WIN=OFF \
+        -DENABLE_CRYPTO=OFF \
+        -DENABLE_DATA_SQLITE=OFF \
+        -DENABLE_DATA_ODBC=OFF \
+        -DENABLE_PDF=ON \
+        -DENABLE_MONGODB=OFF"
     local BUILD_OPTS="--no-tests --no-samples --static --omit=CppUnit,CppUnit/WinTestRunner,Data,Data/SQLite,Data/ODBC,Data/MySQL,PageCompiler,PageCompiler/File2Page,CppParser,PDF,PocoDoc,ProGen,MongoDB"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -113,7 +132,9 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        DEFINES="${BUILD_OPTS} \
+        rm -f CMakeCache.txt *.a *.o
+
+        DEFINES="${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -139,15 +160,17 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCURL_USE_OPENSSL=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
+            -DCMAKE_IGNORE_PATH=/opt/homebrew \
+            -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DOPENSSL_USE_STATIC_LIBS=YES
+            -DOPENSSL_USE_STATIC_LIBS=YES \
+            -GXcode
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
@@ -171,13 +194,15 @@ function build() {
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
 
+        rm -f CMakeCache.txt *.a *.o *.lib
+
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        DEFINES="${BUILD_OPTS} \
+        DEFINES="${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -239,7 +264,10 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        DEFINES="${BUILD_OPTS} \
+        rm -f CMakeCache.txt *.a *.o
+
+
+        DEFINES="${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -268,12 +296,7 @@ function build() {
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
-            -DOPENSSL_ROOT_DIR=${TOOLCHAIN_ROOT} \
-            -DOPENSSL_INCLUDE_DIR=/usr/include \
-            -DOPENSSL_CRYPTO_LIBRARY=${TOOLCHAIN_ROOT}/lib/libcrypto.a \
-            -DOPENSSL_SSL_LIBRARY=${TOOLCHAIN_ROOT}/lib/libssl.a \
-            -DOPENSSL_USE_STATIC_LIBS=YES
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     fi
@@ -284,14 +307,14 @@ function copy() {
 
     # headers
     mkdir -pv $1/include/Poco
-    cp -Rv Crypto/include/Poco/Crypto $1/include/Poco
+    # cp -Rv Crypto/include/Poco/Crypto $1/include/Poco
     cp -Rv Data/include/Poco/Data $1/include/Poco
     cp -Rv Data/SQLite/include/Poco/Data $1/include/Poco
     cp -Rv Foundation/include/Poco/* $1/include/Poco
     cp -Rv JSON/include/Poco/JSON $1/include/Poco
     cp -Rv MongoDB/include/Poco/MongoDB $1/include/Poco
-    cp -Rv Net/include/Poco/Net $1/include/Poco
-    cp -Rv NetSSL_OpenSSL/include/Poco/Net/* $1/include/Poco/Net
+    # cp -Rv Net/include/Poco/Net $1/include/Poco
+    # cp -Rv NetSSL_OpenSSL/include/Poco/Net/* $1/include/Poco/Net
     cp -Rv SevenZip/include/Poco/SevenZip $1/include/Poco
     cp -Rv Util/include/Poco/Util $1/include/Poco
     cp -Rv XML/include/Poco/* $1/include/Poco
