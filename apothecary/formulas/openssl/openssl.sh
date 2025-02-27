@@ -157,6 +157,49 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DENABLE_VISIBILITY=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+
+
+        cd "Release/lib/"
+
+        # Rename with prefixes (including library origin to avoid duplicates)
+        mkdir -p crypto
+        mkdir -p ssl
+
+        mv libcrypto.a crypto/libcrypto.a
+        mv libssl.a ssl/libssl.a
+
+        cd crypto
+        ar -x libcrypto.a
+        for f in *.o; do mv "$f" "openssl_${ARCH}_crypto_$f"; done
+        for obj in *.o; do
+            if [ -z "$(nm "$obj")" ]; then
+                echo "Removing empty object file: $obj"
+                rm -f "$obj"
+            fi
+        done
+        ar rcs "../libcrypto.a" openssl_${ARCH}_crypto_*.o
+
+        cd ../ssl
+        ar -x libssl.a
+        for f in *.o; do mv "$f" "openssl_${ARCH}_ssl_$f"; done
+         for obj in *.o; do
+            if [ -z "$(nm "$obj")" ]; then
+                echo "Removing empty object file: $obj"
+                rm -f "$obj"
+            fi
+        done
+        ar rcs "../libssl.a" openssl_${ARCH}_ssl_*.o
+
+        cd ..
+
+        echo "Verifying libcrypto.:"
+        lipo -info "libcrypto.a"
+        echo "Verifying libssl.a"
+        lipo -info "libssl.a"
+
+        rm -rf crypto ssl
+        rm -f openssl_${ARCH}_crypto_*.o openssl_${ARCH}_ssl_*.o
+
         cd ..
 
     elif [ "$TYPE" == "vs" ]; then
