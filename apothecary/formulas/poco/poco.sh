@@ -11,7 +11,7 @@ FORMULA_TYPES=("osx" "vs" "linux")
 FORMULA_DEPENDS=("openssl")
 
 # define the version
-VER=1.14.0
+VER=1.14.4
 BUILD_ID=1
 DEFINES=""
 
@@ -294,26 +294,6 @@ function build() {
             -DOPENSSL_USE_STATIC_LIBS=YES
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-        # ./configure $BUILD_OPTS
-        # make -j${PARALLEL_MAKE}
-        # # delete debug builds
-        # rm -f lib/Linux/$(uname -m)/*d.a
-    elif [ "$TYPE" == "linuxarmv6l" ] || [ "$TYPE" == "linuxarmv7l" ]; then
-        if [ $CROSSCOMPILING -eq 1 ]; then
-            source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
-            export CROSS_COMPILE=$TOOLCHAIN_ROOT/bin/$TOOLCHAIN_PREFIX-
-            export LIBRARY_PATH="$SYSROOT/usr/lib $SYSROOT/usr/lib/$TOOLCHAIN_PREFIX"
-        fi
-        ./configure $BUILD_OPTS \
-            --library-path="$LIBRARY_PATH" \
-            --cflags="$CFLAGS" \
-            --prefix=$BUILD_DIR/poco/install/$TYPE
-        make -j${PARALLEL_MAKE}
-        make install
-        # delete debug builds
-        rm -f install/$TYPE/lib/*d.a
-    else
-        echoWarning "TODO: build $TYPE lib"
     fi
 }
 
