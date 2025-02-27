@@ -44,7 +44,7 @@ jobs:
         ARCH: [armv7, arm64, x86_64]
         SDK: ["35.0.0"]
         NDK: ["27.2.12479018"] #"26.3.11579264",
-        API: ["21"]
+        API: ["24"]
     env:
       ARCH: ${{ matrix.ARCH }}
       SDK: ${{ matrix.SDK }}
