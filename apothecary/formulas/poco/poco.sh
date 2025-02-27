@@ -276,6 +276,7 @@ function build() {
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DENABLE_NETSSL_WIN=OFF \
+            -DENABLE_JWT=OFF \
             -DENABLE_CRYPTO=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFINES} \
