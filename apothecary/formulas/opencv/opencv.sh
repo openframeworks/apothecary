@@ -599,7 +599,7 @@ function build() {
         -DBUILD_opencv_videoio=ON \
         -DBUILD_opencv_videostab=ON \
         -DOPENCV_ENABLE_NONFREE=OFF \
-        -BUILD_JPEG=OFF \
+        -DBUILD_JPEG=OFF \
         -DWITH_PNG=ON \
         -DBUILD_PNG=OFF \
         -DWITH_FFMPEG=ON \
@@ -716,7 +716,7 @@ function build() {
             -DBUILD_opencv_ts=OFF \
             -DBUILD_opencv_calib3d=ON \
             -DBUILD_opencv_world=ON \
-            -BUILD_JPEG=OFF \
+            -DBUILD_JPEG=OFF \
             -DBUILD_IPP_IW=OFF \
             -DWITH_MATLAB=OFF \
             -DWITH_CUDA=OFF \
