@@ -84,6 +84,9 @@ secure() {
 
     NAME="${NAME%.*}"
 
+    DEFINES=$(echo "$DEFINES" | tr '\n' ' ' | tr -d '/') #replace newline for visuals
+    DEFINES=$(echo "$DEFINES" | tr -d '\r' | tr '\n' ' ')
+
 
     OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
     ACTUAL_FILENAME=$(basename "$BINARY_SEC")
