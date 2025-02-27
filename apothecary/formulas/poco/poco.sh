@@ -11,7 +11,7 @@ FORMULA_TYPES=("osx" "vs" "linux")
 FORMULA_DEPENDS=("openssl" "zlib" )
 
 # define the version
-VER=1.14.4
+VER=1.14.1
 BUILD_ID=1
 DEFINES=""
 
