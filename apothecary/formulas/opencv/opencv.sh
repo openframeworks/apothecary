@@ -11,7 +11,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 
 # define the version
 VER=4.11.0
-BUILD_ID=6
+BUILD_ID=7
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4110
@@ -727,7 +727,6 @@ function build() {
             -DWITH_1394=OFF \
             -DWITH_ADE=OFF \
             -DWITH_JPEG=OFF \
-            -DWITH_OPENJPEG=OFF \
             -DWITH_PNG=OFF \
             -DWITH_FFMPEG=OFF \
             -DWITH_GIGEAPI=OFF \
@@ -758,7 +757,7 @@ function build() {
             -DWITH_LAPACK=OFF \
             -DWITH_ITT=OFF \
             -DBUILD_ZLIB=OFF \
-            -DWITH_ZLIB=OFF \
+            -DWITH_ZLIB=ON \
             -DBUILD_PNG=OFF \
             -DWITH_WEBP=ON \
             -DWITH_VTK=OFF \
