@@ -178,8 +178,8 @@ function build() {
             fi
         done
         ar rcs "../libcrypto.a" openssl_${ARCH}_crypto_*.o
-
         cd ../ssl
+
         ar -x libssl.a
         for f in *.o; do mv "$f" "openssl_${ARCH}_ssl_$f"; done
          for obj in *.o; do
@@ -189,16 +189,13 @@ function build() {
             fi
         done
         ar rcs "../libssl.a" openssl_${ARCH}_ssl_*.o
-
         cd ..
 
         echo "Verifying libcrypto.:"
         lipo -info "libcrypto.a"
         echo "Verifying libssl.a"
         lipo -info "libssl.a"
-
         rm -rf crypto ssl
-        rm -f openssl_${ARCH}_crypto_*.o openssl_${ARCH}_ssl_*.o
 
         cd ..
 
