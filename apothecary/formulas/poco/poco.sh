@@ -270,6 +270,10 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DOPENSSL_ROOT_DIR=${TOOLCHAIN_ROOT} \
+            -DOPENSSL_INCLUDE_DIR=/usr/include \
+            -DOPENSSL_CRYPTO_LIBRARY=${TOOLCHAIN_ROOT}/lib/libcrypto.a \
+            -DOPENSSL_SSL_LIBRARY=${TOOLCHAIN_ROOT}/lib/libssl.a \
             -DOPENSSL_USE_STATIC_LIBS=YES
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
