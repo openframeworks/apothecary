@@ -12,6 +12,7 @@ if [ -z "${TARGET:-}" ]; then
 fi
 FORMULAS=("${FORMULAS[@]:-}")
 BUNDLE=${BUNDLE:-0}
+TARCH=${ARCH:-64}
 
 FORMULAS=(
     # sub Dependencies at top
@@ -69,6 +70,12 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
         "fmt"
         "uriparser"
     )
+    if [[ "$TARCH" =~ ^(64|arm64|x86_64)$ ]]; then
+        FORMULAS+=(
+            "poco"
+        )
+    fi
+
 elif [[ "$TARGET" =~ ^(android)$ ]]; then
     FORMULAS=(
         "pkg-config"
@@ -140,7 +147,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "fmt"
             "openssl"
             "curl"
-            # "poco"
+            "poco"
         )
     fi
 elif [ "$TARGET" == "vs" ]; then
@@ -180,7 +187,7 @@ elif [ "$TARGET" == "vs" ]; then
             "fmt"
             "openssl"
             "curl"
-            # "poco"
+            "poco"
         )
     fi
 fi
