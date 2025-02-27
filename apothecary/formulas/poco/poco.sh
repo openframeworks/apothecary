@@ -297,8 +297,6 @@ function copy() {
     cp -Rv Util/include/Poco/Util $1/include/Poco
     cp -Rv XML/include/Poco/* $1/include/Poco
     cp -Rv Zip/include/Poco/Zip $1/include/Poco
-
-    rm -rf $1/lib/$TYPE
     mkdir -p $1/lib/$TYPE
 
     # libs
