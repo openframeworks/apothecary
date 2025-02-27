@@ -8,7 +8,7 @@ FORMULA_DEPENDS=()
 
 # define the version
 VER=1.3.1
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 FRAMEWORKS=""
 
