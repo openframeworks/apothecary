@@ -274,7 +274,7 @@ jobs:
     env:
       DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
       TARGET: "macos"
-    # if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+    if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
     steps:
       - name: Determine Release
         id: vars

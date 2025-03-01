@@ -365,8 +365,6 @@ function build() {
 
             # Rename with prefixes (including library origin to avoid duplicates)
             mkdir -p curl
-
-
             mv libcurl.a curl/libcurl.a
 
             cd curl
@@ -386,6 +384,7 @@ function build() {
             lipo -info "libcurl.a"
 
             rm -rf curl
+            cd ../..
 
         cd ..
 

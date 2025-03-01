@@ -1656,12 +1656,14 @@ function frameworkFormula() {
       exit 0;
     fi
 
-    if ((BASH_VERSINFO[0] < 4)); then
-      echo "The current version of Bash does not support associative arrays."
-      echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
-      echo "brew install bash"
-      exit 1
+    bash_version=$(bash --version | head -n1 | cut -d' ' -f4 | cut -d'.' -f1)
+    if [ "$bash_version" -lt 4 ]; then
+        echo "The current version of Bash does not support associative arrays."
+        echo "Please update to Bash 4.0 or newer. Current:$bash_version"
+        echo "brew install bash"
+        exit 1
     fi
+    echo "Please update to Bash 4.0 or newer. Current:$bash_version"
 
     declare -A ARCH_PAIRS=(
       ["MAC"]="MAC_ARM64"
@@ -2006,12 +2008,14 @@ function xframeworkFormula() {
 
     rm -rfv "${XCFRAMEWORK_PATH}"
 
-    if ((BASH_VERSINFO[0] < 4)); then
-      echo "The current version of Bash does not support associative arrays."
-      echo "Please update to Bash 4.0 or newer. Current:${BASH_VERSINFO[0]}"
-      echo "brew install bash"
-      exit 1
+    bash_version=$(bash --version | head -n1 | cut -d' ' -f4 | cut -d'.' -f1)
+    if [ "$bash_version" -lt 4 ]; then
+        echo "The current version of Bash does not support associative arrays."
+        echo "Please update to Bash 4.0 or newer. Current:$bash_version"
+        echo "brew install bash"
+        exit 1
     fi
+    echo "Please update to Bash 4.0 or newer. Current:$bash_version"
 
     declare -A ARCH_PAIRS=(
       ["MAC"]="MAC_ARM64"
