@@ -63,7 +63,7 @@ function build() {
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=ON \
+	        -DBUILD_SHARED_LIBS=OFF \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"
@@ -76,7 +76,7 @@ function build() {
             -DLIBUSB_BUILD_TESTING=OFF \
             -DLIBUSB_BUILD_EXAMPLES=OFF \
             -DLIBUSB_INSTALL_TARGETS=ON \
-            -DLIBUSB_BUILD_SHARED_LIBS=ON \
+            -DLIBUSB_BUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             ${CMAKE_WIN_SDK} \
@@ -103,7 +103,7 @@ function build() {
 	        -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 	        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
 	        -DCMAKE_CXX_EXTENSIONS=OFF
-	        -DBUILD_SHARED_LIBS=ON \
+	        -DBUILD_SHARED_LIBS=OFF \
 	        -DCMAKE_INSTALL_PREFIX=Release \
 	        -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 	        -DCMAKE_INSTALL_INCLUDEDIR=include"
@@ -144,7 +144,7 @@ function copy() {
     if [ "$TYPE" == "vs" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libusb-1.0/" $1/
-        cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
+        #cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.dll" $1/lib/$TYPE/$PLATFORM/libusb-1.0.dll
         cp -f "build_${TYPE}_${PLATFORM}/Release/usb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb.lib
         secure "$1/lib/$TYPE/$PLATFORM/libusb.lib" "libusb.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi

@@ -355,19 +355,17 @@ function build() {
                 -DWITH_CUFFT=OFF"
         fi
 
-        if [ "${OPENCV_STATIC:-0}" = "1" ]; then
-            echoInfo "Building with OPENCV_STATIC"
-            export DEFINES="${DEFINES} \
-            -DBUILD_WITH_STATIC_CRT=ON \
-            -DUSE_STATIC_CRT=ON \
-            -DBUILD_SHARED_LIBS=OFF"
-            if [ $MULTITHREADED_TYPE == "MD" ]; then
-                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
-            fi
-        else
-            echoInfo "Building OpenCV Debug"
-            export DEFINES="${DEFINES} -DBUILD_WITH_STATIC_CRT=OFF -DUSE_STATIC_CRT=OFF -DBUILD_SHARED_LIBS=ON"
-            cmake .. ${DEFINES} \
+		echoInfo "Building with OPENCV_STATIC"
+		export DEFINES="${DEFINES} \
+		-DBUILD_WITH_STATIC_CRT=ON \
+		-DUSE_STATIC_CRT=ON \
+		-DBUILD_SHARED_LIBS=OFF"
+		if [ $MULTITHREADED_TYPE == "MD" ]; then
+			sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
+		fi
+
+		echoInfo "Building OpenCV Debug"
+		cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}" \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
@@ -387,19 +385,20 @@ function build() {
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY}
-            cmake --build . --target install --config Debug
-            mv Debug ..
-            mv 3rdparty/lib/Debug ../Debug3rd
+		cmake --build . --target install --config Debug
+		
+		mv Debug ..
+		mv 3rdparty/lib/Debug ../Debug3rd
 
-            rm -f CMakeCache.txt *.a *.o *.lib *.js
-            cd ..
-            if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-                rm -r build_${TYPE}_${PLATFORM}
-            fi
-            mkdir -p "build_${TYPE}_${PLATFORM}"
-            cd "build_${TYPE}_${PLATFORM}"
-            rm -f CMakeCache.txt || true
-        fi
+		rm -f CMakeCache.txt *.a *.o *.lib *.js
+		cd ..
+		if [ -d "build_${TYPE}_${PLATFORM}" ]; then
+			rm -r build_${TYPE}_${PLATFORM}
+		fi
+		mkdir -p "build_${TYPE}_${PLATFORM}"
+		cd "build_${TYPE}_${PLATFORM}"
+		
+		rm -f CMakeCache.txt || true
 
         echoInfo "Building OpenCV Release"
         cmake .. ${DEFINES} \

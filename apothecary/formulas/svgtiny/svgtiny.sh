@@ -204,7 +204,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             ${CMAKE_WIN_SDK} \
-            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
             -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \
@@ -227,7 +227,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_INSTALL_LIBDIR="lib" \
             ${CMAKE_WIN_SDK} \
-            -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_ROOT=$LIBXML2_ROOT \
             -DLIBXML2_INCLUDE_DIR=$LIBXML2_INCLUDE_DIR \
             -DLIBXML2_LIBRARY=$LIBXML2_LIBRARY \

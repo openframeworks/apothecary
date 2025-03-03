@@ -149,39 +149,36 @@ function build() {
             DEFINES="$DEFINES -DASSIMP_NO_EXPORT=ON"
         fi
 
-        if [ "${ASSIMP_STATIC:-0}" = "1" ]; then
-            DEFINES="${DEFINES} \
-            -DBUILD_WITH_STATIC_CRT=ON \
-            -DUSE_STATIC_CRT=ON \
-            -DBUILD_SHARED_LIBS=OFF"
-            if [ $MULTITHREADED_TYPE == "MD" ]; then
-                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
-            fi
-        else
-            DEFINES="${DEFINES} \
-            -DBUILD_WITH_STATIC_CRT=OFF \
-            -DBUILD_SHARED_LIBS=ON"
-            cmake .. ${DEFINES} \
-            -A "${PLATFORM}" \
-            ${CMAKE_WIN_SDK} \
-            -G "${GENERATOR_NAME}" \
-            -DCMAKE_BUILD_TYPE=Debug \
-            -DCMAKE_INSTALL_PREFIX=Debug \
-            -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DASSIMP_BUILD_ZLIB=OFF \
-            -DZLIB_ROOT=${ZLIB_ROOT} \
-            -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
-            cmake --build . --config Debug -j${PARALLEL_MAKE}
-            rm -f CMakeCache.txt || true
+        if [ $MULTITHREADED_TYPE == "MD" ]; then
+			sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
         fi
+
+		DEFINES="${DEFINES} \
+		-DBUILD_WITH_STATIC_CRT=ON \
+		-DUSE_STATIC_CRT=ON \
+		-DBUILD_SHARED_LIBS=OFF"
+		
+		cmake .. ${DEFINES} \
+			-A "${PLATFORM}" \
+			${CMAKE_WIN_SDK} \
+			-G "${GENERATOR_NAME}" \
+			-DCMAKE_BUILD_TYPE=Debug \
+			-DCMAKE_INSTALL_PREFIX=Debug \
+			-DCMAKE_INSTALL_LIBDIR="lib" \
+			-DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+			-DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+			-DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+			-DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
+			-DASSIMP_BUILD_ZLIB=OFF \
+			-DZLIB_ROOT=${ZLIB_ROOT} \
+			-DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+			-DZLIB_LIBRARY=${ZLIB_LIBRARY}
+		cmake --build . --config Debug -j${PARALLEL_MAKE}
+		
+		rm -f CMakeCache.txt || true
 
         cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
