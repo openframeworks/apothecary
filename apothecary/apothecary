@@ -566,7 +566,7 @@ if [ "$TYPE" = "vs" ]; then
 
 
   if [ -z ${MULTITHREADED_TYPE+x} ]; then
-    MULTITHREADED_TYPE="MD"
+    MULTITHREADED_TYPE="MT"
   fi
   if [ $MULTITHREADED_TYPE == "MD" ]; then
     MT_TYPE="/MD"
