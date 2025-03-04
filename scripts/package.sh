@@ -19,11 +19,11 @@ if [ -z "$1" ]; then
 else
     TARGET=$1
 fi
-BUNDLE=${BUNDLE:-0}
+PBUNDLE=${BUNDLE:-0}
 if [ -z "$2" ]; then
-    echo " Bundle: [$2] none - var:[$BUNDLE]"
+    echo " PBUNDLE: [$2] none - var:[$PBUNDLE]"
 else
-    BUNDLE=$2
+    PBUNDLE=$2
 fi
 ARCH=${ARCH:-64}
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
@@ -33,18 +33,19 @@ if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     export OUTPUT_FOLDER="$ROOT/xout"
 fi
 if [[ "$TARGET" =~ ^(macos)$ ]]; then
-    export OUTPUT_FOLDER="$ROOT/xout_${BUNDLE}"
+    export OUTPUT_FOLDER="$ROOT/xout_${PBUNDLE}"
 fi
 if [ -z $TARGET ]; then
     echo "Environment variable TARGET not defined. Should be target os"
     exit 0
 fi
 
-source $LOCAL_ROOT/scripts/calculate_formulas.sh
+source $LOCAL_ROOT/scripts/calculate_formulas.sh $TARGET $PBUNDLE
 if [ -z "$FORMULAS" ]; then
     echo "No formulas to build"
     exit 0
 fi
+
 
 CUR_BRANCH="master"
 EXIT_BEFORE=0
@@ -74,9 +75,21 @@ else
     fi
 fi
 
-cd $OUTPUT_FOLDER
+
 LIBS=$(ls $OUTPUT_FOLDER)
 LIBS=$(echo "$LIBS" | tr '\n' ' ')
+LIBS=""
+for LIB in "${FORMULAS[@]}"; do
+    LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
+    if [ -d "$OUTPUT_FOLDER/$LIB" ] || [ -f "$OUTPUT_FOLDER/$LIB" ]; then
+        LIBS="$LIBS $LIB"
+    else
+        echo "Warning: Formula '$LIB' not found in $OUTPUT_FOLDER"
+    fi
+done
+LIBS=$(echo "$LIBS" | xargs)
+LIBS=$(echo "$LIBS" | tr '\n' ' ')
+cd $OUTPUT_FOLDER
 
 if [ -z "${RELEASE+x}" ]; then
     if [ "${GITHUB_ACTIONS:-0}" = true ]; then
@@ -92,14 +105,14 @@ if [ -z "$LIBS" ]; then
     echo "Error: LIBS is empty. Nothing to package."
     exit 1
 fi
-echo "Compressing Libraries : [$LIBS ] ... to "
+echo "Compressing Libraries : [$LIBS] ... to "
 echo "   from [$OUTPUT_FOLDER]"
 
 echo "Release: [$RELEASE]"
 echo "TARGET: [$TARGET]"
 echo "Current Branch: [$CUR_BRANCH]"
 echo "Current ARCH: [$ARCH]"
-echo "Current BUNDLE: [$BUNDLE]"
+echo "Current PBUNDLE: [$PBUNDLE]"
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
@@ -139,8 +152,8 @@ elif [ "$TARGET" == "vs" ]; then
             TARGET="${TARGET}_2019"
         fi
     fi
-    if [ -n "$BUNDLE" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${BUNDLE}.zip"
+    if [ -n "$PBUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${PBUNDLE}.zip"
     else
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.zip"
     fi
@@ -168,8 +181,8 @@ elif [ "$TARGET" == "android" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [ "$TARGET" == "macos" ]; then
-    if [ -n "$BUNDLE" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2"
+    if [ -n "$PBUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${PBUNDLE}.tar.bz2"
     else
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
     fi
@@ -180,8 +193,8 @@ elif [ "$TARGET" == "macos" ]; then
     fi
     tar cjvf $TARBALL $LIBS
 elif [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
-    if [ -n "$BUNDLE" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${BUNDLE}.tar.bz2"
+    if [ -n "$PBUNDLE" ]; then
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${PBUNDLE}.tar.bz2"
     else
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.tar.bz2"
     fi

@@ -2,6 +2,11 @@
 set -e
 set -o pipefail
 
+if [ -z "$1" ]; then
+    TARGET=${TARGET:-$1}
+else
+    TARGET=$1
+fi
 if [ -z "${TARGET:-}" ]; then
     if [ -n "${TYPE:-}" ]; then
         export TARGET="$TYPE"
@@ -10,8 +15,13 @@ if [ -z "${TARGET:-}" ]; then
         exit 1
     fi
 fi
+TBUNDLE=${BUNDLE:-0}
+if [ -z "$2" ]; then
+    echo " TBUNDLE: [$2] none - var:[$TBUNDLE]"
+else
+    TBUNDLE=$2
+fi
 FORMULAS=("${FORMULAS[@]:-}")
-BUNDLE=${BUNDLE:-0}
 TARCH=${ARCH:-64}
 
 FORMULAS=(
@@ -99,7 +109,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
 
     FORMULAS=()
 
-    if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
+    if [ "$TBUNDLE" == "1" ] || [ "$TBUNDLE" == "0" ]; then
         FORMULAS=(
             "pixman"
             "pkg-config"
@@ -122,7 +132,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "cairo"
         )
     fi
-    if [ "$BUNDLE" == "2" ] || [ "$BUNDLE" == "0" ]; then
+    if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
         if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
             FORMULAS+=(
                 "glm"
@@ -142,7 +152,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             )
         fi
     fi
-    if [ "$BUNDLE" == "3" ] || [ "$BUNDLE" == "0" ]; then
+    if [ "$TBUNDLE" == "3" ] || [ "$TBUNDLE" == "0" ]; then
         FORMULAS+=(
             "fmt"
             "openssl"
@@ -152,7 +162,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
     fi
 elif [ "$TARGET" == "vs" ]; then
     FORMULAS=()
-    if [ "$BUNDLE" == "1" ] || [ "$BUNDLE" == "0" ]; then
+    if [ "$TBUNDLE" == "1" ] || [ "$TBUNDLE" == "0" ]; then
         FORMULAS=(
             # Dependencies for other formulas (cairo)
             "pixman"
@@ -182,7 +192,7 @@ elif [ "$TARGET" == "vs" ]; then
             "cairo"
         )
     fi
-    if [ "$BUNDLE" == "2" ] || [ "$BUNDLE" == "0" ]; then
+    if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
         FORMULAS+=(
             "fmt"
             "openssl"
