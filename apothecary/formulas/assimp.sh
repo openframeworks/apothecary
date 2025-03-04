@@ -149,15 +149,14 @@ function build() {
 
         if [ "${ASSIMP_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
             DEFINES="${DEFINES} \
-            -DBUILD_WITH_STATIC_CRT=ON \
-            -DUSE_STATIC_CRT=ON \
+            ${MT_TYPE_DEFINES} \
             -DBUILD_SHARED_LIBS=OFF"
             if [ $MULTITHREADED_TYPE == "MD" ]; then
                 sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' CMakeLists.txt
             fi
         else
             DEFINES="${DEFINES} \
-            -DBUILD_WITH_STATIC_CRT=OFF \
+            ${MT_TYPE_DEFINES} \
             -DBUILD_SHARED_LIBS=ON"
         fi
 

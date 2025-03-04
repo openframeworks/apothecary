@@ -210,6 +210,7 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
         DEFINES="${DEFINES} \
+            ${MT_TYPE_DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \

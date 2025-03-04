@@ -214,6 +214,7 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
+            ${MT_TYPE_DEFINES} \
             -DBUILD_SHARED_LIBS=OFF"
         cmake .. ${DEFINES} \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Iinclude ${FLAG_RELEASE}" \

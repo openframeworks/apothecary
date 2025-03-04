@@ -570,9 +570,15 @@ if [ "$TYPE" = "vs" ]; then
   fi
   if [ $MULTITHREADED_TYPE == "MD" ]; then
     MT_TYPE="/MD"
+    MT_TYPE_CMAKE="MultiThreadedDLL"
+    export MT_TYPE_DEFINES="-DBUILD_WITH_STATIC_CRT=OFF -DUSE_STATIC_CRT=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=${MT_TYPE_CMAKE}"
+    export MT_TYPE_CASE="md"
     echoVerbose "MULTITHREADED_TYPE MD"
   elif [ $MULTITHREADED_TYPE == "MT" ]; then
     MT_TYPE="/MT"
+    MT_TYPE_CMAKE="MultiThreaded"
+    export MT_TYPE_DEFINES="-DBUILD_WITH_STATIC_CRT=ON -DUSE_STATIC_CRT=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=${MT_TYPE_CMAKE}"
+    export MT_TYPE_CASE="mt"
     echoVerbose "MULTITHREADED_TYPE MT"
   fi
 
