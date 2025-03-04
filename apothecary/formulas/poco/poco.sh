@@ -19,6 +19,8 @@ DEFINES=""
 GIT_URL=https://github.com/pocoproject/poco
 GIT_TAG=poco-${VER}
 
+DEFAULT_VS_STATIC=1
+
 # tell apothecary we want to manually call the dependency commands
 # as we set some env vars for osx the depends need to know about
 FORMULA_DEPENDS_MANUAL=1
@@ -174,7 +176,11 @@ function build() {
 
     elif [ "$TYPE" == "vs" ]; then
 
-        BUILD_OPTS="-DPOCO_STATIC=YES -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+        BUILD_OPTS="-DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+
+        if [ "${POCO_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
+            BUILD_OPTS="${BUILD_OPTS} -DPOCO_STATIC=YES"
+        fi
 
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
         local OF_LIBS_OPENSSL_ABS_PATH=$(realpath $OF_LIBS_OPENSSL)
