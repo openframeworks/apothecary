@@ -297,8 +297,8 @@ function build() {
                 -DWITH_OPENCLCLAMDFFT=OFF \
                 -DWITH_OPENCL_SVM=OFF \
                 -DWITH_LAPACK=OFF \
-                -DBUILD_ZLIB=OFF \
-                -DWITH_ZLIB=ON \
+                -DBUILD_ZLIB=ON \
+                -DWITH_ZLIB=OFF \
                 -DWITH_DIRECTX=ON \
                 -DWITH_MSMF=ON \
                 -DWITH_DSHOW=ON \
