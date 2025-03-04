@@ -836,42 +836,51 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv2" $1/include/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         OUTPUT_FOLDER=${BUILD_PLATFORM}
+        
+		mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
+		mkdir -p $1/lib/$TYPE/$PLATFORM/Release
 
-        if [ "${OPENCV_STATIC:-0}" = "1" ]; then
-            cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM
-            secure "$1/lib/$TYPE/$PLATFORM/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-        else
-
-            mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
-            mkdir -p $1/lib/$TYPE/$PLATFORM/Release
-
-            mkdir -p $1/bin/$PLATFORM/Debug
-            mkdir -p $1/bin/$PLATFORM/Release
-
-            if [ -d "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/" ]; then
-
-                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
-
-                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
+#        if [ "${OPENCV_STATIC:-0}" = "1" ]; then
+                                
+            if [ -d "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/" ]; then
+                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
             else
-
-                cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
-
-                cp -v "build_${TYPE}_${PLATFORM}/Release/bin/"*.dll $1/bin/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/bin/"*.dll $1/bin/$PLATFORM/Debug
-
+                cp -v "build_${TYPE}_${PLATFORM}/Release/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+                cp -v "build_${TYPE}_${PLATFORM}/Debug/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
             fi
 
-            cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-            cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
-            cp -Rv "build_${TYPE}_${PLATFORM}/Release/etc/"* $1/etc
+#        else
+#
+#            mkdir -p $1/bin/$PLATFORM/Debug
+#            mkdir -p $1/bin/$PLATFORM/Release
+#
+#            if [ -d "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/" ]; then
+#
+#                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+#                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+#
+#                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Release
+#                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/bin/"*.dll $1/bin/$PLATFORM/Debug
+#            else
+#
+#                cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+#                cp -v "build_${TYPE}_${PLATFORM}/Debug/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+#
+#                cp -v "build_${TYPE}_${PLATFORM}/Release/bin/"*.dll $1/bin/$PLATFORM/Release
+#                cp -v "build_${TYPE}_${PLATFORM}/Debug/bin/"*.dll $1/bin/$PLATFORM/Debug
+#
+#            fi
+#
+#        fi
 
-            secure "$1/lib/$TYPE/$PLATFORM/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+		cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Release/"*.lib $1/lib/$TYPE/$PLATFORM/Release
+		cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
+		cp -Rv "build_${TYPE}_${PLATFORM}/Release/etc/"* $1/etc
 
-        fi
+		secure "$1/lib/$TYPE/$PLATFORM/Debug/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+		secure "$1/lib/$TYPE/$PLATFORM/Release/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+
 
     elif [ "$TYPE" == "android" ]; then
         if [ $ABI = armeabi-v7a ] || [ $ABI = armeabi ]; then
