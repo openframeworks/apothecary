@@ -2,11 +2,18 @@
 set -e
 set -o pipefail
 
-if [ -z "$1" ]; then
+if [ -z "${1:-}" ]; then
     TARGET=${TARGET:-$1}
 else
     TARGET=$1
 fi
+
+if [ "$TARGET" = "core" ] || [ "$TARGET" = "addons" ]; then
+    if [ -n "${TYPE:-}" ]; then
+        export TARGET="$TYPE"
+    fi
+fi
+
 if [ -z "${TARGET:-}" ]; then
     if [ -n "${TYPE:-}" ]; then
         export TARGET="$TYPE"
@@ -15,8 +22,9 @@ if [ -z "${TARGET:-}" ]; then
         exit 1
     fi
 fi
+echo "Target: $TARGET"
 TBUNDLE=${BUNDLE:-0}
-if [ -z "$2" ]; then
+if [ -z "${2:-}" ]; then
     echo "BUNDLE:[$TBUNDLE]"
 else
     TBUNDLE=$2
