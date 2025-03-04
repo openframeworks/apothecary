@@ -21,7 +21,7 @@ else
 fi
 PBUNDLE=${BUNDLE:-0}
 if [ -z "$2" ]; then
-    echo " PBUNDLE: [$2] none - var:[$PBUNDLE]"
+    echo "packge BUNDLE:[$PBUNDLE]"
 else
     PBUNDLE=$2
 fi

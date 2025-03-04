@@ -17,7 +17,7 @@ if [ -z "${TARGET:-}" ]; then
 fi
 TBUNDLE=${BUNDLE:-0}
 if [ -z "$2" ]; then
-    echo " TBUNDLE: [$2] none - var:[$TBUNDLE]"
+    echo "BUNDLE:[$TBUNDLE]"
 else
     TBUNDLE=$2
 fi
