@@ -130,10 +130,6 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/${PLATFORM}/zlib.lib"
 
-        mkdir -p "build_${TYPE}_${PLATFORM}"
-        cd "build_${TYPE}_${PLATFORM}"
-        find ./ -name "*.o" -type f -delete
-        rm -f CMakeCache.txt || true
         DEFINES="
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -157,13 +153,20 @@ function build() {
             -DUSE_STATIC_CRT=ON \
             -DBUILD_SHARED_LIBS=OFF"
             if [ $MULTITHREADED_TYPE == "MD" ]; then
-                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' ../CMakeLists.txt
+                sed -i 's/\/MT/\/MD/g; s/\/MTd/\/MDd/g' CMakeLists.txt
             fi
         else
             DEFINES="${DEFINES} \
             -DBUILD_WITH_STATIC_CRT=OFF \
             -DBUILD_SHARED_LIBS=ON"
-            cmake .. ${DEFINES} \
+        fi
+
+        mkdir -p "build_${TYPE}_${PLATFORM}_debug"
+        cd "build_${TYPE}_${PLATFORM}_debug"
+        find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true        
+
+        cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
             ${CMAKE_WIN_SDK} \
             -G "${GENERATOR_NAME}" \
@@ -183,7 +186,12 @@ function build() {
             -DZLIB_LIBRARY=${ZLIB_LIBRARY}
             cmake --build . --config Debug -j${PARALLEL_MAKE}
             rm -f CMakeCache.txt || true
-        fi
+
+        cd ..
+        mkdir -p "build_${TYPE}_${PLATFORM}_release"
+        cd "build_${TYPE}_${PLATFORM}_release"
+         find ./ -name "*.o" -type f -delete
+        rm -f CMakeCache.txt || true 
 
         cmake .. ${DEFINES} \
             -A "${PLATFORM}" \
@@ -299,7 +307,6 @@ function build() {
             -DANDROID_API=${ANDROID_API} \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
-            -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fvisibility-inlines-hidden -std=c++${CPP_STANDARD} -frtti ${FLAG_RELEASE}" \
@@ -430,15 +437,16 @@ function copy() {
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         if [ "${ASSIMP_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
-            cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib
+            cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib
+            cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/libassimpD.lib
             secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         else
             mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
             mkdir -p $1/lib/$TYPE/$PLATFORM/Release
-            cp -v "build_${TYPE}_${PLATFORM}/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
-            cp -v "build_${TYPE}_${PLATFORM}/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
-            cp -v "build_${TYPE}_${PLATFORM}/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
-            cp -v "build_${TYPE}_${PLATFORM}/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
+            cp -v "build_${TYPE}_${PLATFORM}_release/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
+            cp -v "build_${TYPE}_${PLATFORM}_debug/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
+            cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
+            cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
             secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         fi
 

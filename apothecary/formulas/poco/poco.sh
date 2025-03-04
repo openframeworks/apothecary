@@ -176,10 +176,12 @@ function build() {
 
     elif [ "$TYPE" == "vs" ]; then
 
-        BUILD_OPTS="-DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
+        BUILD_OPTS="-DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_DATA_ODBC=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_MONGODB=OFF"
 
         if [ "${POCO_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
-            BUILD_OPTS="${BUILD_OPTS} -DPOCO_STATIC=YES"
+            BUILD_OPTS="${BUILD_OPTS} -DPOCO_STATIC=ON -DBUILD_SHARED_LIBS=OFF"
+        else
+            BUILD_OPTS="${BUILD_OPTS} -DPOCO_STATIC=NO -DBUILD_SHARED_LIBS=ON"
         fi
 
         local OF_LIBS_OPENSSL="$LIBS_DIR/openssl/"
@@ -195,8 +197,9 @@ function build() {
         echo "building poco $TYPE | $ARCH | $VS_VER | vs: $VS_VER_GEN"
         echo "--------------------"
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
-        mkdir -p "build_${TYPE}_${ARCH}"
-        cd "build_${TYPE}_${ARCH}"
+        
+        mkdir -p "build_${TYPE}_${ARCH}_release"
+        cd "build_${TYPE}_${ARCH}_release"
 
         rm -f CMakeCache.txt *.a *.o *.lib
 
@@ -208,24 +211,16 @@ function build() {
 
         DEFINES="${DEFINES} \
             -DLIBRARY_SUFFIX=${ARCH} \
-            -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF
-            -DBUILD_SHARED_LIBS=OFF \
-            -DCMAKE_INSTALL_PREFIX=Release \
-            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
-            -DCMAKE_INSTALL_INCLUDEDIR=include"
-        cmake .. ${DEFINES} \
+            -DCURL_USE_OPENSSL=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCURL_USE_OPENSSL=ON \
             -DCMAKE_INSTALL_LIBDIR="lib" \
-            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -235,12 +230,39 @@ function build() {
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             ${CMAKE_WIN_SDK} \
             -DOPENSSL_USE_STATIC_LIBS=YES \
+            -DCMAKE_INSTALL_INCLUDEDIR=include"
+
+        cmake .. ${DEFINES} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
             -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
             -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.lib;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.lib;" \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+
+        cd ..
+
+        mkdir -p "build_${TYPE}_${ARCH}_debug"
+        cd "build_${TYPE}_${ARCH}_debug"
+   
+
+        cmake .. ${DEFINES} \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_INSTALL_PREFIX=Debug \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DOPENSSL_ROOT_DIR="$OF_LIBS_OPENSSL_ABS_PATH" \
+            -DOPENSSL_INCLUDE_DIR="$OF_LIBS_OPENSSL_ABS_PATH/include" \
+            -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.lib;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.lib;" \
+            -A "${PLATFORM}" \
+            -G "${GENERATOR_NAME}"
+        cmake --build . --config Debug -j${PARALLEL_MAKE} --target install
+
+
         cd ..
 
         rm ${OPENSSL_PATH}/lib/libssl.lib
@@ -341,11 +363,18 @@ function copy() {
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${ARCH}/Release/include/" $1/
-        cp -v "build_${TYPE}_${ARCH}/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
-        if ls "build_${TYPE}_${ARCH}/Release/bin/"*.dll 1>/dev/null 2>&1; then
-            cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll "$1/lib/$TYPE/$PLATFORM/"
-        fi
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Release
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
+        cp -Rv "build_${TYPE}_${ARCH}_release/Release/include/" $1/
+        cp -v "build_${TYPE}_${ARCH}_release/Release/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Release/
+
+        cp -v "build_${TYPE}_${ARCH}_debug/Debug/lib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug/
+
+
+
+        # if ls "build_${TYPE}_${ARCH}/Release/bin/"*.dll 1>/dev/null 2>&1; then
+        #     cp -v "build_${TYPE}_${ARCH}/Release/bin/"*.dll "$1/lib/$TYPE/$PLATFORM/"
+        # fi
     elif [ "$TYPE" == "msys2" ]; then
         cp -vf lib/MinGW/i686/*.a $1/lib/$TYPE
         #cp -vf lib/MinGW/x86_64/*.a $1/lib/$TYPE

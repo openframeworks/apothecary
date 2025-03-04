@@ -19,8 +19,9 @@ if [ -z "$1" ]; then
 else
     TARGET=$1
 fi
+BUNDLE=${BUNDLE:-0}
 if [ -z "$2" ]; then
-    echo " Bundle: $2"
+    echo " Bundle: [$2] none - var:[$BUNDLE]"
 else
     BUNDLE=$2
 fi
@@ -98,6 +99,7 @@ echo "Release: [$RELEASE]"
 echo "TARGET: [$TARGET]"
 echo "Current Branch: [$CUR_BRANCH]"
 echo "Current ARCH: [$ARCH]"
+echo "Current BUNDLE: [$BUNDLE]"
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
