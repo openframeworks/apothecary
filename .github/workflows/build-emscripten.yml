@@ -18,7 +18,7 @@ env:
   USE_ARTIFACT: true
   PTHREADS_ENABLED: 1
   NO_FORCE: 1
-  DISABLE_WORKFLOW: "true"
+  DISABLE_WORKFLOW: "false"
 
 jobs:  
   pre-check:
