@@ -434,22 +434,20 @@ function copy() {
     # libs
     mkdir -p $1/lib/$TYPE
     if [ "$TYPE" == "vs" ]; then
-        cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -v -r build_${TYPE}_${PLATFORM}_release/include/* $1/include
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Release
+        mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
         if [ "${ASSIMP_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
             cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/libassimp.lib
             cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/libassimpD.lib
             secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         else
-            mkdir -p $1/lib/$TYPE/$PLATFORM/Debug
-            mkdir -p $1/lib/$TYPE/$PLATFORM/Release
             cp -v "build_${TYPE}_${PLATFORM}_release/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
             cp -v "build_${TYPE}_${PLATFORM}_debug/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
             cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
             cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
             secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         fi
-
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux|msys2)$ ]]; then
         cp -v -r build_${TYPE}_${PLATFORM}/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
