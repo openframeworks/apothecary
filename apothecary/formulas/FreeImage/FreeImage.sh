@@ -99,8 +99,8 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Wno-dynamic-exception-spec -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Wno-dynamic-exception-spec -fPIC ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DPNG_ROOT=${LIBPNG_ROOT} \
@@ -157,8 +157,8 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -Wno-dynamic-exception-spec -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -Wno-dynamic-exception-spec -fPIC ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DPNG_ROOT=${LIBPNG_ROOT} \
@@ -356,8 +356,8 @@ function build() {
             -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_TESTS=OFF \
-            -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE} " \
-            -DCMAKE_C_FLAGS="${FLAG_RELEASE} " \
+            -DCMAKE_CXX_FLAGS="-Wno-dynamic-exception-spec ${FLAG_RELEASE} " \
+            -DCMAKE_C_FLAGS="-Wno-dynamic-exception-spec${FLAG_RELEASE} " \
             -DPNG_ROOT=${LIBPNG_ROOT} \
             -DPNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
@@ -381,8 +381,8 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_FLAGS="-Wno-dynamic-exception-spec -DUSE_PTHREADS=1" \
+            -DCMAKE_C_FLAGS="-Wno-dynamic-exception-spec -DUSE_PTHREADS=1" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
