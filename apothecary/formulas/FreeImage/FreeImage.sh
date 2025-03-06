@@ -16,7 +16,7 @@ FORMULA_DEPENDS=("zlib" "libpng")
 VER=31991
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.19.10
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -86,7 +86,7 @@ function build() {
 		        -DBUILD_SHARED_LIBS=OFF \
 		        -DCMAKE_INSTALL_INCLUDEDIR=include \
 		        -DBUILD_LIBRAWLITE=OFF \
-				-DBUILD_OPENEXR=OFF \
+				-DBUILD_OPENEXR=ON \
 				-DBUILD_WEBP=ON \
 				-DBUILD_JXR=OFF \
 				-DENABLE_BITCODE=OFF \
@@ -145,7 +145,7 @@ function build() {
                 -DBUILD_SHARED_LIBS=OFF \
                 -DCMAKE_INSTALL_INCLUDEDIR=include \
                 -DBUILD_LIBRAWLITE=OFF \
-                -DBUILD_OPENEXR=OFF \
+                -DBUILD_OPENEXR=ON \
                 -DBUILD_WEBP=ON \
                 -DBUILD_JXR=OFF \
                 -DENABLE_ARC=OFF \
@@ -273,8 +273,8 @@ function build() {
         	-DCMAKE_INSTALL_INCLUDEDIR=include \
         	-DBUILD_LIBRAWLITE=OFF \
         	-DBUILD_LIBPNG=OFF \
-			-DBUILD_OPENEXR=OFF \
-			-DBUILD_WEBP=OFF \
+			-DBUILD_OPENEXR=ON \
+			-DBUILD_WEBP=ON \
 			-DBUILD_JXR=OFF \
             ${MT_TYPE_DEFINES} \
 			-DENABLE_VISIBILITY=OFF \
@@ -349,11 +349,11 @@ function build() {
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
+            -DBUILD_OPENEXR=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_TESTS=OFF \
             -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE} " \
@@ -389,8 +389,8 @@ function build() {
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
             -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_OPENEXR=ON \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_LIBPNG=ON \
             -DBUILD_ZLIB=ON \
