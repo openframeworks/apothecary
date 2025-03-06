@@ -568,6 +568,7 @@ if(BUILD_OPENEXR)
     include_directories(Source/OpenEXR/IexMath)
     include_directories(Source/OpenEXR/Imath)
     add_definitions(-DINCLUDE_LIB_OPENEXR)
+	add_definitions(-DINCLUDE_LIB_OPEN_EXR) # this is the one the FreeImage source uses 
 endif()
 
 # Need include directories for FreeImage and all the sub libs
