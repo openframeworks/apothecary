@@ -16,7 +16,7 @@ FORMULA_DEPENDS=("zlib" "libpng")
 VER=31991
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.19.10
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -37,6 +37,8 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
+
+    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
 
     if [ "$TYPE" == "android" ]; then
         local BUILD_TO_DIR=$BUILD_DIR/FreeImage
