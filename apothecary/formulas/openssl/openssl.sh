@@ -3,7 +3,7 @@
 # openssl
 
 # define the version
-FORMULA_TYPES=("vs" "osx" "ios" "xros" "linux")
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "linux" "android" )
 FORMULA_DEPENDS=("zlib")
 
 VER=3.4.1
@@ -159,16 +159,12 @@ function build() {
             -DENABLE_VISIBILITY=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
-
         cd "Release/lib/"
-
         # Rename with prefixes (including library origin to avoid duplicates)
         mkdir -p crypto
         mkdir -p ssl
-
         mv libcrypto.a crypto/libcrypto.a
         mv libssl.a ssl/libssl.a
-
         cd crypto
         ar -x libcrypto.a
         for f in *.o; do mv "$f" "openssl_${ARCH}_crypto_$f"; done
@@ -180,7 +176,6 @@ function build() {
         done
         ar rcs "../libcrypto.a" openssl_${ARCH}_crypto_*.o
         cd ../ssl
-
         ar -x libssl.a
         for f in *.o; do mv "$f" "openssl_${ARCH}_ssl_$f"; done
          for obj in *.o; do
@@ -191,13 +186,93 @@ function build() {
         done
         ar rcs "../libssl.a" openssl_${ARCH}_ssl_*.o
         cd ..
-
         echo "Verifying libcrypto.:"
         lipo -info "libcrypto.a"
         echo "Verifying libssl.a"
         lipo -info "libssl.a"
         rm -rf crypto ssl
+        cd ..
 
+    elif [[ "$TYPE" =~ ^(android)$ ]]; then
+
+        source $APOTHECARY_DIR/configure/android_configure.sh $ABI cmake
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        echo "building $TYPE | $PLATFORM"
+        echo "--------------------"
+        mkdir -p "build_${TYPE}_${PLATFORM}"
+        cd "build_${TYPE}_${PLATFORM}"
+        DEFINES="${DEFINES} \
+            -DNO_FORK=ON \
+            -DOPENSSL_OCSP=OFF \
+            -DOPENSSL_CMP=OFF \
+            "
+        rm -f CMakeCache.txt *.a *.o
+         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_STANDARD=${C_STANDARD} \
+            -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DBUILD_SHARED_LIBS=OFF"
+        cmake .. \
+            ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/android.toolchain.cmake \
+            -DPLATFORM=$PLATFORM \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
+            -DBUILD_TESTING=OFF \
+            -DANDROID_ABI=${ABI} \
+            -DANDROID_API=${ANDROID_API} \
+            -DANDROID_TOOLCHAIN=clang \
+            -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_INSTALL_PREFIX=Release \
+            -DZLIB_ROOT=${ZLIB_ROOT} \
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
+            -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_IGNORE_PATH=/opt/homebrew \
+            -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
+            -DPLATFORM=$PLATFORM \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DENABLE_VISIBILITY=OFF
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd "Release/lib/"
+        mkdir -p crypto
+        mkdir -p ssl
+        mv libcrypto.a crypto/libcrypto.a
+        mv libssl.a ssl/libssl.a
+        cd crypto
+        ar -x libcrypto.a
+        for f in *.o; do mv "$f" "openssl_${ARCH}_crypto_$f"; done
+        for obj in *.o; do
+            if [ -z "$(nm "$obj")" ]; then
+                echo "Removing empty object file: $obj"
+                rm -f "$obj"
+            fi
+        done
+        ar rcs "../libcrypto.a" openssl_${ARCH}_crypto_*.o
+        cd ../ssl
+        ar -x libssl.a
+        for f in *.o; do mv "$f" "openssl_${ARCH}_ssl_$f"; done
+         for obj in *.o; do
+            if [ -z "$(nm "$obj")" ]; then
+                echo "Removing empty object file: $obj"
+                rm -f "$obj"
+            fi
+        done
+        ar rcs "../libssl.a" openssl_${ARCH}_ssl_*.o
+        cd ..
+        echo "Verifying libcrypto.:"
+        lipo -info "libcrypto.a"
+        echo "Verifying libssl.a"
+        lipo -info "libssl.a"
+        rm -rf crypto ssl
         cd ..
 
     elif [ "$TYPE" == "vs" ]; then

@@ -113,6 +113,8 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "FreeImage"
         "assimp"
         "opencv"
+        "openssl"
+        "curl"
     )
 elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
 
