@@ -293,9 +293,6 @@ function build() {
                 fi
             done
             ar rcs "../libcurl.a" curl_${ARCH}_*.o
-            echo "Verifying libcurl.a.:"
-            lipo -info "libcurl.a"
-
             rm -rf curl
             cd ../..
         cd ..

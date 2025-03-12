@@ -267,10 +267,6 @@ function build() {
         done
         ar rcs "../libssl.a" openssl_${ARCH}_ssl_*.o
         cd ..
-        echo "Verifying libcrypto.:"
-        lipo -info "libcrypto.a"
-        echo "Verifying libssl.a"
-        lipo -info "libssl.a"
         rm -rf crypto ssl
         cd ..
 
