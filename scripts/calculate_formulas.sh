@@ -107,6 +107,7 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "tess2"
         "kiss"
         "fmt"
+        "libpng"
         "pugixml"
         "uriparser"
         "freetype"
