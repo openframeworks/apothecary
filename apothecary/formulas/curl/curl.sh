@@ -259,7 +259,6 @@ function build() {
             -DENABLE_UNIX_SOCKETS=OFF \
             -DHAVE_LIBSOCKET=OFF \
             -DCURL_ENABLE_SSL=${CURL_ENABLE_SSL} \
-            -DCMAKE_MACOSX_BUNDLE=OFF \
             -DUSE_SECURE_TRANSPORT=${USE_SECURE_TRANSPORT} \
             -DCURL_USE_SECTRANSP=${USE_SECURE_TRANSPORT} \
             -DUSE_NGHTTP2=OFF \
