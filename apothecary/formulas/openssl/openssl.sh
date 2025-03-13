@@ -127,8 +127,6 @@ function build() {
 
         DEFINES="${DEFINES} \
             -DNO_FORK=ON \
-            -DTIFF_INT64_T=int64_t \
-            -DTIFF_UINT64_T=uint64_t
             -DOPENSSL_OCSP=OFF \
             -DOPENSSL_CMP=OFF \
             "

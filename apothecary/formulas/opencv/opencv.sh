@@ -117,7 +117,7 @@ function build() {
         -DWITH_IMGCODEC_HDR=ON \
         -DWITH_CARBON=OFF \
         -DWITH_JPEG=OFF \
-        -DWITH_TIFF=ON \
+        -DWITH_TIFF=OFF \
         -DWITH_FFMPEG=ON \
         -DWITH_QUIRC=ON \
         -DWITH_GIGEAPI=OFF \
