@@ -481,9 +481,10 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/curl.a
         secure "$1/lib/$TYPE/$PLATFORM/curl.a" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -Rv build/$TYPE/$ABI/include/* $1/include/curl/
-        cp -Rv build/$TYPE/$ABI/lib/libcurl.a $1/lib/$TYPE/$PLATFORM/libcurl.a
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/"* $1/include
+        mkdir -p $1/bin
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/libcurl.a" $1/lib/$TYPE/$PLATFORM/libcurl.a
         secure "$1/lib/$TYPE/$PLATFORM/libcurl.a" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
     # copy license file
@@ -496,7 +497,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|android)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
