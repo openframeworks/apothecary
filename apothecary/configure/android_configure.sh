@@ -23,8 +23,8 @@ export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
 if [ "${NDK:-}" == "27.2.12479018" ]; then 
     export NDK_ROOT="${ANDROID_NDK_ROOT:-}"
 elif [ "${NDK:-}" == "28.0.13004108" ]; then 
-    if [ -n "${ANDROID_NDK_LATEST_HOME}" ]; then
-        export ANDROID_NDK_ROOT=${ANDROID_NDK_LATEST_HOME}
+    if [ -n "${ANDROID_NDK_LATEST_HOME:-}" ]; then
+        export ANDROID_NDK_ROOT="${ANDROID_NDK_LATEST_HOME}"
     fi
     export NDK_ROOT="${ANDROID_NDK_ROOT:-}"
 else
@@ -36,8 +36,8 @@ export HOST_ARCH=$(uname -m)
 case "$(uname)" in
     Darwin) HOST_PLATFORM="darwin-x86_64" ;;
     Linux)  HOST_PLATFORM="linux-x86_64" ;;
-    Windows) HOST_PLATFORM="windows-x86_64" ;;
-    *) echo "Error: Unsupported host platform." >&2; exit 1 ;;
+    Windows|MINGW*|MSYS*|CYGWIN*) HOST_PLATFORM="windows-x86_64" ;;
+    *) echo "Error: Unsupported host platform. $(uname) $(HOST_ARCH)" >&2; exit 1 ;;
 esac
 
 case "$ABI" in
