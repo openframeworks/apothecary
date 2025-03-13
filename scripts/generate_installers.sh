@@ -24,7 +24,7 @@ extract_value() {
     awk -F' *= *' -v key="$key" '$1 == key {gsub(/"/, "", $2); print $2}' "$pkl_file" | tr -d '\n'
 }
 
-# Template for .pc file with corrected relative paths
+# Template for .pc file with relative paths (used if generating a new file)
 pc_template() {
     local libname="$1"
     local version="$2"
@@ -49,13 +49,16 @@ $frameworks
 EOF
 }
 
-# Template for .cmake file with corrected relative paths
+# Template for .cmake file with relative paths (used if generating a new file)
 cmake_template() {
     local libname="$1"
+    local version="$2"
     local LibName="$(echo "$libname" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
     local LIBNAME="$(echo "$libname" | tr '[:lower:]' '[:upper:]')"
     cat <<EOF
 # Find${LibName}.cmake
+# Version: $version (commented for documentation purposes)
+
 find_path(${LIBNAME}_INCLUDE_DIR
     NAMES ${libname}.h
     PATHS "\${CMAKE_CURRENT_LIST_DIR}/../../../include"
@@ -109,7 +112,6 @@ find "$OUT_DIR" -type f -name "*.pkl" | while read -r pkl_file; do
 
     # Clean defines to remove CMake-specific flags (e.g., -DCMAKE_C_STANDARD)
     if [ "$defines" != "-" ]; then
-        # Filter out lines starting with -DCMAKE_
         defines=$(echo "$defines" | sed 's/-DCMAKE_[^ ]*//g' | tr -s ' ' | sed 's/^-//;s/ $//')
         [ -z "$defines" ] && defines=""
     else
@@ -147,13 +149,34 @@ find "$OUT_DIR" -type f -name "*.pkl" | while read -r pkl_file; do
                 fi
             fi
 
-            # Generate .pc file in the same directory as the binary
-            pc_template "$LIB_NAME" "$version" "$libs" "$defines" "$requires" "$framework_line" > "$BINARY_DIR/${LIB_NAME}.pc"
+            # Define paths for .pc and .cmake files
+            PC_FILE="$BINARY_DIR/${LIB_NAME}.pc"
+            CMAKE_FILE="$BINARY_DIR/Find$(echo "$LIB_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}').cmake"
 
-            # Generate .cmake file in the same directory as the binary
-            cmake_template "$LIB_NAME" > "$BINARY_DIR/Find$(echo "$LIB_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}').cmake"
+            # Check if .pc file exists and update it, otherwise generate a new one
+            if [ -f "$PC_FILE" ]; then
+                echo "Existing .pc file found at $PC_FILE, updating paths to relative..."
+                sed -i.bak "s|^prefix=.*|prefix=\${pcfiledir}/../..|" "$PC_FILE"
+                sed -i.bak "s|^exec_prefix=.*|exec_prefix=\${pcfiledir}|" "$PC_FILE"
+                sed -i.bak "s|^libdir=.*|libdir=\${pcfiledir}|" "$PC_FILE"
+                sed -i.bak "s|^includedir=.*|includedir=\${pcfiledir}/../../../include|" "$PC_FILE"
+                rm -v "$PC_FILE.bak"
+            else
+                echo "No existing .pc file found, generating $PC_FILE..."
+                pc_template "$LIB_NAME" "$version" "$libs" "$defines" "$requires" "$framework_line" > "$PC_FILE"
+            fi
 
-            echo "Generated ${LIB_NAME}.pc and Find$(echo "$LIB_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}').cmake for $LIB_NAME at $BINARY_DIR"
+            # Check if .cmake file exists and update it, otherwise generate a new one
+            if [ -f "$CMAKE_FILE" ]; then
+                echo "Existing .cmake file found at $CMAKE_FILE, updating include path to relative..."
+                sed -i.bak "s|PATHS \".*\"|PATHS \"\${CMAKE_CURRENT_LIST_DIR}/../../../include\"|" "$CMAKE_FILE"
+                rm -v "$CMAKE_FILE.bak"
+            else
+                echo "No existing .cmake file found, generating $CMAKE_FILE..."
+                cmake_template "$LIB_NAME" "$version" > "$CMAKE_FILE"
+            fi
+
+            echo "Processed ${LIB_NAME}.pc and Find$(echo "$LIB_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}').cmake for $LIB_NAME at $BINARY_DIR"
         fi
     done < <(find "$LIB_DIR" -type f \( -name "*.a" -o -name "*.lib" \) -o -type d -name "*.xcframework")
 done

@@ -210,7 +210,7 @@ function build() {
             -DOPENSSL_CMP=OFF \
             "
         rm -f CMakeCache.txt *.a *.o
-         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="${DEFINES} -DLIBRARY_SUFFIX=${ARCH} \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -584,11 +584,43 @@ function copy() {
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:${1}/lib/$TYPE/$PLATFORM"
 
     elif [ "$TYPE" == "android" ]; then
-        if [ -d $1/lib/$TYPE/$ABI ]; then
-            rm -r $1/lib/$TYPE/$ABI
-        fi
-        mkdir -p $1/lib/$TYPE/$ABI
-        cp -rv build/$TYPE/$ABI/*.a $1/lib/$TYPE/$ABI/
+        mkdir -p $1/include
+        mkdir -p $1/lib/$TYPE
+        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
+
+        secure "$1/lib/$TYPE/$PLATFORM/libssl.a" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/libcrypto.a" "crypto.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
+        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/openssl.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libcrypto.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+
+        PKG_FILE="$1/lib/$TYPE/$PLATFORM/libssl.pc"
+        sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^exec_prefix=.*|exec_prefix=${1}|" "$PKG_FILE"
+        sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
+        sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
+        rm -v "$PKG_FILE.bak"
+
+        export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:${PKG_CONFIG_PATH}:$1/lib/$TYPE/$PLATFORM"
     fi
 
     # copy license file
