@@ -141,19 +141,19 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
-        DEFS="
-                -DBUILD_SHARED_LIBS=OFF \
-                -DCMAKE_INSTALL_INCLUDEDIR=include \
-                -DBUILD_LIBRAWLITE=OFF \
-                -DBUILD_OPENEXR=OFF \
-                -DBUILD_WEBP=ON \
-                -DBUILD_JXR=OFF \
-                -DENABLE_ARC=OFF \
-                -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-                -DENABLE_VISIBILITY=OFF \
-                -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
-                "
-        cmake .. ${DEFS} \
+        DEFINES="
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DBUILD_LIBRAWLITE=OFF \
+            -DBUILD_OPENEXR=OFF \
+            -DBUILD_WEBP=ON \
+            -DBUILD_JXR=OFF \
+            -DENABLE_ARC=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DENABLE_VISIBILITY=OFF \
+            "
+        cmake .. ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.toolchain.cmake \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -179,7 +179,6 @@ function build() {
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DPLATFORM=$PLATFORM
-
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
     elif [ "$TYPE" == "android" ]; then
@@ -264,7 +263,7 @@ function build() {
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.lib"
 
-        DEFS="-DLIBRARY_SUFFIX=${ARCH} \
+        DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -283,7 +282,7 @@ function build() {
             -DPNG_LIBRARY=${LIBPNG_LIBRARY} \
 			-DBUILD_SHARED_LIBS=OFF"
         env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -307,7 +306,7 @@ function build() {
         rm -f CMakeCache.txt *.a *.o *.lib
 
         env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
-        cmake .. ${DEFS} \
+        cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
             -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \

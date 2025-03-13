@@ -437,6 +437,8 @@ function copy() {
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libcrypto.lib" $1/lib/$TYPE/$PLATFORM/libcrypto.lib
         cp -f "build_${TYPE}_${ARCH}/Release/lib/libssl.lib" $1/lib/$TYPE/$PLATFORM/libssl.lib
 
+        cp -Rv "build_${TYPE}_${ARCH}/Release/lib/cmake" "$1/lib/$TYPE/$PLATFORM/cmake/"
+
         secure "$1/lib/$TYPE/$PLATFORM/libssl.lib" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         secure "$1/lib/$TYPE/$PLATFORM/libcrypto.lib" "crypto.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
@@ -474,6 +476,9 @@ function copy() {
         echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
+
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/cmake" "$1/lib/$TYPE/$PLATFORM/cmake/"
+
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
 
         secure "$1/lib/$TYPE/$PLATFORM/libssl.a" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
