@@ -191,7 +191,7 @@ function build() {
         CURL_ENABLE_SSL=ON
         SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
             -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
-            -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
+            -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a;${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
@@ -277,6 +277,12 @@ function build() {
             -DENABLE_VERBOSE=ON \
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
+
+        echo "--------- CMakeCache.txt Content ---------"
+        cat CMakeCache.txt
+        echo "------------------------------------------"
+
+
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
         cd "Release/lib/"
