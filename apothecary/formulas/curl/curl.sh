@@ -14,7 +14,7 @@ FORMULA_DEPENDS=("openssl" "zlib" "brotli")
 VER=8.15.0
 VER_D=8_15_0
 SHA1="5b4e79489e2d24da13d2fa75897f69ca5fff741e"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -330,18 +330,18 @@ function build() {
 
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
-        # if [[ ! "$TYPE" =~ ^(tvos|catos|watchos)$ ]]; then
-        #     export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
-        #     OPENSSL_ROOT="$LIBS_ROOT/openssl/"
-        #     OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
-        #     OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a"
-        #     OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a"
-        #     USE_SECURE_TRANSPORT=OFF
-        #     CURL_ENABLE_SSL=ON
-        #     SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
-        #         -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
-        #         -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
-        # else
+        if [[ "$TYPE" =~ ^(osx|ios)$ ]]; then
+            export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
+            OPENSSL_ROOT="$LIBS_ROOT/openssl/"
+            OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
+            OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a"
+            OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a"
+            USE_SECURE_TRANSPORT=OFF
+            CURL_ENABLE_SSL=ON
+            SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
+                -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
+                -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
+        else
             # disabled for tvOS SSL
             OPENSSL_ROOT="$LIBS_ROOT"
             OPENSSL_INCLUDE_DIR=""
@@ -353,7 +353,7 @@ function build() {
             CURL_ENABLE_SSL=OFF
             SSL_DEFS=""
 
-        # fi
+        fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
