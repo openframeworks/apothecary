@@ -105,6 +105,7 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
+        cp ../cacert.pem ./cacert.pem
         rm -f CMakeCache.txt *.a *.o *.lib
 
         OPENSSL_ROOT="$LIBS_ROOT/openssl/"
