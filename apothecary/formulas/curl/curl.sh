@@ -91,7 +91,7 @@ function build() {
         export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
     fi
 
-    local CACERT_PATH=$(realpath ./cacert.pem)
+    local CACERT_PATH="./cacert.pem"
 
     if [ "$TYPE" == "vs" ]; then
         export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
@@ -330,7 +330,7 @@ function build() {
 
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
-        if [[ "$TYPE" =~ ^(osx|ios)$ ]]; then
+        if [[ "$TYPE" =~ ^(osx|ios|xros|catos|watchos)$ ]]; then
             export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
             OPENSSL_ROOT="$LIBS_ROOT/openssl/"
             OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
@@ -350,7 +350,7 @@ function build() {
             export USE_SECURE_TRANSPORT="ON"
             OPENSSL_PATH=""
             OF_LIBS_OPENSSL_ABS_PATH=""
-            CURL_ENABLE_SSL="ON" # SSL both SecureTransport or OpenSSL
+            CURL_ENABLE_SSL="OFF"
             SSL_DEFS=""
         fi
 
