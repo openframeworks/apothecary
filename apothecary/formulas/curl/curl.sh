@@ -127,9 +127,9 @@ function build() {
             OPENSSL_DEFS="-DCURL_USE_OPENSSL=ON \
                 -DUSE_OPENSSL=ON \
                 -DCURL_CA_FALLBACK=ON \
-                -DCURL_CA_BUNDLE=$CACERT_PATH \
-                -DCURL_CA_EMBED=$CACERT_PATH"
-            CACERT_PATH=$(realpath "${CACERT_PATH}")
+                -DCURL_CA_BUNDLE=${CACERT_PATH} \
+                -DCURL_CA_EMBED=${CACERT_PATH}"
+            CACERT_PATH="${CACERT_PATH}"
             OPENSSL_DEFS="${OPENSSL_DEFS} -DCURL_CA_BUNDLE=${CACERT_PATH} -DCURL_CA_EMBED=${CACERT_PATH}"
         else
             OPENSSL_DEFS="-DCURL_USE_OPENSSL=OFF -DUSE_OPENSSL=OFF -DCURL_USE_SCHANNEL=ON"
@@ -377,7 +377,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCURL_CA_BUNDLE="$CACERT_PATH" \
+            -DCURL_CA_BUNDLE="${CACERT_PATH}" \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DENABLE_STRICT_TRY_COMPILE=ON \
