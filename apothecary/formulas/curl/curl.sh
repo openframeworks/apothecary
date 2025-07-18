@@ -336,23 +336,22 @@ function build() {
             OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
             OPENSSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a"
             OPENSSL_LIBRARY_CRYPT="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a"
-            USE_SECURE_TRANSPORT=OFF
-            CURL_ENABLE_SSL=ON
+            export USE_SECURE_TRANSPORT="OFF"
+            CURL_ENABLE_SSL="ON"
             SSL_DEFS="-DOPENSSL_ROOT_DIR=${OF_LIBS_OPENSSL_ABS_PATH} \
                 -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
                 -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
         else
-            # disabled for tvOS SSL
+            # Use SecureTransport on platforms that don't support OpenSSL
             OPENSSL_ROOT="$LIBS_ROOT"
             OPENSSL_INCLUDE_DIR=""
             OPENSSL_LIBRARY=""
             OPENSSL_LIBRARY_CRYPT=""
-            USE_SECURE_TRANSPORT=ON
+            export USE_SECURE_TRANSPORT="ON"
             OPENSSL_PATH=""
             OF_LIBS_OPENSSL_ABS_PATH=""
-            CURL_ENABLE_SSL=OFF
+            CURL_ENABLE_SSL="ON" # SSL both SecureTransport or OpenSSL
             SSL_DEFS=""
-
         fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
