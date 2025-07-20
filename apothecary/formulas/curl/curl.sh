@@ -95,6 +95,7 @@ function build() {
     local CACERT_PATH="./cacert.pem"
 
     if [ "$TYPE" == "vs" ]; then
+         local CACERT_PATH=$(realpath "./cacert.pem")
         export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
         export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 
