@@ -40,6 +40,7 @@ function download() {
     rm curl*.tar.gz
 
     curl -LO https://curl.se/ca/cacert.pem
+    cp cacert.pem curl/src/cacert.pem
     mv cacert.pem curl/cacert.pem
 
 }
@@ -107,6 +108,8 @@ function build() {
         cd "build_${TYPE}_${ARCH}"
         cp ../cacert.pem ./cacert.pem
         rm -f CMakeCache.txt *.a *.o *.lib
+
+
 
         OPENSSL_ROOT="$LIBS_ROOT/openssl/"
         OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
