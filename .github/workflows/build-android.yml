@@ -42,8 +42,8 @@ jobs:
     strategy:
       matrix:
         ARCH: [armv7, arm64, x86_64]
-        SDK: ["35.0.0"]
-        NDK: ["28.0.13004108"]
+        SDK: ["36.0.0"]
+        NDK: ["28.2.13676358"]
         API: ["24"]
     env:
       ARCH: ${{ matrix.ARCH }}

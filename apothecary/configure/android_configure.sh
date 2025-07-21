@@ -22,7 +22,7 @@ export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
 
 if [ "${NDK:-}" == "27.2.12479018" ]; then 
     export NDK_ROOT="${ANDROID_NDK_ROOT:-}"
-elif [ "${NDK:-}" == "28.0.13004108" ]; then 
+elif [ "${NDK:-}" == "28.2.13676358" ]; then 
     if [ -n "${ANDROID_NDK_LATEST_HOME:-}" ]; then
         export ANDROID_NDK_ROOT="${ANDROID_NDK_LATEST_HOME}"
     fi
