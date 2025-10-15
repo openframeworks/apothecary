@@ -42,8 +42,8 @@ jobs:
     strategy:
         matrix:
           cfg:
-          - { distro:ubuntu, target: linux, arch: arm64, gcc: gcc14}
-          # - { distro:jetson, target: linux, arch:arm64, gcc: gcc14}
+          - { distro: ubuntu, target: linux, arch: arm64, gcc: gcc14}
+          # - { distro: jetson, target: linux, arch:arm64, gcc: gcc14}
     env:
       TARGET: ${{matrix.cfg.target}}
       GCC: ${{matrix.cfg.gcc}}
@@ -70,30 +70,24 @@ jobs:
         else
           echo "RELEASE=latest" >> $GITHUB_ENV
         fi
-
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.gcc}}
       run: ./scripts/calculate_formulas.sh
-
     - name: Scripts Setup
       run: sudo ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/setup.sh
-      
-    - name: BuildLinuxarm64
+    - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
-
     - name: Package
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
-
     - name: List output directory
       run: ls -lah out/
-
-    - name: Update Release 64
+    - name: Update GitHub Release
       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: softprops/action-gh-release@v2.1.0
       with:
