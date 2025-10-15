@@ -6,7 +6,7 @@ trap "trapError" ERR
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd $SCRIPT_DIR
-APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../../../../" && pwd)"
 cd $APOTHECARY_LEVEL
 
 trapError() {

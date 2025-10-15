@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-LINUX_RELEASE=24.04.2
+LINUX_RELEASE=24.04.3
 
 echo "=== Linux ARM64 cross setup ==="
 lsb_release -a
