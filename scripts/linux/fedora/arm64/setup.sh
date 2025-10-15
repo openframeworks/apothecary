@@ -9,13 +9,11 @@ echo "=== Fedora aarch64 setup ==="
 echo "Release: ${RELEASEVER}"
 echo "Sysroot: ${SYSROOT}"
 
-# Ensure we're on Fedora (the container should be).
 if ! grep -qi '^id=fedora' /etc/os-release; then
   echo "This script expects Fedora. Aborting." >&2
   exit 2
 fi
 
-# Host-side dev tools (container runs as root; no sudo)
 dnf -y upgrade
 dnf -y groupinstall "Development Tools"
 dnf -y install \
@@ -26,11 +24,9 @@ dnf -y install \
 dnf -y install \
   gcc-aarch64-linux-gnu gcc-c++-aarch64-linux-gnu binutils-aarch64-linux-gnu || true
 
-# Fresh sysroot
 rm -rf "${SYSROOT}"
 mkdir -p "${SYSROOT}"
 
-# Minimal base
 dnf -y --releasever="${RELEASEVER}" --installroot="${SYSROOT}" --forcearch=aarch64 \
   --setopt=install_weak_deps=False --nodocs \
   install filesystem bash glibc glibc-langpack-en ca-certificates
@@ -91,4 +87,4 @@ echo "CMake toolchain: $TOOLCHAIN"
 echo "Listing a few .pc files in sysroot:"
 find "${SYSROOT}/usr/lib64/pkgconfig" -maxdepth 1 -name '*.pc' 2>/dev/null | head -n 20 || true
 
-echo "✅ Fedora aarch64 setup complete."
+echo "Fedora aarch64 setup complete."
