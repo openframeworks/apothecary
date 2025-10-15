@@ -7,7 +7,7 @@ SCRIPT_DIR=$(
     pwd -P
 )
 ROOT=$(
-    cd $(dirname "${SCRIPT_DIR}/../../../")
+    cd $(dirname "${SCRIPT_DIR}/../../../../../")
     pwd -P
 )
 APOTHECARY_PATH=${ROOT}/apothecary
@@ -15,7 +15,7 @@ APOTHECARY_PATH=${ROOT}/apothecary
 # Set OF_ROOT directory
 if [ -z "${OF_ROOT+x}" ]; then
     export OF_ROOT=$(
-        cd "$(dirname "$ROOT/../../../")"
+        cd "$(dirname "$ROOT/../../../../../")"
         pwd -P
     )
 fi

@@ -10,7 +10,7 @@ SCRIPT_DIR=$(
 ROOT=$(
     cd $(dirname "$0")
     pwd -P
-)/../../
+)/../../../../
 APOTHECARY_PATH=$ROOT/apothecary
 
 BUNDLE_NO="$1"

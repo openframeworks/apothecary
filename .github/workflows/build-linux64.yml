@@ -77,7 +77,7 @@ jobs:
     - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.gcc}}
       run: ./scripts/calculate_formulas.sh
     - name: Scripts Install
-      run: ./scripts/linux/install.sh
+      run: ./scripts/linux/ubuntu/install.sh
       
     - name: BuildLinux64
       working-directory: ${{env.GITHUB_WORKSPACE}}
