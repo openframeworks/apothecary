@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 #
-# GLFW
-# creating windows with OpenGL contexts and managing input and events
-# http://www.glfw.org
+# uriparser
 #
 # uses a CMake build system
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
 FORMULA_DEPENDS=()
 
-VER=0.9.7
+VER=0.9.9
 BUILD_ID=1
 DEFINES=""
 
@@ -194,7 +192,9 @@ function copy() {
         rm -rf $1/license
     fi
     mkdir -p $1/license
-    cp -v COPYING $1/license/
+    cp -v "COPYING.Apache-2.0" $1/license/
+    cp -v "COPYING.BSD-3-Clause" $1/license/
+    cp -v "COPYING.LGPL-2.1" $1/license/
 }
 
 # executed inside the lib src dir

@@ -34,19 +34,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.15.0)
 
 project(uriparser
     VERSION
-        0.9.7
+        0.9.9
     LANGUAGES
         C
 )
+set(CMAKE_C_STANDARD 90)  # same as C89, value "89" not supported by CMake
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)  # i.e. -std=c90 rather than default -std=gnu90
 
 # See https://verbump.de/ for what these numbers do
-set(URIPARSER_SO_CURRENT    1)
-set(URIPARSER_SO_REVISION  30)
-set(URIPARSER_SO_AGE        0)
+set(URIPARSER_SO_CURRENT    2)
+set(URIPARSER_SO_REVISION   0)
+set(URIPARSER_SO_AGE        1)
 
 include(CheckCCompilerFlag)
 include(CheckFunctionExists)
@@ -66,12 +69,14 @@ endif()
 option(URIPARSER_SHARED_LIBS "Build shared libraries (rather than static ones)" ${_URIPARSER_SHARED_LIBS_DEFAULT})
 option(URIPARSER_BUILD_DOCS "Build API documentation (requires Doxygen, Graphviz, and (optional) Qt's qhelpgenerator)" ON)
 option(URIPARSER_BUILD_TESTS "Build test suite (requires GTest >=1.8.0)" ON)
+option(URIPARSER_BUILD_FUZZERS "Build fuzzers (requires Clang)" OFF)
+option(URIPARSER_OSSFUZZ_BUILD "Build fuzzers via OSS-Fuzz" OFF)
 option(URIPARSER_BUILD_TOOLS "Build tools (e.g. CLI \"uriparse\")" ON)
 option(URIPARSER_BUILD_CHAR "Build code supporting data type 'char'" ON)
 option(URIPARSER_BUILD_WCHAR_T "Build code supporting data type 'wchar_t'" ON)
 option(URIPARSER_ENABLE_INSTALL "Enable installation of uriparser" ON)
 option(URIPARSER_WARNINGS_AS_ERRORS "Treat all compiler warnings as errors" OFF)
-set(URIPARSER_MSVC_RUNTIME "" CACHE STRING "Use of specific runtime library (/MT /MTd /MD /MDd) with MSVC")
+option(URIPARSER_MSVC_STATIC_CRT "Use /MT flag (static CRT) when compiling in MSVC" OFF)
 
 if(NOT URIPARSER_BUILD_CHAR AND NOT URIPARSER_BUILD_WCHAR_T)
     message(SEND_ERROR "One or more of URIPARSER_BUILD_CHAR and URIPARSER_BUILD_WCHAR_T needs to be enabled.")
@@ -83,7 +88,7 @@ if(URIPARSER_BUILD_TOOLS AND NOT URIPARSER_BUILD_CHAR)
     message(SEND_ERROR "URIPARSER_BUILD_TOOLS=ON requires URIPARSER_BUILD_CHAR=ON.")
 endif()
 
-if(URIPARSER_BUILD_TESTS)
+if(URIPARSER_BUILD_TESTS OR URIPARSER_BUILD_FUZZERS)
     # We have to call enable_language() before modifying any CMAKE_CXX_* variables
     enable_language(CXX)
 endif()
@@ -94,14 +99,18 @@ else()
     set(_URIPARSER_STATIC_OR_SHARED STATIC)
 endif()
 
-macro(uriparser_apply_msvc_runtime_to ref)
-    string(REGEX REPLACE "/M[DT]d?" ${URIPARSER_MSVC_RUNTIME} ${ref} "${${ref}}")
-endmacro()
+if (MSVC)
+    cmake_policy(GET CMP0091 _policy_cmp0091_behavior)
+    if (NOT _policy_cmp0091_behavior STREQUAL NEW)
+        message(SEND_ERROR "Policy CMP0091 behavior is '${_policy_cmp0091_behavior}' rather than 'NEW', mis-compilation detected.")
+    endif()
 
-if(MSVC AND URIPARSER_MSVC_RUNTIME)
-    uriparser_apply_msvc_runtime_to(CMAKE_C_FLAGS)
-    uriparser_apply_msvc_runtime_to(CMAKE_C_FLAGS_DEBUG)
-    uriparser_apply_msvc_runtime_to(CMAKE_C_FLAGS_RELEASE)
+    message(STATUS "-- Using static CRT ${URIPARSER_MSVC_STATIC_CRT}")
+    if (URIPARSER_MSVC_STATIC_CRT)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")  # .. without suffix "DLL": static
+    else()
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")  # i.e. CMake default behavior: shared
+    endif()
 endif()
 
 macro(uriparser_install)
@@ -142,6 +151,8 @@ set(LIBRARY_CODE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCommon.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCompare.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriCopy.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriEscape.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriFile.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriIp4Base.c
@@ -152,13 +163,29 @@ set(LIBRARY_CODE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalizeBase.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalizeBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalize.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriNormalize.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParseBase.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParseBase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriParse.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriQuery.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriRecompose.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriResolve.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetFragment.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostAuto.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostBase.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostCommon.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostCommon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostIp4.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostIp6.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostIpFuture.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetHostRegName.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetPath.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetPort.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetQuery.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetScheme.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriSetUserInfo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UriShorten.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UriVersion.c
 )
 
 add_library(uriparser
@@ -166,6 +193,8 @@ add_library(uriparser
     ${API_HEADER_FILES}
     ${LIBRARY_CODE_FILES}
 )
+
+add_library(uriparser::uriparser ALIAS uriparser)
 
 if(NOT MSVC)
     math(EXPR URIPARSER_SO_CURRENT_MINUS_AGE "${URIPARSER_SO_CURRENT} - ${URIPARSER_SO_AGE}")
@@ -276,9 +305,21 @@ if(URIPARSER_BUILD_TESTS)
     find_package(GTest 1.8.0 REQUIRED)
 
     add_executable(testrunner
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/copy.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/FourSuite.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/MemoryManagerSuite.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetFragment.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetHostAuto.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetHostIp4.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetHostIp6.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetHostIpFuture.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetHostRegName.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetPath.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetPort.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetQuery.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetScheme.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/SetUserInfo.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/VersionSuite.cpp
 
         # These library code files have non-public symbols that the test suite
@@ -330,6 +371,73 @@ if(URIPARSER_BUILD_TESTS)
     )
 
     add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+endif()
+
+#
+# Fuzzers
+#
+if(URIPARSER_BUILD_FUZZERS)
+    if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+        message(FATAL_ERROR
+            "Building fuzz targets without Clang (but ${CMAKE_C_COMPILER_ID}) is not "
+            "supported. Please set -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++.")
+    endif()
+
+    if(URIPARSER_OSSFUZZ_BUILD AND NOT DEFINED ENV{LIB_FUZZING_ENGINE})
+        message(FATAL_ERROR
+            "OSS-Fuzz builds require the environment variable "
+            "LIB_FUZZING_ENGINE to be set. If you are seeing this "
+            "warning, it points to a deeper problem in the OSS-Fuzz "
+            "build setup.")
+    endif()
+
+    add_library(fuzzparser STATIC ${API_HEADER_FILES} ${LIBRARY_CODE_FILES})
+    target_compile_definitions(fuzzparser PUBLIC URI_STATIC_BUILD)
+    target_include_directories(fuzzparser
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+        PRIVATE
+            ${CMAKE_CURRENT_BINARY_DIR}  # for UriConfig.h
+    )
+
+    if(NOT URIPARSER_OSSFUZZ_BUILD)
+        target_compile_options(fuzzparser PRIVATE -fsanitize=fuzzer-no-link)
+    endif()
+
+    function(add_fuzzer target_name source compile_definitions)
+        add_executable(${target_name} ${source})
+        target_link_libraries(${target_name} PRIVATE fuzzparser)
+        target_compile_definitions(${target_name} PRIVATE ${compile_definitions})
+        if(URIPARSER_OSSFUZZ_BUILD)
+            set_target_properties(${target_name} PROPERTIES LINK_FLAGS $ENV{LIB_FUZZING_ENGINE})
+            set_target_properties(${target_name} PROPERTIES LINKER_LANGUAGE "CXX")
+        else()
+            target_compile_options(${target_name} PRIVATE -fsanitize=fuzzer)
+            set_target_properties(${target_name} PROPERTIES LINK_FLAGS -fsanitize=fuzzer)
+        endif()
+        set_property(TARGET ${target_name} PROPERTY RUNTIME_OUTPUT_DIRECTORY fuzz)
+    endfunction()
+
+    function(add_ansi_and_unicode_fuzzer name source)
+        if(URIPARSER_BUILD_CHAR)
+            add_fuzzer(${name}_fuzzer ${source} URI_NO_UNICODE)
+        endif()
+
+        if(URIPARSER_BUILD_WCHAR_T)
+            add_fuzzer(${name}w_fuzzer ${source} URI_NO_ANSI)
+        endif()
+    endfunction()
+
+    add_ansi_and_unicode_fuzzer(uri_dissect_query_malloc fuzz/DissectQueryMallocFuzzer.cpp)
+    add_ansi_and_unicode_fuzzer(uri_free fuzz/FreeFuzzer.cpp)
+    add_ansi_and_unicode_fuzzer(uri_parse fuzz/ParseFuzzer.cpp)
+else()
+    if(URIPARSER_OSSFUZZ_BUILD)
+        message(SEND_ERROR
+                "Attempting to perform an OSS-Fuzz build without turning on the fuzzer build. "
+                "This is likely in error - consider adding "
+                "-DURIPARSER_BUILD_FUZZERS=ON to your CMake execution.")
+    endif()
 endif()
 
 #
@@ -402,7 +510,7 @@ if(URIPARSER_BUILD_DOCS)
     if(QHG_LOCATION)
         uriparser_install(
             FILES
-                ${CMAKE_CURRENT_BINARY_DIR}/doc/uriparser-${PROJECT_VERSION}.qch
+                ${CMAKE_CURRENT_BINARY_DIR}/doc/uriparser-${PROJECT_VERSION}-doc.qch
             DESTINATION
                 ${CMAKE_INSTALL_DOCDIR}
         )
@@ -493,6 +601,7 @@ message(STATUS "    Code for char * ...... ${URIPARSER_BUILD_CHAR}")
 message(STATUS "    Code for wchar_t * ... ${URIPARSER_BUILD_WCHAR_T}")
 message(STATUS "    Tools ................ ${URIPARSER_BUILD_TOOLS}")
 message(STATUS "    Test suite ........... ${URIPARSER_BUILD_TESTS}")
+message(STATUS "    Fuzzers .............. ${URIPARSER_BUILD_FUZZERS}")
 message(STATUS "    Documentation ........ ${URIPARSER_BUILD_DOCS}")
 message(STATUS "")
 if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
