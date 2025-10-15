@@ -117,6 +117,7 @@ function build() {
         -DWITH_IMGCODEC_HDR=ON \
         -DWITH_CARBON=OFF \
         -DWITH_JPEG=OFF \
+        -DWITH_OPENJPEG=OFF \
         -DWITH_TIFF=OFF \
         -DWITH_FFMPEG=ON \
         -DWITH_QUIRC=ON \
@@ -251,11 +252,11 @@ function build() {
                 -DWITH_JASPER=OFF \
                 -DWITH_GIGEAPI=OFF \
                 -DWITH_JPEG=OFF \
+                -DWITH_OPENJPEG=OFF \
                 -DBUILD_WITH_DEBUG_INFO=OFF \
                 -DBUILD_TIFF=OFF \
                 -DWITH_TIFF=OFF \
                 -DBUILD_JPEG=OFF \
-                -DWITH_JPEG=OFF \
                 -DBUILD_OPENJPEG=OFF \
                 -DWITH_OPENJPEG=OFF \
                 -DWITH_OPENCLAMDFFT=OFF \
@@ -619,7 +620,7 @@ function build() {
         -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
         -DPNG_LIBRARY=${LIBPNG_LIBRARY}"
 
-    DEFINES="$
+    DEFINES="
         -DBUILD_DOCS=OFF \
         -DENABLE_BUILD_HARDENING=ON \
         -DBUILD_EXAMPLES=OFF \
