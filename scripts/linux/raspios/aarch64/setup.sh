@@ -48,7 +48,8 @@ fi
 
 
 if [ "$NATIVE" == "0" ]; then
-    wget https://downloads.raspberrypi.com/raspios_lite_arm64/root.tar.xz
+    #wget https://downloads.raspberrypi.com/raspios_lite_arm64/root.tar.xz
+    wget https://downloads.raspberrypi.com/raspios_lite_arm64/images/raspios_lite_arm64-2025-10-02/2025-10-01-raspios-trixie-arm64-lite.img.xz root.tar.xz
     mkdir -p rpi-arm64-rootfs
     sudo tar -xJpf raspios_lite_arm64/root.tar.xz -C rpi-arm64-rootfs
 fi
