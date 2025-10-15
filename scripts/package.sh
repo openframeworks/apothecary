@@ -26,6 +26,7 @@ else
     PBUNDLE=$2
 fi
 ARCH=${ARCH:-64}
+DISTRO=${DISTRO:-ubuntu}
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
@@ -117,9 +118,9 @@ echo "Current PBUNDLE: [$PBUNDLE]"
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
     if [ -n "$GCC" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${GCC}.tar.bz2"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${DISTRO}_${ARCH}_${GCC}.tar.bz2"
     else
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2"
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${DISTRO}_${ARCH}.tar.bz2"
     fi
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then

@@ -16,7 +16,8 @@ env:
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
   USE_ARTIFACT: false
-  DISABLE_WORKFLOW: "true"
+  DISABLE_WORKFLOW: "false"
+  DISTRO: raspios
 
 jobs:  
   pre-check:
@@ -90,14 +91,14 @@ jobs:
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
 
-      - name: Script Install
-        run: sudo ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
-
       - name: Setup Cross Compiler and Target Local File System
-        run: sudo ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/setup.sh
 
-      - name: Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
+      - name: Script Install and Build
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/install.sh
+
+      - name: Script Install and Build
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
 
       - name: Package
         #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
@@ -105,6 +106,7 @@ jobs:
         run: scripts/package.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
+          DISTRO: ${{ env.DISTRO }}
           GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
 
       - name: List output directory
@@ -119,7 +121,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           draft: false
-          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
 
   build-linux-armv6l-pi-1zero:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
@@ -156,13 +158,25 @@ jobs:
           sudo apt-get install -y build-essential gcc g++ gfortran git texinfo bison libncurses-dev tar wget qemu-user-static rsync xz-utils
       
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
-      
-      - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/setup.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/install.sh
+
+      - name: Script Install and Build
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
+
+      - name: Package
+        #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          DISTRO: ${{ env.DISTRO }}
+          GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
+
+      - name: List output directory
+        run: ls -lah out/
 
       - name: Update Release armv6l
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
@@ -171,7 +185,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           draft: false
-          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2
 
   build-linux-armv7-pi3ab45:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
@@ -231,19 +245,31 @@ jobs:
       #     fi
 
       - name: Setup Cross Compiler and Target Local File System
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/setup.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/setup.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/install.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/install.sh
 
       - name: Script Install and Build
-        run: ./scripts/${{ env.TARGET }}/raspios/${{ env.ARCH }}/build.sh
+        run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
 
-      - name: Update Release armv7l
+      - name: Package
+        #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          BUNDLE: ${{ matrix.bundle }}
+          DISTRO: ${{ env.DISTRO }}
+          GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
+
+      - name: List output directory
+        run: ls -lah out/
+
+      - name: Update Release
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           draft: false
-          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_{{ env.GCC }}.tar.bz2

@@ -42,12 +42,13 @@ jobs:
     strategy:
         matrix:
           cfg:
-          - {target: linux, arch: arm64, gcc: gcc14}
-          # - {target: linux, arch: jetson, gcc: gcc14}
+          - { distro:ubuntu, target: linux, arch: arm64, gcc: gcc14}
+          # - { distro:jetson, target: linux, arch:arm64, gcc: gcc14}
     env:
       TARGET: ${{matrix.cfg.target}}
       GCC: ${{matrix.cfg.gcc}}
       ARCH: ${{matrix.cfg.arch}}
+      DISTRO: ${{matrix.cfg.distro}}
     steps:      
     - uses: actions/checkout@v4.2.2
     - name: Check if Workflow is disabled
@@ -74,13 +75,14 @@ jobs:
       run: ./scripts/calculate_formulas.sh
 
     - name: Scripts Setup
-      run: sudo ./scripts/${{ env.TARGET }}/${{ env.ARCH }}/setup.sh
+      run: sudo ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/setup.sh
       
-    - name: BuildLinux64
+    - name: BuildLinuxarm64
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: scripts/build.sh
+      run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
+
     - name: Package
       if: (github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -98,4 +100,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ env.RELEASE }}
         draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
+        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
