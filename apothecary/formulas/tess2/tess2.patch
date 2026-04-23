@@ -1,51 +1,28 @@
 diff --git a/Include/tesselator.h b/Include/tesselator.h
-index 8dbd648..9f2c1a5 100644
+index c27541e..eafb0aa 100755
 --- a/Include/tesselator.h
 +++ b/Include/tesselator.h
-@@ -36,6 +36,46 @@ extern "C" {
+@@ -36,6 +36,10 @@
+ extern "C" {
  #endif
 
-+#if defined(__APPLE_CC__)
-+ #include <TargetConditionals.h>
-+#endif
-+
-+/* TESSindex
-+ *
-+ * Index type used for the generated vertex indices returned by tessGetElements().
-+ *
-+ * Default: 16-bit (unsigned short) on memory/bandwidth constrained platforms
-+ * (mobile, embedded, ARM, WebAssembly/Emscripten) and 32-bit elsewhere.
-+ *
-+ * You can force the size by defining one of these BEFORE including tesselator.h:
-+ *     #define TESS_INDEX_SHORT     (force 16-bit)
-+ *     #define TESS_INDEX_INT       (force 32-bit)
-+ */
-+#ifndef TESSindex
-+    #if defined(TESS_INDEX_SHORT) || defined(TESS_USE_SHORT_INDEX)
-+        typedef unsigned short TESSindex;
-+    #elif defined(TESS_INDEX_INT) || defined(TESS_USE_INT_INDEX)
-+        typedef unsigned int TESSindex;
-+    #elif defined(TARGET_OS_IPHONE) || defined(TARGET_OS_IOS) || \
-+          defined(ANDROID) || defined(TARGET_ANDROID) || \
-+          defined(__ARMEL__) || defined(__arm__) || defined(__aarch32__) || \
-+          defined(__EMSCRIPTEN__) || defined(TARGET_EMSCRIPTEN) || \
-+          defined(TARGET_OS_WATCHOS) || defined(TARGET_OS_XROS) || \
-+          defined(TARGET_OS_VISION) || defined(TARGET_CATOS) || \
-+          defined(__QNX__)
-+        typedef unsigned short TESSindex;
-+    #else
-+        typedef unsigned int TESSindex;
-+    #endif
++#if defined( __APPLE_CC__)
++	#include <TargetConditionals.h>
 +#endif
 +
  // See OpenGL Red Book for description of the winding rules
  // http://www.glprogramming.com/red/chapter11.html
  enum TessWindingRule
-@@ -140,9 +180,8 @@ enum TessOption
+@@ -115,11 +119,15 @@
  };
 
  typedef float TESSreal;
 -typedef int TESSindex;
++#if defined(TARGET_OS_IPHONE) || defined(TARGET_OS_IOS) || defined(ANDROID) || defined(TARGET_ANDROID) || defined(__ARMEL__) || defined(__arm__) || defined(__aarch32__) || defined(__EMSCRIPTEN__) || defined(TARGET_EMSCRIPTEN) || defined(TARGET_OS_WATCHOS) || defined(TARGET_OS_XROS) || defined(TARGET_OS_VISION) || defined(TARGET_CATOS) || defined(__QNX__)
++	typedef unsigned short TESSindex;
++#else
++	typedef unsigned int TESSindex;
++#endif
  typedef struct TESStesselator TESStesselator;
  typedef struct TESSalloc TESSalloc;
 
@@ -53,8 +30,9 @@ index 8dbd648..9f2c1a5 100644
 +#define TESS_UNDEF ((TESSindex)~0)
 
  #define TESS_NOTUSED(v) do { (void)(1 ? (void)0 : ( (void)(v) ) ); } while(0)
+
 diff --git a/Source/tess.c b/Source/tess.c
-index 67c038f..93061bb 100644
+index 67c038f..93061bb 100755
 --- a/Source/tess.c
 +++ b/Source/tess.c
 @@ -976,7 +976,7 @@ int tessGetElementCount( TESStesselator *tess )
