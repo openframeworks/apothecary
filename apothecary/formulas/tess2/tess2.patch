@@ -1,13 +1,12 @@
 diff --git a/Include/tesselator.h b/Include/tesselator.h
-index c27541e..eafb0aa 100755
+index 8dbd648..9f2c1a5 100644
 --- a/Include/tesselator.h
 +++ b/Include/tesselator.h
-@@ -36,6 +36,45 @@
- extern "C" {
+@@ -36,6 +36,46 @@ extern "C" {
  #endif
 
 +#if defined(__APPLE_CC__)
-+    #include <TargetConditionals.h>
++ #include <TargetConditionals.h>
 +#endif
 +
 +/* TESSindex
@@ -15,7 +14,7 @@ index c27541e..eafb0aa 100755
 + * Index type used for the generated vertex indices returned by tessGetElements().
 + *
 + * Default: 16-bit (unsigned short) on memory/bandwidth constrained platforms
-+ * (mobile, embedded, ARM, WebAssembly/Emscripten, Apple embedded) and 32-bit elsewhere.
++ * (mobile, embedded, ARM, WebAssembly/Emscripten) and 32-bit elsewhere.
 + *
 + * You can force the size by defining one of these BEFORE including tesselator.h:
 + *     #define TESS_INDEX_SHORT     (force 16-bit)
@@ -42,26 +41,28 @@ index c27541e..eafb0aa 100755
  // See OpenGL Red Book for description of the winding rules
  // http://www.glprogramming.com/red/chapter11.html
  enum TessWindingRule
-@@ -115,11 +154,9 @@
+@@ -140,9 +180,8 @@ enum TessOption
  };
+
  typedef float TESSreal;
 -typedef int TESSindex;
-
-+#define TESS_UNDEF ((TESSindex)~0)
  typedef struct TESStesselator TESStesselator;
  typedef struct TESSalloc TESSalloc;
--#define TESS_UNDEF (~(TESSindex)0)
- #define TESS_NOTUSED(v) do { (void)(1 ? (void)0 : ( (void)(v) ) ); } while(0)
 
+-#define TESS_UNDEF (~(TESSindex)0)
++#define TESS_UNDEF ((TESSindex)~0)
+
+ #define TESS_NOTUSED(v) do { (void)(1 ? (void)0 : ( (void)(v) ) ); } while(0)
 diff --git a/Source/tess.c b/Source/tess.c
-index 67c038f..93061bb 100755
+index 67c038f..93061bb 100644
 --- a/Source/tess.c
 +++ b/Source/tess.c
 @@ -976,7 +976,7 @@ int tessGetElementCount( TESStesselator *tess )
-  return tess->elementCount;
+ 	return tess->elementCount;
  }
+
 -const int* tessGetElements( TESStesselator *tess )
 +const TESSindex* tessGetElements( TESStesselator *tess )
  {
-  return tess->elements;
+ 	return tess->elements;
  }
