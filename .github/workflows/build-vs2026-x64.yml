@@ -108,7 +108,7 @@ jobs:
             if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
             const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: 'openframeworks', repo: 'apothecary',
+              owner: context.repo.owner, repo: context.repo.repo,
               sort: 'created_at', direction: 'desc', per_page: 150
             });
 

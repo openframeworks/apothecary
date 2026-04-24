@@ -77,7 +77,7 @@ jobs:
             }
             // https://api.github.com/repos/openframeworks/apothecary/actions/artifacts?per_page=250
             const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: 'openframeworks',
+              owner: context.repo.owner,
               repo: 'apothecary',
               sort: 'created_at',
               direction: 'desc',

@@ -111,7 +111,7 @@ jobs:
 
           // List all artifacts for the repository
           const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: 'openframeworks',
+              owner: context.repo.owner,
               repo: 'apothecary',
               sort: 'created_at',
               direction: 'desc',
