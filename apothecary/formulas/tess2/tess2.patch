@@ -5,7 +5,7 @@ index c27541e..eafb0aa 100755
 @@ -36,6 +36,10 @@
  extern "C" {
  #endif
- 
+
 +#if defined( __APPLE_CC__)
 +	#include <TargetConditionals.h>
 +#endif
@@ -15,17 +15,17 @@ index c27541e..eafb0aa 100755
  enum TessWindingRule
 @@ -115,11 +119,15 @@
  };
- 
+
  typedef float TESSreal;
 -typedef int TESSindex;
-+#if TARGET_OS_IPHONE || ANDROID || __ARMEL__ || EMSCRIPTEN
++#if defined(TARGET_OS_IPHONE) || defined(TARGET_OS_IOS) || defined(ANDROID) || defined(TARGET_ANDROID) || defined(__ARMEL__) || defined(__arm__) || defined(__aarch32__) || defined(__EMSCRIPTEN__) || defined(TARGET_EMSCRIPTEN) || defined(TARGET_OS_WATCHOS) || defined(TARGET_OS_XROS) || defined(TARGET_OS_VISION) || defined(TARGET_CATOS) || defined(__QNX__)
 +	typedef unsigned short TESSindex;
 +#else
 +	typedef unsigned int TESSindex;
 +#endif
  typedef struct TESStesselator TESStesselator;
  typedef struct TESSalloc TESSalloc;
- 
+
 -#define TESS_UNDEF (~(TESSindex)0)
 +#define TESS_UNDEF ((TESSindex)~0)
 
@@ -38,7 +38,7 @@ index 67c038f..93061bb 100755
 @@ -976,7 +976,7 @@ int tessGetElementCount( TESStesselator *tess )
  	return tess->elementCount;
  }
- 
+
 -const int* tessGetElements( TESStesselator *tess )
 +const TESSindex* tessGetElements( TESStesselator *tess )
  {
