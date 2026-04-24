@@ -164,14 +164,14 @@ jobs:
       #   run: ./apothecary/apothecary -tosx -ax86_64 update poco
 
       - name: Package Binaries for Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/artifact/artifact.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Upload binaries as Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: actions/upload-artifact@v7.0.0
         with:
           name: libs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}
@@ -179,7 +179,7 @@ jobs:
           retention-days: 31
 
       - name: Remove .tar.bz2 files
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' )
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' )
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
@@ -193,7 +193,7 @@ jobs:
           BUNDLE: ${{ matrix.bundle }}
 
       - name: Package Individual Modular Libraries (macOS)
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/')) && matrix.bundle == 3
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/')) && matrix.bundle == 3
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           scripts/package-individual.sh
@@ -201,12 +201,12 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
       - name: List output directory before modular upload
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/')) && matrix.bundle == 3
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/')) && matrix.bundle == 3
         run: ls -lah xout/
 
       # ── Clean before latest-modular upload (macOS) ─────────────────────────
       - name: Clean before latest-modular upload
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
         run: |
           echo "🧹 Cleaning any existing openFrameworksLibs* files before latest-modular upload..."
           rm -f xout/openFrameworksLibs*.tar.bz2
@@ -214,7 +214,7 @@ jobs:
           ls -lah xout/
 
       - name: Upload to GitHub Release (latest-modular)
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
         uses: softprops/action-gh-release@v2.6.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -222,7 +222,7 @@ jobs:
           files: xout/*.tar.bz2
 
       - name: Remove .tar.bz2 files
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' )
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' )
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
@@ -230,13 +230,13 @@ jobs:
           echo "Cleanup complete."
 
       - name: Package final
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
       - name: Update Release XCFramework
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.6.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

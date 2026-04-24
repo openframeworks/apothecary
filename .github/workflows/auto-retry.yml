@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Re-run failed workflow runs on the current branch
         uses: actions/github-script@v6
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         with:
           script: |
             // Remove 'refs/heads/' from the branch name

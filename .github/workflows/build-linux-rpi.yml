@@ -101,7 +101,7 @@ jobs:
         run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
 
       - name: Package
-        #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        #if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
         env:
@@ -113,7 +113,7 @@ jobs:
         run: ls -lah out/
 
       - name: Update Release
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.6.1
         env:
           GCC: "_${{ matrix.CROSS_CPU }}_${{ matrix.CROSS_OS }}"
@@ -167,7 +167,7 @@ jobs:
   #       run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
 
   #     - name: Package
-  #       #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+  #       #if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
   #       working-directory: ${{ env.GITHUB_WORKSPACE }}
   #       run: scripts/package.sh
   #       env:
@@ -179,7 +179,7 @@ jobs:
   #       run: ls -lah out/
 
   #     - name: Update Release armv6l
-  #       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+  #       if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
   #       uses: softprops/action-gh-release@v2.6.1
   #       with:
   #         token: ${{ secrets.GITHUB_TOKEN }}
@@ -254,7 +254,7 @@ jobs:
   #       run: ./scripts/${{ env.TARGET }}/${{ env.DISTRO }}/${{ env.ARCH }}/build.sh
 
   #     - name: Package
-  #       #if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+  #       #if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
   #       working-directory: ${{ env.GITHUB_WORKSPACE }}
   #       run: scripts/package.sh
   #       env:
@@ -266,7 +266,7 @@ jobs:
   #       run: ls -lah out/
 
   #     - name: Update Release
-  #       if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+  #       if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
   #       uses: softprops/action-gh-release@v2.6.1
   #       with:
   #         token: ${{ secrets.GITHUB_TOKEN }}

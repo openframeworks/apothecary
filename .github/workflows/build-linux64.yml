@@ -90,7 +90,7 @@ jobs:
     #   run: ./apothecary/apothecary -tlinux -a${{ env.ARCH }} update poco
 
     - name: Package
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: scripts/package.sh
       env:
@@ -111,7 +111,7 @@ jobs:
         ./scripts/summary.sh
       
     - name: Update Release 64
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
       uses: softprops/action-gh-release@v2.6.1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -120,12 +120,12 @@ jobs:
         files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
 
     - name: Clean
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+      if: github.event_name == 'push'
       run: |
         rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
 
     - name: Package Split
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
       working-directory: ${{ env.GITHUB_WORKSPACE }}
       run: |
         scripts/package-individual.sh
@@ -137,14 +137,14 @@ jobs:
       run: ls -lah out/
 
     - name: Clean before latest-modular upload
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
+      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
           env.GCC == 'gcc14'
       run: |
         echo "Cleaning any existing openFrameworksLibs* files before latest-modular upload..."
         rm -f out/openFrameworksLibs*.tar.bz2
 
     - name: Upload to GitHub Release
-      if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
+      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
           env.GCC == 'gcc14'
       uses: softprops/action-gh-release@v2.6.1
       with:

@@ -177,7 +177,7 @@ jobs:
           ARCH: ${{ env.ARCH }}
     
       - name: Package Binaries for Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           scripts/artifact/artifact.sh
@@ -185,7 +185,7 @@ jobs:
           ARCH: ${{ env.ARCH }}
 
       - name: Upload Artifact
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
         uses: actions/upload-artifact@v7.0.0
         with:
           name: libs-${{ env.RELEASE }}-emscripten-${{ env.ARCH }}
@@ -193,7 +193,7 @@ jobs:
           retention-days: 31
 
       - name: Remove .tar.bz2 files
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         run: |
           echo "Removing .tar.bz2 files from out/ directory..."
           rm -f out/*.tar.bz2
@@ -201,7 +201,7 @@ jobs:
           echo "Cleanup complete."
 
       - name: Package
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           scripts/package.sh
@@ -213,7 +213,7 @@ jobs:
         run: ls -lah out/
 
       - name: Update Release
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.6.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -221,12 +221,12 @@ jobs:
           files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
 
       - name: Clean for
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
 
       - name: Package
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           scripts/package-individual.sh
@@ -235,7 +235,7 @@ jobs:
           ARCH: ${{ env.ARCH }}
 
       - name: Upload to GitHub Release
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v2.6.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
