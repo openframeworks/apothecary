@@ -18,8 +18,6 @@ DEFINES=""
 GIT_URL=https://github.com/ofTheo/videoInput.git
 GIT_BRANCH=$VER
 
-CMAKE_LIST=https://raw.githubusercontent.com/danoli3/videoInput/master/videoInputSrcAndDemos/libs/videoInput/CMakeLists.txt
-
 # download the source code and unpack it into LIB_NAME
 function download() {
     echo "Running: git clone --branch ${GIT_BRANCH} ${GIT_URL}"
