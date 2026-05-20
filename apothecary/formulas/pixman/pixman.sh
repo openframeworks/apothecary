@@ -7,32 +7,42 @@ FORMULA_TYPES=("osx" "vs")
 FORMULA_DEPENDS=()
 
 # define the version
-VER=0.43.4
-SHA1=d7baa6377b6f48e29db011c669788bb1268d08ad
-BUILD_ID=1
+VER=0.46.4
+BUILD_ID=3
 DEFINES=""
 
 # tools for git use
 GIT_URL=http://anongit.freedesktop.org/git/pixman.git
 GIT_TAG=pixman-$VER
+# https://cairographics.org/releases/ (may block CI with Anubis)
 URL=https://cairographics.org/releases
+GIT_LAB=https://gitlab.freedesktop.org/pixman/pixman/-/archive/pixman-${VER}/pixman-pixman-${VER}
+
+# pixman 0.46+ release tarballs ship .gitlab-ci.d/meson-cross symlinks; Windows tar cannot create them.
+pixman_tar_extract() {
+    tar --exclude='.gitlab-ci.d' "$@"
+}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
 
     . "$DOWNLOADER_SCRIPT"
 
-    downloader ${URL}/pixman-$VER.tar.gz
-    tar -xzf pixman-$VER.tar.gz
-    mv "pixman-$VER" pixman
-    CHECKSHA=$(shasum -a 1 pixman-$VER.tar.gz | cut -d ' ' -f1)
-    # if [ "$CHECKSHA" != "$SHA1" ] ; then
-    # 	echoError "ERROR! SHA did not Verify: [$CHECKSHA] SHA on Record:[$SHA1] - Developer has not updated SHA or Man in the Middle Attack"
-    # 	exit
-    # else
-    #     echo "SHA for Download Verified Successfully: [$CHECKSHA] SHA on Record:[$SHA1]"
-    # fi
-    rm pixman-$VER.tar.gz
+    local OFFICIAL="pixman-${VER}.tar.gz"
+    if downloader "${URL}/${OFFICIAL}" && gzip -t "${OFFICIAL}" 2>/dev/null; then
+        pixman_tar_extract -xzf "${OFFICIAL}"
+        rm "${OFFICIAL}"
+        mv "pixman-${VER}" pixman
+        return
+    fi
+    rm -f "${OFFICIAL}"
+
+    echo "cairographics.org download unavailable; using GitLab pixman/pixman archive"
+    local TARBALL="pixman-pixman-${VER}.tar"
+    downloader "${GIT_LAB}.tar"
+    pixman_tar_extract -xf "${TARBALL}"
+    rm "${TARBALL}"
+    mv "pixman-pixman-${VER}" pixman
 
 }
 

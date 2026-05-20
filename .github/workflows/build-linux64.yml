@@ -52,6 +52,7 @@ jobs:
       TARGET: ${{matrix.cfg.target}}
       GCC: ${{matrix.cfg.gcc}}
       ARCH: ${{matrix.cfg.arch}}
+      DISTRO: ubuntu
     steps:      
     - uses: actions/checkout@v6.0.2
     - name: Check if Workflow is disabled
@@ -117,12 +118,12 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag_name: ${{ env.RELEASE }}
         draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
+        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
 
     - name: Clean
       if: github.event_name == 'push'
       run: |
-        rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
+        rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
 
     - name: Package Split
       if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
