@@ -172,7 +172,7 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "poco"
         )
     fi
-elif [ "$TARGET" == "vs" ]; then
+elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
     FORMULAS=()
     if [ "$TBUNDLE" == "1" ] || [ "$TBUNDLE" == "0" ]; then
         FORMULAS=(

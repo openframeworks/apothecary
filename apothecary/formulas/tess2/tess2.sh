@@ -264,10 +264,11 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
         secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "msys2" ]; then
-        mkdir -p $1/lib/$TYPE/$PLATFORM/
+        mkdir -p $1/lib/$TYPE/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/
-        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/$PLATFORM/libtess2.a
-        secure "$1/lib/$TYPE/$PLATFORM/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        cp -v "build_${TYPE}_${PLATFORM}/libtess2.a" $1/lib/$TYPE/libtess2.a
+        secure "$1/lib/$TYPE/libtess2.a" "tess2.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        echo "libtess2.a" > $1/lib/$TYPE/libsorder.make
     elif [ "$TYPE" == "android" ]; then
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$PLATFORM

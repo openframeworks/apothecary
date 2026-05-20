@@ -5,7 +5,7 @@
 # http://sourceforge.net/projects/kissfft/
 
 FORMULA_TYPES=("linux" "msys2")
-FORMULA_DEPENDS=("libpng")
+FORMULA_DEPENDS=()
 
 # define the version
 VER=131.1.0
@@ -169,10 +169,11 @@ function copy() {
         secure "$1/lib/$TYPE/$PLATFORM/libkiss.a" "kiss.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
     elif [ "$TYPE" == "msys2" ]; then
-        mkdir -p $1/lib/$TYPE/$PLATFORM
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/$PLATFORM/libkiss.a
-        secure "$1/lib/$TYPE/$PLATFORM/libkiss.a" "kiss.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        mkdir -p $1/lib/$TYPE
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libkissfft-float.a" $1/lib/$TYPE/libkiss.a
+        secure "$1/lib/$TYPE/libkiss.a" "kiss.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
+        echo "libkiss.a" > $1/lib/$TYPE/libsorder.make
     else
         cp -v lib/$TYPE/libkiss.a $1/lib/$TYPE/libkiss.a
     fi
