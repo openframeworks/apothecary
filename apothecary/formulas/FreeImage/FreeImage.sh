@@ -16,7 +16,7 @@ FORMULA_DEPENDS=("zlib" "libpng")
 VER=31911
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=3.19.11
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -417,13 +417,13 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
         cp Source/FreeImage.h $1/include
-        secure $1/lib/$TYPE/$PLATFORM/FreeImage.a FreeImage.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/FreeImage.a" "FreeImage.pkl" "$VER" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libFreeImage.a" $1/lib/$TYPE/$PLATFORM/FreeImage.a
         cp Source/FreeImage.h $1/include
-        secure $1/lib/$TYPE/$PLATFORM/FreeImage.a FreeImage.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/FreeImage.a" "FreeImage.pkl" "$VER" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "vs" ]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
@@ -431,13 +431,13 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${ARCH}_release/Release/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImage.lib
         cp -v "build_${TYPE}_${ARCH}_debug/Debug/FreeImage.lib" $1/lib/$TYPE/$PLATFORM/FreeImageD.lib
-        secure $1/lib/$TYPE/$PLATFORM/FreeImage.lib FreeImage.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/FreeImage.lib" "FreeImage.pkl" "$VER" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         cp Source/FreeImage.h $1/include
         rm -rf $1/lib/$TYPE/$ABI
         mkdir -p $1/lib/$TYPE/$ABI
         cp -v build__${TYPE}_$ABI/Release/lib/libFreeImage.a $1/lib/$TYPE/$PLATFORM/libFreeImage.a
-        secure $1/lib/$TYPE/$PLATFORM/libFreeImage.a FreeImage.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libFreeImage.a" "FreeImage.pkl" "$VER" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "emscripten" ]; then
         cp Source/FreeImage.h $1/include
         if [ -d $1/lib/$TYPE/$PLATFORM/ ]; then
@@ -445,7 +445,7 @@ function copy() {
         fi
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v build_${TYPE}/build/libFreeImage.a $1/lib/$TYPE/$PLATFORM/libfreeimage.a
-        secure $1/lib/$TYPE/$PLATFORM/libfreeimage.a FreeImage.pkl
+        secure "$1/lib/$TYPE/$PLATFORM/libfreeimage.a" "FreeImage.pkl" "$VER" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     # copy license files
