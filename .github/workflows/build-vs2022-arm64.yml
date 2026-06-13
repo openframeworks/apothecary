@@ -40,7 +40,7 @@ jobs:
   build-vs2022-arm64:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
     needs: pre-check
-    runs-on: windows-2025
+    runs-on: windows-2022
     strategy:
       matrix:
         bundle: [1,2]
