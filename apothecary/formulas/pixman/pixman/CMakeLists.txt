@@ -25,6 +25,8 @@ set(SOURCES
     pixman-radial-gradient.c
     pixman-region16.c
     pixman-region32.c
+    pixman-region64f.c
+    pixman-riscv.c
     pixman-solid-fill.c
     pixman-timer.c
     pixman-trap.c
