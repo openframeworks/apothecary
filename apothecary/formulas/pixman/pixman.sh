@@ -8,8 +8,6 @@ FORMULA_DEPENDS=()
 
 # define the version
 VER=0.46.4
-# BUILD_ID 4: add pixman-region64f.c / pixman-riscv.c to the cmake source list;
-# 0.46 pixman-utils.c / pixman-implementation.c reference their symbols.
 BUILD_ID=4
 DEFINES=""
 
