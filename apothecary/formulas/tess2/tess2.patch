@@ -18,7 +18,7 @@ index c27541e..eafb0aa 100755
 
  typedef float TESSreal;
 -typedef int TESSindex;
-+#if defined(TARGET_OS_IPHONE) || defined(TARGET_OS_IOS) || defined(ANDROID) || defined(TARGET_ANDROID) || defined(__EMSCRIPTEN__) || defined(TARGET_EMSCRIPTEN) || defined(TARGET_OS_WATCHOS) || defined(TARGET_OS_XROS) || defined(TARGET_OS_VISION) || defined(TARGET_CATOS) || defined(__QNX__) || ((defined(__ARMEL__) || defined(__arm__) || defined(__aarch32__)) && !defined(__APPLE__))
++#if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined(TARGET_OS_IOS) && TARGET_OS_IOS) || defined(ANDROID) || defined(TARGET_ANDROID) || defined(__EMSCRIPTEN__) || defined(TARGET_EMSCRIPTEN) || (defined(TARGET_OS_WATCHOS) && TARGET_OS_WATCHOS) || (defined(TARGET_OS_XROS) && TARGET_OS_XROS) || (defined(TARGET_OS_VISION) && TARGET_OS_VISION) || (defined(TARGET_CATOS) && TARGET_CATOS) || defined(__QNX__) || ((defined(__ARMEL__) || defined(__arm__) || defined(__aarch32__)) && !defined(__APPLE__))
 +	typedef unsigned short TESSindex;
 +#else
 +	typedef unsigned int TESSindex;
