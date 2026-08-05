@@ -7,6 +7,11 @@
 !/apothecary
 !/scripts
 !/docker
+!/.github
+!/.github/workflows
+/.github/workflows/*
+!/.github/workflows/move-latest-tags.yml
+!/.github/workflows/release-openframeworks.yml
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build

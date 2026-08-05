@@ -1,0 +1,115 @@
+name: Build and release openFrameworks libraries
+
+on:
+  workflow_dispatch:
+    inputs:
+      openframeworks_version:
+        description: "openFrameworks version to release (for example 12.2.0)"
+        required: true
+        type: string
+      overwrite_existing:
+        description: "Move an existing version tag to latest and rebuild its release"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openframeworks-release-${{ inputs.openframeworks_version }}
+  cancel-in-progress: false
+
+jobs:
+  create-release-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the latest build
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+          ref: latest
+          # A PAT is required: pushes made with GITHUB_TOKEN do not start the
+          # existing build-* workflows that upload the platform release assets.
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Validate and resolve version
+        id: release
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.openframeworks_version }}
+        run: |
+          set -euo pipefail
+
+          version="${INPUT_VERSION#v}"
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+            echo "Version must look like 12.2.0 (an optional leading v and prerelease suffix are accepted)." >&2
+            exit 1
+          fi
+
+          tag="v${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Check existing release tag
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          OVERWRITE_EXISTING: ${{ inputs.overwrite_existing }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            if [[ "${OVERWRITE_EXISTING}" != "true" ]]; then
+              echo "Tag ${RELEASE_TAG} already exists. Enable 'overwrite existing' to move and rebuild it." >&2
+              exit 1
+            fi
+            echo "Tag ${RELEASE_TAG} exists and will be moved to $(git rev-parse HEAD)."
+          fi
+
+      - name: Create and push release tag
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f -a "$RELEASE_TAG" -m "openFrameworks ${RELEASE_VERSION} libraries"
+          if [[ "${{ inputs.overwrite_existing }}" == "true" ]]; then
+            git push origin "refs/tags/${RELEASE_TAG}" --force
+          else
+            git push origin "refs/tags/${RELEASE_TAG}"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          SOURCE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          title="openFrameworks ${RELEASE_VERSION} libraries"
+          notes="Precompiled openFrameworks libraries built from the latest revision (${SOURCE_SHA}). Platform assets are added by the build workflows as they complete."
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" --title "$title" --notes "$notes"
+          else
+            gh release create "$RELEASE_TAG" \
+              --verify-tag \
+              --title "$title" \
+              --notes "$notes"
+          fi
+
+      - name: Summary
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          SOURCE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          {
+            echo "## Release started"
+            echo
+            echo "Created \`${RELEASE_TAG}\` from \`latest\` at \`${SOURCE_SHA}\`."
+            echo "The tag push started the enabled platform build workflows; each successful build uploads its archive to this release."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,84 @@
+# Move both latest floating tags to the bleeding branch tip after every push.
+# A merged PR produces a push event, so HEAD is the exact post-merge commit.
+#
+# Does not build or upload assets — build-* workflows still publish releases via
+# softprops/action-gh-release. This only force-moves lightweight tags so
+# consumers (git clone @ tag, LIB_TAG=latest, etc.) resolve the newest commit.
+#
+# Never force-moves version tags (v12.x.y).
+
+name: move-latest-tags
+
+on:
+  push:
+    branches:
+      - bleeding
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch whose tip receives the floating tags"
+        required: true
+        default: bleeding
+        type: choice
+        options:
+          - bleeding
+
+concurrency:
+  group: move-latest-tags-${{ github.event_name == 'workflow_dispatch' && inputs.branch || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  retag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve branch
+        id: meta
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            BRANCH="${{ inputs.branch }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+          fi
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.meta.outputs.branch }}
+          # Prefer PAT if set (orgs that block GITHUB_TOKEN tag force-push)
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Force-move floating tags to branch tip
+        env:
+          BRANCH: ${{ steps.meta.outputs.branch }}
+        run: |
+          set -euo pipefail
+
+          SHA="$(git rev-parse HEAD)"
+          echo "branch=${BRANCH}"
+          echo "sha=${SHA}"
+
+          if [[ "${BRANCH}" != "bleeding" ]]; then
+            echo "Refusing to move latest tags from '${BRANCH}'" >&2
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git tag -f latest "$SHA"
+          git tag -f latest-modular "$SHA"
+
+          # Push both refs together so they always identify the same commit.
+          git push origin \
+            refs/tags/latest \
+            refs/tags/latest-modular \
+            --force --atomic
+
+          echo "moved latest and latest-modular → ${SHA}"
