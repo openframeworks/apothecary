@@ -56,7 +56,7 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common ca-certificates git sudo
           add-apt-repository -y ppa:ubuntu-toolchain-r/test
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y gcc-10 g++-10 gfortran-10 binutils file bzip2 autoconf automake cmake ccache dos2unix flex gperf libtool make ninja-build pkg-config python3 xz-utils libasound2-dev libegl1-mesa-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev
+          DEBIAN_FRONTEND=noninteractive apt-get install -y gcc-10 g++-10 gfortran-10 binutils file curl bzip2 autoconf automake build-essential ccache cmake coreutils dos2unix flex gperf libtool make ninja-build pkg-config python3 xz-utils freeglut3-dev libasound2-dev libegl1-mesa-dev libfftw3-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev oss4-dev xorg-dev
           gcc-10 --version
           test "$(gcc-10 -dumpversion | cut -d. -f1)" = 10
       - uses: actions/checkout@v6.0.2
