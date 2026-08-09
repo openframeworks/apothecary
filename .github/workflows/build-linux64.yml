@@ -1,154 +1,145 @@
-name: build-linux64
+name: build-linux
 
 on:
   push:
     paths-ignore:
-    - '**/README.md'
+      - "**/README.md"
   pull_request:
     paths-ignore:
-    - '**/README.md'
+      - "**/README.md"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  TARGET: "linux"
-  NO_FORCE: 1
-  GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-  USE_ARTIFACT: true  
-  DISABLE_WORKFLOW: "false"
+permissions:
+  contents: write
 
-jobs:  
-  pre-check:
-    runs-on: ubuntu-latest
-    outputs:
-      workflow_disabled: ${{ steps.check-disabled.outputs.disabled }}
-    steps:
-    - name: Check if Workflow is disabled
-      id: check-disabled
-      shell: bash
-      run: |
-        if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
-          echo "disabled=true" >> $GITHUB_ENV
-          echo "::set-output name=disabled::true"
-        else
-          echo "::set-output name=disabled::false"
-        fi
-  build-linux64:
-    if: needs.pre-check.outputs.workflow_disabled != 'true'
-    needs: pre-check
-    runs-on: ubuntu-latest
+jobs:
+  build:
+    name: ${{ matrix.target }} / GCC 10
     strategy:
-        matrix:
-          cfg:
-          - {target: linux, arch: 64, gcc: gcc9}
-          - {target: linux, arch: 64, gcc: gcc10}
-          - {target: linux, arch: 64, gcc: gcc11}
-          - {target: linux, arch: 64, gcc: gcc12}
-          - {target: linux, arch: 64, gcc: gcc13}
-          - {target: linux, arch: 64, gcc: gcc14}
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux/64
+            artifact_target: linux_64
+            arch: "64"
+            runner: ubuntu-24.04
+            arch_flags: -march=x86-64 -mtune=generic
+            machine: x86-64
+          - target: linux/arm64
+            artifact_target: linux_arm64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            arch_flags: -march=armv8-a -mtune=generic
+            machine: ARM aarch64
+    runs-on: ${{ matrix.runner }}
+    container: ubuntu:20.04
     env:
-      TARGET: ${{matrix.cfg.target}}
-      GCC: ${{matrix.cfg.gcc}}
-      ARCH: ${{matrix.cfg.arch}}
-      DISTRO: ubuntu
-    steps:      
-    - uses: actions/checkout@v6.0.2
-    - name: Check if Workflow is disabled
-      run: |
-        if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
-          echo "Workflow is disabled. Exiting."
-          exit 78
-        fi
-    - name: Determine Release
-      id: vars
-      shell: bash
-      run: |
-        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          echo "RELEASE=${{ github.ref_name }}" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-          echo "RELEASE=nightly" >> $GITHUB_ENV
-        elif [[ "${{ github.ref }}" == "refs/heads/bleeding" ]]; then
-          echo "RELEASE=latest" >> $GITHUB_ENV
-        else
-          echo "RELEASE=latest" >> $GITHUB_ENV
-        fi
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      GCC: gcc10
+      LINUX_ARTIFACT_TARGET: ${{ matrix.artifact_target }}
+      NO_FORCE: 1
+      USE_ARTIFACT: true
+      CC: gcc-10
+      CXX: g++-10
+      CFLAGS: -O2 -fPIC ${{ matrix.arch_flags }}
+      CXXFLAGS: -O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1 ${{ matrix.arch_flags }}
+    steps:
+      - name: Install build tools and GCC 10
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common ca-certificates git sudo
+          add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y gcc-10 g++-10 gfortran-10 binutils file bzip2 autoconf automake cmake ccache dos2unix flex gperf libtool make ninja-build pkg-config python3 xz-utils libasound2-dev libegl1-mesa-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev
+          gcc-10 --version
+          test "$(gcc-10 -dumpversion | cut -d. -f1)" = 10
+      - uses: actions/checkout@v6.0.2
+      - name: Determine release identity
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            release="$GITHUB_REF_NAME"
+          elif [[ "$GITHUB_REF" == refs/heads/master ]]; then
+            release=nightly
+          else
+            release=latest
+          fi
+          echo "RELEASE=$release" >> "$GITHUB_ENV"
+      - name: Build libraries
+        run: scripts/build.sh
+      - name: Package canonical archive
+        run: scripts/package.sh
+      - name: Validate archive
+        run: scripts/linux/validate-release-archive.sh "out/openFrameworksLibs_${RELEASE}_${LINUX_ARTIFACT_TARGET}_${GCC}.tar.bz2" "lib/linux/${ARCH}/" "${{ matrix.machine }}"
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact_target }}-gcc10
+          path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ matrix.artifact_target }}_gcc10.tar.bz2*
+      - name: Package modular archives
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        run: scripts/package-individual.sh
+      - name: Upload modular release assets
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v2.6.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          files: out/oF_*_${{ matrix.artifact_target }}_gcc10.tar.bz2
+      - name: Upload release assets
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v2.6.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || (github.ref == 'refs/heads/master' && 'nightly' || 'latest') }}
+          files: |
+            out/openFrameworksLibs_${{ env.RELEASE }}_${{ matrix.artifact_target }}_gcc10.tar.bz2
+            out/openFrameworksLibs_${{ env.RELEASE }}_${{ matrix.artifact_target }}_gcc10.tar.bz2.sha256
+            out/openFrameworksLibs_${{ env.RELEASE }}_${{ matrix.artifact_target }}_gcc10.tar.bz2.manifest.json
 
-    - name: Scripts Calc Formula - ${{matrix.cfg.target}} - ${{matrix.cfg.gcc}}
-      run: ./scripts/calculate_formulas.sh
-    - name: Scripts Install
-      run: ./scripts/linux/ubuntu/install.sh
-      
-    - name: BuildLinux64
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: scripts/build.sh
-      env:
-        BUNDLE: ${{ matrix.bundle }}
-
-    # - name: Build Poco
-    #   shell: bash
-    #   run: ./apothecary/apothecary -tlinux -a${{ env.ARCH }} update poco
-
-    - name: Package
-      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: scripts/package.sh
-      env:
-        BUNDLE: ${{ matrix.bundle }}
-
-    - name: List output directory
-      run: ls -lah out/
-
-    - name: List output main directory
-      run: ls -lah 
-
-    - name: List packaged file
-      run: find out/ -type f \( -name "*.zip" -o -name "*.tar.bz2" \) -exec echo {} \;
-
-    - name: Generate Summary
-      run: |
-        chmod +x ./scripts/summary.sh
-        ./scripts/summary.sh
-      
-    - name: Update Release 64
-      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-      uses: softprops/action-gh-release@v2.6.1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: ${{ env.RELEASE }}
-        draft: false
-        files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
-
-    - name: Clean
-      if: github.event_name == 'push'
-      run: |
-        rm -f out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.DISTRO }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
-
-    - name: Package Split
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
-      working-directory: ${{ env.GITHUB_WORKSPACE }}
-      run: |
-        scripts/package-individual.sh
-      env:
-        GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-        ARCH: ${{ env.ARCH }}
-
-    - name: List output directory 3
-      run: ls -lah out/
-
-    - name: Clean before latest-modular upload
-      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
-          env.GCC == 'gcc14'
-      run: |
-        echo "Cleaning any existing openFrameworksLibs* files before latest-modular upload..."
-        rm -f out/openFrameworksLibs*.tar.bz2
-
-    - name: Upload to GitHub Release
-      if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') &&
-          env.GCC == 'gcc14'
-      uses: softprops/action-gh-release@v2.6.1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: "latest-modular"
-        files: out/*.tar.bz2
+  consume-newer-gcc:
+    name: consume x86-64 archive / GCC ${{ matrix.gcc }}
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        gcc: [11, 12, 13, 14]
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: linux_64-gcc10
+          path: archive
+      - name: Install consumer compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-${{ matrix.gcc }} file
+      - name: Extract, compile, link, and run
+        run: |
+          archive=$(find archive -name '*.tar.bz2' -type f -print -quit)
+          test -n "$archive"
+          mkdir extracted
+          tar -xjf "$archive" -C extracted
+          zlib=$(find extracted -path '*/lib/linux/64/zlib.a' -print -quit)
+          zlib_header=$(find extracted -path '*/include/zlib.h' -print -quit)
+          test -n "$zlib"
+          test -n "$zlib_header"
+          cat > smoke.cpp <<'EOF'
+          #include <zlib.h>
+          #include <cstring>
+          int main() {
+              const char input[] = "apothecary";
+              unsigned char output[64];
+              unsigned long size = sizeof(output);
+              return compress(output, &size, reinterpret_cast<const unsigned char *>(input), std::strlen(input)) == Z_OK ? 0 : 1;
+          }
+          EOF
+          g++-${{ matrix.gcc }} -std=c++17 -D_GLIBCXX_USE_CXX11_ABI=1 -I"$(dirname "$zlib_header")" smoke.cpp "$zlib" -o smoke
+          file smoke | grep -q 'x86-64'
+          ./smoke

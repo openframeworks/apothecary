@@ -26,7 +26,6 @@ else
     PBUNDLE=$2
 fi
 ARCH=${ARCH:-64}
-DISTRO=${DISTRO:-ubuntu}
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
@@ -51,7 +50,10 @@ fi
 CUR_BRANCH="master"
 EXIT_BEFORE=0
 
-if [ -n "${ALWAYS_BUILD+x}" ]; then
+if [ -n "${RELEASE:-}" ]; then
+    echo "Explicit release identity '$RELEASE' - proceeding with packaging"
+    CUR_BRANCH="$RELEASE"
+elif [ -n "${ALWAYS_BUILD+x}" ]; then
     echo "ALWAYS_BUILD is set - proceeding with build regardless of branch/tag"
     CUR_BRANCH="latest"
     RELEASE="latest"
@@ -117,23 +119,46 @@ echo "Current PBUNDLE: [$PBUNDLE]"
 
 TARBALL=openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}.tar.bz2
 if [ "$TARGET" == "linux" ]; then
-    if [ -n "$GCC" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${DISTRO}_${ARCH}_${GCC}.tar.bz2"
-    else
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${DISTRO}_${ARCH}.tar.bz2"
+    LINUX_ARTIFACT_TARGET=${LINUX_ARTIFACT_TARGET:-}
+    case "$LINUX_ARTIFACT_TARGET" in
+        linux_64|linux_arm64|linux_raspberrypi_arm64|linux_raspberrypi_armv6|linux_raspberrypi_armv7) ;;
+        *)
+            echo "Error: LINUX_ARTIFACT_TARGET must be an explicit supported Linux release target." >&2
+            exit 1
+            ;;
+    esac
+    if [ "$GCC" != "gcc10" ]; then
+        echo "Error: Linux release archives must use the GCC 10 baseline (got '${GCC:-unset}')." >&2
+        exit 1
+    fi
+    TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${ARCH}_${GCC}.tar.bz2"
+    expected_artifact_target="${TARGET}_${ARCH}"
+    if [ "$LINUX_ARTIFACT_TARGET" != "$expected_artifact_target" ]; then
+        echo "Error: Linux target mapping '$LINUX_ARTIFACT_TARGET' does not match '$expected_artifact_target'." >&2
+        exit 1
     fi
     echo "TARBALL: [$TARBALL]"
     if [ "${EXIT_BEFORE}" == "1" ]; then
         exit 0
     fi
-    echo "cd ${OUTPUT_FOLDER}; tar cjf $TARBALL $LIBS"
-    tar cjvf $TARBALL $LIBS
+    SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -C "$ROOT" log -1 --format=%ct)}
+    if tar --version 2>/dev/null | grep -q 'GNU tar'; then
+        echo "cd ${OUTPUT_FOLDER}; deterministic tar -> $TARBALL"
+        tar --sort=name --mtime="@${SOURCE_DATE_EPOCH}" --owner=0 --group=0 --numeric-owner -cjvf "$TARBALL" $LIBS
+    else
+        echo "Warning: deterministic release archives require GNU tar; creating a local validation archive." >&2
+        tar cjvf "$TARBALL" $LIBS
+    fi
     if [ $? -eq 0 ]; then
         echo "Successfully created tarball: $TARBALL"
     else
         echo "Error: Failed to create tarball."
         exit 1
     fi
+    sha256sum "$TARBALL" > "${TARBALL}.sha256"
+    cat > "${TARBALL}.manifest.json" <<EOF
+{"schema":1,"artifact":"${TARBALL}","target":"${LINUX_ARTIFACT_TARGET}","compiler":"gcc10","architecture":"${ARCH}","source_date_epoch":${SOURCE_DATE_EPOCH}}
+EOF
 elif [ "$TARGET" == "msys2" ]; then
     if [ -n "$MSYSTEM" ]; then
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM}.zip"

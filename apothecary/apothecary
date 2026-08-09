@@ -2750,20 +2750,21 @@ fi
 export CROSSCOMPILING=${CROSSCOMPILING:-0}
 
 if [ "$TYPE" == "linux" ]; then
-  export FLAG_RELEASE="-O3"
+  export FLAG_RELEASE="-O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1"
   if [[ "$ARCH" =~ ^("armv7l"|"aarch64"|"armv6l")$ ]]; then
     export PLATFORM="$ARCH"
     export ABI="${ARCH}"
   elif [[ "$ARCH" =~ ^("64"|"x86_64")$ ]]; then
     export PLATFORM="64"
     export ABI="x86_64"
+    export FLAG_RELEASE="$FLAG_RELEASE -march=x86-64 -mtune=generic"
   elif [[ "$ARCH" =~ ^("32"|"x86")$ ]]; then
     export PLATFORM="86"
     export ABI="x86"
   elif [[ "$ARCH" =~ ^(arm64)$ ]]; then
     export PLATFORM="arm64"
     export ABI="aarch64"
-    export GCC=gcc13
+    export FLAG_RELEASE="$FLAG_RELEASE -march=armv8-a -mtune=generic"
   elif [[ "$ARCH" =~ ^("jetson")$ ]]; then
     export PLATFORM="jetson"
     export ABI="aarch64"
