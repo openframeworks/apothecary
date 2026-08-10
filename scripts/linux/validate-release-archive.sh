@@ -10,17 +10,21 @@ test -f "${archive}.sha256"
 test -f "${archive}.manifest.json"
 (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256")
 
-if ! tar -tjf "$archive" | grep -Eq "^[^/]+/${expected_path}[^/]+"; then
+archive_list=$(mktemp)
+trap 'rm -f "$archive_list"' EXIT
+tar -tjf "$archive" > "$archive_list"
+
+if ! grep -Eq "^[^/]+/${expected_path}[^/]+" "$archive_list"; then
     echo "Archive does not contain the expected ${expected_path} payload." >&2
     exit 1
 fi
-if tar -tjf "$archive" | grep -Eq '/lib/(linux64|linuxarmv6l|linuxaarch64)/'; then
+if grep -Eq '/lib/(linux64|linuxarmv6l|linuxaarch64)/' "$archive_list"; then
     echo "Archive contains a forbidden legacy Linux path." >&2
     exit 1
 fi
 
 extract_dir=$(mktemp -d)
-trap 'rm -rf "$extract_dir"' EXIT
+trap 'rm -f "$archive_list"; rm -rf "$extract_dir"' EXIT
 tar -xjf "$archive" -C "$extract_dir"
 
 found=0

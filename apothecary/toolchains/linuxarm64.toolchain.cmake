@@ -74,9 +74,15 @@ if(NOT DEFINED GCC_PATH)
     endif()
 endif()
 
-# Compiler settings
-set(CMAKE_C_COMPILER "${GCC_PATH}/aarch64-linux-gnu-gcc")
-set(CMAKE_CXX_COMPILER "${GCC_PATH}/aarch64-linux-gnu-g++")
+# Compiler settings. Explicit environment selections take precedence for native
+# ARM64 builds; otherwise use the target-prefixed cross compilers.
+if(DEFINED ENV{CC} AND DEFINED ENV{CXX})
+    set(CMAKE_C_COMPILER "$ENV{CC}" CACHE FILEPATH "" FORCE)
+    set(CMAKE_CXX_COMPILER "$ENV{CXX}" CACHE FILEPATH "" FORCE)
+else()
+    set(CMAKE_C_COMPILER "${GCC_PATH}/aarch64-linux-gnu-gcc" CACHE FILEPATH "" FORCE)
+    set(CMAKE_CXX_COMPILER "${GCC_PATH}/aarch64-linux-gnu-g++" CACHE FILEPATH "" FORCE)
+endif()
 set(CMAKE_SYSROOT "${SYSROOT}")
 set(CMAKE_FIND_ROOT_PATH ${CMAKE_SYSROOT})
 
@@ -95,14 +101,6 @@ set(CMAKE_C_STANDARD ${C_STANDARD} CACHE STRING "" FORCE)
 set(CMAKE_C_STANDARD_REQUIRED ON )
 set(CMAKE_CXX_STANDARD ${CPP_STANDARD} CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Compiler Binary Paths
-set(CMAKE_C_COMPILER "${GCC_PATH}/aarch64-linux-gnu-gcc")
-set(CMAKE_CXX_COMPILER "${GCC_PATH}/aarch64-linux-gnu-g++")
-
-
-find_program(CMAKE_C_COMPILER aarch64-linux-gnu-gcc PATHS "${TOOLCHAIN_ROOT}/bin" "/usr/bin" "/usr/aarch64-linux-gnu/bin" "/opt/aarch64-linux-gnu/bin" NO_DEFAULT_PATH)
-find_program(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++ PATHS "${TOOLCHAIN_ROOT}/bin" "/usr/bin" "/usr/aarch64-linux-gnu/bin" "/opt/aarch64-linux-gnu/bin" NO_DEFAULT_PATH)
 
 find_program(CMAKE_LINKER aarch64-linux-gnu-ld PATHS "${TOOLCHAIN_ROOT}/bin/")
 find_program(CMAKE_AR aarch64-linux-gnu-ar PATHS "${TOOLCHAIN_ROOT}/bin/")
@@ -138,11 +136,11 @@ if (EXISTS "/usr/lib/aarch64-linux-gnu/")
     list(APPEND EXTRA_LINKS "-Wl,-rpath-link,/usr/lib/aarch64-linux-gnu" "-L/usr/lib/aarch64-linux-gnu")
 endif()
 
-set(CFLAGS "--sysroot=${SYSROOT} -I${TOOLCHAIN_ROOT}/${GCC_PREFIX}/libc/usr/include -I${TOOLCHAIN_ROOT}/lib/gcc/${GCC_PREFIX}/${GCC_VERSION}/include -I/usr/include -DSTANDALONE -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST")
+set(CFLAGS "-DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64")
 
 # Compiler and linker flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -march=armv8-a")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O3 -Wall -Wextra -std=c++${CPP_STANDARD} -march=armv8-a+simd+crypto")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CFLAGS} -fPIC -O2 -Wall -Wextra -march=armv8-a -mtune=generic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CFLAGS} -fPIC -O2 -Wall -Wextra -march=armv8-a -mtune=generic")
 
 # Linker flags
 set(CMAKE_EXE_LINKER_FLAGS "-fPIE -pie ${EXTRA_LINKS}")

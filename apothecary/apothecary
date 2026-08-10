@@ -2781,7 +2781,10 @@ if [ "$TYPE" == "linux" ]; then
     export GCC_VERSION=14
   fi
 
-  if [[ "$GCC_VERSION" =~ ^(10|11|12)$ ]]; then
+  if [[ "$GCC_VERSION" == "10" ]]; then
+    export C_STANDARD=17
+    export CPP_STANDARD=17
+  elif [[ "$GCC_VERSION" =~ ^(11|12)$ ]]; then
     export C_STANDARD=17
     export CPP_STANDARD=20
   elif [[ "$GCC_VERSION" =~ ^(13|14)$ ]]; then

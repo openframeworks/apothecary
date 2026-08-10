@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    name: ${{ matrix.target }} / GCC 10
+    name: Linux - ${{ matrix.arch }} - GCC10
     strategy:
       fail-fast: false
       matrix:
