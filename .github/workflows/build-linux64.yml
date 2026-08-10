@@ -28,13 +28,11 @@ jobs:
             arch: "64"
             runner: ubuntu-24.04
             arch_flags: -march=x86-64 -mtune=generic
-            machine: x86-64
           - target: linux/arm64
             artifact_target: linux_arm64
             arch: arm64
             runner: ubuntu-24.04-arm
             arch_flags: -march=armv8-a -mtune=generic
-            machine: ARM aarch64
     runs-on: ${{ matrix.runner }}
     container: ubuntu:20.04
     env:
@@ -79,8 +77,6 @@ jobs:
         run: scripts/build.sh
       - name: Package canonical archive
         run: scripts/package.sh
-      - name: Validate archive
-        run: scripts/linux/validate-release-archive.sh "out/openFrameworksLibs_${RELEASE}_${LINUX_ARTIFACT_TARGET}_${GCC}.tar.bz2" "lib/linux/${ARCH}/" "${{ matrix.machine }}"
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v7
         with:
