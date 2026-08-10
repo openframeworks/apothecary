@@ -62,6 +62,8 @@ jobs:
           gcc-10 --version
           test "$(gcc-10 -dumpversion | cut -d. -f1)" = 10
       - uses: actions/checkout@v6.0.2
+      - name: Trust checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Determine release identity
         shell: bash
         run: |
