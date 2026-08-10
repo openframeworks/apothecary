@@ -13,9 +13,9 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=31911
+VER=3.19.11
 GIT_URL=https://github.com/danoli3/FreeImage
-GIT_TAG=3.19.11
+GIT_TAG=$VER
 BUILD_ID=4
 DEFINES=""
 
@@ -488,5 +488,4 @@ function clean() {
         clean.sh
     fi
 }
-
 
