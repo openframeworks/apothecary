@@ -235,6 +235,21 @@ jobs:
         run: scripts/package.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
+      - name: Package PR smoke-test libraries
+        if: github.event_name == 'pull_request'
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package.sh
+        env:
+          ALWAYS_BUILD: 1
+          BUNDLE: ${{ matrix.bundle }}
+      - name: Upload PR smoke-test libraries
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: pr-libraries-osx-${{ matrix.bundle }}
+          path: xout/openFrameworksLibs_latest_osx_${{ matrix.bundle }}.tar.bz2
+          if-no-files-found: error
+          retention-days: 7
       - name: Update Release XCFramework
         if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: softprops/action-gh-release@v3.0.2
@@ -243,3 +258,52 @@ jobs:
           tag_name: ${{ env.RELEASE }}
           release: ${{ env.RELEASE }}
           files: xout/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
+
+  smoke-test-openframeworks:
+    name: Smoke test PR libraries in openFrameworks
+    if: github.event_name == 'pull_request'
+    needs: build-macos-platforms
+    runs-on: macos-14
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+      OF_ROOT: ${{ github.workspace }}/openFrameworks
+    steps:
+      - name: Check out Apothecary test scripts
+        uses: actions/checkout@v7.0.1
+        with:
+          path: apothecary-tests
+
+      - name: Check out openFrameworks
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: openframeworks/openFrameworks
+          ref: master
+          submodules: recursive
+          path: openFrameworks
+
+      - name: Download PR library bundles
+        uses: actions/download-artifact@v8.0.1
+        with:
+          pattern: pr-libraries-osx-*
+          path: pr-libraries
+          merge-multiple: true
+
+      - name: Deploy PR libraries into openFrameworks
+        run: bash apothecary-tests/scripts/deploy-openframeworks-artifacts.sh "$OF_ROOT" "$GITHUB_WORKSPACE/pr-libraries" osx
+
+      - name: Build openFrameworks macOS smoke test
+        working-directory: openFrameworks
+        env:
+          TRAVIS_BUILD_DIR: ${{ github.workspace }}/openFrameworks
+        run: scripts/ci/osx/build.sh xcode
+
+      - name: Smoke-test summary
+        if: always()
+        run: |
+          {
+            echo "## macOS PR library smoke test"
+            echo
+            echo "- Apothecary commit: \`${{ github.event.pull_request.head.sha }}\`"
+            echo "- openFrameworks: \`master\`"
+            echo "- Result: \`${{ job.status }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
