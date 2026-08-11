@@ -17,7 +17,7 @@ SHA1="f15ff190a787ab21402b493984e636209de9e182"
 SHA256="2a2c11db4c122691aa23b4363befda1bfd801770bfebf41e1d21cee4f2ab0f71"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -151,8 +151,8 @@ function build() {
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include"
         cmake .. ${DEFS} \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE" \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 " \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
             -DCMAKE_CPP_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
@@ -253,8 +253,8 @@ function build() {
             -DANDROID_TOOLCHAIN=clang \
             -DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT \
             -DENABLE_VISIBILITY=OFF \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DENABLE_STRICT_TRY_COMPILE=ON \
             -DHAVE_GETPASS_R=0 \
             -DCURL_USE_LIBSSH2=OFF \
@@ -381,8 +381,8 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCURL_CA_BUNDLE="${CACERT_PATH}" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -DOPENSSL_NO_ENGINE ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DENABLE_STRICT_TRY_COMPILE=ON \
             -DHAVE_GETPASS_R=0 \
             -DCURL_USE_LIBSSH2=OFF \
