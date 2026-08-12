@@ -7,7 +7,7 @@
 # uses an autotools build system,
 # specify specfic build configs in poco/config using ./configure --config=NAME
 
-FORMULA_TYPES=("osx" "vs" "linux")
+FORMULA_TYPES=("osx" "ios" "vs" "linux")
 FORMULA_DEPENDS=("openssl" "zlib" )
 
 # define the version
@@ -105,6 +105,8 @@ function build() {
         -DENABLE_DATA_SQLITE=OFF \
         -DENABLE_DATA_ODBC=OFF \
         -DENABLE_DATA_MYSQL=OFF \
+        -DENABLE_ACTIVERECORD=OFF \
+        -DENABLE_ACTIVERECORD_COMPILER=OFF \
         -DENABLE_PAGECOMPILER=OFF \
         -DENABLE_PAGECOMPILER_FILE2PAGE=OFF \
         -DENABLE_POCODOC=OFF \
@@ -122,6 +124,10 @@ function build() {
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+        OPENSSL_ROOT="$LIBS_ROOT/openssl/"
+        OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
+        OPENSSL_SSL_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libssl.a"
+        OPENSSL_CRYPTO_LIBRARY="$LIBS_ROOT/openssl/lib/$TYPE/$PLATFORM/libcrypto.a"
 
         rm -f CMakeCache.txt *.a *.o
 
@@ -131,7 +137,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
+            -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
@@ -160,6 +166,11 @@ function build() {
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
             -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT} \
+            -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR} \
+            -DOPENSSL_SSL_LIBRARY=${OPENSSL_SSL_LIBRARY} \
+            -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY} \
+            -DOPENSSL_LIBRARIES="${OPENSSL_SSL_LIBRARY};${OPENSSL_CRYPTO_LIBRARY}" \
             -DOPENSSL_USE_STATIC_LIBS=YES \
             -GXcode
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install

@@ -169,8 +169,12 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "fmt"
             "openssl"
             "curl"
-            "poco"
         )
+        # Poco is built separately for iOS and published only as a modular
+        # release asset, not as part of the monolithic iOS bundle.
+        if [ "$TARGET" != "ios" ]; then
+            FORMULAS+=("poco")
+        fi
     fi
 elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
     FORMULAS=()
@@ -232,4 +236,3 @@ if [ -z ${FORMULAS} ]; then
     echo "===No formulas to build, failing==="
     exit 1
 fi
-

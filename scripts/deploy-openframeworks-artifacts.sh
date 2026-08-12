@@ -39,7 +39,7 @@ destination_for() {
         opencv|ippicv) echo "$OF_ROOT/addons/ofxOpenCv/libs" ;;
         libusb) echo "$OF_ROOT/addons/ofxKinect/libs" ;;
         libxml2|svgtiny) echo "$OF_ROOT/addons/ofxSvg/libs" ;;
-        poco|openssl) echo "$OF_ROOT/addons/ofxPoco/libs" ;;
+        poco) echo "$OF_ROOT/addons/ofxPoco/libs" ;;
         *) echo "$OF_ROOT/libs" ;;
     esac
 }
@@ -57,6 +57,11 @@ done < <(find "$STAGING_DIRECTORY" -mindepth 1 -maxdepth 1 -type d -print | sort
 
 [[ "$library_count" -gt 0 ]] || {
     echo "artifacts did not contain any library directories" >&2
+    exit 1
+}
+
+[[ -d "$OF_ROOT/libs/openssl/lib/macos/openssl.xcframework" ]] || {
+    echo "deployed artifacts are missing the macOS OpenSSL XCFramework at libs/openssl" >&2
     exit 1
 }
 

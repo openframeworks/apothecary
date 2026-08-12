@@ -219,6 +219,34 @@ jobs:
         run: scripts/ios/xcframework_all.sh
         env:
           BUNDLE: ${{ matrix.bundle }}
+      - name: Build modular Poco for iOS
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          for arch in arm64 x86_64 SIM_arm64; do
+            NO_COLOR=1 UI_ANIM=0 TYPE=ios ARCH="$arch" OUTPUT_FOLDER="$GITHUB_WORKSPACE/out" ./apo update poco
+          done
+
+      - name: Create modular Poco XCFramework
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: NO_COLOR=1 UI_ANIM=0 TYPE=ios ARCH=arm64 OUTPUT_FOLDER="$GITHUB_WORKSPACE/out" ./apo modular poco
+
+      - name: Package modular Poco for iOS
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: scripts/package-individual.sh
+        env:
+          ARCH: 64
+          PACKAGE_LIBS: poco
+
+      - name: Upload modular Poco to latest-modular
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && matrix.bundle == 3
+        uses: softprops/action-gh-release@v3.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          files: xout/oF_poco_ios_64.tar.bz2
       - name: Package
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
@@ -433,4 +461,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           files: xout_3/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_3.tar.bz2
-
