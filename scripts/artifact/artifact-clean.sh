@@ -83,24 +83,27 @@ fi
 # Define the base directory where the library folders are located
 LIBRARY_BASE_DIR="$LOCAL_ROOT/libraries"
 
-# Create an associative array to keep track of the libraries to keep
-declare -A KEEP_LIBRARIES
+# Build a delimiter-wrapped keep list. macOS ships Bash 3.2, which does not
+# support associative arrays (declare -A).
+KEEP_LIBRARIES="|"
 for formula in "${FORMULAS[@]}"; do
     formula_name="${formula%.*}"
-    KEEP_LIBRARIES[$formula_name]=1
+    KEEP_LIBRARIES="${KEEP_LIBRARIES}${formula_name}|"
 done
 
 # Iterate over the folders in the library base directory
 for library_dir in "$OUTPUT_FOLDER"/*; do
+    [ -e "$library_dir" ] || continue
     library_name=$(basename "$library_dir")
 
     # Check if the library name is not in the keep list
-    if [ -z "${KEEP_LIBRARIES[$library_name]}" ]; then
-        echo "Deleting library folder: $library_dir"
-        rm -rf "$library_dir"
-    else
-        echo "Keeping library folder: $library_dir"
-    fi
+    case "$KEEP_LIBRARIES" in
+        *"|${library_name}|"*) echo "Keeping library folder: $library_dir" ;;
+        *)
+            echo "Deleting library folder: $library_dir"
+            rm -rf "$library_dir"
+            ;;
+    esac
 done
 
 echo ""
