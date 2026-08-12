@@ -17,7 +17,7 @@ SHA1="c4a973118684745cb03c38987d131ccbce9e7ab1"
 SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=4
+BUILD_ID=5
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -341,7 +341,7 @@ function build() {
 
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
 
-        if [[ "$TYPE" =~ ^(osx|ios|xros|catos|watchos)$ ]]; then
+        if [[ "$TYPE" =~ ^(ios|xros|catos|watchos)$ ]]; then
             export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
             OPENSSL_ROOT="$LIBS_ROOT/openssl/"
             OPENSSL_INCLUDE_DIR="$LIBS_ROOT/openssl/include"
@@ -353,7 +353,7 @@ function build() {
                 -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
                 -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a:${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
         else
-            # Use SecureTransport on platforms that don't support OpenSSL
+            # Use Apple's native Secure Transport backend on macOS and tvOS.
             OPENSSL_ROOT="$LIBS_ROOT"
             OPENSSL_INCLUDE_DIR=""
             OPENSSL_LIBRARY=""
@@ -361,8 +361,8 @@ function build() {
             export USE_SECURE_TRANSPORT="ON"
             OPENSSL_PATH=""
             OF_LIBS_OPENSSL_ABS_PATH=""
-            CURL_ENABLE_SSL="OFF"
-            SSL_DEFS=""
+            CURL_ENABLE_SSL="ON"
+            SSL_DEFS="-DCURL_USE_OPENSSL=OFF -DUSE_OPENSSL=OFF"
         fi
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
