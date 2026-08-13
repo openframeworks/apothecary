@@ -63,7 +63,13 @@ jobs:
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
-        run: ./scripts/osx/install.sh
+        run: |
+          ./scripts/osx/install.sh
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+      - name: Verify Homebrew Bash
+        run: |
+          command -v bash
+          bash --version
       - name: 'Download artifacts'
         uses: actions/github-script@v9.0.0
         if: env.USE_ARTIFACT == 'true'

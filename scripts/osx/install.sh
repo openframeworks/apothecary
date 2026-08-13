@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 # Silent update to prevent long logs
 
 if ! which realpath >&/dev/null; then

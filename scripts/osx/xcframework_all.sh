@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Apothecary ROOT dir relative
 
@@ -85,7 +85,7 @@ move_libraries() {
 
 build_xcframework() {
     echo "build_xcframework"
-    ${SCRIPT_DIR}/build_xcframework.sh
+    "${SCRIPT_DIR}/build_xcframework.sh" "$BUNDLE"
     if [ $? -ne 0 ]; then
         echo "Error building $PLATFORM$ARCHE"
         exit 1
