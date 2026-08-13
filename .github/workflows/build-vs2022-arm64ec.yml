@@ -12,6 +12,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 env:
   TARGET: "vs"
   ARCH: arm64ec
@@ -217,5 +220,4 @@ jobs:
         tag_name: ${{ env.RELEASE }}
         draft: false
         files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ matrix.bundle }}.zip
-
 
