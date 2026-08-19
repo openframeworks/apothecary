@@ -38,7 +38,7 @@
 
 | Formula | Current (pinned) | Latest upstream | Status | Remote source | Formula path |
 |---------|------------------|-----------------|--------|---------------|--------------|
-| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (GN); GLES→D3D11 on VS | pinned-dev | https://github.com/google/angle | `apothecary/formulas/angle/angle.sh` |
+| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle GN; GLES→D3D11 on VS, GLES→Metal on osx/ios/tvos/catos/xros (not metalangle) | pinned-dev | https://github.com/google/angle | `apothecary/formulas/angle/angle.sh` |
 | **assimp** | `5.4.3` | `v6.0.5` | compatibility pin | https://github.com/assimp/assimp | `apothecary/formulas/assimp.sh` |
 | **boost** | `1.66.0` | `boost-1.91.0` (stable); `1.92.0.beta1` | stale | https://www.boost.org / https://github.com/boostorg/boost · tarball via jfrog artifactory in formula | `apothecary/formulas/boost/boost.sh` |
 | **brotli** | `1.2.0` | `v1.2.0` | current | https://github.com/google/brotli | `apothecary/formulas/brotli.sh` |

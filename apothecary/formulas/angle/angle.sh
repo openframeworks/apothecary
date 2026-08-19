@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 #
-# ANGLE — GLES → D3D11 on Windows (OpenGL ES 2/3 + EGL)
+# ANGLE — google/angle via GN (not MetalANGLE)
 # https://github.com/google/angle
 #
-# VS-only for now. Apple GLES→Metal is metalangle. Desktop GL→D3D12 is glon12.
-# Official build is depot_tools + gn + ninja (not the stale unofficial CMake).
-# target_os must be "win" (PR #533 passed TYPE=vs and that is wrong).
+# VS:  GLES → D3D11. Apple: GLES → Metal (osx/ios/tvos/catos/xros).
+# metalangle is the frozen MGLKit fork. glon12 is desktop GL → D3D12.
+# Official build is depot_tools + gn + ninja (not the unofficial CMake).
+# target_os must be "win" / "mac" / "ios" (PR #533 passed TYPE=vs and that is wrong).
 #
-# Output: libEGL.dll + libGLESv2.dll. OF keeps ofGLProgrammableRenderer;
-# the window must be EGL (GLFW EGL or ofAppEGLWindow) under OF_USE_ANGLE.
+# Output: libEGL + libGLESv2 (DLL on VS, dylib/a on Apple). OF keeps
+# ofGLProgrammableRenderer; the window must be EGL under OF_USE_ANGLE.
 
-FORMULA_TYPES=("vs")
+FORMULA_TYPES=("vs" "osx" "ios" "tvos" "catos" "xros")
 FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=1
-DEFINES="angle_enable_d3d11=true angle_enable_vulkan=false"
+BUILD_ID=3
+DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
 GIT_URL_FALLBACK=https://chromium.googlesource.com/angle/angle
@@ -121,24 +122,104 @@ function _angle_cpu() {
     esac
 }
 
+function _angle_os() {
+    case "${TYPE}" in
+        vs) echo "win" ;;
+        osx|macos) echo "mac" ;;
+        ios|tvos|catos|xros) echo "ios" ;;
+        *) echoError "angle: no GN target_os for TYPE=${TYPE}"; exit 1 ;;
+    esac
+}
+
+# device | simulator | catalyst — from PLATFORM (SIMULATOR*, MAC_CATALYST*) or TYPE.
+function _angle_environment() {
+    local p="${PLATFORM:-}"
+    case "${p}" in
+        *SIMULATOR*|*simulator*) echo "simulator" ; return ;;
+        *CATALYST*|*catalyst*) echo "catalyst" ; return ;;
+    esac
+    case "${TYPE}" in
+        catos) echo "catalyst" ;;
+        *) echo "device" ;;
+    esac
+}
+
+function _angle_xcrun_sdk() {
+    local env
+    env="$(_angle_environment)"
+    case "${TYPE}" in
+        ios)
+            if [ "$env" = "simulator" ]; then echo "iphonesimulator"; else echo "iphoneos"; fi
+            ;;
+        tvos)
+            if [ "$env" = "simulator" ]; then echo "appletvsimulator"; else echo "appletvos"; fi
+            ;;
+        xros)
+            if [ "$env" = "simulator" ]; then echo "xrsimulator"; else echo "xros"; fi
+            ;;
+        catos) echo "macosx" ;;
+        osx|macos) echo "macosx" ;;
+        *) echo "" ;;
+    esac
+}
+
+function _angle_gn_args() {
+    local cpu os env apple
+    cpu="$(_angle_cpu)"
+    os="$(_angle_os)"
+    env="$(_angle_environment)"
+    local common
+    common="is_debug=false is_component_build=false symbol_level=0 angle_assert_always_on=false angle_build_tests=false angle_enable_d3d9=false angle_enable_d3d12=false angle_enable_gl=false angle_enable_null=false angle_enable_vulkan=false angle_enable_essl=true angle_enable_glsl=true target_os=\"${os}\" target_cpu=\"${cpu}\""
+    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true ios_enable_code_signing=false"
+    case "${TYPE}" in
+        vs)
+            echo "${common} is_clang=false angle_enable_d3d11=true angle_enable_metal=false"
+            ;;
+        osx|macos)
+            echo "${common} ${apple} mac_deployment_target=\"11.0\""
+            ;;
+        catos)
+            echo "${common} ${apple} target_environment=\"catalyst\" ios_deployment_target=\"16.0\" mac_deployment_target=\"16.0\""
+            ;;
+        ios)
+            echo "${common} ${apple} target_environment=\"${env}\" ios_deployment_target=\"13.0\""
+            ;;
+        tvos|xros)
+            local sdk sdk_path
+            sdk="$(_angle_xcrun_sdk)"
+            sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path 2>/dev/null || true)"
+            local extra=""
+            if [ -n "${sdk_path}" ]; then
+                extra=" ios_sdk_name=\"${sdk}\" ios_sdk_path=\"${sdk_path}\""
+            fi
+            echo "${common} ${apple} target_environment=\"${env}\" ios_deployment_target=\"16.0\"${extra}"
+            ;;
+        *)
+            echoError "angle: GN args not defined for TYPE=${TYPE}"
+            exit 1
+            ;;
+    esac
+}
+
 function build() {
-    if [ "$TYPE" != "vs" ]; then
-        echoError "angle formula is VS-only here (Apple uses metalangle)"
+    local cpu outdir gn_args
+    cpu="$(_angle_cpu)"
+    outdir="out/Release_${PLATFORM}"
+
+    if [ "$TYPE" = "vs" ]; then
+        setup_vs_vars
+        export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
+        _angle_depot_env "$(pwd)/.vendor"
+    elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
+        _angle_depot_env "$(pwd)/.vendor"
+    else
+        echoError "angle: unsupported TYPE=${TYPE}"
         exit 1
     fi
 
-    setup_vs_vars
-    export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
-    _angle_depot_env "$(pwd)/.vendor"
-
-    local cpu
-    cpu="$(_angle_cpu)"
-    local outdir="out/Release_${PLATFORM}"
-
-    # is_clang=false → MSVC. D3D11 is the GLES backend. No Vulkan/GL/Metal.
-    local gn_args
-    gn_args="is_debug=false is_component_build=false is_clang=false symbol_level=0 angle_assert_always_on=false angle_build_tests=false angle_enable_d3d9=false angle_enable_d3d11=true angle_enable_d3d12=false angle_enable_gl=false angle_enable_metal=false angle_enable_null=false angle_enable_vulkan=false angle_enable_essl=true angle_enable_glsl=true target_os=\"win\" target_cpu=\"${cpu}\""
+    gn_args="$(_angle_gn_args)"
     DEFINES="${gn_args}"
+    echo "angle: gn --args=${gn_args}"
 
     gn gen "${outdir}" --args="${gn_args}"
     autoninja -C "${outdir}" libEGL libGLESv2
@@ -159,14 +240,16 @@ function copy() {
     local outdir="out/Release_${PLATFORM}"
     local copied=0
     local f
-    for f in "${outdir}/libEGL.dll" "${outdir}/libGLESv2.dll"; do
+    for f in "${outdir}/libEGL.dll" "${outdir}/libGLESv2.dll" \
+        "${outdir}/libEGL.dylib" "${outdir}/libGLESv2.dylib"; do
         if [ -f "$f" ]; then
             cp -v "$f" "$1/bin/$TYPE/$PLATFORM/"
             copied=1
         fi
     done
     for f in "${outdir}/libEGL.dll.lib" "${outdir}/libGLESv2.dll.lib" \
-        "${outdir}/libEGL.lib" "${outdir}/libGLESv2.lib"; do
+        "${outdir}/libEGL.lib" "${outdir}/libGLESv2.lib" \
+        "${outdir}/libEGL.a" "${outdir}/libGLESv2.a"; do
         if [ -f "$f" ]; then
             cp -v "$f" "$1/lib/$TYPE/$PLATFORM/"
             copied=1
@@ -184,6 +267,10 @@ function copy() {
 
     if [ -f "$1/bin/$TYPE/$PLATFORM/libGLESv2.dll" ]; then
         secure "$1/bin/$TYPE/$PLATFORM/libGLESv2.dll" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ -f "$1/bin/$TYPE/$PLATFORM/libGLESv2.dylib" ]; then
+        secure "$1/bin/$TYPE/$PLATFORM/libGLESv2.dylib" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.a" ]; then
+        secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.a" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" ]; then
         secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
@@ -203,12 +290,21 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "angle" ${ARCH} ${VER} "$LIBS_DIR_REAL/angle/bin/$TYPE/$PLATFORM" ${BUILD_ID})
+    if [[ "$TYPE" =~ ^(ios|tvos|catos|xros)$ ]]; then
+        LOAD_RESULT=$(loadsave ${TYPE} "angle" ${ARCH} ${VER} "$LIBS_DIR_REAL/angle/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    else
+        LOAD_RESULT=$(loadsave ${TYPE} "angle" ${ARCH} ${VER} "$LIBS_DIR_REAL/angle/bin/$TYPE/$PLATFORM" ${BUILD_ID})
+    fi
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
     else
         TARGET_DIR="$LIBS_DIR_REAL/$1/bin/$TYPE/$PLATFORM"
+        if [ -d "$TARGET_DIR" ]; then
+            echoInfo "Deleting existing folder: $TARGET_DIR"
+            rm -rf "$TARGET_DIR"
+        fi
+        TARGET_DIR="$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM"
         if [ -d "$TARGET_DIR" ]; then
             echoInfo "Deleting existing folder: $TARGET_DIR"
             rm -rf "$TARGET_DIR"
