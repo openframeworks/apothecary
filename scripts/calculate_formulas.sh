@@ -167,9 +167,15 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "rtAudio"
             "tess2"
             "uriparser"
-            #"metalangle"
             "cairo"
         )
+        # metalangle: MGLKit (osx/ios/tvos). angle: google GN Metal.
+        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
+            FORMULAS+=("metalangle")
+        fi
+        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
+            FORMULAS+=("angle")
+        fi
     fi
     if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
         if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
