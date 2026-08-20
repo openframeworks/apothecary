@@ -169,13 +169,11 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "uriparser"
             "cairo"
         )
-        # metalangle: MGLKit (osx/ios/tvos). angle: google GN Metal.
+        # metalangle: MGLKit (osx/ios/tvos). google/angle GN is opt-in until gn gen is green.
         if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
             FORMULAS+=("metalangle")
         fi
-        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
-            FORMULAS+=("angle")
-        fi
+        # TYPE=osx|ios|tvos|catos|xros ./apo update angle
     fi
     if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
         if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then

@@ -16,7 +16,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=3
+BUILD_ID=4
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -170,7 +170,7 @@ function _angle_gn_args() {
     env="$(_angle_environment)"
     local common
     common="is_debug=false is_component_build=false symbol_level=0 angle_assert_always_on=false angle_build_tests=false angle_enable_d3d9=false angle_enable_d3d12=false angle_enable_gl=false angle_enable_null=false angle_enable_vulkan=false angle_enable_essl=true angle_enable_glsl=true target_os=\"${os}\" target_cpu=\"${cpu}\""
-    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true ios_enable_code_signing=false"
+    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true"
     case "${TYPE}" in
         vs)
             echo "${common} is_clang=false angle_enable_d3d11=true angle_enable_metal=false"
@@ -179,20 +179,20 @@ function _angle_gn_args() {
             echo "${common} ${apple} mac_deployment_target=\"11.0\""
             ;;
         catos)
-            echo "${common} ${apple} target_environment=\"catalyst\" ios_deployment_target=\"16.0\" mac_deployment_target=\"16.0\""
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"catalyst\" ios_deployment_target=\"16.0\" mac_deployment_target=\"16.0\""
             ;;
         ios)
-            echo "${common} ${apple} target_environment=\"${env}\" ios_deployment_target=\"13.0\""
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"13.0\""
             ;;
         tvos|xros)
-            local sdk sdk_path
+            local sdk sdk_path extra
             sdk="$(_angle_xcrun_sdk)"
             sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path 2>/dev/null || true)"
-            local extra=""
+            extra="ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"16.0\""
             if [ -n "${sdk_path}" ]; then
-                extra=" ios_sdk_name=\"${sdk}\" ios_sdk_path=\"${sdk_path}\""
+                extra="${extra} ios_sdk_name=\"${sdk}\" ios_sdk_path=\"${sdk_path}\""
             fi
-            echo "${common} ${apple} target_environment=\"${env}\" ios_deployment_target=\"16.0\"${extra}"
+            echo "${common} ${apple} ${extra}"
             ;;
         *)
             echoError "angle: GN args not defined for TYPE=${TYPE}"
@@ -219,7 +219,12 @@ function build() {
 
     gn_args="$(_angle_gn_args)"
     DEFINES="${gn_args}"
-    echo "angle: gn --args=${gn_args}"
+    echo "angle: gn=$(command -v gn 2>/dev/null || echo MISSING) --args=${gn_args}"
+    if ! command -v gn >/dev/null 2>&1; then
+        echoError "angle: gn not on PATH. depot_tools=$(pwd)/.vendor/depot_tools"
+        ls -la "$(pwd)/.vendor/depot_tools/gn"* 2>/dev/null || true
+        exit 1
+    fi
 
     gn gen "${outdir}" --args="${gn_args}"
     autoninja -C "${outdir}" libEGL libGLESv2
