@@ -150,9 +150,13 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "rtAudio"
             "tess2"
             "uriparser"
-            #"metalangle"
             "cairo"
         )
+        # metalangle: MGLKit (osx/ios/tvos). google/angle GN is opt-in until gn gen is green.
+        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
+            FORMULAS+=("metalangle")
+        fi
+        # TYPE=osx|ios|tvos|catos|xros ./apo update angle
     fi
     if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
         if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
