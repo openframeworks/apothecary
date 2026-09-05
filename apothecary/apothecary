@@ -1836,6 +1836,74 @@ function mergeStaticArchives() {
   mv -f "$tmp" "$dest"
 }
 
+# OpenSSL exposes libssl and libcrypto as separate public link products.
+# Preserve that layout when creating XCFrameworks instead of only publishing
+# the legacy framework that merges every archive belonging to the formula.
+function createOpenSSLProductXCFramework() {
+  local archive_name="$1"
+  local product_name="${archive_name%.a}"
+  local output_type="${TYPE_OUT:-${X_TYPE:-macos}}"
+  local source_root="$LIBS_DIR_REAL/openssl/lib"
+  local output_root="$XLIBS_DIR_REAL/openssl/lib/$output_type"
+  local staging_root="$XLIBS_DIR_REAL/openssl/.xcframework-staging/$product_name"
+  local output_path="$output_root/$product_name.xcframework"
+  local -a product_flags=()
+  local -a platform_types=("ios" "osx" "tvos" "catos" "xros" "watchos")
+  local -A arch_pairs=(
+    ["MAC"]="MAC_ARM64"
+    ["MAC_ARM64"]="MAC"
+    ["MAC_CATALYST"]="MAC_CATALYST_ARM64"
+    ["MAC_CATALYST_ARM64"]="MAC_CATALYST"
+    ["SIMULATOR64"]="SIMULATORARM64"
+    ["SIMULATORARM64"]="SIMULATOR64"
+    ["SIMULATOR_TVOS"]="SIMULATORARM64_TVOS"
+    ["SIMULATORARM64_TVOS"]="SIMULATOR_TVOS"
+    ["TVOS"]="TVOS"
+    ["WATCHOS"]="WATCHOS"
+    ["SIMULATORARM64_WATCHOS"]="SIMULATOR_WATCHOS"
+    ["SIMULATOR_WATCHOS"]="SIMULATORARM64_WATCHOS"
+    ["OS64"]="OS64"
+    ["VISIONOS"]="VISIONOS"
+    ["SIMULATOR64_VISIONOS"]="SIMULATOR_VISIONOS"
+    ["SIMULATOR_VISIONOS"]="SIMULATOR64_VISIONOS"
+  )
+  local -A processed=()
+
+  rm -rf "$staging_root" "$output_path"
+  mkdir -p "$staging_root" "$output_root"
+
+  local current_type arch pair archive_path pair_path product_archive merge_dir
+  for current_type in "${platform_types[@]}"; do
+    for arch in "${!arch_pairs[@]}"; do
+      [ -z "${processed[$current_type/$arch]:-}" ] || continue
+      pair="${arch_pairs[$arch]}"
+      archive_path="$source_root/$current_type/$arch/$archive_name"
+      [ -f "$archive_path" ] || continue
+
+      pair_path="$source_root/$current_type/$pair/$archive_name"
+      product_archive="$archive_path"
+      if [ "$arch" != "$pair" ] && [ -f "$pair_path" ]; then
+        merge_dir="$staging_root/${current_type}_${arch}_${pair}"
+        mkdir -p "$merge_dir"
+        product_archive="$merge_dir/$archive_name"
+        xcrun lipo -create "$archive_path" "$pair_path" -output "$product_archive"
+        processed[$current_type/$pair]=1
+      fi
+
+      product_flags+=( -library "$product_archive" -headers "$LIBS_DIR_REAL/openssl/include" )
+      processed[$current_type/$arch]=1
+    done
+  done
+
+  if [ "${#product_flags[@]}" -eq 0 ]; then
+    echoError "No $archive_name slices found for OpenSSL XCFramework"
+    return 1
+  fi
+
+  xcrun xcodebuild -create-xcframework "${product_flags[@]}" -output "$output_path"
+  echoSuccess "Created separate OpenSSL product: $output_path"
+}
+
 function frameworkFormula() {
 
   echoStart " frameworkFormula [\"$1\"] for:[${TYPE}]"
@@ -2127,6 +2195,12 @@ function frameworkFormula() {
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
 
+    if [ "$1" == "openssl" ]; then
+      createOpenSSLProductXCFramework "libssl.a"
+      createOpenSSLProductXCFramework "libcrypto.a"
+      rm -rf "$XLIBS_DIR_REAL/openssl/.xcframework-staging"
+    fi
+
     cd $HERE_DIR
 
 
@@ -2411,6 +2485,12 @@ function xframeworkFormula() {
     xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
+
+    if [ "$1" == "openssl" ]; then
+      createOpenSSLProductXCFramework "libssl.a"
+      createOpenSSLProductXCFramework "libcrypto.a"
+      rm -rf "$XLIBS_DIR_REAL/openssl/.xcframework-staging"
+    fi
 
     cd $HERE_DIR
 

@@ -60,9 +60,11 @@ done < <(find "$STAGING_DIRECTORY" -mindepth 1 -maxdepth 1 -type d -print | sort
     exit 1
 }
 
-[[ -d "$OF_ROOT/libs/openssl/lib/macos/openssl.xcframework" ]] || {
-    echo "deployed artifacts are missing the macOS OpenSSL XCFramework at libs/openssl" >&2
-    exit 1
-}
+for framework in openssl libssl libcrypto; do
+    [[ -d "$OF_ROOT/libs/openssl/lib/macos/$framework.xcframework" ]] || {
+        echo "deployed artifacts are missing $framework.xcframework at libs/openssl/lib/macos" >&2
+        exit 1
+    }
+done
 
 echo "Installed $library_count libraries from $archive_count artifacts into openFrameworks"
