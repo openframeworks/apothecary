@@ -22,7 +22,10 @@ GIT_TAG=
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
-    downloader http://www.portaudio.com/archives/pa_$VER.tgz
+    if ! downloader "https://files.portaudio.com/archives/pa_$VER.tgz"; then
+        echoWarning "PortAudio download service unavailable; trying legacy archive host"
+        downloader "http://www.portaudio.com/archives/pa_$VER.tgz"
+    fi
     verify_sha256 "pa_$VER.tgz" "$SHA256"
     tar -xf pa_$VER.tgz
     rm pa_$VER.tgz
