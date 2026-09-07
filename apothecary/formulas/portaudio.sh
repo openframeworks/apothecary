@@ -33,16 +33,21 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    : # noop
+    local automake_libdir
+    automake_libdir="$(automake --print-libdir)"
+    cp "$automake_libdir/config.guess" "$automake_libdir/config.sub" .
 }
 
 # executed inside the lib src dir
 function build() {
+    local BUILD_TRIPLET
+    BUILD_TRIPLET="$(gcc -dumpmachine)"
     local HOST_ARGS=()
     if [ -n "${TOOLCHAIN_PREFIX:-}" ]; then
         HOST_ARGS=(--host="$TOOLCHAIN_PREFIX")
     fi
     ./configure \
+        --build="$BUILD_TRIPLET" \
         "${HOST_ARGS[@]}" \
         --prefix="$PWD/build_${TYPE}_${PLATFORM}/Release" \
         --disable-shared \
