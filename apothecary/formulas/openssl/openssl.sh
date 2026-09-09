@@ -175,8 +175,12 @@ function build() {
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
         echo "building $TYPE | $PLATFORM"
         echo "--------------------"
-        mkdir -p "build_${TYPE}_${PLATFORM}"
-        cd "build_${TYPE}_${PLATFORM}"
+        BUILD_SUBDIR="build_${TYPE}_${PLATFORM}"
+        if [ "$TYPE" == "catos" ]; then
+            BUILD_SUBDIR="${BUILD_SUBDIR}_${ARCH}"
+        fi
+        mkdir -p "$BUILD_SUBDIR"
+        cd "$BUILD_SUBDIR"
 
         # if [[ "$TYPE" =~ ^(tvos|xros|catos|watchos)$ ]]; then
         # 	# LANG=C sed -i -- 's/define HAVE_FORK 1/define HAVE_FORK 0/' "./openssl/apps/speed.c"
@@ -467,20 +471,24 @@ function copy() {
     . "$SECURE_SCRIPT"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
 
+        BUILD_SUBDIR="build_${TYPE}_${PLATFORM}"
+        if [ "$TYPE" == "catos" ]; then
+            BUILD_SUBDIR="${BUILD_SUBDIR}_${ARCH}"
+        fi
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        echo "cppy: build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a"
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
-        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
+        echo "copy: ${BUILD_SUBDIR}/Release/lib/libcrypto.a"
+        cp -v "${BUILD_SUBDIR}/Release/lib/libcrypto.a" $1/lib/$TYPE/$PLATFORM/libcrypto.a
+        cp -v "${BUILD_SUBDIR}/Release/lib/libssl.a" $1/lib/$TYPE/$PLATFORM/libssl.a
+        cp -Rv "${BUILD_SUBDIR}/Release/include" $1/
 
         secure "$1/lib/$TYPE/$PLATFORM/libssl.a" "openssl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         secure "$1/lib/$TYPE/$PLATFORM/libcrypto.a" "crypto.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
-        cp -vR "build_${TYPE}_${PLATFORM}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
+        cp -vR "${BUILD_SUBDIR}/Release/lib/pkgconfig/openssl.pc" $1/lib/$TYPE/$PLATFORM/openssl.pc
+        cp -vR "${BUILD_SUBDIR}/Release/lib/pkgconfig/libcrypto.pc" $1/lib/$TYPE/$PLATFORM/libcrypto.pc
+        cp -vR "${BUILD_SUBDIR}/Release/lib/pkgconfig/libssl.pc" $1/lib/$TYPE/$PLATFORM/libssl.pc
 
         PKG_FILE="$1/lib/$TYPE/$PLATFORM/openssl.pc"
         sed -i.bak "s|^prefix=.*|prefix=${1}|" "$PKG_FILE"
@@ -604,8 +612,12 @@ function copy() {
 function clean() {
 
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
-        if [ -d "build_${TYPE}_${PLATFORM}" ]; then
-            rm -r build_${TYPE}_${PLATFORM}
+        BUILD_SUBDIR="build_${TYPE}_${PLATFORM}"
+        if [ "$TYPE" == "catos" ]; then
+            BUILD_SUBDIR="${BUILD_SUBDIR}_${ARCH}"
+        fi
+        if [ -d "$BUILD_SUBDIR" ]; then
+            rm -r "$BUILD_SUBDIR"
         fi
     elif [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${ARCH}" ]; then

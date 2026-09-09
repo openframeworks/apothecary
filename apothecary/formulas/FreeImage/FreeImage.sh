@@ -12,11 +12,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.13
-SHA256="499a4692b16aab3248e1474f6391f61690a37f8d1f50793d2c06177ef7c346e9"
+VER=3.19.14
+SHA256="2dcc823d744706f71006b13ddb6ea6278628d083f04836cdb7196d25fb4511fe"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=9
+BUILD_ID=10
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -519,4 +519,3 @@ function clean() {
         clean.sh
     fi
 }
-
