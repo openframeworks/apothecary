@@ -12,7 +12,7 @@
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
-FORMULA_TYPES=("osx" "vs")
+FORMULA_TYPES=("osx" "vs" "linux")
 FORMULA_DEPENDS=("zlib" "libpng" "pixman" "freetype")
 
 # tell apothecary we want to manually call the dependency commands
@@ -213,7 +213,7 @@ function build() {
             ${CMAKE_WIN_SDK}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-    elif [ "$TYPE" == "osx" ]; then
+    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
@@ -272,20 +272,28 @@ function build() {
         	-DFREETYPE_LIBS=${FREETYPE_LIBRARY} \
         	-DBUILD_GTK_DOC=OFF -DNO_BUILD_TESTS=ON -DNO_DEPENDENCY_TRACKING=ON -DBUILD_XLIB=OFF -DNO_QT=ON -DBUILD_SHARED_LIBS=OFF -DNO_QUARTZ_FONT=OFF -DNO_QUARTZ=OFF -DNO_QUARTZ_IMAGE=OFF"
 
+        local PLATFORM_DEFS=()
+        if [ "$TYPE" == "osx" ]; then
+            PLATFORM_DEFS=(
+                -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/ios.toolchain.cmake"
+                -DPLATFORM="$PLATFORM"
+                -DENABLE_BITCODE=OFF
+                -DENABLE_ARC=OFF
+                -DDEPLOYMENT_TARGET="$MIN_SDK_VER"
+            )
+        else
+            PLATFORM_DEFS=(-DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake")
+        fi
         cmake .. ${DEFS} \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-            -DPLATFORM=$PLATFORM \
+            "${PLATFORM_DEFS[@]}" \
             -DBROTLIDEC_INCLUDE_DIRS="${LIBBROTLI_INCLUDE_DIR}" \
             -DBROTLI_INCLUDE_DIR="${LIBBROTLI_INCLUDE_DIR}" \
             -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY};${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB}" \
             -DCMAKE_INCLUDE_PATH="${LIBBROTLI_INCLUDE_DIR};${FREETYPE_INCLUDE_DIR};${LIBPNG_INCLUDE_DIR};${ZLIB_INCLUDE_DIR};${PIXMAN_INCLUDE_DIR}" \
             -DCMAKE_LIBRARY_PATH="${LIBBROTLI_LIBRARY};${LIBBROTLI_DEC_LIB};${LIBBROTLI_ENC_LIB};${FREETYPE_LIBRARY};${LIBPNG_LIBRARY};${ZLIB_LIBRARY};${PIXMAN_LIBRARY}" \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_STATIC_LIBS=ON \
             -DENABLE_VISIBILITY=OFF \
-            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DNO_FONTCONFIG=OFF \
@@ -322,7 +330,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib
         secure "$1/lib/$TYPE/$PLATFORM/libcairo.lib" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-    elif [ "$TYPE" == "osx" ]; then
+    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
         secure "$1/lib/$TYPE/$PLATFORM/libcairo.a" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
@@ -345,7 +353,7 @@ function clean() {
     apothecaryDependencies clean
 
     # cairo
-    make clean
+    rm -rf "build_${TYPE}_${PLATFORM}"
 }
 
 function load() {

@@ -4,7 +4,7 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten")
+FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 FORMULA_DEPENDS=()
 
 VER=1.0.2
@@ -106,6 +106,14 @@ function build() {
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 
+    elif [ "$TYPE" == "linux" ]; then
+        cmake -S . -B "build_${TYPE}_${PLATFORM}" ${DEFS} \
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="build_${TYPE}_${PLATFORM}/Release" \
+            -DURIPARSER_ENABLE_INSTALL=ON \
+            -DBUILD_SHARED_LIBS=OFF
+        cmake --build "build_${TYPE}_${PLATFORM}" -j"${PARALLEL_MAKE}" --target install
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         echo "int main(){return 0;}" >tool/uriparse.c
         mkdir -p "build_${TYPE}_${PLATFORM}"
@@ -185,6 +193,11 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/UriConfig.h" $1/include/uriparser/
         cp -Rv "build_${TYPE}_${PLATFORM}/liburiparser.a" $1/lib/$TYPE/${PLATFORM}/uriparser.a
         secure "$1/lib/$TYPE/$PLATFORM/uriparser.a" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ "$TYPE" == "linux" ]; then
+        cp -R "build_${TYPE}_${PLATFORM}/Release/include/"* "$1/include/"
+        mkdir -p "$1/lib/$TYPE/$PLATFORM/"
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/liburiparser.a" "$1/lib/$TYPE/$PLATFORM/liburiparser.a"
+        secure "$1/lib/$TYPE/$PLATFORM/liburiparser.a" "uriparser.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         cp -R include/uriparser/* $1/include/uriparser/
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -210,7 +223,7 @@ function clean() {
         if [ -d "build_${TYPE}_${ABI}" ]; then
             rm -r build_${TYPE}_${ABI}
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi

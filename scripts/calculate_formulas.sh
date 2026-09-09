@@ -72,6 +72,14 @@ FORMULAS=(
     "metalangle"
 )
 
+FORMULAS_MODULAR_ONLY=()
+LINUX_MODULAR_FORMULAS=(
+    pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny
+    FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2
+    uriparser opencv cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
+    poco dawn
+)
+
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
     FORMULAS=(
         "pkg-config"
@@ -91,9 +99,18 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
         "FreeImage"
         "fmt"
         "uriparser"
+        "openssl"
+        "nghttp2"
+        "nghttp3"
+        "ngtcp2"
+        "libssh2"
+        "curl"
         # dawn: not in core until Linux CI is GCC 11+ (atomic::wait / bit_cast)
         # TYPE=linux ./apo update dawn
     )
+    # Build and publish the networking stack as individual packages without
+    # changing the established openFrameworks Linux core archive yet.
+    FORMULAS_MODULAR_ONLY=("openssl" "nghttp2" "nghttp3" "ngtcp2" "libssh2" "curl")
     if [[ "$TARCH" =~ ^(64|arm64|x86_64)$ ]]; then
         FORMULAS+=(
            # "poco"
@@ -267,9 +284,25 @@ fi
 # and pickles. Do not xcframework or put in the published tarball.
 FORMULAS_INTERNAL=("nghttp2" "nghttp3" "ngtcp2" "libssh2")
 
+formula_is_modular_only() {
+    local name="$1"
+    local f
+    for f in "${FORMULAS_MODULAR_ONLY[@]}"; do
+        if [ "$f" = "$name" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
 formula_is_internal() {
     local name="$1"
     local f
+    # Linux publishes the transport libraries as modular packages even though
+    # curl also incorporates them into its convenience static archive.
+    if [ "$TARGET" = "linux" ]; then
+        return 1
+    fi
     for f in "${FORMULAS_INTERNAL[@]}"; do
         if [ "$f" = "$name" ]; then
             return 0

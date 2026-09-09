@@ -14,6 +14,7 @@
 !/.github/workflows/move-latest-tags.yml
 !/.github/workflows/release-openframeworks.yml
 !/.github/workflows/build-opencv-cuda-modular.yml
+!/.github/workflows/build-linux-modular.yml
 !/.github/workflows/test-openframeworks-libraries.yml
 !/.github/workflows/validate-formula-sources.yml
 !/apothecary/**/*

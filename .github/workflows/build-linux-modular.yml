@@ -1,0 +1,76 @@
+name: build-linux-modular
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [bleeding, master]
+    paths-ignore: ['**/*.md']
+  pull_request:
+    paths-ignore: ['**/*.md']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Linux modular - ${{ matrix.arch }} - GCC14
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: '64'
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      GCC: gcc14
+      GCC_VERSION: '14'
+      CC: gcc-14
+      CXX: g++-14
+      NO_FORCE: 1
+      FORMULAS_OVERRIDE: pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2 uriparser opencv cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl poco dawn
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf automake build-essential ccache cmake curl dos2unix flex \
+            g++-14 gcc-14 git gperf libasound2-dev libegl1-mesa-dev \
+            libfftw3-dev libfontconfig1-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libjack-dev libpulse-dev libtool libudev-dev libwayland-dev \
+            libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev \
+            libxkbcommon-dev libxrandr-dev meson ninja-build perl pkg-config \
+            python3 python3-pip unzip xorg-dev
+
+      - name: Restore modular build cache
+        uses: actions/cache@v5
+        with:
+          path: apothecary/build
+          key: linux-modular-gcc14-${{ matrix.arch }}-${{ hashFiles('apothecary/formulas/**', 'apothecary/apothecary', 'scripts/build.sh', 'scripts/calculate_formulas.sh') }}
+
+      - name: Build modular libraries
+        run: scripts/build.sh
+
+      - name: Package modular libraries
+        if: github.event_name == 'push'
+        env:
+          ALWAYS_BUILD: 1
+        run: scripts/package-individual.sh
+
+      - name: Upload modular libraries
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          files: out/oF_*_linux_${{ matrix.arch }}_gcc14.tar.bz2
