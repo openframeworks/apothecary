@@ -45,9 +45,12 @@ jobs:
     strategy:
       matrix:
         ARCH: [armv7, arm64, x86_64]
-        SDK: ["36.0.0"]
-        NDK: ["28.2.13676358"]
-        API: ["24"]
+        # ubuntu-24.04 image (20260907): NDK 27.3 default, 28.2, 29.0 latest;
+        # build-tools 37.0.0; platforms through android-37. Pin the latest NDK/SDK
+        # on the image. ANDROID_API is the *min* compile target (not the SDK).
+        SDK: ["37.0.0"]
+        NDK: ["29.0.14206865"]
+        API: ["25"]
     env:
       ARCH: ${{ matrix.ARCH }}
       SDK: ${{ matrix.SDK }}

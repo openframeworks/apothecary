@@ -10,6 +10,14 @@ APOTHECARY_PATH=$(
 if [ -n "$NDK" ]; then
     NDK_VERSION=${NDK}
     echo "Using ANDROID_NDK_VERSION: $NDK"
+    for _sdk in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" "/usr/local/lib/android/sdk"; do
+        if [ -n "$_sdk" ] && [ -d "${_sdk}/ndk/${NDK}" ]; then
+            export ANDROID_NDK_ROOT="${_sdk}/ndk/${NDK}"
+            export NDK_ROOT="${ANDROID_NDK_ROOT}"
+            echo "Resolved NDK $NDK -> $NDK_ROOT"
+            break
+        fi
+    done
 fi
 
 if [ -n "$SDK" ]; then
