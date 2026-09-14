@@ -5,10 +5,10 @@
 # http://freeimage.sourceforge.net
 #
 # Uses the CMakeLists shipped in danoli3/FreeImage (3.19.12+).
-# Optional codecs: OpenEXR, WebP, and LibRaw are ON for every FORMULA_TYPE
-# except VS ARM64/ARM64EC (LibRaw C2491 dllimport; JXR off there too).
+# Optional codecs: OpenEXR, WebP, and LibRaw are ON except on VS, where
+# LibRaw C2491 (dllimport) and jxrlib SAL keep both off. ARM64EC also
+# cannot compile OpenEXR (emmintrin.h via ImfSystemSpecific/ImfZip).
 # OpenEXR 3.3.13 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
-# JXR stays Windows x64-only (jxrlib SAL/GUID; ARM64 Windows DLL issues).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
@@ -20,7 +20,7 @@ VER=3.19.15
 SHA256="c3b1ed2051a2cb7f33dda984c841cd9266630d03762ac9d0742b7cb8def11f91"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=13
+BUILD_ID=14
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -272,12 +272,13 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        # Static LibRaw on x64. ARM64 still hits C2491 dllimport — leave it off.
-        FI_LIBRAW=ON
-        FI_JXR=ON
-        if [[ "$ARCH" =~ ^(arm64|arm64ec|arm)$ ]]; then
-            FI_LIBRAW=OFF
-            FI_JXR=OFF
+        # VS: LibRaw C2491 dllimport even with LIBRAW_NODLL cmake cache var;
+        # jxrlib SAL fails on MSVC too. ARM64EC OpenEXR pulls emmintrin.h.
+        FI_LIBRAW=OFF
+        FI_JXR=OFF
+        FI_OPENEXR=ON
+        if [[ "$ARCH" =~ ^(arm64ec)$ ]]; then
+            FI_OPENEXR=OFF
         fi
 
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
@@ -291,7 +292,7 @@ function build() {
         	-DBUILD_LIBRAWLITE=${FI_LIBRAW} \
         	-DBUILD_LIBPNG=OFF \
 			-DBUILD_ZLIB=OFF \
-			-DBUILD_OPENEXR=ON \
+			-DBUILD_OPENEXR=${FI_OPENEXR} \
 			-DBUILD_WEBP=ON \
 			-DBUILD_JXR=${FI_JXR} \
             ${MT_TYPE_DEFINES} \
