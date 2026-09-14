@@ -5,6 +5,9 @@
 # http://freeimage.sourceforge.net
 #
 # Uses the CMakeLists shipped in danoli3/FreeImage (3.19.12+).
+# Optional codecs: OpenEXR, WebP, and LibRaw are ON for every FORMULA_TYPE.
+# OpenEXR 3.3.13 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
+# JXR stays Windows-only (jxrlib SAL/GUID; FreeImage's own BUILD_JXR default is WIN32).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
@@ -16,7 +19,7 @@ VER=3.19.15
 SHA256="c3b1ed2051a2cb7f33dda984c841cd9266630d03762ac9d0742b7cb8def11f91"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=11
+BUILD_ID=12
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -85,8 +88,8 @@ function build() {
         DEFS="
 		        -DBUILD_SHARED_LIBS=OFF \
 		        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		        -DBUILD_LIBRAWLITE=OFF \
-				-DBUILD_OPENEXR=OFF \
+		        -DBUILD_LIBRAWLITE=ON \
+				-DBUILD_OPENEXR=ON \
 				-DBUILD_WEBP=ON \
 				-DBUILD_JXR=OFF \
 				-DENABLE_BITCODE=OFF \
@@ -145,8 +148,8 @@ function build() {
         DEFINES="
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
             -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DENABLE_ARC=OFF \
@@ -238,9 +241,9 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -275,12 +278,12 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         	-DCMAKE_INSTALL_INCLUDEDIR=include \
-        	-DBUILD_LIBRAWLITE=OFF \
+        	-DBUILD_LIBRAWLITE=ON \
         	-DBUILD_LIBPNG=OFF \
 			-DBUILD_ZLIB=OFF \
-			-DBUILD_OPENEXR=OFF \
-			-DBUILD_WEBP=OFF \
-			-DBUILD_JXR=OFF \
+			-DBUILD_OPENEXR=ON \
+			-DBUILD_WEBP=ON \
+			-DBUILD_JXR=ON \
             ${MT_TYPE_DEFINES} \
 			-DENABLE_VISIBILITY=OFF \
 			-DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
@@ -359,12 +362,12 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_TESTS=OFF \
             -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE} " \
@@ -399,9 +402,9 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_LIBPNG=ON \
             -DBUILD_ZLIB=ON \
