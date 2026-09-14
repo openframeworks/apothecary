@@ -1868,7 +1868,14 @@ function recordSplitXcframeworkLibrary() {
   if [[ "${SPLIT_XCFRAMEWORK_FLAGS[$product]:-}" =~ $archive ]]; then
     return 0
   fi
-  SPLIT_XCFRAMEWORK_FLAGS[$product]+=" -library $archive -headers $headers"
+  SPLIT_XCFRAMEWORK_FLAGS[$product]+=" -library $archive"
+  # OpenSSL: libssl and libcrypto share include/openssl. Xcode copies headers
+  # from every XCFramework into the same output dir, so attaching the tree to
+  # both products fails iOS ("Multiple commands produce"). Keep headers only
+  # on libcrypto; libssl is library-only.
+  if [ "$product" = "libcrypto" ] && [ -n "$headers" ]; then
+    SPLIT_XCFRAMEWORK_FLAGS[$product]+=" -headers $headers"
+  fi
 }
 
 function mergeOrSplitStaticArchives() {
