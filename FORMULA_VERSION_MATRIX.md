@@ -45,7 +45,7 @@
 | **cairo** | `1.18.4` | `1.18.4` | current | https://gitlab.freedesktop.org/cairo/cairo · releases https://www.cairographics.org/releases/ | `apothecary/formulas/cairo/cairo.sh` |
 | **curl** | `8.19.0` | `curl-8_21_0` / `8.21.0` | compatibility pin | https://github.com/curl/curl | `apothecary/formulas/curl/curl.sh` |
 | **fmt** | `12.2.0` | `12.2.0` | current | https://github.com/fmtlib/fmt | `apothecary/formulas/fmt/fmt.sh` |
-| **FreeImage** | `3.19.13` | `3.19.13` | current | https://github.com/danoli3/FreeImage (OF fork) | `apothecary/formulas/FreeImage/FreeImage.sh` |
+| **FreeImage** | `3.19.15` | `3.19.15` | current | https://github.com/danoli3/FreeImage (OF fork) | `apothecary/formulas/FreeImage/FreeImage.sh` |
 | **freetype** | `2.14.3` | `VER-2-14-3` / `2.14.3` | current | https://github.com/freetype/freetype · https://freetype.org | `apothecary/formulas/freetype/freetype.sh` |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | https://github.com/nigels-com/glew | `apothecary/formulas/glew/glew.sh` |
 | **glon12** | Mesa `26.0.4` | Mesa 26.0.x (D3D12 gallium) | pinned-dev | https://archive.mesa3d.org · https://docs.mesa3d.org/drivers/d3d12.html | `apothecary/formulas/glon12.sh` |
@@ -135,7 +135,7 @@
 | cairo | cairographics.org releases / freedesktop git |
 | curl | `github.com/curl/curl` release `curl-$VER_D` |
 | fmt | `github.com/fmtlib/fmt` tag `$VER` |
-| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.13` |
+| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.15` |
 | freetype | `github.com/freetype/freetype` tag `VER-X-Y-Z` |
 | glew | `github.com/nigels-com/glew` release tarball |
 | glfw | `github.com/glfw/glfw` tag `$VER` |
@@ -188,7 +188,7 @@ formulas:
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current,      source: "https://gitlab.freedesktop.org/cairo/cairo" }
   curl:       { current: "8.19.0",   latest: "8.21.0",   status: compatibility_pin, source: "https://github.com/curl/curl" }
   fmt:        { current: "12.2.0",   latest: "12.2.0",   status: current,      source: "https://github.com/fmtlib/fmt" }
-  FreeImage:  { current: "3.19.13",  latest: "3.19.13",  status: current,      source: "https://github.com/danoli3/FreeImage" }
+  FreeImage:  { current: "3.19.15",  latest: "3.19.15",  status: current,      source: "https://github.com/danoli3/FreeImage" }
   freetype:   { current: "2.14.3",   latest: "2.14.3",   status: current,      source: "https://github.com/freetype/freetype" }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current,      source: "https://github.com/nigels-com/glew" }
   glfw:       { current: "3.5.1",    latest: "3.5.1",    status: current,      source: "https://github.com/glfw/glfw" }
