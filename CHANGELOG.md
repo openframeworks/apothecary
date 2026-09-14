@@ -14,8 +14,9 @@ Curated from the git history of [openframeworks/apothecary](https://github.com/o
 
 `bleeding` (rolling, latest-commit build) isn't a fixed tag but is referenced throughout CI/README as the always-current stream.
 
-## 2026 (Jan – Aug, 23 merges)
+## 2026 (Jan – Sep)
 
+- **Android** NDK `28.2.13676358` → **r29 `29.0.14206865`**, SDK build-tools `36.0.0` → **`37.0.0`** (latest on ubuntu-24.04 Actions). Min compile API **24 → 25**.
 - **VS2026** support added (#546), then FreeImage link-error fixes for it (#556) and VS2022 runner fixes (#559)
 - **Emscripten** bumped 4.0.16 → 5.0.5 → 5.0.6 → 5.0.7 → 6.0.6 (#547, #553, #557, #566)
 - **FreeImage** 3.19.10 → 3.19.11 (#551), then 3.19.12, then 3.19.13
