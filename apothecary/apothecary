@@ -1836,6 +1836,72 @@ function mergeStaticArchives() {
   mv -f "$tmp" "$dest"
 }
 
+# Same merge, but leave the input archives in place so they can also be
+# published as their own XCFramework products (libssl.a / libcrypto.a).
+function mergeStaticArchivesKeepSources() {
+  local dest="$1"
+  shift
+  local work src base
+  local -a copies=()
+  work="${dest}.keep.src"
+  rm -rf "$work"
+  mkdir -p "$work"
+  for src in "$@"; do
+    base="$(basename "$src")"
+    cp -f "$src" "$work/$base"
+    copies+=("$work/$base")
+  done
+  mergeStaticArchives "$dest" "${copies[@]}"
+  rm -rf "$work"
+}
+
+function formulaSplitsXcframeworks() {
+  [ "$1" = "openssl" ]
+}
+
+# Group archives by basename (libssl.a, libcrypto.a) across Apple slices
+# instead of combining every .a in a directory into ${formula}.a.
+function recordSplitXcframeworkLibrary() {
+  local product="$1"
+  local archive="$2"
+  local headers="$3"
+  if [[ "${SPLIT_XCFRAMEWORK_FLAGS[$product]:-}" =~ $archive ]]; then
+    return 0
+  fi
+  SPLIT_XCFRAMEWORK_FLAGS[$product]+=" -library $archive -headers $headers"
+}
+
+function mergeOrSplitStaticArchives() {
+  local dest="$1"
+  local formula="$2"
+  local headers="$3"
+  shift 3
+  local archive product
+  if formulaSplitsXcframeworks "$formula" && [ "$#" -gt 1 ]; then
+    for archive in "$@"; do
+      product="$(basename "$archive" .a)"
+      [ "$product" = "$formula" ] && continue
+      recordSplitXcframeworkLibrary "$product" "$archive" "$headers"
+    done
+    mergeStaticArchivesKeepSources "$dest" "$@"
+  else
+    mergeStaticArchives "$dest" "$@"
+  fi
+}
+
+function emitSplitXcframeworks() {
+  local output_dir="$1"
+  local product output_path
+  [ "${#SPLIT_XCFRAMEWORK_FLAGS[@]}" -gt 0 ] || return 0
+  mkdir -p "$output_dir"
+  for product in "${!SPLIT_XCFRAMEWORK_FLAGS[@]}"; do
+    output_path="$output_dir/${product}.xcframework"
+    rm -rf "$output_path"
+    xcodebuild -create-xcframework ${SPLIT_XCFRAMEWORK_FLAGS[$product]} -output "$output_path"
+    echoSuccess "Created split XCFramework: $output_path"
+  done
+}
+
 function frameworkFormula() {
 
   echoStart " frameworkFormula [\"$1\"] for:[${TYPE}]"
@@ -1931,6 +1997,7 @@ function frameworkFormula() {
     # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
     PLATFORM_TYPES=("ios" "osx" "tvos" "catos" "xros" "watchos" )
     declare -a merged_dirs=()
+    declare -gA SPLIT_XCFRAMEWORK_FLAGS=()
     VERSION=""
     LIB_NAME=""
     CURRENT_TYPE=$TYPE
@@ -2064,7 +2131,7 @@ function frameworkFormula() {
 
         # Merge all .a files into a single static library
         if [ "${#a_files[@]}" -gt 1 ]; then
-          mergeStaticArchives "${dir}/${1}.a" "${a_files[@]}"
+          mergeOrSplitStaticArchives "${dir}/${1}.a" "$1" "$LIBS_DIR_REAL/$1/include" "${a_files[@]}"
           echo "Merged .a files into ${dir}/${1}.a"
           lipo -info "${dir}/${1}.a"
           # Add to xcframework flags
@@ -2124,16 +2191,14 @@ function frameworkFormula() {
     XCFRAMEWORK_PATH="${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/$1.xcframework"
     cd "${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/"
     xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+    emitSplitXcframeworks "${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}"
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
 
     cd $HERE_DIR
 
-
-
-
     # Loop over each .a file found within the xcframework
-    find "$XCFRAMEWORK_PATH" -type f -name "*.a" | while read -r lib_a; do
+    find "${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}" -path "*.xcframework/*" -type f -name "*.a" | while read -r lib_a; do
       echo "Securing $lib_a..."
       lipo -info "$lib_a"
       #xcrun codesign --sign - "$lib_a" || true
@@ -2278,6 +2343,7 @@ function xframeworkFormula() {
     )
     # this gets a bit advanced bash so need Bash 4 - brew install bash if issues arrise... hectic problems
     declare -a merged_dirs=()
+    declare -gA SPLIT_XCFRAMEWORK_FLAGS=()
     LIB_NAME=""
     for CURRENT_TYPE in "${PLATFORM_TYPES[@]}"; do
       if [ -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE" ]; then
@@ -2387,7 +2453,7 @@ function xframeworkFormula() {
       num_files=${#a_files[@]}
       if [ "$num_files" -gt 1 ]; then
         echo "Multiple archives found in $dir. Commencing the merge..."
-        mergeStaticArchives "${dir}/${1}.a" "${a_files[@]}"
+        mergeOrSplitStaticArchives "${dir}/${1}.a" "$1" "$LIBS_DIR_REAL/$1/include" "${a_files[@]}"
         echo "Merged into ${dir}/${1}.a"
         lipo -info "${dir}/${1}.a"
         #xcrun codesign --sign - "${dir}/${1}.a" || true
@@ -2409,13 +2475,14 @@ function xframeworkFormula() {
     HERE_DIR=$(cd $(dirname "./"); pwd -P)
     cd "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/"
     xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+    emitSplitXcframeworks "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}"
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
 
     cd $HERE_DIR
 
     # Loop over each .a file found within the xcframework
-    find "$XCFRAMEWORK_PATH" -type f -name "*.a" | while read -r lib_a; do
+    find "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}" -path "*.xcframework/*" -type f -name "*.a" | while read -r lib_a; do
       echo "Securing $lib_a..."
       lipo -info "$lib_a"
       #xcrun codesign --sign - "$lib_a" || true
@@ -2425,11 +2492,11 @@ function xframeworkFormula() {
 
     echo " -- deploy to xcframework [$X_LIBS]..."
     if ! command -v rsync &> /dev/null; then
-      cp -av "${XCFRAMEWORK_PATH}/"* ${X_LIBS}
+      cp -av "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/"*.xcframework ${X_LIBS}
       cp -av "${LIBS_DIR_REAL}/${1}/include/"* ${X_INCLUDE}
       cp -av "${LIBS_DIR_REAL}/${1}/license/"* ${X_LICENSE}
     else
-      rsync -av "${XCFRAMEWORK_PATH}" ${X_LIBS}
+      rsync -av "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/"*.xcframework ${X_LIBS}
       rsync -av "${LIBS_DIR_REAL}/${1}/include/" ${X_INCLUDE}
       rsync -av "${LIBS_DIR_REAL}/${1}/license/" ${X_LICENSE}
     fi
