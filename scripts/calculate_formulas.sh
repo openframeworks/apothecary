@@ -76,7 +76,7 @@ FORMULAS_MODULAR_ONLY=()
 LINUX_MODULAR_FORMULAS=(
     pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny
     FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2
-    uriparser opencv cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
+    uriparser cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
     poco dawn
 )
 
