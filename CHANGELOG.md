@@ -18,7 +18,7 @@ Curated from the git history of [openframeworks/apothecary](https://github.com/o
 
 - **VS2026** support added (#546), then FreeImage link-error fixes for it (#556) and VS2022 runner fixes (#559)
 - **Emscripten** bumped 4.0.16 → 5.0.5 → 5.0.6 → 5.0.7 → 6.0.6 (#547, #553, #557, #566)
-- **FreeImage** 3.19.10 → 3.19.11 (#551), then 3.19.12, then 3.19.13
+- **FreeImage** 3.19.10 → 3.19.11 (#551), then 3.19.12, 3.19.13, 3.19.14, then 3.19.15 (ICO/PSD heap-overflow CVEs)
 - **Linux "generic" distro / GCC10** support added — release path fixes (#567, #568, #569)
 - **Apo Menu** interactive CLI with a configurable output folder for deploying straight into an OF checkout (#563, #564)
 - **pixman** 0.46 link errors fixed (missing region64f / riscv sources) (#560)
