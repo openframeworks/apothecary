@@ -7,8 +7,7 @@ cd $SCRIPT_DIR
 APOTHECARY_LEVEL="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 export MAKE_TARGET="${MAKE_TARGET:-cmake}"
-export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-27}"
-export ANDROID_API="${ANDROID_API:-34}" #minimum Android API supported. 21 default
+export ANDROID_API="${ANDROID_API:-25}" # min compile API (Android 7.1). Not the SDK version.
 
 if [ -z "$1" ]; then
     echo "Error: ABI is not specified. Usage: $0 <ABI> [BUILD_SYSTEM]" >&2
@@ -20,17 +19,26 @@ export BUILD_SYSTEM=${2:-make}
 
 export TOOLCHAIN_ROOT="${APOTHECARY_LEVEL}/android"
 
-if [ "${NDK:-}" == "27.2.12479018" ]; then 
-    export NDK_ROOT="${ANDROID_NDK_ROOT:-}"
-elif [ "${NDK:-}" == "28.2.13676358" ]; then 
-    if [ -n "${ANDROID_NDK_LATEST_HOME:-}" ]; then
-        export ANDROID_NDK_ROOT="${ANDROID_NDK_LATEST_HOME}"
-    fi
-    export NDK_ROOT="${ANDROID_NDK_ROOT:-}"
-else
-    echo "Error: NDK path variable not set" >&2
+# NDK=major.minor.build (Actions matrix) → $ANDROID_HOME/ndk/$NDK.
+# Do not remap an older pin onto ANDROID_NDK_LATEST_HOME — that silently
+# compiled r29 while YAML still said 28.2.
+if [[ "${NDK:-}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    NDK_VERSION_MAJOR="${NDK%%.*}"
+    for _sdk in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" "/usr/local/lib/android/sdk"; do
+        if [ -n "$_sdk" ] && [ -d "${_sdk}/ndk/${NDK}" ]; then
+            export ANDROID_NDK_ROOT="${_sdk}/ndk/${NDK}"
+            break
+        fi
+    done
+fi
+export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-${NDK%%.*}}"
+export NDK_VERSION_MAJOR="${NDK_VERSION_MAJOR:-29}"
+export NDK_ROOT="${ANDROID_NDK_ROOT:-${ANDROID_NDK:-${ANDROID_NDK_HOME:-${ANDROID_NDK_LATEST_HOME:-}}}}"
+if [ -z "${NDK_ROOT}" ] || [ ! -d "${NDK_ROOT}" ]; then
+    echo "Error: NDK path not set or missing (NDK=${NDK:-unset} NDK_ROOT=${NDK_ROOT:-unset})" >&2
     exit 1
 fi
+export ANDROID_NDK_ROOT="${NDK_ROOT}"
 
 export HOST_ARCH=$(uname -m)
 case "$(uname)" in
