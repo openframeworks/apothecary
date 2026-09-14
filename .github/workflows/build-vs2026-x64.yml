@@ -77,7 +77,7 @@ jobs:
             mingw-w64-x86_64-gcc mingw-w64-x86_64-gcc-libs
             mingw-w64-x86_64-cmake mingw-w64-x86_64-gdb
             mingw-w64-x86_64-make
-            meson mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
 
       - name: Clone repository
         uses: actions/checkout@v7.0.1
