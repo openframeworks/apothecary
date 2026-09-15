@@ -66,6 +66,8 @@ Unknown commands may **passthrough** to the underlying `apothecary` binary.
 | `NO_COLOR=1` | off | No ANSI color |
 | `UI_ANIM=0` | `1` | No spinners / list animation |
 | `OUTPUT_FOLDER` | `<repo>/out` | Install / package output (`-d`) |
+
+After `copy`, `scripts/export_config.sh` writes relocatable `.pc` and `cmake/*Config.cmake` next to each binary (issue #405). Absolute cmake-install prefixes are rewritten to `\${pcfiledir}` / `CMAKE_CURRENT_LIST_DIR`.
 | `BUILD_DIR` | `<repo>/build` | Build cache (`-b`) |
 | `PACKAGE_LIBS` | unset | Space/comma-separated non-core staging directories for `scripts/package-individual.sh` |
 | `OPENCV_EXTRA_DEFINES` | unset | Additional CMake definitions for modular OpenCV variants |
