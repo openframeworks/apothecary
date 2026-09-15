@@ -84,6 +84,10 @@ LIBS=$(echo "$LIBS" | tr '\n' ' ')
 LIBS=""
 for LIB in "${FORMULAS[@]}"; do
     LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
+    if formula_is_modular_only "$LIB"; then
+        echo "Skipping modular-only formula '$LIB' from the core archive"
+        continue
+    fi
     if formula_is_internal "$LIB"; then
         echo "Skipping internal formula '$LIB' (merged into curl)"
         continue

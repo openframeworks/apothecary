@@ -155,7 +155,7 @@ function build() {
                 -DRTAUDIO_API_PULSE=ON \
                 -DRTAUDIO_API_ALSA=ON \
                 -DRTAUDIO_API_JACK=ON \
-                -DRTAUDIO_API_OSS=ON \
+                -DRTAUDIO_API_OSS=OFF \
                 -DRTAUDIO_API_DS=OFF \
                 -DRTAUDIO_API_ASIO=OFF \
                 -DRTAUDIO_API_WASAPI=OFF \

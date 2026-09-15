@@ -489,6 +489,17 @@ function build() {
             mv "Debug3rd" build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug
         fi
 
+    elif [ "$TYPE" == "linux" ]; then
+        mkdir -p "$1/lib/$TYPE/$PLATFORM"
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" "$1/include/"
+        cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        if compgen -G "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/*.a" >/dev/null; then
+            cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        fi
+        if [ -d "build_${TYPE}_${PLATFORM}/Release/share/opencv4" ]; then
+            cp -Rv "build_${TYPE}_${PLATFORM}/Release/share/opencv4/"* "$1/etc/"
+        fi
+        secure "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "android" ]; then
         export ANDROID_NDK=${NDK_ROOT}
 
@@ -1029,7 +1040,7 @@ function clean() {
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi

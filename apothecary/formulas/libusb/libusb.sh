@@ -3,7 +3,7 @@
 # libusb for ofxKinect needed for
 # Visual Studio and OS X
 
-FORMULA_TYPES=("osx" "vs")
+FORMULA_TYPES=("osx" "vs" "linux")
 FORMULA_DEPENDS=()
 
 GIT_URL=https://github.com/libusb/libusb
@@ -29,7 +29,7 @@ function download() {
         mv libusb-${VER} libusb
     fi
 
-    if [ "$TYPE" == "osx" ]; then
+    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
         downloader "${URL}.tar.gz"
         verify_sha256 "v${VER}.tar.gz" "$SHA256"
         tar -xzf v${VER}.tar.gz
@@ -43,9 +43,9 @@ function download() {
 function prepare() {
     cp -f $FORMULA_DIR/CMakeLists.txt .
 
-    if [ "$TYPE" == "vs" ]; then
+    if [ "$TYPE" == "vs" ] || [ "$TYPE" == "linux" ]; then
         cp -f $FORMULA_DIR/config.h.in ./config.h.in
-    else
+    elif [ "$TYPE" == "osx" ]; then
         cp -f ./Xcode/config.h ./config.h
     fi
 }
@@ -136,6 +136,23 @@ function build() {
         cd ..
     fi
 
+    if [ "$TYPE" == "linux" ]; then
+        cmake -S . -B "build_${TYPE}_${PLATFORM}" \
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake" \
+            -DCMAKE_C_STANDARD="${C_STANDARD}" \
+            -DCMAKE_CXX_STANDARD="${CPP_STANDARD}" \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="build_${TYPE}_${PLATFORM}/Release" \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DLIBUSB_BUILD_TESTING=OFF \
+            -DLIBUSB_BUILD_EXAMPLES=OFF \
+            -DLIBUSB_INSTALL_TARGETS=ON \
+            -DLIBUSB_BUILD_SHARED_LIBS=OFF
+        cmake --build "build_${TYPE}_${PLATFORM}" -j"${PARALLEL_MAKE}" --target install
+    fi
+
 }
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
@@ -152,7 +169,7 @@ function copy() {
         cp -f "build_${TYPE}_${PLATFORM}/Release/libusb-1.0.lib" $1/lib/$TYPE/$PLATFORM/libusb.lib
         secure "$1/lib/$TYPE/$PLATFORM/libusb.lib" "libusb.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
-    if [ "$TYPE" == "osx" ]; then
+    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/libusb-1.0/" $1/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libusb-1.0.a" $1/lib/$TYPE/$PLATFORM/libusb.a
@@ -174,7 +191,7 @@ function clean() {
         rm -f *.lib
 
     fi
-    if [ "$TYPE" == "osx" ]; then
+    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
         rm -f *.a
     fi
 

@@ -115,6 +115,10 @@ else()
     add_library(usb-1.0 STATIC)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_compile_definitions(usb-1.0 PRIVATE _GNU_SOURCE)
+endif()
+
 set_target_properties(usb-1.0 PROPERTIES
     PREFIX lib # to be consistent with mainline libusb build system(s)
 )

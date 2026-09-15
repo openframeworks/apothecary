@@ -9,9 +9,9 @@ FORMULA_TYPES=()
 FORMULA_DEPENDS=()
 
 # define the version
-VERSION=1.66.0
-SHA256=71c32f4085e3adef4fffc90674a01079665d281d1de2aea6c6955db8567deae1
-UNCOMPRESSED_NAME=boost_1_66_0
+VERSION=1.87.0
+SHA256=f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
+UNCOMPRESSED_NAME=boost_1_87_0
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
 BUILD_ID=1
 DEFINES=""
@@ -23,13 +23,13 @@ EXTRA_CPPFLAGS="-std=c++${CPP_STANDARD} -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPIN
 
 # tools for git use
 
-OFFICIAL_DOWNLOAD_HOST=https://boostorg.jfrog.io/artifactory/main
+OFFICIAL_DOWNLOAD_HOST=https://archives.boost.io
 
 # URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.tar.gz
 
 WIN_URL=${OFFICIAL_DOWNLOAD_HOST}/release/$VERSION/source/$UNCOMPRESSED_NAME.zip
 
-URL=https://boostorg.jfrog.io/artifactory/main/release/1.66.0/source/$TARBALL
+URL=${OFFICIAL_DOWNLOAD_HOST}/release/${VERSION}/source/${TARBALL}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -63,8 +63,8 @@ function prepare() {
         ./bootstrap.sh --with-toolset=clang --with-libraries=filesystem
     elif [ "$TYPE" == "emscripten" ]; then
         ./bootstrap.sh --with-libraries=filesystem
-    elif [ "$TYPE" == "emscripten" ]; then
-        ./bootstrap.sh --with-libraries=filesystem
+    elif [ "$TYPE" == "linux" ]; then
+        ./bootstrap.sh --with-toolset=gcc --with-libraries=filesystem
     elif [[ "${TYPE}" == "ios" || "${TYPE}" == "tvos" ]]; then
         mkdir -p lib/
         mkdir -p build/
@@ -96,6 +96,12 @@ function build() {
 
     elif [ "$TYPE" == "osx" ]; then
         ./b2 -j${PARALLEL_MAKE} toolset=clang cxxflags="-std=c++${CPP_STANDARD} -stdlib=libc++ -arch arm64 -arch x86_64 -Wno-implicit-function-declaration -mmacosx-version-min=${OSX_MIN_SDK_VER}" linkflags="-stdlib=libc++" threading=multi variant=release --build-dir=build --stage-dir=stage link=static stage
+        cd tools/bcp
+        ../../b2
+    elif [ "$TYPE" == "linux" ]; then
+        ./b2 -j${PARALLEL_MAKE} toolset=gcc cxxflags="-std=c++${CPP_STANDARD} -fPIC" \
+            threading=multi variant=release --build-dir=build --stage-dir=stage \
+            --with-filesystem link=static stage
         cd tools/bcp
         ../../b2
     elif [[ "$TYPE" == "ios" || "${TYPE}" == "tvos" ]]; then
@@ -342,6 +348,10 @@ function copy() {
         rsync -ar install_dir/boost/* $1/include/boost/
         cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
         cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
+    elif [ "$TYPE" == "linux" ]; then
+        dist/bin/bcp filesystem install_dir
+        rsync -ar install_dir/boost/* $1/include/boost/
+        cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
     elif [[ "$TYPE" == "ios" || "$TYPE" == "tvos" ]]; then
         bcp filesystem install_dir
         OUTPUT_DIR_LIB=$(pwd)/lib/boost/ios/
