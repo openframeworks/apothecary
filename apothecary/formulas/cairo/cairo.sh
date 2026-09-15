@@ -20,7 +20,7 @@ FORMULA_DEPENDS=("zlib" "libpng" "pixman" "freetype")
 FORMULA_DEPENDS_MANUAL=1
 
 VER=1.18.4
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 SHA1="0a54ce94df6e9db9b9d55ada2ef58b6c47861fde"
@@ -89,7 +89,7 @@ function prepare() {
         apothecaryDepend copy freetype
         echo ""
 
-        cp -RvT $FORMULA_DIR/ ./
+        overlayCairoCMake
     else
         # generate the configure script if it's not there
 
@@ -114,7 +114,23 @@ function prepare() {
         apothecaryDepend build freetype
         apothecaryDepend copy freetype
 
-        cp -Rv $FORMULA_DIR/ ./
+        overlayCairoCMake
+    fi
+}
+
+# Cairo upstream is Meson. Overlay the formula's CMake files into the unpacked
+# source. GNU cp -R $FORMULA_DIR/ ./ nests ./cairo/ when PWD is already cairo
+# (same basename), so cmake .. finds no CMakeLists.txt. Copy contents with /.
+function overlayCairoCMake() {
+    if [ ! -f "$FORMULA_DIR/CMakeLists.txt" ]; then
+        echoError "cairo formula overlay missing CMakeLists.txt in $FORMULA_DIR"
+        exit 1
+    fi
+    cp -Rv "$FORMULA_DIR/." ./
+    if [ ! -f CMakeLists.txt ]; then
+        echoError "cairo CMake overlay failed; CMakeLists.txt not in $PWD"
+        ls -la
+        exit 1
     fi
 }
 
@@ -249,9 +265,9 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_CXX_EXTENSIONS=OFF
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1" \
-			-DCMAKE_C_FLAGS="-DUSE_PTHREADS=1" \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_CXX_FLAGS=-DUSE_PTHREADS=1 \
+            -DCMAKE_C_FLAGS=-DUSE_PTHREADS=1 \
             -DCMAKE_INSTALL_PREFIX=Release \
             -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
