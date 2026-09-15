@@ -1621,6 +1621,10 @@ function copyFormula() {
     promoteMsys2ArchPath "$LIBS_DIR_REAL/$1"
     reindexMsys2GnuArchives "$LIBS_DIR_REAL/$1"
   fi
+  # Relocate cmake/pkg-config install files to formula-relative paths (issue #405).
+  if [ -f "$APOTHECARY_DIR/../scripts/export_config.sh" ]; then
+    bash "$APOTHECARY_DIR/../scripts/export_config.sh" "$LIBS_DIR_REAL/$1" "${PLATFORM:-${ARCH:-}}" "${ARCH:-}"
+  fi
   cd $APOTHECARY_DIR
 }
 
