@@ -3,7 +3,7 @@
 # A Massively Spiffy Yet Delicately Unobtrusive Compression Library
 # http://zlib.net/
 
-FORMULA_TYPES=("vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "android")
+FORMULA_TYPES=("vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" "msys2")
 FORMULA_DEPENDS=()
 
 # define the version
