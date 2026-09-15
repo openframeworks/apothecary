@@ -16,8 +16,10 @@ FORMULA_DEPENDS=()
 # define the version
 VER=1.0
 SOURCE_COMMIT=ec925142edeb1da3158fd8710ecc6dc2fb1f1f97
-BUILD_ID=3
+BUILD_ID=4
 DEFINES="ANGLE_IS_64_BIT_CPU"
+# frameworkFormula / xframeworkFormula emit this name instead of metalangle.xcframework
+XCFRAMEWORK_NAME=MetalANGLE
 
 # tools for git use
 GIT_URL=https://github.com/kakashidinho/metalangle.git
@@ -91,14 +93,42 @@ function _metalangle_apple_frameworks() {
 
 function _lipo_ios_simulator() {
     local dest="$1"
+    local fatdir="${dest}/lib/ios/iphonesimulator"
+    local combined="${dest}/lib/ios/SIMULATOR64COMBINED/MetalANGLE.a"
     local arm64="${dest}/lib/ios/SIMULATORARM64/MetalANGLE.a"
     local x64="${dest}/lib/ios/SIMULATOR64/MetalANGLE.a"
-    local fatdir="${dest}/lib/ios/iphonesimulator"
-    if [[ -f "${arm64}" && -f "${x64}" ]]; then
-        mkdir -p "${fatdir}"
+    mkdir -p "${fatdir}"
+    if [[ -f "${combined}" ]]; then
+        echo "iOS simulator MetalANGLE.a already combined (SIMULATOR64COMBINED)"
+        cp -f "${combined}" "${fatdir}/MetalANGLE.a"
+        lipo -info "${fatdir}/MetalANGLE.a"
+    elif [[ -f "${arm64}" && -f "${x64}" ]]; then
         echo "lipo iOS simulator MetalANGLE.a (arm64 + x86_64)"
         lipo -create "${arm64}" "${x64}" -output "${fatdir}/MetalANGLE.a"
         lipo -info "${fatdir}/MetalANGLE.a"
+    elif [[ -f "${arm64}" ]]; then
+        echo "iOS simulator MetalANGLE.a: only arm64 slice present"
+        cp -f "${arm64}" "${fatdir}/MetalANGLE.a"
+    elif [[ -f "${x64}" ]]; then
+        echo "iOS simulator MetalANGLE.a: only x86_64 slice present"
+        cp -f "${x64}" "${fatdir}/MetalANGLE.a"
+    fi
+}
+
+function _lipo_tvos_simulator() {
+    local dest="$1"
+    local fatdir="${dest}/lib/tvos/appletvsimulator"
+    local arm64="${dest}/lib/tvos/SIMULATORARM64_TVOS/MetalANGLE.a"
+    local x64="${dest}/lib/tvos/SIMULATOR_TVOS/MetalANGLE.a"
+    mkdir -p "${fatdir}"
+    if [[ -f "${arm64}" && -f "${x64}" ]]; then
+        echo "lipo tvOS simulator MetalANGLE.a (arm64 + x86_64)"
+        lipo -create "${arm64}" "${x64}" -output "${fatdir}/MetalANGLE.a"
+        lipo -info "${fatdir}/MetalANGLE.a"
+    elif [[ -f "${arm64}" ]]; then
+        cp -f "${arm64}" "${fatdir}/MetalANGLE.a"
+    elif [[ -f "${x64}" ]]; then
+        cp -f "${x64}" "${fatdir}/MetalANGLE.a"
     fi
 }
 
@@ -286,18 +316,35 @@ function copy() {
         mkdir -p "$1/lib/$TYPE/$PLATFORM/"
         if [[ $BUILD_STATIC == true ]] || [[ $BUILD_CMAKE == true ]]; then
             local built=""
-            if [ -f "build_${TYPE}_${PLATFORM}/Release/lib/libmetalangle.a" ]; then
-                built="build_${TYPE}_${PLATFORM}/Release/lib/libmetalangle.a"
-            elif [ -f "build_${TYPE}_${PLATFORM}/Release/lib/MetalANGLE.a" ]; then
-                built="build_${TYPE}_${PLATFORM}/Release/lib/MetalANGLE.a"
-            fi
+            local cand
+            for cand in \
+                "build_${TYPE}_${PLATFORM}/Release/lib/libMetalANGLE.a" \
+                "build_${TYPE}_${PLATFORM}/Release/lib/libmetalangle.a" \
+                "build_${TYPE}_${PLATFORM}/Release/lib/MetalANGLE.a" \
+                "build_${TYPE}_${PLATFORM}/Release/lib/metalangle.a"; do
+                if [ -f "$cand" ]; then
+                    built="$cand"
+                    break
+                fi
+            done
             if [ -z "$built" ]; then
-                echoError "metalangle: no libmetalangle.a under build_${TYPE}_${PLATFORM}/Release/lib"
+                echoError "metalangle: no MetalANGLE archive under build_${TYPE}_${PLATFORM}/Release/lib"
+                ls -la "build_${TYPE}_${PLATFORM}/Release/lib" 2>/dev/null || true
                 exit 1
             fi
+            # One archive named MetalANGLE.a (secure this path — not a lowercase alias).
             cp -v "$built" "$1/lib/$TYPE/$PLATFORM/MetalANGLE.a"
-            secure "$1/lib/$TYPE/$PLATFORM/MetalANGLE.a" "metalangle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+            secure "$1/lib/$TYPE/$PLATFORM/MetalANGLE.a" "MetalANGLE.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         fi
+        local fw
+        for fw in \
+            "build_${TYPE}_${PLATFORM}/Release/MetalANGLE.framework" \
+            "build_${TYPE}_${PLATFORM}/Release/lib/MetalANGLE.framework"; do
+            if [ -d "$fw" ]; then
+                rm -rf "$1/lib/$TYPE/$PLATFORM/MetalANGLE.framework"
+                cp -R "$fw" "$1/lib/$TYPE/$PLATFORM/MetalANGLE.framework"
+            fi
+        done
         if [[ $BUILD_XCARCHIVE == true ]]; then
             if [ -d "build_${TYPE}_${PLATFORM}/Release/MetalANGLE.xcarchive" ]; then
                 cp -R "build_${TYPE}_${PLATFORM}/Release/MetalANGLE.xcarchive" "$1/lib/$TYPE/$PLATFORM/MetalANGLE.xcarchive"
@@ -305,6 +352,8 @@ function copy() {
         fi
         if [[ "$TYPE" == "ios" ]]; then
             _lipo_ios_simulator "$1"
+        elif [[ "$TYPE" == "tvos" ]]; then
+            _lipo_tvos_simulator "$1"
         fi
     fi
 

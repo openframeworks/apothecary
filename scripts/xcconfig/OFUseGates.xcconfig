@@ -12,11 +12,20 @@ OF_USE_DAWN = 0
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) OF_USE_ANGLE=$(OF_USE_ANGLE) OF_USE_DAWN=$(OF_USE_DAWN)
 
 // --- ANGLE (GLES -> Metal drop-in). Flip OF_USE_ANGLE=1 ---
+// Apothecary ships libs/metalangle (not libs/metal). Prefer the XCFramework
+// (device + sim in one bundle, same pattern as Dawn). Thin .a paths remain
+// as a fallback before `apo framework metalangle` has been run.
 HEADER_METALANGLE = $(OF_PATH)/libs/metalangle/include
+LIB_METALANGLE_XCF[sdk=macosx*] = $(OF_PATH)/libs/metalangle/lib/macos/MetalANGLE.xcframework
+LIB_METALANGLE_XCF[sdk=iphoneos*] = $(OF_PATH)/libs/metalangle/lib/ios/MetalANGLE.xcframework
+LIB_METALANGLE_XCF[sdk=iphonesimulator*] = $(OF_PATH)/libs/metalangle/lib/ios/MetalANGLE.xcframework
+LIB_METALANGLE_XCF[sdk=appletvos*] = $(OF_PATH)/libs/metalangle/lib/tvos/MetalANGLE.xcframework
+LIB_METALANGLE_XCF[sdk=appletvsimulator*] = $(OF_PATH)/libs/metalangle/lib/tvos/MetalANGLE.xcframework
 LIB_METALANGLE[sdk=macosx*] = $(OF_PATH)/libs/metalangle/lib/osx/$(PLATFORM)/MetalANGLE.a
 LIB_METALANGLE[sdk=iphoneos*] = $(OF_PATH)/libs/metalangle/lib/ios/$(PLATFORM)/MetalANGLE.a
 LIB_METALANGLE[sdk=iphonesimulator*] = $(OF_PATH)/libs/metalangle/lib/ios/iphonesimulator/MetalANGLE.a
-// fallback when only one sim slice was built:
+LIB_METALANGLE[sdk=appletvos*] = $(OF_PATH)/libs/metalangle/lib/tvos/$(PLATFORM)/MetalANGLE.a
+LIB_METALANGLE[sdk=appletvsimulator*] = $(OF_PATH)/libs/metalangle/lib/tvos/appletvsimulator/MetalANGLE.a
 LIB_METALANGLE_SIM_SLICE = $(OF_PATH)/libs/metalangle/lib/ios/$(PLATFORM)/MetalANGLE.a
 
 // --- Dawn (WebGPU). Flip OF_USE_DAWN=1 ---

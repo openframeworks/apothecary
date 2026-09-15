@@ -1055,6 +1055,7 @@ include_directories(
 
 # Setup target
 add_library(${TARGET_NAME} STATIC ${SRC_FILES})
+set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME MetalANGLE)
 
 if(IOS OR TVOS)
   target_link_libraries(${TARGET_NAME} PRIVATE

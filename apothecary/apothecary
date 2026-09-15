@@ -2195,9 +2195,10 @@ function frameworkFormula() {
 
 
 
-    XCFRAMEWORK_PATH="${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/$1.xcframework"
+    XCFRAMEWORK_NAME="${XCFRAMEWORK_NAME:-$1}"
+    XCFRAMEWORK_PATH="${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/${XCFRAMEWORK_NAME}.xcframework"
     cd "${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}/"
-    xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+    xcodebuild -create-xcframework $xcframework_flags -output "${XCFRAMEWORK_NAME}.xcframework"
     emitSplitXcframeworks "${XLIBS_DIR_REAL}/${1}/lib/${TYPE_OUT}"
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
@@ -2480,8 +2481,9 @@ function xframeworkFormula() {
 
     echoSuccess " flags: \"$1\" \"$xcframework_flags\" "
     HERE_DIR=$(cd $(dirname "./"); pwd -P)
+    XCFRAMEWORK_NAME="${XCFRAMEWORK_NAME:-$1}"
     cd "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}/"
-    xcodebuild -create-xcframework $xcframework_flags -output $1.xcframework
+    xcodebuild -create-xcframework $xcframework_flags -output "${XCFRAMEWORK_NAME}.xcframework"
     emitSplitXcframeworks "${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}"
     echoSuccess " xcframework for $TYPE built successfully."
     echo "========================"
