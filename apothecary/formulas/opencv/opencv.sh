@@ -6,13 +6,13 @@
 #
 # uses a CMake build system
 
-FORMULA_TYPES=("osx" "ios" "catos" "xros" "tvos" "vs" "android" "emscripten" "linux" )
+FORMULA_TYPES=("osx" "ios" "catos" "xros" "tvos" "vs" "msys2" "android" "emscripten" "linux" )
 FORMULA_DEPENDS=("zlib" "libpng" )
 
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=5
+BUILD_ID=6
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -488,6 +488,107 @@ function build() {
             mv "Debug" build_${TYPE}_${PLATFORM}/Debug
             mv "Debug3rd" build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug
         fi
+
+    elif [ "$TYPE" == "msys2" ]; then
+        echoInfo "building $TYPE | $ARCH | $PLATFORM"
+        echoInfo "--------------------"
+        mkdir -p "build_${TYPE}_${ARCH}"
+        cd "build_${TYPE}_${ARCH}"
+        rm -f CMakeCache.txt || true
+
+        ZLIB_ROOT="$LIBS_ROOT/zlib/"
+        ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
+
+        ZLIB_DEFS="-DBUILD_ZLIB=ON -DWITH_ZLIB=ON"
+        if [ -f "$ZLIB_LIBRARY" ]; then
+            ZLIB_DEFS="-DBUILD_ZLIB=OFF -DWITH_ZLIB=ON \
+                -DZLIB_ROOT=${ZLIB_ROOT} \
+                -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+                -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
+                -DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR}"
+        fi
+
+        # ofxOpenCv still uses OpenCV 4's C API (IplImage, CV_INTER_NN, cvarrToMat).
+        # Build a static 4.x world lib and keep PNG/zlib in-tree so we do not
+        # depend on MSYS2's OpenCV 5 package.
+        export DEFINES="
+                -DCMAKE_C_STANDARD=${C_STANDARD} \
+                -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
+                -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+                -DCMAKE_CXX_EXTENSIONS=OFF \
+                -DBUILD_SHARED_LIBS=OFF \
+                -DCMAKE_INSTALL_PREFIX=Release \
+                -DCMAKE_INSTALL_INCLUDEDIR=include \
+                -DCMAKE_INSTALL_LIBDIR=lib \
+                -DOPENCV_ENABLE_NONFREE=OFF \
+                -DOPENCV_GENERATE_PKGCONFIG=ON \
+                -DENABLE_PRECOMPILED_HEADERS=OFF \
+                -DBUILD_TESTS=OFF \
+                -DBUILD_PERF_TESTS=OFF \
+                -DBUILD_EXAMPLES=OFF \
+                -DBUILD_DOCS=OFF \
+                -DBUILD_PACKAGE=OFF \
+                -DBUILD_opencv_python=OFF \
+                -DBUILD_opencv_python2=OFF \
+                -DBUILD_opencv_python3=OFF \
+                -DBUILD_opencv_java=OFF \
+                -DBUILD_opencv_apps=OFF \
+                -DBUILD_opencv_world=ON \
+                -DBUILD_opencv_highgui=OFF \
+                -DBUILD_opencv_imgcodecs=ON \
+                -DBUILD_opencv_videoio=OFF \
+                -DBUILD_opencv_videostab=OFF \
+                -DBUILD_opencv_stitching=ON \
+                -DBUILD_opencv_calib3d=ON \
+                -DBUILD_opencv_objdetect=ON \
+                -DWITH_FFMPEG=OFF \
+                -DWITH_GSTREAMER=OFF \
+                -DWITH_MSMF=OFF \
+                -DWITH_DSHOW=OFF \
+                -DWITH_VFW=OFF \
+                -DWITH_WIN32UI=OFF \
+                -DWITH_GTK=OFF \
+                -DWITH_QT=OFF \
+                -DWITH_OPENGL=OFF \
+                -DWITH_OPENCL=OFF \
+                -DWITH_CUDA=OFF \
+                -DWITH_IPP=OFF \
+                -DWITH_TBB=OFF \
+                -DWITH_OPENMP=OFF \
+                -DWITH_EIGEN=OFF \
+                -DWITH_JPEG=OFF \
+                -DWITH_TIFF=OFF \
+                -DWITH_WEBP=OFF \
+                -DWITH_OPENEXR=OFF \
+                -DWITH_OPENJPEG=OFF \
+                -DWITH_JASPER=OFF \
+                -DWITH_PNG=ON \
+                -DBUILD_PNG=ON \
+                -DBUILD_JPEG=OFF \
+                -DBUILD_TIFF=OFF \
+                -DWITH_1394=OFF \
+                -DWITH_VTK=OFF \
+                -DWITH_LAPACK=OFF \
+                -DWITH_ADE=OFF \
+                ${ZLIB_DEFS}"
+
+        if [[ "$ARCH" == "clangarm64" ]]; then
+            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=OFF -DWITH_NEON=OFF -DENABLE_NEON=OFF -DPNG_ARM_NEON=off"
+        else
+            EXTRA_DEFS="-DCV_ENABLE_INTRINSICS=ON -DCPU_BASELINE=SSE2 -DPNG_ARM_NEON=off"
+        fi
+
+        cmake .. ${DEFINES} \
+            ${EXTRA_DEFS} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
+            -DCMAKE_CXX_FLAGS="${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="${FLAG_RELEASE}" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
+        cmake --build . --config Release -j${PARALLEL_MAKE} --target install
+        cd ..
 
     elif [ "$TYPE" == "android" ]; then
         export ANDROID_NDK=${NDK_ROOT}
@@ -1004,6 +1105,36 @@ function copy() {
         cp -v "LICENSE" "$1/license/"
 
         secure "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ "$TYPE" == "msys2" ]; then
+        mkdir -p "$1/lib/$TYPE/$PLATFORM"
+        mkdir -p "$1/include"
+        MSYS_BUILD="build_${TYPE}_${ARCH}"
+        if [ -d "${MSYS_BUILD}/Release/include/opencv4" ]; then
+            cp -Rv "${MSYS_BUILD}/Release/include/opencv4/" "$1/include/"
+        elif [ -d "${MSYS_BUILD}/Release/include" ]; then
+            cp -Rv "${MSYS_BUILD}/Release/include/" "$1/include/"
+        fi
+        if compgen -G "${MSYS_BUILD}/Release/lib/*.a" >/dev/null; then
+            cp -v "${MSYS_BUILD}/Release/lib/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        fi
+        if compgen -G "${MSYS_BUILD}/Release/lib/opencv4/3rdparty/*.a" >/dev/null; then
+            cp -v "${MSYS_BUILD}/Release/lib/opencv4/3rdparty/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        fi
+        if [ -d "${MSYS_BUILD}/Release/share/opencv4" ]; then
+            cp -Rv "${MSYS_BUILD}/Release/share/opencv4/"* "$1/etc/"
+        fi
+        if [ -d "${MSYS_BUILD}/Release/share/licenses" ]; then
+            cp -Rv "${MSYS_BUILD}/Release/share/licenses/"* "$1/license/"
+        fi
+        mkdir -p "$1/lib/$TYPE/$PLATFORM/pkgconfig"
+        if compgen -G "${MSYS_BUILD}/Release/lib/pkgconfig/opencv4.pc" >/dev/null; then
+            cp -v "${MSYS_BUILD}/Release/lib/pkgconfig/opencv4.pc" "$1/lib/$TYPE/$PLATFORM/pkgconfig/"
+        fi
+        if [ -f "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" ]; then
+            secure "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        elif [ -f "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" ]; then
+            secure "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        fi
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/include/opencv2
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include/
@@ -1032,6 +1163,10 @@ function clean() {
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
+        fi
+    elif [ "$TYPE" == "msys2" ]; then
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            rm -r build_${TYPE}_${ARCH}
         fi
     fi
 }

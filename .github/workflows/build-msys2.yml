@@ -74,6 +74,7 @@ jobs:
           pacboy: >-
             gcc:p
             cmake:p
+            ninja:p
             gperf:p
             libxml2:p
             python3:p
