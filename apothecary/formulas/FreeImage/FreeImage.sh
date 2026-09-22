@@ -5,10 +5,10 @@
 # http://freeimage.sourceforge.net
 #
 # Uses the CMakeLists shipped in danoli3/FreeImage (3.19.12+).
-# Optional codecs: OpenEXR, WebP, and LibRaw are ON except on VS, where
-# LibRaw C2491 (dllimport) and jxrlib SAL keep both off. ARM64EC also
-# cannot compile OpenEXR (emmintrin.h via ImfSystemSpecific/ImfZip).
-# OpenEXR 3.3.13 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
+# Optional codecs: OpenEXR, WebP, and LibRaw are ON for every type.
+# JXR stays Windows-only (jxrlib SAL/GUID). 3.19.16 vendors OpenEXR 3.3.14
+# with the ARM64EC emmintrin.h fix, so ARM VS no longer disables OpenEXR.
+# OpenEXR 3.3 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
@@ -16,11 +16,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.15
-SHA256="c3b1ed2051a2cb7f33dda984c841cd9266630d03762ac9d0742b7cb8def11f91"
+VER=3.19.16
+SHA256="3eaa781355cac618526cf6fd286581a8c33dbc15cd15467f241616d06b6b9f7e"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=14
+BUILD_ID=15
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -272,15 +272,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        # VS: LibRaw C2491 dllimport even with LIBRAW_NODLL cmake cache var;
-        # jxrlib SAL fails on MSVC too. ARM64EC OpenEXR pulls emmintrin.h.
-        FI_LIBRAW=OFF
-        FI_JXR=OFF
-        FI_OPENEXR=ON
-        if [[ "$ARCH" =~ ^(arm64ec)$ ]]; then
-            FI_OPENEXR=OFF
-        fi
-
+        # 3.19.16 OpenEXR 3.3.14 takes the scalar/NEON path on _M_ARM64EC.
+        # LIBRAW_NODLL must be a compiler define, not only a CMake cache var.
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DLIBRAW_NODLL=ON \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -289,12 +282,12 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         	-DCMAKE_INSTALL_INCLUDEDIR=include \
-        	-DBUILD_LIBRAWLITE=${FI_LIBRAW} \
+        	-DBUILD_LIBRAWLITE=ON \
         	-DBUILD_LIBPNG=OFF \
 			-DBUILD_ZLIB=OFF \
-			-DBUILD_OPENEXR=${FI_OPENEXR} \
+			-DBUILD_OPENEXR=ON \
 			-DBUILD_WEBP=ON \
-			-DBUILD_JXR=${FI_JXR} \
+			-DBUILD_JXR=ON \
             ${MT_TYPE_DEFINES} \
 			-DENABLE_VISIBILITY=OFF \
 			-DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
@@ -307,13 +300,13 @@ function build() {
 			-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 			-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
 			-DBUILD_SHARED_LIBS=OFF"
-        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
+        env CXXFLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
         cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
-            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
             -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
@@ -331,13 +324,13 @@ function build() {
         cd "build_${TYPE}_${ARCH}_debug"
         rm -f CMakeCache.txt *.a *.o *.lib
 
-        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
+        env CXXFLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
         cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
+            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
+            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 -DLIBRAW_NODLL ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
             -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
