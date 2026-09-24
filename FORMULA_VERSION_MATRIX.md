@@ -35,7 +35,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **libpng** | **1.6.58** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
 | **libxml2** | **2.13.9** (latest 2.13.x) | 2.14/2.15 (`v2.15.4`) break consumers; stay on 2.13 until OF is tested. |
 | **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
-| **FreeImage** | **3.19.16** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON. JXR is Windows-only. 3.19.16 vendors OpenEXR 3.3.14 with the ARM64EC `emmintrin.h` fix. |
+| **FreeImage** | **3.19.17** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON. JXR is Windows-only (restored in 3.19.17). ARM64EC OpenEXR on since 3.19.16. |
 | **ANGLE / Dawn / MetalANGLE / GLon12** | SHA pins | Opt-in backends. Not default OF GL. See `AGENTS.md`. |
 | **Linux CI compiler** | **GCC 10** | Focal-era CI. Dawn stays **off** Linux core until GCC 11 (`std::bit_cast` / `atomic::wait`). |
 | **Android NDK** | YAML `28.2.13676358` | See [Toolchains](#toolchains). Configure currently redirects that string to `ANDROID_NDK_LATEST_HOME` (**r29** on ubuntu-24.04). |
@@ -54,7 +54,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **curl** | `8.21.0` | `curl-8_22_0` / `8.22.0` | behind | Just shipped 8.21.0 (#574/#579) with nghttp2/3 + ngtcp2 + libssh2. **8.22.0 is a one-point bump**, not a pin. | https://github.com/curl/curl |
 | **dawn** | `2026.07.31` (`cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7`) | Dawn `v20260911.162847` (rolling) | pinned-dev | ofLibs-era SHA. `DAWN_BUILD_MONOLITHIC_LIBRARY=STATIC`. Linux off until GCC 11. watchOS: no Metal. | https://dawn.googlesource.com/dawn |
 | **fmt** | `12.2.0` | `12.2.0` | current | Latest stable. | https://github.com/fmtlib/fmt |
-| **FreeImage** | `3.19.16` | `3.19.16` | current | OF fork (`danoli3/FreeImage`). Security 3.19.16 (OpenEXR 3.3.14, LibRaw 0.22.2). ARM64EC OpenEXR on. | https://github.com/danoli3/FreeImage |
+| **FreeImage** | `3.19.17` | `3.19.17` | current | OF fork (`danoli3/FreeImage`). 3.19.17 restores Windows JPEG-XR. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.14.3` | `VER-2-14-3` | current | Latest 2.14. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
 | **glon12** | Mesa `26.0.4` | Mesa `26.2.2` | pinned-dev | VS-only GL→D3D12. SHA256 `6d91541e…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
@@ -171,7 +171,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | cairo | cairographics / freedesktop git |
 | curl | `github.com/curl/curl` `curl-$VER_D` |
 | fmt | `github.com/fmtlib/fmt` tag `$VER` |
-| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.16` |
+| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.17` |
 | freetype | `github.com/freetype/freetype` `VER-2-14-3` |
 | glew | nigels-com/glew release tarball |
 | glfw | `github.com/glfw/glfw` tag `$VER` |
@@ -220,7 +220,7 @@ formulas:
   curl:       { current: "8.21.0",   latest: "8.22.0",   status: behind, pin: "none — one-point bump available" }
   dawn:       { current: "2026.07.31", latest: "v20260911.162847", status: pinned-dev, pin: "SHA; Linux needs GCC 11" }
   fmt:        { current: "12.2.0",   latest: "12.2.0",   status: current }
-  FreeImage:  { current: "3.19.16",  latest: "3.19.16",  status: current, pin: "OF fork; JXR Windows-only; ARM64EC OpenEXR on in 3.19.16" }
+  FreeImage:  { current: "3.19.17",  latest: "3.19.17",  status: current, pin: "OF fork; JXR Windows-only (restored 3.19.17)" }
   freetype:   { current: "2.14.3",   latest: "2.14.3",   status: current }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current }
   glon12:     { current: "26.0.4",   latest: "26.2.2",   status: pinned-dev, pin: "Mesa SHA; VS-only" }

@@ -6,8 +6,8 @@
 #
 # Uses the CMakeLists shipped in danoli3/FreeImage (3.19.12+).
 # Optional codecs: OpenEXR, WebP, and LibRaw are ON for every type.
-# JXR stays Windows-only (jxrlib SAL/GUID). 3.19.16 vendors OpenEXR 3.3.14
-# with the ARM64EC emmintrin.h fix, so ARM VS no longer disables OpenEXR.
+# JXR is Windows-only; 3.19.17 restores the plugin (JXRMeta without __in).
+# 3.19.16+ vendors OpenEXR 3.3.14 with the ARM64EC emmintrin.h fix.
 # OpenEXR 3.3 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -16,11 +16,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.16
-SHA256="3eaa781355cac618526cf6fd286581a8c33dbc15cd15467f241616d06b6b9f7e"
+VER=3.19.17
+SHA256="90f5e812dafdaeb7251d9344b2625fd865e54f767d20a8fa436756721e9a1a9a"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=15
+BUILD_ID=16
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -272,8 +272,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        # 3.19.16 OpenEXR 3.3.14 takes the scalar/NEON path on _M_ARM64EC.
-        # LIBRAW_NODLL must be a compiler define, not only a CMake cache var.
+        # 3.19.16+ OpenEXR 3.3.14 takes the scalar/NEON path on _M_ARM64EC.
+        # 3.19.17 restores JPEG-XR. LIBRAW_NODLL must be a compiler define.
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DLIBRAW_NODLL=ON \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
