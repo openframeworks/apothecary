@@ -20,7 +20,7 @@ VER=3.19.17
 SHA256="90f5e812dafdaeb7251d9344b2625fd865e54f767d20a8fa436756721e9a1a9a"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=17
+BUILD_ID=18
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -54,7 +54,17 @@ function prepare() {
         perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 
     elif [ "$TYPE" == "vs" ]; then
-        echo "vs"
+        # LibDeflate treats ARM64EC as x86_64 because MSVC sets _M_X64.
+        # That pulls AVX (__m256) into adler32.c, which ARM64EC rejects (C7302).
+        # Prefer the ARM generic path. This is not apothecary zlib — BUILD_ZLIB
+        # is OFF; LibDeflate is OpenEXR's bundled compressor.
+        if [[ "$ARCH" == "arm64ec" ]]; then
+            local defs="Source/LibDeflate/common_defs.h"
+            if [ -f "$defs" ] && ! grep -q "_M_ARM64EC" "$defs"; then
+                echo "FreeImage: treat ARM64EC as ARCH_ARM64 in LibDeflate"
+                perl -0777 -pi -e 's/#ifdef _MSC_VER\n#  if defined\(_M_X64\)/#ifdef _MSC_VER\n#  if defined(_M_ARM64EC)\n#    define ARCH_ARM64\n#  elif defined(_M_X64)/' "$defs"
+            fi
+        fi
     fi
 }
 
