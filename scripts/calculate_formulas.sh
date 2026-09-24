@@ -167,12 +167,10 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "rtAudio"
             "tess2"
             "uriparser"
+            #"metalangle"
             "cairo"
         )
-        # metalangle: MGLKit (osx/ios/tvos). google/angle GN is opt-in until gn gen is green.
-        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
-            FORMULAS+=("metalangle")
-        fi
+        # google/angle (GN GLES→Metal) is opt-in; not in CI formula lists.
         # TYPE=osx|ios|tvos|catos|xros ./apo update angle
     fi
     if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
@@ -258,7 +256,7 @@ elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
             "curl"
             "poco"
             "dawn"
-            # angle / glon12: not in core — GN/gclient and Mesa meson are opt-in
+            # google/angle and glon12 are opt-in; not in CI formula lists.
             # TYPE=vs ./apo update angle
             # TYPE=vs ./apo update glon12
         )
