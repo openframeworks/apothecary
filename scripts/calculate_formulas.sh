@@ -170,7 +170,8 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             #"metalangle"
             "cairo"
         )
-        # google/angle (GN GLES→Metal) is opt-in; not in CI formula lists.
+        # google/angle (GN GLES→Metal) is opt-in; not in core CI formula lists.
+        # Built on the modular-optional pass → latest-modular.
         # TYPE=osx|ios|tvos|catos|xros ./apo update angle
     fi
     if [ "$TBUNDLE" == "2" ] || [ "$TBUNDLE" == "0" ]; then
@@ -256,11 +257,22 @@ elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
             "curl"
             "poco"
             "dawn"
-            # google/angle and glon12 are opt-in; not in CI formula lists.
+            # google/angle and glon12 are opt-in; not in core CI formula lists.
+            # Built on the modular-optional pass and published to latest-modular.
             # TYPE=vs ./apo update angle
             # TYPE=vs ./apo update glon12
         )
     fi
+fi
+
+# Optional latest-modular packages. Not in core FORMULAS / Action bundle lists.
+# scripts/build-modular-optional.sh builds these on push to bleeding/master.
+FORMULAS_MODULAR_OPTIONAL=()
+if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros)$ ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("angle")
+fi
+if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("metalangle")
 fi
 
 array_contains() {
