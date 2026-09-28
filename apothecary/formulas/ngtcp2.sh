@@ -3,7 +3,7 @@
 # ngtcp2 - QUIC transport library with the OpenSSL 3.5+ crypto helper
 # https://github.com/ngtcp2/ngtcp2
 
-FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android")
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=("openssl")
 
 VER=1.25.0
@@ -74,6 +74,12 @@ function build() {
             -DANDROID_ABI="$ABI"
             -DANDROID_API="$ANDROID_API"
             -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT"
+            -DOPENSSL_SSL_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libssl.a"
+            -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libcrypto.a"
+        )
+    elif [ "$TYPE" == "linux" ]; then
+        PLATFORM_ARGS=(
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake"
             -DOPENSSL_SSL_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libssl.a"
             -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libcrypto.a"
         )

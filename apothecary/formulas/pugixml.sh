@@ -5,7 +5,7 @@
 # http://pugixml.org/
 #
 # uses a makeifle build system
-FORMULA_TYPES=("emscripten" "osx" "vs" "ios" "watchos" "xros" "catos" "tvos" "android")
+FORMULA_TYPES=("emscripten" "osx" "vs" "ios" "watchos" "xros" "catos" "tvos" "android" "linux")
 FORMULA_DEPENDS=()
 
 # define the version by sha
@@ -151,6 +151,15 @@ function build() {
             -DCMAKE_INSTALL_LIBDIR=lib
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
+    elif [ "$TYPE" == "linux" ]; then
+        cmake -S . -B "build_${TYPE}_${PLATFORM}" ${DEFINES} \
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="build_${TYPE}_${PLATFORM}/Release" \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_TESTS=OFF
+        cmake --build "build_${TYPE}_${PLATFORM}" -j"${PARALLEL_MAKE}" --target install
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -197,7 +206,7 @@ function copy() {
         cp -f "build_${TYPE}_${ARCH}/Release/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixml.lib
         cp -f "build_${TYPE}_${ARCH}/Debug/lib/pugixml.lib" $1/lib/$TYPE/$PLATFORM/pugixmlD.lib
         secure "$1/lib/$TYPE/$PLATFORM/pugixml.lib" "pugixml.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|linux)$ ]]; then
         mkdir -p $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -R "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
@@ -229,7 +238,7 @@ function clean() {
             # Delete the folder and its contents
             rm -r build_${TYPE}_${ARCH}
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         rm -f *.a
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             # Delete the folder and its contents

@@ -745,6 +745,16 @@ endif()
 
 set(SOURCES ${enabled_cairo_sources})
 
+# Overlay sources.cmake lists optional backends (GL, Xlib, …) that later
+# cairo tarballs no longer ship. Drop missing files so cairo-static is not empty.
+set(_cairo_existing_sources)
+foreach(_cairo_src ${SOURCES})
+	if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_cairo_src}")
+		list(APPEND _cairo_existing_sources ${_cairo_src})
+	endif()
+endforeach()
+set(SOURCES ${_cairo_existing_sources})
+
 if(BUILD_SHARED_LIBS)
 	add_library(cairo SHARED ${SOURCES})
 	target_link_libraries(cairo ${CAIRO_LIBS})

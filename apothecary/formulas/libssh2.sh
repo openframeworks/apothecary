@@ -3,7 +3,7 @@
 # libssh2 - SSH2 client library used by curl for SCP and SFTP
 # https://github.com/libssh2/libssh2
 
-FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android")
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=("zlib" "openssl")
 
 VER=1.11.1
@@ -85,6 +85,13 @@ function build() {
             -DANDROID_ABI="$ABI"
             -DANDROID_API="$ANDROID_API"
             -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT"
+            -DOPENSSL_SSL_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libssl.a"
+            -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libcrypto.a"
+            -DZLIB_LIBRARY="$ZLIB_ROOT/lib/$TYPE/$PLATFORM/zlib.a"
+        )
+    elif [ "$TYPE" == "linux" ]; then
+        PLATFORM_ARGS=(
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake"
             -DOPENSSL_SSL_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libssl.a"
             -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libcrypto.a"
             -DZLIB_LIBRARY="$ZLIB_ROOT/lib/$TYPE/$PLATFORM/zlib.a"

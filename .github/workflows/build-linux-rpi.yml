@@ -24,8 +24,6 @@ env:
   CROSS_OS: bookworm
   NO_FORCE: 1
   USE_ARTIFACT: false
-  # Prove the QEMU sysroot + GCC 10 cross compiler before brewing the full core set.
-  FORMULAS_OVERRIDE: zlib
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
 jobs:
@@ -110,3 +108,19 @@ jobs:
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.sha256
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.manifest.json
+
+      - name: Clean canonical archive before modular packaging
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        run: rm -f out/openFrameworksLibs*.tar.bz2
+
+      - name: Package modular libraries
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        run: scripts/package-individual.sh
+
+      - name: Upload modular libraries
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          files: out/oF_*_linux_${{ env.ARCH }}_gcc10.tar.bz2

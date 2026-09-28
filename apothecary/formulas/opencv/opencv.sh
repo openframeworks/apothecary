@@ -753,6 +753,13 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
+        LIBPNG_ROOT="$LIBS_ROOT/libpng/"
+        LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng16.a"
+        if [ ! -f "$LIBPNG_LIBRARY" ]; then
+            LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
+        fi
+
         CORE_DEFS="
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_C_STANDARD=${C_STANDARD} \
@@ -772,6 +779,9 @@ function build() {
         -DBUILD_DOCS=OFF \
         -DENABLE_BUILD_HARDENING=ON \
         -DBUILD_EXAMPLES=OFF \
+        -DBUILD_opencv_apps=OFF \
+        -DBUILD_opencv_python=OFF \
+        -DBUILD_opencv_java=OFF \
         -DBUILD_ANDROID_EXAMPLES=OFF \
         -DINSTALL_ANDROID_EXAMPLES=OFF \
         -DINSTALL_PYTHON_EXAMPLES=OFF \
@@ -1104,6 +1114,31 @@ function copy() {
         cp -v "LICENSE" "$1/license/"
 
         secure "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ "$TYPE" == "linux" ]; then
+        mkdir -p "$1/lib/$TYPE/$PLATFORM"
+        mkdir -p "$1/include"
+        if [ -d "build_${TYPE}_${PLATFORM}/Release/include/opencv4" ]; then
+            cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" "$1/include/"
+        elif [ -d "build_${TYPE}_${PLATFORM}/Release/include" ]; then
+            cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" "$1/include/"
+        fi
+        if compgen -G "build_${TYPE}_${PLATFORM}/Release/lib/*.a" >/dev/null; then
+            cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        fi
+        if compgen -G "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/*.a" >/dev/null; then
+            cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a "$1/lib/$TYPE/$PLATFORM/"
+        fi
+        if [ -d "build_${TYPE}_${PLATFORM}/Release/share/opencv4" ]; then
+            cp -Rv "build_${TYPE}_${PLATFORM}/Release/share/opencv4/"* "$1/etc/"
+        fi
+        if [ -d "build_${TYPE}_${PLATFORM}/Release/share/licenses" ]; then
+            cp -Rv "build_${TYPE}_${PLATFORM}/Release/share/licenses/"* "$1/license/"
+        fi
+        if [ -f "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" ]; then
+            secure "$1/lib/$TYPE/$PLATFORM/libopencv_world.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        elif [ -f "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" ]; then
+            secure "$1/lib/$TYPE/$PLATFORM/libopencv_core.a" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        fi
     elif [ "$TYPE" == "msys2" ]; then
         mkdir -p "$1/lib/$TYPE/$PLATFORM"
         mkdir -p "$1/include"
@@ -1159,7 +1194,7 @@ function clean() {
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
-    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten)$ ]]; then
+    elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos|emscripten|linux)$ ]]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi

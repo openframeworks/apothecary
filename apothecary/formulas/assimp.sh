@@ -394,7 +394,8 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0"
+            -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
 
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh

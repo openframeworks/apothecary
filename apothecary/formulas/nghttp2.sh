@@ -3,7 +3,7 @@
 # nghttp2 - HTTP/2 C library
 # https://github.com/nghttp2/nghttp2
 
-FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android")
+FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=()
 
 VER=1.70.0
@@ -47,6 +47,10 @@ function build() {
             -DANDROID_ABI="$ABI"
             -DANDROID_API="$ANDROID_API"
             -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT"
+        )
+    elif [ "$TYPE" == "linux" ]; then
+        platform_args=(
+            -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake"
         )
     else
         platform_args=(

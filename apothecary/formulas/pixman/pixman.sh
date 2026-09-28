@@ -3,7 +3,7 @@
 # a low-level software library for pixel manipulation
 # http://pixman.org/
 
-FORMULA_TYPES=("osx" "vs")
+FORMULA_TYPES=("osx" "vs" "linux")
 FORMULA_DEPENDS=()
 
 # define the version
@@ -73,13 +73,25 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     mkdir -p pixman
-    if [ "$TYPE" == "osx" ]; then
+    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
         echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
         rm -f CMakeCache.txt *.a *.o
+        local PLATFORM_DEFS=()
+        if [ "$TYPE" == "osx" ]; then
+            PLATFORM_DEFS=(
+                -DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/ios.toolchain.cmake"
+                -DPLATFORM="$PLATFORM"
+                -DENABLE_BITCODE=OFF
+                -DENABLE_ARC=OFF
+                -DDEPLOYMENT_TARGET="$MIN_SDK_VER"
+            )
+        else
+            PLATFORM_DEFS=(-DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake")
+        fi
         cmake .. \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -98,11 +110,7 @@ function build() {
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=bin \
             -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FLAG_RELEASE} " \
-            -DCMAKE_TOOLCHAIN_FILE=$APOTHECARY_DIR/toolchains/ios.toolchain.cmake \
-            -DPLATFORM=$PLATFORM \
-            -DENABLE_BITCODE=OFF \
-            -DENABLE_ARC=OFF \
-            -DDEPLOYMENT_TARGET=${MIN_SDK_VER} \
+            "${PLATFORM_DEFS[@]}" \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
@@ -180,8 +188,7 @@ function copy() {
 
 # executed inside the lib src dir
 function clean() {
-    make uninstall
-    make clean
+    rm -rf "build_${TYPE}_${PLATFORM}"
 }
 
 function load() {

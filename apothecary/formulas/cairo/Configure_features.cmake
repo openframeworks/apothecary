@@ -50,7 +50,10 @@ if(MESA_FOUND)
     set(CAIRO_HAS_GALLIUM_SURFACE 1)
 endif()
 
-if(OPENGL_FOUND)
+# cairo 1.17+ dropped the GL backend sources. Never enable them unless the
+# unpacked tarball still has cairo-gl-composite.c.
+set(CAIRO_HAS_GL_SURFACE 0)
+if(OPENGL_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/src/cairo-gl-composite.c")
     set(CAIRO_HAS_GL_SURFACE 1)
 endif()
 
