@@ -21,7 +21,7 @@ VER=3.19.18
 SHA256="e12b0636ad99ef9e81c9fa2eb27c9fc23332d2755e4e83b454e48985def03f0a"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=20
+BUILD_ID=21
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -69,6 +69,20 @@ function prepare() {
                 echo "FreeImage: disable LibWebP SSE/AVX on ARM64EC"
                 perl -pi -e 's/\(defined\(_M_X64\) \|\| defined\(_M_IX86\)\)/(defined(_M_X64) || defined(_M_IX86)) \&\& !defined(_M_ARM64EC)/g' "$webp_cpu"
             fi
+            # cpu.h only enables WEBP_USE_SSE2 if HAVE_CONFIG_H is unset or
+            # WEBP_HAVE_SSE2 is set. A stub config.h without SSE/AVX makes
+            # every *_sse2.c / *_avx2.c compile as an empty stub.
+            local webp_cfg="Source/LibWebP/src/webp/config.h"
+            if [ ! -f "$webp_cfg" ]; then
+                echo "FreeImage: write LibWebP config.h without x86 SIMD"
+                cat > "$webp_cfg" <<'WEBP_CFG'
+#ifndef WEBP_CONFIG_H_
+#define WEBP_CONFIG_H_
+/* ARM64EC: MSVC defines _M_X64, but emmintrin.h is forbidden. */
+#endif
+WEBP_CFG
+            fi
+        fi
         fi
     fi
 }
@@ -291,6 +305,9 @@ function build() {
         # 3.19.17+ restores JPEG-XR. LibJXR needs WIN32 (MSVC only defines _WIN32)
         # so x86.h provides PACKETLENGTH / UINTPTR_T. LIBRAW_NODLL is a compiler define.
         FI_VS_DEFS="-DLIBRAW_NODLL -DWIN32"
+        if [[ "$ARCH" == "arm64ec" ]]; then
+            FI_VS_DEFS="${FI_VS_DEFS} -DHAVE_CONFIG_H"
+        fi
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
 	        -DLIBRAW_NODLL=ON \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
