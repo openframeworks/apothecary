@@ -21,7 +21,7 @@ VER=3.19.18
 SHA256="e12b0636ad99ef9e81c9fa2eb27c9fc23332d2755e4e83b454e48985def03f0a"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=19
+BUILD_ID=20
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -55,15 +55,19 @@ function prepare() {
         perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 
     elif [ "$TYPE" == "vs" ]; then
-        # LibDeflate treats ARM64EC as x86_64 because MSVC sets _M_X64.
-        # That pulls AVX (__m256) into adler32.c, which ARM64EC rejects (C7302).
-        # Prefer the ARM generic path. This is not apothecary zlib — BUILD_ZLIB
-        # is OFF; LibDeflate is OpenEXR's bundled compressor.
+        # ARM64EC defines _M_X64 for x64 source compatibility. MSVC then
+        # forbids including emmintrin.h/immintrin.h except via <intrin.h>
+        # (C1189 / C7302). Force the ARM/generic paths in bundled codecs.
         if [[ "$ARCH" == "arm64ec" ]]; then
             local defs="Source/LibDeflate/common_defs.h"
             if [ -f "$defs" ] && ! grep -q "_M_ARM64EC" "$defs"; then
                 echo "FreeImage: treat ARM64EC as ARCH_ARM64 in LibDeflate"
                 perl -0777 -pi -e 's/#ifdef _MSC_VER\n#  if defined\(_M_X64\)/#ifdef _MSC_VER\n#  if defined(_M_ARM64EC)\n#    define ARCH_ARM64\n#  elif defined(_M_X64)/' "$defs"
+            fi
+            local webp_cpu="Source/LibWebP/src/dsp/cpu.h"
+            if [ -f "$webp_cpu" ] && ! grep -q "_M_ARM64EC" "$webp_cpu"; then
+                echo "FreeImage: disable LibWebP SSE/AVX on ARM64EC"
+                perl -pi -e 's/\(defined\(_M_X64\) \|\| defined\(_M_IX86\)\)/(defined(_M_X64) || defined(_M_IX86)) \&\& !defined(_M_ARM64EC)/g' "$webp_cpu"
             fi
         fi
     fi
