@@ -83,7 +83,6 @@ function prepare() {
 WEBP_CFG
             fi
         fi
-        fi
     fi
 }
 
