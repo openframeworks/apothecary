@@ -1,0 +1,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -422,7 +422,7 @@
+         if (OPENSSL_FIPS)
+             set("${_CIPHER_STR}" ON CACHE BOOL "${_CIPHER_HELP}" FORCE)
+         else()
+-            cmake_dependent_option("${_CIPHER_STR}" "${_CIPHER_HELP}" "${_CIPHER_DEFAULT}" "BUILD_SHARED_LIBS" OFF)
++            option("${_CIPHER_STR}" "${_CIPHER_HELP}" "${_CIPHER_DEFAULT}") # static autoalginit
+         endif()
+     elseif (_CIPHER STREQUAL "capieng")
+         cmake_dependent_option("${_CIPHER_STR}" "${_CIPHER_HELP}" "${_CIPHER_DEFAULT}" "OPENSSL_STDIO;OPENSSL_ENGINE" OFF)
+--- a/crypto/configuration.h.cmake.in
++++ b/crypto/configuration.h.cmake.in
+@@ -143,3 +143,4 @@
+ #cmakedefine OPENSSL_NO_JITTER
++#cmakedefine OPENSSL_NO_FIPS_JITTER
+ #cmakedefine OPENSSL_NO_KDF
+ #cmakedefine OPENSSL_NO_KTLS

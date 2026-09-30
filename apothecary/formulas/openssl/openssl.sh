@@ -15,7 +15,7 @@ OPENSSL_CMAKE_COMMIT=83f28a9791bb3189e125a9e21ff9bae3cd4d55f5
 SHA1=236d35817b0adda5c07572ae24bcbe643b05c71d
 SHA256=736b467530f916737b7031310ccb21d8218c6229e61e8e160cd1d3458cd543a8
 
-BUILD_ID=12
+BUILD_ID=13
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -54,6 +54,8 @@ DEFINES="-DOPENSSL_NO_DEPRECATED=OFF \
 	-DOPENSSL_NO_STATIC_ENGINE=OFF \
 	-DOPENSSL_STATIC_ENGINE=ON \
 	-DOPENSSL_THREADS=ON \
+	-DOPENSSL_AUTOALGINIT=ON \
+	-DOPENSSL_NO_FIPS_JITTER=ON \
 	-DOPENSSL_RAND_SEED=os \
 	-DOPENSSL_BUILD_APPS=OFF \
 	-DBUILD_TESTING=OFF \
@@ -131,6 +133,18 @@ function prepare() {
         echo "rand-seed.patch applied successfully"
     else
         echo "Failed to apply rand-seed.patch"
+        exit 1
+    fi
+
+    # Static libraries need algorithm registration, and OpenSSL 4 must not
+    # request the FIPS jitter source when jitter support is not built.
+    if grep -q '^#cmakedefine OPENSSL_NO_FIPS_JITTER$' crypto/configuration.h.cmake.in &&
+        grep -q 'option("${_CIPHER_STR}" "${_CIPHER_HELP}" "${_CIPHER_DEFAULT}") # static autoalginit' CMakeLists.txt; then
+        echo "static-init.patch already applied"
+    elif patch --batch --forward -p1 <"$FORMULA_DIR/static-init.patch"; then
+        echo "static-init.patch applied successfully"
+    else
+        echo "Failed to apply static-init.patch"
         exit 1
     fi
 
