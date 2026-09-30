@@ -12,7 +12,17 @@ if ! which realpath >&/dev/null; then
 fi
 
 brew update >/dev/null
-brew install --formula cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig bash shfmt wget2 curl gum
+formulae=(cmake coreutils autoconf automake gtk-doc brotli libtool wget fontconfig bash shfmt wget2 curl gum)
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+  # Keep the runner's working tools instead of upgrading their dependency trees.
+  export HOMEBREW_NO_INSTALL_UPGRADE=1
+  export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+  # ccache is optional in build.sh. Installing it from source on older macOS
+  # pulls in Rust/LLVM and can fail before any Apothecary formula is built.
+else
+  formulae+=(ccache)
+fi
+brew install --formula "${formulae[@]}"
 
 ls -n /Applications/ | grep Xcode
 
