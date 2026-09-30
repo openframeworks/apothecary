@@ -77,7 +77,7 @@ LINUX_MODULAR_FORMULAS=(
     pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny
     FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2
     uriparser cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
-    poco dawn
+    poco dawn opencv5
 )
 
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
@@ -260,6 +260,16 @@ elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
         )
     fi
 fi
+
+# OpenCV 5 follows each OpenCV build slot, but is published separately.
+# Do this before overrides so explicitly selected formula lists stay exact.
+for formula in "${FORMULAS[@]}"; do
+    if [ "$formula" = "opencv" ] && [ "$TARGET" != "watchos" ]; then
+        FORMULAS+=("opencv5")
+        break
+    fi
+done
+FORMULAS_MODULAR_ONLY+=("opencv5")
 
 array_contains() {
     local array="$1[@]"
