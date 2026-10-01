@@ -23,7 +23,7 @@ GIT_TAG=$VER
 
 GIT_CONTRIB_URL=https://github.com/opencv/opencv_contrib
 VER_CONTRIB=$VER
-SHA256_CONTRIB="35a09c60f4f3165639df5996d3d6f9700761720d91bcf036597826a39a8d3e57"
+SHA256_CONTRIB="c58f6344170c39abf187c56f3843b59cab1fd3e89cf19ba2ce25dc061659b27f"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
