@@ -15,19 +15,32 @@ BUILD_ID=1
 DEFINES=""
 
 # tools for git use
-GIT_URL=git://git.netsurf-browser.org/libsvgtiny.git
+GIT_URL=https://github.com/netsurf-browser/libsvgtiny.git
 GIT_TAG=$VER
+SVG_COMMIT=a041b0d9978f412d86ffe1c97bba7473d2f9c4fd
+DOM_COMMIT=6094e804fc14074bae65f45614099f01d0227ac3
+PARSER_COMMIT=447c86722d4043ca10921a1746c72fea05838c11
+WAPCAPLET_COMMIT=b5e42b12211a92339b0b62cb90f1a86a397e146e
+
+function svgtiny_checkout() {
+    local url="$1" destination="$2" commit="$3"
+    git init "$destination" || return $?
+    git -C "$destination" remote add origin "$url" || return $?
+    git -C "$destination" fetch --depth 1 origin "$commit" || return $?
+    git -c advice.detachedHead=false -C "$destination" checkout --detach "$commit" || return $?
+    verify_git_commit "$destination" "$commit"
+}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
-    git -c advice.detachedHead=false clone -b release/$VER --depth 1 git://git.netsurf-browser.org/libsvgtiny.git
-    mv libsvgtiny svgtiny
+    . "$DOWNLOADER_SCRIPT"
+    svgtiny_checkout "$GIT_URL" svgtiny "$SVG_COMMIT" || return $?
     cd svgtiny
 
     # git -c advice.detachedHead=false clone -b release/0.4.2 --depth 1 git://git.netsurf-browser.org/libdom.git
-    git -c advice.detachedHead=false clone -b master --depth 1 https://github.com/danoli3/libdom.git #0.2.5
-    git -c advice.detachedHead=false clone -b release/0.2.5 --depth 1 git://git.netsurf-browser.org/libparserutils.git
-    git -c advice.detachedHead=false clone -b release/0.4.3 --depth 1 git://git.netsurf-browser.org/libwapcaplet.git
+    svgtiny_checkout https://github.com/danoli3/libdom.git libdom "$DOM_COMMIT" || return $?
+    svgtiny_checkout https://github.com/netsurf-browser/libparserutils.git libparserutils "$PARSER_COMMIT" || return $?
+    svgtiny_checkout https://github.com/netsurf-browser/libwapcaplet.git libwapcaplet "$WAPCAPLET_COMMIT" || return $?
 
     #if [ "$TYPE" == "vs" ]; then
     #dos2unix $FORMULA_DIR/libdom.patch
