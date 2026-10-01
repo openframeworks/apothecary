@@ -6,16 +6,16 @@
 FORMULA_TYPES=("vs" "osx" "ios" "tvos" "xros" "catos" "watchos" "linux" "android" )
 FORMULA_DEPENDS=("zlib")
 
-# OpenSSL 4.0.2 + danoli3/openssl-cmake branch 4.0 (test pin for PR #562)
+# OpenSSL 4.0.3 + danoli3/openssl-cmake branch 4.0 (test pin for PR #562)
 # Note: openssl-cmake 3.5 + 3.5.7 failed CI (ML-DSA DTLS capability macros).
-VER=4.0.2
+VER=4.0.3
 VERDIR=4.0.0
 VER_TAG="4.0"
-OPENSSL_CMAKE_COMMIT=83f28a9791bb3189e125a9e21ff9bae3cd4d55f5
-SHA1=236d35817b0adda5c07572ae24bcbe643b05c71d
-SHA256=736b467530f916737b7031310ccb21d8218c6229e61e8e160cd1d3458cd543a8
+OPENSSL_CMAKE_COMMIT=2058261bb74c7443c753981bcecc1b2c7d9bc73d
+SHA1=7035f60f356f8c80b76eebfdeb81a499f19028fa
+SHA256=325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9
 
-BUILD_ID=13
+BUILD_ID=14
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -55,9 +55,9 @@ DEFINES="-DOPENSSL_NO_DEPRECATED=OFF \
 	-DOPENSSL_STATIC_ENGINE=ON \
 	-DOPENSSL_THREADS=ON \
 	-DOPENSSL_AUTOALGINIT=ON \
-	-DOPENSSL_NO_FIPS_JITTER=ON \
+	-DOPENSSL_FIPS_JITTER=OFF \
 	-DOPENSSL_RAND_SEED=os \
-	-DOPENSSL_BUILD_APPS=OFF \
+	-DOPENSSL_APPS=OFF \
 	-DBUILD_TESTING=OFF \
 	-DOPENSSL_NO_AFALGENG=ON \
 	-DOPENSSL_ZLIB=ON \
@@ -118,33 +118,12 @@ function prepare() {
     apothecaryDepend build zlib
     apothecaryDepend copy zlib
 
-    if grep -q '^option(OPENSSL_BUILD_APPS ' CMakeLists.txt; then
-        echo "disable-apps.patch already applied"
-    elif patch --batch --forward -p1 <"$FORMULA_DIR/disable-apps.patch"; then
-        echo "disable-apps.patch applied successfully"
-    else
-        echo "Failed to apply disable-apps.patch"
-        exit 1
-    fi
-
     if grep -q 'OPENSSL_RAND_SEED_.*CACHE BOOL.*FORCE)' CMakeLists.txt; then
         echo "rand-seed.patch already applied"
     elif patch --batch --forward -p1 <"$FORMULA_DIR/rand-seed.patch"; then
         echo "rand-seed.patch applied successfully"
     else
         echo "Failed to apply rand-seed.patch"
-        exit 1
-    fi
-
-    # Static libraries need algorithm registration, and OpenSSL 4 must not
-    # request the FIPS jitter source when jitter support is not built.
-    if grep -q '^#cmakedefine OPENSSL_NO_FIPS_JITTER$' crypto/configuration.h.cmake.in &&
-        grep -q 'option("${_CIPHER_STR}" "${_CIPHER_HELP}" "${_CIPHER_DEFAULT}") # static autoalginit' CMakeLists.txt; then
-        echo "static-init.patch already applied"
-    elif patch --batch --forward -p1 <"$FORMULA_DIR/static-init.patch"; then
-        echo "static-init.patch applied successfully"
-    else
-        echo "Failed to apply static-init.patch"
         exit 1
     fi
 
