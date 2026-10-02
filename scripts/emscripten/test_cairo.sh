@@ -18,7 +18,7 @@ trap 'rm -rf "$test_dir"' EXIT
     "$LIBS_ROOT/cairo/lib/emscripten/$platform/libcairo.a" \
     "$LIBS_ROOT/pixman/lib/emscripten/$platform/libpixman-1.a" \
     "$LIBS_ROOT/freetype/lib/emscripten/$platform/libfreetype.a" \
-    "$LIBS_ROOT/libpng/lib/emscripten/$platform/libpng.a" \
+    "$LIBS_ROOT/libpng/lib/emscripten/$platform/libpng16.a" \
     "$LIBS_ROOT/zlib/lib/emscripten/$platform/zlib.a" \
     "$LIBS_ROOT/brotli/lib/emscripten/$platform/libbrotlidec.a" \
     "$LIBS_ROOT/brotli/lib/emscripten/$platform/libbrotlicommon.a" \

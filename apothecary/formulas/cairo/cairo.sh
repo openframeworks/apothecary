@@ -242,6 +242,9 @@ function build() {
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
         LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng.a"
+        if [ "$TYPE" == "emscripten" ]; then
+            LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/$TYPE/$PLATFORM/libpng16.a"
+        fi
 
         PIXMAN_ROOT="$LIBS_ROOT/pixman/"
         PIXMAN_INCLUDE_DIR="$LIBS_ROOT/pixman/include"
