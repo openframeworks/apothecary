@@ -56,7 +56,7 @@ Libraries are built on [GitHub Actions](https://github.com/openframeworks/apothe
 | **visionOS (xrOS) arm64 / Simulator** | [![build-xros](https://github.com/openframeworks/apothecary/actions/workflows/build-xros.yml/badge.svg)](https://github.com/openframeworks/apothecary/actions/workflows/build-xros.yml) | Xcode, VSCode | .xcFrameworks, C++2b |
 | **watchOS arm64 / Simulator**  | [![build-watchos](https://github.com/openframeworks/apothecary/actions/workflows/build-watchos.yml/badge.svg)](https://github.com/openframeworks/apothecary/actions/workflows/build-watchos.yml) | Xcode, VSCode | .xcFrameworks, C++2b |
 | **emscripten / memory64**      | [![build-emscripten](https://github.com/openframeworks/apothecary/actions/workflows/build-emscripten.yml/badge.svg)](https://github.com/openframeworks/apothecary/actions/workflows/build-emscripten.yml) | Make | C++17, C17 |
-| **Android arm64 / armv7 / x86 / x86_64** | [![build-android](https://github.com/openframeworks/apothecary/actions/workflows/build-android.yml/badge.svg)](https://github.com/openframeworks/apothecary/actions/workflows/build-android.yml) | NDK 23, Android Studio | CMake |
+| **Android arm64 / armv7 / x86 / x86_64** | [![build-android](https://github.com/openframeworks/apothecary/actions/workflows/build-android.yml/badge.svg)](https://github.com/openframeworks/apothecary/actions/workflows/build-android.yml) | NDK r29 (`29.0.14206865`), SDK 37, API 25 | CMake |
 
 ## Requirements
 
