@@ -1754,6 +1754,17 @@ function gnuReindexArchive() {
     *.dll.a) return 0 ;;
   esac
   archive_abs="$(cd "$(dirname "$archive")" && pwd)/$(basename "$archive")"
+  # ar x flattens members into one directory, so same-named objects (e.g.
+  # OpenCV world's core/src/parallel.cpp.o and core/src/parallel/parallel.cpp.o)
+  # overwrite each other and the repacked archive silently loses code.
+  # Only rebuild the symbol index in place for those archives.
+  if [ -n "$("$ar_bin" t "$archive_abs" 2>/dev/null | sort | uniq -d)" ]; then
+    "$ar_bin" s "$archive_abs" || return 1
+    if [ "$ar_kind" != llvm ] && [ -n "$ranlib_bin" ]; then
+      "$ranlib_bin" "$archive_abs" >/dev/null 2>&1 || true
+    fi
+    return 0
+  fi
   tmpdir=$(mktemp -d 2>/dev/null || mktemp -d -t apoar)
   (
     cd "$tmpdir" || exit 1
