@@ -1,0 +1,266 @@
+[
+  {
+    "name": "FreeImage",
+    "formula": "apothecary/formulas/FreeImage/FreeImage.sh",
+    "repo": "danoli3/FreeImage",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "assimp",
+    "formula": "apothecary/formulas/assimp.sh",
+    "repo": "assimp/assimp",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "brotli",
+    "formula": "apothecary/formulas/brotli.sh",
+    "repo": "google/brotli",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "fmt",
+    "formula": "apothecary/formulas/fmt/fmt.sh",
+    "repo": "fmtlib/fmt",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "glfw",
+    "formula": "apothecary/formulas/glfw.sh",
+    "repo": "glfw/glfw",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "glm",
+    "formula": "apothecary/formulas/glm/glm.sh",
+    "repo": "g-truc/glm",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "json",
+    "formula": "apothecary/formulas/json.sh",
+    "repo": "nlohmann/json",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "kissfft",
+    "formula": "apothecary/formulas/kiss/kiss.sh",
+    "repo": "mborgerding/kissfft",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "libpng",
+    "formula": "apothecary/formulas/libpng/libpng.sh",
+    "repo": "pnggroup/libpng",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "libusb",
+    "formula": "apothecary/formulas/libusb/libusb.sh",
+    "repo": "libusb/libusb",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "libxml2",
+    "formula": "apothecary/formulas/libxml2/libxml2.sh",
+    "repo": "GNOME/libxml2",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "nghttp2",
+    "formula": "apothecary/formulas/nghttp2.sh",
+    "repo": "nghttp2/nghttp2",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "nghttp3",
+    "formula": "apothecary/formulas/nghttp3.sh",
+    "repo": "ngtcp2/nghttp3",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "ngtcp2",
+    "formula": "apothecary/formulas/ngtcp2.sh",
+    "repo": "ngtcp2/ngtcp2",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "OpenCV",
+    "formula": "apothecary/formulas/opencv/opencv.sh",
+    "repo": "opencv/opencv",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "pugixml",
+    "formula": "apothecary/formulas/pugixml.sh",
+    "repo": "zeux/pugixml",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "RtAudio",
+    "formula": "apothecary/formulas/rtAudio/rtAudio.sh",
+    "repo": "thestk/rtaudio",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "utf8",
+    "formula": "apothecary/formulas/utf8.sh",
+    "repo": "nemtrif/utfcpp",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "zlib",
+    "formula": "apothecary/formulas/zlib/zlib.sh",
+    "repo": "madler/zlib",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "Boost",
+    "formula": "apothecary/formulas/boost/boost.sh",
+    "repo": "boostorg/boost",
+    "pattern": "boost-(\\d+(?:\\.\\d+)+)",
+    "variable": "VERSION"
+  },
+  {
+    "name": "curl",
+    "formula": "apothecary/formulas/curl/curl.sh",
+    "repo": "curl/curl",
+    "pattern": "curl-(\\d+(?:_\\d+)+)|curl_(\\d+(?:_\\d+)+)|v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "FreeType",
+    "formula": "apothecary/formulas/freetype/freetype.sh",
+    "repo": "freetype/freetype",
+    "pattern": "VER-(\\d+(?:-\\d+)+)"
+  },
+  {
+    "name": "GLEW",
+    "formula": "apothecary/formulas/glew/glew.sh",
+    "repo": "nigels-com/glew",
+    "pattern": "glew-(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "libssh2",
+    "formula": "apothecary/formulas/libssh2.sh",
+    "repo": "libssh2/libssh2",
+    "pattern": "libssh2-(\\d+(?:\\.\\d+)+)|v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "OpenSSL",
+    "formula": "apothecary/formulas/openssl/openssl.sh",
+    "repo": "openssl/openssl",
+    "pattern": "openssl-(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "POCO",
+    "formula": "apothecary/formulas/poco/poco.sh",
+    "repo": "pocoproject/poco",
+    "pattern": "poco-(\\d+(?:\\.\\d+)+)-release"
+  },
+  {
+    "name": "uriparser",
+    "formula": "apothecary/formulas/uriparser/uriparser.sh",
+    "repo": "uriparser/uriparser",
+    "pattern": "uriparser-(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "PortAudio",
+    "formula": "apothecary/formulas/portaudio.sh",
+    "repo": "PortAudio/portaudio",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)",
+    "current_pattern": "stable_v(\\d+)_20110326"
+  },
+  {
+    "name": "Cairo",
+    "formula": "apothecary/formulas/cairo/cairo.sh",
+    "repo": "cairo/cairo",
+    "pattern": "(\\d+(?:\\.\\d+)+)",
+    "provider": "gitlab",
+    "even_components": [
+      1,
+      2
+    ]
+  },
+  {
+    "name": "Pixman",
+    "formula": "apothecary/formulas/pixman/pixman.sh",
+    "repo": "pixman/pixman",
+    "pattern": "pixman-(\\d+(?:\\.\\d+)+)",
+    "provider": "gitlab"
+  },
+  {
+    "name": "GStreamer",
+    "formula": "apothecary/formulas/gstreamer.sh",
+    "repo": "gstreamer/gstreamer",
+    "pattern": "(\\d+(?:\\.\\d+)+)",
+    "provider": "gitlab",
+    "even_components": [
+      1
+    ]
+  },
+  {
+    "name": "Mesa",
+    "formula": "apothecary/formulas/glon12.sh",
+    "repo": "mesa/mesa",
+    "pattern": "(\\d+(?:\\.\\d+)+)",
+    "provider": "archive",
+    "url": "https://archive.mesa3d.org/",
+    "filename_pattern": "mesa-(\\d+\\.\\d+\\.\\d+)\\.tar\\.xz"
+  },
+  {
+    "name": "pkg-config",
+    "formula": "apothecary/formulas/_depends/pkg-config.sh",
+    "repo": "pkg-config/pkg-config",
+    "pattern": "pkg-config-(\\d+(?:\\.\\d+)+)",
+    "provider": "gitlab"
+  },
+  {
+    "name": "ANGLE",
+    "formula": "apothecary/formulas/angle/angle.sh",
+    "skip": "Pinned commit/date rather than a stable release"
+  },
+  {
+    "name": "Dawn",
+    "formula": "apothecary/formulas/dawn/dawn.sh",
+    "skip": "Pinned commit/date rather than a stable release"
+  },
+  {
+    "name": "MetalANGLE",
+    "formula": "apothecary/formulas/metalangle/metalangle.sh",
+    "skip": "Pinned fork commit; version label does not identify its source revision"
+  },
+  {
+    "name": "shaderc",
+    "formula": "apothecary/formulas/shaderc.sh",
+    "skip": "Pinned source commit rather than a stable release"
+  },
+  {
+    "name": "FMOD",
+    "formula": "apothecary/formulas/fmod.sh",
+    "skip": "Proprietary legacy SDK; no public release API"
+  },
+  {
+    "name": "FMOD Ex",
+    "formula": "apothecary/formulas/fmodex.sh",
+    "skip": "Proprietary legacy SDK; no public release API"
+  },
+  {
+    "name": "videoInput",
+    "formula": "apothecary/formulas/videoInput.sh",
+    "skip": "Pinned snapshot; no stable upstream version tags"
+  },
+  {
+    "name": "svgtiny",
+    "formula": "apothecary/formulas/svgtiny/svgtiny.sh",
+    "skip": "GitHub mirror does not publish upstream release tags"
+  },
+  {
+    "name": "tess2",
+    "formula": "apothecary/formulas/tess2/tess2.sh",
+    "skip": "Upstream has no matching maintained stable release tags"
+  },
+  {
+    "name": "automake",
+    "formula": "apothecary/formulas/_depends/automake.sh",
+    "skip": "Legacy bootstrap dependency hosted on GNU FTP; no release API"
+  }
+]
