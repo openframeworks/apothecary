@@ -25,6 +25,10 @@ endif()
 set(CMAKE_DEBUG_POSTFIX "d")
 
 #dependencies
+if(EMSCRIPTEN)
+    # The default WebAssembly package is single-threaded.
+    add_compile_definitions(PIXMAN_NO_TLS)
+endif()
 find_package(Threads)
 if(BUILD_TESTS)
     find_package(PNG)

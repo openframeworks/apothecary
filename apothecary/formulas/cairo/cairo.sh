@@ -12,7 +12,7 @@
 # prefix (install location) and use a custom copy of pkg-config which returns
 # the dependent lib cflags/ldflags for that prefix (cairo/apothecary-build)
 
-FORMULA_TYPES=("osx" "vs" "linux")
+FORMULA_TYPES=("osx" "vs" "linux" "emscripten")
 FORMULA_DEPENDS=("zlib" "libpng" "pixman" "freetype")
 
 # tell apothecary we want to manually call the dependency commands
@@ -20,7 +20,7 @@ FORMULA_DEPENDS=("zlib" "libpng" "pixman" "freetype")
 FORMULA_DEPENDS_MANUAL=1
 
 VER=1.18.4
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 SHA1="0a54ce94df6e9db9b9d55ada2ef58b6c47861fde"
@@ -73,7 +73,7 @@ function prepare() {
 
     apothecaryDependencies download
 
-    if [ "$TYPE" == "vs" ]; then
+    if [ "$TYPE" == "vs" ] || [ "$TYPE" == "emscripten" ]; then
 
         apothecaryDepend prepare zlib
         apothecaryDepend build zlib
@@ -229,7 +229,7 @@ function build() {
             ${CMAKE_WIN_SDK}
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
-    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
+    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "emscripten" ]; then
 
         LIBS_ROOT=$(realpath $LIBS_DIR)
 
@@ -286,7 +286,7 @@ function build() {
             -DFREETYPE_INCLUDE_DIRS=${FREETYPE_INCLUDE_DIR} \
             -DFREETYPE_CFLAGS=-I${FREETYPE_INCLUDE_DIR}/freetype \
         	-DFREETYPE_LIBS=${FREETYPE_LIBRARY} \
-        	-DBUILD_GTK_DOC=OFF -DNO_BUILD_TESTS=ON -DNO_DEPENDENCY_TRACKING=ON -DBUILD_XLIB=OFF -DNO_QT=ON -DBUILD_SHARED_LIBS=OFF -DNO_QUARTZ_FONT=OFF -DNO_QUARTZ=OFF -DNO_QUARTZ_IMAGE=OFF"
+            -DBUILD_GTK_DOC=OFF -DNO_BUILD_TESTS=ON -DNO_DEPENDENCY_TRACKING=ON -DBUILD_XLIB=OFF -DNO_QT=ON -DBUILD_SHARED_LIBS=OFF -DNO_QUARTZ_FONT=OFF -DNO_QUARTZ=OFF -DNO_QUARTZ_IMAGE=OFF -DNO_FONTCONFIG=OFF"
 
         local PLATFORM_DEFS=()
         if [ "$TYPE" == "osx" ]; then
@@ -296,6 +296,17 @@ function build() {
                 -DENABLE_BITCODE=OFF
                 -DENABLE_ARC=OFF
                 -DDEPLOYMENT_TARGET="$MIN_SDK_VER"
+            )
+        elif [ "$TYPE" == "emscripten" ]; then
+            # Match Apothecary's Emscripten architecture flags without requiring workers.
+            local wasm_flags="-O3 -matomics -mbulk-memory ${PLATFORM_FLAG:-}"
+            PLATFORM_DEFS=(
+                -DCMAKE_TOOLCHAIN_FILE="$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+                -DCMAKE_C_FLAGS="$wasm_flags" -DCMAKE_CXX_FLAGS="$wasm_flags"
+                -DCMAKE_C_FLAGS_RELEASE="$wasm_flags" -DCMAKE_CXX_FLAGS_RELEASE="$wasm_flags"
+                -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
+                -DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON
+                -DNO_FONTCONFIG=ON
             )
         else
             PLATFORM_DEFS=(-DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake")
@@ -312,7 +323,6 @@ function build() {
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DNO_FONTCONFIG=OFF \
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -D CMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE}
         cmake --build . --config Release -j${PARALLEL_MAKE}
@@ -346,7 +356,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/Release/include/"* $1/include/
         cp -v "build_${TYPE}_${ARCH}/Release/lib/cairo-static.lib" $1/lib/$TYPE/$PLATFORM/libcairo.lib
         secure "$1/lib/$TYPE/$PLATFORM/libcairo.lib" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
+    elif [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libcairo-static.a" $1/lib/$TYPE/$PLATFORM/libcairo.a
         secure "$1/lib/$TYPE/$PLATFORM/libcairo.a" "cairo.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
