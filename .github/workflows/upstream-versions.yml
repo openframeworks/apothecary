@@ -6,15 +6,17 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'scripts/check-upstream-versions.py'
+      - 'scripts/check-upstream-versions.sh'
       - 'scripts/upstream-versions.json'
-      - 'scripts/tests/test_upstream_versions.py'
+      - 'scripts/upstream-versions.jq'
+      - 'scripts/tests/test-upstream-versions.sh'
       - '.github/workflows/upstream-versions.yml'
   push:
     paths:
-      - 'scripts/check-upstream-versions.py'
+      - 'scripts/check-upstream-versions.sh'
       - 'scripts/upstream-versions.json'
-      - 'scripts/tests/test_upstream_versions.py'
+      - 'scripts/upstream-versions.jq'
+      - 'scripts/tests/test-upstream-versions.sh'
       - '.github/workflows/upstream-versions.yml'
 
 permissions:
@@ -29,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
-      - run: python3 -m unittest discover -s scripts/tests -p test_upstream_versions.py
+      - run: bash scripts/tests/test-upstream-versions.sh
 
   check:
     needs: test
@@ -47,4 +49,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: python3 scripts/check-upstream-versions.py --file-issue
+        run: bash scripts/check-upstream-versions.sh --file-issue
