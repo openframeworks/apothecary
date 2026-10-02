@@ -1,0 +1,50 @@
+name: Upstream version check
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/check-upstream-versions.py'
+      - 'scripts/upstream-versions.json'
+      - 'scripts/tests/test_upstream_versions.py'
+      - '.github/workflows/upstream-versions.yml'
+  push:
+    paths:
+      - 'scripts/check-upstream-versions.py'
+      - 'scripts/upstream-versions.json'
+      - 'scripts/tests/test_upstream_versions.py'
+      - '.github/workflows/upstream-versions.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-versions-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: python3 -m unittest discover -s scripts/tests -p test_upstream_versions.py
+
+  check:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.repository == 'openframeworks/apothecary')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: bleeding
+      - name: Compare formula versions and maintain tracking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python3 scripts/check-upstream-versions.py --file-issue

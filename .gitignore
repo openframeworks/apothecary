@@ -17,6 +17,7 @@
 !/.github/workflows/build-linux-modular.yml
 !/.github/workflows/test-openframeworks-libraries.yml
 !/.github/workflows/validate-formula-sources.yml
+!/.github/workflows/upstream-versions.yml
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build
@@ -33,4 +34,5 @@ scripts/linuxarmv6l/master.zip
 scripts/linuxarmv6l/firmware-master
 scripts/status.txt
 *.log
+__pycache__/
 *.xcuserstate
