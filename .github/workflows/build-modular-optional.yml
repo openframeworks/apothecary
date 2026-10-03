@@ -1,0 +1,104 @@
+name: build-modular-optional
+
+# Optional latest-modular packages (google/angle, metalangle). Not in core
+# bundle FORMULAS, so pull_request CI does not gn gen ANGLE.
+on:
+  workflow_dispatch:
+  push:
+    branches: [bleeding, master]
+    paths-ignore: ['**/*.md']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  apple:
+    name: optional ${{ matrix.target }}
+    runs-on: macos-14
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: osx
+            xcode: Xcode_16.2.app
+            archs: x86_64 arm64
+            install: osx
+          - target: ios
+            xcode: Xcode_16.2.app
+            archs: arm64 x86_64 SIM_arm64
+            install: ios
+          - target: tvos
+            xcode: Xcode_16.2.app
+            archs: arm64 SIM_arm64
+            install: tvos
+          - target: catos
+            xcode: Xcode_26.6.app
+            archs: arm64 x86_64
+            install: catos
+          - target: xros
+            xcode: Xcode_26.6.app
+            archs: arm64 x86_64 SIM_arm64
+            install: xros
+    env:
+      TARGET: ${{ matrix.target }}
+      TYPE: ${{ matrix.target }}
+      DEVELOPER_DIR: /Applications/${{ matrix.xcode }}/Contents/Developer
+      OPTIONAL_ARCHS: ${{ matrix.archs }}
+      ALWAYS_BUILD: 1
+      NO_FORCE: 1
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install
+        run: ./scripts/${{ matrix.install }}/install.sh
+      - name: Build optional modular libraries
+        run: scripts/build-modular-optional.sh
+      - name: Upload to latest-modular
+        if: github.repository == 'openframeworks/apothecary'
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: false
+          files: xout/oF_*.tar.bz2
+
+  vs:
+    name: optional vs-64
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      TARGET: vs
+      TYPE: vs
+      ARCH: 64
+      VS_VER: 17
+      ALWAYS_BUILD: 1
+      NO_FORCE: 1
+    steps:
+      - uses: msys2/setup-msys2@v2.32.0
+        with:
+          update: true
+          install: >-
+            base-devel unzip dos2unix gperf git python3
+            mingw-w64-x86_64-binutils mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gcc mingw-w64-x86_64-gcc-libs
+            mingw-w64-x86_64-cmake mingw-w64-x86_64-make meson
+            mingw-w64-x86_64-ninja
+      - uses: actions/checkout@v7.0.1
+      - uses: microsoft/setup-msbuild@v3
+      - name: Scripts Install
+        run: ./scripts/vs/install.sh
+      - name: Build optional modular libraries
+        run: scripts/build-modular-optional.sh
+      - name: Upload to latest-modular
+        if: github.repository == 'openframeworks/apothecary'
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: false
+          files: out/oF_*.zip
