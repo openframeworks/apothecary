@@ -942,10 +942,10 @@ if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
   IOS_SDK_VER=18.1
   IOS_LATEST_SDK=$(xcrun -sdk iphoneos --show-sdk-version >/dev/null || echo "SDKNotInstalled")
   IOS_MIN_SDK_VER=15.0
-  TVOS_MIN_SDK_VER=17.0
+  TVOS_MIN_SDK_VER=15.0
   TVOS_LATEST_SDK=$(xcrun -sdk appletvos --show-sdk-version >/dev/null || echo "SDKNotInstalled")
-  XROS_MIN_SDK_VER=1.1
-  WATCHOS_MIN_SDK_VER=6.0
+  XROS_MIN_SDK_VER=1.0
+  WATCHOS_MIN_SDK_VER=9.0
 fi
 
 
