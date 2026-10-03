@@ -21,7 +21,7 @@ VER=3.19.19
 SHA256="518b3dc504069204cc967863395eef114e9d9546c4880209a30d57ee9d00b079"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=22
+BUILD_ID=23
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -191,7 +191,7 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-D_GNU_SOURCE -DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DPNG_ROOT=${LIBPNG_ROOT} \
