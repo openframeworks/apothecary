@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
 project(cairo)
 
+if(EMSCRIPTEN)
+    # Match the single-threaded Pixman package without requiring browser workers.
+    add_compile_definitions(CAIRO_NO_MUTEX=1 HAVE_GCC_LEGACY_ATOMICS=1)
+endif()
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Pixman REQUIRED)
@@ -82,4 +87,3 @@ endif()
 
 include_directories(src)
 add_subdirectory(src)
-

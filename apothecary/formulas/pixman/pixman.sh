@@ -3,14 +3,14 @@
 # a low-level software library for pixel manipulation
 # http://pixman.org/
 
-FORMULA_TYPES=("osx" "vs" "linux")
+FORMULA_TYPES=("osx" "vs" "linux" "emscripten")
 FORMULA_DEPENDS=()
 
 # define the version
 VER=0.46.4
 SHA256_OFFICIAL=d09c44ebc3bd5bee7021c79f922fe8fb2fb57f7320f55e97ff9914d2346a591c
 SHA256_GITLAB=40de14d71320eaa91bc171c5f657210cf0b9a0ee9ae72629fbc8ab1d33b8887c
-BUILD_ID=4
+BUILD_ID=5
 DEFINES=""
 
 # tools for git use
@@ -73,7 +73,7 @@ function prepare() {
 # executed inside the lib src dir
 function build() {
     mkdir -p pixman
-    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then
+    if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ] || [ "$TYPE" == "emscripten" ]; then
         echo "building $TYPE | $PLATFORM"
         echo "--------------------"
 
@@ -88,6 +88,15 @@ function build() {
                 -DENABLE_BITCODE=OFF
                 -DENABLE_ARC=OFF
                 -DDEPLOYMENT_TARGET="$MIN_SDK_VER"
+            )
+        elif [ "$TYPE" == "emscripten" ]; then
+            # Match Apothecary's Emscripten architecture flags without requiring workers.
+            local wasm_flags="-O3 -matomics -mbulk-memory ${PLATFORM_FLAG:-}"
+            PLATFORM_DEFS=(
+                -DCMAKE_TOOLCHAIN_FILE="$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+                -DCMAKE_C_FLAGS="$wasm_flags" -DCMAKE_CXX_FLAGS="$wasm_flags"
+                -DCMAKE_C_FLAGS_RELEASE="$wasm_flags" -DCMAKE_CXX_FLAGS_RELEASE="$wasm_flags"
+                -DCMAKE_DISABLE_FIND_PACKAGE_Threads=ON
             )
         else
             PLATFORM_DEFS=(-DCMAKE_TOOLCHAIN_FILE="$APOTHECARY_DIR/toolchains/linux${PLATFORM}.toolchain.cmake")

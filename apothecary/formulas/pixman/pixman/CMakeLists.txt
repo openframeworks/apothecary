@@ -102,7 +102,7 @@ if(X86)
 endif(X86)
 
 IF(UNIX)
-    set(CMAKE_C_FLAGS -fPIC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 ENDIF(UNIX) 
 
 add_library (pixman-1_core OBJECT ${SOURCES} ${HEADERS})
