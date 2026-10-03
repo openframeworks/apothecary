@@ -117,7 +117,7 @@ function build() {
         DEFS="
 		        -DBUILD_SHARED_LIBS=OFF \
 		        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		        -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_LIBRAWLITE=ON \
 				-DBUILD_OPENEXR=ON \
 				-DBUILD_WEBP=ON \
 				-DBUILD_JXR=OFF \
@@ -315,7 +315,7 @@ function build() {
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         	-DCMAKE_INSTALL_INCLUDEDIR=include \
-        	-DBUILD_LIBRAWLITE=ON \
+            -DBUILD_LIBRAWLITE=ON \
         	-DBUILD_LIBPNG=OFF \
 			-DBUILD_ZLIB=OFF \
 			-DBUILD_OPENEXR=ON \

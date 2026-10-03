@@ -1,8 +1,8 @@
 # Formula Version Matrix
 
 **Repo:** openFrameworks apothecary  
-**Generated:** 2026-09-14  
-**Source of truth:** `VER=` / `VERSION=` / `GIT_TAG=` / `SOURCE_COMMIT=` in `apothecary/formulas/`  
+**Generated:** 2026-09-14
+**Source of truth:** `VER=` / `VERSION=` / `GIT_TAG=` / `SOURCE_COMMIT=` in `apothecary/formulas/`
 **Upstream check:** GitHub/GitLab APIs, 2026-09-14
 
 ```bash
