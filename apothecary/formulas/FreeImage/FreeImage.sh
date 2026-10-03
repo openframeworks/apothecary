@@ -5,6 +5,11 @@
 # http://freeimage.sourceforge.net
 #
 # Uses the CMakeLists shipped in danoli3/FreeImage (3.19.12+).
+# Optional codecs: OpenEXR, WebP, and LibRaw are ON for every type.
+# JXR is Windows-only; 3.19.17 restores the plugin (JXRMeta without __in).
+# 3.19.18 turns LibRaw on by default and compiles it with LIBRAW_NODLL on VS.
+# 3.19.19 vendors OpenEXR 3.5.1, libdeflate 1.26 and libtiff 4.7.2.
+# OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
@@ -12,11 +17,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.14
-SHA256="2dcc823d744706f71006b13ddb6ea6278628d083f04836cdb7196d25fb4511fe"
+VER=3.19.19
+SHA256="518b3dc504069204cc967863395eef114e9d9546c4880209a30d57ee9d00b079"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=10
+BUILD_ID=23
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -50,7 +55,34 @@ function prepare() {
         perl -pi -e "s/#define WEBP_ANDROID_NEON/\/\/#define WEBP_ANDROID_NEON/g" Source/LibWebP/./src/dsp/dsp.h
 
     elif [ "$TYPE" == "vs" ]; then
-        echo "vs"
+        # ARM64EC defines _M_X64 for x64 source compatibility. MSVC then
+        # forbids including emmintrin.h/immintrin.h except via <intrin.h>
+        # (C1189 / C7302). Force the ARM/generic paths in bundled codecs.
+        if [[ "$ARCH" == "arm64ec" ]]; then
+            local defs="Source/LibDeflate/common_defs.h"
+            if [ -f "$defs" ] && ! grep -q "_M_ARM64EC" "$defs"; then
+                echo "FreeImage: treat ARM64EC as ARCH_ARM64 in LibDeflate"
+                perl -0777 -pi -e 's/#ifdef _MSC_VER\n#  if defined\(_M_X64\)/#ifdef _MSC_VER\n#  if defined(_M_ARM64EC)\n#    define ARCH_ARM64\n#  elif defined(_M_X64)/' "$defs"
+            fi
+            local webp_cpu="Source/LibWebP/src/dsp/cpu.h"
+            if [ -f "$webp_cpu" ] && ! grep -q "_M_ARM64EC" "$webp_cpu"; then
+                echo "FreeImage: disable LibWebP SSE/AVX on ARM64EC"
+                perl -pi -e 's/\(defined\(_M_X64\) \|\| defined\(_M_IX86\)\)/(defined(_M_X64) || defined(_M_IX86)) \&\& !defined(_M_ARM64EC)/g' "$webp_cpu"
+            fi
+            # cpu.h only enables WEBP_USE_SSE2 if HAVE_CONFIG_H is unset or
+            # WEBP_HAVE_SSE2 is set. A stub config.h without SSE/AVX makes
+            # every *_sse2.c / *_avx2.c compile as an empty stub.
+            local webp_cfg="Source/LibWebP/src/webp/config.h"
+            if [ ! -f "$webp_cfg" ]; then
+                echo "FreeImage: write LibWebP config.h without x86 SIMD"
+                cat > "$webp_cfg" <<'WEBP_CFG'
+#ifndef WEBP_CONFIG_H_
+#define WEBP_CONFIG_H_
+/* ARM64EC: MSVC defines _M_X64, but emmintrin.h is forbidden. */
+#endif
+WEBP_CFG
+            fi
+        fi
     fi
 }
 
@@ -85,8 +117,8 @@ function build() {
         DEFS="
 		        -DBUILD_SHARED_LIBS=OFF \
 		        -DCMAKE_INSTALL_INCLUDEDIR=include \
-		        -DBUILD_LIBRAWLITE=OFF \
-				-DBUILD_OPENEXR=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+				-DBUILD_OPENEXR=ON \
 				-DBUILD_WEBP=ON \
 				-DBUILD_JXR=OFF \
 				-DENABLE_BITCODE=OFF \
@@ -145,8 +177,8 @@ function build() {
         DEFINES="
             -DBUILD_SHARED_LIBS=OFF \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
             -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DENABLE_ARC=OFF \
@@ -159,7 +191,7 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-D_GNU_SOURCE -DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DPNG_ROOT=${LIBPNG_ROOT} \
@@ -238,9 +270,9 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
@@ -268,19 +300,27 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
+        # OpenEXR takes the scalar/NEON path on _M_ARM64EC.
+        # 3.19.17+ restores JPEG-XR. LibJXR needs WIN32 (MSVC only defines _WIN32)
+        # so x86.h provides PACKETLENGTH / UINTPTR_T. LIBRAW_NODLL is a compiler define.
+        FI_VS_DEFS="-DLIBRAW_NODLL -DWIN32"
+        if [[ "$ARCH" == "arm64ec" ]]; then
+            FI_VS_DEFS="${FI_VS_DEFS} -DHAVE_CONFIG_H"
+        fi
         DEFINES="-DLIBRARY_SUFFIX=${ARCH} \
+	        -DLIBRAW_NODLL=ON \
 	        -DCMAKE_C_STANDARD=${C_STANDARD} \
 			-DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 			-DCMAKE_CXX_STANDARD_REQUIRED=ON \
 			-DCMAKE_CXX_EXTENSIONS=OFF \
 			-DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
         	-DCMAKE_INSTALL_INCLUDEDIR=include \
-        	-DBUILD_LIBRAWLITE=OFF \
+            -DBUILD_LIBRAWLITE=ON \
         	-DBUILD_LIBPNG=OFF \
 			-DBUILD_ZLIB=OFF \
-			-DBUILD_OPENEXR=OFF \
-			-DBUILD_WEBP=OFF \
-			-DBUILD_JXR=OFF \
+			-DBUILD_OPENEXR=ON \
+			-DBUILD_WEBP=ON \
+			-DBUILD_JXR=ON \
             ${MT_TYPE_DEFINES} \
 			-DENABLE_VISIBILITY=OFF \
 			-DCMAKE_PREFIX_PATH=${LIBS_ROOT} \
@@ -293,13 +333,13 @@ function build() {
 			-DZLIB_INCLUDE_DIRS=${ZLIB_INCLUDE_DIR} \
 			-DZLIB_LIBRARY=${ZLIB_LIBRARY} \
 			-DBUILD_SHARED_LIBS=OFF"
-        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}"
         cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
-            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_RELEASE} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
+            -DCMAKE_C_FLAGS_RELEASE="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_RELEASE}" \
             -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
@@ -317,13 +357,13 @@ function build() {
         cd "build_${TYPE}_${ARCH}_debug"
         rm -f CMakeCache.txt *.a *.o *.lib
 
-        env CXXFLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
+        env CXXFLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}"
         cmake .. ${DEFINES} \
             -UCMAKE_CXX_FLAGS \
-            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
-            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
-            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
+            -DCMAKE_CXX_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_DEBUG} ${EXCEPTION_FLAGS}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
+            -DCMAKE_C_FLAGS_DEBUG="-DUSE_PTHREADS=1 ${FI_VS_DEFS} ${VS_C_FLAGS} ${FLAGS_DEBUG}" \
             -DCMAKE_INSTALL_LIBDIR="build_${TYPE}_${ARCH}" \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
@@ -359,12 +399,12 @@ function build() {
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_TESTS=OFF \
             -DCMAKE_CXX_FLAGS=" ${FLAG_RELEASE} " \
@@ -399,9 +439,9 @@ function build() {
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
             -DENABLE_VISIBILITY=OFF \
-            -DBUILD_LIBRAWLITE=OFF \
-            -DBUILD_OPENEXR=OFF \
-            -DBUILD_WEBP=OFF \
+            -DBUILD_LIBRAWLITE=ON \
+            -DBUILD_OPENEXR=ON \
+            -DBUILD_WEBP=ON \
             -DBUILD_JXR=OFF \
             -DBUILD_LIBPNG=ON \
             -DBUILD_ZLIB=ON \
