@@ -93,7 +93,7 @@
 #    CMAKE_OSX_SYSROOT, but can also be manually specified (although this should
 #    not be required).
 #
-# DEPLOYMENT_TARGET: Minimum SDK version to target. Default 9.0 on watchOS, 15.0 on tvOS+iOS/iPadOS+Mac Catalyst, 12.0 on macOS, 1.0 on visionOS
+# DEPLOYMENT_TARGET: Minimum SDK version to target. Default 9.0 on watchOS, 18.0 on tvOS+iOS/iPadOS+Mac Catalyst, 12.0 on macOS, 1.0 on visionOS
 #
 # NAMED_LANGUAGE_SUPPORT:
 #    ON (default) = Will require "enable_language(OBJC) and/or enable_language(OBJCXX)" for full OBJC|OBJCXX support
@@ -290,11 +290,11 @@ if(NOT DEFINED DEPLOYMENT_TARGET)
     # Unless specified, SDK version 12.0 (Monterey) is used by default as minimum target version for universal builds.
     set(DEPLOYMENT_TARGET "12.0")
   elseif(PLATFORM STREQUAL "MAC_CATALYST" OR PLATFORM STREQUAL "MAC_CATALYST_ARM64" OR PLATFORM STREQUAL "MAC_CATALYST_UNIVERSAL")
-    # Unless specified, SDK version 15.0 is used by default as the minimum target version (Mac Catalyst).
-    set(DEPLOYMENT_TARGET "15.0")
+    # Unless specified, SDK version 18.0 is used by default as the minimum target version (Mac Catalyst).
+    set(DEPLOYMENT_TARGET "18.0")
   else()
-    # Unless specified, SDK version 15.0 is used by default as the minimum target version (iOS, tvOS).
-    set(DEPLOYMENT_TARGET "15.0")
+    # Unless specified, SDK version 18.0 is used by default as the minimum target version (iOS, tvOS).
+    set(DEPLOYMENT_TARGET "18.0")
   endif()
   message(STATUS "[DEFAULTS] Using the default min-version since DEPLOYMENT_TARGET not provided!")
 elseif(DEFINED DEPLOYMENT_TARGET AND PLATFORM MATCHES "^MAC_CATALYST" AND ${DEPLOYMENT_TARGET} VERSION_LESS "13.1")
