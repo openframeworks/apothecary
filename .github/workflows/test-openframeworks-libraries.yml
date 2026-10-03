@@ -141,7 +141,7 @@ jobs:
         if: inputs.platform == 'emscripten'
         working-directory: openFrameworks
         run: |
-          docker run --rm -v "$PWD:/src" -w /src emscripten/emsdk:6.0.8 scripts/ci/emscripten/build.sh
+          docker run --rm -v "$PWD:/src" -w /src emscripten/emsdk:6.0.10 scripts/ci/emscripten/build.sh
 
       - name: Set up MSBuild
         if: inputs.platform == 'windows'
