@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=5.0.0
 SHA256="b0528f5a1d379d59d4701cb28c36e22214cc51cf64594e5b56f2d3e6c0233095"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=500
@@ -50,6 +50,11 @@ function prepare() {
 
     #no idea why we are building iOS stuff on Windows - but this might fix it
     if [ "$TYPE" == "vs" ]; then
+        # OpenCV 5's vendored GNU assembly kernels do not build with MSVC.
+        # Keep DNN enabled using its built-in SGEMM fallback.
+        if ! grep -q 'GNU assembly kernels unavailable with MSVC' 3rdparty/mlas/CMakeLists.txt; then
+            patch -p1 < "$FORMULA_DIR/msvc-mlas-fallback.patch"
+        fi
         rm -rf modules/objc_bindings_generator
         rm -rf modules/objc
     fi

@@ -1,0 +1,17 @@
+--- a/3rdparty/mlas/CMakeLists.txt
++++ b/3rdparty/mlas/CMakeLists.txt
+@@ -76,6 +76,14 @@
+ set(OPENCV_DNN_MLAS_ENABLED     0  CACHE INTERNAL "" FORCE)
+ set(OPENCV_DNN_MLAS_SKIP_REASON "" CACHE INTERNAL "" FORCE)
+ 
++# The vendored kernels use GNU assembly, which the Visual Studio generator
++# does not compile into the objects consumed by opencv_dnn.
++if(MSVC)
++  set(OPENCV_DNN_MLAS_SKIP_REASON "GNU assembly kernels unavailable with MSVC"
++      CACHE INTERNAL "" FORCE)
++  message(STATUS "MLAS disabled on MSVC; DNN will use its built-in SGEMM")
++  return()
++endif()
+ # Probe ASM language once. check_language(ASM) is a no-op when
+ # CMAKE_ASM_COMPILER is already set in cache — and the Android NDK toolchain
+ # pre-sets it for every ABI. So on Android the guard falls through to
