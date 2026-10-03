@@ -8,8 +8,8 @@
 # Optional codecs: OpenEXR, WebP, and LibRaw are ON for every type.
 # JXR is Windows-only; 3.19.17 restores the plugin (JXRMeta without __in).
 # 3.19.18 turns LibRaw on by default and compiles it with LIBRAW_NODLL on VS.
-# 3.19.16+ vendors OpenEXR 3.3.14 with the ARM64EC emmintrin.h fix.
-# OpenEXR 3.3 needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
+# 3.19.19 vendors OpenEXR 3.5.1, libdeflate 1.26 and libtiff 4.7.2.
+# OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 
@@ -17,11 +17,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.18
-SHA256="e12b0636ad99ef9e81c9fa2eb27c9fc23332d2755e4e83b454e48985def03f0a"
+VER=3.19.19
+SHA256="518b3dc504069204cc967863395eef114e9d9546c4880209a30d57ee9d00b079"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=21
+BUILD_ID=22
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -300,7 +300,7 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.lib"
 
-        # 3.19.16+ OpenEXR 3.3.14 takes the scalar/NEON path on _M_ARM64EC.
+        # OpenEXR takes the scalar/NEON path on _M_ARM64EC.
         # 3.19.17+ restores JPEG-XR. LibJXR needs WIN32 (MSVC only defines _WIN32)
         # so x86.h provides PACKETLENGTH / UINTPTR_T. LIBRAW_NODLL is a compiler define.
         FI_VS_DEFS="-DLIBRAW_NODLL -DWIN32"
