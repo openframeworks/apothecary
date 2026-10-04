@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=5.0.0
 SHA256="b0528f5a1d379d59d4701cb28c36e22214cc51cf64594e5b56f2d3e6c0233095"
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=500
@@ -1047,7 +1047,7 @@ function copy() {
     local dest="$1"
     local build_dir="build_${TYPE}_${PLATFORM}"
     [ "$TYPE" != "msys2" ] || build_dir="build_${TYPE}_${ARCH}"
-    local config install_dir lib_dest library core
+    local config install_dir lib_dest library library_name core
     local configs=(Release)
     [ "$TYPE" != "vs" ] || configs=(Debug Release)
 
@@ -1074,7 +1074,16 @@ function copy() {
         fi
         mkdir -p "$lib_dest"
         while IFS= read -r library; do
-            cp -v "$library" "$lib_dest/"
+            library_name=$(basename "$library")
+            if [ "$TYPE" = "vs" ] && [[ "$library_name" == *.a ]]; then
+                # MSVC's librarian emits COFF archives even when OpenCV names
+                # them like Unix libraries. Package the conventional .lib name.
+                library_name="${library_name%.a}.lib"
+                if [[ "$library_name" == libopencv_* ]]; then
+                    library_name="${library_name#lib}"
+                fi
+            fi
+            cp -v "$library" "$lib_dest/$library_name"
         done < <(find "$install_dir/lib" -type f \( -name '*.a' -o -name '*.lib' \))
         if [ ! -f "$lib_dest/$core" ]; then
             echo "Missing OpenCV 5 core library: $lib_dest/$core" >&2

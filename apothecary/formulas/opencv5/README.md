@@ -28,6 +28,8 @@ with OpenCV's built-in SGEMM fallback. MLAS acceleration is unavailable there;
 inference performance may differ from platforms that build those kernels.
 MSVC also disables iconv discovery to prevent MinGW CRT headers from entering
 the WeChat QR module; that module uses its existing `NO_ICONV` fallback.
+MSVC archives emitted with Unix-style names are packaged as conventional `.lib`
+files, preserving their contents and the Debug suffix. MSYS2 retains `.a` names.
 
 Validation results are recorded when available; native builds for the remaining
 platforms require their respective toolchains and CI runners.
