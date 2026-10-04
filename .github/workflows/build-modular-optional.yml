@@ -1,9 +1,14 @@
 name: build-modular-optional
 
-# Optional latest-modular packages (google/angle, metalangle). Not in core
-# bundle FORMULAS, so pull_request CI does not gn gen ANGLE.
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/build-modular-optional.yml'
+      - 'scripts/modular-cache-key.sh'
+      - 'scripts/build-modular-optional.sh'
+      - 'scripts/calculate_formulas.sh'
+      - 'scripts/tests/test-modular-cache.sh'
   push:
     branches: [bleeding, master]
     paths-ignore: ['**/*.md']
@@ -16,57 +21,83 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash scripts/tests/test-modular-cache.sh
+
   apple:
-    name: optional ${{ matrix.target }}
-    runs-on: macos-14
+    needs: test
+    if: github.event_name != 'pull_request'
+    name: optional ${{ matrix.library }}-${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
+        target: [osx, ios, tvos, catos, xros]
+        library: [angle, metalangle]
+        exclude:
+          - {target: catos, library: metalangle}
+          - {target: xros, library: metalangle}
         include:
-          - target: osx
-            xcode: Xcode_16.2.app
-            archs: x86_64 arm64
-            install: osx
-          - target: ios
-            xcode: Xcode_16.2.app
-            archs: arm64 x86_64 SIM_arm64
-            install: ios
-          - target: tvos
-            xcode: Xcode_16.2.app
-            archs: arm64 SIM_arm64
-            install: tvos
-          - target: catos
-            xcode: Xcode_26.6.app
-            archs: arm64 x86_64
-            install: catos
-          - target: xros
-            xcode: Xcode_26.6.app
-            archs: arm64 x86_64 SIM_arm64
-            install: xros
+          - {target: osx, runner: macos-14, xcode: Xcode_16.2.app, archs: 'x86_64 arm64', install: osx}
+          - {target: ios, runner: macos-14, xcode: Xcode_16.2.app, archs: 'arm64 x86_64 SIM_arm64', install: ios}
+          - {target: tvos, runner: macos-14, xcode: Xcode_16.2.app, archs: 'arm64 SIM_arm64', install: tvos}
+          - {target: catos, runner: macos-26, xcode: Xcode_26.6.app, archs: 'arm64 x86_64', install: catos}
+          - {target: xros, runner: macos-26, xcode: Xcode_26.6.app, archs: 'arm64 x86_64 SIM_arm64', install: xros}
     env:
       TARGET: ${{ matrix.target }}
       TYPE: ${{ matrix.target }}
       DEVELOPER_DIR: /Applications/${{ matrix.xcode }}/Contents/Developer
       OPTIONAL_ARCHS: ${{ matrix.archs }}
+      PACKAGE_LIBS: ${{ matrix.library }}
       ALWAYS_BUILD: 1
       NO_FORCE: 1
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Install
         run: ./scripts/${{ matrix.install }}/install.sh
-      - name: Build optional modular libraries
-        run: scripts/build-modular-optional.sh
+      - name: Ensure Ninja is available for the cache fingerprint
+        run: command -v ninja >/dev/null || brew install ninja
+      - name: Compute exact modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
+      - name: Restore compiled modular outputs
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: |
+            out/${{ matrix.library }}
+            xout/${{ matrix.library }}
+      - name: Build or reuse and package modular library
+        env:
+          MODULAR_CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: bash scripts/build-modular-optional.sh
+      - name: Save compiled modular outputs
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: |
+            out/${{ matrix.library }}
+            xout/${{ matrix.library }}
       - name: Upload to latest-modular
         if: github.repository == 'openframeworks/apothecary'
         uses: softprops/action-gh-release@v3.0.3
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
-          fail_on_unmatched_files: false
-          files: xout/oF_*.tar.bz2
+          fail_on_unmatched_files: true
+          files: xout/oF_${{ matrix.library }}_*.tar.bz2
 
   vs:
-    name: optional vs-64
+    needs: test
+    if: github.event_name != 'pull_request'
+    name: optional angle-vs-64
     runs-on: windows-2022
     defaults:
       run:
@@ -76,6 +107,7 @@ jobs:
       TYPE: vs
       ARCH: 64
       VS_VER: 17
+      PACKAGE_LIBS: angle
       ALWAYS_BUILD: 1
       NO_FORCE: 1
     steps:
@@ -92,13 +124,30 @@ jobs:
       - uses: microsoft/setup-msbuild@v3
       - name: Scripts Install
         run: ./scripts/vs/install.sh
-      - name: Build optional modular libraries
-        run: scripts/build-modular-optional.sh
+      - name: Compute exact modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
+      - name: Restore compiled modular outputs
+        id: cache
+        uses: actions/cache/restore@v5
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/angle
+      - name: Build or reuse and package modular library
+        env:
+          MODULAR_CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: bash scripts/build-modular-optional.sh
+      - name: Save compiled modular outputs
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/angle
       - name: Upload to latest-modular
         if: github.repository == 'openframeworks/apothecary'
         uses: softprops/action-gh-release@v3.0.3
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
-          fail_on_unmatched_files: false
-          files: out/oF_*.zip
+          fail_on_unmatched_files: true
+          files: out/oF_angle_*.zip

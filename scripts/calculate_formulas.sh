@@ -167,9 +167,11 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "rtAudio"
             "tess2"
             "uriparser"
-            #"metalangle"
             "cairo"
         )
+        if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
+            FORMULAS+=("metalangle")
+        fi
         # google/angle (GN GLES→Metal) is opt-in; not in core CI formula lists.
         # Built on the modular-optional pass → latest-modular.
         # TYPE=osx|ios|tvos|catos|xros ./apo update angle

@@ -44,18 +44,29 @@ fi
 echo "Optional modular libraries: [${OPTIONAL[*]}]"
 echo "Archs: [${ARCHS[*]}]"
 
-for lib in "${OPTIONAL[@]}"; do
-    for arch in "${ARCHS[@]}"; do
-        echo "==== apo update $lib TYPE=$TYPE ARCH=$arch ===="
-        TYPE="$TYPE" ARCH="$arch" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
-            "$ROOT/apo" update "$lib"
+if [[ "${MODULAR_CACHE_HIT:-false}" == true ]]; then
+    for lib in "${OPTIONAL[@]}"; do
+        [[ -d "$OUTPUT_FOLDER/$lib" ]] || { echo "Cached output missing: $lib" >&2; exit 1; }
+        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
+            [[ -d "$ROOT/xout/$lib" ]] || { echo "Cached XCFramework staging missing: $lib" >&2; exit 1; }
+        fi
     done
-    if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
-        echo "==== apo modular $lib ===="
-        TYPE="$TYPE" ARCH="${ARCHS[0]}" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
-            "$ROOT/apo" modular "$lib"
-    fi
-done
+    echo 'Exact modular cache hit: skipping compilation and XCFramework staging'
+else
+    for lib in "${OPTIONAL[@]}"; do
+        for arch in "${ARCHS[@]}"; do
+            echo "==== apo update $lib TYPE=$TYPE ARCH=$arch ===="
+            TYPE="$TYPE" ARCH="$arch" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
+                "$ROOT/apo" update "$lib"
+        done
+        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
+            echo "==== apo modular $lib ===="
+            TYPE="$TYPE" ARCH="${ARCHS[0]}" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
+                "$ROOT/apo" modular "$lib"
+        fi
+    done
+
+fi
 
 export PACKAGE_LIBS="${OPTIONAL[*]}"
 "$ROOT/scripts/package-individual.sh"

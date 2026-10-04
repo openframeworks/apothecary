@@ -46,7 +46,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Formula | Pinned | Latest upstream | Status | Why pinned | Source |
 |---------|--------|-----------------|--------|------------|--------|
-| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS. Apple `gn gen` failed CI (#589) — **off core**. Not metalangle. | https://github.com/google/angle |
+| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS and GLES→Metal on osx/ios/tvos/catos/xros. Opt-in `latest-modular` with artifact caching; **off core**. Not metalangle. | https://github.com/google/angle |
 | **assimp** | `5.4.3` | `v6.0.5` | compatibility pin | 6.x failed CI. Last known-good 5.4.3. | https://github.com/assimp/assimp |
 | **boost** | `1.66.0` | `boost-1.92.0` | stale | `FORMULA_TYPES=()` — unused. filesystem/system only until C++ std; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.0` | `v1.2.0` | current | Latest stable. | https://github.com/google/brotli |
