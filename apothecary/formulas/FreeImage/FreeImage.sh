@@ -17,11 +17,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.19
-SHA256="518b3dc504069204cc967863395eef114e9d9546c4880209a30d57ee9d00b079"
+VER=3.19.20
+SHA256="8818c80483f714f103a7811d66e1409c261b9fb4a9d60dd2ea28cbc7e9a2f77c"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=23
+BUILD_ID=24
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -191,7 +191,7 @@ function build() {
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
-            -DCMAKE_C_FLAGS="-D_GNU_SOURCE -DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
+            -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 -fPIC ${FLAG_RELEASE}" \
             -DCMAKE_CXX_EXTENSIONS=OFF \
             -DCMAKE_BUILD_TYPE=Release \
             -DPNG_ROOT=${LIBPNG_ROOT} \
