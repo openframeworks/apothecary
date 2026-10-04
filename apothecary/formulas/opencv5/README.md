@@ -23,9 +23,11 @@ C++17, and packages installed headers and third-party archives. Windows includes
 Debug and Release libraries. The output lives under `out/opencv5`, independently
 of `out/opencv`. This does not imply source or ABI compatibility with ofxOpenCv.
 
-MSVC builds skip the vendored MLAS GNU assembly kernels and keep DNN enabled
+Windows builds skip the vendored MLAS assembly/POSIX kernels and keep DNN enabled
 with OpenCV's built-in SGEMM fallback. MLAS acceleration is unavailable there;
 inference performance may differ from platforms that build those kernels.
+MSVC also disables iconv discovery to prevent MinGW CRT headers from entering
+the WeChat QR module; that module uses its existing `NO_ICONV` fallback.
 
 Validation results are recorded when available; native builds for the remaining
 platforms require their respective toolchains and CI runners.
