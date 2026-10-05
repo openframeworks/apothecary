@@ -29,7 +29,11 @@ inference performance may differ from platforms that build those kernels.
 MSVC also disables iconv discovery to prevent MinGW CRT headers from entering
 the WeChat QR module; that module uses its existing `NO_ICONV` fallback.
 MSVC archives emitted with Unix-style names are packaged as conventional `.lib`
-files, preserving their contents and the Debug suffix. MSYS2 retains `.a` names.
+files, preserving their contents and the Debug suffix. MSYS2 retains the
+unversioned `.a` names installed by OpenCV 5 (for example `libopencv_core.a`).
+ARM64EC excludes the explicit AVX2 kernels in the DNN QuantizeLinear and
+DequantizeLinear layers and uses their scalar paths; `_M_X64` is also defined
+on ARM64EC even though MSVC cannot compile AVX types for that target.
 
 Validation results are recorded when available; native builds for the remaining
 platforms require their respective toolchains and CI runners.

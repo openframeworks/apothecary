@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=5.0.0
 SHA256="b0528f5a1d379d59d4701cb28c36e22214cc51cf64594e5b56f2d3e6c0233095"
-BUILD_ID=4
+BUILD_ID=5
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=500
@@ -53,6 +53,13 @@ function prepare() {
         # Keep DNN enabled using its built-in SGEMM fallback.
         if ! grep -q 'vendored MLAS kernels unsupported on Windows' 3rdparty/mlas/CMakeLists.txt; then
             patch -p1 < "$FORMULA_DIR/windows-mlas-fallback.patch"
+        fi
+    fi
+    if [ "$TYPE" = "vs" ] && [ "$ARCH" = "arm64ec" ]; then
+        # ARM64EC also defines _M_X64, but cannot compile these AVX2 kernels.
+        # Exclude both the kernels and their callers, keeping the scalar paths.
+        if ! grep -q '!defined(_M_ARM64EC)' modules/dnn/src/layers/quantlizelinear_layer.cpp; then
+            patch -p1 < "$FORMULA_DIR/arm64ec-dnn-avx.patch" || return 1
         fi
     fi
     if [ "$TYPE" == "vs" ]; then
@@ -1069,8 +1076,6 @@ function copy() {
             lib_dest="$lib_dest/$config"
             core="opencv_core${FILE_VERSION}.lib"
             [ "$config" != "Debug" ] || core="opencv_core${FILE_VERSION}d.lib"
-        elif [ "$TYPE" = "msys2" ]; then
-            core="libopencv_core${FILE_VERSION}.a"
         fi
         mkdir -p "$lib_dest"
         while IFS= read -r library; do
