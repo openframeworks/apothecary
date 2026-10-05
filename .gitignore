@@ -3,6 +3,7 @@
 !.gitattributes
 !.travis.yml
 !README.md
+!AGENTS.md
 !LICENSE.md
 !/apo
 !/apothecary
