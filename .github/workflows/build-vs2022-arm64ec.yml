@@ -74,7 +74,7 @@ jobs:
           dos2unix
           gperf
           git
-          python3
+          mingw-w64-x86_64-python
           mingw-w64-x86_64-binutils
           mingw-w64-x86_64-clang
           mingw-w64-x86_64-gcc
@@ -82,7 +82,7 @@ jobs:
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-gdb
           mingw-w64-x86_64-make
-          meson
+          mingw-w64-x86_64-meson
           mingw-w64-x86_64-ninja
     - name: Clone repository
       uses: actions/checkout@v7.0.1
