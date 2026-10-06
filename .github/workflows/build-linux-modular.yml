@@ -37,7 +37,7 @@ jobs:
       CXX: g++-14
       NO_FORCE: 1
       # dawn: deferred — git fetch of the pinned SHA fails in ~9s on this runner
-      FORMULAS_OVERRIDE: pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2 uriparser opencv cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl poco
+      FORMULAS_OVERRIDE: pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2 uriparser opencv opencv5 cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl poco
     steps:
       - uses: actions/checkout@v7.0.1
 
