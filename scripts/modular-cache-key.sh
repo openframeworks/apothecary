@@ -52,8 +52,8 @@ trap 'rm -f "$manifest"' EXIT
         printf '%s %s\n' "$path" "$(git hash-object "$path")"
     done < <(git ls-files -- apothecary/apothecary apothecary/configure apothecary/toolchains \
         scripts/apo.sh scripts/build-modular-optional.sh scripts/modular-cache-key.sh \
-        scripts/calculate_formulas.sh scripts/load.sh scripts/save.sh scripts/secure.sh \
-        scripts/package-individual.sh scripts/export_config.sh "scripts/$TARGET/install.sh" apo "${formula_paths[@]}" | LC_ALL=C sort -u)
+        scripts/calculate_formulas.sh scripts/apple-install-tools.sh scripts/load.sh scripts/save.sh scripts/secure.sh \
+        scripts/package-individual.sh scripts/export_config.sh ":(icase)scripts/$TARGET/install.sh" apo "${formula_paths[@]}" | LC_ALL=C sort -u)
 } > "$manifest"
 digest=$(shasum -a 256 "$manifest" | cut -d ' ' -f1)
 printf 'key=modular-v1-%s-%s-%s\n' "$TARGET" "$LIBRARY" "$digest"
