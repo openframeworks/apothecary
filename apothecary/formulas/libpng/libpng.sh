@@ -8,8 +8,8 @@ FORMULA_DEPENDS=("zlib")
 
 # define the version
 MAJOR_VER=16
-VER=1.6.58
-BUILD_ID=4
+VER=1.6.59
+BUILD_ID=5
 DEFINES=""
 
 # tools for git use
@@ -17,8 +17,8 @@ GIT_URL=http://git.code.sf.net/p/libpng/code
 GIT_TAG=v$VER
 #URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # RIP Glenn Randers-Pehrson
 URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
-SHA256="a9d4df463d36a6e5f9c29bd6f4967312d17e996c1854f3511f833924eb1993cf"
-SHA256_ZIP="ad8fc23d75a76f352989bbec9e905bdfe8f2d2e77b32e4f2070a4bb1849802ee"
+SHA256="2540302a1844ad2b2b501977abecfa850f265f97b78f065a712ab4074a89f5b5"
+SHA256_ZIP="6fd97a1e5e2ac55cec0a538a9800a351eb3844086736291844ebd12db72ba433"
 WINDOWS_URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}
 
 # download the source code and unpack it into LIB_NAME
