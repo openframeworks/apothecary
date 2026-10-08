@@ -1,0 +1,67 @@
+name: Platform binary artifacts
+description: Restore compatible formula outputs or publish a complete trusted baseline
+inputs:
+  phase:
+    description: restore or save
+    required: true
+  variant:
+    description: Architecture/flavor or Apple bundle number
+    required: true
+  archs:
+    description: All architectures built by this job
+    required: true
+  shell:
+    description: Runner shell (msys2 for MinGW jobs)
+    default: bash
+runs:
+  using: composite
+  steps:
+    - name: Fingerprint formula inputs
+      if: inputs.phase == 'restore'
+      shell: ${{ inputs.shell }}
+      env:
+        OPTIONAL_ARCHS: ${{ inputs.archs }}
+      run: bash scripts/platform-artifact-manifest.sh > "$RUNNER_TEMP/platform-artifact-keys.tsv"
+    - name: Find trusted platform baseline
+      if: inputs.phase == 'restore'
+      id: baseline
+      uses: actions/github-script@v9.0.0
+      env:
+        ARTIFACT_VARIANT: ${{ inputs.variant }}
+      with:
+        script: |
+          await require(`${process.env.GITHUB_WORKSPACE}/scripts/platform-artifacts.cjs`).select({github, context, core});
+    - name: Download platform baseline
+      if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
+      uses: actions/download-artifact@v8
+      with:
+        github-token: ${{ github.token }}
+        run-id: ${{ steps.baseline.outputs.run-id }}
+        name: ${{ steps.baseline.outputs.name }}
+        path: ${{ runner.temp }}/platform-artifact-download
+    - name: Extract baseline
+      if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
+      shell: ${{ inputs.shell }}
+      run: |
+        mkdir -p "$RUNNER_TEMP/platform-artifact-output"
+        tar -xzf "$RUNNER_TEMP/platform-artifact-download/platform-binaries.tar.gz" -C "$RUNNER_TEMP/platform-artifact-output"
+    - name: Restore matching formulas
+      if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
+      uses: actions/github-script@v9.0.0
+      with:
+        script: |
+          require(`${process.env.GITHUB_WORKSPACE}/scripts/platform-artifacts.cjs`).restore({core});
+    - name: Package complete platform output
+      if: inputs.phase == 'save'
+      shell: ${{ inputs.shell }}
+      run: |
+        cp "$RUNNER_TEMP/platform-artifact-keys.tsv" out/.platform-artifact-keys.tsv
+        tar -czf "$RUNNER_TEMP/platform-binaries.tar.gz" -C out .
+    - name: Upload trusted platform baseline
+      if: inputs.phase == 'save'
+      uses: actions/upload-artifact@v7.0.0
+      with:
+        name: platform-v1-${{ env.TARGET }}-${{ inputs.variant }}
+        path: ${{ runner.temp }}/platform-binaries.tar.gz
+        if-no-files-found: error
+        retention-days: 30

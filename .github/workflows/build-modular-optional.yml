@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/build-modular-optional.yml'
       - 'scripts/modular-cache-key.sh'
+      - 'scripts/cache-toolchain.sh'
       - 'scripts/build-modular-optional.sh'
       - 'scripts/calculate_formulas.sh'
       - 'scripts/tests/test-modular-cache.sh'
@@ -16,8 +17,8 @@ on:
     paths-ignore: ['**/*.md']
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
   contents: write

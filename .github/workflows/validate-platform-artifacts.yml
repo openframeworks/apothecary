@@ -1,0 +1,39 @@
+name: Validate platform artifact reuse
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/build*.yml'
+      - '.github/actions/platform-artifacts/**'
+      - 'scripts/*artifact*'
+      - 'scripts/modular-cache-key.sh'
+      - 'scripts/cache-toolchain.sh'
+      - 'scripts/tests/test-*cache*'
+      - 'scripts/tests/test-platform-artifacts.cjs'
+      - 'scripts/tests/test-workflow-scheduling.rb'
+      - '.github/workflows/validate-platform-artifacts.yml'
+  push:
+    branches: [bleeding, master]
+    paths:
+      - '.github/workflows/build*.yml'
+      - '.github/actions/platform-artifacts/**'
+      - 'scripts/*artifact*'
+      - 'scripts/modular-cache-key.sh'
+      - 'scripts/cache-toolchain.sh'
+      - 'scripts/tests/test-*cache*'
+      - 'scripts/tests/test-platform-artifacts.cjs'
+      - 'scripts/tests/test-workflow-scheduling.rb'
+      - '.github/workflows/validate-platform-artifacts.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash -n scripts/platform-artifact-manifest.sh scripts/modular-cache-key.sh scripts/cache-toolchain.sh
+      - run: bash scripts/tests/test-modular-cache.sh
+      - run: node scripts/tests/test-platform-artifacts.cjs
+      - run: ruby scripts/tests/test-workflow-scheduling.rb

@@ -2,6 +2,8 @@ name: build-msys2
 
 on:
   push:
+    branches: [bleeding, master]
+    tags: ['**']
     paths-ignore:
     - '**/*.md'
   pull_request:
@@ -9,17 +11,18 @@ on:
     - '**/*.md'
     
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
   contents: write
+  actions: read
 
 env:
   TARGET: "msys2"
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-  USE_ARTIFACT: false
+  USE_ARTIFACT: true
   DISABLE_WORKFLOW: "false"
   
 jobs:  
@@ -62,7 +65,7 @@ jobs:
           # windows-latest has C:\msys64 already. windows-11-arm does not,
           # so clangarm64 needs a fresh installer (msys2-arm64).
           release: ${{ matrix.flavor == 'clangarm64' }}
-          cache: false
+          cache: true
           msystem: ${{ matrix.flavor }}
           install: >-
             base-devel
@@ -112,15 +115,32 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v7.0.1
 
+      - name: Restore compatible platform artifacts
+        id: platform-artifacts
+        if: env.USE_ARTIFACT == 'true'
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: restore
+          variant: ${{ matrix.flavor }}
+          archs: ${{ matrix.flavor }}
+          shell: msys2 {0}
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
+      - name: Publish platform artifact baseline
+        continue-on-error: true
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: save
+          variant: ${{ matrix.flavor }}
+          archs: ${{ matrix.flavor }}
+          shell: msys2 {0}
       - name: Package
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/package.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
       - name: List output directory2
         run: ls -lah out/
       - name: Update Release

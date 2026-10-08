@@ -2,6 +2,8 @@ name: build-emscripten
 
 on:
   push:
+    branches: [bleeding, master]
+    tags: ['**']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -9,8 +11,8 @@ on:
       - '**/README.md'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
   contents: write

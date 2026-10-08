@@ -3,6 +3,8 @@ name: build-catos
 on:
   workflow_dispatch:
   push:
+    branches: [bleeding, master]
+    tags: ['**']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -10,11 +12,12 @@ on:
       - '**/README.md'
       
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions:
   contents: write
+  actions: read
 
 env:
   TARGET: "catos"
@@ -67,6 +70,15 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/catos/install.sh
+      - name: Restore compatible platform artifacts
+        id: platform-artifacts
+        if: env.USE_ARTIFACT == 'true'
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: restore
+          variant: ${{ matrix.bundle }}
+          archs: arm64 x86_64
       - name: Build Catalyst arm64
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/build.sh
@@ -85,26 +97,14 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: List output directory
         run: ls -lah out/
-      - name: Package Binaries for Artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
-        run: scripts/artifact/artifact.sh
-        env:
-          BUNDLE: ${{ matrix.bundle }}
-          GA_CI_SECRET: ${{ secrets.CI_SECRET }}
-      - name: Upload binaries as Artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: actions/upload-artifact@v7.0.0
+      - name: Publish platform artifact baseline
+        continue-on-error: true
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
+        uses: ./.github/actions/platform-artifacts
         with:
-          name: libs-mac-cataylst-${{ env.TARGET }}-${{ matrix.bundle }}
-          path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
-          retention-days: 30
-      - name: Remove .tar.bz2 files
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        run: |
-          echo "Removing .tar.bz2 files from out/ directory..."
-          rm -f out/*.tar.bz2
-          echo "Cleanup complete."
+          phase: save
+          variant: ${{ matrix.bundle }}
+          archs: arm64 x86_64
       - name: Merge our iOS libaries into XC Framework
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: scripts/catos/xcframework_all.sh
