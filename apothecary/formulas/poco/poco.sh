@@ -11,8 +11,8 @@ FORMULA_TYPES=("osx" "ios" "vs" "linux")
 FORMULA_DEPENDS=("openssl" "zlib" )
 
 # define the version
-VER=1.15.3
-BUILD_ID=1
+VER=1.15.4
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -29,7 +29,7 @@ FORMULA_DEPENDS_MANUAL=1
 # 3rd Party libraries.  See https://github.com/pocoproject/poco/blob/develop/README
 # for more information.
 
-SHA256="4f112fea59e0c65f0fffe30a4957f8d66cf41528c21dd9903e6d7550022c794e"
+SHA256="4635007f593646b3db8754bbb31ded34cd533487519d4d4a45c788dbff3fe07f"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
