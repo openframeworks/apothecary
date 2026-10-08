@@ -15,7 +15,7 @@ FORMULA_DEPENDS=()
 # define the version
 VER=1.0.2
 SHA256="f2a04467515555ab45abbf05f5ecdf0eb807f56f2e8b60e31f3848d51f9b4a41"
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 
 # tools for git use
