@@ -79,7 +79,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **pugixml** | `1.16` | `v1.16` | current | Latest stable. | https://github.com/zeux/pugixml |
 | **rtAudio** | `6.0.1` | `6.0.1` | current | Tag in formula is `master` but `VER=6.0.1` matches latest release. | https://github.com/thestk/rtaudio |
 | **shaderc** | `ff84893dd52d28f0b1737d2635733d952013bd9c` | tag `v2026.4` | pinned-dev | `FORMULA_TYPES=()` — unused. SHA is shaderc “known-good”. Only bump with SPIRV/Glslang stack. | https://github.com/google/shaderc |
-| **svgtiny** | `0.1.8` | netsurf package line | n/a | NetSurf libsvgtiny; not a GitHub release train. | `git://git.netsurf-browser.org/libsvgtiny.git` |
+| **svgtiny** | `0.1.8` | netsurf package line | n/a | Opt-in legacy SVG Tiny parser; current ofxSvg uses ofXml/pugixml. Explicit and Linux modular builds remain available. | https://github.com/netsurf-browser/libsvgtiny |
 | **tess2** | `1.0.2` | `v1.0.2` | current | Latest stable (`GIT_TAG=master` in formula — verify checkout). | https://github.com/memononen/libtess2 |
 | **uriparser** | `1.0.2` | `uriparser-1.0.2` | current | Latest stable. | https://github.com/uriparser/uriparser |
 | **utf8** (utfcpp) | `4.2.1` | `v4.2.1` | current | Header-only; includes the 4.2.1 next16 error-type fix. | https://github.com/nemtrif/utfcpp |
