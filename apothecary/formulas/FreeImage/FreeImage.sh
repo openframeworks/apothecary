@@ -9,6 +9,7 @@
 # JXR is Windows-only; 3.19.17 restores the plugin (JXRMeta without __in).
 # 3.19.18 turns LibRaw on by default and compiles it with LIBRAW_NODLL on VS.
 # 3.19.19 vendors OpenEXR 3.5.1, libdeflate 1.26 and libtiff 4.7.2.
+# 3.19.21 vendors OpenEXR 3.5.2 and libpng 1.6.59; adds CR3/X3F RAW support.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -17,11 +18,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.20
-SHA256="8818c80483f714f103a7811d66e1409c261b9fb4a9d60dd2ea28cbc7e9a2f77c"
+VER=3.19.21
+SHA256="52034b31614f1f5b91a7fa94a69e83e5d5438a72aecfb496fe99d9603ea95eb8"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=24
+BUILD_ID=25
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
