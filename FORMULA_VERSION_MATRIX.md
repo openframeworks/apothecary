@@ -32,7 +32,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 |-------|----------------|-----|
 | **OpenSSL** | **4.0.2** via `danoli3/openssl-cmake` branch `4.0` | OF moved off 3.x onto 4.0 (#562/#590). `openssl-cmake` 3.5 + OpenSSL 3.5.7 failed CI (ML-DSA DTLS macros). LTS **3.5.8** is the rollback track, not the default. **4.1.0-alpha1** is not for OF. |
 | **OpenCV** | **4.14.0** (latest 4.x) | OF still uses the 4.x API. **5.0.0** is a major. |
-| **libpng** | **1.6.58** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
+| **libpng** | **1.6.59** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
 | **libxml2** | **2.13.9** (latest 2.13.x) | 2.14/2.15 (`v2.15.4`) break consumers; stay on 2.13 until OF is tested. |
 | **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
 | **FreeImage** | **3.19.20** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON. JXR is Windows-only (restored in 3.19.17). 3.19.19 updates OpenEXR, libdeflate and libtiff; LibRaw default + VS LIBRAW_NODLL. |
@@ -63,7 +63,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **gstreamer** | `1.24.0` (`b125253c…`) | `1.28.7` stable; `1.29.2` newer | behind | linux/osx only. No OF API freeze documented — **just not bumped**. Candidate: 1.28.7. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
 | **json** (nlohmann) | `3.12.0` | `v3.12.0` | current | Latest stable. | https://github.com/nlohmann/json |
 | **kiss** (kissfft) | `131.2.0` | `131.2.0` | current | Latest stable. | https://github.com/mborgerding/kissfft |
-| **libpng** | `1.6.58` | `v1.6.58` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
+| **libpng** | `1.6.59` | `v1.6.59` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
 | **libssh2** | `1.11.1` | `libssh2-1.11.1` | current | Release pin (was wrongly listed as `1.11.0-dev`). cURL SSH backend. | https://github.com/libssh2/libssh2 |
 | **libusb** | `1.0.30` | `v1.0.30` | current | Latest stable. | https://github.com/libusb/libusb |
 | **libxml2** | `2.13.9` | `v2.15.4` (2.13 latest = 2.13.9) | major-behind | **On purpose** latest 2.13.x. 2.14/2.15 need an OF test pass. | https://github.com/GNOME/libxml2 |
@@ -148,7 +148,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **assimp** | 5.4.3 | 6.0.5 CI regressions |
 | **opencv** | 4.14.0 | 5.0 is a major |
 | **libxml2** | 2.13.9 | 2.15.4 track change |
-| **libpng** | 1.6.58 | 1.7 beta |
+| **libpng** | 1.6.59 | 1.7 beta |
 | **openssl** | 4.0.2 | not 4.1-alpha; not 3.5 unless rolling back |
 | **boost / portaudio / shaderc** | as-is | unused formulas |
 | **metalangle SHA** | `ec92514` | overlay + SPIRV-Cross pin |
@@ -229,7 +229,7 @@ formulas:
   gstreamer:  { current: "1.24.0",   latest: "1.28.7",   status: behind, pin: "none documented — not bumped" }
   json:       { current: "3.12.0",   latest: "3.12.0",   status: current }
   kiss:       { current: "131.2.0",  latest: "131.2.0",  status: current }
-  libpng:     { current: "1.6.58",   latest: "1.6.58",   status: current, track: "1.6", pin: "1.7 still beta" }
+  libpng:     { current: "1.6.59",   latest: "1.6.59",   status: current, track: "1.6", pin: "1.7 still beta" }
   libssh2:    { current: "1.11.1",   latest: "1.11.1",   status: current }
   libusb:     { current: "1.0.30",   latest: "1.0.30",   status: current }
   libxml2:    { current: "2.13.9",   latest: "2.15.4",   status: major-behind, pin: "stay on 2.13.x" }
