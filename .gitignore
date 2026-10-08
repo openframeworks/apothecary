@@ -19,6 +19,7 @@
 !/.github/workflows/test-openframeworks-libraries.yml
 !/.github/workflows/validate-formula-sources.yml
 !/.github/workflows/upstream-versions.yml
+!/.github/workflows/build-modular-optional.yml
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build
