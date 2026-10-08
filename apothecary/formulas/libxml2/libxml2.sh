@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib")
 # define the version by sha
 VER=2.15.4
 SOURCE_COMMIT=96498992efa48d52b0e8b83058bd88dbdaf153c1
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
@@ -167,7 +167,10 @@ function build() {
 
     elif [ "$TYPE" == "android" ]; then
 
-        cp $FORMULA_DIR/config.h .
+        # CMake generates the target configuration (including XML_SYSCONFDIR).
+        # A legacy source-root header shadows it through libxml.h's quoted include.
+        # Remove copies left by older Android builds as well as avoiding new ones.
+        rm -f config.h
 
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
