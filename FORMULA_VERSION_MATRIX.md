@@ -33,7 +33,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **OpenSSL** | **4.0.2** via `danoli3/openssl-cmake` branch `4.0` | OF moved off 3.x onto 4.0 (#562/#590). `openssl-cmake` 3.5 + OpenSSL 3.5.7 failed CI (ML-DSA DTLS macros). LTS **3.5.8** is the rollback track, not the default. **4.1.0-alpha1** is not for OF. |
 | **OpenCV** | **4.14.0** (latest 4.x) | OF still uses the 4.x API. **5.0.0** is a major. |
 | **libpng** | **1.6.58** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
-| **libxml2** | **2.13.9** (latest 2.13.x) | 2.14/2.15 (`v2.15.4`) break consumers; stay on 2.13 until OF is tested. |
+| **libxml2** | **2.15.4** | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
 | **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
 | **FreeImage** | **3.19.20** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON. JXR is Windows-only (restored in 3.19.17). 3.19.19 updates OpenEXR, libdeflate and libtiff; LibRaw default + VS LIBRAW_NODLL. |
 | **ANGLE / Dawn / MetalANGLE / GLon12** | SHA pins | Opt-in backends. Not default OF GL. See `AGENTS.md`. |
@@ -66,7 +66,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **libpng** | `1.6.58` | `v1.6.58` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
 | **libssh2** | `1.11.1` | `libssh2-1.11.1` | current | Release pin (was wrongly listed as `1.11.0-dev`). cURL SSH backend. | https://github.com/libssh2/libssh2 |
 | **libusb** | `1.0.30` | `v1.0.30` | current | Latest stable. | https://github.com/libusb/libusb |
-| **libxml2** | `2.13.9` | `v2.15.4` (2.13 latest = 2.13.9) | major-behind | **On purpose** latest 2.13.x. 2.14/2.15 need an OF test pass. | https://github.com/GNOME/libxml2 |
+| **libxml2** | `2.15.4` | `v2.15.4` | current | 2.15 track; rebuild consumers formerly linked to 2.13. HTML/HTTP/legacy features remain disabled. | https://github.com/GNOME/libxml2 |
 | **metalangle** | `1.0` (`ec925142edeb1da3158fd8710ecc6dc2fb1f1f97`) | kakashidinho frozen 2023-02-11 | pinned-dev | 2022 Metal overlay + SPIRV-Cross `f38cbeb8`. **Never** put a 2025+ Chromium SHA here — that belongs on `angle`. | https://github.com/kakashidinho/metalangle |
 | **nghttp2** | `1.70.0` | `v1.70.0` | current | cURL HTTP/2. | https://github.com/nghttp2/nghttp2 |
 | **nghttp3** | `1.18.0` | `v1.18.0` | current | cURL HTTP/3. | https://github.com/ngtcp2/nghttp3 |
@@ -147,7 +147,6 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 |------|-------|---------|
 | **assimp** | 5.4.3 | 6.0.5 CI regressions |
 | **opencv** | 4.14.0 | 5.0 is a major |
-| **libxml2** | 2.13.9 | 2.15.4 track change |
 | **libpng** | 1.6.58 | 1.7 beta |
 | **openssl** | 4.0.2 | not 4.1-alpha; not 3.5 unless rolling back |
 | **boost / portaudio / shaderc** | as-is | unused formulas |
@@ -232,7 +231,7 @@ formulas:
   libpng:     { current: "1.6.58",   latest: "1.6.58",   status: current, track: "1.6", pin: "1.7 still beta" }
   libssh2:    { current: "1.11.1",   latest: "1.11.1",   status: current }
   libusb:     { current: "1.0.30",   latest: "1.0.30",   status: current }
-  libxml2:    { current: "2.13.9",   latest: "2.15.4",   status: major-behind, pin: "stay on 2.13.x" }
+  libxml2:    { current: "2.15.4",   latest: "2.15.4",   status: current, pin: "2.15 track; consumers must rebuild" }
   metalangle: { current: "ec92514",  latest: "frozen-2023", status: pinned-dev, pin: "2022 overlay + SPIRV-Cross" }
   nghttp2:    { current: "1.70.0",   latest: "1.70.0",   status: current }
   nghttp3:    { current: "1.18.0",   latest: "1.18.0",   status: current }
