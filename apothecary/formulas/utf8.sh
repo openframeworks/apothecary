@@ -7,11 +7,11 @@ FORMULA_TYPES=("osx" "msys2" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" 
 FORMULA_DEPENDS=()
 
 # define the version
-VER=4.1.1
-VER_=4_1_1
-SHA256="1ca68016f0abc24172998e39ce0d8f8e2b7a26f7579a0ff85d4e1b9a7aea56f8"
-SHA256_ZIP="45ae96c0a7b7b02c147160aae7562002f5a93fec696919d3b6b2ca6c91304a5a"
-BUILD_ID=1
+VER=4.2.1
+VER_=4_2_1
+SHA256="6d6a5493a111884cc085ee31babfe6d9960c8fb08fc80a64852eaeea8323dbc1"
+SHA256_ZIP="8b46132df358c9c78fd24c80c84908df0678e9788ea45db1e7b722060ff4f99e"
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
