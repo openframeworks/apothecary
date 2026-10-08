@@ -90,6 +90,12 @@
     "pattern": "v?(\\d+(?:\\.\\d+)+)"
   },
   {
+    "name": "OpenCV 5",
+    "formula": "apothecary/formulas/opencv5/opencv5.sh",
+    "repo": "opencv/opencv",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
     "name": "pugixml",
     "formula": "apothecary/formulas/pugixml.sh",
     "repo": "zeux/pugixml",
