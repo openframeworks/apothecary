@@ -66,7 +66,6 @@ FORMULAS=(
     "uriparser"
     "curl"
     # "poco"
-    "svgtiny"
     "cairo"
     "fmt"
     "metalangle"
@@ -93,7 +92,6 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
         "glfw"
         "freetype"
         "libxml2"
-        "svgtiny"
         "tess2"
         "kiss"
         "FreeImage"
@@ -126,7 +124,6 @@ elif [[ "$TARGET" =~ ^(android)$ ]]; then
         "brotli"
         "zlib"
         "libxml2"
-        "svgtiny"
         "tess2"
         "kiss"
         "fmt"
@@ -159,7 +156,6 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             "pugixml"
             "freetype"
             "libxml2"
-            "svgtiny"
             "FreeImage"
             "assimp"
             "glew"
@@ -228,7 +224,6 @@ elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
             "brotli"
             "freetype"
             "libxml2"
-            "svgtiny"
             "assimp"
             "FreeImage"
             "glew"
@@ -284,7 +279,9 @@ for formula in "${FORMULAS[@]}"; do
         break
     fi
 done
-FORMULAS_MODULAR_ONLY+=("opencv5")
+# Current ofxSvg uses ofXml/pugixml. Keep svgtiny available for legacy users
+# through explicit builds and the Linux modular job, outside core archives.
+FORMULAS_MODULAR_ONLY+=("opencv5" "svgtiny")
 
 array_contains() {
     local array="$1[@]"

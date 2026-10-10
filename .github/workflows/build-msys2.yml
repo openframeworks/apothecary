@@ -58,31 +58,19 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
+      - name: Preserve shell script line endings
+        shell: pwsh
+        run: git config --global core.autocrlf input
+      - name: Clone repository
+        uses: actions/checkout@v7.0.1
       - name: Setup msys2
-        uses: msys2/setup-msys2@v2.32.0
+        timeout-minutes: 20
+        uses: ./.github/actions/setup-msys2
         with:
-          update: true
           # windows-latest has C:\msys64 already. windows-11-arm does not,
-          # so clangarm64 needs a fresh installer (msys2-arm64).
+          # so clangarm64 needs the base installer before configuring mirrors.
           release: ${{ matrix.flavor == 'clangarm64' }}
-          cache: true
           msystem: ${{ matrix.flavor }}
-          install: >-
-            base-devel
-            unzip
-            dos2unix
-            git
-            curl
-            cmake
-          pacboy: >-
-            gcc:p
-            cmake:p
-            ninja:p
-            gperf:p
-            libxml2:p
-            python3:p
-            libpng:p
-            zlib:p
 
       - name: Use system curl for clangarm64
         if: matrix.flavor == 'clangarm64'
@@ -110,10 +98,6 @@ jobs:
         run: |
           echo "Setting up environment for ${{ matrix.flavor }}"
           echo "ARCH=${{ matrix.flavor }}" >> $GITHUB_ENV
-
-      - run: git config --global core.autocrlf input
-      - name: Clone repository
-        uses: actions/checkout@v7.0.1
 
       - name: Restore compatible platform artifacts
         id: platform-artifacts

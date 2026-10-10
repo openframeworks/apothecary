@@ -1,0 +1,58 @@
+name: Reliable MSYS2 setup
+description: Configure the package server before updates and retry failed downloads once
+inputs:
+  msystem:
+    description: MSYS2 environment/flavor
+    required: true
+  release:
+    description: Download a fresh installation on runners without MSYS2
+    default: 'false'
+  install:
+    description: Packages installed through pacman
+    default: base-devel unzip dos2unix git curl cmake
+  pacboy:
+    description: Flavor-specific build packages
+    default: gcc:p cmake:p ninja:p gperf:p libxml2:p python3:p libpng:p zlib:p
+runs:
+  using: composite
+  steps:
+    - name: Bootstrap MSYS2 without package downloads
+      uses: msys2/setup-msys2@v2.32.0
+      with:
+        update: false
+        release: ${{ inputs.release }}
+        # Both fresh ARM-runner installs and preinstalled x64 use this location.
+        # The subsequent release:false calls reuse it rather than reinstalling.
+        location: 'C:\'
+        cache: false
+        msystem: ${{ inputs.msystem }}
+    - name: Configure package server and clear partial downloads
+      shell: msys2 {0}
+      run: bash scripts/msys2/prepare-install.sh
+    - name: Update and install packages
+      id: install
+      continue-on-error: true
+      uses: msys2/setup-msys2@v2.32.0
+      with:
+        update: true
+        release: false
+        cache: true
+        msystem: ${{ inputs.msystem }}
+        install: ${{ inputs.install }}
+        pacboy: ${{ inputs.pacboy }}
+    - name: Clear failed partial downloads before retry
+      if: steps.install.outcome == 'failure'
+      shell: msys2 {0}
+      run: |
+        echo 'MSYS2 package setup failed; retrying once with complete downloads.'
+        bash scripts/msys2/prepare-install.sh
+    - name: Retry update and package installation
+      if: steps.install.outcome == 'failure'
+      uses: msys2/setup-msys2@v2.32.0
+      with:
+        update: true
+        release: false
+        cache: true
+        msystem: ${{ inputs.msystem }}
+        install: ${{ inputs.install }}
+        pacboy: ${{ inputs.pacboy }}
