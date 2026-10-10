@@ -82,7 +82,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **svgtiny** | `0.1.8` | netsurf package line | n/a | NetSurf libsvgtiny; not a GitHub release train. | `git://git.netsurf-browser.org/libsvgtiny.git` |
 | **tess2** | `1.0.2` | `v1.0.2` | current | Latest stable (`GIT_TAG=master` in formula — verify checkout). | https://github.com/memononen/libtess2 |
 | **uriparser** | `1.0.2` | `uriparser-1.0.2` | current | Latest stable. | https://github.com/uriparser/uriparser |
-| **utf8** (utfcpp) | `4.1.1` | `v4.2.0` | behind | Header-only. **4.2.0 is a straightforward candidate.** | https://github.com/nemtrif/utfcpp |
+| **utf8** (utfcpp) | `4.2.1` | `v4.2.1` | current | Header-only; includes the 4.2.1 next16 error-type fix. | https://github.com/nemtrif/utfcpp |
 | **videoInput** | `master` (`261bfeee…`) | branch only | pinned-dev | ofTheo fork SHA. Windows capture. | https://github.com/ofTheo/videoInput |
 | **zlib** | `1.3.2` | `v1.3.2` | current | Latest stable. | https://github.com/madler/zlib |
 
@@ -125,7 +125,6 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Item | Pinned → candidate | Why it is safe-ish |
 |------|--------------------|--------------------|
-| **utf8** | `4.1.1` → `4.2.0` | Header-only. |
 | **gstreamer** | `1.24.0` → `1.28.7` | Same 1.x line; linux/osx only; needs a real rebuild. |
 | **automake** | `1.16.4` → `1.18.1` | Host-only. |
 | **Android NDK mapping** | YAML 28.2 → actually r29 | Either pin `NDK_ROOT` to the 28.2 path, or declare r29 on purpose. Do not leave the redirect implicit. |
@@ -246,7 +245,7 @@ formulas:
   shaderc:    { current: "ff84893",  latest: "v2026.4",  status: pinned-dev, pin: "FORMULA_TYPES empty; known-good SHA" }
   tess2:      { current: "1.0.2",    latest: "1.0.2",    status: current }
   uriparser:  { current: "1.0.2",    latest: "1.0.2",    status: current }
-  utf8:       { current: "4.1.1",    latest: "4.2.0",    status: behind, pin: "none — header-only bump" }
+  utf8:       { current: "4.2.1", latest: "4.2.1", status: current, pin: "header-only" }
   videoInput: { current: "261bfeee", latest: "master",   status: pinned-dev, pin: "ofTheo SHA" }
   zlib:       { current: "1.3.2",    latest: "1.3.2",    status: current }
   fmod:       { current: "44459",    latest: "vendor",   status: vendor }
