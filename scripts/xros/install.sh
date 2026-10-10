@@ -1,7 +1,8 @@
-# Silent update to prevent long logs
-brew update >/dev/null
+#!/usr/bin/env bash
+set -e
+set -o pipefail
 
-brew install --formula cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig bash shfmt gum
+bash "$(dirname "${BASH_SOURCE[0]}")/../apple-install-tools.sh" cmake coreutils autoconf automake ccache gtk-doc brotli libtool wget fontconfig bash shfmt gum
 
 # brew reinstall libtool
 

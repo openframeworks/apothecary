@@ -32,8 +32,8 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 |-------|----------------|-----|
 | **OpenSSL** | **4.0.2** via `danoli3/openssl-cmake` branch `4.0` | OF moved off 3.x onto 4.0 (#562/#590). `openssl-cmake` 3.5 + OpenSSL 3.5.7 failed CI (ML-DSA DTLS macros). LTS **3.5.8** is the rollback track, not the default. **4.1.0-alpha1** is not for OF. |
 | **OpenCV** | **4.14.0** (latest 4.x) | OF still uses the 4.x API. **5.0.0** is a major. |
-| **libpng** | **1.6.58** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
-| **libxml2** | **2.15.4** | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
+| **libpng** | **1.6.59** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
+| **libxml2** | **2.15.4** (latest 2.13.x) | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
 | **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
 | **FreeImage** | **3.19.20** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON. JXR is Windows-only (restored in 3.19.17). 3.19.19 updates OpenEXR, libdeflate and libtiff; LibRaw default + VS LIBRAW_NODLL. |
 | **ANGLE / Dawn / MetalANGLE / GLon12** | SHA pins | Opt-in backends. Not default OF GL. See `AGENTS.md`. |
@@ -46,7 +46,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Formula | Pinned | Latest upstream | Status | Why pinned | Source |
 |---------|--------|-----------------|--------|------------|--------|
-| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS. Apple `gn gen` failed CI (#589) — **off core**. Not metalangle. | https://github.com/google/angle |
+| **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS and GLES→Metal on osx/ios/tvos/catos/xros. Opt-in `latest-modular` with artifact caching; **off core**. Not metalangle. | https://github.com/google/angle |
 | **assimp** | `5.4.3` | `v6.0.5` | compatibility pin | 6.x failed CI. Last known-good 5.4.3. | https://github.com/assimp/assimp |
 | **boost** | `1.66.0` | `boost-1.92.0` | stale | `FORMULA_TYPES=()` — unused. filesystem/system only until C++ std; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.0` | `v1.2.0` | current | Latest stable. | https://github.com/google/brotli |
@@ -63,7 +63,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **gstreamer** | `1.24.0` (`b125253c…`) | `1.28.7` stable; `1.29.2` newer | behind | linux/osx only. No OF API freeze documented — **just not bumped**. Candidate: 1.28.7. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
 | **json** (nlohmann) | `3.12.0` | `v3.12.0` | current | Latest stable. | https://github.com/nlohmann/json |
 | **kiss** (kissfft) | `131.2.0` | `131.2.0` | current | Latest stable. | https://github.com/mborgerding/kissfft |
-| **libpng** | `1.6.58` | `v1.6.58` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
+| **libpng** | `1.6.59` | `v1.6.59` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
 | **libssh2** | `1.11.1` | `libssh2-1.11.1` | current | Release pin (was wrongly listed as `1.11.0-dev`). cURL SSH backend. | https://github.com/libssh2/libssh2 |
 | **libusb** | `1.0.30` | `v1.0.30` | current | Latest stable. | https://github.com/libusb/libusb |
 | **libxml2** | `2.15.4` | `v2.15.4` | current | 2.15 track; rebuild consumers formerly linked to 2.13. HTML/HTTP/legacy features remain disabled. | https://github.com/GNOME/libxml2 |
@@ -74,7 +74,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **opencv** | `4.14.0` | `5.0.0` latest · **`4.14.0` latest 4.x** | current (4.x track) | OF 4.x API. Do not take 5.0 without an OF renderer/module pass. | https://github.com/opencv/opencv |
 | **openssl** | `4.0.2` + cmake `VER_TAG=4.0` | `openssl-4.0.2` · LTS `3.5.8` · `4.1.0-alpha1` | current (4.0 track) | 4.0 via `danoli3/openssl-cmake`. Not 3.5 (CI fail). Not 4.1 alpha. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
 | **pixman** | `0.46.4` | `pixman-0.46.4` | current | Latest stable. | https://gitlab.freedesktop.org/pixman/pixman |
-| **poco** | `1.15.3` | `poco-1.15.3-release` | current | Latest stable. | https://github.com/pocoproject/poco |
+| **poco** | `1.15.4` | `poco-1.15.4-release` | current | Latest stable. | https://github.com/pocoproject/poco |
 | **portaudio** | `stable_v19_20110326` | `v19.7.0` | stale | `FORMULA_TYPES=()` — **not built**. 2011 SourceForge tarball. Ignore unless someone revives it (then `v19.7.0`). | http://www.portaudio.com |
 | **pugixml** | `1.16` | `v1.16` | current | Latest stable. | https://github.com/zeux/pugixml |
 | **rtAudio** | `6.0.1` | `6.0.1` | current | Tag in formula is `master` but `VER=6.0.1` matches latest release. | https://github.com/thestk/rtaudio |
@@ -147,7 +147,8 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 |------|-------|---------|
 | **assimp** | 5.4.3 | 6.0.5 CI regressions |
 | **opencv** | 4.14.0 | 5.0 is a major |
-| **libpng** | 1.6.58 | 1.7 beta |
+| **libxml2** | 2.13.9 | 2.15.4 track change |
+| **libpng** | 1.6.59 | 1.7 beta |
 | **openssl** | 4.0.2 | not 4.1-alpha; not 3.5 unless rolling back |
 | **boost / portaudio / shaderc** | as-is | unused formulas |
 | **metalangle SHA** | `ec92514` | overlay + SPIRV-Cross pin |
@@ -228,7 +229,7 @@ formulas:
   gstreamer:  { current: "1.24.0",   latest: "1.28.7",   status: behind, pin: "none documented — not bumped" }
   json:       { current: "3.12.0",   latest: "3.12.0",   status: current }
   kiss:       { current: "131.2.0",  latest: "131.2.0",  status: current }
-  libpng:     { current: "1.6.58",   latest: "1.6.58",   status: current, track: "1.6", pin: "1.7 still beta" }
+  libpng:     { current: "1.6.59",   latest: "1.6.59",   status: current, track: "1.6", pin: "1.7 still beta" }
   libssh2:    { current: "1.11.1",   latest: "1.11.1",   status: current }
   libusb:     { current: "1.0.30",   latest: "1.0.30",   status: current }
   libxml2:    { current: "2.15.4",   latest: "2.15.4",   status: current, pin: "2.15 track; consumers must rebuild" }
@@ -239,7 +240,7 @@ formulas:
   opencv:     { current: "4.14.0",   latest: "5.0.0",    status: current, track: "4.x", pin: "OF 4.x API" }
   openssl:    { current: "4.0.2",    latest: "4.0.2",    status: current, track: "4.0", pin: "openssl-cmake 4.0; not 3.5; not 4.1-alpha" }
   pixman:     { current: "0.46.4",   latest: "0.46.4",   status: current }
-  poco:       { current: "1.15.3",   latest: "1.15.3",   status: current }
+  poco:       { current: "1.15.4",   latest: "1.15.4",   status: current }
   portaudio:  { current: "stable_v19_20110326", latest: "v19.7.0", status: stale, pin: "FORMULA_TYPES empty" }
   pugixml:    { current: "1.16",     latest: "1.16",     status: current }
   rtAudio:    { current: "6.0.1",    latest: "6.0.1",    status: current }

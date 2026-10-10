@@ -1,7 +1,9 @@
-# Silent update to prevent long logs
-brew update >/dev/null
+#!/usr/bin/env bash
+set -e
+set -o pipefail
 
-brew install --formula cmake coreutils boost-bcp autoconf automake libtool ccache brotli libtool wget bash shfmt gum
+bash "$(dirname "${BASH_SOURCE[0]}")/../apple-install-tools.sh" cmake coreutils boost-bcp autoconf automake libtool ccache brotli wget bash shfmt gum
+
 # brew reinstall libtool
 # export PATH="/usr/local/opt/ccache/libexec:$PATH"
 
