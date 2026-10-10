@@ -69,11 +69,13 @@ is matched case-insensitively when fingerprinting the `tvos` installer.
 
 Further improvements should be separate, measured changes:
 
-- Core artifact lookup currently considers only one repository artifact page and
+- Android/MSYS2/Catalyst/visionOS now use per-formula fingerprints and trusted,
+  paginated baseline lookup; see [PLATFORM_ARTIFACTS.md](PLATFORM_ARTIFACTS.md).
+  Other core artifact lookup currently considers only one repository artifact page and
   matches names by substring without deduplicating bundle names. It worked for
   this iOS run, but needs paginated, exact-name selection to avoid missing bundles
   or overwriting a newer archive with an older duplicate.
-- Core binary reuse validates formula version/build ID rather than the complete
+- Other core binary reuse validates formula version/build ID rather than the complete
   formula/dependency/toolchain fingerprint used by optional outputs. Extending
   exact caching to core libraries needs dependency-aware invalidation and
   retained PR validation of the changed formulas.

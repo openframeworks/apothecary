@@ -4,7 +4,7 @@ SOURCE_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 TEST_ROOT=$(mktemp -d)
 trap 'rm -rf "$TEST_ROOT"' EXIT
 mkdir -p "$TEST_ROOT/scripts" "$TEST_ROOT/apothecary/formulas/example" "$TEST_ROOT/bin"
-cp "$SOURCE_ROOT/scripts/modular-cache-key.sh" "$SOURCE_ROOT/scripts/build-modular-optional.sh" "$TEST_ROOT/scripts/"
+cp "$SOURCE_ROOT/scripts/modular-cache-key.sh" "$SOURCE_ROOT/scripts/build-modular-optional.sh" "$SOURCE_ROOT/scripts/cache-toolchain.sh" "$TEST_ROOT/scripts/"
 cat > "$TEST_ROOT/apothecary/formulas/example/example.sh" <<'FORMULA'
 FORMULA_DEPENDS=("dependency")
 VER=1.0
@@ -66,6 +66,21 @@ sed -i.bak '$d' "$TEST_ROOT/apothecary/formulas/example/example.sh"
 [[ $(OPTIONAL_ARCHS=arm64 key) != "$base" ]]
 [[ $(TARGET=ios key) != "$base" ]]
 [[ $(CFLAGS=-O3 key) != "$base" ]]
+printf 'NDK=29\nANDROID_API=25\n' > "$TEST_ROOT/platform-context"
+platform_base=$(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key)
+printf 'ANDROID_API=26\n' >> "$TEST_ROOT/platform-context"
+[[ $(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key) != "$platform_base" ]]
+mkdir -p "$TEST_ROOT/apothecary/formulas/_depends"
+printf 'FORMULA_DEPENDS=()\nVER=1.0\n' > "$TEST_ROOT/apothecary/formulas/_depends/host-tool.sh"
+git -C "$TEST_ROOT" add apothecary/formulas/_depends/host-tool.sh
+bash "$TEST_ROOT/scripts/modular-cache-key.sh" host-tool >/dev/null
+printf 'VER=1.0\n' > "$TEST_ROOT/apothecary/formulas/legacy.sh"
+git -C "$TEST_ROOT" add apothecary/formulas/legacy.sh
+bash "$TEST_ROOT/scripts/modular-cache-key.sh" legacy >/dev/null
+printf 'FORMULA_DEPENDS=($DYNAMIC_DEPENDENCY)\n' >> "$TEST_ROOT/apothecary/formulas/legacy.sh"
+if bash "$TEST_ROOT/scripts/modular-cache-key.sh" legacy >/dev/null 2>&1; then
+    echo 'FAIL: nonliteral dependencies accepted' >&2; exit 1
+fi
 printf '#!/bin/sh\necho mock-tool-2\n' > "$TEST_ROOT/bin/cmake"
 [[ $(key) != "$base" ]]
 bash "$TEST_ROOT/scripts/build-modular-optional.sh"
