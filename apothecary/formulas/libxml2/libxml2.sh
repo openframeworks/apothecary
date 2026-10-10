@@ -10,9 +10,9 @@ FORMULA_TYPES=("osx" "linux" "vs" "ios" "watchos" "catos" "xros" "tvos" "android
 FORMULA_DEPENDS=("zlib")
 
 # define the version by sha
-VER=2.13.9
-SOURCE_COMMIT=04af2cabb9f859c198b8a553c028a87481199410
-BUILD_ID=2
+VER=2.15.4
+SOURCE_COMMIT=96498992efa48d52b0e8b83058bd88dbdaf153c1
+BUILD_ID=4
 DEFINES=""
 
 URL=https://github.com/GNOME/libxml2/archive/refs/tags/v${VER}
@@ -87,15 +87,11 @@ function build() {
 -DBUILD_SHARED_LIBS=OFF \
 -DCMAKE_INCLUDE_OUTPUT_DIRECTORY=include \
 -DCMAKE_INSTALL_INCLUDEDIR=include\
--DLIBXML2_WITH_UNICODE=ON \
--DLIBXML2_WITH_LZMA=OFF \
 -DLIBXML2_WITH_ZLIB=ON \
--DLIBXML2_WITH_FTP=OFF \
 -DLIBXML2_WITH_HTTP=OFF \
 -DLIBXML2_WITH_HTML=OFF \
 -DLIBXML2_WITH_ICONV=OFF \
 -DLIBXML2_WITH_LEGACY=OFF \
--DLIBXML2_WITH_UNICODE=ON \
 -DLIBXML2_WITH_MODULES=OFF \
 -DLIBXML2_WITH_OUTPUT=ON \
 -DLIBXML2_WITH_PYTHON=OFF \
@@ -171,7 +167,10 @@ function build() {
 
     elif [ "$TYPE" == "android" ]; then
 
-        cp $FORMULA_DIR/config.h .
+        # CMake generates the target configuration (including XML_SYSCONFDIR).
+        # A legacy source-root header shadows it through libxml.h's quoted include.
+        # Remove copies left by older Android builds as well as avoiding new ones.
+        rm -f config.h
 
         find . -name "test*.c" | xargs -r rm
         find . -name "run*.c" | xargs -r rm
@@ -367,7 +366,6 @@ function build() {
             -DCMAKE_SYSTEM_PROCESSOR=$ABI \
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DCMAKE_MINIMUM_REQUIRED_VERSION=3.22 \
-            -DLIBXML2_WITH_LZMA=OFF \
             -DBUILD_SHARED_LIBS=OFF \
             -DLIBXML2_WITH_THREAD_ALLOC=OFF
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
