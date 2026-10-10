@@ -4,6 +4,9 @@ on:
     paths:
       - '.github/workflows/build*.yml'
       - '.github/actions/platform-artifacts/**'
+      - '.github/actions/setup-msys2/**'
+      - 'scripts/msys2/**'
+      - 'scripts/tests/test-msys2-install.sh'
       - 'scripts/*artifact*'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
@@ -16,6 +19,9 @@ on:
     paths:
       - '.github/workflows/build*.yml'
       - '.github/actions/platform-artifacts/**'
+      - '.github/actions/setup-msys2/**'
+      - 'scripts/msys2/**'
+      - 'scripts/tests/test-msys2-install.sh'
       - 'scripts/*artifact*'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
@@ -37,3 +43,4 @@ jobs:
       - run: bash scripts/tests/test-modular-cache.sh
       - run: node scripts/tests/test-platform-artifacts.cjs
       - run: ruby scripts/tests/test-workflow-scheduling.rb
+      - run: bash scripts/tests/test-msys2-install.sh
