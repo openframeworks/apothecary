@@ -74,7 +74,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **opencv** | `4.14.0` | `5.0.0` latest · **`4.14.0` latest 4.x** | current (4.x track) | OF 4.x API. Do not take 5.0 without an OF renderer/module pass. | https://github.com/opencv/opencv |
 | **openssl** | `4.0.2` + cmake `VER_TAG=4.0` | `openssl-4.0.2` · LTS `3.5.8` · `4.1.0-alpha1` | current (4.0 track) | 4.0 via `danoli3/openssl-cmake`. Not 3.5 (CI fail). Not 4.1 alpha. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
 | **pixman** | `0.46.4` | `pixman-0.46.4` | current | Latest stable. | https://gitlab.freedesktop.org/pixman/pixman |
-| **poco** | `1.15.3` | `poco-1.15.3-release` | current | Latest stable. | https://github.com/pocoproject/poco |
+| **poco** | `1.15.4` | `poco-1.15.4-release` | current | Latest stable. | https://github.com/pocoproject/poco |
 | **portaudio** | `stable_v19_20110326` | `v19.7.0` | stale | `FORMULA_TYPES=()` — **not built**. 2011 SourceForge tarball. Ignore unless someone revives it (then `v19.7.0`). | http://www.portaudio.com |
 | **pugixml** | `1.16` | `v1.16` | current | Latest stable. | https://github.com/zeux/pugixml |
 | **rtAudio** | `6.0.1` | `6.0.1` | current | Tag in formula is `master` but `VER=6.0.1` matches latest release. | https://github.com/thestk/rtaudio |
@@ -240,7 +240,7 @@ formulas:
   opencv:     { current: "4.14.0",   latest: "5.0.0",    status: current, track: "4.x", pin: "OF 4.x API" }
   openssl:    { current: "4.0.2",    latest: "4.0.2",    status: current, track: "4.0", pin: "openssl-cmake 4.0; not 3.5; not 4.1-alpha" }
   pixman:     { current: "0.46.4",   latest: "0.46.4",   status: current }
-  poco:       { current: "1.15.3",   latest: "1.15.3",   status: current }
+  poco:       { current: "1.15.4",   latest: "1.15.4",   status: current }
   portaudio:  { current: "stable_v19_20110326", latest: "v19.7.0", status: stale, pin: "FORMULA_TYPES empty" }
   pugixml:    { current: "1.16",     latest: "1.16",     status: current }
   rtAudio:    { current: "6.0.1",    latest: "6.0.1",    status: current }
