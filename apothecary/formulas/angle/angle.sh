@@ -75,7 +75,7 @@ function _angle_depot_env() {
 
 # gclient/gn/autoninja are Win32. cmd.exe PATH must be C:\... so git.bat is found.
 function _angle_win_run() {
-    local vendor dt_w winpath git_dir py_dir
+    local vendor dt_w winpath git_dir py_dir cmd_dir cmd_file status
     vendor="$(pwd)/.vendor"
     dt_w="$(cygpath -w "${vendor}/depot_tools")"
     winpath="${dt_w}"
@@ -88,7 +88,16 @@ function _angle_win_run() {
         winpath="${winpath};$(cygpath -w "${py_dir}")"
     fi
     echo "angle: cmd ${*}"
-    cmd.exe //d //s //c "set \"PATH=${winpath};%PATH%\" && $*"
+    # MSYS escapes embedded quotes when passing a command string to a native
+    # executable. Keep cmd syntax in a batch file rather than in argv.
+    cmd_dir="$(mktemp -d)" || return 1
+    cmd_file="${cmd_dir}/angle.cmd"
+    printf '@echo off\r\nset "PATH=%s;%%PATH%%"\r\n%s\r\n' "$winpath" "$*" > "$cmd_file"
+    status=0
+    cmd.exe //d //c call "$(cygpath -w "$cmd_file")" || status=$?
+    rm -f "$cmd_file"
+    rmdir "$cmd_dir"
+    return "$status"
 }
 
 function prepare() {

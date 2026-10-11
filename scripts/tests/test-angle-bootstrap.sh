@@ -31,3 +31,27 @@ TYPE=vs ARCH=64 PLATFORM=x64 build
 grep -F 'call gn.bat gen out/Release_x64' "$ANGLE_TEST_LOG" | grep -F 'target_os=\"win\"'
 grep -F 'call autoninja.bat -C out/Release_x64 libEGL libGLESv2' "$ANGLE_TEST_LOG"
 echo 'ANGLE bootstrap ordering and Windows command tests passed'
+# Exercise the real launcher boundary: cmd.exe receives only a batch pathname,
+# while quotes and Windows command syntax remain in the generated file.
+source "$ROOT/apothecary/formulas/angle/angle.sh"
+cmd.exe() {
+    [ "$#" -eq 4 ] && [ "$1" = '//d' ] && [ "$2" = '//c' ] && [ "$3" = call ]
+    [ -f "$4" ]
+    cp "$4" "$fixture/launched.cmd"
+    printf '%s\n' "$4" > "$fixture/launched-path"
+    return "${ANGLE_TEST_EXIT:-0}"
+}
+_angle_win_run 'call "C:\path with spaces\bootstrap\win_tools.bat"'
+tr -d '\r' < "$fixture/launched.cmd" > "$fixture/launched.txt"
+grep -Fx 'call "C:\path with spaces\bootstrap\win_tools.bat"' "$fixture/launched.txt"
+grep -E '^set "PATH=.*;%PATH%"$' "$fixture/launched.txt"
+[ ! -e "$(cat "$fixture/launched-path")" ]
+ANGLE_TEST_EXIT=17
+if _angle_win_run 'call gclient.bat sync'; then
+    echo 'Windows launcher swallowed command failure' >&2
+    exit 1
+else
+    [ "$?" -eq 17 ]
+fi
+[ ! -e "$(cat "$fixture/launched-path")" ]
+echo 'Windows batch transport, cleanup and exit propagation passed'
