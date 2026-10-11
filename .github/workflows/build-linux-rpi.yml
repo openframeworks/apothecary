@@ -91,6 +91,9 @@ jobs:
       - name: Build
         run: ./scripts/linux/raspios/${{ matrix.arch }}/build.sh
 
+      - name: Verify GLFW window backends and native API linking
+        run: bash scripts/tests/test-rpi-glfw-backends.sh
+
       - name: Package canonical archive
         run: scripts/package.sh
 

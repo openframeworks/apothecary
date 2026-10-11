@@ -14,7 +14,7 @@ VER=3.5.1
 SHA256="5234f4f29473e9a06bc7847d8371858dd135d38466eeeaa652fdc9f8f9ff0c20"
 SHA256_ZIP="e9a80355e8a0c59b15ae8576c2c3aeae792c2b1082ec426dc93bde70d5017fda"
 GIT_BRANCH=$VER
-BUILD_ID=1
+BUILD_ID=3
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
@@ -130,18 +130,15 @@ function build() {
     elif [[ "$TYPE" =~ ^(linux)$ ]]; then
         if [ $CROSSCOMPILING -eq 1 ]; then
             source $APOTHECARY_DIR/configure/${TYPE}${PLATFORM}_configure.sh
-            export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH
-            export PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
-            export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
-            if [[ "$PLATFORM" =~ ^arm64$ ]] && [ "$TYPE" = "linux" ]; then
-                echoInfo "Building GLFW for ARM64 Linux - Using Wayland/X11, skipping EGL/OpenGL ES"
+            # The target configure script owns pkg-config's sysroot paths.
+            # GLES/EGL contexts still need a real X11 or Wayland window backend.
+            if [[ "$PLATFORM" =~ ^(arm64|aarch64|armv6l|armv7l|armv8)$ ]]; then
+                echoInfo "Building GLFW for Linux ARM with Wayland and X11"
                 export GLFW_WAYLAND=1
                 export GLFW_X11=1
             else
-                echoInfo "Building GLFW for cross-compiled target - Using EGL/OpenGL ES"
-                DEFINES="$DEFINES -DGLFW_USE_EGL=1 -DGLFW_CLIENT_LIBRARY=glesv2"
-                export GLFW_WAYLAND=0
-                export GLFW_X11=0
+                export GLFW_WAYLAND=${GLFW_WAYLAND:-1}
+                export GLFW_X11=${GLFW_X11:-1}
             fi
         else
             export GLFW_WAYLAND=${GLFW_WAYLAND:-1}
@@ -239,7 +236,7 @@ function copy() {
         secure "$1/lib/$TYPE/$PLATFORM/libglfw3.a" "glfw3.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ "$TYPE" == "linux" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
-        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/" $1/include
+        cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/." "$1/include/"
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/libglfw3.a" $1/lib/$TYPE/$PLATFORM/libglfw3.a
         secure "$1/lib/$TYPE/$PLATFORM/libglfw3.a" "glfw3.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi

@@ -47,6 +47,7 @@ HOST_PACKAGES=(
     ca-certificates
     curl
     pkg-config
+    libwayland-bin # Native wayland-scanner generates code for the target build.
     build-essential
     cmake
     ninja-build
