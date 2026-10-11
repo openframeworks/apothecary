@@ -55,3 +55,17 @@ else
 fi
 [ ! -e "$(cat "$fixture/launched-path")" ]
 echo 'Windows batch transport, cleanup and exit propagation passed'
+
+# tvOS must use Chromium's SDK discovery, including device/simulator metadata.
+for tvos_platform in TVOS SIMULATOR_TVOS; do
+    args=$(TYPE=tvos ARCH=arm64 PLATFORM="$tvos_platform" _angle_gn_args)
+    [[ "$args" == *'target_platform="tvos"'* ]]
+    [[ "$args" == *'use_blink=true'* ]]
+    [[ "$args" != *ios_sdk_path* ]]
+    if [ "$tvos_platform" = TVOS ]; then
+        [[ "$args" == *'target_environment="device"'* ]]
+    else
+        [[ "$args" == *'target_environment="simulator"'* ]]
+    fi
+done
+echo 'tvOS device and simulator use complete upstream SDK discovery'

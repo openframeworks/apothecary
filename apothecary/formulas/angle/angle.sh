@@ -16,7 +16,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=5
+BUILD_ID=6
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -202,7 +202,12 @@ function _angle_gn_args() {
         ios)
             echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"13.0\""
             ;;
-        tvos|xros)
+        tvos)
+            # Let Chromium discover the tvOS SDK and its complete metadata.
+            # Supplying only ios_sdk_path bypasses ios_platform_build setup.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"tvos\" use_blink=true ios_deployment_target=\"16.0\""
+            ;;
+        xros)
             local sdk sdk_path extra
             sdk="$(_angle_xcrun_sdk)"
             sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path 2>/dev/null || true)"
