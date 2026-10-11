@@ -1,0 +1,9 @@
+--- a/modules/stereo/src/stereo_geom.cpp
++++ b/modules/stereo/src/stereo_geom.cpp
+@@ -3,6 +3,7 @@
+ // of this distribution and at http://opencv.org/license.html
+
+ #include "precomp.hpp"
++#include <iterator>
+
+ namespace cv {

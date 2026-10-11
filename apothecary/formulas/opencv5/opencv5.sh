@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=5.0.0
 SHA256="b0528f5a1d379d59d4701cb28c36e22214cc51cf64594e5b56f2d3e6c0233095"
-BUILD_ID=5
+BUILD_ID=6
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=500
@@ -44,7 +44,11 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    : # noop
+    # std::back_inserter is declared by <iterator>, not by incidental PCH
+    # includes (newer libc++ no longer supplies it transitively).
+    if ! grep -q '^#include <iterator>' modules/stereo/src/stereo_geom.cpp; then
+        patch -p1 < "$FORMULA_DIR/stereo-iterator.patch" || return 1
+    fi
 
     # OpenCV 5.0.0 includes <exception>; the OpenCV 4 patch is unnecessary.
 
