@@ -13,7 +13,7 @@ FORMULA_DEPENDS=("zlib")
 VER=5.4.3
 SHA256="66dfbaee288f2bc43172440a55d0235dfc7bf885dda6435c038e8000e79582cb"
 SHA256_ZIP="795c29716f4ac123b403e53b677e9f32a8605c4a7b2d9904bfaae3f4053b506d"
-BUILD_ID=5
+BUILD_ID=6
 DEFINES=""
 
 # tools for git use
@@ -53,7 +53,21 @@ function download() {
 
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
-    echo "Prepare"
+    # Newer libc++ no longer supplies ostream through incidental includes.
+    # poly2tri declares a stream operator in this header on every platform.
+    local header="contrib/poly2tri/poly2tri/common/shapes.h"
+    if ! grep -q '^#include <ostream>' "$header"; then
+        patch -p1 <<'PATCH' || return 1
+--- a/contrib/poly2tri/poly2tri/common/shapes.h
++++ b/contrib/poly2tri/poly2tri/common/shapes.h
+@@ -36,4 +36,5 @@
+ #include <cmath>
+ #include <cstddef>
++#include <ostream>
+ #include <stdexcept>
+ #include <vector>
+PATCH
+    fi
 }
 
 function load() {
