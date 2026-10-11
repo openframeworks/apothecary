@@ -16,12 +16,13 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=4
+BUILD_ID=5
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
 GIT_URL_FALLBACK=https://chromium.googlesource.com/angle/angle
 DEPOT_TOOLS_URL=https://chromium.googlesource.com/chromium/tools/depot_tools.git
+DEPOT_TOOLS_COMMIT=a03dfbf7f2d1cefa2795d81d59ca4f16c8616a8f
 
 function download() {
     . "$DOWNLOADER_SCRIPT"
@@ -87,7 +88,7 @@ function _angle_win_run() {
         winpath="${winpath};$(cygpath -w "${py_dir}")"
     fi
     echo "angle: cmd ${*}"
-    cmd.exe //c "set PATH=${winpath};%PATH% && $*"
+    cmd.exe //d //s //c "set \"PATH=${winpath};%PATH%\" && $*"
 }
 
 function prepare() {
@@ -95,10 +96,16 @@ function prepare() {
     vendor="$(pwd)/.vendor"
     mkdir -p "${vendor}"
     if [ ! -d "${vendor}/depot_tools/.git" ]; then
-        git clone --depth=1 "${DEPOT_TOOLS_URL}" "${vendor}/depot_tools"
+        git -C "${vendor}" init depot_tools
+        git -C "${vendor}/depot_tools" remote add origin "${DEPOT_TOOLS_URL}"
+        git -C "${vendor}/depot_tools" fetch --depth=1 origin "${DEPOT_TOOLS_COMMIT}"
+        git -C "${vendor}/depot_tools" checkout --force FETCH_HEAD
     fi
+    verify_git_commit "${vendor}/depot_tools" "${DEPOT_TOOLS_COMMIT}"
     _angle_depot_env "${vendor}"
 
+    # Disabling automatic updates also skips first-run setup. Initialize the
+    # pinned checkout explicitly before any gclient, GN or autoninja command.
     if [ "$TYPE" = "vs" ]; then
         if ! _angle_git_win_dir >/dev/null; then
             echoError "angle: Git for Windows git.exe not found (MSYS git is not enough)."
@@ -106,9 +113,11 @@ function prepare() {
             echoError "  Need: C:\\\\Program Files\\\\Git\\\\cmd\\\\git.exe"
             exit 1
         fi
+        _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
         _angle_win_run "gclient sync --no-history --shallow"
     else
+        bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
         gclient sync --no-history --shallow
     fi
@@ -202,7 +211,7 @@ function _angle_gn_args() {
 }
 
 function build() {
-    local cpu outdir gn_args
+    local cpu outdir gn_args win_args
     cpu="$(_angle_cpu)"
     outdir="out/Release_${PLATFORM}"
 
@@ -226,8 +235,14 @@ function build() {
         exit 1
     fi
 
-    gn gen "${outdir}" --args="${gn_args}"
-    autoninja -C "${outdir}" libEGL libGLESv2
+    if [ "$TYPE" = "vs" ]; then
+        win_args="${gn_args//\"/\\\"}"
+        _angle_win_run "call gn.bat gen ${outdir} --args=\"${win_args}\""
+        _angle_win_run "call autoninja.bat -C ${outdir} libEGL libGLESv2"
+    else
+        gn gen "${outdir}" --args="${gn_args}"
+        autoninja -C "${outdir}" libEGL libGLESv2
+    fi
 }
 
 function copy() {
