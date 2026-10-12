@@ -27,6 +27,7 @@ sed -n '3p' "$ANGLE_TEST_LOG" | grep -F 'gclient sync --no-history --shallow'
 gn() { echo "Unexpected direct GN invocation" >&2; return 1; }
 autoninja() { echo "Unexpected direct Ninja invocation" >&2; return 1; }
 setup_vs_vars() { VS_INSTALL_PATH='C:\Program Files\Microsoft Visual Studio'; }
+_angle_windows_sdk() { :; }
 TYPE=vs ARCH=64 PLATFORM=x64 build
 grep -F 'call gn.bat gen out/Release_x64' "$ANGLE_TEST_LOG" | grep -F 'target_os=\"win\"'
 grep -F 'call autoninja.bat -C out/Release_x64 libEGL libGLESv2' "$ANGLE_TEST_LOG"
@@ -69,3 +70,21 @@ for tvos_platform in TVOS SIMULATOR_TVOS; do
     fi
 done
 echo 'tvOS device and simulator use complete upstream SDK discovery'
+
+# Keep both Chromium SDK constants aligned with complete installed headers/libs.
+source "$ROOT/apothecary/formulas/angle/angle.sh"
+mkdir -p build/toolchain/win "$fixture/sdk/Include/10.0.26100.0/um" "$fixture/sdk/Include/10.0.26100.0/ucrt" "$fixture/sdk/Lib/10.0.26100.0/um/x64" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64" "$fixture/sdk/Include/10.0.28000.0/um"
+touch "$fixture/sdk/Include/10.0.26100.0/um/Windows.h" "$fixture/sdk/Include/10.0.26100.0/ucrt/stdio.h" "$fixture/sdk/Lib/10.0.26100.0/um/x64/kernel32.lib" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64/ucrt.lib"
+printf "SDK_VERSION = '10.0.28000.0'\n" > build/vs_toolchain.py
+cp build/vs_toolchain.py build/toolchain/win/setup_toolchain.py
+ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" _angle_windows_sdk
+ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" _angle_windows_sdk
+for sdk_file in build/vs_toolchain.py build/toolchain/win/setup_toolchain.py; do
+    grep -Fx "SDK_VERSION = '10.0.26100.0'" "$sdk_file"
+done
+echoError() { echo "$*" >&2; }
+if ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" WINDOWS_SDK_VERSION=10.0.28000.0 _angle_windows_sdk; then
+    echo 'Incomplete SDK was incorrectly accepted' >&2
+    exit 1
+fi
+echo 'Installed SDK selection, script alignment and incomplete-SDK rejection passed'

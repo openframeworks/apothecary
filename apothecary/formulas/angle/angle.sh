@@ -16,7 +16,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=6
+BUILD_ID=7
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -98,6 +98,41 @@ function _angle_win_run() {
     rm -f "$cmd_file"
     rmdir "$cmd_dir"
     return "$status"
+}
+
+# Chromium pins its downloaded toolchain's SDK even with local VS enabled.
+# Match the scripts to the SDK actually available on the local toolchain.
+function _angle_windows_sdk() {
+    local root="${ANGLE_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
+    local sdk="${WINDOWS_SDK_VERSION:-}" candidate file
+    if [ -z "$sdk" ]; then
+        for candidate in "$root"/Include/10.0.*; do
+            if [ -f "$candidate/um/Windows.h" ] &&
+               [ -f "$candidate/ucrt/stdio.h" ] &&
+               [ -f "$root/Lib/${candidate##*/}/um/x64/kernel32.lib" ] &&
+               [ -f "$root/Lib/${candidate##*/}/ucrt/x64/ucrt.lib" ]; then
+                sdk="${candidate##*/}"
+            fi
+        done
+    fi
+    if [ -z "$sdk" ] || [ ! -f "$root/Include/$sdk/um/Windows.h" ] ||
+       [ ! -f "$root/Include/$sdk/ucrt/stdio.h" ] ||
+       [ ! -f "$root/Lib/$sdk/um/x64/kernel32.lib" ] ||
+       [ ! -f "$root/Lib/$sdk/ucrt/x64/ucrt.lib" ]; then
+        echoError "angle: no complete Windows SDK at $root (requested: $sdk)"
+        return 1
+    fi
+    case "$sdk" in
+        10.0.*) ;;
+        *) echoError "angle: invalid Windows SDK version: $sdk"; return 1 ;;
+    esac
+    for file in build/vs_toolchain.py build/toolchain/win/setup_toolchain.py; do
+        grep -q '^SDK_VERSION = ' "$file" || return 1
+        sed "s/^SDK_VERSION = .*/SDK_VERSION = '$sdk'/" "$file" > "$file.sdk-tmp" || return 1
+        mv "$file.sdk-tmp" "$file" || return 1
+    done
+    export WINDOWSSDKDIR="$(cygpath -w "$root")"
+    echo "angle: local Windows SDK $sdk at $WINDOWSSDKDIR"
 }
 
 function prepare() {
@@ -232,6 +267,7 @@ function build() {
     if [ "$TYPE" = "vs" ]; then
         setup_vs_vars
         export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
+        _angle_windows_sdk || return 1
         _angle_depot_env "$(pwd)/.vendor"
     elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
         _angle_depot_env "$(pwd)/.vendor"
