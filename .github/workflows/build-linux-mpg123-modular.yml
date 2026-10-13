@@ -1,0 +1,95 @@
+name: build-linux-mpg123-modular
+on:
+  pull_request:
+    paths: ['apothecary/formulas/mpg123/**', '.github/workflows/build-linux-mpg123-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  push:
+    branches: [bleeding, master]
+    paths: ['apothecary/formulas/mpg123/**', '.github/workflows/build-linux-mpg123-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  build:
+    name: mpg123 Linux ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {arch: '64', runner: ubuntu-24.04}
+          - {arch: arm64, runner: ubuntu-24.04-arm}
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      GCC: gcc14
+      GCC_VERSION: '14'
+      CC: gcc-14
+      CXX: g++-14
+      NO_COLOR: '1'
+      UI_ANIM: '0'
+      NO_FORCE: '1'
+      PACKAGE_LIBS: mpg123
+      ALWAYS_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake build-essential cmake curl gcc-14 g++-14 git libtool pkg-config python3-venv unzip
+          python3 -m venv "$RUNNER_TEMP/build-tools"
+          "$RUNNER_TEMP/build-tools/bin/pip" install meson==1.12.1 ninja packaging mako pyyaml
+          echo "$RUNNER_TEMP/build-tools/bin" >> "$GITHUB_PATH"
+      - name: Record exact native build context
+        run: |
+          context="$RUNNER_TEMP/mpg123-context"
+          {
+            "$CC" --version
+            "$CXX" --version
+            cmake --version
+            meson --version
+            ninja --version
+            dpkg-query -W
+            git hash-object .github/workflows/build-linux-mpg123-modular.yml
+          } > "$context"
+          echo "PLATFORM_ARTIFACT_CONTEXT=$context" >> "$GITHUB_ENV"
+      - name: Compute modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh mpg123 >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v5
+        id: cache
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/mpg123
+      - name: Build library
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./apo update mpg123
+      - name: Check headers, pkg-config and target linking
+        run: |
+          export PKG_CONFIG_PATH="$PWD/out/mpg123/lib/linux/$ARCH/pkgconfig"
+          test -f "$PKG_CONFIG_PATH/libmpg123.pc"
+          pkg-config --exists libmpg123
+          printf '#include <mpg123.h>\nint main(void) { (void)mpg123_init(); return 0; }\n' > "$RUNNER_TEMP/mpg123-smoke.c"
+          "$CC" "$RUNNER_TEMP/mpg123-smoke.c" $(pkg-config --cflags --libs libmpg123) -o "$RUNNER_TEMP/mpg123-smoke"
+          export LD_LIBRARY_PATH="$PWD/out/mpg123/lib/linux/$ARCH:$PWD/out/mpg123/lib/linux/$ARCH/pulseaudio:${LD_LIBRARY_PATH:-}"
+          "$RUNNER_TEMP/mpg123-smoke"
+      - name: Package modular library
+        run: bash scripts/package-individual.sh
+      - uses: actions/cache/save@v5
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/mpg123
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mpg123-linux-${{ matrix.arch }}-gcc14
+          path: out/oF_mpg123_linux_${{ matrix.arch }}_gcc14.tar.bz2
+          if-no-files-found: error
+      - name: Publish latest-modular asset
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: gh release upload latest-modular "out/oF_mpg123_linux_${ARCH}_gcc14.tar.bz2" --clobber --repo "$GITHUB_REPOSITORY"
