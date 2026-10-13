@@ -1,0 +1,95 @@
+name: build-linux-pulseaudio-modular
+on:
+  pull_request:
+    paths: ['apothecary/formulas/pulseaudio/**', '.github/workflows/build-linux-pulseaudio-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  push:
+    branches: [bleeding, master]
+    paths: ['apothecary/formulas/pulseaudio/**', '.github/workflows/build-linux-pulseaudio-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  build:
+    name: pulseaudio Linux ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {arch: '64', runner: ubuntu-24.04}
+          - {arch: arm64, runner: ubuntu-24.04-arm}
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      GCC: gcc14
+      GCC_VERSION: '14'
+      CC: gcc-14
+      CXX: g++-14
+      NO_COLOR: '1'
+      UI_ANIM: '0'
+      NO_FORCE: '1'
+      PACKAGE_LIBS: pulseaudio
+      ALWAYS_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake build-essential cmake curl gcc-14 g++-14 git libtool pkg-config python3-venv unzip libatomic-ops-dev libsndfile1-dev libltdl-dev libdbus-1-dev
+          python3 -m venv "$RUNNER_TEMP/build-tools"
+          "$RUNNER_TEMP/build-tools/bin/pip" install meson==1.12.1 ninja packaging mako pyyaml
+          echo "$RUNNER_TEMP/build-tools/bin" >> "$GITHUB_PATH"
+      - name: Record exact native build context
+        run: |
+          context="$RUNNER_TEMP/pulseaudio-context"
+          {
+            "$CC" --version
+            "$CXX" --version
+            cmake --version
+            meson --version
+            ninja --version
+            dpkg-query -W
+            git hash-object .github/workflows/build-linux-pulseaudio-modular.yml
+          } > "$context"
+          echo "PLATFORM_ARTIFACT_CONTEXT=$context" >> "$GITHUB_ENV"
+      - name: Compute modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh pulseaudio >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v5
+        id: cache
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/pulseaudio
+      - name: Build library
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./apo update pulseaudio
+      - name: Check headers, pkg-config and target linking
+        run: |
+          export PKG_CONFIG_PATH="$PWD/out/pulseaudio/lib/linux/$ARCH/pkgconfig"
+          test -f "$PKG_CONFIG_PATH/libpulse-simple.pc"
+          pkg-config --exists libpulse-simple
+          printf '#include <pulse/pulseaudio.h>\nint main(void) { (void)pa_get_library_version(); return 0; }\n' > "$RUNNER_TEMP/pulseaudio-smoke.c"
+          "$CC" "$RUNNER_TEMP/pulseaudio-smoke.c" $(pkg-config --cflags --libs libpulse-simple) -o "$RUNNER_TEMP/pulseaudio-smoke"
+          export LD_LIBRARY_PATH="$PWD/out/pulseaudio/lib/linux/$ARCH:$PWD/out/pulseaudio/lib/linux/$ARCH/pulseaudio:${LD_LIBRARY_PATH:-}"
+          "$RUNNER_TEMP/pulseaudio-smoke"
+      - name: Package modular library
+        run: bash scripts/package-individual.sh
+      - uses: actions/cache/save@v5
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/pulseaudio
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pulseaudio-linux-${{ matrix.arch }}-gcc14
+          path: out/oF_pulseaudio_linux_${{ matrix.arch }}_gcc14.tar.bz2
+          if-no-files-found: error
+      - name: Publish latest-modular asset
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: gh release upload latest-modular "out/oF_pulseaudio_linux_${ARCH}_gcc14.tar.bz2" --clobber --repo "$GITHUB_REPOSITORY"
