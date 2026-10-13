@@ -71,6 +71,27 @@ for tvos_platform in TVOS SIMULATOR_TVOS; do
 done
 echo 'tvOS device and simulator use complete upstream SDK discovery'
 
+ios_args=$(TYPE=ios ARCH=arm64 PLATFORM=OS64 _angle_gn_args)
+[[ "$ios_args" == *'ios_deployment_target="15.0"'* ]]
+[[ "$ios_args" != *'ios_deployment_target="13.0"'* ]]
+osx_args=$(TYPE=osx ARCH=arm64 PLATFORM=MAC_ARM64 _angle_gn_args)
+[[ "$osx_args" == *'mac_deployment_target="12.0"'* ]]
+vs_args=$(TYPE=vs ARCH=64 PLATFORM=x64 _angle_gn_args)
+[[ "$vs_args" == *'use_custom_libcxx=false'* ]]
+[[ "$vs_args" == *'use_custom_libcxx_for_host=false'* ]]
+for xros_platform in XROS SIMULATOR_XROS; do
+    xros_args=$(TYPE=xros ARCH=arm64 PLATFORM="$xros_platform" _angle_gn_args)
+    [[ "$xros_args" == *'target_platform="xros"'* ]]
+    [[ "$xros_args" == *'ios_deployment_target="2.0"'* ]]
+    [[ "$xros_args" != *ios_sdk_path* ]]
+    if [ "$xros_platform" = XROS ]; then
+        [[ "$xros_args" == *'target_environment="device"'* ]]
+    else
+        [[ "$xros_args" == *'target_environment="simulator"'* ]]
+    fi
+done
+echo 'iOS 15, macOS 12, MSVC libc++ and visionOS SDK discovery args passed'
+
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
 mkdir -p build/toolchain/win "$fixture/sdk/Include/10.0.26100.0/um" "$fixture/sdk/Include/10.0.26100.0/ucrt" "$fixture/sdk/Lib/10.0.26100.0/um/x64" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64" "$fixture/sdk/Include/10.0.28000.0/um"

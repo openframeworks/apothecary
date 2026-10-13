@@ -8,15 +8,16 @@
 # Official build is depot_tools + gn + ninja (not the unofficial CMake).
 # target_os must be "win" / "mac" / "ios" (PR #533 passed TYPE=vs and that is wrong).
 #
-# Output: libEGL + libGLESv2 (DLL on VS, dylib/a on Apple). OF keeps
-# ofGLProgrammableRenderer; the window must be EGL under OF_USE_ANGLE.
+# Output: libEGL + libGLESv2. DLL on VS, dylib on macOS, framework on
+# ios/tvos/catos/xros (ANGLE's iOS shared target is an ios_framework_bundle).
+# OF keeps ofGLProgrammableRenderer; the window must be EGL under OF_USE_ANGLE.
 
 FORMULA_TYPES=("vs" "osx" "ios" "tvos" "catos" "xros")
 FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=7
+BUILD_ID=8
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -197,23 +198,25 @@ function _angle_environment() {
     esac
 }
 
-function _angle_xcrun_sdk() {
-    local env
-    env="$(_angle_environment)"
-    case "${TYPE}" in
-        ios)
-            if [ "$env" = "simulator" ]; then echo "iphonesimulator"; else echo "iphoneos"; fi
-            ;;
-        tvos)
-            if [ "$env" = "simulator" ]; then echo "appletvsimulator"; else echo "appletvos"; fi
-            ;;
-        xros)
-            if [ "$env" = "simulator" ]; then echo "xrsimulator"; else echo "xros"; fi
-            ;;
-        catos) echo "macosx" ;;
-        osx|macos) echo "macosx" ;;
-        *) echo "" ;;
-    esac
+# Chromium's bundled clang -Werrors when -mmacos-version-min is below the
+# SDK, and visionOS is not a target_platform until apple-gn.patch lands.
+function _angle_patch_apple() {
+    local formula_dir patch_file
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    patch_file="${formula_dir}/apple-gn.patch"
+    if [ ! -f "$patch_file" ]; then
+        echoError "angle: missing ${patch_file}"
+        exit 1
+    fi
+    if grep -q 'target_platform == "xros"' build/config/ios/ios_sdk.gni 2>/dev/null &&
+       grep -q 'overriding-deployment-version' build/config/mac/BUILD.gn 2>/dev/null; then
+        echo "angle: apple gn patch already applied"
+        return 0
+    fi
+    if ! patch -p1 --forward --reject-file=- < "$patch_file"; then
+        echoError "angle: failed to apply apple-gn.patch"
+        exit 1
+    fi
 }
 
 function _angle_gn_args() {
@@ -226,16 +229,19 @@ function _angle_gn_args() {
     apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true"
     case "${TYPE}" in
         vs)
-            echo "${common} is_clang=false angle_enable_d3d11=true angle_enable_metal=false"
+            # MSVC does not define __BYTE_ORDER__, which Chromium's libc++ requires.
+            echo "${common} is_clang=false use_custom_libcxx=false use_custom_libcxx_for_host=false angle_enable_d3d11=true angle_enable_metal=false"
             ;;
         osx|macos)
-            echo "${common} ${apple} mac_deployment_target=\"11.0\""
+            # kIOMainPortDefault needs macOS 12.
+            echo "${common} ${apple} mac_deployment_target=\"12.0\""
             ;;
         catos)
             echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"catalyst\" ios_deployment_target=\"16.0\" mac_deployment_target=\"16.0\""
             ;;
         ios)
-            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"13.0\""
+            # Dawn WorkerThread uses std::atomic::wait, available from iOS 14.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"15.0\""
             ;;
         tvos)
             # Let Chromium discover the tvOS SDK and its complete metadata.
@@ -243,14 +249,8 @@ function _angle_gn_args() {
             echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"tvos\" use_blink=true ios_deployment_target=\"16.0\""
             ;;
         xros)
-            local sdk sdk_path extra
-            sdk="$(_angle_xcrun_sdk)"
-            sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path 2>/dev/null || true)"
-            extra="ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"16.0\""
-            if [ -n "${sdk_path}" ]; then
-                extra="${extra} ios_sdk_name=\"${sdk}\" ios_sdk_path=\"${sdk_path}\""
-            fi
-            echo "${common} ${apple} ${extra}"
+            # Same discovery path as tvOS. visionOS 2 is the first stable release.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"xros\" ios_deployment_target=\"2.0\""
             ;;
         *)
             echoError "angle: GN args not defined for TYPE=${TYPE}"
@@ -271,6 +271,7 @@ function build() {
         _angle_depot_env "$(pwd)/.vendor"
     elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
         _angle_depot_env "$(pwd)/.vendor"
+        _angle_patch_apple
     else
         echoError "angle: unsupported TYPE=${TYPE}"
         exit 1
@@ -328,6 +329,14 @@ function copy() {
     if [ -f "${outdir}/d3dcompiler_47.dll" ]; then
         cp -v "${outdir}/d3dcompiler_47.dll" "$1/bin/$TYPE/$PLATFORM/"
     fi
+    # iOS, tvOS, Catalyst and visionOS shared targets are frameworks, not flat dylibs.
+    for f in libEGL libGLESv2; do
+        if [ -d "${outdir}/${f}.framework" ]; then
+            rm -rf "$1/lib/$TYPE/$PLATFORM/${f}.framework"
+            cp -R "${outdir}/${f}.framework" "$1/lib/$TYPE/$PLATFORM/"
+            copied=1
+        fi
+    done
 
     if [ "$copied" -eq 0 ]; then
         echoError "angle: no libEGL/libGLESv2 under ${outdir}"
@@ -343,6 +352,8 @@ function copy() {
         secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.a" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" ]; then
         secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.framework/libGLESv2" ]; then
+        secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.framework/libGLESv2" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     if [ -d "$1/license" ]; then

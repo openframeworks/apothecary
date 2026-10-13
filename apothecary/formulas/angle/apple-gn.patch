@@ -1,0 +1,108 @@
+diff -ruN a/build/config/apple/mobile_config.gni b/build/config/apple/mobile_config.gni
+--- a/build/config/apple/mobile_config.gni	2026-10-13 18:53:56
++++ b/build/config/apple/mobile_config.gni	2026-10-13 18:53:56
+@@ -9,7 +9,7 @@
+   # "simulator" or "catalyst". Must be specified.
+   target_environment = ""
+ 
+-  # Valid values: "iphoneos" (default), "tvos", "watchos".
++  # Valid values: "iphoneos" (default), "tvos", "watchos", "xros".
+   # Indicates the kind of iOS or iOS-based platform that is being targeted.
+   # Note that this value is available only when is_ios is also true (i.e. it
+   # cannot be used with the host toolchain).
+@@ -83,6 +83,7 @@
+     _target_platforms += [
+       "iphoneos",
+       "tvos",
++      "xros",
+     ]
+   } else if (is_watchos) {
+     _target_platforms += [
+diff -ruN a/build/config/ios/BUILD.gn b/build/config/ios/BUILD.gn
+--- a/build/config/ios/BUILD.gn	2026-10-13 18:53:56
++++ b/build/config/ios/BUILD.gn	2026-10-13 18:53:56
+@@ -45,6 +45,8 @@
+     triplet_os = "apple-ios"
+   } else if (target_platform == "tvos") {
+     triplet_os = "apple-tvos"
++  } else if (target_platform == "xros") {
++    triplet_os = "apple-xros"
+   }
+ 
+   # Set target.
+diff -ruN a/build/config/ios/ios_sdk.gni b/build/config/ios/ios_sdk.gni
+--- a/build/config/ios/ios_sdk.gni	2026-10-13 18:53:56
++++ b/build/config/ios/ios_sdk.gni	2026-10-13 18:53:56
+@@ -94,6 +94,16 @@
+     } else {
+       assert(false, "unsupported target_environment=$target_environment")
+     }
++  } else if (target_platform == "xros") {
++    if (target_environment == "simulator") {
++      ios_sdk_name = "xrsimulator"
++      ios_sdk_platform = "XRSimulator"
++    } else if (target_environment == "device") {
++      ios_sdk_name = "xros"
++      ios_sdk_platform = "XROS"
++    } else {
++      assert(false, "unsupported target_environment=$target_environment")
++    }
+   } else {
+     assert(false, "unsupported target_platform=$target_platform")
+   }
+diff -ruN a/build/config/ios/rules.gni b/build/config/ios/rules.gni
+--- a/build/config/ios/rules.gni	2026-10-13 18:53:56
++++ b/build/config/ios/rules.gni	2026-10-13 18:53:56
+@@ -138,6 +138,8 @@
+       _build_info_plist = "//build/config/ios/BuildInfo.plist"
+     } else if (target_platform == "tvos") {
+       _build_info_plist = "//build/config/tvos/BuildInfo.plist"
++    } else if (target_platform == "xros") {
++      _build_info_plist = "//build/config/ios/BuildInfo.plist"
+     }
+     plist_templates = [
+       _build_info_plist,
+diff -ruN a/build/config/mac/BUILD.gn b/build/config/mac/BUILD.gn
+--- a/build/config/mac/BUILD.gn	2026-10-13 18:53:56
++++ b/build/config/mac/BUILD.gn	2026-10-13 18:53:56
+@@ -54,6 +54,9 @@
+     "-isysroot",
+     rebase_path(sysroot, root_build_dir),
+     "-mmacos-version-min=$mac_deployment_target",
++    # This clang -Werrors when -mmacos-version-min is below the SDK version,
++    # then still emits the requested minos. Keep the lower deployment target.
++    "-Wno-error=overriding-deployment-version",
+   ]
+ 
+   asmflags = common_flags
+diff -ruN a/build/config/rust.gni b/build/config/rust.gni
+--- a/build/config/rust.gni	2026-10-13 18:53:56
++++ b/build/config/rust.gni	2026-10-13 18:53:56
+@@ -295,6 +295,14 @@
+       } else {
+         assert(false, "unsupported target_environment=$target_environment")
+       }
++    } else if (target_platform == "xros") {
++      if (target_environment == "simulator") {
++        rust_abi_target = "aarch64-apple-visionos-sim"
++      } else if (target_environment == "device") {
++        rust_abi_target = "aarch64-apple-visionos"
++      } else {
++        assert(false, "unsupported target_environment=$target_environment")
++      }
+     } else {
+       assert(false, "unsupported target_platform=$target_platform")
+     }
+@@ -312,6 +320,12 @@
+     } else if (target_platform == "tvos") {
+       if (target_environment == "simulator") {
+         rust_abi_target = "x86_64-apple-tvos"
++      } else {
++        assert(false, "unsupported target_environment=$target_environment")
++      }
++    } else if (target_platform == "xros") {
++      if (target_environment == "simulator") {
++        rust_abi_target = "x86_64-apple-visionos"
+       } else {
+         assert(false, "unsupported target_environment=$target_environment")
+       }
