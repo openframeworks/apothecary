@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=7
+BUILD_ID=8
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -124,6 +124,9 @@ function build() {
     export LD="${VS_BIN_PATH}/link.exe"
     # Mesa adds /we4189. NDEBUG makes assert-only locals unused (C4189).
     # _CL_ is appended after the compiler command, so it beats /we4189.
+    # MSYS otherwise converts slash-prefixed environment flags into paths
+    # before launching native Meson/Python (e.g. /wd4189 becomes wd4189.obj).
+    export MSYS2_ENV_CONV_EXCL="${MSYS2_ENV_CONV_EXCL:+${MSYS2_ENV_CONV_EXCL};}CL;_CL_"
     export _CL_="${_CL_:+${_CL_} }/wd4189"
     if [ "$ARCH" = "arm64ec" ]; then
         export _CL_="${_CL_} /arm64EC"
