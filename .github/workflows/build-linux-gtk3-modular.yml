@@ -1,0 +1,95 @@
+name: build-linux-gtk3-modular
+on:
+  pull_request:
+    paths: ['apothecary/formulas/gtk3/**', '.github/workflows/build-linux-gtk3-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  push:
+    branches: [bleeding, master]
+    paths: ['apothecary/formulas/gtk3/**', '.github/workflows/build-linux-gtk3-modular.yml', 'scripts/modular-cache-key.sh', 'scripts/package-individual.sh', 'scripts/export_config.sh', 'apothecary/apothecary']
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  build:
+    name: gtk3 Linux ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {arch: '64', runner: ubuntu-24.04}
+          - {arch: arm64, runner: ubuntu-24.04-arm}
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      GCC: gcc14
+      GCC_VERSION: '14'
+      CC: gcc-14
+      CXX: g++-14
+      NO_COLOR: '1'
+      UI_ANIM: '0'
+      NO_FORCE: '1'
+      PACKAGE_LIBS: gtk3
+      ALWAYS_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake build-essential cmake curl gcc-14 g++-14 git libtool pkg-config python3-venv unzip gettext libglib2.0-dev libatk1.0-dev libatk-bridge2.0-dev libpango1.0-dev libgdk-pixbuf-2.0-dev libcairo2-dev libepoxy-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxcomposite-dev libxdamage-dev libxinerama-dev libwayland-dev wayland-protocols libxkbcommon-dev
+          python3 -m venv "$RUNNER_TEMP/build-tools"
+          "$RUNNER_TEMP/build-tools/bin/pip" install meson==1.12.1 ninja packaging mako pyyaml
+          echo "$RUNNER_TEMP/build-tools/bin" >> "$GITHUB_PATH"
+      - name: Record exact native build context
+        run: |
+          context="$RUNNER_TEMP/gtk3-context"
+          {
+            "$CC" --version
+            "$CXX" --version
+            cmake --version
+            meson --version
+            ninja --version
+            dpkg-query -W
+            git hash-object .github/workflows/build-linux-gtk3-modular.yml
+          } > "$context"
+          echo "PLATFORM_ARTIFACT_CONTEXT=$context" >> "$GITHUB_ENV"
+      - name: Compute modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh gtk3 >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v5
+        id: cache
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/gtk3
+      - name: Build library
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: ./apo update gtk3
+      - name: Check headers, pkg-config and target linking
+        run: |
+          export PKG_CONFIG_PATH="$PWD/out/gtk3/lib/linux/$ARCH/pkgconfig"
+          test -f "$PKG_CONFIG_PATH/gtk+-3.0.pc"
+          pkg-config --exists gtk+-3.0
+          printf '#include <gtk/gtk.h>\nint main(void) { (void)gtk_get_major_version(); return 0; }\n' > "$RUNNER_TEMP/gtk3-smoke.c"
+          "$CC" "$RUNNER_TEMP/gtk3-smoke.c" $(pkg-config --cflags --libs gtk+-3.0) -o "$RUNNER_TEMP/gtk3-smoke"
+          export LD_LIBRARY_PATH="$PWD/out/gtk3/lib/linux/$ARCH:$PWD/out/gtk3/lib/linux/$ARCH/pulseaudio:${LD_LIBRARY_PATH:-}"
+          "$RUNNER_TEMP/gtk3-smoke"
+      - name: Package modular library
+        run: bash scripts/package-individual.sh
+      - uses: actions/cache/save@v5
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/gtk3
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gtk3-linux-${{ matrix.arch }}-gcc14
+          path: out/oF_gtk3_linux_${{ matrix.arch }}_gcc14.tar.bz2
+          if-no-files-found: error
+      - name: Publish latest-modular asset
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        run: gh release upload latest-modular "out/oF_gtk3_linux_${ARCH}_gcc14.tar.bz2" --clobber --repo "$GITHUB_REPOSITORY"
