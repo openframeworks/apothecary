@@ -60,7 +60,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **glon12** | Mesa `26.0.4` | Mesa `26.2.2` | pinned-dev | VS-only GL→D3D12. SHA256 `6d91541e…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
 | **glfw** | `3.5.1` | `3.5.1` | current | Latest stable. | https://github.com/glfw/glfw |
 | **glm** | `1.0.3` | `1.0.3` | current | Latest stable. | https://github.com/g-truc/glm |
-| **gstreamer** | `1.24.0` (`b125253c…`) | `1.28.7` stable; `1.29.2` newer | behind | linux/osx only. No OF API freeze documented — **just not bumped**. Candidate: 1.28.7. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
+| **gstreamer** | `1.28.8` (`1b2a95a1…`) | `1.28.8` stable; `1.29.2` newer | updated | linux/osx only. Stable 1.x update. Updated source pin; build validation required. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
 | **json** (nlohmann) | `3.12.0` | `v3.12.0` | current | Latest stable. | https://github.com/nlohmann/json |
 | **kiss** (kissfft) | `131.2.0` | `131.2.0` | current | Latest stable. | https://github.com/mborgerding/kissfft |
 | **libpng** | `1.6.59` | `v1.6.59` stable · `v1.7.0beta89` | current (1.6 track) | Stay on 1.6 until 1.7 is stable. | https://github.com/pnggroup/libpng |
@@ -125,7 +125,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Item | Pinned → candidate | Why it is safe-ish |
 |------|--------------------|--------------------|
-| **gstreamer** | `1.24.0` → `1.28.7` | Same 1.x line; linux/osx only; needs a real rebuild. |
+| **gstreamer** | `1.28.8` → `1.28.8` | Updated stable 1.x source pin; native CI validation pending. |
 | **automake** | `1.16.4` → `1.18.1` | Host-only. |
 | **Android NDK mapping** | YAML 28.2 → actually r29 | Either pin `NDK_ROOT` to the 28.2 path, or declare r29 on purpose. Do not leave the redirect implicit. |
 | **README Android line** | “NDK 23, Android Studio” | Lies; Actions uses SDK cmdline + NDK, no Studio. |
@@ -224,7 +224,7 @@ formulas:
   glon12:     { current: "26.0.4",   latest: "26.2.2",   status: pinned-dev, pin: "Mesa SHA; VS-only" }
   glfw:       { current: "3.5.1",    latest: "3.5.1",    status: current }
   glm:        { current: "1.0.3",    latest: "1.0.3",    status: current }
-  gstreamer:  { current: "1.24.0",   latest: "1.28.7",   status: behind, pin: "none documented — not bumped" }
+  gstreamer:  { current: "1.28.8",   latest: "1.28.8",   status: updated, pin: "none documented — not bumped" }
   json:       { current: "3.12.0",   latest: "3.12.0",   status: current }
   kiss:       { current: "131.2.0",  latest: "131.2.0",  status: current }
   libpng:     { current: "1.6.59",   latest: "1.6.59",   status: current, track: "1.6", pin: "1.7 still beta" }
