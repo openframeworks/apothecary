@@ -57,7 +57,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **FreeImage** | `3.19.21` | `3.19.21` | current | OF fork (`danoli3/FreeImage`). OpenEXR 3.5.2, bundled libpng 1.6.59, CR3/X3F RAW; VS LIBRAW_NODLL. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.14.3` | `VER-2-14-3` | current | Latest 2.14. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
-| **glon12** | Mesa `26.2.4` | Mesa `26.2.4` | pinned-dev | VS-only GL→D3D12. SHA256 `6d91541e…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
+| **glon12** | Mesa `26.2.4` | Mesa `26.2.4` | pinned-dev | VS-only GL→D3D12. SHA256 `bce5f7fb…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
 | **glfw** | `3.5.1` | `3.5.1` | current | Latest stable. | https://github.com/glfw/glfw |
 | **glm** | `1.0.3` | `1.0.3` | current | Latest stable. | https://github.com/g-truc/glm |
 | **gstreamer** | `1.28.8` (`1b2a95a1…`) | `1.28.8` stable; `1.29.2` newer | updated | linux/osx only. Stable 1.x update. Updated source pin; build validation required. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
@@ -134,7 +134,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Item | Pinned → candidate | Why it is a project |
 |------|--------------------|---------------------|
-| **glon12** | Mesa 26.2.4 → 26.2.4 | VS GL→D3D12 only. |
+| **glon12** | Mesa 26.2.4 | Updated; native VS GL→D3D12 validation pending. |
 | **shaderc** | SHA `ff84893` → `v2026.4` | Formula unused (`FORMULA_TYPES=()`). |
 | **dawn / angle** | current SHAs → newer Chromium | Rolling; needs `AGENTS.md` pin table + CI. |
 | **tess2 / rtAudio `GIT_TAG=master`** | tag vs `VER` | Align git tag with `VER` so checkouts are reproducible. |
