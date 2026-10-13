@@ -75,7 +75,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **openssl** | `4.0.2` + cmake `VER_TAG=4.0` | `openssl-4.0.2` · LTS `3.5.8` · `4.1.0-alpha1` | current (4.0 track) | 4.0 via `danoli3/openssl-cmake`. Not 3.5 (CI fail). Not 4.1 alpha. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
 | **pixman** | `0.46.4` | `pixman-0.46.4` | current | Latest stable. | https://gitlab.freedesktop.org/pixman/pixman |
 | **poco** | `1.15.4` | `poco-1.15.4-release` | current | Latest stable. | https://github.com/pocoproject/poco |
-| **portaudio** | `stable_v19_20110326` | `v19.7.0` | stale | `FORMULA_TYPES=()` — **not built**. 2011 SourceForge tarball. Ignore unless someone revives it (then `v19.7.0`). | http://www.portaudio.com |
+| **portaudio** | `19.7.0` | `v19.7.0` | updated | Linux formula; updated to the 2021 v19.7.0 stable source archive. | http://www.portaudio.com |
 | **pugixml** | `1.16` | `v1.16` | current | Latest stable. | https://github.com/zeux/pugixml |
 | **rtAudio** | `6.0.1` | `6.0.1` | current | Tag in formula is `master` but `VER=6.0.1` matches latest release. | https://github.com/thestk/rtaudio |
 | **shaderc** | `ff84893dd52d28f0b1737d2635733d952013bd9c` | tag `v2026.4` | pinned-dev | `FORMULA_TYPES=()` — unused. SHA is shaderc “known-good”. Only bump with SPIRV/Glslang stack. | https://github.com/google/shaderc |
@@ -212,7 +212,7 @@ generated: 2026-09-14
 formulas:
   angle:      { current: "2026.08.13", latest: "rolling", status: pinned-dev, pin: "chromium SHA; Apple gn gen off core" }
   assimp:     { current: "5.4.3",    latest: "6.0.5",    status: compatibility_pin, pin: "6.x CI regressions" }
-  boost:      { current: "1.66.0",   latest: "1.92.0",   status: stale, pin: "FORMULA_TYPES empty; unused" }
+  boost:      { current: "1.66.0",   latest: "1.92.0",   status: stale, pin: "Linux formula; unused" }
   brotli:     { current: "1.2.0",    latest: "1.2.0",    status: current }
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current }
   curl:       { current: "8.22.0",   latest: "8.22.0",   status: current, pin: "none" }
@@ -239,10 +239,10 @@ formulas:
   openssl:    { current: "4.0.2",    latest: "4.0.2",    status: current, track: "4.0", pin: "openssl-cmake 4.0; not 3.5; not 4.1-alpha" }
   pixman:     { current: "0.46.4",   latest: "0.46.4",   status: current }
   poco:       { current: "1.15.4",   latest: "1.15.4",   status: current }
-  portaudio:  { current: "stable_v19_20110326", latest: "v19.7.0", status: stale, pin: "FORMULA_TYPES empty" }
+  portaudio:  { current: "19.7.0", latest: "v19.7.0", status: updated, pin: "Linux formula" }
   pugixml:    { current: "1.16",     latest: "1.16",     status: current }
   rtAudio:    { current: "6.0.1",    latest: "6.0.1",    status: current }
-  shaderc:    { current: "ff84893",  latest: "v2026.4",  status: pinned-dev, pin: "FORMULA_TYPES empty; known-good SHA" }
+  shaderc:    { current: "ff84893",  latest: "v2026.4",  status: pinned-dev, pin: "Linux formula; known-good SHA" }
   tess2:      { current: "1.0.2",    latest: "1.0.2",    status: current }
   uriparser:  { current: "1.0.2",    latest: "1.0.2",    status: current }
   utf8:       { current: "4.2.1", latest: "4.2.1", status: current, pin: "header-only" }

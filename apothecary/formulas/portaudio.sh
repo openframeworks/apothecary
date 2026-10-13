@@ -10,9 +10,10 @@ FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 
 # define the version
-VER=stable_v19_20110326
-SHA256=328a89adc42c66840641d2d557d01e8bd9e6be32e12d3802e3b638e0791de540
-BUILD_ID=1
+VER=19.7.0
+ARCHIVE_VERSION=stable_v190700_20210406
+SHA256=47efbf42c77c19a05d22e627d42873e991ec0c1357219c0d74ce6a2948cb2def
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -22,13 +23,13 @@ GIT_TAG=
 # download the source code and unpack it into LIB_NAME
 function download() {
     . "$DOWNLOADER_SCRIPT"
-    if ! downloader "https://files.portaudio.com/archives/pa_$VER.tgz"; then
+    if ! downloader "https://files.portaudio.com/archives/pa_$ARCHIVE_VERSION.tgz"; then
         echoWarning "PortAudio download service unavailable; trying legacy archive host"
-        downloader "http://www.portaudio.com/archives/pa_$VER.tgz"
+        downloader "http://www.portaudio.com/archives/pa_$ARCHIVE_VERSION.tgz"
     fi
-    verify_sha256 "pa_$VER.tgz" "$SHA256"
-    tar -xf pa_$VER.tgz
-    rm pa_$VER.tgz
+    verify_sha256 "pa_$ARCHIVE_VERSION.tgz" "$SHA256"
+    tar -xf pa_$ARCHIVE_VERSION.tgz
+    rm pa_$ARCHIVE_VERSION.tgz
 }
 
 # prepare the build environment, executed inside the lib src dir
