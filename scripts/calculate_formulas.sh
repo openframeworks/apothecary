@@ -263,6 +263,9 @@ fi
 # Optional latest-modular packages. Not in core FORMULAS / Action bundle lists.
 # scripts/build-modular-optional.sh builds these on push to bleeding/master.
 FORMULAS_MODULAR_OPTIONAL=()
+if [[ "$TARGET" == vs ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("glon12")
+fi
 if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("angle")
 fi
