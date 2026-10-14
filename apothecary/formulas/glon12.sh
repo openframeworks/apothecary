@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=8
+BUILD_ID=9
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -103,14 +103,14 @@ function build() {
         lib_arch="arm64ec"
     fi
     msvc_root="$(cd "${VS_BIN_PATH}/../../.." && pwd)"
-    kits="/c/Program Files (x86)/Windows Kits/10"
+    kits="${GLON12_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
     kitver="$(ls -1 "${kits}/Lib" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1)"
 
     local inc_w lib_w
     inc_w="$(cygpath -w "${msvc_root}/include")"
     lib_w="$(cygpath -w "${msvc_root}/lib/${lib_arch}")"
     if [ -n "${kitver}" ]; then
-        inc_w="${inc_w};$(cygpath -w "${kits}/Include/${kitver}/ucrt");$(cygpath -w "${kits}/Include/${kitver}/um");$(cygpath -w "${kits}/Include/${kitver}/shared")"
+        inc_w="${inc_w};$(cygpath -w "${kits}/Include/${kitver}/ucrt");$(cygpath -w "${kits}/Include/${kitver}/um");$(cygpath -w "${kits}/Include/${kitver}/shared");$(cygpath -w "${kits}/Include/${kitver}/winrt")"
         lib_w="${lib_w};$(cygpath -w "${kits}/Lib/${kitver}/ucrt/${lib_arch}");$(cygpath -w "${kits}/Lib/${kitver}/um/${lib_arch}")"
     fi
     export INCLUDE="${inc_w}${INCLUDE:+;${INCLUDE}}"
