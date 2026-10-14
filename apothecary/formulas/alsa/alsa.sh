@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=1.2.16.1
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://www.alsa-project.org/files/pub/lib/alsa-lib-1.2.16.1.tar.bz2"
 SHA256=f740db7f488255944ffd4428416ee3390a96742856916433df468c281436480e
 DEFINES="--disable-static --enable-shared --disable-python"
 
@@ -50,7 +51,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libasound.so" "alsa.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libasound.so" "alsa.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
