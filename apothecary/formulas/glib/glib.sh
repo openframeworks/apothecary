@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=2.88.4
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://download.gnome.org/sources/glib/2.88/glib-2.88.4.tar.xz"
 SHA256=25fd169f3b2f91fe2391ad297883ce0fcf30c69fc789ffd1c9672d1332b1c5a8
 DEFINES="-Dtests=false -Dinstalled_tests=false -Dintrospection=disabled -Ddocumentation=false -Dman=false -Dgtk_doc=false"
 
@@ -48,7 +49,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libglib-2.0.so" "glib.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libglib-2.0.so" "glib.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
