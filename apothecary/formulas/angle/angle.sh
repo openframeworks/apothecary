@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=8
+BUILD_ID=9
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -132,6 +132,14 @@ function _angle_windows_sdk() {
         sed "s/^SDK_VERSION = .*/SDK_VERSION = '$sdk'/" "$file" > "$file.sdk-tmp" || return 1
         mv "$file.sdk-tmp" "$file" || return 1
     done
+    # The pinned Chromium build targets a newer SDK's NTDDI_WIN11_BR.
+    # An undefined NTDDI constant evaluates to zero in SDK header guards,
+    # hiding types such as FILE_INFO_BY_HANDLE_CLASS. Match WINVER's Windows
+    # 10 minimum with a numeric value that also works with older installed SDKs.
+    file=build/config/win/BUILD.gn
+    grep -q 'NTDDI_VERSION=' "$file" || return 1
+    sed 's/NTDDI_VERSION=[A-Za-z0-9_]*/NTDDI_VERSION=0x0A000000/' "$file" > "$file.sdk-tmp" || return 1
+    mv "$file.sdk-tmp" "$file" || return 1
     export WINDOWSSDKDIR="$(cygpath -w "$root")"
     echo "angle: local Windows SDK $sdk at $WINDOWSSDKDIR"
 }
