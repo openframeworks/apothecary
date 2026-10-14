@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=17.0
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-17.0.tar.xz"
 SHA256=053794d6671a3e397d849e478a80b82a63cb9d8ca296bd35b73317bb5ceb87b5
 DEFINES="-Ddaemon=false -Dclient=true -Dtests=false -Ddoxygen=false -Dman=false -Ddatabase=simple -Ddbus=disabled -Dsystemd=disabled -Dudev=disabled -Dbluez5=disabled -Davahi=disabled -Dalsa=disabled -Dgtk=disabled -Dglib=disabled -Dx11=disabled"
 
@@ -50,7 +51,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libpulse.so" "pulseaudio.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libpulse.so" "pulseaudio.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
