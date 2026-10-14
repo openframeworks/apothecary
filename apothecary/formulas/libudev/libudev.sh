@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=3.2.15
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://github.com/eudev-project/eudev/releases/download/v3.2.15/eudev-3.2.15.tar.gz"
 SHA256=eb69809fc0d1187f2463ab2149c53aa9f42a78e59f14ebea68eae6cb6b4fc1c3
 DEFINES="--disable-static --enable-shared --disable-programs --disable-manpages --disable-blkid --disable-kmod --disable-selinux"
 
@@ -50,7 +51,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libudev.so" "libudev.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libudev.so" "libudev.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
