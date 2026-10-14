@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=1.7.0
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://gitlab.freedesktop.org/glvnd/libglvnd/-/archive/v1.7.0/libglvnd-v1.7.0.tar.gz"
 SHA256=2b6e15b06aafb4c0b6e2348124808cbd9b291c647299eaaba2e3202f51ff2f3d
 DEFINES="-Dx11=enabled -Dglx=enabled -Degl=true -Dgles1=true -Dgles2=true"
 
@@ -49,7 +50,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libGL.so" "glvnd.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libGL.so" "glvnd.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
