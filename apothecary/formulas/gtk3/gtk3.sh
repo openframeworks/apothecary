@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=3.24.52
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://download.gnome.org/sources/gtk/3.24/gtk-3.24.52.tar.xz"
 SHA256=80931fa472a77b9a164f6740e3c0b444fac6770054632d35a7ff9d679e5e7b9f
 DEFINES="-Dgtk_doc=false -Dintrospection=false -Dman=false -Ddemos=false -Dexamples=false -Dtests=false -Dinstalled_tests=false -Dx11_backend=true -Dwayland_backend=true -Dprint_backends=file"
 
@@ -48,7 +49,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libgtk-3.so" "gtk3.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libgtk-3.so" "gtk3.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
