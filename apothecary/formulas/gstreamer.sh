@@ -7,12 +7,12 @@ FORMULA_TYPES=("linux" "osx" )
 
 FORMULA_DEPENDS=( "freetype" "libpng" "zlib" )
 
-VER=1.24.0
-SOURCE_COMMIT=b125253cade5432e535ef2ea848ac00d2fb5286d
+VER=1.28.8
+SOURCE_COMMIT=1b2a95a1b72787cda146b46df9605b168e5b683b
 GIT_URL=https://gitlab.freedesktop.org/gstreamer/gstreamer.git
 
 DEFINES=""
-BUILD_ID=1
+BUILD_ID=2
 
 function download() {
     . "$DOWNLOADER_SCRIPT"
@@ -82,6 +82,8 @@ function build() {
 
     meson setup "$BUILD_DIR" \
     --cross-file "$APOTHECARY_DIR/toolchains/${TYPE}${PLATFORM}.meson.ini" \
+    --prefix="$PWD/$BUILD_DIR/Release" \
+    --libdir=lib \
     --buildtype=release \
     --default-library=static \
     --backend=ninja \
@@ -96,13 +98,14 @@ function build() {
 }
 
 function copy() {
-    mkdir -p $1/include
-    mkdir -p $1/lib/$TYPE
-    mkdir -p $1/lib/$TYPE/$PLATFORM/
-
-    cp -Rv "build_${TYPE}_${PLATFORM}/Release/include" $1/
-    cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib" $1/lib/$TYPE/$PLATFORM/
-    cp -Rv "build_${TYPE}_${PLATFORM}/Release/share" $1/$TYPE/$PLATFORM/share/
+    local prefix="build_${TYPE}_${PLATFORM}/Release"
+    mkdir -p "$1/include" "$1/lib/$TYPE/$PLATFORM" "$1/share" "$1/license"
+    cp -R "$prefix/include/." "$1/include/"
+    cp -R "$prefix/lib/." "$1/lib/$TYPE/$PLATFORM/"
+    cp -R "$prefix/share/." "$1/share/"
+    cp subprojects/gstreamer/COPYING "$1/license/"
+    . "$SECURE_SCRIPT"
+    secure "$1/lib/$TYPE/$PLATFORM/libgstreamer-1.0.a" "gstreamer.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
 }
 
 function clean() {
