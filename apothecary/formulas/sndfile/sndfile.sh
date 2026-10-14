@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=1.2.2
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://github.com/libsndfile/libsndfile/releases/download/1.2.2/libsndfile-1.2.2.tar.xz"
 SHA256=3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e
 DEFINES="-DBUILD_TESTING=OFF -DBUILD_PROGRAMS=OFF -DBUILD_EXAMPLES=OFF -DENABLE_EXTERNAL_LIBS=ON -DENABLE_MPEG=ON"
 
@@ -49,7 +50,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libsndfile.so" "sndfile.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libsndfile.so" "sndfile.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
