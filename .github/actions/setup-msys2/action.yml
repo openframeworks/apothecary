@@ -16,11 +16,22 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Reuse a preinstalled MSYS2 distribution
+      id: distribution
+      shell: pwsh
+      env:
+        REQUESTED_RELEASE: ${{ inputs.release }}
+      run: |
+        if (Test-Path 'C:\msys64\msys2_shell.cmd') {
+          'release=false' >> $env:GITHUB_OUTPUT
+        } else {
+          "release=$env:REQUESTED_RELEASE" >> $env:GITHUB_OUTPUT
+        }
     - name: Bootstrap MSYS2 without package downloads
       uses: msys2/setup-msys2@v2.32.0
       with:
         update: false
-        release: ${{ inputs.release }}
+        release: ${{ steps.distribution.outputs.release }}
         # Both fresh ARM-runner installs and preinstalled x64 use this location.
         # The subsequent release:false calls reuse it rather than reinstalling.
         location: 'C:\'
@@ -36,6 +47,7 @@ runs:
       with:
         update: true
         release: false
+        location: 'C:\'
         cache: true
         msystem: ${{ inputs.msystem }}
         install: ${{ inputs.install }}
@@ -52,6 +64,7 @@ runs:
       with:
         update: true
         release: false
+        location: 'C:\'
         cache: true
         msystem: ${{ inputs.msystem }}
         install: ${{ inputs.install }}
