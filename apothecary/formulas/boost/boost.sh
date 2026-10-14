@@ -9,16 +9,17 @@ FORMULA_TYPES=()
 FORMULA_DEPENDS=()
 
 # define the version
-VERSION=1.87.0
-SHA256=f55c340aa49763b1925ccf02b2e83f35fdcf634c9d5164a2acb87540173c741d
-UNCOMPRESSED_NAME=boost_1_87_0
+VERSION=1.92.0
+SHA256=c4a3b310ddd2472416e091067166b0713be97c63f38c212c484ada022fd296ce
+UNCOMPRESSED_NAME=boost_1_92_0
 TARBALL=$UNCOMPRESSED_NAME.tar.gz
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # need to maybe migrate to github https://github.com/boostorg/boost
 
-BOOST_LIBS="filesystem system"
+BOOST_LIBS="filesystem"
+# Boost.System is header-only; recent releases no longer emit its archive.
 EXTRA_CPPFLAGS="-std=c++${CPP_STANDARD} -stdlib=libc++ -fPIC -DBOOST_SP_USE_SPINLOCK"
 
 # tools for git use
@@ -315,7 +316,6 @@ EOF
 
         # Run ranlib on binaries (not called corectly by b2)
         ${RANLIB} stage/lib/libboost_filesystem.a
-        ${RANLIB} stage/lib/libboost_system.a
 
         mv stage stage_$ARCH
     fi
@@ -337,17 +337,14 @@ function copy() {
         if [ "$ARCH" == "32" ]; then
             mkdir -p $1/lib/$TYPE/Win32
             cp stage_$ARCH/lib/libboost_filesystem*.lib $1/lib/$TYPE/Win32/
-            cp stage_$ARCH/lib/libboost_system*.lib $1/lib/$TYPE/Win32/
         elif [ "$ARCH" == "64" ]; then
             mkdir -p $1/lib/$TYPE/x64
             cp stage_$ARCH/lib/libboost_filesystem*.lib $1/lib/$TYPE/x64/
-            cp stage_$ARCH/lib/libboost_system*.lib $1/lib/$TYPE/x64/
         fi
     elif [ "$TYPE" == "osx" ]; then
         dist/bin/bcp filesystem install_dir
         rsync -ar install_dir/boost/* $1/include/boost/
         cp stage/lib/libboost_filesystem.a $1/lib/$TYPE/boost_filesystem.a
-        cp stage/lib/libboost_system.a $1/lib/$TYPE/boost_system.a
     elif [ "$TYPE" == "linux" ]; then
         dist/bin/bcp filesystem install_dir
         rsync -ar install_dir/boost/* $1/include/boost/
@@ -357,9 +354,7 @@ function copy() {
         OUTPUT_DIR_LIB=$(pwd)/lib/boost/ios/
         rsync -ar install_dir/boost/* $1/include/boost/
         lipo -info $OUTPUT_DIR_LIB/boost_filesystem.a
-        lipo -info $OUTPUT_DIR_LIB/boost_system.a
         cp -v $OUTPUT_DIR_LIB/boost_filesystem.a $1/lib/$TYPE/
-        cp -v $OUTPUT_DIR_LIB/boost_system.a $1/lib/$TYPE/
     elif [ "$TYPE" == "emscripten" ]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         bcp filesystem install_dir

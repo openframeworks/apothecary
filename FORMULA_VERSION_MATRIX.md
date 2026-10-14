@@ -48,7 +48,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 |---------|--------|-----------------|--------|------------|--------|
 | **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS and GLES→Metal on osx/ios/tvos/catos/xros. Opt-in `latest-modular` with artifact caching; **off core**. Not metalangle. | https://github.com/google/angle |
 | **assimp** | `5.4.3` | `v6.0.5` | compatibility pin | 6.x failed CI. Last known-good 5.4.3. | https://github.com/assimp/assimp |
-| **boost** | `1.66.0` | `boost-1.92.0` | stale | `FORMULA_TYPES=()` — unused. filesystem/system only until C++ std; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
+| **boost** | `1.92.0` | `boost-1.92.0` | updated | `FORMULA_TYPES=()` — unused. filesystem with header-only System; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.0` | `v1.2.0` | current | Latest stable. | https://github.com/google/brotli |
 | **cairo** | `1.18.4` | `1.18.4` | current | Latest stable. | https://gitlab.freedesktop.org/cairo/cairo |
 | **curl** | `8.22.0` | `curl-8_22_0` / `8.22.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
@@ -164,7 +164,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | Formula | Download / clone |
 |---------|------------------|
 | assimp | `github.com/assimp/assimp` `v$VER` |
-| boost | boostorg jfrog tarball |
+| boost | archives.boost.io source tarball |
 | brotli | `github.com/google/brotli` `v$VER` |
 | cairo | cairographics / freedesktop git |
 | curl | `github.com/curl/curl` `curl-$VER_D` |
@@ -212,7 +212,7 @@ generated: 2026-09-14
 formulas:
   angle:      { current: "2026.08.13", latest: "rolling", status: pinned-dev, pin: "chromium SHA; Apple gn gen off core" }
   assimp:     { current: "5.4.3",    latest: "6.0.5",    status: compatibility_pin, pin: "6.x CI regressions" }
-  boost:      { current: "1.66.0",   latest: "1.92.0",   status: stale, pin: "Linux formula; unused" }
+  boost:      { current: "1.92.0",   latest: "1.92.0",   status: updated, pin: "FORMULA_TYPES empty; unused" }
   brotli:     { current: "1.2.0",    latest: "1.2.0",    status: current }
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current }
   curl:       { current: "8.22.0",   latest: "8.22.0",   status: current, pin: "none" }
