@@ -3,7 +3,8 @@
 FORMULA_TYPES=("linux")
 FORMULA_DEPENDS=()
 VER=2.18.3
-BUILD_ID=1
+BUILD_ID=2
+GIT_URL="https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/2.18.3/fontconfig-2.18.3.tar.xz"
 SHA256=4f7b554a38cdf78c033f666c8871f3749e14a094f65a07f630c91ed0b43d35e3
 DEFINES="-Ddoc=disabled -Dtests=disabled -Dcache-build=disabled -Dfontations=disabled"
 
@@ -48,7 +49,7 @@ function copy() {
         if [ -f "$license" ]; then cp "$license" "$1/license/"; fi
     done
     . "$SECURE_SCRIPT"
-    secure "$1/lib/$TYPE/$PLATFORM/libfontconfig.so" "fontconfig.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    secure "$1/lib/$TYPE/$PLATFORM/libfontconfig.so" "fontconfig.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256"
 }
 
 function load() {
