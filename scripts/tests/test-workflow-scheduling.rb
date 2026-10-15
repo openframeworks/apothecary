@@ -12,7 +12,7 @@ Dir["#{root}/.github/workflows/build*.yml"].each do |file|
   triggers = workflow['on'] || workflow[true] # YAML 1.1 interprets 'on' as true.
   if triggers.key?('push')
     raise "Duplicate feature push validation: #{file}" unless triggers['push']['branches'] == ['bleeding', 'master']
-    unless File.basename(file).match?(/build-(linux(?:-[a-z0-9]+)?-modular|modular-optional)\.yml/)
+    unless File.basename(file).match?(/build-(linux(?:-[a-z0-9]+)?-modular|rgfw-modular|modular-optional)\.yml/)
       raise "Lost tag publishing: #{file}" unless triggers['push']['tags'] == release_tags
     end
   end
