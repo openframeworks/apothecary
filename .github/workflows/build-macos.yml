@@ -234,6 +234,7 @@ jobs:
         env:
           BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
         with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-macos.yml', job: 'build-macos-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
   smoke-test-openframeworks:

@@ -20,8 +20,9 @@ variables: declare them in FORMULA_DEPENDS and version the build settings.
 ## Published state
 
 After trusted bleeding/master jobs publish successfully, each uploads a separate
-`build-state-<workflow>-<job>-<variant-hash>.json` asset. Core states go on `latest`
-or `nightly`; Linux modular states go on `latest-modular`. Records contain:
+`build-state-<workflow>-<job>-<variant-hash>.json` asset on the dedicated `build-state` prerelease. Filenames are prefixed with
+`latest-`, `nightly-` or `modular-` to avoid branch/channel collisions. The
+library archives remain on `latest`, `nightly` and `latest-modular`. Records contain:
 
 - Formula versions, BUILD_ID, source pins and input SHA-256 fingerprints.
 - Matrix/profile, source commit, run ID and publication time.

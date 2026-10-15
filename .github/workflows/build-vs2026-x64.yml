@@ -190,5 +190,6 @@ jobs:
         env:
           BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
         with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-vs2026-x64.yml', job: 'build-vs2026', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});

@@ -72,15 +72,36 @@ function matches(wanted, previous, assets, now = Date.now()) {
     const names = Object.keys(wanted.formulas).sort();
     return JSON.stringify(names) === JSON.stringify(Object.keys(previous.formulas || {}).sort()) && names.every(name => wanted.formulas[name].key === previous.formulas[name].key);
 }
+function channel(file, context) {
+    return file.endsWith('build-linux-modular.yml') ? 'modular' :
+        (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
+}
+function publishedStateName(file, job, row, context) {return `${channel(file,context)}-${stateName(file,job,row)}`;}
+async function stateRelease(github, context, create = false) {
+    try {return (await github.rest.repos.getReleaseByTag({...context.repo,tag:'build-state'})).data;}
+    catch (error) {
+        if (!create || error.status !== 404) throw error;
+        try {
+            return (await github.rest.repos.createRelease({...context.repo,tag_name:'build-state',target_commitish:context.sha,
+                name:'Build state manifests',body:'Machine-readable build records. Library downloads are on latest, nightly and latest-modular.',
+                prerelease:true,make_latest:'false'})).data;
+        } catch (race) {
+            if (race.status !== 422) throw race;
+            return (await github.rest.repos.getReleaseByTag({...context.repo,tag:'build-state'})).data;
+        }
+    }
+}
 async function plan({github,context,core,workflow: file,job:jobId}) {
     const config = yaml(file), rows = matrixRows(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'))[file][jobId]);
     const chosen = [], summary = [];
-    let release, assets = [];
+    let release, assets = [], states = [];
     const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
     if (!context.payload.pull_request && !context.ref.startsWith('refs/tags/')) {
         try {
             release = (await github.rest.repos.getReleaseByTag({...context.repo,tag})).data;
             assets = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:release.id,per_page:100});
+            const metadata = await stateRelease(github,context);
+            states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
         } catch (error) {core.warning(`No release baseline: ${error.message}`);}
     }
     for (const row of rows) {
@@ -96,7 +117,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
             } else if (context.ref.startsWith('refs/tags/')) reason = 'tag publication';
             else if (context.eventName === 'workflow_dispatch') reason = 'manual rebuild';
             else {
-                const asset = assets.find(a => a.name === stateName(file,jobId,row));
+                const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context));
                 if (asset && asset.size < 4*1024*1024) {
                     const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
                     const previous = JSON.parse(Buffer.from(response.data).toString('utf8'));
@@ -174,11 +195,14 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
     }
     state.publishedAt = new Date().toISOString(); state.commit = context.sha; state.runId = context.runId; state.assets = published;
     state.toolchain = execFileSync('bash',['scripts/release-toolchain.sh'],{encoding:'utf8'});
-    const name = stateName(file,jobId,row), data = Buffer.from(JSON.stringify(state,null,2)+'\n');
+    state.channel = channel(file,context); state.release = tag; state.releaseId = release.id;
+    const metadata = await stateRelease(github,context,true);
+    const states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
+    const name = publishedStateName(file,jobId,row,context), data = Buffer.from(JSON.stringify(state,null,2)+'\n');
     fs.writeFileSync(path.join('out',name),data);
-    const old = assets.find(a => a.name === name);
+    const old = states.find(a => a.name === name);
     if (old) await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:old.id});
-    await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:release.id,name,data,headers:{'content-type':'application/json','content-length':data.length}});
+    await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:metadata.id,name,data,headers:{'content-type':'application/json','content-length':data.length}});
     core.info(`Recorded ${name}: ${Object.keys(state.formulas).length} formulas, ${published.length} verified outputs`);
 };
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;
