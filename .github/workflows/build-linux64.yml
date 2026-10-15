@@ -3,7 +3,7 @@ name: build-linux
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - "**/README.md"
   pull_request:
@@ -17,24 +17,38 @@ concurrency:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-linux64.yml', job: 'build'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: ignore
   build:
+    needs: pre-check
+    if: needs.pre-check.outputs.build_needed == 'true'
     name: Linux - ${{ matrix.arch }} - GCC10
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - target: linux/64
-            artifact_target: linux_64
-            arch: "64"
-            runner: ubuntu-24.04
-            arch_flags: -march=x86-64 -mtune=generic
-          - target: linux/arm64
-            artifact_target: linux_arm64
-            arch: arm64
-            runner: ubuntu-24.04-arm
-            arch_flags: -march=armv8-a -mtune=generic
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     container: ubuntu:20.04
     env:
@@ -161,3 +175,19 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: "latest-modular"
           files: out/*.tar.bz2
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux64.yml', job: 'build', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});

@@ -9,6 +9,7 @@ async function test() {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'platform-artifacts-test-'));
     try {
         process.env.TARGET = 'catos';
+        process.env.GITHUB_WORKFLOW_REF = 'openframeworks/apothecary/.github/workflows/build-catos.yml@refs/heads/master';
         process.env.ARTIFACT_VARIANT = '2';
         process.env.RUNNER_TEMP = temp;
         process.env.GITHUB_WORKSPACE = path.join(temp, 'workspace');
@@ -36,7 +37,7 @@ async function test() {
                 assert.equal(args.workflow_id, 'build-catos.yml');
                 assert.equal(args.owner, 'openframeworks');
                 yield {data: {workflow_runs: [{id: 1}, {id: 2}]}};
-                yield {data: {workflow_runs: [{id: 3}]}};
+                yield {data: [{id: 3}]}; // Octokit pagination normalizes this response to an array.
             }}),
         };
         await helper.select({github, context, core});

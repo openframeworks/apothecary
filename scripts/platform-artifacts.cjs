@@ -25,10 +25,11 @@ exports.select = async ({github, context, core}) => {
         // Search successful producers, not arbitrary repository-wide artifact names.
         // A cancelled/failed run may have uploaded a bundle before another job failed.
         for await (const page of github.paginate.iterator(github.rest.actions.listWorkflowRuns, {
-            ...context.repo, workflow_id: `build-${process.env.TARGET}.yml`,
+            ...context.repo, workflow_id: process.env.GITHUB_WORKFLOW_REF?.match(/\.github\/workflows\/([^@]+)@/)?.[1] || `build-${process.env.TARGET === 'osx' ? 'macos' : process.env.TARGET}.yml`,
             branch, event: 'push', status: 'success', per_page: 30,
         })) {
-            for (const run of page.data.workflow_runs) {
+            const runs = Array.isArray(page.data) ? page.data : page.data.workflow_runs;
+            for (const run of runs) {
                 const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
                     ...context.repo, run_id: run.id, per_page: 100,
                 });
@@ -41,7 +42,7 @@ exports.select = async ({github, context, core}) => {
                 // All older artifacts are also outside our retention period.
                 if (Date.parse(run.created_at) < Date.now() - 30 * 86400000) break;
             }
-            if (page.data.workflow_runs.some(r => Date.parse(r.created_at) < Date.now() - 30 * 86400000)) break;
+            if (runs.some(r => Date.parse(r.created_at) < Date.now() - 30 * 86400000)) break;
         }
         core.info('No unexpired platform baseline; building from source.');
     } catch (error) {

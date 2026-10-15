@@ -3,7 +3,7 @@ name: build-ios
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -16,6 +16,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: read
 
 env:
   TARGET: "ios"
@@ -28,25 +29,32 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      workflow_disabled: ${{ steps.check-disabled.outputs.disabled }}
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      apple_finalize: ${{ steps.plan.outputs.apple_finalize }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
-    - name: Check if Workflow is disabled
-      id: check-disabled
-      shell: bash
-      run: |
-        if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
-          echo "disabled=true" >> $GITHUB_ENV
-          echo "::set-output name=disabled::true"
-        else
-          echo "::set-output name=disabled::false"
-        fi
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-ios.yml', job: 'build-ios-platforms'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: ignore
   build-ios-platforms:
-    if: needs.pre-check.outputs.workflow_disabled != 'true'
+    if: needs.pre-check.outputs.build_needed == 'true'
     runs-on: macos-14
     needs: pre-check
     strategy:
-      matrix:
-        bundle: [1, 2, 3]
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     env:
       BUNDLE: ${{ matrix.bundle }}
       DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
@@ -75,101 +83,15 @@ jobs:
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
         run: ./scripts/osx/install.sh
-      - name: 'Download artifacts'
-        uses: actions/github-script@v9.0.0
+      - name: Restore compatible platform artifacts
+        id: platform-artifacts
+        continue-on-error: true
         if: env.USE_ARTIFACT == 'true'
+        uses: ./.github/actions/platform-artifacts
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
-
-            // Ensure output directory exists
-            if (!fs.existsSync(outputDir)) {
-              fs.mkdirSync(outputDir);
-            }
-
-            try {
-              console.log("Fetching artifacts...");
-              const artifacts = await github.rest.actions.listArtifactsForRepo({
-                owner: context.repo.owner,
-                repo: 'apothecary',
-                sort: 'created_at',
-                direction: 'desc',
-                per_page: 150
-              });
-
-              const target = process.env.TARGET;
-              const bundle = process.env.MATRIX_BUNDLE;
-              const release = '${{ github.ref }}'.startsWith('refs/tags/') ? 'latest' : process.env.RELEASE;
-
-              console.log(`Target: ${target}, Bundle: ${bundle}, Release: ${release}`);
-
-              const artifactName1 = `libs-${release}-${target}-1`;
-              const artifactName2 = `libs-${release}-${target}-2`;
-              const artifactName3 = `libs-${release}-${target}-3`;
-              const artifactNamesToDownload = new Set([artifactName1, artifactName2, artifactName3]);
-
-              console.log(`Artifacts to download: ${Array.from(artifactNamesToDownload).join(', ')}`);
-
-              let count = 0;
-              const max = 3;
-
-              for (const artifact of artifacts.data.artifacts) {
-                console.log(`Checking artifact: ${artifact.name} (Expired: ${artifact.expired})`);
-
-                  const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}`) && !artifact.expired;
-                  if (isArtifactMatch) {
-                  const download = await github.rest.actions.downloadArtifact({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    artifact_id: artifact.id,
-                    archive_format: 'zip',
-                  });
-
-                  const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
-                  fs.writeFileSync(artifactPath, Buffer.from(download.data));
-                  console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
-                  count++;
-
-                  if (count >= max) {
-                    console.log("Reached maximum artifact download count.");
-                    break;
-                  }
-                } else {
-                  console.log(`Skipping artifact: ${artifact.name} - Conditions not met.`);
-                }
-              }
-            } catch (error) {
-              console.error("An error occurred:", error);
-            }
-
-      - name: Extract Artifacts to /out
-        if: env.USE_ARTIFACT == 'true'
-        run: |
-            mkdir -p out
-            if ls out/*.zip 1> /dev/null 2>&1; then
-              for zip in out/*.zip; do
-                  echo "Extracting $zip..."
-                  unzip -o "$zip" -d out/
-              done
-              echo "Extraction complete."
-              rm out/*.zip
-            else
-              echo "No zip files to extract."
-            fi
-            if ls out/*.tar.bz2 1> /dev/null 2>&1; then
-              for tarball in out/*.tar.bz2; do
-                  echo "Extracting $tarball..."
-                  tar -xjf "$tarball" -C out/
-              done
-              echo ".tar.bz2 extraction complete."
-              rm -f out/*.tar.bz2
-            else
-              echo "No .tar.bz2 files to extract."
-            fi
-            rm -f xout/*.tar.bz2 
-            rm -f out/*.tar.bz2
+          phase: restore
+          variant: ${{ matrix.bundle }}
+          archs: arm64 x86_64 SIM_arm64
       - name: List output directory1
         run: ls -lah out/
       - name: Build iOS arm64
@@ -190,6 +112,14 @@ jobs:
         env:
           BUNDLE: ${{ matrix.bundle }}
           ARCH: SIM_arm64
+      - name: Publish platform artifact baseline
+        continue-on-error: true
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: save
+          variant: ${{ matrix.bundle }}
+          archs: arm64 x86_64 SIM_arm64
       - name: List output directory
         run: ls -lah out/
       - name: Cleanup out of bundle
@@ -266,10 +196,26 @@ jobs:
           tag_name: ${{ env.RELEASE }}
           files: xout/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
 
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-ios.yml', job: 'build-ios-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
   wait-for-workflows:
     runs-on: [ubuntu-latest]
-    needs: build-ios-platforms
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || startsWith(github.ref, 'refs/tags/'))
+    needs: [pre-check, build-ios-platforms]
+    if: always() && !cancelled() && needs.pre-check.outputs.apple_finalize == 'true' && needs.build-ios-platforms.result != 'failure' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || startsWith(github.ref, 'refs/tags/'))
     steps:
     # - name: Wait build-ios
     #   uses: NathanFirmo/wait-for-other-action@v1.0.4

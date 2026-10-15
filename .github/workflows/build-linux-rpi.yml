@@ -3,7 +3,7 @@ name: build-linux-rpi
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - "**/README.md"
   pull_request:
@@ -17,6 +17,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: read
 
 env:
   TARGET: linux
@@ -29,28 +30,36 @@ env:
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-linux-rpi.yml', job: 'build-linux-rpi'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: ignore
   build-linux-rpi:
+    needs: pre-check
+    if: needs.pre-check.outputs.build_needed == 'true'
     name: Raspberry Pi ${{ matrix.arch }} - GCC10
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - arch: aarch64
-            artifact_target: linux_raspberrypi_arm64
-            sysroot: /opt/rpi-arm64-sysroot
-            prefix: aarch64-linux-gnu
-            qemu_arch: aarch64
-          - arch: armv7l
-            artifact_target: linux_raspberrypi_armv7
-            sysroot: /opt/rpi-armv7l-sysroot
-            prefix: arm-linux-gnueabihf
-            qemu_arch: armv7l
-          - arch: armv6l
-            artifact_target: linux_raspberrypi_armv6
-            sysroot: /opt/rpi-armv6l-sysroot
-            prefix: arm-linux-gnueabihf
-            qemu_arch: armv6l
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     env:
       ARCH: ${{ matrix.arch }}
       LINUX_ARTIFACT_TARGET: ${{ matrix.artifact_target }}
@@ -129,3 +138,19 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
           files: out/oF_*_linux_${{ env.ARCH }}_gcc10.tar.bz2
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-rpi.yml', job: 'build-linux-rpi', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});

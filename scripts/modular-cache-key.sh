@@ -33,6 +33,9 @@ collect_formula() {
     for dependency in $depends; do collect_formula "$dependency"; done
 }
 collect_formula "$LIBRARY"
+workflow_file="${GITHUB_WORKFLOW_REF:-}"
+workflow_file="${workflow_file%%@*}"
+workflow_file="${workflow_file##*/}"
 manifest=$(mktemp)
 trap 'rm -f "$manifest"' EXIT
 {
@@ -56,7 +59,7 @@ trap 'rm -f "$manifest"' EXIT
             printf '%s %s\n' "$path" "$(git hash-object "$path")"
         done < <(git ls-files -- scripts/build.sh scripts/package.sh scripts/artifact \
             scripts/platform-artifact-manifest.sh scripts/platform-artifacts.cjs \
-            .github/actions/platform-artifacts ".github/workflows/build-$TARGET.yml" \
+            .github/actions/platform-artifacts ".github/workflows/build-$TARGET.yml" ".github/workflows/$workflow_file" \
             ":(icase)scripts/$TARGET" | LC_ALL=C sort -u)
     fi
 } > "$manifest"

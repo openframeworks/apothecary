@@ -3,7 +3,7 @@ name: build-android
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -29,30 +29,31 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      workflow_disabled: ${{ steps.check-disabled.outputs.disabled }}
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
-    - name: Check if Workflow is disabled
-      id: check-disabled
-      shell: bash
-      run: |
-        if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
-          echo "disabled=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "disabled=false" >> "$GITHUB_OUTPUT"
-        fi
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-android.yml', job: 'build-android-platforms'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: ignore
   build-android-platforms:
-    if: needs.pre-check.outputs.workflow_disabled != 'true'
+    if: needs.pre-check.outputs.build_needed == 'true'
     needs: pre-check
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        ARCH: [armv7, arm64, x86_64]
-        # ubuntu-24.04 image (20260907): NDK 27.3 default, 28.2, 29.0 latest;
-        # build-tools 37.0.0; platforms through android-37. Pin the latest NDK/SDK
-        # on the image. ANDROID_API is the *min* compile target (not the SDK).
-        SDK: ["37.0.0"]
-        NDK: ["29.0.14206865"]
-        API: ["25"]
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     env:
       ARCH: ${{ matrix.ARCH }}
       SDK: ${{ matrix.SDK }}
@@ -123,3 +124,19 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           files: out/openFrameworksLibs_${{ env.RELEASE }}_android_${{ matrix.ARCH }}.tar.bz2
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-android.yml', job: 'build-android-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});

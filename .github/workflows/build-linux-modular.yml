@@ -14,67 +14,238 @@ concurrency:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-linux-modular.yml', job: 'build'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: ignore
   build:
-    name: Linux modular - ${{ matrix.arch }} - GCC14
+    needs: pre-check
+    if: needs.pre-check.outputs.build_needed == 'true'
+    name: Linux modular - ${{ matrix.arch }} - GCC10
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - arch: '64'
-            runner: ubuntu-24.04
-          - arch: arm64
-            runner: ubuntu-24.04-arm
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
+    container: ubuntu:20.04
     env:
       TARGET: linux
       TYPE: linux
       ARCH: ${{ matrix.arch }}
-      GCC: gcc14
-      GCC_VERSION: '14'
-      CC: gcc-14
-      CXX: g++-14
+      GCC: gcc10
+      GCC_VERSION: '10'
+      CC: gcc-10
+      CXX: g++-10
+      CFLAGS: -O2 -fPIC ${{ matrix.arch_flags }}
+      CXXFLAGS: -O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1 ${{ matrix.arch_flags }}
       NO_FORCE: 1
       # dawn: deferred — git fetch of the pinned SHA fails in ~9s on this runner
-      FORMULAS_OVERRIDE: pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2 uriparser opencv opencv5 cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl poco
+      FORMULAS_OVERRIDE: ${{ join(matrix.libraries, ' ') }}
+      PACKAGE_LIBS: ${{ join(matrix.libraries, ' ') }}
     steps:
-      - uses: actions/checkout@v7.0.1
-
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            autoconf automake build-essential ccache cmake curl dos2unix flex \
-            g++-14 gcc-14 git gperf libasound2-dev libegl1-mesa-dev \
-            libfftw3-dev libfontconfig1-dev libgl1-mesa-dev libglu1-mesa-dev \
-            libjack-dev libpulse-dev libtool libudev-dev libwayland-dev \
-            libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev \
-            libxkbcommon-dev libxrandr-dev meson ninja-build perl pkg-config \
-            python3 python3-pip unzip xorg-dev \
-            libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev \
-            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-
-      - name: Restore modular build cache
+      - name: Restore APT package cache
         uses: actions/cache@v5
         with:
-          path: apothecary/build
-          key: linux-modular-gcc14-${{ matrix.arch }}-${{ hashFiles('apothecary/formulas/**', 'apothecary/apothecary', 'scripts/build.sh', 'scripts/calculate_formulas.sh') }}
+          path: /github/home/.cache/apt/archives
+          key: apt-focal-${{ matrix.arch }}-gcc10-v1
 
-      - name: Build modular libraries
-        run: scripts/build.sh
+      - name: Install build tools and GCC 10
+        shell: bash
+        env:
+          APT_ARCHIVES: /github/home/.cache/apt/archives
+        run: |
+          set -euo pipefail
 
-      - name: Package modular libraries
-        if: github.event_name == 'push'
+          retry() {
+            local attempt=1
+            local max_attempts=3
+            until "$@"; do
+              if (( attempt >= max_attempts )); then
+                echo "Command failed after ${attempt} attempts: $*" >&2
+                return 1
+              fi
+              echo "Attempt ${attempt} failed; retrying in $((attempt * 5)) seconds: $*" >&2
+              sleep $((attempt * 5))
+              attempt=$((attempt + 1))
+            done
+          }
+
+          install -d -m 755 "$APT_ARCHIVES/partial"
+          retry apt-get update
+          retry env DEBIAN_FRONTEND=noninteractive apt-get \
+            -o "Dir::Cache::archives=$APT_ARCHIVES" \
+            -o Acquire::Retries=5 \
+            install -y ca-certificates git sudo gcc-10 g++-10 gfortran-10 binutils file curl unzip bzip2 autoconf automake build-essential ccache coreutils dos2unix flex gperf libtool make ninja-build pkg-config python3 python3-pip xz-utils freeglut3-dev libasound2-dev libc6-dev libegl1-mesa-dev libfftw3-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libudev-dev libfontconfig1-dev libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev oss4-dev xorg-dev
+          python3 -m pip install --no-cache-dir cmake==3.31.6 meson==1.5.2 packaging mako pyyaml
+          pkg-config --exists libudev
+          test -f /usr/include/libudev.h
+          cmake --version
+          gcc-10 --version
+          test "$(gcc-10 -dumpversion | cut -d. -f1)" = 10
+      - uses: actions/checkout@v7.0.1
+      - name: Trust checked-out workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Keep reusable outputs for every modular library
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            const matrix = require(`${process.env.GITHUB_WORKSPACE}/scripts/build-matrices.json`)['.github/workflows/build-linux-modular.yml'].build;
+            core.exportVariable('PLATFORM_CACHE_FORMULAS_OVERRIDE', matrix.library.join(' '));
+
+      - name: Restore compatible platform artifacts
+        id: platform-artifacts
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: restore
+          variant: ${{ matrix.arch }}
+          archs: ${{ matrix.arch }}
+
+      - name: Build selected libraries on this runner
+        id: libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          built=""
+          failed=""
+          for library in $FORMULAS_OVERRIDE; do
+            echo "::group::Build $library ($ARCH / GCC10)"
+            if FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
+              built="$built $library"
+            else
+              echo "::error::Failed to build $library for $ARCH"
+              failed="$failed $library"
+            fi
+            echo "::endgroup::"
+          done
+          echo "built=${built# }" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
+
+      - name: Publish platform artifact baseline
+        if: github.event_name == 'push' && steps.platform-artifacts.outcome == 'success' && steps.libraries.outputs.failed == ''
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: save
+          variant: ${{ matrix.arch }}
+          archs: ${{ matrix.arch }}
+
+      - name: Package successful modular libraries
+        id: packages
+        if: github.event_name == 'push' && steps.libraries.outputs.built != ''
         env:
           ALWAYS_BUILD: 1
-        run: scripts/package-individual.sh
+          BUILT_LIBRARIES: ${{ steps.libraries.outputs.built }}
+        run: |
+          set -euo pipefail
+          packaged=""
+          failed=""
+          for library in $BUILT_LIBRARIES; do
+            archive="out/oF_${library}_linux_${ARCH}_gcc10.tar.bz2"
+            # A previous output must not conceal a packaging failure.
+            rm -f "$archive"
+            if PACKAGE_LIBS="$library" bash scripts/package-individual.sh && test -s "$archive"; then
+              packaged="$packaged $library"
+            else
+              echo "::error::Failed to package $library for $ARCH"
+              failed="$failed $library"
+            fi
+          done
+          echo "packaged=${packaged# }" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
 
-      - name: Upload modular libraries
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
-        uses: softprops/action-gh-release@v3.0.3
+      - name: Upload modular library asset
+        id: uploads
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && steps.packages.outputs.packaged != ''
+        uses: actions/github-script@v9.0.0
+        env:
+          LIBRARY_NAMES: ${{ steps.packages.outputs.packaged }}
         with:
-          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-          tag_name: latest-modular
-          fail_on_unmatched_files: false
-          files: out/oF_*_linux_${{ matrix.arch }}_gcc14.tar.bz2
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('node:fs');
+            const release = (await github.rest.repos.getReleaseByTag({...context.repo, tag: 'latest-modular'})).data;
+            const assets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id: release.id, per_page: 100});
+            const uploaded = [], failed = [];
+            for (const library of process.env.LIBRARY_NAMES.split(/\s+/).filter(Boolean)) {
+              try {
+                const name = `oF_${library}_linux_${process.env.ARCH}_gcc10.tar.bz2`;
+                const data = fs.readFileSync(`out/${name}`);
+                const old = assets.find(asset => asset.name === name);
+                if (old) await github.rest.repos.deleteReleaseAsset({...context.repo, asset_id: old.id});
+                await github.rest.repos.uploadReleaseAsset({...context.repo, release_id: release.id, name, data, headers: {'content-type': 'application/octet-stream', 'content-length': data.length}});
+                uploaded.push(library);
+              } catch (error) {core.error(`Upload failed for ${library}: ${error.message}`); failed.push(library);}
+            }
+            core.setOutput('uploaded', uploaded.join(' '));
+            core.setOutput('failed', failed.join(' '));
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push'
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        id: records
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+          UPLOADED_LIBRARIES: ${{ steps.uploads.outputs.uploaded }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const matrix = JSON.parse(process.env.BUILD_PLAN_MATRIX);
+            const uploaded = new Set(process.env.UPLOADED_LIBRARIES.split(/\s+/).filter(Boolean));
+            const failed = [];
+            for (const entry of matrix.entries.filter(entry => uploaded.has(entry.library))) {
+              try {
+                await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-modular.yml', job: 'build', matrix: entry});
+              } catch (error) {core.error(`Recording failed for ${entry.library}: ${error.message}`); failed.push(entry.library);}
+            }
+            core.setOutput('failed', failed.join(' '));
+
+      - name: Report modular results
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILT: ${{ steps.libraries.outputs.built }}
+          PUBLISHED: ${{ steps.uploads.outputs.uploaded }}
+          BUILD_FAILURES: ${{ steps.libraries.outputs.failed }}
+          PACKAGE_FAILURES: ${{ steps.packages.outputs.failed }}
+          UPLOAD_FAILURES: ${{ steps.uploads.outputs.failed }}
+          RECORD_FAILURES: ${{ steps.records.outputs.failed }}
+          EARLIER_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const rows = [['Stage', 'Libraries']];
+            for (const key of ['BUILT', 'PUBLISHED', 'BUILD_FAILURES', 'PACKAGE_FAILURES', 'UPLOAD_FAILURES', 'RECORD_FAILURES']) {
+              rows.push([key.toLowerCase().replaceAll('_', ' '), process.env[key] || 'none']);
+            }
+            await core.summary.addHeading('Modular library results').addTable(rows).write();
+            if (process.env.EARLIER_STATUS === 'failure' || ['BUILD_FAILURES', 'PACKAGE_FAILURES', 'UPLOAD_FAILURES', 'RECORD_FAILURES'].some(key => process.env[key])) {
+              core.setFailed('Some modular libraries failed; successful libraries were processed independently.');
+            }

@@ -63,6 +63,17 @@ BUILD_TIME=$(date -u +"%Y-%m-%d T%H:%M:%SZ")
 : "${FRAMEWORKS:=${8:-}}"
 
 
+# Quote extra metadata as Pkl string literals without requiring Node or Pkl.
+pkl_property() {
+    local value="${2:-}"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\t'/\\t}"
+    printf '%s = "%s"\n' "$1" "$value"
+}
+
 secure() {
 
     local BINARY_SEC="${1:-}"
@@ -84,8 +95,8 @@ secure() {
 
     NAME="${NAME%.*}"
 
-    DEFINES=$(echo "$DEFINES" | tr '\n' ' ' | tr -d '/') #replace newline for visuals
-    DEFINES=$(echo "$DEFINES" | tr -d '\r' | tr '\n' ' ')
+    # Keep logs and Pkl metadata on one readable line, preserving flag paths.
+    DEFINES=$(printf '%s' "$DEFINES" | LC_ALL=C tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//')
 
 
     OUTPUT_LOCATION=$(dirname "$BINARY_SEC")
@@ -140,6 +151,25 @@ sourceSHA = "$SOURCE_SHA"
 defines = "$DEFINES"
 frameworks = "$FRAMEWORKS"
 EOF
+    # Keep build provenance beside the binary in its existing Pkl metadata.
+    local compiler="${CXX:-${CC:-c++}}"
+    compiler="${compiler%% *}"
+    local compiler_version
+    compiler_version=$("$compiler" --version 2>/dev/null | head -n 1)
+    {
+        pkl_property architecture "${ARCH:-}"
+        pkl_property sdk "${SDK:-${SDKROOT:-}}"
+        pkl_property ndk "${NDK:-}"
+        pkl_property androidApi "${ANDROID_API:-}"
+        pkl_property emsdkVersion "${EMSDK_VERSION:-}"
+        pkl_property compiler "$compiler"
+        pkl_property compilerVersion "$compiler_version"
+        pkl_property buildCommit "${GITHUB_SHA:-}"
+        pkl_property buildRunId "${GITHUB_RUN_ID:-}"
+        pkl_property runnerImage "${ImageVersion:-}"
+        pkl_property cFlags "${CFLAGS:-}"
+        pkl_property cxxFlags "${CXXFLAGS:-}"
+    } >> "$OUTPUT_PKL_FILE"
     cat "$OUTPUT_PKL_FILE"
 
 }

@@ -1,0 +1,221 @@
+{
+  ".github/workflows/build-android.yml": {
+    "build-android-platforms": {
+      "ARCH": [
+        "armv7",
+        "arm64",
+        "x86_64"
+      ],
+      "SDK": [
+        "37.0.0"
+      ],
+      "NDK": [
+        "29.0.14206865"
+      ],
+      "API": [
+        "25"
+      ]
+    }
+  },
+  ".github/workflows/build-catos.yml": {
+    "build-catos-platforms": {
+      "bundle": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  ".github/workflows/build-emscripten.yml": {
+    "build-emscripten-platforms": {
+      "ARCH": [
+        32,
+        64
+      ]
+    }
+  },
+  ".github/workflows/build-ios.yml": {
+    "build-ios-platforms": {
+      "bundle": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  ".github/workflows/build-linux-rpi.yml": {
+    "build-linux-rpi": {
+      "include": [
+        {
+          "arch": "aarch64",
+          "artifact_target": "linux_raspberrypi_arm64",
+          "sysroot": "/opt/rpi-arm64-sysroot",
+          "prefix": "aarch64-linux-gnu",
+          "qemu_arch": "aarch64"
+        },
+        {
+          "arch": "armv7l",
+          "artifact_target": "linux_raspberrypi_armv7",
+          "sysroot": "/opt/rpi-armv7l-sysroot",
+          "prefix": "arm-linux-gnueabihf",
+          "qemu_arch": "armv7l"
+        },
+        {
+          "arch": "armv6l",
+          "artifact_target": "linux_raspberrypi_armv6",
+          "sysroot": "/opt/rpi-armv6l-sysroot",
+          "prefix": "arm-linux-gnueabihf",
+          "qemu_arch": "armv6l"
+        }
+      ]
+    }
+  },
+  ".github/workflows/build-linux64.yml": {
+    "build": {
+      "include": [
+        {
+          "target": "linux/64",
+          "artifact_target": "linux_64",
+          "arch": "64",
+          "runner": "ubuntu-24.04",
+          "arch_flags": "-march=x86-64 -mtune=generic"
+        },
+        {
+          "target": "linux/arm64",
+          "artifact_target": "linux_arm64",
+          "arch": "arm64",
+          "runner": "ubuntu-24.04-arm",
+          "arch_flags": "-march=armv8-a -mtune=generic"
+        }
+      ]
+    }
+  },
+  ".github/workflows/build-macos.yml": {
+    "build-macos-platforms": {
+      "bundle": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  ".github/workflows/build-msys2.yml": {
+    "build-msys2": {
+      "flavor": [
+        "mingw64",
+        "ucrt64",
+        "clang64",
+        "clangarm64"
+      ]
+    }
+  },
+  ".github/workflows/build-tvos.yml": {
+    "build-tvos-platforms": {
+      "bundle": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  ".github/workflows/build-vs2022-arm64.yml": {
+    "build-vs2022-arm64": {
+      "bundle": [
+        1,
+        2
+      ]
+    }
+  },
+  ".github/workflows/build-vs2022-arm64ec.yml": {
+    "build-vs2022-arm64ec": {
+      "bundle": [
+        1,
+        2
+      ]
+    }
+  },
+  ".github/workflows/build-vs2022-x64.yml": {
+    "build-vs2022-64": {
+      "bundle": [
+        1,
+        2
+      ]
+    }
+  },
+  ".github/workflows/build-vs2026-x64.yml": {
+    "build-vs2026": {
+      "arch": [
+        64,
+        "arm64",
+        "arm64ec"
+      ],
+      "bundle": [
+        1,
+        2
+      ]
+    }
+  },
+  ".github/workflows/build-xros.yml": {
+    "build-xros-platforms": {
+      "bundle": [
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  ".github/workflows/build-linux-modular.yml": {
+    "build": {
+      "library": [
+        "pixman",
+        "zlib",
+        "utf8",
+        "libpng",
+        "brotli",
+        "pugixml",
+        "freetype",
+        "libxml2",
+        "svgtiny",
+        "FreeImage",
+        "assimp",
+        "glew",
+        "glfw",
+        "glm",
+        "json",
+        "libusb",
+        "kiss",
+        "portaudio",
+        "rtAudio",
+        "tess2",
+        "uriparser",
+        "opencv",
+        "opencv5",
+        "cairo",
+        "fmt",
+        "openssl",
+        "nghttp2",
+        "nghttp3",
+        "ngtcp2",
+        "libssh2",
+        "curl",
+        "poco"
+      ],
+      "arch": [
+        "64",
+        "arm64"
+      ],
+      "include": [
+        {
+          "arch": "64",
+          "runner": "ubuntu-24.04",
+          "arch_flags": "-march=x86-64 -mtune=generic"
+        },
+        {
+          "arch": "arm64",
+          "runner": "ubuntu-24.04-arm",
+          "arch_flags": "-march=armv8-a -mtune=generic"
+        }
+      ]
+    }
+  }
+}

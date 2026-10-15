@@ -3,6 +3,10 @@
 set -eo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT"
+# Shared runners retain all matching outputs while compiling only selected libraries.
+if [[ -n ${PLATFORM_CACHE_FORMULAS_OVERRIDE:-} ]]; then
+    export FORMULAS_OVERRIDE="$PLATFORM_CACHE_FORMULAS_OVERRIDE"
+fi
 source scripts/calculate_formulas.sh >/dev/null
 context_file=$(mktemp)
 trap 'rm -f "$context_file"' EXIT
@@ -18,6 +22,8 @@ trap 'rm -f "$context_file"' EXIT
     elif [[ $TARGET == msys2 ]]; then
         # The rolling MSYS2 installation must not reuse output from older headers/tools.
         pacman -Q | LC_ALL=C sort
+    elif [[ $(uname -s) == Linux ]] && command -v dpkg-query >/dev/null; then
+        dpkg-query -W | LC_ALL=C sort
     elif [[ $(uname -s) == Darwin ]]; then
         brew list --versions | LC_ALL=C sort
     fi
