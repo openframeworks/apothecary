@@ -11,7 +11,7 @@ FORMULA_DEPENDS=()
 # define the version by sha
 VER=1.16
 SHA256="4cee1ca4aad395170f4c7a07824f3bdd41f28316c6e1e1090a1425b278ec0b4b"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -60,7 +60,7 @@ function build() {
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
-            -DCMAKE_CPP_FLAGS="${FLAG_RELEASE}" \
+            -DCMAKE_CXX_FLAGS="${FLAG_RELEASE}" \
             -DCMAKE_C_FLAGS="${FLAG_RELEASE}" \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -69,7 +69,7 @@ function build() {
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_LIBDIR=lib \
             -G 'Unix Makefiles'
-        $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}${PARALLEL_MAKE}
+        $EMSDK/upstream/emscripten/emmake make -j${PARALLEL_MAKE}
         $EMSDK/upstream/emscripten/emmake make install
         # cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
