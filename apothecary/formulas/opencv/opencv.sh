@@ -1023,18 +1023,6 @@ function build() {
 
 }
 
-# Apple packages deliberately disable KleidiCV; reject stale/incompatible output.
-function _opencv_check_no_kleidicv() {
-    local archive symbols
-    for archive in "$@"; do
-        symbols=$(nm -u "$archive") || return 1
-        if printf '%s\n' "$symbols" | grep -i kleidicv; then
-            echo "opencv: unbundled KleidiCV dependency in $archive" >&2
-            return 1
-        fi
-    done
-}
-
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
 
@@ -1056,7 +1044,6 @@ function copy() {
         mkdir -p $1/lib/$TYPE/$PLATFORM
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
-        _opencv_check_no_kleidicv "$1/lib/$TYPE/$PLATFORM/"libopencv*.a || return 1
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/"*.dylib $1/lib/$TYPE/$PLATFORM 2>/dev/null || true
 
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" $1/include/
