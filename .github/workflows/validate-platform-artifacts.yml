@@ -7,6 +7,8 @@ on:
       - 'scripts/*artifact*'
       - 'scripts/package*.sh'
       - 'scripts/tests/test-package-platforms.sh'
+      - 'apothecary/formulas/metalangle/**'
+      - 'scripts/tests/test-metalangle-fetch.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/apple-install-tools.sh'
@@ -27,6 +29,8 @@ on:
       - 'scripts/*artifact*'
       - 'scripts/package*.sh'
       - 'scripts/tests/test-package-platforms.sh'
+      - 'apothecary/formulas/metalangle/**'
+      - 'scripts/tests/test-metalangle-fetch.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/apple-install-tools.sh'
@@ -56,3 +60,4 @@ jobs:
       - run: ruby scripts/tests/test-workflow-scheduling.rb
       - run: node scripts/tests/test-release-build-plan.cjs
       - run: bash scripts/tests/test-package-platforms.sh
+      - run: bash scripts/tests/test-metalangle-fetch.sh
