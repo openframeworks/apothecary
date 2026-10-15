@@ -20,7 +20,7 @@ async function scenario({dryRun=false,corrupt=false,changed=false,publishFail=fa
         deleteRelease:async args=>{deleted.push(args.release_id);}
     }}};
     let failure;
-    try {await helper.refresh({github,context:{repo:{owner:'owner',repo:'repo'},runId:123},core:{info(){},notice(){},warning(){}},dryRun,now:new Date('2026-10-15T03:17:00Z'),download:async(asset,file)=>fs.writeFileSync(file,corrupt?Buffer.from('corrupt'):data.get(asset.id))});}
+    try {await helper.refresh({github,context:{repo:{owner:'owner',repo:'repo'},runId:123},core:{info(){},notice(){},warning(){}},dryRun,now:new Date('2026-10-15T05:00:00Z'),download:async(asset,file)=>fs.writeFileSync(file,corrupt?Buffer.from('corrupt'):data.get(asset.id))});}
     catch(e){failure=e;}
     return {failure,published,rolledBack,uploads,deleted,updates};
 }
