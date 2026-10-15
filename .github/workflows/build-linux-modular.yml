@@ -106,9 +106,11 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Keep reusable outputs for every modular library
-        run: |
-          libraries=$(node -e "process.stdout.write(require('./scripts/build-matrices.json')['.github/workflows/build-linux-modular.yml'].build.library.join(' '))")
-          echo "PLATFORM_CACHE_FORMULAS_OVERRIDE=$libraries" >> "$GITHUB_ENV"
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            const matrix = require(`${process.env.GITHUB_WORKSPACE}/scripts/build-matrices.json`)['.github/workflows/build-linux-modular.yml'].build;
+            core.exportVariable('PLATFORM_CACHE_FORMULAS_OVERRIDE', matrix.library.join(' '));
 
       - name: Restore compatible platform artifacts
         id: platform-artifacts
