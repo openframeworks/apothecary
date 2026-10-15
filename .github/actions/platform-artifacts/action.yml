@@ -22,9 +22,13 @@ runs:
       env:
         OPTIONAL_ARCHS: ${{ inputs.archs }}
       run: |
+        artifact_temp="$RUNNER_TEMP"
+        if command -v cygpath >/dev/null 2>&1; then
+          artifact_temp=$(cygpath -u "$artifact_temp")
+        fi
         # Cold caches still need the staging directory before listing/building.
         mkdir -p out
-        bash scripts/platform-artifact-manifest.sh > "$RUNNER_TEMP/platform-artifact-keys.tsv"
+        bash scripts/platform-artifact-manifest.sh > "$artifact_temp/platform-artifact-keys.tsv"
     - name: Find trusted platform baseline
       if: inputs.phase == 'restore'
       id: baseline
@@ -46,8 +50,12 @@ runs:
       if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
       shell: ${{ inputs.shell }}
       run: |
-        mkdir -p "$RUNNER_TEMP/platform-artifact-output"
-        tar -xzf "$RUNNER_TEMP/platform-artifact-download/platform-binaries.tar.gz" -C "$RUNNER_TEMP/platform-artifact-output"
+        artifact_temp="$RUNNER_TEMP"
+        if command -v cygpath >/dev/null 2>&1; then
+          artifact_temp=$(cygpath -u "$artifact_temp")
+        fi
+        mkdir -p "$artifact_temp/platform-artifact-output"
+        tar -xzf "$artifact_temp/platform-artifact-download/platform-binaries.tar.gz" -C "$artifact_temp/platform-artifact-output"
     - name: Restore matching formulas
       if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
       uses: actions/github-script@v9.0.0
@@ -58,8 +66,12 @@ runs:
       if: inputs.phase == 'save'
       shell: ${{ inputs.shell }}
       run: |
-        cp "$RUNNER_TEMP/platform-artifact-keys.tsv" out/.platform-artifact-keys.tsv
-        tar -czf "$RUNNER_TEMP/platform-binaries.tar.gz" -C out .
+        artifact_temp="$RUNNER_TEMP"
+        if command -v cygpath >/dev/null 2>&1; then
+          artifact_temp=$(cygpath -u "$artifact_temp")
+        fi
+        cp "$artifact_temp/platform-artifact-keys.tsv" out/.platform-artifact-keys.tsv
+        tar -czf "$artifact_temp/platform-binaries.tar.gz" -C out .
     - name: Upload trusted platform baseline
       if: inputs.phase == 'save'
       uses: actions/upload-artifact@v7.0.0

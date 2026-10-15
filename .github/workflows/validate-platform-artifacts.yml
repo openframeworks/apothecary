@@ -5,6 +5,8 @@ on:
       - '.github/workflows/build*.yml'
       - '.github/actions/platform-artifacts/**'
       - 'scripts/*artifact*'
+      - 'scripts/package*.sh'
+      - 'scripts/tests/test-package-platforms.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/release-*'
@@ -20,6 +22,8 @@ on:
       - '.github/workflows/build*.yml'
       - '.github/actions/platform-artifacts/**'
       - 'scripts/*artifact*'
+      - 'scripts/package*.sh'
+      - 'scripts/tests/test-package-platforms.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/release-*'
@@ -44,3 +48,4 @@ jobs:
       - run: node scripts/tests/test-platform-artifacts.cjs
       - run: ruby scripts/tests/test-workflow-scheduling.rb
       - run: node scripts/tests/test-release-build-plan.cjs
+      - run: bash scripts/tests/test-package-platforms.sh

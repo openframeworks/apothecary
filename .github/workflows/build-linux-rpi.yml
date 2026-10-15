@@ -123,22 +123,6 @@ jobs:
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.sha256
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.manifest.json
 
-      - name: Clean canonical archive before modular packaging
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
-        run: rm -f out/openFrameworksLibs*.tar.bz2
-
-      - name: Package modular libraries
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        run: scripts/package-individual.sh
-
-      - name: Upload modular libraries
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: softprops/action-gh-release@v3.0.3
-        with:
-          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-          tag_name: latest-modular
-          files: out/oF_*_linux_${{ env.ARCH }}_gcc10.tar.bz2
-
       - name: Download verified Linux build plan
         if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
         uses: actions/download-artifact@v8
@@ -154,3 +138,19 @@ jobs:
           github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-rpi.yml', job: 'build-linux-rpi', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
+
+      - name: Clean canonical archive before modular packaging
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        run: rm -f out/openFrameworksLibs*.tar.bz2
+
+      - name: Package modular libraries
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        run: scripts/package-individual.sh
+
+      - name: Upload modular libraries
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          files: out/oF_*_linux_${{ env.ARCH }}_gcc10.tar.bz2

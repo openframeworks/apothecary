@@ -8,6 +8,7 @@ ROOT=$(
 )/..
 LOCAL_ROOT=$ROOT
 APOTHECARY_PATH=$ROOT/apothecary
+source "$ROOT/scripts/package-platform.sh"
 
 if [ -z "${NO_FORCE+x}" ]; then
     export FORCE="-f"
@@ -84,6 +85,14 @@ LIBS=$(echo "$LIBS" | tr '\n' ' ')
 LIBS=""
 for LIB in "${FORMULAS[@]}"; do
     LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
+    if formula_has_package_for_target "$LIB" "$TARGET" "$APOTHECARY_PATH"; then
+        :
+    else
+        result=$?
+        [ "$result" -eq 1 ] || exit "$result"
+        echo "Skipping '$LIB': no library package for $TARGET"
+        continue
+    fi
     if formula_is_modular_only "$LIB"; then
         echo "Skipping modular-only formula '$LIB' from the core archive"
         continue
@@ -172,7 +181,8 @@ if [ "$TARGET" == "linux" ]; then
 EOF
 elif [ "$TARGET" == "msys2" ]; then
     if [ -n "$MSYSTEM" ]; then
-        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${MSYSTEM}.zip"
+        msys2_flavor=$(printf '%s' "$MSYSTEM" | tr '[:upper:]' '[:lower:]')
+        TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}_${msys2_flavor}.zip"
     else
         TARBALL="openFrameworksLibs_${CUR_BRANCH}_${TARGET}.zip"
     fi

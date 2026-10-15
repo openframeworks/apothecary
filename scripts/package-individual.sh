@@ -8,6 +8,7 @@ ROOT=$(
 )/..
 LOCAL_ROOT=$ROOT
 APOTHECARY_PATH=$ROOT/apothecary
+source "$ROOT/scripts/package-platform.sh"
 
 if [ -z "${NO_FORCE+x}" ]; then
     export FORCE="-f"
@@ -94,12 +95,15 @@ echo "Compressing individual libraries from [$OUTPUT_FOLDER]... FORMULAS:[$FORMU
 package_failed=0
 for LIB in "${FORMULAS[@]}"; do
     LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
-    echo "Loop: [$LIB]"
-    # pkg-config is a host build tool, not a downloadable library output.
-    if [ "$LIB" = "pkg-config" ]; then
-        echo "Skipping host tool '$LIB'"
+    if formula_has_package_for_target "$LIB" "$TARGET" "$APOTHECARY_PATH"; then
+        :
+    else
+        result=$?
+        [ "$result" -eq 1 ] || exit "$result"
+        echo "Skipping '$LIB': no library package for $TARGET"
         continue
     fi
+    echo "Loop: [$LIB]"
     if formula_is_internal "$LIB"; then
         echo "Skipping internal formula '$LIB' (merged into curl)"
         continue
