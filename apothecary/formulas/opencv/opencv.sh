@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=7
+BUILD_ID=8
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -121,7 +121,10 @@ function build() {
         -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
         -DPNG_LIBRARY=${LIBPNG_LIBRARY}"
 
+        # The Apple combined archive does not bundle KleidiCV's HAL libraries.
+        # Keep OpenCV self-contained until those acceleration archives are packaged.
         DEFINES="
+        -DWITH_KLEIDICV=OFF \
         -DBUILD_DOCS=OFF \
         -DENABLE_BUILD_HARDENING=ON \
         -DBUILD_ANDROID_EXAMPLES=OFF \
