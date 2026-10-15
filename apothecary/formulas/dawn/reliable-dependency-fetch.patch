@@ -1,0 +1,78 @@
+--- a/tools/fetch_dawn_dependencies.py
++++ b/tools/fetch_dawn_dependencies.py
+@@ -40,6 +40,7 @@
+ import sys
+ import subprocess
+ import argparse
++import time
+ from pathlib import Path
+ 
+ parser = argparse.ArgumentParser(
+@@ -90,6 +91,20 @@
+                     help="""
+     Deprecated: Test dependencies are now always included.
+     """)
++
++
++def run_git(command, probe=False):
++    """Retry network operations and propagate errors instead of leaving empty repos."""
++    attempts = 3 if any(arg in ('clone', 'fetch') for arg in command[1:]) else 1
++    for attempt in range(attempts):
++        proc = subprocess.run(command, capture_output=True)
++        if proc.returncode == 0 or probe:
++            return proc
++        if attempt + 1 < attempts:
++            print(proc.stderr.decode(errors='replace'), file=sys.stderr)
++            time.sleep(2 ** attempt)
++    print(proc.stderr.decode(errors='replace'), file=sys.stderr)
++    proc.check_returncode()
+ 
+ 
+ def main(args):
+@@ -154,10 +169,15 @@
+ 
+         raw_url = deps[submodule]['url']
+         git_url, git_tag = raw_url.format(**variables).rsplit('@', 1)
++        # Use the original GitHub repository for Chromium's GitHub mirrors.
++        # Preserve the exact DEPS commit; only the download endpoint changes.
++        git_url = git_url.replace(
++            'https://chromium.googlesource.com/external/github.com/',
++            'https://github.com/')
+ 
+         # Run git from within the submodule's path (don't use for clone)
+-        git = lambda *x: subprocess.run([args.git, '-C', submodule_path, *x],
+-                                        capture_output=True)
++        git = lambda *x: run_git([args.git, '-C', submodule_path, *x],
++                                 probe=x[0] in ('rev-parse', 'cat-file'))
+ 
+         log(f"Fetching dependency '{submodule}'")
+         if (submodule_path / ".git").is_dir():
+@@ -173,9 +193,9 @@
+                 if not git_tag_exists:
+                     log(f"Updating '{submodule_path}' from '{git_url}'")
+                     if args.shallow:
+-                        git('fetch', 'origin', git_tag, '--depth', '1')
++                        git('fetch', git_url, git_tag, '--depth', '1')
+                     else:
+-                        git('fetch', 'origin')
++                        git('fetch', git_url)
+ 
+                 log(f"Checking out tag '{git_tag}'")
+                 git('checkout', git_tag)
+@@ -187,14 +207,13 @@
+                 shallow_clone(git, git_url, git_tag)
+             else:
+                 log(f"Cloning '{git_url}' into '{submodule_path}'")
+-                subprocess.run([
++                run_git([
+                     args.git,
+                     'clone',
+                     '--recurse-submodules',
+                     git_url,
+                     submodule_path,
+-                ],
+-                               capture_output=True)
++                ])
+ 
+             log(f"Checking out tag '{git_tag}'")
+             git('checkout', git_tag)

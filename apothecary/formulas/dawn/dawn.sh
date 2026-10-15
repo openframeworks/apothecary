@@ -22,7 +22,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.07.31
 SOURCE_COMMIT=cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7
-BUILD_ID=4
+BUILD_ID=5
 DEFINES=""
 
 GIT_URL=https://dawn.googlesource.com/dawn
@@ -32,6 +32,21 @@ GIT_TAG=$SOURCE_COMMIT
 DEPOT_TOOLS_URL=https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
 # download the source code and unpack it into LIB_NAME
+function _dawn_retry_git() {
+    local attempt
+    for attempt in 1 2 3; do
+        if git "$@"; then return 0; fi
+        if [ "$attempt" -lt 3 ]; then sleep "$attempt"; fi
+    done
+    return 1
+}
+
+function _dawn_patch_fetcher() {
+    if ! grep -q '^def run_git(' tools/fetch_dawn_dependencies.py; then
+        patch -p1 < "$APOTHECARY_DIR/formulas/dawn/reliable-dependency-fetch.patch" || return 1
+    fi
+}
+
 function download() {
     . "$DOWNLOADER_SCRIPT"
 
@@ -44,10 +59,10 @@ function download() {
     if ! git -C dawn remote add origin "${GIT_URL}"; then
         echoWarning "dawn: remote add failed (already set?)"
     fi
-    if ! git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"; then
+    if ! _dawn_retry_git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"; then
         echoWarning "dawn.googlesource.com fetch failed; trying ${GIT_URL_FALLBACK}"
         git -C dawn remote set-url origin "${GIT_URL_FALLBACK}"
-        git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"
+        _dawn_retry_git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"
     fi
     git -C dawn checkout --force FETCH_HEAD
     verify_git_commit dawn "${SOURCE_COMMIT}"
@@ -56,6 +71,7 @@ function download() {
 # prepare the build environment, executed inside the lib src dir
 function prepare() {
     echoVerbose "prepare dawn @ $(pwd)"
+    _dawn_patch_fetcher || return 1
 
     # Vendored depot_tools (PR #533 / user request). Fetch itself is CMake
     # DAWN_FETCH_DEPENDENCIES — ofLibs proved that path; we do not run gn/ninja.
@@ -64,7 +80,7 @@ function prepare() {
     mkdir -p "${vendor}"
     if [ ! -d "${vendor}/depot_tools/.git" ]; then
         echo "Cloning depot_tools into ${vendor}/depot_tools"
-        git clone --depth=1 "${DEPOT_TOOLS_URL}" "${vendor}/depot_tools"
+        _dawn_retry_git clone --depth=1 "${DEPOT_TOOLS_URL}" "${vendor}/depot_tools" || return 1
     fi
     export PATH="${vendor}/depot_tools:${PATH}"
     export DEPOT_TOOLS_UPDATE=0
@@ -145,6 +161,7 @@ function _lipo_ios_simulator() {
 function build() {
     LIBS_ROOT=$(realpath "$LIBS_DIR")
     CORE_DIR=$(pwd)
+    _dawn_patch_fetcher || return 1
 
     # `apo build` does not run prepareFormula. Vendor depot_tools if needed.
     if [ ! -d "${CORE_DIR}/.vendor/depot_tools" ]; then
