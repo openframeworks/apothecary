@@ -111,5 +111,4 @@ Active core matrices are defined in `scripts/build-matrices.json` and filtered b
 SDK/compiler axes and ABI flags versioned there or in the workflow/toolchain.
 Declare formula dependencies so reverse invalidation is complete. Published
 `build-state-*.json` assets record final archive identities; do not mark a baseline
-successful before verifying the published bytes. See `docs/BUILD_PLANNING.md` for
-the 24-hour rolling-toolchain policy and validation commands.
+successful before verifying the published bytes.
