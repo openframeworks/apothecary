@@ -1,0 +1,29 @@
+--- a/src/libANGLE/renderer/metal/mtl_utils.mm
++++ b/src/libANGLE/renderer/metal/mtl_utils.mm
+@@ -284,7 +284,7 @@
+     }
+ }
+ 
+-#if TARGET_OS_OSX || TARGET_OS_MACCATALYST
++#if defined(ANGLE_PLATFORM_MACOS) && ANGLE_ENABLE_METAL
+ uint32_t GetDeviceVendorIdFromIOKit(id<MTLDevice> device)
+ {
+     return angle::GetVendorIDFromMetalDeviceRegistryID(device.registryID);
+@@ -823,7 +823,7 @@
+ uint32_t GetDeviceVendorId(id<MTLDevice> metalDevice)
+ {
+     uint32_t vendorId = 0;
+-#if TARGET_OS_OSX || TARGET_OS_MACCATALYST
++#if defined(ANGLE_PLATFORM_MACOS) && ANGLE_ENABLE_METAL
+     vendorId = GetDeviceVendorIdFromIOKit(metalDevice);
+ #endif
+     if (!vendorId)
+@@ -1420,7 +1420,7 @@
+ 
+ bool SupportsMacGPUFamily(id<MTLDevice> device, uint8_t macFamily)
+ {
+-#if TARGET_OS_OSX || TARGET_OS_MACCATALYST
++#if defined(ANGLE_PLATFORM_MACOS) && ANGLE_ENABLE_METAL
+     switch (macFamily)
+     {
+         case 1:

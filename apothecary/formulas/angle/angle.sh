@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=9
+BUILD_ID=10
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -145,6 +145,8 @@ function _angle_windows_sdk() {
 }
 
 function prepare() {
+    # Each architecture can enter prepare() without running download().
+    . "$DOWNLOADER_SCRIPT"
     local vendor
     vendor="$(pwd)/.vendor"
     mkdir -p "${vendor}"
@@ -227,6 +229,22 @@ function _angle_patch_apple() {
     fi
 }
 
+# Complete the source/SDK guards missing from this pinned Chromium revision.
+function _angle_patch_platform_sources() {
+    local formula_dir
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ "$TYPE" = catos ] &&
+       grep -q '^#if TARGET_OS_OSX || TARGET_OS_MACCATALYST' src/libANGLE/renderer/metal/mtl_utils.mm; then
+        # Catalyst uses the existing Metal device-name fallback; IOKit lookup
+        # is declared and implemented only for ANGLE_PLATFORM_MACOS.
+        patch -p1 --forward --reject-file=- < "$formula_dir/catalyst-metal-vendor.patch" || return 1
+    fi
+    if [ "$TYPE" = xros ] &&
+       ! grep -q "'xrsimulator'," build/config/apple/sdk_info.py; then
+        patch -p1 --forward --reject-file=- < "$formula_dir/visionos-sdk-info.patch" || return 1
+    fi
+}
+
 function _angle_gn_args() {
     local cpu os env apple
     cpu="$(_angle_cpu)"
@@ -238,7 +256,9 @@ function _angle_gn_args() {
     case "${TYPE}" in
         vs)
             # MSVC does not define __BYTE_ORDER__, which Chromium's libc++ requires.
-            echo "${common} is_clang=false use_custom_libcxx=false use_custom_libcxx_for_host=false angle_enable_d3d11=true angle_enable_metal=false"
+            # Siso cannot relativize C: SDK headers against a D: checkout when
+            # parsing /showIncludes. Use the supported Ninja runner instead.
+            echo "${common} is_clang=false use_custom_libcxx=false use_custom_libcxx_for_host=false use_siso=false angle_enable_d3d11=true angle_enable_metal=false"
             ;;
         osx|macos)
             # kIOMainPortDefault needs macOS 12.
@@ -280,6 +300,7 @@ function build() {
     elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
         _angle_depot_env "$(pwd)/.vendor"
         _angle_patch_apple
+        _angle_patch_platform_sources || return 1
     else
         echoError "angle: unsupported TYPE=${TYPE}"
         exit 1
