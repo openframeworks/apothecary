@@ -9,6 +9,7 @@ async function test() {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'platform-artifacts-test-'));
     try {
         process.env.TARGET = 'catos';
+        process.env.GITHUB_WORKFLOW_REF = 'openframeworks/apothecary/.github/workflows/build-catos.yml@refs/heads/master';
         process.env.ARTIFACT_VARIANT = '2';
         process.env.RUNNER_TEMP = temp;
         process.env.GITHUB_WORKSPACE = path.join(temp, 'workspace');

@@ -21,7 +21,10 @@ runs:
       shell: ${{ inputs.shell }}
       env:
         OPTIONAL_ARCHS: ${{ inputs.archs }}
-      run: bash scripts/platform-artifact-manifest.sh > "$RUNNER_TEMP/platform-artifact-keys.tsv"
+      run: |
+        # Cold caches still need the staging directory before listing/building.
+        mkdir -p out
+        bash scripts/platform-artifact-manifest.sh > "$RUNNER_TEMP/platform-artifact-keys.tsv"
     - name: Find trusted platform baseline
       if: inputs.phase == 'restore'
       id: baseline
