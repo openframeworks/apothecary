@@ -95,6 +95,11 @@ package_failed=0
 for LIB in "${FORMULAS[@]}"; do
     LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
     echo "Loop: [$LIB]"
+    # pkg-config is a host build tool, not a downloadable library output.
+    if [ "$LIB" = "pkg-config" ]; then
+        echo "Skipping host tool '$LIB'"
+        continue
+    fi
     if formula_is_internal "$LIB"; then
         echo "Skipping internal formula '$LIB' (merged into curl)"
         continue
