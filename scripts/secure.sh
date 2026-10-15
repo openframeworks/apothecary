@@ -84,8 +84,8 @@ secure() {
 
     NAME="${NAME%.*}"
 
-    DEFINES=$(echo "$DEFINES" | tr '\n' ' ' | tr -d '/') #replace newline for visuals
-    DEFINES=$(echo "$DEFINES" | tr -d '\r' | tr '\n' ' ')
+    # Keep logs and Pkl metadata on one readable line, preserving flag paths.
+    DEFINES=$(printf '%s' "$DEFINES" | LC_ALL=C tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//')
 
 
     OUTPUT_LOCATION=$(dirname "$BINARY_SEC")

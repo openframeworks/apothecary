@@ -96,8 +96,10 @@ jobs:
           retry env DEBIAN_FRONTEND=noninteractive apt-get \
             -o "Dir::Cache::archives=$APT_ARCHIVES" \
             -o Acquire::Retries=5 \
-            install -y ca-certificates git sudo gcc-10 g++-10 gfortran-10 binutils file curl unzip bzip2 autoconf automake build-essential ccache coreutils dos2unix flex gperf libtool make ninja-build pkg-config python3 python3-pip xz-utils freeglut3-dev libasound2-dev libc6-dev libegl1-mesa-dev libfftw3-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libfontconfig1-dev libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev oss4-dev xorg-dev
+            install -y ca-certificates git sudo gcc-10 g++-10 gfortran-10 binutils file curl unzip bzip2 autoconf automake build-essential ccache coreutils dos2unix flex gperf libtool make ninja-build pkg-config python3 python3-pip xz-utils freeglut3-dev libasound2-dev libc6-dev libegl1-mesa-dev libfftw3-dev libgl1-mesa-dev libglu1-mesa-dev libjack-dev libudev-dev libfontconfig1-dev libgtk-3-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpulse-dev libwayland-dev libx11-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxkbcommon-dev libxrandr-dev oss4-dev xorg-dev
           python3 -m pip install --no-cache-dir cmake==3.31.6 meson==1.5.2 packaging mako pyyaml
+          pkg-config --exists libudev
+          test -f /usr/include/libudev.h
           cmake --version
           gcc-10 --version
           test "$(gcc-10 -dumpversion | cut -d. -f1)" = 10
