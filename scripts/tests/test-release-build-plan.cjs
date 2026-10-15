@@ -52,7 +52,7 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert(!p.matches(baseline,previous,[{...asset,id:2}]),'replaced asset IDs rebuild');
  assert(!p.matches(baseline,previous,[{...asset,digest:'sha256:'+'b'.repeat(64)}]),'changed bytes rebuild');
  assert(!p.matches(baseline,{...previous,publishedAt:'invalid'},[asset]));
- assert(!p.matches(baseline,{...previous,publishedAt:new Date(Date.now()-25*3600000).toISOString()},[asset]),'rolling toolchain recheck is bounded');
+ assert(p.matches(baseline,{...previous,publishedAt:'2020-01-01T00:00:00.000Z'},[asset]),'unchanged verified outputs remain reusable regardless of age');
  const outputs={},summary={addHeading(){return this;},addTable(){return this;},async write(){}};
  const core={setOutput(k,v){outputs[k]=v;},warning(){},summary};
  // Use a non-iOS workflow fixture so no Apple aggregate scan is needed.
@@ -108,5 +108,5 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  await p.record({github,context,core:recorderCore,workflow:file,job,matrix:{libraries:['FreeImage'],entries:[entry]}});
  assert.equal(uploaded.assets.length,1,'a library state must not depend on unrelated packages sharing the runner');
  assert.equal(uploaded.assets[0].id,51);
- console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, expiry, tags and API fallback passed');
+ console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, age-independent reuse, tags and API fallback passed');
 }finally{process.chdir(root);fs.rmSync(tmp,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});

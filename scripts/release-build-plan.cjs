@@ -129,7 +129,7 @@ function stateName(file, job, row) {
     return parts.join('-')+'.pkl';
 }
 function matches(wanted, previous, assets, now = Date.now()) {
-    if (previous?.schema !== 1 || previous.profile !== wanted.profile || !Number.isFinite(Date.parse(previous.publishedAt)) || now-Date.parse(previous.publishedAt) > 24*3600*1000 || Date.parse(previous.publishedAt)>now) return false;
+    if (previous?.schema !== 1 || previous.profile !== wanted.profile || !Number.isFinite(Date.parse(previous.publishedAt)) || Date.parse(previous.publishedAt)>now) return false;
     if (!Array.isArray(previous.assets) || !previous.assets.length || !previous.assets.every(a => assets.some(b => b.id === a.id && b.name === a.name && b.size === a.size && b.digest === a.digest && /^sha256:[0-9a-f]{64}$/.test(b.digest || '')))) return false;
     const names = Object.keys(wanted.formulas).sort();
     return JSON.stringify(names) === JSON.stringify(Object.keys(previous.formulas || {}).sort()) && names.every(name => wanted.formulas[name].key === previous.formulas[name].key);

@@ -112,3 +112,8 @@ SDK/compiler axes and ABI flags versioned there or in the workflow/toolchain.
 Declare formula dependencies so reverse invalidation is complete. Published
 channel-prefixed `.pkl` assets record final archive identities; do not mark a baseline
 successful before verifying the published bytes.
+
+Release records do not expire with age. Rebuild on changed inputs or missing/invalid
+verified outputs, or by explicit manual/version-tag publication. Keep SDK and
+compiler versions declared in configuration; silent runner updates are not
+discovered when a native job is skipped.
