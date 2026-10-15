@@ -18,6 +18,8 @@ trap 'rm -f "$context_file"' EXIT
     elif [[ $TARGET == msys2 ]]; then
         # The rolling MSYS2 installation must not reuse output from older headers/tools.
         pacman -Q | LC_ALL=C sort
+    elif [[ $(uname -s) == Linux ]] && command -v dpkg-query >/dev/null; then
+        dpkg-query -W | LC_ALL=C sort
     elif [[ $(uname -s) == Darwin ]]; then
         brew list --versions | LC_ALL=C sort
     fi

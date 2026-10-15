@@ -36,7 +36,7 @@ async function test() {
                 assert.equal(args.workflow_id, 'build-catos.yml');
                 assert.equal(args.owner, 'openframeworks');
                 yield {data: {workflow_runs: [{id: 1}, {id: 2}]}};
-                yield {data: {workflow_runs: [{id: 3}]}};
+                yield {data: [{id: 3}]}; // Octokit pagination normalizes this response to an array.
             }}),
         };
         await helper.select({github, context, core});

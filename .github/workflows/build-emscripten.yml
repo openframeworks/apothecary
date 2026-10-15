@@ -16,6 +16,7 @@ concurrency:
 
 permissions:
   contents: write
+  actions: read
 
 env:
   TARGET: "emscripten"
@@ -29,25 +30,31 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      workflow_disabled: ${{ steps.check-disabled.outputs.disabled }}
+      workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
-    - name: Check if Workflow is disabled
-      id: check-disabled
-      shell: bash
-      run: |
-        if [ "${{ env.DISABLE_WORKFLOW }}" == "true" ]; then
-          echo "disabled=true" >> $GITHUB_ENV
-          echo "::set-output name=disabled::true"
-        else
-          echo "::set-output name=disabled::false"
-        fi
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan selected formula and toolchain builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-emscripten.yml', job: 'build-emscripten-platforms'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
   build-emscripten-platforms:
-    if: needs.pre-check.outputs.workflow_disabled != 'true'
+    if: needs.pre-check.outputs.build_needed == 'true'
     needs: pre-check
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        ARCH: [32, 64]
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Install Emscripten SDK (emsdk)
@@ -92,100 +99,34 @@ jobs:
           else
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
-      - name: Download previous artifacts
-        uses: actions/github-script@v9.0.0
+      - name: Restore compatible platform artifacts
+        id: platform-artifacts
+        continue-on-error: true
         if: env.USE_ARTIFACT == 'true'
+        uses: ./.github/actions/platform-artifacts
         with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const outputDir = path.join(process.env.GITHUB_WORKSPACE, 'out');
-            if (!fs.existsSync(outputDir)){
-              fs.mkdirSync(outputDir);
-            }
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner,
-              repo: 'apothecary',
-              sort: 'created_at',
-              direction: 'desc',
-              per_page: 150
-            });
-            const target = process.env.TARGET;
-            const release = process.env.RELEASE;
-            const arch = process.env.ARCH;
-            const artifactName = `libs-${release}-${target}-${arch}`;
-            let count = 0;
-            const max = 1;
-            for (const artifact of artifacts.data.artifacts) {
-              const isArtifactMatch = artifact.name.includes(`libs-${release}-${target}-${arch}`) && !artifact.expired;
-              if (isArtifactMatch) {
-                const download = await github.rest.actions.downloadArtifact({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  artifact_id: artifact.id,
-                  archive_format: 'zip',
-                });
-                const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
-                fs.writeFileSync(artifactPath, Buffer.from(download.data));
-                console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
-                count++;
-                if (count >= max) {
-                  break;
-                }
-              }
-            }
-      - name: Extract Artifacts to /out
-        if: env.USE_ARTIFACT == 'true'
-        run: |
-            mkdir -p out
-            if ls out/*.zip 1> /dev/null 2>&1; then
-              for zip in out/*.zip; do
-                  echo "Extracting $zip..."
-                  unzip -o "$zip" -d out/
-                  echo "Removing $zip..."
-                  rm "$zip"
-              done
-              echo "First-level extraction and cleanup complete."
-
-              # Check and extract second-level zip files and remove them
-              if ls out/*.zip 1> /dev/null 2>&1; then
-                  for nested_zip in out/*.zip; do
-                      echo "Extracting nested zip $nested_zip..."
-                      unzip -o "$nested_zip" -d out/
-                      echo "Removing $nested_zip..."
-                      rm "$nested_zip"
-                  done
-                  echo "Second-level extraction and cleanup complete."
-              else
-                  echo "No nested zip files found."
-              fi
-            else
-                echo "No zip files to extract."
-            fi
-            if ls out/*.tar.bz2 1> /dev/null 2>&1; then
-              for tarball in out/*.tar.bz2; do
-                  echo "Extracting $tarball..."
-                  tar -xjf "$tarball" -C out/
-              done
-              echo ".tar.bz2 extraction complete."
-              rm -f out/*.tar.bz2
-            else
-              echo "No .tar.bz2 files to extract."
-            fi
-            rm -f xout/*.tar.bz2 
-            rm -f out/*.tar.bz2
-
+          phase: restore
+          variant: ${{ matrix.ARCH }}
+          archs: ${{ matrix.ARCH }}
       - name: build
         run: ./scripts/build.sh
         env:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
           ARCH: ${{ env.ARCH }}
     
+      - name: Publish platform artifact baseline
+        continue-on-error: true
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: save
+          variant: ${{ matrix.ARCH }}
+          archs: ${{ matrix.ARCH }}
       - name: Test Cairo rendering and exports
         run: bash scripts/emscripten/test_cairo.sh
 
       - name: Package Binaries for Artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
         working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           scripts/artifact/artifact.sh
@@ -193,7 +134,7 @@ jobs:
           ARCH: ${{ env.ARCH }}
 
       - name: Upload Artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
         uses: actions/upload-artifact@v7.0.0
         with:
           name: libs-${{ env.RELEASE }}-emscripten-${{ env.ARCH }}
@@ -249,3 +190,18 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: "latest-modular"
           files: out/*.tar.bz2
+
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-emscripten.yml', job: 'build-emscripten-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
