@@ -39,7 +39,7 @@ jobs:
       - uses: actions/upload-artifact@v7.0.0
         with:
           name: build-plan-${{ github.workflow }}
-          path: .build-plans/*.json
+          path: .build-plans/*.pkl
           include-hidden-files: true
           if-no-files-found: ignore
   build:

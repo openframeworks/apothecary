@@ -5,6 +5,12 @@ const p=require('../release-build-plan.cjs');
 const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'release-plan-test-'));
 const write=(name,data)=>{fs.mkdirSync(path.dirname(name),{recursive:true});fs.writeFileSync(name,data);};
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.env,GIT_AUTHOR_NAME:'Fixture',GIT_AUTHOR_EMAIL:'fixture@example.invalid',GIT_COMMITTER_NAME:'Fixture',GIT_COMMITTER_EMAIL:'fixture@example.invalid'}}).trim();
+// The workflow must actually upload the extension emitted by the planner.
+for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8')))) {
+ const text=fs.readFileSync(file,'utf8');
+ assert.ok(text.includes('path: .build-plans/*.pkl'), `${file} uploads Pkl build plans`);
+ assert.ok(!text.includes('.build-plans/*.json'), `${file} has no obsolete JSON glob`);
+}
 (async()=>{try{
  process.chdir(tmp);
  const file='.github/workflows/build-macos.yml', job='build', row={bundle:1};
