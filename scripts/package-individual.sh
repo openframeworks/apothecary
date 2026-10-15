@@ -91,6 +91,7 @@ cd $OUTPUT_FOLDER
 
 echo "Compressing individual libraries from [$OUTPUT_FOLDER]... FORMULAS:[$FORMULAS]"
 
+package_failed=0
 for LIB in "${FORMULAS[@]}"; do
     LIB=$(echo "$LIB" | tr -d '[:space:]')  # Remove all whitespace
     echo "Loop: [$LIB]"
@@ -119,9 +120,11 @@ for LIB in "${FORMULAS[@]}"; do
             echo "Successfully created package: $TARBALL"
         else
             echo "Error: Failed to package $LIB"
+            package_failed=1
         fi
     else
-        echo "Warning: Skipping $LIB as it does not exist in $OUTPUT_FOLDER"
+        echo "Error: Cannot package $LIB as it does not exist in $OUTPUT_FOLDER"
+        package_failed=1
     fi
 done
 
@@ -130,3 +133,5 @@ echo "Listing all created packages:"
 find . -type f -name "*.tar.bz2"
 
 cd ../
+
+exit "$package_failed"

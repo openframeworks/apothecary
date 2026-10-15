@@ -124,22 +124,27 @@ jobs:
           archs: ${{ matrix.arch }}
 
       - name: Build selected libraries on this runner
+        id: libraries
         shell: bash
         run: |
           set -euo pipefail
-          failed=0
+          built=""
+          failed=""
           for library in $FORMULAS_OVERRIDE; do
             echo "::group::Build $library ($ARCH / GCC10)"
-            if ! FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
+            if FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
+              built="$built $library"
+            else
               echo "::error::Failed to build $library for $ARCH"
-              failed=1
+              failed="$failed $library"
             fi
             echo "::endgroup::"
           done
-          exit "$failed"
+          echo "built=${built# }" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
 
       - name: Publish platform artifact baseline
-        if: github.event_name == 'push' && steps.platform-artifacts.outcome == 'success'
+        if: github.event_name == 'push' && steps.platform-artifacts.outcome == 'success' && steps.libraries.outputs.failed == ''
         continue-on-error: true
         uses: ./.github/actions/platform-artifacts
         with:
@@ -147,30 +152,55 @@ jobs:
           variant: ${{ matrix.arch }}
           archs: ${{ matrix.arch }}
 
-      - name: Package modular libraries
-        if: github.event_name == 'push'
+      - name: Package successful modular libraries
+        id: packages
+        if: github.event_name == 'push' && steps.libraries.outputs.built != ''
         env:
           ALWAYS_BUILD: 1
-        run: scripts/package-individual.sh
+          BUILT_LIBRARIES: ${{ steps.libraries.outputs.built }}
+        run: |
+          set -euo pipefail
+          packaged=""
+          failed=""
+          for library in $BUILT_LIBRARIES; do
+            archive="out/oF_${library}_linux_${ARCH}_gcc10.tar.bz2"
+            # A previous output must not conceal a packaging failure.
+            rm -f "$archive"
+            if PACKAGE_LIBS="$library" bash scripts/package-individual.sh && test -s "$archive"; then
+              packaged="$packaged $library"
+            else
+              echo "::error::Failed to package $library for $ARCH"
+              failed="$failed $library"
+            fi
+          done
+          echo "packaged=${packaged# }" >> "$GITHUB_OUTPUT"
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
 
       - name: Upload modular library asset
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        id: uploads
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && steps.packages.outputs.packaged != ''
         uses: actions/github-script@v9.0.0
         env:
-          LIBRARY_NAMES: ${{ join(matrix.libraries, ' ') }}
+          LIBRARY_NAMES: ${{ steps.packages.outputs.packaged }}
         with:
           github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('node:fs');
             const release = (await github.rest.repos.getReleaseByTag({...context.repo, tag: 'latest-modular'})).data;
             const assets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id: release.id, per_page: 100});
+            const uploaded = [], failed = [];
             for (const library of process.env.LIBRARY_NAMES.split(/\s+/).filter(Boolean)) {
-              const name = `oF_${library}_linux_${process.env.ARCH}_gcc10.tar.bz2`;
-              const old = assets.find(asset => asset.name === name);
-              if (old) await github.rest.repos.deleteReleaseAsset({...context.repo, asset_id: old.id});
-              const data = fs.readFileSync(`out/${name}`);
-              await github.rest.repos.uploadReleaseAsset({...context.repo, release_id: release.id, name, data, headers: {'content-type': 'application/octet-stream', 'content-length': data.length}});
+              try {
+                const name = `oF_${library}_linux_${process.env.ARCH}_gcc10.tar.bz2`;
+                const data = fs.readFileSync(`out/${name}`);
+                const old = assets.find(asset => asset.name === name);
+                if (old) await github.rest.repos.deleteReleaseAsset({...context.repo, asset_id: old.id});
+                await github.rest.repos.uploadReleaseAsset({...context.repo, release_id: release.id, name, data, headers: {'content-type': 'application/octet-stream', 'content-length': data.length}});
+                uploaded.push(library);
+              } catch (error) {core.error(`Upload failed for ${library}: ${error.message}`); failed.push(library);}
             }
+            core.setOutput('uploaded', uploaded.join(' '));
+            core.setOutput('failed', failed.join(' '));
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push'
@@ -179,11 +209,43 @@ jobs:
           name: build-plan-${{ github.workflow }}
           path: ${{ runner.temp }}/build-plans
       - name: Record final release outputs
+        id: records
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
         uses: actions/github-script@v9.0.0
         env:
           BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+          UPLOADED_LIBRARIES: ${{ steps.uploads.outputs.uploaded }}
         with:
           github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
-            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-modular.yml', job: 'build', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
+            const matrix = JSON.parse(process.env.BUILD_PLAN_MATRIX);
+            const uploaded = new Set(process.env.UPLOADED_LIBRARIES.split(/\s+/).filter(Boolean));
+            const failed = [];
+            for (const entry of matrix.entries.filter(entry => uploaded.has(entry.library))) {
+              try {
+                await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-modular.yml', job: 'build', matrix: entry});
+              } catch (error) {core.error(`Recording failed for ${entry.library}: ${error.message}`); failed.push(entry.library);}
+            }
+            core.setOutput('failed', failed.join(' '));
+
+      - name: Report modular results
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILT: ${{ steps.libraries.outputs.built }}
+          PUBLISHED: ${{ steps.uploads.outputs.uploaded }}
+          BUILD_FAILURES: ${{ steps.libraries.outputs.failed }}
+          PACKAGE_FAILURES: ${{ steps.packages.outputs.failed }}
+          UPLOAD_FAILURES: ${{ steps.uploads.outputs.failed }}
+          RECORD_FAILURES: ${{ steps.records.outputs.failed }}
+          EARLIER_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const rows = [['Stage', 'Libraries']];
+            for (const key of ['BUILT', 'PUBLISHED', 'BUILD_FAILURES', 'PACKAGE_FAILURES', 'UPLOAD_FAILURES', 'RECORD_FAILURES']) {
+              rows.push([key.toLowerCase().replaceAll('_', ' '), process.env[key] || 'none']);
+            }
+            await core.summary.addHeading('Modular library results').addTable(rows).write();
+            if (process.env.EARLIER_STATUS === 'failure' || ['BUILD_FAILURES', 'PACKAGE_FAILURES', 'UPLOAD_FAILURES', 'RECORD_FAILURES'].some(key => process.env[key])) {
+              core.setFailed('Some modular libraries failed; successful libraries were processed independently.');
+            }
