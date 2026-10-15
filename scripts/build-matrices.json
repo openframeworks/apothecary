@@ -207,7 +207,8 @@
         "libssh2",
         "curl",
         "poco",
-        "dawn"
+        "dawn",
+        "rgfw"
       ],
       "arch": [
         "64",

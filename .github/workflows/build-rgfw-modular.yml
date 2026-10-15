@@ -1,0 +1,136 @@
+name: build-rgfw-modular
+on:
+  workflow_dispatch:
+  push:
+    branches: [bleeding, master]
+    paths-ignore: ['**/*.md']
+  pull_request:
+    paths-ignore: ['**/*.md']
+concurrency:
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+permissions:
+  contents: write
+  actions: read
+jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/github-script@v9.0.0
+        id: plan
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-rgfw-modular.yml', job: 'build'});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: error
+  build:
+    needs: pre-check
+    if: needs.pre-check.outputs.build_needed == 'true'
+    name: RGFW - ${{ matrix.target }} - ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      TARGET: ${{ matrix.target }}
+      TYPE: ${{ matrix.target }}
+      ARCH: ${{ matrix.arch }}
+      OPTIONAL_ARCHS: ${{ matrix.archs }}
+      VS_VER: ${{ matrix.vs }}
+      EMSDK_VERSION: ${{ matrix.emsdk }}
+      PACKAGE_LIBS: rgfw
+      FORMULAS_OVERRIDE: rgfw
+      ALWAYS_BUILD: 1
+      NO_FORCE: 1
+    steps:
+      - uses: msys2/setup-msys2@v2.32.0
+        if: matrix.target == 'vs' || matrix.target == 'msys2'
+        with:
+          release: ${{ matrix.flavor == 'clangarm64' }}
+          update: true
+          msystem: ${{ matrix.target == 'msys2' && matrix.flavor || 'MINGW64' }}
+          install: base-devel git curl unzip
+          pacboy: cmake:p ninja:p gcc:p
+      - uses: actions/checkout@v7.0.1
+      - name: Set up macOS build tools
+        if: matrix.target == 'osx'
+        run: bash scripts/apple-install-tools.sh cmake coreutils bash
+      - name: Set up Emscripten
+        if: matrix.target == 'emscripten'
+        run: source scripts/emscripten/setup.sh
+      - name: Restore compatible binary artifacts
+        id: baseline
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: restore
+          variant: rgfw-${{ matrix.target }}-${{ matrix.arch }}
+          archs: ${{ matrix.archs }}
+          shell: ${{ (matrix.target == 'vs' || matrix.target == 'msys2') && 'msys2 {0}' || 'bash' }}
+      - name: Build and package RGFW (Windows)
+        if: matrix.target == 'vs' || matrix.target == 'msys2'
+        shell: msys2 {0}
+        run: bash scripts/build-modular-optional.sh
+      - name: Build and package RGFW (macOS / Emscripten)
+        if: matrix.target != 'vs' && matrix.target != 'msys2'
+        run: |
+          if [ "$TYPE" = emscripten ]; then source "$EMSDK/emsdk_env.sh"; fi
+          bash scripts/build-modular-optional.sh
+      - name: Save compatible binary artifacts
+        if: github.event_name == 'push' && steps.baseline.outcome == 'success'
+        continue-on-error: true
+        uses: ./.github/actions/platform-artifacts
+        with:
+          phase: save
+          variant: rgfw-${{ matrix.target }}-${{ matrix.arch }}
+          archs: ${{ matrix.archs }}
+          shell: ${{ (matrix.target == 'vs' || matrix.target == 'msys2') && 'msys2 {0}' || 'bash' }}
+      - name: Upload PR packages for inspection
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: rgfw-${{ matrix.target }}-${{ matrix.arch }}
+          path: |
+            out/oF_rgfw_*.zip
+            out/oF_rgfw_*.tar.bz2
+            xout/oF_rgfw_*.tar.bz2
+          if-no-files-found: error
+      - name: Publish modular archives
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: false
+          files: |
+            out/oF_rgfw_*.zip
+            out/oF_rgfw_*.tar.bz2
+            xout/oF_rgfw_*.tar.bz2
+      - name: Download build plans
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record verified release metadata
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-rgfw-modular.yml', job: 'build', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
