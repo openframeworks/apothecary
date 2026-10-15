@@ -42,10 +42,10 @@ jobs:
   build:
     needs: pre-check
     if: needs.pre-check.outputs.build_needed == 'true'
-    name: ${{ matrix.library }} Linux modular - ${{ matrix.arch }} - GCC10
+    name: Linux modular - ${{ matrix.arch }} - GCC10
     strategy:
       fail-fast: false
-      max-parallel: 4
+      max-parallel: 2
       matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     container: ubuntu:20.04
@@ -61,8 +61,8 @@ jobs:
       CXXFLAGS: -O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1 ${{ matrix.arch_flags }}
       NO_FORCE: 1
       # dawn: deferred — git fetch of the pinned SHA fails in ~9s on this runner
-      FORMULAS_OVERRIDE: ${{ matrix.library }}
-      PACKAGE_LIBS: ${{ matrix.library }}
+      FORMULAS_OVERRIDE: ${{ join(matrix.libraries, ' ') }}
+      PACKAGE_LIBS: ${{ join(matrix.libraries, ' ') }}
     steps:
       - name: Restore APT package cache
         uses: actions/cache@v5
@@ -105,17 +105,34 @@ jobs:
       - name: Trust checked-out workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      - name: Keep reusable outputs for every modular library
+        run: |
+          libraries=$(node -e "process.stdout.write(require('./scripts/build-matrices.json')['.github/workflows/build-linux-modular.yml'].build.library.join(' '))")
+          echo "PLATFORM_CACHE_FORMULAS_OVERRIDE=$libraries" >> "$GITHUB_ENV"
+
       - name: Restore compatible platform artifacts
         id: platform-artifacts
         continue-on-error: true
         uses: ./.github/actions/platform-artifacts
         with:
           phase: restore
-          variant: ${{ matrix.library }}-${{ matrix.arch }}
+          variant: ${{ matrix.arch }}
           archs: ${{ matrix.arch }}
 
-      - name: Build modular libraries
-        run: scripts/build.sh
+      - name: Build selected libraries on this runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          failed=0
+          for library in $FORMULAS_OVERRIDE; do
+            echo "::group::Build $library ($ARCH / GCC10)"
+            if ! FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
+              echo "::error::Failed to build $library for $ARCH"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          exit "$failed"
 
       - name: Publish platform artifact baseline
         if: github.event_name == 'push' && steps.platform-artifacts.outcome == 'success'
@@ -123,7 +140,7 @@ jobs:
         uses: ./.github/actions/platform-artifacts
         with:
           phase: save
-          variant: ${{ matrix.library }}-${{ matrix.arch }}
+          variant: ${{ matrix.arch }}
           archs: ${{ matrix.arch }}
 
       - name: Package modular libraries
@@ -136,18 +153,20 @@ jobs:
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
         uses: actions/github-script@v9.0.0
         env:
-          LIBRARY_ASSET: out/oF_${{ matrix.library }}_linux_${{ matrix.arch }}_gcc10.tar.bz2
+          LIBRARY_NAMES: ${{ join(matrix.libraries, ' ') }}
         with:
           github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('node:fs');
-            const name = require('node:path').basename(process.env.LIBRARY_ASSET);
             const release = (await github.rest.repos.getReleaseByTag({...context.repo, tag: 'latest-modular'})).data;
             const assets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id: release.id, per_page: 100});
-            const old = assets.find(asset => asset.name === name);
-            if (old) await github.rest.repos.deleteReleaseAsset({...context.repo, asset_id: old.id});
-            const data = fs.readFileSync(process.env.LIBRARY_ASSET);
-            await github.rest.repos.uploadReleaseAsset({...context.repo, release_id: release.id, name, data, headers: {'content-type': 'application/octet-stream', 'content-length': data.length}});
+            for (const library of process.env.LIBRARY_NAMES.split(/\s+/).filter(Boolean)) {
+              const name = `oF_${library}_linux_${process.env.ARCH}_gcc10.tar.bz2`;
+              const old = assets.find(asset => asset.name === name);
+              if (old) await github.rest.repos.deleteReleaseAsset({...context.repo, asset_id: old.id});
+              const data = fs.readFileSync(`out/${name}`);
+              await github.rest.repos.uploadReleaseAsset({...context.repo, release_id: release.id, name, data, headers: {'content-type': 'application/octet-stream', 'content-length': data.length}});
+            }
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push'

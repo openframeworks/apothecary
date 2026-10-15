@@ -31,6 +31,11 @@ const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.en
  assert.equal(p.stateName(file,job,{a:1,b:2}),p.stateName(file,job,{b:2,a:1}),'matrix key order is irrelevant');
  assert.equal(p.matrixRows({include:[{arch:'64'},{arch:'arm64'},{arch:'armv6l'}]}).length,3);
  assert.equal(p.matrixRows({arch:['64','arm64'],bundle:[1,2]}).length,4);
+ const grouped=p.groupLibraries([{arch:'64',runner:'ubuntu',library:'FreeImage'},{arch:'64',runner:'ubuntu',library:'zlib'},{arch:'arm64',runner:'ubuntu-arm',library:'FreeImage'}]);
+ assert.equal(grouped.length,2,'one setup per architecture');
+ assert.deepEqual(grouped[0].libraries,['FreeImage','zlib']);assert.equal(grouped[0].entries.length,2,'retain original per-library records');
+ assert.equal(p.groupLibraries([{arch:'64',SDK:'old',library:'a'},{arch:'64',SDK:'new',library:'b'}]).length,2,'different toolchain profiles do not share execution');
+
  const asset={id:1,name:'archive.zip',size:42,digest:'sha256:'+'a'.repeat(64)};
  const previous={...baseline,publishedAt:new Date().toISOString(),assets:[asset]};
  assert(p.matches(baseline,previous,[asset]));
@@ -80,5 +85,16 @@ const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.en
  assert.equal(outputs.build_needed,'true','missing final archive makes the planner schedule native work');
  published.digest='sha256:'+'0'.repeat(64);
  await assert.rejects(p.record({github,context,core:recorderCore,workflow:file,job,matrix:row}),/digest differs/,'incorrectly published bytes cannot become a reusable baseline');
+ // Grouped execution still publishes each library's state independently.
+ const entry={bundle:1,library:'FreeImage'}, wanted=p.inputs(file,job,entry);
+ write(path.join(process.env.RUNNER_TEMP,'build-plans',p.stateName(file,job,entry)),JSON.stringify(wanted));
+ const archiveA=Buffer.from('FreeImage output'),archiveB=Buffer.from('unrelated zlib output');
+ write('out/oF_FreeImage_linux_64_gcc10.tar.bz2',archiveA);write('out/oF_zlib_linux_64_gcc10.tar.bz2',archiveB);
+ const packageAsset=(id,name,bytes)=>({id,name,size:bytes.length,digest:'sha256:'+require('node:crypto').createHash('sha256').update(bytes).digest('hex')});
+ const libraryAssets=[packageAsset(51,'oF_FreeImage_linux_64_gcc10.tar.bz2',archiveA),packageAsset(52,'oF_zlib_linux_64_gcc10.tar.bz2',archiveB)];
+ github.paginate=async()=>libraryAssets;
+ await p.record({github,context,core:recorderCore,workflow:file,job,matrix:{libraries:['FreeImage'],entries:[entry]}});
+ assert.equal(uploaded.assets.length,1,'a library state must not depend on unrelated packages sharing the runner');
+ assert.equal(uploaded.assets[0].id,51);
  console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, expiry, tags and API fallback passed');
 }finally{process.chdir(root);fs.rmSync(tmp,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});

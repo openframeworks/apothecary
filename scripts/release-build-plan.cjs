@@ -38,6 +38,8 @@ function inputs(file, jobId, row, ref) {
     const env = Object.fromEntries(Object.entries({...workflow.env,...job.env}).filter(([key]) => !/SECRET|TOKEN|PASSWORD/i.test(key)).map(([key,value]) => [key,resolve(value,row)]));
     env.ARCH = String(row.ARCH ?? row.arch ?? row.flavor ?? row.cfg?.arch ?? env.ARCH ?? '64');
     env.BUNDLE = String(row.bundle ?? env.BUNDLE ?? 0);
+    // Plan individual library records even when native execution shares a runner.
+    if (row.library) {env.FORMULAS_OVERRIDE=String(row.library);env.PACKAGE_LIBS=String(row.library);}
     if (!/^[a-z0-9]+$/.test(env.TARGET || '')) throw new Error('Unresolved target');
     const selectionScript = read('scripts/calculate_formulas.sh',ref);
     const libraries = execFileSync('bash',['-c',`${selectionScript}\nprintf '\\nPLANNER_FORMULAS=%s\\n' "\${FORMULAS[*]}"`], {env:{...process.env,...env},encoding:'utf8'}).split('\n').find(line => line.startsWith('PLANNER_FORMULAS=')).slice(17).trim().split(/\s+/).filter(Boolean);
@@ -71,6 +73,16 @@ function matches(wanted, previous, assets, now = Date.now()) {
     if (!Array.isArray(previous.assets) || !previous.assets.length || !previous.assets.every(a => assets.some(b => b.id === a.id && b.name === a.name && b.size === a.size && b.digest === a.digest && /^sha256:[0-9a-f]{64}$/.test(b.digest || '')))) return false;
     const names = Object.keys(wanted.formulas).sort();
     return JSON.stringify(names) === JSON.stringify(Object.keys(previous.formulas || {}).sort()) && names.every(name => wanted.formulas[name].key === previous.formulas[name].key);
+}
+function groupLibraries(rows) {
+    const groups=new Map();
+    for(const row of rows) {
+        const {library,...platform}=row, key=stable(platform);
+        if(!groups.has(key))groups.set(key,{...platform,libraries:[],entries:[]});
+        const group=groups.get(key);
+        group.libraries.push(library);group.entries.push(row);
+    }
+    return [...groups.values()];
 }
 function channel(file, context) {
     return file.endsWith('build-linux-modular.yml') ? 'modular' :
@@ -131,7 +143,8 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
     const disabled = String(config.env?.DISABLE_WORKFLOW || 'false') === 'true';
     core.setOutput('build_needed',String(!disabled && chosen.length > 0));
     // Keep a syntactically valid matrix even when the job-level if skips it.
-    core.setOutput('matrix',JSON.stringify({include:chosen.length ? chosen : rows.slice(0,1)}));
+    const execution = file.endsWith('build-linux-modular.yml') ? groupLibraries(chosen.length ? chosen : rows.slice(0,1)) : chosen.length ? chosen : rows.slice(0,1);
+    core.setOutput('matrix',JSON.stringify({include:execution}));
     core.setOutput('workflow_disabled',String(disabled));
     await core.summary.addHeading('Platform build plan').addTable([['Variant','Decision'],...summary]).write();
     if (file.endsWith('/build-ios.yml')) {
@@ -147,6 +160,10 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
 exports.plan=plan;
 exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}) => {
     if (context.eventName !== 'push' || !['refs/heads/bleeding','refs/heads/master'].includes(context.ref)) return;
+    if (Array.isArray(row.entries)) {
+        for (const entry of row.entries) await exports.record({github,context,core,workflow:file,job:jobId,matrix:entry});
+        return;
+    }
     const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : context.ref === 'refs/heads/master' ? 'nightly' : 'latest';
     const release = (await github.rest.repos.getReleaseByTag({...context.repo,tag})).data;
     const assets = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:release.id,per_page:100});
@@ -155,6 +172,7 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
         if (!fs.existsSync(dir)) continue;
         for (const name of fs.readdirSync(dir)) {
             if (!/^(?:openFrameworksLibs_|oF_).*\.(zip|tar\.bz2|tar\.gz)(\.sha256)?$/.test(name)) continue;
+            if (row.library && !name.startsWith(`oF_${row.library}_`)) continue;
             const archive = name.replace(/\.sha256$/,''), asset = assets.find(a => a.name === archive);
             if (!asset) continue; // Raw intermediate bundles are not final release assets.
             const file = path.join(dir,name);
@@ -206,3 +224,5 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
     core.info(`Recorded ${name}: ${Object.keys(state.formulas).length} formulas, ${published.length} verified outputs`);
 };
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;
+
+exports.groupLibraries=groupLibraries;

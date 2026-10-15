@@ -3,6 +3,10 @@
 set -eo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT"
+# Shared runners retain all matching outputs while compiling only selected libraries.
+if [[ -n ${PLATFORM_CACHE_FORMULAS_OVERRIDE:-} ]]; then
+    export FORMULAS_OVERRIDE="$PLATFORM_CACHE_FORMULAS_OVERRIDE"
+fi
 source scripts/calculate_formulas.sh >/dev/null
 context_file=$(mktemp)
 trap 'rm -f "$context_file"' EXIT
