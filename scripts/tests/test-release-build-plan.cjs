@@ -28,6 +28,9 @@ const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.en
  write('scripts/build-matrices.json',JSON.stringify({[file]:{[job]:{bundle:[1,2],SDK:['new-sdk']}}}));
  assert.notEqual(p.inputs(file,job,row).profile,baseline.profile,'SDK matrix changes invalidate the build');
  git('checkout','--','scripts/build-matrices.json');
+ assert.equal(p.stateName('.github/workflows/build-macos.yml','build-macos-platforms',{bundle:2}),'macos-bundle-2.pkl');
+ assert.equal(p.stateName('.github/workflows/build-linux-modular.yml','build',{library:'poco',arch:'arm64',runner:'ubuntu-24.04-arm'}),'poco-linux-arch-arm64.pkl');
+ assert.notEqual(p.stateName(file,job,{SDK:'one'}),p.stateName(file,job,{SDK:'two'}),'SDK variants have distinct readable names');
  assert.equal(p.stateName(file,job,{a:1,b:2}),p.stateName(file,job,{b:2,a:1}),'matrix key order is irrelevant');
  assert.equal(p.matrixRows({include:[{arch:'64'},{arch:'arm64'},{arch:'armv6l'}]}).length,3);
  assert.equal(p.matrixRows({arch:['64','arm64'],bundle:[1,2]}).length,4);

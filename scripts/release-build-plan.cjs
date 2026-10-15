@@ -113,7 +113,21 @@ function parsePkl(text) {
 }
 exports.renderPkl=renderPkl;exports.parsePkl=parsePkl;
 
-function stateName(file, job, row) {return `build-state-${path.basename(file,'.yml')}-${job}-${hash(stable(row)).slice(0,16)}.pkl`;}
+function stateName(file, job, row) {
+    const platform=path.basename(file,'.yml').replace(/^build-/, '').replace(/-modular$/, '');
+    const part=value=>encodeURIComponent(String(value)).replace(/-/g,'%2D');
+    const parts=row.library ? [part(row.library),platform] : [platform];
+    const standardJobs=['build',`build-${platform}`,`build-${platform}-platforms`, 'build-vs2022-64', 'build-vs2026'];
+    if(!standardJobs.includes(job))parts.push('job',part(job));
+    // These describe runner setup, not independent output variants. Their values
+    // still participate in profile/recipe fingerprints inside the record.
+    const setup=new Set(['library','runner','arch_flags','artifact_target','sysroot','prefix','qemu_arch','target']);
+    for(const [key,value] of Object.entries(row).sort(([a],[b])=>a.localeCompare(b))) {
+        if(setup.has(key))continue;
+        parts.push(part(key.toLowerCase()),part(value && typeof value==='object' ? stable(value) : value));
+    }
+    return parts.join('-')+'.pkl';
+}
 function matches(wanted, previous, assets, now = Date.now()) {
     if (previous?.schema !== 1 || previous.profile !== wanted.profile || !Number.isFinite(Date.parse(previous.publishedAt)) || now-Date.parse(previous.publishedAt) > 24*3600*1000 || Date.parse(previous.publishedAt)>now) return false;
     if (!Array.isArray(previous.assets) || !previous.assets.length || !previous.assets.every(a => assets.some(b => b.id === a.id && b.name === a.name && b.size === a.size && b.digest === a.digest && /^sha256:[0-9a-f]{64}$/.test(b.digest || '')))) return false;
