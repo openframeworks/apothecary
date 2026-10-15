@@ -8,20 +8,22 @@
 # Official build is depot_tools + gn + ninja (not the unofficial CMake).
 # target_os must be "win" / "mac" / "ios" (PR #533 passed TYPE=vs and that is wrong).
 #
-# Output: libEGL + libGLESv2 (DLL on VS, dylib/a on Apple). OF keeps
-# ofGLProgrammableRenderer; the window must be EGL under OF_USE_ANGLE.
+# Output: libEGL + libGLESv2. DLL on VS, dylib on macOS, framework on
+# ios/tvos/catos/xros (ANGLE's iOS shared target is an ios_framework_bundle).
+# OF keeps ofGLProgrammableRenderer; the window must be EGL under OF_USE_ANGLE.
 
 FORMULA_TYPES=("vs" "osx" "ios" "tvos" "catos" "xros")
 FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=4
+BUILD_ID=9
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
 GIT_URL_FALLBACK=https://chromium.googlesource.com/angle/angle
 DEPOT_TOOLS_URL=https://chromium.googlesource.com/chromium/tools/depot_tools.git
+DEPOT_TOOLS_COMMIT=a03dfbf7f2d1cefa2795d81d59ca4f16c8616a8f
 
 function download() {
     . "$DOWNLOADER_SCRIPT"
@@ -74,7 +76,7 @@ function _angle_depot_env() {
 
 # gclient/gn/autoninja are Win32. cmd.exe PATH must be C:\... so git.bat is found.
 function _angle_win_run() {
-    local vendor dt_w winpath git_dir py_dir
+    local vendor dt_w winpath git_dir py_dir cmd_dir cmd_file status
     vendor="$(pwd)/.vendor"
     dt_w="$(cygpath -w "${vendor}/depot_tools")"
     winpath="${dt_w}"
@@ -87,7 +89,59 @@ function _angle_win_run() {
         winpath="${winpath};$(cygpath -w "${py_dir}")"
     fi
     echo "angle: cmd ${*}"
-    cmd.exe //c "set PATH=${winpath};%PATH% && $*"
+    # MSYS escapes embedded quotes when passing a command string to a native
+    # executable. Keep cmd syntax in a batch file rather than in argv.
+    cmd_dir="$(mktemp -d)" || return 1
+    cmd_file="${cmd_dir}/angle.cmd"
+    printf '@echo off\r\nset "PATH=%s;%%PATH%%"\r\n%s\r\n' "$winpath" "$*" > "$cmd_file"
+    status=0
+    cmd.exe //d //c call "$(cygpath -w "$cmd_file")" || status=$?
+    rm -f "$cmd_file"
+    rmdir "$cmd_dir"
+    return "$status"
+}
+
+# Chromium pins its downloaded toolchain's SDK even with local VS enabled.
+# Match the scripts to the SDK actually available on the local toolchain.
+function _angle_windows_sdk() {
+    local root="${ANGLE_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
+    local sdk="${WINDOWS_SDK_VERSION:-}" candidate file
+    if [ -z "$sdk" ]; then
+        for candidate in "$root"/Include/10.0.*; do
+            if [ -f "$candidate/um/Windows.h" ] &&
+               [ -f "$candidate/ucrt/stdio.h" ] &&
+               [ -f "$root/Lib/${candidate##*/}/um/x64/kernel32.lib" ] &&
+               [ -f "$root/Lib/${candidate##*/}/ucrt/x64/ucrt.lib" ]; then
+                sdk="${candidate##*/}"
+            fi
+        done
+    fi
+    if [ -z "$sdk" ] || [ ! -f "$root/Include/$sdk/um/Windows.h" ] ||
+       [ ! -f "$root/Include/$sdk/ucrt/stdio.h" ] ||
+       [ ! -f "$root/Lib/$sdk/um/x64/kernel32.lib" ] ||
+       [ ! -f "$root/Lib/$sdk/ucrt/x64/ucrt.lib" ]; then
+        echoError "angle: no complete Windows SDK at $root (requested: $sdk)"
+        return 1
+    fi
+    case "$sdk" in
+        10.0.*) ;;
+        *) echoError "angle: invalid Windows SDK version: $sdk"; return 1 ;;
+    esac
+    for file in build/vs_toolchain.py build/toolchain/win/setup_toolchain.py; do
+        grep -q '^SDK_VERSION = ' "$file" || return 1
+        sed "s/^SDK_VERSION = .*/SDK_VERSION = '$sdk'/" "$file" > "$file.sdk-tmp" || return 1
+        mv "$file.sdk-tmp" "$file" || return 1
+    done
+    # The pinned Chromium build targets a newer SDK's NTDDI_WIN11_BR.
+    # An undefined NTDDI constant evaluates to zero in SDK header guards,
+    # hiding types such as FILE_INFO_BY_HANDLE_CLASS. Match WINVER's Windows
+    # 10 minimum with a numeric value that also works with older installed SDKs.
+    file=build/config/win/BUILD.gn
+    grep -q 'NTDDI_VERSION=' "$file" || return 1
+    sed 's/NTDDI_VERSION=[A-Za-z0-9_]*/NTDDI_VERSION=0x0A000000/' "$file" > "$file.sdk-tmp" || return 1
+    mv "$file.sdk-tmp" "$file" || return 1
+    export WINDOWSSDKDIR="$(cygpath -w "$root")"
+    echo "angle: local Windows SDK $sdk at $WINDOWSSDKDIR"
 }
 
 function prepare() {
@@ -95,10 +149,16 @@ function prepare() {
     vendor="$(pwd)/.vendor"
     mkdir -p "${vendor}"
     if [ ! -d "${vendor}/depot_tools/.git" ]; then
-        git clone --depth=1 "${DEPOT_TOOLS_URL}" "${vendor}/depot_tools"
+        git -C "${vendor}" init depot_tools
+        git -C "${vendor}/depot_tools" remote add origin "${DEPOT_TOOLS_URL}"
+        git -C "${vendor}/depot_tools" fetch --depth=1 origin "${DEPOT_TOOLS_COMMIT}"
+        git -C "${vendor}/depot_tools" checkout --force FETCH_HEAD
     fi
+    verify_git_commit "${vendor}/depot_tools" "${DEPOT_TOOLS_COMMIT}"
     _angle_depot_env "${vendor}"
 
+    # Disabling automatic updates also skips first-run setup. Initialize the
+    # pinned checkout explicitly before any gclient, GN or autoninja command.
     if [ "$TYPE" = "vs" ]; then
         if ! _angle_git_win_dir >/dev/null; then
             echoError "angle: Git for Windows git.exe not found (MSYS git is not enough)."
@@ -106,9 +166,11 @@ function prepare() {
             echoError "  Need: C:\\\\Program Files\\\\Git\\\\cmd\\\\git.exe"
             exit 1
         fi
+        _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
         _angle_win_run "gclient sync --no-history --shallow"
     else
+        bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
         gclient sync --no-history --shallow
     fi
@@ -144,23 +206,25 @@ function _angle_environment() {
     esac
 }
 
-function _angle_xcrun_sdk() {
-    local env
-    env="$(_angle_environment)"
-    case "${TYPE}" in
-        ios)
-            if [ "$env" = "simulator" ]; then echo "iphonesimulator"; else echo "iphoneos"; fi
-            ;;
-        tvos)
-            if [ "$env" = "simulator" ]; then echo "appletvsimulator"; else echo "appletvos"; fi
-            ;;
-        xros)
-            if [ "$env" = "simulator" ]; then echo "xrsimulator"; else echo "xros"; fi
-            ;;
-        catos) echo "macosx" ;;
-        osx|macos) echo "macosx" ;;
-        *) echo "" ;;
-    esac
+# Chromium's bundled clang -Werrors when -mmacos-version-min is below the
+# SDK, and visionOS is not a target_platform until apple-gn.patch lands.
+function _angle_patch_apple() {
+    local formula_dir patch_file
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    patch_file="${formula_dir}/apple-gn.patch"
+    if [ ! -f "$patch_file" ]; then
+        echoError "angle: missing ${patch_file}"
+        exit 1
+    fi
+    if grep -q 'target_platform == "xros"' build/config/ios/ios_sdk.gni 2>/dev/null &&
+       grep -q 'overriding-deployment-version' build/config/mac/BUILD.gn 2>/dev/null; then
+        echo "angle: apple gn patch already applied"
+        return 0
+    fi
+    if ! patch -p1 --forward --reject-file=- < "$patch_file"; then
+        echoError "angle: failed to apply apple-gn.patch"
+        exit 1
+    fi
 }
 
 function _angle_gn_args() {
@@ -173,26 +237,28 @@ function _angle_gn_args() {
     apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true"
     case "${TYPE}" in
         vs)
-            echo "${common} is_clang=false angle_enable_d3d11=true angle_enable_metal=false"
+            # MSVC does not define __BYTE_ORDER__, which Chromium's libc++ requires.
+            echo "${common} is_clang=false use_custom_libcxx=false use_custom_libcxx_for_host=false angle_enable_d3d11=true angle_enable_metal=false"
             ;;
         osx|macos)
-            echo "${common} ${apple} mac_deployment_target=\"11.0\""
+            # kIOMainPortDefault needs macOS 12.
+            echo "${common} ${apple} mac_deployment_target=\"12.0\""
             ;;
         catos)
             echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"catalyst\" ios_deployment_target=\"16.0\" mac_deployment_target=\"16.0\""
             ;;
         ios)
-            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"13.0\""
+            # Dawn WorkerThread uses std::atomic::wait, available from iOS 14.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"15.0\""
             ;;
-        tvos|xros)
-            local sdk sdk_path extra
-            sdk="$(_angle_xcrun_sdk)"
-            sdk_path="$(xcrun --sdk "${sdk}" --show-sdk-path 2>/dev/null || true)"
-            extra="ios_enable_code_signing=false target_environment=\"${env}\" ios_deployment_target=\"16.0\""
-            if [ -n "${sdk_path}" ]; then
-                extra="${extra} ios_sdk_name=\"${sdk}\" ios_sdk_path=\"${sdk_path}\""
-            fi
-            echo "${common} ${apple} ${extra}"
+        tvos)
+            # Let Chromium discover the tvOS SDK and its complete metadata.
+            # Supplying only ios_sdk_path bypasses ios_platform_build setup.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"tvos\" use_blink=true ios_deployment_target=\"16.0\""
+            ;;
+        xros)
+            # Same discovery path as tvOS. visionOS 2 is the first stable release.
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"xros\" ios_deployment_target=\"2.0\""
             ;;
         *)
             echoError "angle: GN args not defined for TYPE=${TYPE}"
@@ -202,16 +268,18 @@ function _angle_gn_args() {
 }
 
 function build() {
-    local cpu outdir gn_args
+    local cpu outdir gn_args win_args
     cpu="$(_angle_cpu)"
     outdir="out/Release_${PLATFORM}"
 
     if [ "$TYPE" = "vs" ]; then
         setup_vs_vars
         export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
+        _angle_windows_sdk || return 1
         _angle_depot_env "$(pwd)/.vendor"
     elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
         _angle_depot_env "$(pwd)/.vendor"
+        _angle_patch_apple
     else
         echoError "angle: unsupported TYPE=${TYPE}"
         exit 1
@@ -226,8 +294,14 @@ function build() {
         exit 1
     fi
 
-    gn gen "${outdir}" --args="${gn_args}"
-    autoninja -C "${outdir}" libEGL libGLESv2
+    if [ "$TYPE" = "vs" ]; then
+        win_args="${gn_args//\"/\\\"}"
+        _angle_win_run "call gn.bat gen ${outdir} --args=\"${win_args}\""
+        _angle_win_run "call autoninja.bat -C ${outdir} libEGL libGLESv2"
+    else
+        gn gen "${outdir}" --args="${gn_args}"
+        autoninja -C "${outdir}" libEGL libGLESv2
+    fi
 }
 
 function copy() {
@@ -263,6 +337,14 @@ function copy() {
     if [ -f "${outdir}/d3dcompiler_47.dll" ]; then
         cp -v "${outdir}/d3dcompiler_47.dll" "$1/bin/$TYPE/$PLATFORM/"
     fi
+    # iOS, tvOS, Catalyst and visionOS shared targets are frameworks, not flat dylibs.
+    for f in libEGL libGLESv2; do
+        if [ -d "${outdir}/${f}.framework" ]; then
+            rm -rf "$1/lib/$TYPE/$PLATFORM/${f}.framework"
+            cp -R "${outdir}/${f}.framework" "$1/lib/$TYPE/$PLATFORM/"
+            copied=1
+        fi
+    done
 
     if [ "$copied" -eq 0 ]; then
         echoError "angle: no libEGL/libGLESv2 under ${outdir}"
@@ -278,6 +360,8 @@ function copy() {
         secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.a" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" ]; then
         secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.lib" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+    elif [ -f "$1/lib/$TYPE/$PLATFORM/libGLESv2.framework/libGLESv2" ]; then
+        secure "$1/lib/$TYPE/$PLATFORM/libGLESv2.framework/libGLESv2" "angle.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     fi
 
     if [ -d "$1/license" ]; then

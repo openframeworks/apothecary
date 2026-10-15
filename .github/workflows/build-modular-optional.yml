@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - '.github/workflows/build-modular-optional.yml'
+      - 'apothecary/formulas/angle/**'
+      - 'apothecary/formulas/metalangle/**'
+      - 'scripts/tests/test-angle-bootstrap.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/build-modular-optional.sh'
@@ -30,12 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
+      - run: bash scripts/tests/test-angle-bootstrap.sh
       - run: bash scripts/tests/test-modular-cache.sh
       - run: bash scripts/tests/test-apple-install-tools.sh
 
   apple:
     needs: test
-    if: github.event_name != 'pull_request'
     name: optional ${{ matrix.library }}-${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -96,7 +99,7 @@ jobs:
             out/${{ matrix.library }}
             xout/${{ matrix.library }}
       - name: Upload to latest-modular
-        if: github.repository == 'openframeworks/apothecary'
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
         uses: softprops/action-gh-release@v3.0.3
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
@@ -106,7 +109,6 @@ jobs:
 
   vs:
     needs: test
-    if: github.event_name != 'pull_request'
     name: optional angle-vs-64
     runs-on: windows-2022
     defaults:
@@ -160,7 +162,7 @@ jobs:
           key: ${{ steps.key.outputs.key }}
           path: out/angle
       - name: Upload to latest-modular
-        if: github.repository == 'openframeworks/apothecary'
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
         uses: softprops/action-gh-release@v3.0.3
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
