@@ -1,6 +1,6 @@
 # Daily nightly snapshots
 
-`refresh-nightly.yml` runs on the default branch at 03:17 UTC daily, with manual
+`refresh-nightly.yml` runs on the default branch at 05:00 UTC daily, one hour before openFrameworks nightly.yml (06:00 UTC), with manual
 workflow dispatch available. Manual dispatch defaults to a read-only dry run.
 Set dry_run=false to publish. The schedule publishes automatically after merge.
 
@@ -27,3 +27,6 @@ This recreates the rolling nightly release with a fresh publication date; it doe
 not retain a dated release every day. GitHub upload/delete/tag permissions and
 network transfer still need verification in a real publication. No live release
 is changed by PR tests. Use the manual dry run before the first live refresh.
+
+GitHub schedules can be delayed; this establishes a one-hour scheduled lead,
+not a cross-repository completion dependency.
