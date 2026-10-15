@@ -16,7 +16,7 @@ FORMULA_DEPENDS=()
 # define the version
 VER=1.0
 SOURCE_COMMIT=ec925142edeb1da3158fd8710ecc6dc2fb1f1f97
-BUILD_ID=4
+BUILD_ID=5
 DEFINES="ANGLE_IS_64_BIT_CPU"
 # frameworkFormula / xframeworkFormula emit this name instead of metalangle.xcframework
 XCFRAMEWORK_NAME=MetalANGLE
@@ -53,7 +53,7 @@ function prepare() {
     cp -R "${FORMULA_DIR}/metalangle/." ./
 
     echo "Fetch MetalANGLE third_party (glslang / spirv-cross / jsoncpp)"
-    ./ios/xcode/fetchDependencies.sh
+    bash ./ios/xcode/fetchDependencies.sh || return 1
 
     # SPIRV-Cross f38cbeb (2020) calls std::terminate() without <exception>.
     # AppleClang 15+ / libc++ no longer pull that in transitively.
