@@ -49,6 +49,9 @@ jobs:
       matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     container: ubuntu:20.04
+    defaults:
+      run:
+        shell: bash
     env:
       TARGET: linux
       TYPE: linux
