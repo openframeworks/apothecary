@@ -37,7 +37,8 @@ build. The first trusted publication bootstraps the state files.
 PRs compare selected inputs with their base commit and do not publish or supply
 trusted binaries. Unchanged PR platforms can skip even without release state,
 because PR validation is not responsible for publishing missing release outputs.
-Tags always publish. Manual dispatch forces the selected work to run. The Apple
+Version tags always publish. Rolling latest/nightly tags, build-state and
+nightly staging/backup tags do not trigger library builds. Manual dispatch forces the selected work to run. The Apple
 XCFramework finalizer still runs for changes to other Apple platforms even when
 iOS itself is skipped.
 

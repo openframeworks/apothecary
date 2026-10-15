@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [bleeding, master]
-    tags: ['**']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
     - '**/*.md'
   pull_request:
