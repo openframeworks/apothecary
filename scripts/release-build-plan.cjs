@@ -114,19 +114,20 @@ function parsePkl(text) {
 exports.renderPkl=renderPkl;exports.parsePkl=parsePkl;
 
 function stateName(file, job, row, legacy = false) {
-    const platform=path.basename(file,'.yml').replace(/^build-/, '').replace(/-modular$/, '');
+    let platform=path.basename(file,'.yml').replace(/^build-/, '').replace(/-modular$/, '');
+    if(row.library && /^[a-z0-9]+$/.test(row.target || ''))platform=row.target;
     const part=value=>encodeURIComponent(String(value)).replace(/-/g,'%2D');
     const parts=row.library ? [part(row.library),platform] : [platform];
     const standardJobs=['build',`build-${platform}`,`build-${platform}-platforms`, 'build-vs2022-64', 'build-vs2026'];
     if(!standardJobs.includes(job))parts.push('job',part(job));
     // These describe runner setup, not independent output variants. Their values
     // still participate in profile/recipe fingerprints inside the record.
-    const setup=new Set(['library','runner','arch_flags','artifact_target','sysroot','prefix','qemu_arch','target']);
+    const setup=new Set(['library','runner','arch_flags','artifact_target','sysroot','prefix','qemu_arch','target','archs']);
     // Android release archives have one name per architecture. Toolchain
     // versions belong in the record/fingerprint, not its stable asset name.
     if (platform === 'android' && !legacy) for (const key of ['SDK','NDK','API']) setup.add(key);
     for(const [key,value] of Object.entries(row).sort(([a],[b])=>a.localeCompare(b))) {
-        if(setup.has(key))continue;
+        if(setup.has(key) || value==='none')continue;
         parts.push(part(key.toLowerCase()),part(value && typeof value==='object' ? stable(value) : value));
     }
     return parts.join('-')+'.pkl';
@@ -148,7 +149,7 @@ function groupLibraries(rows) {
     return [...groups.values()];
 }
 function channel(file, context) {
-    return file.endsWith('build-linux-modular.yml') ? 'modular' :
+    return file.endsWith('-modular.yml') ? 'modular' :
         (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
 }
 function publishedStateName(file, job, row, context, legacy = false) {return `${channel(file,context)}-${stateName(file,job,row,legacy)}`;}
@@ -176,7 +177,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
         const metadata = await stateRelease(github,context);
         states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
     } catch (error) {core.warning(`No published build history: ${error.message}`);}
-    const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
+    const tag = file.endsWith('-modular.yml') ? 'latest-modular' : (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
     if (!context.payload.pull_request && !context.ref.startsWith('refs/tags/')) {
         try {
             release = (await github.rest.repos.getReleaseByTag({...context.repo,tag})).data;
@@ -232,7 +233,7 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
         for (const entry of row.entries) await exports.record({github,context,core,workflow:file,job:jobId,matrix:entry});
         return;
     }
-    const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : context.ref === 'refs/heads/master' ? 'nightly' : 'latest';
+    const tag = file.endsWith('-modular.yml') ? 'latest-modular' : context.ref === 'refs/heads/master' ? 'nightly' : 'latest';
     const release = (await github.rest.repos.getReleaseByTag({...context.repo,tag})).data;
     const assets = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:release.id,per_page:100});
     const publishedByName = new Map();

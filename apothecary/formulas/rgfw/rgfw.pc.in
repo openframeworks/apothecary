@@ -1,0 +1,9 @@
+prefix=${pcfiledir}/../../../..
+libdir=${pcfiledir}/..
+includedir=${prefix}/include
+Name: rgfw
+Description: Riley's General Framework for Windowing (OpenGL helpers)
+Version: @VERSION@
+Libs: -L${libdir} -lrgfw
+Libs.private: @PRIVATE_LIBS@
+Cflags: -I${includedir} -DRGFW_OPENGL -DRGFWDEF=extern
