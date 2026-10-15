@@ -152,6 +152,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           draft: false
+          fail_on_unmatched_files: true
           files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.flavor }}.zip
 
       - name: Download verified Linux build plan

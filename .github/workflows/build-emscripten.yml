@@ -169,6 +169,22 @@ jobs:
           tag_name: ${{ env.RELEASE }}
           files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}.tar.bz2
 
+      - name: Download verified Linux build plan
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/download-artifact@v8
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Record final release outputs
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
+        uses: actions/github-script@v9.0.0
+        env:
+          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-emscripten.yml', job: 'build-emscripten-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
+
       - name: Clean for
         if: github.event_name == 'push'
         run: |
@@ -190,19 +206,3 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: "latest-modular"
           files: out/*.tar.bz2
-
-      - name: Download verified Linux build plan
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
-        uses: actions/download-artifact@v8
-        with:
-          name: build-plan-${{ github.workflow }}
-          path: ${{ runner.temp }}/build-plans
-      - name: Record final release outputs
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
-        uses: actions/github-script@v9.0.0
-        env:
-          BUILD_PLAN_MATRIX: ${{ toJSON(matrix) }}
-        with:
-          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-          script: |
-            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-emscripten.yml', job: 'build-emscripten-platforms', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
