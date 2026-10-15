@@ -67,7 +67,53 @@ function inputs(file, jobId, row, ref) {
     }
     return {schema:1,workflow:file,job:jobId,matrix:row,target:env.TARGET,profile,formulas};
 }
-function stateName(file, job, row) {return `build-state-${path.basename(file,'.yml')}-${job}-${hash(stable(row)).slice(0,16)}.json`;}
+// Emit and read a data-only Pkl subset. Never evaluate downloaded Pkl code.
+function pklString(value) {
+    return '"'+Array.from(value, ch => {
+        const code=ch.codePointAt(0);
+        if(code<32)return `\\u{${code.toString(16).padStart(4,'0')}}`;
+        return ch==='"'||ch==='\\' ? '\\'+ch : ch;
+    }).join('')+'"';
+}
+function renderPkl(state) {
+    function value(item, depth) {
+        if (item === null) return 'null';
+        if (typeof item === 'string') return pklString(item);
+        if (typeof item === 'number' || typeof item === 'boolean') return String(item);
+        const pad='  '.repeat(depth), inner=pad+'  ';
+        if (Array.isArray(item)) return 'new Listing {\n'+item.map(v=>inner+value(v,depth+1)).join('\n')+'\n'+pad+'}';
+        return 'new Mapping {\n'+Object.entries(item).map(([k,v])=>inner+'['+pklString(k)+'] = '+value(v,depth+1)).join('\n')+'\n'+pad+'}';
+    }
+    return Object.entries(state).filter(([,v])=>v!==undefined).map(([k,v])=>k+' = '+value(v,0)).join('\n')+'\n';
+}
+function parsePkl(text) {
+    const tokens=text.match(/"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z_0-9]*|-?\d+(?:\.\d+)?|[{}\[\]=]|\S/g)||[];
+    let i=0;
+    const take=expected=>{const token=tokens[i++];if(expected!==undefined&&token!==expected)throw Error('Invalid build-state Pkl');return token;};
+    function string(token) {return JSON.parse(token.replace(/\\u\{([0-9a-f]{4})\}/gi,'\\u$1'));}
+    function value() {
+        const token=take();
+        if(token?.startsWith('"'))return string(token);
+        if(token==='null')return null;
+        if(token==='true'||token==='false')return token==='true';
+        if(/^-?\d/.test(token||''))return Number(token);
+        if(token!=='new')throw Error('Unsupported build-state Pkl value');
+        const kind=take();if(!['Mapping','Listing'].includes(kind))throw Error('Unsupported Pkl collection');take('{');
+        const result=kind==='Listing'?[]:Object.create(null);
+        while(tokens[i]!=='}') {
+            if(i>=tokens.length)throw Error('Unterminated Pkl collection');
+            if(kind==='Listing')result.push(value());
+            else {take('[');const key=string(take());take(']');take('=');result[key]=value();}
+        }
+        take('}');return result;
+    }
+    const result=Object.create(null);
+    while(i<tokens.length){const key=take();if(!/^[A-Za-z_][A-Za-z_0-9]*$/.test(key))throw Error('Invalid Pkl property');take('=');result[key]=value();}
+    return result;
+}
+exports.renderPkl=renderPkl;exports.parsePkl=parsePkl;
+
+function stateName(file, job, row) {return `build-state-${path.basename(file,'.yml')}-${job}-${hash(stable(row)).slice(0,16)}.pkl`;}
 function matches(wanted, previous, assets, now = Date.now()) {
     if (previous?.schema !== 1 || previous.profile !== wanted.profile || !Number.isFinite(Date.parse(previous.publishedAt)) || now-Date.parse(previous.publishedAt) > 24*3600*1000 || Date.parse(previous.publishedAt)>now) return false;
     if (!Array.isArray(previous.assets) || !previous.assets.length || !previous.assets.every(a => assets.some(b => b.id === a.id && b.name === a.name && b.size === a.size && b.digest === a.digest && /^sha256:[0-9a-f]{64}$/.test(b.digest || '')))) return false;
@@ -121,7 +167,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
         try {
             const wanted = inputs(file,jobId,row);
             fs.mkdirSync('.build-plans',{recursive:true});
-            fs.writeFileSync(path.join('.build-plans',stateName(file,jobId,row)),JSON.stringify(wanted));
+            fs.writeFileSync(path.join('.build-plans',stateName(file,jobId,row)),renderPkl(wanted));
             if (context.payload.pull_request) {
                 const previous = inputs(file,jobId,row,context.payload.pull_request.base.sha);
                 if (JSON.stringify(wanted.formulas) === JSON.stringify(previous.formulas) && wanted.profile === previous.profile) reason = '';
@@ -132,7 +178,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
                 const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context));
                 if (asset && asset.size < 4*1024*1024) {
                     const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
-                    const previous = JSON.parse(Buffer.from(response.data).toString('utf8'));
+                    const previous = parsePkl(Buffer.from(response.data).toString('utf8'));
                     if (matches(wanted,previous,assets)) reason = '';
                 }
             }
@@ -190,7 +236,7 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
     }
     const published = [...publishedByName.values()];
     if (!published.length) throw new Error('No verified final release outputs; refusing to record a successful baseline');
-    const state = JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'build-plans',stateName(file,jobId,row)),'utf8'));
+    const state = parsePkl(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'build-plans',stateName(file,jobId,row)),'utf8'));
     for (const [library, recipe] of Object.entries(state.formulas)) {
         const metadata = [];
         function inspect(dir) {
@@ -200,7 +246,7 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
                 if (entry.isDirectory()) inspect(file);
                 else if (entry.isFile() && entry.name.endsWith('.pkl')) {
                     const text = fs.readFileSync(file,'utf8'), values = {};
-                    for (const key of ['version','buildNumber','binary','binarySha','cppStandard','cStandard']) {
+                    for (const key of ['version','buildNumber','binary','binarySha','cppStandard','cStandard','architecture','sdk','ndk','androidApi','emsdkVersion','compiler','compilerVersion','buildCommit','buildRunId','runnerImage','cFlags','cxxFlags']) {
                         const match = text.match(new RegExp(`^${key} = "([^"\\n]*)"$`,'m'));
                         if (match) values[key] = match[1];
                     }
@@ -216,11 +262,11 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
     state.channel = channel(file,context); state.release = tag; state.releaseId = release.id;
     const metadata = await stateRelease(github,context,true);
     const states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
-    const name = publishedStateName(file,jobId,row,context), data = Buffer.from(JSON.stringify(state,null,2)+'\n');
+    const name = publishedStateName(file,jobId,row,context), data = Buffer.from(renderPkl(state));
     fs.writeFileSync(path.join('out',name),data);
     const old = states.find(a => a.name === name);
     if (old) await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:old.id});
-    await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:metadata.id,name,data,headers:{'content-type':'application/json','content-length':data.length}});
+    await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:metadata.id,name,data,headers:{'content-type':'application/vnd.apple.pkl','content-length':data.length}});
     core.info(`Recorded ${name}: ${Object.keys(state.formulas).length} formulas, ${published.length} verified outputs`);
 };
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;

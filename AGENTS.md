@@ -110,5 +110,5 @@ Active core matrices are defined in `scripts/build-matrices.json` and filtered b
 `scripts/release-build-plan.cjs` on Linux before native runners start. Keep new
 SDK/compiler axes and ABI flags versioned there or in the workflow/toolchain.
 Declare formula dependencies so reverse invalidation is complete. Published
-`build-state-*.json` assets record final archive identities; do not mark a baseline
+`build-state-*.pkl` assets record final archive identities; do not mark a baseline
 successful before verifying the published bytes.
