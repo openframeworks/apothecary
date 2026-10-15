@@ -207,11 +207,13 @@
       "include": [
         {
           "arch": "64",
-          "runner": "ubuntu-24.04"
+          "runner": "ubuntu-24.04",
+          "arch_flags": "-march=x86-64 -mtune=generic"
         },
         {
           "arch": "arm64",
-          "runner": "ubuntu-24.04-arm"
+          "runner": "ubuntu-24.04-arm",
+          "arch_flags": "-march=armv8-a -mtune=generic"
         }
       ]
     }

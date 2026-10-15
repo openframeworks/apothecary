@@ -3,7 +3,9 @@
 Active core workflows first run an Ubuntu pre-check. It fingerprints selected
 formulas, their transitive FORMULA_DEPENDS and toolchain inputs before allocating
 native runners. Linux modular builds select library × architecture rows, with
-at most four builds in parallel. Disabled recipes (Boost and host pkg-config)
+at most four builds in parallel. These stay enabled by default using GCC10
+in Ubuntu 20.04 containers, matching the core compatibility baseline. GCC14
+is not enabled. Disabled recipes (Boost and host pkg-config)
 are not standalone Linux package producers. A fontconfig-only PR therefore does not build
 macOS FreeImage or unrelated Linux modular libraries.
 
