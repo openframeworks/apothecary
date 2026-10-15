@@ -37,4 +37,15 @@ cmp "$SCRATCH/expected" "$BREW_TEST_LOG"
 if GITHUB_ACTIONS=true BREW_TEST_FAIL=1 bash "$ROOT/scripts/apple-install-tools.sh" missing; then
     echo 'FAIL: Homebrew install failure ignored' >&2; exit 1
 fi
-echo 'Apple setup reuse, missing-tool installation, local behavior and failure propagation passed'
+# Exercise the finalizer's actual installer, not just its shared helper.
+cat > "$SCRATCH/ls" <<'LS'
+#!/usr/bin/env bash
+printf 'Xcode_16.2.app\n'
+LS
+chmod +x "$SCRATCH/ls"
+: > "$BREW_TEST_LOG"
+GITHUB_ACTIONS=true bash "$ROOT/scripts/macos/install.sh"
+if grep -E '^(update|upgrade|install)|--versions (ccache|gtk-doc|wget2)$' "$BREW_TEST_LOG"; then
+    echo 'FAIL: finalizer updates/reinstalls tools or requests costly optional tools' >&2; exit 1
+fi
+echo 'Apple setup reuse, missing-tool installation, failure propagation and finalizer entry point passed'
