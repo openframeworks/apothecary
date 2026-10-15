@@ -7,12 +7,15 @@ fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/.vendor/depot_tools/.git" "$fixture/scripts"
 cd "$fixture"
+DOWNLOADER_SCRIPT="$fixture/downloader.sh"
+printf 'ANGLE_TEST_DOWNLOADER_LOADED=1\n' > "$DOWNLOADER_SCRIPT"
 export ANGLE_TEST_LOG="$fixture/commands"
 verify_git_commit() { [ "$1" = "$fixture/.vendor/depot_tools" ]; [ "$2" = "$DEPOT_TOOLS_COMMIT" ]; }
 printf 'printf "bootstrap\\n" >> "$ANGLE_TEST_LOG"\ntouch "$(dirname "$0")/python3_bin_reldir.txt"\n' > .vendor/depot_tools/ensure_bootstrap
 python3() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'config\n' >> "$ANGLE_TEST_LOG"; }
 gclient() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'sync\n' >> "$ANGLE_TEST_LOG"; }
 TYPE=osx prepare
+[ "$ANGLE_TEST_DOWNLOADER_LOADED" = 1 ]
 printf 'bootstrap\nconfig\nsync\n' > expected
 cmp expected "$ANGLE_TEST_LOG"
 # Windows must bootstrap before gclient, then run GN/Ninja through cmd.exe.
@@ -79,6 +82,7 @@ osx_args=$(TYPE=osx ARCH=arm64 PLATFORM=MAC_ARM64 _angle_gn_args)
 vs_args=$(TYPE=vs ARCH=64 PLATFORM=x64 _angle_gn_args)
 [[ "$vs_args" == *'use_custom_libcxx=false'* ]]
 [[ "$vs_args" == *'use_custom_libcxx_for_host=false'* ]]
+[[ "$vs_args" == *'use_siso=false'* ]]
 for xros_platform in XROS SIMULATOR_XROS; do
     xros_args=$(TYPE=xros ARCH=arm64 PLATFORM="$xros_platform" _angle_gn_args)
     [[ "$xros_args" == *'target_platform="xros"'* ]]

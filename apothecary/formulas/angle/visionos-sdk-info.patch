@@ -1,0 +1,11 @@
+--- a/build/config/apple/sdk_info.py
++++ b/build/config/apple/sdk_info.py
+@@ -143,6 +143,8 @@
+                           'macosx',
+                           'watchos',
+                           'watchsimulator',
++                          'xros',
++                          'xrsimulator',
+                       ])
+   args = parser.parse_args()
+   if args.developer_dir:
