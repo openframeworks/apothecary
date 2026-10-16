@@ -100,7 +100,7 @@ jobs:
             xout/${{ matrix.library }}
       - name: Upload to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
-        uses: softprops/action-gh-release@v3.0.3
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
@@ -163,7 +163,7 @@ jobs:
           path: out/angle
       - name: Upload to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
-        uses: softprops/action-gh-release@v3.0.3
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
