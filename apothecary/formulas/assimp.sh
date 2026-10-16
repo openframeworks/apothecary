@@ -10,9 +10,9 @@ FORMULA_TYPES=("osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten
 FORMULA_DEPENDS=("zlib")
 
 # define the version
-VER=5.4.3
-SHA256="66dfbaee288f2bc43172440a55d0235dfc7bf885dda6435c038e8000e79582cb"
-SHA256_ZIP="795c29716f4ac123b403e53b677e9f32a8605c4a7b2d9904bfaae3f4053b506d"
+VER=6.0.5
+SHA256="edf3749559c2b7d1f758ffb66fc5bec62186221e623b7f2e8969f17ee46ecb6f"
+SHA256_ZIP="89e477e89df739ecc7dd21874897ac2e70c8944eb1074fbdbbdbf4dd2de6a403"
 BUILD_ID=6
 DEFINES=""
 
