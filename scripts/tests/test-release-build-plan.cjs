@@ -53,7 +53,7 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert(!p.matches(baseline,previous,[{...asset,digest:'sha256:'+'b'.repeat(64)}]),'changed bytes rebuild');
  assert(!p.matches(baseline,{...previous,publishedAt:'invalid'},[asset]));
  assert(p.matches(baseline,{...previous,publishedAt:'2020-01-01T00:00:00.000Z'},[asset]),'unchanged verified outputs remain reusable regardless of age');
- const outputs={},summary={addHeading(){return this;},addTable(){return this;},async write(){}};
+ const outputs={},summaryTables=[],summary={addHeading(){return this;},addTable(rows){summaryTables.push(rows);return this;},addRaw(){return this;},async write(){}};
  const core={setOutput(k,v){outputs[k]=v;},warning(){},summary};
  // Use a non-iOS workflow fixture so no Apple aggregate scan is needed.
  const context={repo:{owner:'owner',repo:'repo'},eventName:'pull_request',ref:'refs/pull/1/merge',payload:{pull_request:{base:{sha:ref,ref:'bleeding'}}}};
@@ -78,10 +78,11 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  const published={id:42,name:'openFrameworksLibs_latest_osx_1.tar.bz2',size:bytes.length,digest:'sha256:'+require('node:crypto').createHash('sha256').update(bytes).digest('hex')};
  let uploaded;
  const github={rest:{repos:{getReleaseByTag:async args=>({data:{id:args.tag==='build-state' ? 20 : 10}}),listReleaseAssets:'assets',uploadReleaseAsset:async args=>{assert.equal(args.release_id,20);uploaded=p.parsePkl(args.data.toString());}}},paginate:async()=>[published]};
- write('out/FreeImage/lib/osx/FreeImage.pkl','version = \"1.0\"\nbuildNumber = \"1\"\n');
+ write('out/FreeImage/lib/osx/FreeImage.pkl','version = \"1.0\"\nbuildNumber = \"1\"\nbuildTime = \"2026-01-02 T03:04:05Z\"\n');
  const recorderCore={info(){}};
  await p.record({github,context,core:recorderCore,workflow:file,job,matrix:row});
  assert.equal(uploaded.formulas.FreeImage.installed[0].version,'1.0');
+ assert.equal(uploaded.formulas.FreeImage.installed[0].buildTime,'2026-01-02 T03:04:05Z');
  assert.equal(uploaded.assets[0].digest,published.digest);assert.equal(uploaded.formulas.FreeImage.key,state.formulas.FreeImage.key);
  const unusual={path:'C:\\bin\\foo',flags:'quotes " and tabs\t newline\n',nested:[{version:'1.0'}],enabled:true};
  assert.deepEqual(JSON.parse(JSON.stringify(p.parsePkl(p.renderPkl(unusual)))),unusual,'Pkl metadata safely round-trips paths, quotes, whitespace and collections');
@@ -92,6 +93,15 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  const baselineAPI={rest:{repos:{getReleaseByTag:async args=>({data:{id:args.tag==='build-state' ? 20 : 10}}),listReleaseAssets:'assets',getReleaseAsset:async args=>({data:Buffer.from(p.renderPkl(args.asset_id===99 ? uploaded : otherState))})}},paginate:async (_,args)=>args.release_id===20 ? [sidecar,otherSidecar] : [published]};
  await p.plan({github:baselineAPI,context,core,workflow:file,job});
  assert.equal(outputs.build_needed,'false','matching published release state skips the native runner');
+ const prContext={...context,eventName:'pull_request',ref:'refs/pull/1/merge',payload:{pull_request:{base:{sha:ref,ref:'bleeding'}}}};
+ summaryTables.length=0;
+ await p.plan({github:baselineAPI,context:prContext,core,workflow:file,job});
+ assert.equal(outputs.build_needed,'false','published history does not change unchanged PR selection');
+ assert(summaryTables.some(table=>table.some(row=>row[0]==='FreeImage' && row[3]==='2026-01-02T03:04:05.000Z' && row[4].includes('No rebuild needed'))),'PR summaries show recorded binary build times');
+ const brokenHistory={...baselineAPI,rest:{repos:{...baselineAPI.rest.repos,getReleaseAsset:async()=>{throw Error('unavailable');}}}};
+ await p.plan({github:brokenHistory,context:prContext,core,workflow:file,job});
+ assert.equal(outputs.build_needed,'false','unavailable history does not schedule unchanged PR builds');
+
  baselineAPI.paginate=async (_,args)=>args.release_id===20 ? [sidecar,otherSidecar] : [];
  await p.plan({github:baselineAPI,context,core,workflow:file,job});
  assert.equal(outputs.build_needed,'true','missing final archive makes the planner schedule native work');
