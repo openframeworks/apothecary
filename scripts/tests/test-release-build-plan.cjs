@@ -38,6 +38,13 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert.equal(p.stateName('.github/workflows/build-linux-modular.yml','build',{library:'poco',arch:'arm64',runner:'ubuntu-24.04-arm'}),'poco-linux-arch-arm64.pkl');
  assert.notEqual(p.stateName(file,job,{SDK:'one'}),p.stateName(file,job,{SDK:'two'}),'SDK variants have distinct readable names');
  assert.equal(p.stateName(file,job,{a:1,b:2}),p.stateName(file,job,{b:2,a:1}),'matrix key order is irrelevant');
+ const androidFile='.github/workflows/build-android.yml', androidJob='build-android-platforms';
+ const androidRow={ARCH:'arm64',SDK:'37.0.0',NDK:'29.0.14206865',API:'25'};
+ assert.equal(p.stateName(androidFile,androidJob,androidRow),'android-arch-arm64.pkl');
+ assert.equal(p.stateName(androidFile,androidJob,{...androidRow,SDK:'38.0.0',NDK:'30',API:'26'}),'android-arch-arm64.pkl','Android toolchain changes retain the friendly asset name');
+ assert.equal(p.stateName(androidFile,androidJob,androidRow,true),'android-api-25-arch-arm64-ndk-29.0.14206865-sdk-37.0.0.pkl','legacy name remains readable for migration');
+ assert.equal(new Set(['arm64','armv7','x86_64'].map(ARCH=>p.stateName(androidFile,androidJob,{...androidRow,ARCH}))).size,3);
+
  assert.equal(p.matrixRows({include:[{arch:'64'},{arch:'arm64'},{arch:'armv6l'}]}).length,3);
  assert.equal(p.matrixRows({arch:['64','arm64'],bundle:[1,2]}).length,4);
  const grouped=p.groupLibraries([{arch:'64',runner:'ubuntu',library:'FreeImage'},{arch:'64',runner:'ubuntu',library:'zlib'},{arch:'arm64',runner:'ubuntu-arm',library:'FreeImage'}]);
@@ -118,5 +125,34 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  await p.record({github,context,core:recorderCore,workflow:file,job,matrix:{libraries:['FreeImage'],entries:[entry]}});
  assert.equal(uploaded.assets.length,1,'a library state must not depend on unrelated packages sharing the runner');
  assert.equal(uploaded.assets[0].id,51);
+
+ write(androidFile,'env:\n  TARGET: android\njobs:\n  build-android-platforms:\n    env:\n      SDK: ${{ matrix.SDK }}\n      NDK: ${{ matrix.NDK }}\n      ANDROID_API: ${{ matrix.API }}\n');
+ write('scripts/build-matrices.json',JSON.stringify({[androidFile]:{[androidJob]:{include:[androidRow]}}}));
+ git('add',androidFile,'scripts/build-matrices.json');
+ const androidState=p.inputs(androidFile,androidJob,androidRow);
+ const changedAndroid=p.inputs(androidFile,androidJob,{...androidRow,NDK:'30'});
+ assert.notEqual(androidState.profile,changedAndroid.profile,'NDK still invalidates the build profile');
+ assert.notEqual(androidState.formulas.FreeImage.key,changedAndroid.formulas.FreeImage.key,'NDK still invalidates recipe fingerprints');
+ assert.equal(androidState.matrix.NDK,androidRow.NDK,'versions remain inside the record');
+ for(const key of ['SDK','API']) assert.notEqual(p.inputs(androidFile,androidJob,{...androidRow,[key]:'changed'}).profile,androidState.profile,`${key} still triggers rebuilding`);
+ const androidPublished={...androidState,publishedAt:new Date().toISOString(),assets:libraryAssets};
+ const legacyAsset={id:200,name:'latest-'+p.stateName(androidFile,androidJob,androidRow,true),size:p.renderPkl(androidPublished).length};
+ const migrationEvents=[];
+ const androidAPI={rest:{repos:{getReleaseByTag:async args=>({data:{id:args.tag==='build-state'?20:10}}),listReleaseAssets:'assets',getReleaseAsset:async args=>{assert.equal(args.asset_id,200);return {data:Buffer.from(p.renderPkl(androidPublished))};},uploadReleaseAsset:async args=>{migrationEvents.push(['upload',args.name]);assert.equal(p.parsePkl(args.data.toString()).matrix.NDK,androidRow.NDK);},deleteReleaseAsset:async args=>migrationEvents.push(['delete',args.asset_id])}},paginate:async(_,args)=>args.release_id===20?[legacyAsset]:libraryAssets};
+ await p.plan({github:androidAPI,context,core,workflow:androidFile,job:androidJob});
+ assert.equal(outputs.build_needed,'false','legacy Android history remains reusable when fingerprints match');
+ const canonicalAsset={...legacyAsset,id:201,name:'latest-'+p.stateName(androidFile,androidJob,androidRow)};
+ androidAPI.paginate=async(_,args)=>args.release_id===20?[legacyAsset,canonicalAsset]:libraryAssets;
+ androidAPI.rest.repos.getReleaseAsset=async args=>{assert.equal(args.asset_id,201,'canonical state takes precedence over legacy state');return {data:Buffer.from(p.renderPkl(androidPublished))};};
+ await p.plan({github:androidAPI,context,core,workflow:androidFile,job:androidJob});
+ androidAPI.paginate=async(_,args)=>args.release_id===20?[legacyAsset]:libraryAssets;
+
+ write(path.join(process.env.RUNNER_TEMP,'build-plans',p.stateName(androidFile,androidJob,androidRow)),p.renderPkl(androidState));
+ await p.record({github:androidAPI,context,core:recorderCore,workflow:androidFile,job:androidJob,matrix:androidRow});
+ assert.deepEqual(migrationEvents,[['upload','latest-android-arch-arm64.pkl'],['delete',200]],'new metadata is uploaded before removing its legacy name');
+ migrationEvents.length=0;
+ androidAPI.rest.repos.uploadReleaseAsset=async()=>{throw Error('upload failed');};
+ await assert.rejects(p.record({github:androidAPI,context,core:recorderCore,workflow:androidFile,job:androidJob,matrix:androidRow}),/upload failed/);
+ assert.equal(migrationEvents.length,0,'failed publication preserves the legacy record');
  console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, age-independent reuse, tags and API fallback passed');
 }finally{process.chdir(root);fs.rmSync(tmp,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});
