@@ -165,21 +165,32 @@ async function stateRelease(github, context, create = false) {
 }
 async function plan({github,context,core,workflow: file,job:jobId}) {
     const config = yaml(file), rows = matrixRows(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'))[file][jobId]);
-    const chosen = [], summary = [];
+    const chosen = [], plans = [];
     let release, assets = [], states = [];
+    // History is also useful on PRs, but PR selection still compares recipes
+    // against the base commit, independently of release records.
+    try {
+        const metadata = await stateRelease(github,context);
+        states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
+    } catch (error) {core.warning(`No published build history: ${error.message}`);}
     const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
     if (!context.payload.pull_request && !context.ref.startsWith('refs/tags/')) {
         try {
             release = (await github.rest.repos.getReleaseByTag({...context.repo,tag})).data;
             assets = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:release.id,per_page:100});
-            const metadata = await stateRelease(github,context);
-            states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});
         } catch (error) {core.warning(`No release baseline: ${error.message}`);}
     }
     for (const row of rows) {
-        let reason = 'missing or changed published output';
+        let reason = 'missing or changed published output', wanted, published;
         try {
-            const wanted = inputs(file,jobId,row);
+            wanted = inputs(file,jobId,row);
+            const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context));
+            if (asset && asset.size < 4*1024*1024) {
+                try {
+                    const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
+                    published = parsePkl(Buffer.from(response.data).toString('utf8'));
+                } catch (error) {core.warning(`Build history unavailable for ${asset.name}: ${error.message}`);}
+            }
             fs.mkdirSync('.build-plans',{recursive:true});
             fs.writeFileSync(path.join('.build-plans',stateName(file,jobId,row)),renderPkl(wanted));
             if (context.payload.pull_request) {
@@ -188,17 +199,10 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
                 else reason = 'PR changes selected recipes, dependencies or toolchain';
             } else if (context.ref.startsWith('refs/tags/')) reason = 'tag publication';
             else if (context.eventName === 'workflow_dispatch') reason = 'manual rebuild';
-            else {
-                const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context));
-                if (asset && asset.size < 4*1024*1024) {
-                    const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
-                    const previous = parsePkl(Buffer.from(response.data).toString('utf8'));
-                    if (matches(wanted,previous,assets)) reason = '';
-                }
-            }
+            else if (matches(wanted,published,assets)) reason = '';
         } catch (error) {reason = `conservative rebuild: ${error.message}`;}
         if (reason) chosen.push(row);
-        summary.push([JSON.stringify(row),reason || 'unchanged; runner skipped']);
+        plans.push({row,wanted,published,reason});
     }
     const disabled = String(config.env?.DISABLE_WORKFLOW || 'false') === 'true';
     core.setOutput('build_needed',String(!disabled && chosen.length > 0));
@@ -206,7 +210,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
     const execution = file.endsWith('build-linux-modular.yml') ? groupLibraries(chosen.length ? chosen : rows.slice(0,1)) : chosen.length ? chosen : rows.slice(0,1);
     core.setOutput('matrix',JSON.stringify({include:execution}));
     core.setOutput('workflow_disabled',String(disabled));
-    await core.summary.addHeading('Platform build plan').addTable([['Variant','Decision'],...summary]).write();
+    await require('./release-plan-summary.cjs').write({core,file,job:jobId,config,plans,disabled,isPR:!!context.payload.pull_request});
     if (file.endsWith('/build-ios.yml')) {
         let finalize = !disabled && chosen.length > 0;
         for (const target of ['macos','tvos','catos','xros']) {
@@ -260,7 +264,7 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
                 if (entry.isDirectory()) inspect(file);
                 else if (entry.isFile() && entry.name.endsWith('.pkl')) {
                     const text = fs.readFileSync(file,'utf8'), values = {};
-                    for (const key of ['version','buildNumber','binary','binarySha','cppStandard','cStandard','architecture','sdk','ndk','androidApi','emsdkVersion','compiler','compilerVersion','buildCommit','buildRunId','runnerImage','cFlags','cxxFlags']) {
+                    for (const key of ['version','buildNumber','buildTime','binary','binarySha','cppStandard','cStandard','architecture','sdk','ndk','androidApi','emsdkVersion','compiler','compilerVersion','buildCommit','buildRunId','runnerImage','cFlags','cxxFlags']) {
                         const match = text.match(new RegExp(`^${key} = "([^"\\n]*)"$`,'m'));
                         if (match) values[key] = match[1];
                     }

@@ -17,6 +17,7 @@ on:
       - 'scripts/release-*'
       - 'scripts/build-matrices.json'
       - 'scripts/tests/test-release-build-plan.cjs'
+      - 'scripts/tests/test-release-plan-summary.cjs'
       - 'scripts/tests/test-*cache*'
       - 'scripts/tests/test-platform-artifacts.cjs'
       - 'scripts/tests/test-workflow-scheduling.rb'
@@ -39,6 +40,7 @@ on:
       - 'scripts/release-*'
       - 'scripts/build-matrices.json'
       - 'scripts/tests/test-release-build-plan.cjs'
+      - 'scripts/tests/test-release-plan-summary.cjs'
       - 'scripts/tests/test-*cache*'
       - 'scripts/tests/test-platform-artifacts.cjs'
       - 'scripts/tests/test-workflow-scheduling.rb'
@@ -61,3 +63,4 @@ jobs:
       - run: node scripts/tests/test-release-build-plan.cjs
       - run: bash scripts/tests/test-package-platforms.sh
       - run: bash scripts/tests/test-metalangle-fetch.sh
+      - run: node scripts/tests/test-release-plan-summary.cjs
