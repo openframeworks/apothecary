@@ -63,7 +63,6 @@ jobs:
       CFLAGS: -O2 -fPIC ${{ matrix.arch_flags }}
       CXXFLAGS: -O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1 ${{ matrix.arch_flags }}
       NO_FORCE: 1
-      # dawn: deferred — git fetch of the pinned SHA fails in ~9s on this runner
       FORMULAS_OVERRIDE: ${{ join(matrix.libraries, ' ') }}
       PACKAGE_LIBS: ${{ join(matrix.libraries, ' ') }}
     steps:

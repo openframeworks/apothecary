@@ -198,7 +198,8 @@
         "ngtcp2",
         "libssh2",
         "curl",
-        "poco"
+        "poco",
+        "dawn"
       ],
       "arch": [
         "64",
