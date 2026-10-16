@@ -113,7 +113,7 @@ function parsePkl(text) {
 }
 exports.renderPkl=renderPkl;exports.parsePkl=parsePkl;
 
-function stateName(file, job, row) {
+function stateName(file, job, row, legacy = false) {
     const platform=path.basename(file,'.yml').replace(/^build-/, '').replace(/-modular$/, '');
     const part=value=>encodeURIComponent(String(value)).replace(/-/g,'%2D');
     const parts=row.library ? [part(row.library),platform] : [platform];
@@ -122,6 +122,9 @@ function stateName(file, job, row) {
     // These describe runner setup, not independent output variants. Their values
     // still participate in profile/recipe fingerprints inside the record.
     const setup=new Set(['library','runner','arch_flags','artifact_target','sysroot','prefix','qemu_arch','target']);
+    // Android release archives have one name per architecture. Toolchain
+    // versions belong in the record/fingerprint, not its stable asset name.
+    if (platform === 'android' && !legacy) for (const key of ['SDK','NDK','API']) setup.add(key);
     for(const [key,value] of Object.entries(row).sort(([a],[b])=>a.localeCompare(b))) {
         if(setup.has(key))continue;
         parts.push(part(key.toLowerCase()),part(value && typeof value==='object' ? stable(value) : value));
@@ -148,7 +151,7 @@ function channel(file, context) {
     return file.endsWith('build-linux-modular.yml') ? 'modular' :
         (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
 }
-function publishedStateName(file, job, row, context) {return `${channel(file,context)}-${stateName(file,job,row)}`;}
+function publishedStateName(file, job, row, context, legacy = false) {return `${channel(file,context)}-${stateName(file,job,row,legacy)}`;}
 async function stateRelease(github, context, create = false) {
     try {return (await github.rest.repos.getReleaseByTag({...context.repo,tag:'build-state'})).data;}
     catch (error) {
@@ -184,7 +187,8 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
         let reason = 'missing or changed published output', wanted, published;
         try {
             wanted = inputs(file,jobId,row);
-            const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context));
+            const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context)) ||
+                states.find(a => a.name === publishedStateName(file,jobId,row,context,true));
             if (asset && asset.size < 4*1024*1024) {
                 try {
                     const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
@@ -285,6 +289,13 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
     const old = states.find(a => a.name === name);
     if (old) await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:old.id});
     await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:metadata.id,name,data,headers:{'content-type':'application/vnd.apple.pkl','content-length':data.length}});
+    // Retire the old verbose Android name only after the new record is durable.
+    const legacyName = publishedStateName(file,jobId,row,context,true);
+    const legacy = legacyName !== name && states.find(a => a.name === legacyName);
+    if (legacy) {
+        try {await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:legacy.id});}
+        catch (error) {core.warning(`Published ${name}, but could not remove ${legacyName}: ${error.message}`);}
+    }
     core.info(`Recorded ${name}: ${Object.keys(state.formulas).length} formulas, ${published.length} verified outputs`);
 };
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;
