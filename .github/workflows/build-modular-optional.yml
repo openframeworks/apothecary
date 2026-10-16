@@ -7,6 +7,7 @@ on:
       - '.github/workflows/build-modular-optional.yml'
       - 'apothecary/formulas/angle/**'
       - 'apothecary/formulas/metalangle/**'
+      - 'apothecary/formulas/dawn/**'
       - 'scripts/tests/test-angle-bootstrap.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
@@ -45,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         target: [osx, ios, tvos, catos, xros]
-        library: [angle, metalangle]
+        library: [angle, metalangle, dawn]
         exclude:
           - {target: catos, library: metalangle}
           - {target: xros, library: metalangle}
@@ -109,8 +110,12 @@ jobs:
 
   vs:
     needs: test
-    name: optional angle-vs-64
+    name: optional ${{ matrix.library }}-vs-64
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        library: [angle, dawn]
     defaults:
       run:
         shell: msys2 {0}
@@ -119,7 +124,7 @@ jobs:
       TYPE: vs
       ARCH: 64
       VS_VER: 17
-      PACKAGE_LIBS: angle
+      PACKAGE_LIBS: ${{ matrix.library }}
       ALWAYS_BUILD: 1
       NO_FORCE: 1
     steps:
@@ -144,7 +149,7 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           key: ${{ steps.key.outputs.key }}
-          path: out/angle
+          path: out/${{ matrix.library }}
       - name: Report modular cache result
         env:
           CACHE_KEY: ${{ steps.key.outputs.key }}
@@ -160,7 +165,7 @@ jobs:
         uses: actions/cache/save@v5
         with:
           key: ${{ steps.key.outputs.key }}
-          path: out/angle
+          path: out/${{ matrix.library }}
       - name: Upload to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
@@ -168,4 +173,4 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
           fail_on_unmatched_files: true
-          files: out/oF_angle_*.zip
+          files: out/oF_${{ matrix.library }}_*.zip

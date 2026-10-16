@@ -105,8 +105,7 @@ if [[ "$TARGET" =~ ^(linux)$ ]]; then
         "ngtcp2"
         "libssh2"
         "curl"
-        # dawn: not in core until Linux CI is GCC 11+ (atomic::wait / bit_cast)
-        # TYPE=linux ./apo update dawn
+        # Dawn stays outside the core package; Linux builds it in the modular job.
     )
     # Build and publish the networking stack as individual packages without
     # changing the established openFrameworks Linux core archive yet.
@@ -211,10 +210,6 @@ elif [[ "$TARGET" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
         if [ "$TARGET" != "ios" ]; then
             FORMULAS+=("poco")
         fi
-        # Dawn is Metal on Apple; watchOS SDK has no Metal.framework.
-        if [ "$TARGET" != "watchos" ]; then
-            FORMULAS+=("dawn")
-        fi
     fi
 elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
     FORMULAS=()
@@ -258,9 +253,7 @@ elif [[ "$TARGET" =~ ^(vs|msys2)$ ]]; then
             "libssh2"
             "curl"
             "poco"
-            "dawn"
-            # google/angle and glon12 are opt-in; not in core CI formula lists.
-            # Built on the modular-optional pass and published to latest-modular.
+            # Google ANGLE, glon12 and Dawn are optional modular packages.
             # TYPE=vs ./apo update angle
             # TYPE=vs ./apo update glon12
         )
@@ -272,6 +265,9 @@ fi
 FORMULAS_MODULAR_OPTIONAL=()
 if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("angle")
+fi
+if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros|linux)$ ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("dawn")
 fi
 if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("metalangle")
