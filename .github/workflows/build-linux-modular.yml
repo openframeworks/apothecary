@@ -132,9 +132,11 @@ jobs:
           set -euo pipefail
           built=""
           failed=""
+          timings_file="$(mktemp)"
+          trap 'rm -f "$timings_file"' EXIT
           for library in $FORMULAS_OVERRIDE; do
             echo "::group::Build $library ($ARCH / GCC10)"
-            if FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
+            if APOTHECARY_BUILD_TIMINGS_FILE="$timings_file" APOTHECARY_BUILD_TIMINGS_DEFER=1 FORMULAS_OVERRIDE="$library" bash scripts/build.sh; then
               built="$built $library"
             else
               echo "::error::Failed to build $library for $ARCH"
@@ -142,6 +144,8 @@ jobs:
             fi
             echo "::endgroup::"
           done
+          source scripts/build-timings.sh
+          apothecary_report_build_timings_file "$TARGET" "$ARCH" "$timings_file"
           echo "built=${built# }" >> "$GITHUB_OUTPUT"
           echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
 

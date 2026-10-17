@@ -19,4 +19,26 @@ printf '%s\n' "$output" | cmp -s "$summary" -
 
 APOTHECARY_BUILD_TIMINGS=()
 [[ -z "$(apothecary_report_build_timings macos arm64)" ]]
-echo 'Per-library build timing summaries passed'
+
+# Modular workflows invoke build.sh once per library; defer each process's
+# report and combine all successful and failed rows into one final table.
+timings_file=$(mktemp)
+trap 'rm -f "$summary" "$timings_file"' EXIT
+: > "$summary"
+APOTHECARY_BUILD_TIMINGS=()
+APOTHECARY_BUILD_TIMINGS_FILE=$timings_file
+APOTHECARY_BUILD_TIMINGS_DEFER=1
+apothecary_record_build_timing dawn 64 13 failed
+[[ -z "$(apothecary_report_build_timings linux 64)" ]]
+APOTHECARY_BUILD_TIMINGS=()
+apothecary_record_build_timing pixman 64 65 completed
+[[ -z "$(apothecary_report_build_timings linux 64)" ]]
+APOTHECARY_BUILD_TIMINGS_FILE=
+APOTHECARY_BUILD_TIMINGS_DEFER=0
+output=$(apothecary_report_build_timings_file linux 64 "$timings_file")
+[[ "$output" == *'| pixman | 64 | 00:01:05 | completed |'* ]]
+[[ "$output" == *'| dawn | 64 | 00:00:13 | failed |'* ]]
+[[ "$(grep -c '^| Library |' "$summary")" -eq 1 ]]
+[[ "$(grep -c '^| dawn |' "$summary")" -eq 1 ]]
+[[ "$(grep -c '^| pixman |' "$summary")" -eq 1 ]]
+echo 'Build timing summaries aggregate all libraries into one table'
