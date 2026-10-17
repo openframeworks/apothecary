@@ -170,12 +170,27 @@ function prepare() {
         fi
         _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
+        _angle_use_github_khronos_mirrors
         _angle_win_run "gclient sync --no-history --shallow"
     else
         bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
+        _angle_use_github_khronos_mirrors
         gclient sync --no-history --shallow
     fi
+}
+
+# Chromium's Gitiles mirror can return transient 5xx errors. ANGLE's pinned
+# Khronos commits are available from the upstream GitHub repositories.
+function _angle_use_github_khronos_mirrors() {
+    local deps_file="DEPS"
+    if ! grep -qF '{chromium_git}/external/github.com/KhronosGroup/' "$deps_file"; then
+        echoError "angle: expected pinned Khronos dependencies in DEPS"
+        return 1
+    fi
+    sed 's#{chromium_git}/external/github.com/KhronosGroup/#https://github.com/KhronosGroup/#g' \
+        "$deps_file" > "${deps_file}.tmp" || return 1
+    mv "${deps_file}.tmp" "$deps_file"
 }
 
 function _angle_cpu() {
