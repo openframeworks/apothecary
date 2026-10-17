@@ -7,13 +7,31 @@ fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/.vendor/depot_tools/.git" "$fixture/scripts"
 cd "$fixture"
+# prepare() rewrites ANGLE's checked-in DEPS file before running gclient. Keep
+# both a standalone GitHub mirror and an LLVM subtree entry in this fixture:
+# the former verifies the rewrite and the latter ensures a second prepare()
+# call remains valid after the standalone URL has already been rewritten.
+cat > DEPS <<'EOF'
+deps = [
+  {'name': 'src/third_party/glslang', 'url': Var('chromium_git') + '/external/github.com/KhronosGroup/glslang@abc123'},
+  {'name': 'src/third_party/llvm', 'url': Var('chromium_git') + '/external/github.com/llvm/llvm-project@def456'},
+  {'name': 'src/third_party/libcxx', 'url': Var('chromium_git') + '/external/github.com/llvm/llvm-project/libcxx@789abc'},
+]
+EOF
+echoError() { echo "$*" >&2; }
 DOWNLOADER_SCRIPT="$fixture/downloader.sh"
 printf 'ANGLE_TEST_DOWNLOADER_LOADED=1\n' > "$DOWNLOADER_SCRIPT"
 export ANGLE_TEST_LOG="$fixture/commands"
 verify_git_commit() { [ "$1" = "$fixture/.vendor/depot_tools" ]; [ "$2" = "$DEPOT_TOOLS_COMMIT" ]; }
 printf 'printf "bootstrap\\n" >> "$ANGLE_TEST_LOG"\ntouch "$(dirname "$0")/python3_bin_reldir.txt"\n' > .vendor/depot_tools/ensure_bootstrap
 python3() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'config\n' >> "$ANGLE_TEST_LOG"; }
-gclient() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'sync\n' >> "$ANGLE_TEST_LOG"; }
+gclient() {
+    [ -f .vendor/depot_tools/python3_bin_reldir.txt ]
+    grep -Fq "'https://github.com/KhronosGroup/glslang@abc123'" DEPS
+    grep -Fq "'https://github.com/llvm/llvm-project@def456'" DEPS
+    grep -Fq "external/github.com/llvm/llvm-project/libcxx@789abc" DEPS
+    printf 'sync\n' >> "$ANGLE_TEST_LOG"
+}
 TYPE=osx prepare
 [ "$ANGLE_TEST_DOWNLOADER_LOADED" = 1 ]
 printf 'bootstrap\nconfig\nsync\n' > expected
