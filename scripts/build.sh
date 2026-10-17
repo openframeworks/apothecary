@@ -33,6 +33,11 @@ fi
 # trap "trapError" ERR
 
 trapError() {
+    trap - ERR
+    if [ -n "${BUILD_TIMING_CURRENT:-}" ]; then
+        apothecary_record_build_timing "$BUILD_TIMING_CURRENT" "${ARCH:-unknown}" "$((SECONDS - BUILD_TIMING_START))" failed
+        apothecary_report_build_timings "${TARGET:-unknown}" "${ARCH:-unknown}" || true
+    fi
     echo
     echo " ^ Received error building $formula_name ^"
     cat "formula_${ARCH}.log"
@@ -68,6 +73,7 @@ ROOT=$(
     pwd -P
 )/..
 LOCAL_ROOT=$ROOT
+source "$LOCAL_ROOT/scripts/build-timings.sh"
 
 
 APOTHECARY_PATH=$ROOT/apothecary
@@ -246,6 +252,8 @@ run "mkdir -p $OUTPUT_FOLDER"
 ITER=0
 for formula in "${FORMULAS[@]}"; do
     formula_name="${formula%.*}"
+    BUILD_TIMING_CURRENT=$formula_name
+    BUILD_TIMING_START=$SECONDS
 
     if [ "$TRAVIS" = true ]; then
         travis_fold_start "build.$ITER" "Build $formula_name"
@@ -253,6 +261,8 @@ for formula in "${FORMULAS[@]}"; do
     fi
 
     build
+    apothecary_record_build_timing "$formula_name" "${ARCH:-unknown}" "$((SECONDS - BUILD_TIMING_START))" completed
+    BUILD_TIMING_CURRENT=""
 
     if [ "$TRAVIS" = true ]; then
         travis_time_finish
@@ -260,6 +270,8 @@ for formula in "${FORMULAS[@]}"; do
         ITER=$(expr $ITER + 1)
     fi
 done
+
+apothecary_report_build_timings "${TARGET:-unknown}" "${ARCH:-unknown}"
 
 echo ""
 echo ""
