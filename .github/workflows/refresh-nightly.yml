@@ -1,0 +1,44 @@
+name: Refresh daily nightly snapshot
+on:
+  schedule:
+    # openFrameworks/nightly.yml starts at 06:00 UTC; refresh one hour earlier.
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List the snapshot without changing releases
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - 'scripts/nightly-snapshot.cjs'
+      - 'scripts/tests/test-nightly-snapshot.cjs'
+      - '.github/workflows/refresh-nightly.yml'
+concurrency:
+  group: nightly-release-refresh
+  cancel-in-progress: false
+permissions:
+  contents: write
+  actions: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: node scripts/tests/test-nightly-snapshot.cjs
+  refresh:
+    needs: test
+    if: github.repository == 'openframeworks/apothecary' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Stage and verify a fresh nightly release
+        uses: actions/github-script@v9.0.0
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          SNAPSHOT_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/nightly-snapshot.cjs`).refresh({github, context, core, dryRun: process.env.SNAPSHOT_DRY_RUN === 'true'});
