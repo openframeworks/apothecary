@@ -84,3 +84,17 @@ Further improvements should be separate, measured changes:
   and change-aware platform selection without skipping required validation.
 - Compiler caching requires persistent storage and actual compiler launcher
   integration. Installing ccache alone does not provide cross-run reuse.
+
+
+GLon12 is an optional Windows package built for x64, ARM64 and ARM64EC by
+`build-modular-optional.yml`. Relevant PRs and manual dispatches build or reuse
+exact cached outputs, verify the ZIP contains `opengl32.dll` and
+`libgallium_wgl.dll`, and upload a review artifact. Trusted upstream branch pushes
+also upload `oF_glon12_vs_<arch>.zip` to the existing `latest-modular` release.
+GLon12 stays outside core bundle lists. Publishing uploads assets directly and
+does not update release metadata in each matrix job.
+
+These jobs use native Windows Python/Meson/Ninja with MSYS only as the shell.
+The cache context records their versions, the installed MSVC toolset and Windows
+SDK directories; architecture, formula and build infrastructure hashes are also
+part of the key. A cache hit still repackages and verifies the ZIP.
