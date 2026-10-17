@@ -2280,7 +2280,7 @@ function xframeworkFormula() {
   fi
   export XLIBS_DIR_REAL=$(realpath $XLIBSLOCAL)
 
-  export PLATFORM_TYPES=("ios" "osx" "catos" "xros" "tvos" "watchos")
+  export PLATFORM_TYPES=("ios" "macos" "osx" "catos" "xros" "tvos" "watchos")
   VERSION=""
   DEFINES=""
   mkdir -p ${LIBS_DIR_REAL}/${1}/lib/${X_TYPE}
@@ -2352,7 +2352,7 @@ function xframeworkFormula() {
         echo "brew install bash"
         exit 1
     fi
-    echo "Please update to Bash 4.0 or newer. Current:$bash_version"
+    echo "Using Bash $bash_version for XCFramework merging."
 
     declare -A ARCH_PAIRS=(
       ["MAC"]="MAC_ARM64"
