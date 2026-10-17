@@ -6,6 +6,9 @@ on:
       - '.github/actions/platform-artifacts/**'
       - 'scripts/*artifact*'
       - 'scripts/package*.sh'
+      - 'scripts/build.sh'
+      - 'scripts/build-timings.sh'
+      - 'scripts/tests/test-build-timings.sh'
       - 'scripts/tests/test-package-platforms.sh'
       - 'apothecary/formulas/metalangle/**'
       - 'scripts/tests/test-metalangle-fetch.sh'
@@ -29,6 +32,9 @@ on:
       - '.github/actions/platform-artifacts/**'
       - 'scripts/*artifact*'
       - 'scripts/package*.sh'
+      - 'scripts/build.sh'
+      - 'scripts/build-timings.sh'
+      - 'scripts/tests/test-build-timings.sh'
       - 'scripts/tests/test-package-platforms.sh'
       - 'apothecary/formulas/metalangle/**'
       - 'scripts/tests/test-metalangle-fetch.sh'
@@ -64,3 +70,5 @@ jobs:
       - run: bash scripts/tests/test-package-platforms.sh
       - run: bash scripts/tests/test-metalangle-fetch.sh
       - run: node scripts/tests/test-release-plan-summary.cjs
+      - run: bash -n scripts/build.sh scripts/build-timings.sh scripts/tests/test-build-timings.sh
+      - run: bash scripts/tests/test-build-timings.sh
