@@ -13,7 +13,7 @@ BUILD_ID=5
 DEFINES=""
 
 # tools for git use
-GIT_URL=http://git.code.sf.net/p/libpng/code
+GIT_URL=https://github.com/pnggroup/libpng.git
 GIT_TAG=v$VER
 #URL=https://github.com/glennrp/libpng/archive/refs/tags/v1.6.40 # RIP Glenn Randers-Pehrson
 URL=https://github.com/pnggroup/libpng/archive/refs/tags/v${VER}

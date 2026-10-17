@@ -9,7 +9,7 @@ FORMULA_DEPENDS=( "freetype" "libpng" "zlib" )
 
 VER=1.28.8
 SOURCE_COMMIT=1b2a95a1b72787cda146b46df9605b168e5b683b
-GIT_URL=https://gitlab.freedesktop.org/gstreamer/gstreamer.git
+GIT_URL=https://github.com/GStreamer/gstreamer.git
 
 DEFINES=""
 BUILD_ID=2

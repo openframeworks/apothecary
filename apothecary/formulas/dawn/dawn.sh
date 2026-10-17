@@ -25,8 +25,8 @@ SOURCE_COMMIT=cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7
 BUILD_ID=5
 DEFINES=""
 
-GIT_URL=https://dawn.googlesource.com/dawn
-GIT_URL_FALLBACK=https://github.com/google/dawn.git
+GIT_URL=https://github.com/google/dawn.git
+GIT_URL_FALLBACK=https://dawn.googlesource.com/dawn
 GIT_TAG=$SOURCE_COMMIT
 
 DEPOT_TOOLS_URL=https://chromium.googlesource.com/chromium/tools/depot_tools.git
@@ -60,7 +60,7 @@ function download() {
         echoWarning "dawn: remote add failed (already set?)"
     fi
     if ! _dawn_retry_git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"; then
-        echoWarning "dawn.googlesource.com fetch failed; trying ${GIT_URL_FALLBACK}"
+        echoWarning "Dawn GitHub fetch failed; trying ${GIT_URL_FALLBACK}"
         git -C dawn remote set-url origin "${GIT_URL_FALLBACK}"
         _dawn_retry_git -C dawn fetch --depth=1 origin "${SOURCE_COMMIT}"
     fi

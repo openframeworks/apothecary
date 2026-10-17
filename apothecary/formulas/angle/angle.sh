@@ -170,27 +170,75 @@ function prepare() {
         fi
         _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
-        _angle_use_github_khronos_mirrors
+        _angle_use_github_dependency_mirrors
         _angle_win_run "gclient sync --no-history --shallow"
     else
         bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
-        _angle_use_github_khronos_mirrors
+        _angle_use_github_dependency_mirrors
         gclient sync --no-history --shallow
     fi
 }
 
-# Chromium's Gitiles mirror can return transient 5xx errors. ANGLE's pinned
-# Khronos commits are available from the upstream GitHub repositories.
-function _angle_use_github_khronos_mirrors() {
+# Chromium's Gitiles mirrors can return transient 5xx errors. For dependencies
+# with direct official GitHub repositories, rewrite only the mirror prefix and
+# keep the DEPS commit pins unchanged. Do not rewrite Chromium subtrees such as
+# LLVM libc++: those are not standalone GitHub repositories.
+function _angle_use_github_dependency_mirrors() {
     local deps_file="DEPS"
-    if ! grep -qF '{chromium_git}/external/github.com/KhronosGroup/' "$deps_file"; then
-        echoError "angle: expected pinned Khronos dependencies in DEPS"
+    local repo
+    local github_repos=(
+        ARM-software/astc-encoder
+        google/clspv
+        google/cpu_features
+        libexpat/libexpat
+        KhronosGroup/EGL-Registry
+        google/flatbuffers
+        glmark2/glmark2
+        google/googletest
+        KhronosGroup/OpenCL-CTS
+        KhronosGroup/OpenCL-Docs
+        KhronosGroup/OpenCL-ICD-Loader
+        KhronosGroup/OpenGL-Registry
+        mesonbuild/meson
+        google/perfetto
+        KhronosGroup/VK-GL-CTS
+        KhronosGroup/glslang
+        LunarG/VulkanTools
+        KhronosGroup/SPIRV-Cross
+        KhronosGroup/SPIRV-Headers
+        KhronosGroup/SPIRV-Tools
+        KhronosGroup/Vulkan-Headers
+        KhronosGroup/Vulkan-Loader
+        KhronosGroup/Vulkan-Tools
+        KhronosGroup/Vulkan-Utility-Libraries
+        KhronosGroup/Vulkan-ValidationLayers
+        Tencent/rapidjson
+        google/re2
+    )
+    if ! grep -qF 'external/github.com/' "$deps_file"; then
+        echoError "angle: no GitHub mirror dependencies found in DEPS"
         return 1
     fi
-    sed 's#{chromium_git}/external/github.com/KhronosGroup/#https://github.com/KhronosGroup/#g' \
+    for repo in "${github_repos[@]}"; do
+        sed \
+            -e "s#Var('chromium_git') + '/external/github.com/${repo}#'https://github.com/${repo}#g" \
+            -e "s#{chromium_git}/external/github.com/${repo}#https://github.com/${repo}#g" \
+            "$deps_file" > "${deps_file}.tmp" || return 1
+        mv "${deps_file}.tmp" "$deps_file" || return 1
+    done
+    # LLVM's root repository has a matching GitHub commit; its nested libc++
+    # and tool subdirectories above are split mirrors and remain on Gitiles.
+    sed \
+        -e "s#Var('chromium_git') + '/external/github.com/llvm/llvm-project@#'https://github.com/llvm/llvm-project@#g" \
         "$deps_file" > "${deps_file}.tmp" || return 1
-    mv "${deps_file}.tmp" "$deps_file"
+    mv "${deps_file}.tmp" "$deps_file" || return 1
+    # This project moved from kennethreitz/requests to psf/requests; preserve
+    # the verified commit while using its current official repository.
+    sed \
+        -e "s#Var('chromium_git') + '/external/github.com/kennethreitz/requests#'https://github.com/psf/requests#g" \
+        "$deps_file" > "${deps_file}.tmp" || return 1
+    mv "${deps_file}.tmp" "$deps_file" || return 1
 }
 
 function _angle_cpu() {
