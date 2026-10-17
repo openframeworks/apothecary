@@ -10,6 +10,8 @@
 # 3.19.18 turns LibRaw on by default and compiles it with LIBRAW_NODLL on VS.
 # 3.19.19 vendors OpenEXR 3.5.1, libdeflate 1.26 and libtiff 4.7.2.
 # 3.19.21 vendors OpenEXR 3.5.2 and libpng 1.6.59; adds CR3/X3F RAW support.
+# 3.19.25 adds channel-count queries, HEIF/AVIF/JXL codecs (disabled by default),
+# and hardens GIF, IFF and Sun Raster decoding against malformed input.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -18,11 +20,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.21
-SHA256="52034b31614f1f5b91a7fa94a69e83e5d5438a72aecfb496fe99d9603ea95eb8"
+VER=3.19.25
+SHA256="1736f4d91b80675d7c9a707484e0b84d366acb6ab8d92f5fcf1623d2f2af82b1"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=25
+BUILD_ID=26
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
