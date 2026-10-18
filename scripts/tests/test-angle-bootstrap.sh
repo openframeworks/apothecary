@@ -27,6 +27,7 @@ printf 'printf "bootstrap\\n" >> "$ANGLE_TEST_LOG"\ntouch "$(dirname "$0")/pytho
 python3() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'config\n' >> "$ANGLE_TEST_LOG"; }
 gclient() {
     [ -f .vendor/depot_tools/python3_bin_reldir.txt ]
+    [ "$*" = 'sync --force --no-history --shallow' ]
     grep -Fq "'https://github.com/KhronosGroup/glslang@abc123'" DEPS
     grep -Fq "'https://github.com/llvm/llvm-project@def456'" DEPS
     grep -Fq "external/github.com/llvm/llvm-project/libcxx@789abc" DEPS
@@ -44,7 +45,7 @@ _angle_win_run() { printf '%s\n' "$*" >> "$ANGLE_TEST_LOG"; }
 TYPE=vs prepare
 head -1 "$ANGLE_TEST_LOG" | grep -F 'bootstrap/win_tools.bat'
 sed -n '2p' "$ANGLE_TEST_LOG" | grep -F 'python scripts\bootstrap.py'
-sed -n '3p' "$ANGLE_TEST_LOG" | grep -F 'gclient sync --no-history --shallow'
+sed -n '3p' "$ANGLE_TEST_LOG" | grep -Fx 'gclient sync --force --no-history --shallow'
 gn() { echo "Unexpected direct GN invocation" >&2; return 1; }
 autoninja() { echo "Unexpected direct Ninja invocation" >&2; return 1; }
 setup_vs_vars() { VS_INSTALL_PATH='C:\Program Files\Microsoft Visual Studio'; }
