@@ -171,12 +171,18 @@ function prepare() {
         _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
         _angle_use_github_dependency_mirrors
-        _angle_win_run "gclient sync --no-history --shallow"
+        # ANGLE patches Chromium's pinned build dependency after sync. Later
+        # platform builds reuse this checkout, so reset dependency changes
+        # before syncing it again.
+        _angle_win_run "gclient sync --force --no-history --shallow"
     else
         bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
         _angle_use_github_dependency_mirrors
-        gclient sync --no-history --shallow
+        # ANGLE patches Chromium's pinned build dependency after sync. Later
+        # platform builds reuse this checkout, so reset dependency changes
+        # before syncing it again.
+        gclient sync --force --no-history --shallow
     fi
 }
 
