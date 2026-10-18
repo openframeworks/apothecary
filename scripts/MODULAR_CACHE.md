@@ -34,6 +34,24 @@ Run the offline checks with:
 bash scripts/tests/test-modular-cache.sh
 ```
 
+## Linux system libraries
+
+`sndfile`, `fontconfig`, `mpg123`, `alsa`, `pulseaudio`, `libudev`, `gtk3`,
+`glib`, `glvnd` and `glu` stay distro packages on Linux. Do not add modular
+formulas or dedicated build/publish workflows for these ten libraries.
+openFrameworks discovers its Linux system dependencies through pkg-config in
+`config.linux.common.mk`, and `install_dependencies.sh` installs them.
+
+A Linux modular package must be a static library that openFrameworks compiles
+into the application, with no host configuration, daemon or driver it must
+match. A bundled shared replacement needs an rpath or `LD_LIBRARY_PATH` to load
+and does not remove the distro package requirement.
+
+Keep development packages such as `libasound2-dev`, `libpulse-dev`,
+`libudev-dev`, `libgtk-3-dev`, `libglu1-mesa-dev` and `libfontconfig1-dev` in
+`build-linux-modular.yml`: they are still needed as build dependencies. This
+policy does not remove apt prerequisites from CI.
+
 ## Timing audit of PR #589 (2026-10-05)
 
 The optional build jobs are skipped on `pull_request`; only their offline tests

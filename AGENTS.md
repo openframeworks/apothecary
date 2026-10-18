@@ -72,6 +72,10 @@ belongs in the core archive. Keep Google ANGLE and the frozen MetalANGLE fork
 separate: they have different source pins, build systems and platform support.
 Check the branch's platform lists before changing either backend's defaults.
 
+Follow the [Linux system-library policy](scripts/MODULAR_CACHE.md#linux-system-libraries).
+Do not recreate modular formulas or workflows for those host packages; retain
+their development packages as CI build dependencies.
+
 For artifact caching, include the selected formula and its dependencies, patches,
 build and packaging scripts, flags, architecture, compiler and SDK in the key.
 Avoid relying solely on a version string or broad restore key. A cache hit must
