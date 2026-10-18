@@ -219,5 +219,111 @@
         }
       ]
     }
+  },
+  ".github/workflows/build-rgfw-modular.yml": {
+    "build": {
+      "include": [
+        {
+          "library": "rgfw",
+          "target": "osx",
+          "arch": "universal",
+          "archs": "x86_64 arm64",
+          "runner": "macos-14",
+          "vs": "none",
+          "emsdk": "none",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "emscripten",
+          "arch": "32",
+          "archs": "32",
+          "runner": "ubuntu-latest",
+          "vs": "none",
+          "emsdk": "6.0.11",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "emscripten",
+          "arch": "64",
+          "archs": "64",
+          "runner": "ubuntu-latest",
+          "vs": "none",
+          "emsdk": "6.0.11",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "vs",
+          "arch": "64",
+          "archs": "64",
+          "runner": "windows-2022",
+          "vs": "17",
+          "emsdk": "none",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "vs",
+          "arch": "arm64",
+          "archs": "arm64",
+          "runner": "windows-2022",
+          "vs": "17",
+          "emsdk": "none",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "vs",
+          "arch": "arm64ec",
+          "archs": "arm64ec",
+          "runner": "windows-2022",
+          "vs": "17",
+          "emsdk": "none",
+          "flavor": "none"
+        },
+        {
+          "library": "rgfw",
+          "target": "msys2",
+          "arch": "mingw64",
+          "archs": "mingw64",
+          "runner": "windows-latest",
+          "vs": "none",
+          "emsdk": "none",
+          "flavor": "mingw64"
+        },
+        {
+          "library": "rgfw",
+          "target": "msys2",
+          "arch": "ucrt64",
+          "archs": "ucrt64",
+          "runner": "windows-latest",
+          "vs": "none",
+          "emsdk": "none",
+          "flavor": "ucrt64"
+        },
+        {
+          "library": "rgfw",
+          "target": "msys2",
+          "arch": "clang64",
+          "archs": "clang64",
+          "runner": "windows-latest",
+          "vs": "none",
+          "emsdk": "none",
+          "flavor": "clang64"
+        },
+        {
+          "library": "rgfw",
+          "target": "msys2",
+          "arch": "clangarm64",
+          "archs": "clangarm64",
+          "runner": "windows-11-arm",
+          "vs": "none",
+          "emsdk": "none",
+          "flavor": "clangarm64"
+        }
+      ]
+    }
   }
 }
