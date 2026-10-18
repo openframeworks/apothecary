@@ -153,9 +153,19 @@ frameworks = "$FRAMEWORKS"
 EOF
     # Keep build provenance beside the binary in its existing Pkl metadata.
     local compiler="${CXX:-${CC:-c++}}"
-    compiler="${compiler%% *}"
+    # CMake and the VS formulas can supply an executable path with spaces.
+    if [ ! -f "$compiler" ] && ! command -v "$compiler" >/dev/null 2>&1; then
+        compiler="${compiler%% *}"
+    fi
     local compiler_version
-    compiler_version=$("$compiler" --version 2>/dev/null | head -n 1)
+    # Provenance probes must not turn a successfully copied binary into a
+    # failed build. MSVC reports its banner on stderr without --version.
+    compiler_version=$("$compiler" --version 2>/dev/null | sed -n '1p') || true
+    if [ -z "$compiler_version" ]; then
+        case "${compiler##*/}" in
+            cl|cl.exe) compiler_version=$("$compiler" 2>&1 | sed -n '1p') || true ;;
+        esac
+    fi
     {
         pkl_property architecture "${ARCH:-}"
         pkl_property sdk "${SDK:-${SDKROOT:-}}"
