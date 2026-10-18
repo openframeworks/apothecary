@@ -27,6 +27,7 @@ printf 'printf "bootstrap\\n" >> "$ANGLE_TEST_LOG"\ntouch "$(dirname "$0")/pytho
 python3() { [ -f .vendor/depot_tools/python3_bin_reldir.txt ]; printf 'config\n' >> "$ANGLE_TEST_LOG"; }
 gclient() {
     [ -f .vendor/depot_tools/python3_bin_reldir.txt ]
+    [ "$*" = 'sync --force --no-history --shallow' ]
     grep -Fq "'https://github.com/KhronosGroup/glslang@abc123'" DEPS
     grep -Fq "'https://github.com/llvm/llvm-project@def456'" DEPS
     grep -Fq "external/github.com/llvm/llvm-project/libcxx@789abc" DEPS
@@ -44,7 +45,7 @@ _angle_win_run() { printf '%s\n' "$*" >> "$ANGLE_TEST_LOG"; }
 TYPE=vs prepare
 head -1 "$ANGLE_TEST_LOG" | grep -F 'bootstrap/win_tools.bat'
 sed -n '2p' "$ANGLE_TEST_LOG" | grep -F 'python scripts\bootstrap.py'
-sed -n '3p' "$ANGLE_TEST_LOG" | grep -F 'gclient sync --no-history --shallow'
+sed -n '3p' "$ANGLE_TEST_LOG" | grep -Fx 'gclient sync --force --no-history --shallow'
 gn() { echo "Unexpected direct GN invocation" >&2; return 1; }
 autoninja() { echo "Unexpected direct Ninja invocation" >&2; return 1; }
 setup_vs_vars() { VS_INSTALL_PATH='C:\Program Files\Microsoft Visual Studio'; }
@@ -120,13 +121,15 @@ mkdir -p build/toolchain/win build/config/win "$fixture/sdk/Include/10.0.26100.0
 touch "$fixture/sdk/Include/10.0.26100.0/um/Windows.h" "$fixture/sdk/Include/10.0.26100.0/ucrt/stdio.h" "$fixture/sdk/Lib/10.0.26100.0/um/x64/kernel32.lib" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64/ucrt.lib"
 printf "SDK_VERSION = '10.0.28000.0'\n" > build/vs_toolchain.py
 cp build/vs_toolchain.py build/toolchain/win/setup_toolchain.py
-printf 'config("winver") {\n  defines = ["NTDDI_VERSION=NTDDI_WIN11_BR", "_WIN32_WINNT=0x0A00", "WINVER=0x0A00"]\n}\n' > build/config/win/BUILD.gn
+printf 'config("compiler") {\n  cflags = [ "/utf-8", ]\n}\nconfig("winver") {\n  defines = ["NTDDI_VERSION=NTDDI_WIN11_BR", "_WIN32_WINNT=0x0A00", "WINVER=0x0A00"]\n}\n' > build/config/win/BUILD.gn
 ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" _angle_windows_sdk
 ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" _angle_windows_sdk
 for sdk_file in build/vs_toolchain.py build/toolchain/win/setup_toolchain.py; do
     grep -Fx "SDK_VERSION = '10.0.26100.0'" "$sdk_file"
 done
 grep -F '"NTDDI_VERSION=0x0A000000", "_WIN32_WINNT=0x0A00", "WINVER=0x0A00"' build/config/win/BUILD.gn
+grep -F 'cflags = [ "/utf-8", "/Zc:preprocessor", ]' build/config/win/BUILD.gn
+[ "$(grep -c '/Zc:preprocessor' build/config/win/BUILD.gn)" -eq 1 ]
 echoError() { echo "$*" >&2; }
 if ANGLE_WINDOWS_SDK_ROOT="$fixture/sdk" WINDOWS_SDK_VERSION=10.0.28000.0 _angle_windows_sdk; then
     echo 'Incomplete SDK was incorrectly accepted' >&2

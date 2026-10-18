@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=10
+BUILD_ID=11
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -140,6 +140,13 @@ function _angle_windows_sdk() {
     grep -q 'NTDDI_VERSION=' "$file" || return 1
     sed 's/NTDDI_VERSION=[A-Za-z0-9_]*/NTDDI_VERSION=0x0A000000/' "$file" > "$file.sdk-tmp" || return 1
     mv "$file.sdk-tmp" "$file" || return 1
+    # ANGLE's counter macros require standard argument expansion. MSVC's
+    # traditional preprocessor reports C4002, which /WX makes fatal.
+    if ! grep -q '/Zc:preprocessor' "$file"; then
+        grep -q '"/utf-8",' "$file" || return 1
+        sed 's|"/utf-8",|"/utf-8", "/Zc:preprocessor",|' "$file" > "$file.sdk-tmp" || return 1
+        mv "$file.sdk-tmp" "$file" || return 1
+    fi
     export WINDOWSSDKDIR="$(cygpath -w "$root")"
     echo "angle: local Windows SDK $sdk at $WINDOWSSDKDIR"
 }
@@ -171,12 +178,18 @@ function prepare() {
         _angle_win_run "call \"$(cygpath -w "${vendor}/depot_tools/bootstrap/win_tools.bat")\""
         _angle_win_run "python scripts\\bootstrap.py"
         _angle_use_github_dependency_mirrors
-        _angle_win_run "gclient sync --no-history --shallow"
+        # ANGLE patches Chromium's pinned build dependency after sync. Later
+        # platform builds reuse this checkout, so reset dependency changes
+        # before syncing it again.
+        _angle_win_run "gclient sync --force --no-history --shallow"
     else
         bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
         _angle_use_github_dependency_mirrors
-        gclient sync --no-history --shallow
+        # ANGLE patches Chromium's pinned build dependency after sync. Later
+        # platform builds reuse this checkout, so reset dependency changes
+        # before syncing it again.
+        gclient sync --force --no-history --shallow
     fi
 }
 
