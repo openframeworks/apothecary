@@ -5,6 +5,14 @@ const p=require('../release-build-plan.cjs');
 const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'release-plan-test-'));
 const write=(name,data)=>{fs.mkdirSync(path.dirname(name),{recursive:true});fs.writeFileSync(name,data);};
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.env,GIT_AUTHOR_NAME:'Fixture',GIT_AUTHOR_EMAIL:'fixture@example.invalid',GIT_COMMITTER_NAME:'Fixture',GIT_COMMITTER_EMAIL:'fixture@example.invalid'}}).trim();
+// Exercise the actual optional workflow configuration before fixture setup.
+const rgfwWorkflow='.github/workflows/build-rgfw-modular.yml';
+const rgfwMatrix=JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'))[rgfwWorkflow]?.build;
+assert.ok(rgfwMatrix,'RGFW pre-check has a registered build matrix');
+const rgfwRows=p.matrixRows(rgfwMatrix);
+assert.equal(rgfwRows.length,10,'macOS, wasm32/64, MSVC and MSYS2 variants are planned');
+assert.equal(new Set(rgfwRows.map(row=>p.stateName(rgfwWorkflow,'build',row))).size,rgfwRows.length,'RGFW variants have distinct metadata assets');
+for (const row of rgfwRows) assert.deepEqual(Object.keys(p.inputs(rgfwWorkflow,'build',row).formulas),['rgfw'],'each native RGFW row resolves its environment and selects only RGFW');
 // The workflow must actually upload the extension emitted by the planner.
 for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8')))) {
  const text=fs.readFileSync(file,'utf8');
