@@ -22,7 +22,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.07.31
 SOURCE_COMMIT=cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7
-BUILD_ID=5
+BUILD_ID=6
 DEFINES=""
 
 GIT_URL=https://github.com/google/dawn.git
