@@ -10,10 +10,10 @@ FORMULA_TYPES=("osx" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten
 FORMULA_DEPENDS=("zlib")
 
 # define the version
-VER=5.4.3
-SHA256="66dfbaee288f2bc43172440a55d0235dfc7bf885dda6435c038e8000e79582cb"
-SHA256_ZIP="795c29716f4ac123b403e53b677e9f32a8605c4a7b2d9904bfaae3f4053b506d"
-BUILD_ID=6
+VER=6.0.5
+SHA256="edf3749559c2b7d1f758ffb66fc5bec62186221e623b7f2e8969f17ee46ecb6f"
+SHA256_ZIP="89e477e89df739ecc7dd21874897ac2e70c8944eb1074fbdbbdbf4dd2de6a403"
+BUILD_ID=7
 DEFINES=""
 
 # tools for git use
@@ -290,6 +290,8 @@ function build() {
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
         ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$ABI/zlib.a"
 
+        # The separate JNI IO helper is not packaged. Assimp 6 makes its
+        # DefaultIOSystem base final, so that legacy helper no longer builds.
         DEFINES="
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
@@ -300,7 +302,7 @@ function build() {
             -DASSIMP_BUILD_SAMPLES=OFF \
             -DASSIMP_BUILD_3MF_IMPORTER=OFF \
             -DASSIMP_WARNINGS_AS_ERRORS=OFF \
-            -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+            -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
             -DASSIMP_BUILD_DOCS=OFF \
             -DASSIMP_BUILD_BLEND_IMPORTER=0 \
             -DASSIMP_BUILD_3MF_IMPORTER=0 \
