@@ -11,6 +11,7 @@ on:
       - 'apothecary/formulas/dawn/**'
       - 'scripts/tests/test-angle-bootstrap.sh'
       - 'scripts/tests/test-secure-compiler.sh'
+      - 'scripts/tests/test-glon12-toolchain.sh'
       - 'scripts/secure.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
@@ -39,6 +40,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - run: bash scripts/tests/test-angle-bootstrap.sh
       - run: bash scripts/tests/test-secure-compiler.sh
+      - run: bash scripts/tests/test-glon12-toolchain.sh
       - run: bash scripts/tests/test-modular-cache.sh
       - run: bash scripts/tests/test-apple-install-tools.sh
 

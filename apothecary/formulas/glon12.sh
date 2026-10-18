@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=9
+BUILD_ID=10
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -84,7 +84,7 @@ function build() {
     # (lib/arm64ec + cl that defaults to /arm64EC) so DLLs link with OF ARM64EC.
     if [ "$ARCH" = "arm64ec" ]; then
         local ec_bin
-        ec_bin="$(cd "${VS_BIN_PATH}/../arm64ec" 2>/dev/null && pwd)"
+        ec_bin="$(cd "${VS_BIN_PATH}/../arm64ec" 2>/dev/null && pwd)" || ec_bin=""
         if [ -n "$ec_bin" ] && [ -f "${ec_bin}/cl.exe" ]; then
             VS_BIN_PATH="$ec_bin"
             echo "glon12: ARM64EC toolset ${VS_BIN_PATH}"
