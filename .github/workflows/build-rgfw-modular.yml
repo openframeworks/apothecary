@@ -63,7 +63,7 @@ jobs:
           update: true
           msystem: ${{ matrix.target == 'msys2' && matrix.flavor || 'MINGW64' }}
           install: base-devel git curl unzip
-          pacboy: cmake:p ninja:p gcc:p
+          pacboy: cmake:p ninja:p ${{ startsWith(matrix.flavor, 'clang') && 'clang:p' || 'gcc:p' }}
       - uses: actions/checkout@v7.0.1
       - name: Set up macOS build tools
         if: matrix.target == 'osx'
@@ -110,7 +110,7 @@ jobs:
           if-no-files-found: error
       - name: Publish modular archives
         if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
-        uses: softprops/action-gh-release@v3.0.3
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
