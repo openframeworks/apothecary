@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=10
+BUILD_ID=11
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -81,7 +81,7 @@ function build() {
     export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
 
     # Core maps arm64ec → Host*/arm64. Prefer the real ARM64EC toolset
-    # (lib/arm64ec + cl that defaults to /arm64EC) so DLLs link with OF ARM64EC.
+    # when installed; otherwise /arm64EC selects the ABI on the ARM64 compiler.
     if [ "$ARCH" = "arm64ec" ]; then
         local ec_bin
         ec_bin="$(cd "${VS_BIN_PATH}/../arm64ec" 2>/dev/null && pwd)" || ec_bin=""
@@ -99,8 +99,10 @@ function build() {
 
     local lib_arch msvc_root kits kitver
     lib_arch="$(basename "${VS_BIN_PATH}")"
-    if [ "$ARCH" = "arm64ec" ] && [ "$lib_arch" != "arm64ec" ]; then
-        lib_arch="arm64ec"
+    # MSVC and Windows SDK ship the hybrid ARM64/ARM64EC runtime and import
+    # libraries under arm64, even when the compiler lives in bin/*/arm64ec.
+    if [ "$ARCH" = "arm64ec" ]; then
+        lib_arch="arm64"
     fi
     msvc_root="$(cd "${VS_BIN_PATH}/../../.." && pwd)"
     kits="${GLON12_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
@@ -170,6 +172,12 @@ function build() {
         echo "cpu_family = '${cpu_family}'"
         echo "cpu = '${cpu}'"
         echo "endian = 'little'"
+        if [ "$ARCH" = "arm64ec" ]; then
+            echo
+            echo "[built-in options]"
+            echo "c_link_args = ['/machine:arm64ec']"
+            echo "cpp_link_args = ['/machine:arm64ec']"
+        fi
     } > "${machine_ini}"
     echo "glon12: meson cpu_family=${cpu_family} (ARCH=${ARCH}) host=${host_family} file=${machine_ini}"
 
