@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=11
+BUILD_ID=12
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -146,7 +146,8 @@ function build() {
     local cpu_family cpu
     case "${ARCH}" in
         32|x86) cpu_family="x86"; cpu="i686" ;;
-        arm64|arm64ec) cpu_family="aarch64"; cpu="aarch64" ;;
+        arm64) cpu_family="aarch64"; cpu="aarch64" ;;
+        arm64ec) cpu_family="aarch64"; cpu="arm64ec" ;;
         *) cpu_family="x86_64"; cpu="x86_64" ;;
     esac
     local host_m host_family
@@ -181,9 +182,14 @@ function build() {
     } > "${machine_ini}"
     echo "glon12: meson cpu_family=${cpu_family} (ARCH=${ARCH}) host=${host_family} file=${machine_ini}"
 
+    # Ninja derives lib.exe /MACHINE from cl's banner, which still says ARM64
+    # with /arm64EC. The VS backend honors host_machine.cpu=arm64ec for both
+    # DLLs and the static libraries in Mesa subprojects.
+    local backend=ninja
+    [ "$ARCH" != arm64ec ] || backend=vs
     local meson_args=(
         setup "${bdir}"
-        --backend=ninja
+        --backend="$backend"
         --buildtype=release
         --prefix="$(pwd)/${bdir}/Release"
         -Dgallium-drivers=d3d12

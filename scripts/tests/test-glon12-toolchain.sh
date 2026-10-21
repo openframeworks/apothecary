@@ -26,6 +26,8 @@ build > /dev/null
 [[ "$LIB" == *'/ucrt/arm64'* ]]
 [[ "$LIB" == *'/um/arm64'* ]]
 [[ "$LIB" != *'/arm64ec'* ]]
+grep -F "cpu = 'arm64ec'" meson-cpu-ARM64EC.ini
+grep -F -- '--backend=vs' "$fixture/meson-commands"
 grep -F "c_link_args = ['/machine:arm64ec']" meson-cpu-ARM64EC.ini
 grep -F "cpp_link_args = ['/machine:arm64ec']" meson-cpu-ARM64EC.ini
 grep -F -- '--cross-file meson-cpu-ARM64EC.ini' "$fixture/meson-commands"
