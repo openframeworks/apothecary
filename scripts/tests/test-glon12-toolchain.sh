@@ -9,6 +9,9 @@ msvc_root="$fixture/VS tools/VC/Tools/MSVC/fixture"
 VS_BIN_PATH="$msvc_root/bin/Hostx64/arm64"
 GLON12_WINDOWS_SDK_ROOT="$fixture/sdk"
 mkdir -p "$VS_BIN_PATH" "$msvc_root/lib/arm64" "$GLON12_WINDOWS_SDK_ROOT/Lib/10.0.26100.0"
+mkdir -p "$fixture/VS tools/MSBuild/Current/Bin"
+printf '#!/bin/sh\nexit 0\n' > "$fixture/VS tools/MSBuild/Current/Bin/MSBuild.exe"
+chmod +x "$fixture/VS tools/MSBuild/Current/Bin/MSBuild.exe"
 touch "$VS_BIN_PATH/cl.exe" "$msvc_root/lib/arm64/msvcrt.lib"
 setup_vs_vars() { VS_INSTALL_PATH="$fixture/VS tools"; }
 echoWarning() { echo "$*" >&2; }
@@ -21,6 +24,7 @@ TYPE=vs ARCH=arm64ec PLATFORM=ARM64EC PARALLEL_MAKE=2
 # under errexit, instead of exiting during the optional directory probe.
 build > /dev/null
 [[ "$CC" == "$msvc_root/bin/Hostx64/arm64/cl.exe" ]]
+[[ "$(command -v MSBuild.exe)" == "$fixture/VS tools/MSBuild/Current/Bin/MSBuild.exe" ]]
 [[ "$_CL_" == *'/arm64EC'* ]]
 [[ "$LIB" == *'/lib/arm64'* ]]
 [[ "$LIB" == *'/ucrt/arm64'* ]]

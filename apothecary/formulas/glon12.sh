@@ -17,7 +17,7 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=12
+BUILD_ID=13
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -203,6 +203,22 @@ function build() {
         meson_args+=(--native-file "${machine_ini}")
     else
         meson_args+=(--cross-file "${machine_ini}")
+    fi
+    if [ "$backend" = vs ]; then
+        # Meson launches msbuild by name. setup_vs_vars discovers VS but does
+        # not add MSBuild's directory to PATH for the native Python process.
+        local vs_root msbuild_dir
+        vs_root="$(cygpath -u "$VS_INSTALL_PATH")"
+        for msbuild_dir in "$vs_root/MSBuild/Current/Bin" "$vs_root/MSBuild/${VS_VER:-17}.0/Bin"; do
+            if [ -f "$msbuild_dir/MSBuild.exe" ]; then
+                export PATH="$msbuild_dir:$PATH"
+                break
+            fi
+        done
+        if ! command -v MSBuild.exe >/dev/null 2>&1; then
+            echoError "glon12: MSBuild.exe not found under $vs_root/MSBuild"
+            return 1
+        fi
     fi
     # --vsenv is nice on a working VS; CI MSYS meson + our INCLUDE/LIB is enough.
     if ! meson "${meson_args[@]}" --vsenv; then
