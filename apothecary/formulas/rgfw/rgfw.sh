@@ -3,7 +3,7 @@
 FORMULA_TYPES=("osx" "vs" "msys2" "linux" "emscripten")
 FORMULA_DEPENDS=()
 VER=1.8.1
-BUILD_ID=1
+BUILD_ID=2
 SHA256="39f9dc8f89e86926fe2be4ffd6cdc877c1e7d179e24e3c803389ece50d6aef60"
 GIT_URL=https://github.com/ColleagueRiley/RGFW
 GIT_TAG=$VER
@@ -32,6 +32,8 @@ function build() {
                 -DENABLE_BITCODE=OFF -DENABLE_ARC=OFF -DCMAKE_C_FLAGS="${FLAG_RELEASE:-}")
             ;;
         vs)
+            # Keep slash-prefixed MSVC flags as flags, rather than MSYS paths.
+            export MSYS2_ARG_CONV_EXCL="${MSYS2_ARG_CONV_EXCL:+${MSYS2_ARG_CONV_EXCL};}-DCMAKE_C_FLAGS_RELEASE="
             args+=(-G "Visual Studio ${VS_VER_GEN}" -A "$PLATFORM"
                 -DCMAKE_C_FLAGS_RELEASE="${VS_C_FLAGS:-} ${FLAGS_RELEASE:-} ${EXCEPTION_FLAGS:-}")
             ;;
