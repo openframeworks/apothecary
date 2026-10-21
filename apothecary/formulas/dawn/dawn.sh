@@ -22,7 +22,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.07.31
 SOURCE_COMMIT=cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7
-BUILD_ID=6
+BUILD_ID=7
 DEFINES=""
 
 GIT_URL=https://github.com/google/dawn.git
@@ -88,6 +88,11 @@ function prepare() {
 
     # gcc-10 libstdc++ has no std::atomic::wait / notify_all (GCC 11).
     if [ "$TYPE" = "linux" ]; then
+        # GCC 10 cannot deduce this aggregate visitor's template arguments.
+        local visitor=src/tint/lang/core/ir/transform/multiplanar_external_texture.cc
+        if ! grep -q 'overloaded(Ts...) -> overloaded<Ts...>;' "$visitor"; then
+            patch -p1 < "$APOTHECARY_DIR/formulas/dawn/gcc10-visitor-deduction.patch" || return 1
+        fi
         local p
         p="${APOTHECARY_DIR}/formulas/dawn/gcc10-atomic-wait.patch"
         if [ -f "$p" ] && ! grep -q "mCompletedCv" src/dawn/platform/WorkerThread.h 2>/dev/null; then

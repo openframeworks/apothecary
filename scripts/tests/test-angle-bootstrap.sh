@@ -115,6 +115,18 @@ for xros_platform in XROS SIMULATOR_XROS; do
 done
 echo 'iOS 15, macOS 12, MSVC libc++ and visionOS SDK discovery args passed'
 
+# visionOS ABI names introduced by the GN patch must pass Rust's allowlist.
+mkdir -p build/config/apple build/rust
+printf "'xrsimulator',\n" > build/config/apple/sdk_info.py
+printf 'aarch64-apple-ios\n' > build/rust/known-target-triples.txt
+TYPE=xros _angle_patch_platform_sources
+TYPE=xros _angle_patch_platform_sources
+for triple in aarch64-apple-visionos aarch64-apple-visionos-sim x86_64-apple-visionos; do
+    grep -Fx "$triple" build/rust/known-target-triples.txt
+done
+[ "$(wc -l < build/rust/known-target-triples.txt | tr -d ' ')" = 4 ]
+echo 'visionOS Rust target registration is complete and repeatable'
+
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
 mkdir -p build/toolchain/win build/config/win "$fixture/sdk/Include/10.0.26100.0/um" "$fixture/sdk/Include/10.0.26100.0/ucrt" "$fixture/sdk/Lib/10.0.26100.0/um/x64" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64" "$fixture/sdk/Include/10.0.28000.0/um"
