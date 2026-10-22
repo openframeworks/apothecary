@@ -1,0 +1,11 @@
+--- a/src/tint/lang/core/ir/transform/multiplanar_external_texture.cc
++++ b/src/tint/lang/core/ir/transform/multiplanar_external_texture.cc
+@@ -45,6 +45,8 @@
+ struct overloaded : Ts... {
+     using Ts::operator()...;
+ };
++template <class... Ts>
++overloaded(Ts...) -> overloaded<Ts...>;
+
+ using MultiplanarTexture = tint::transform::multiplanar::MultiplanarTexture;
+ using YCBCRTexture = tint::transform::multiplanar::YCBCRTexture;

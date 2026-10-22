@@ -1,0 +1,50 @@
+--- a/src/dawn/native/Buffer.h
++++ b/src/dawn/native/Buffer.h
+@@ -29,8 +29,10 @@
+ #define SRC_DAWN_NATIVE_BUFFER_H_
+
+ #include <atomic>
++#include <condition_variable>
+ #include <functional>
+ #include <memory>
++#include <mutex>
+ #include <utility>
+
+ #include "partition_alloc/pointers/raw_ptr.h"
+@@ -310,6 +312,8 @@
+     // successful, that MapAsync() must have succeeded. We cannot guarantee, however, that Unmap()
+     // did not race with GetMappedRange(), but that is the responsibility of the caller.
+     std::atomic<BufferState> mState = BufferState::Unmapped;
++    std::mutex mMapCompletionMutex;
++    std::condition_variable mMapCompletionCv;
+
+     // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
+     // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
+--- a/src/dawn/native/Buffer.cpp
++++ b/src/dawn/native/Buffer.cpp
+@@ -322,8 +322,11 @@
+         }
+
+         DAWN_CHECK(buffer);
+-        MaybeError result = buffer->FinalizeMap(BufferState::Mapped);
+-        buffer->mState.notify_all();
++        MaybeError result = [&] {
++            std::lock_guard<std::mutex> stateLock(buffer->mMapCompletionMutex);
++            return buffer->FinalizeMap(BufferState::Mapped);
++        }();
++        buffer->mMapCompletionCv.notify_all();
+         if (result.IsError()) {
+             auto error = result.AcquireError();
+             DAWN_CHECK(error->GetType() != InternalErrorType::Validation);
+@@ -959,7 +962,10 @@
+         }
+
+         // Wait until FinalizeMap() finishes before falling through to a regular unmap.
+-        mState.wait(BufferState::PendingMap, std::memory_order::acquire);
++        std::unique_lock<std::mutex> stateLock(mMapCompletionMutex);
++        mMapCompletionCv.wait(stateLock, [this] {
++            return mState.load(std::memory_order_acquire) != BufferState::PendingMap;
++        });
+     }
+
+     // Wait for any active MapAsyncEvent callback to finish. Just acquiring and releasing the lock
