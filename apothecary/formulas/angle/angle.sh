@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=11
+BUILD_ID=14
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -257,7 +257,7 @@ function _angle_use_github_dependency_mirrors() {
 function _angle_cpu() {
     case "${ARCH}" in
         32|x86) echo "x86" ;;
-        arm64|arm64ec) echo "arm64" ;;
+        arm64|arm64ec|SIM_arm64) echo "arm64" ;;
         *) echo "x64" ;;
     esac
 }
@@ -315,9 +315,29 @@ function _angle_patch_platform_sources() {
         # is declared and implemented only for ANGLE_PLATFORM_MACOS.
         patch -p1 --forward --reject-file=- < "$formula_dir/catalyst-metal-vendor.patch" || return 1
     fi
+    if [ "$TYPE" = catos ] &&
+       ! grep -q 'sysctlbyname("hw.model"' src/common/apple_platform_utils.mm; then
+        patch -p1 --forward --reject-file=- < "$formula_dir/catalyst-machine-model.patch" || return 1
+    fi
     if [ "$TYPE" = xros ] &&
        ! grep -q "'xrsimulator'," build/config/apple/sdk_info.py; then
         patch -p1 --forward --reject-file=- < "$formula_dir/visionos-sdk-info.patch" || return 1
+    fi
+    if [ "$TYPE" = xros ]; then
+        # Chromium's compiler runtime selector predates visionOS. Device and
+        # simulator must use their own builtins archives, just like iOS/tvOS.
+        if ! grep -q 'target_platform == "xros"' build/config/clang/BUILD.gn; then
+            patch -p1 --forward --reject-file=- < "$formula_dir/visionos-clang-runtime.patch" || return 1
+        fi
+        # Keep the Rust allowlist consistent with apple-gn.patch's ABI names.
+        # GN validates these even when ANGLE has no Rust compilation targets.
+        local triple
+        [ -f build/rust/known-target-triples.txt ] || return 1
+        for triple in aarch64-apple-visionos aarch64-apple-visionos-sim x86_64-apple-visionos; do
+            if ! grep -Fxq "$triple" build/rust/known-target-triples.txt; then
+                printf '%s\n' "$triple" >> build/rust/known-target-triples.txt || return 1
+            fi
+        done
     fi
 }
 

@@ -61,8 +61,13 @@ else
         done
         if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
             echo "==== apo modular $lib ===="
-            TYPE="$TYPE" ARCH="${ARCHS[0]}" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
-                "$ROOT/apo" modular "$lib"
+            if [ "$lib" = angle ]; then
+                TYPE="$TYPE" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
+                    bash "$ROOT/apothecary/formulas/angle/stage-apple.sh"
+            else
+                TYPE="$TYPE" ARCH="${ARCHS[0]}" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
+                    "$ROOT/apo" modular "$lib"
+            fi
         fi
     done
 
