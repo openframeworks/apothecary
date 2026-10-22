@@ -115,6 +115,70 @@ for xros_platform in XROS SIMULATOR_XROS; do
 done
 echo 'iOS 15, macOS 12, MSVC libc++ and visionOS SDK discovery args passed'
 
+# Match the actual labels passed by the Apple workflow and engine, rather than
+# treating every simulator as ARCH=arm64. SIM_arm64 must not fall back to x64.
+for target in ios tvos xros; do
+    case "$target" in
+        ios) simulator_platform=SIMULATORARM64 ;;
+        tvos) simulator_platform=SIMULATORARM64_TVOS ;;
+        xros) simulator_platform=SIMULATOR_VISIONOS ;;
+    esac
+    simulator_args=$(TYPE="$target" ARCH=SIM_arm64 PLATFORM="$simulator_platform" _angle_gn_args)
+    [[ "$simulator_args" == *'target_cpu="arm64"'* ]]
+    [[ "$simulator_args" == *'target_environment="simulator"'* ]]
+    [[ "$simulator_args" != *'target_cpu="x64"'* ]]
+done
+intel_simulator_args=$(TYPE=ios ARCH=x86_64 PLATFORM=SIMULATOR64 _angle_gn_args)
+[[ "$intel_simulator_args" == *'target_cpu="x64"'* ]]
+echo 'Real ARM64 and Intel simulator labels select distinct GN CPUs'
+
+# visionOS ABI names introduced by the GN patch must pass Rust's allowlist.
+mkdir -p build/config/apple build/config/clang build/rust
+printf "'xrsimulator',\n" > build/config/apple/sdk_info.py
+printf 'aarch64-apple-ios\n' > build/rust/known-target-triples.txt
+cat > build/config/clang/BUILD.gn <<'EOF'
+clang_lib("compiler_builtins") {
+  if (is_mac) {
+    libname = "osx"
+  } else if (is_ios) {
+    if (target_platform == "iphoneos") {
+      if (target_environment == "simulator") {
+        libname = "iossim"
+      } else if (target_environment == "device") {
+        libname = "ios"
+      } else if (target_environment == "catalyst") {
+        libname = "osx"
+      } else {
+        assert(false, "unsupported target_environment=$target_environment")
+      }
+    } else if (target_platform == "tvos") {
+      if (target_environment == "simulator") {
+        libname = "tvossim"
+      } else if (target_environment == "device") {
+        libname = "tvos"
+      } else {
+        assert(false, "unsupported target_environment=$target_environment")
+      }
+    } else {
+      assert(false, "unsupported target_platform=$target_platform")
+    }
+  } else if (current_cpu != "ppc64" && current_cpu != "s390x") {
+    libname = "builtins"
+  }
+}
+
+EOF
+TYPE=xros _angle_patch_platform_sources
+TYPE=xros _angle_patch_platform_sources
+for triple in aarch64-apple-visionos aarch64-apple-visionos-sim x86_64-apple-visionos; do
+    grep -Fx "$triple" build/rust/known-target-triples.txt
+done
+[ "$(wc -l < build/rust/known-target-triples.txt | tr -d ' ')" = 4 ]
+grep -F 'libname = "xros"' build/config/clang/BUILD.gn
+grep -F 'libname = "xrossim"' build/config/clang/BUILD.gn
+[ "$(grep -c 'target_platform == "xros"' build/config/clang/BUILD.gn)" -eq 1 ]
+echo 'visionOS Rust and Clang runtime registration is complete and repeatable'
+
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
 mkdir -p build/toolchain/win build/config/win "$fixture/sdk/Include/10.0.26100.0/um" "$fixture/sdk/Include/10.0.26100.0/ucrt" "$fixture/sdk/Lib/10.0.26100.0/um/x64" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64" "$fixture/sdk/Include/10.0.28000.0/um"

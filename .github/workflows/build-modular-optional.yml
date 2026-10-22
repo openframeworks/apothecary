@@ -9,6 +9,8 @@ on:
       - 'apothecary/formulas/metalangle/**'
       - 'apothecary/formulas/dawn/**'
       - 'scripts/tests/test-angle-bootstrap.sh'
+      - 'scripts/tests/test-secure-compiler.sh'
+      - 'scripts/secure.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
       - 'scripts/build-modular-optional.sh'
@@ -35,6 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - run: bash scripts/tests/test-angle-bootstrap.sh
+      - run: bash scripts/tests/test-secure-compiler.sh
       - run: bash scripts/tests/test-modular-cache.sh
       - run: bash scripts/tests/test-apple-install-tools.sh
 
@@ -55,7 +58,7 @@ jobs:
           - {target: ios, runner: macos-14, xcode: Xcode_16.2.app, archs: 'arm64 x86_64 SIM_arm64', install: ios}
           - {target: tvos, runner: macos-14, xcode: Xcode_16.2.app, archs: 'arm64 SIM_arm64', install: tvos}
           - {target: catos, runner: macos-26, xcode: Xcode_26.6.app, archs: 'arm64 x86_64', install: catos}
-          - {target: xros, runner: macos-26, xcode: Xcode_26.6.app, archs: 'arm64 x86_64 SIM_arm64', install: xros}
+          - {target: xros, runner: macos-26, xcode: Xcode_26.6.app, archs: 'arm64 SIM_arm64', install: xros}
     env:
       TARGET: ${{ matrix.target }}
       TYPE: ${{ matrix.target }}
@@ -66,6 +69,9 @@ jobs:
       NO_FORCE: 1
     steps:
       - uses: actions/checkout@v7.0.1
+      - name: Verify ANGLE dynamic XCFramework staging
+        if: matrix.library == 'angle'
+        run: bash scripts/tests/test-angle-apple-stage.sh
       - name: Install
         run: ./scripts/${{ matrix.install }}/install.sh
       - name: Ensure Ninja is available for the cache fingerprint

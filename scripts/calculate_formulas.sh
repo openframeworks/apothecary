@@ -77,7 +77,7 @@ LINUX_MODULAR_FORMULAS=(
     pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny
     FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2
     uriparser cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
-    poco dawn opencv5
+    poco dawn opencv5 rgfw
 )
 
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
@@ -263,6 +263,9 @@ fi
 # Optional latest-modular packages. Not in core FORMULAS / Action bundle lists.
 # scripts/build-modular-optional.sh builds these on push to bleeding/master.
 FORMULAS_MODULAR_OPTIONAL=()
+if [[ "$TARGET" =~ ^(osx|macos|vs|msys2|linux|emscripten)$ ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("rgfw")
+fi
 if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("angle")
 fi

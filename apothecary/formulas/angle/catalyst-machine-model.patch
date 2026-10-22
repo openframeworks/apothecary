@@ -1,0 +1,44 @@
+--- a/src/common/apple_platform_utils.mm
++++ b/src/common/apple_platform_utils.mm
+@@ -12,6 +12,10 @@
+
+ #include <Foundation/Foundation.h>
+ #include <Metal/Metal.h>
++
++#if defined(ANGLE_PLATFORM_MACCATALYST)
++#    include <sys/sysctl.h>
++#endif
+
+ namespace angle
+ {
+@@ -122,6 +126,22 @@
+ #if defined(ANGLE_PLATFORM_MACOS) || defined(ANGLE_PLATFORM_MACCATALYST)
+ bool GetMacosMachineModel(std::string *outMachineModel)
+ {
++#if defined(ANGLE_PLATFORM_MACCATALYST)
++    // IOKit is not linked on Catalyst. Query the same hardware model via sysctl.
++    size_t modelSize = 0;
++    if (sysctlbyname("hw.model", nullptr, &modelSize, nullptr, 0) != 0 || modelSize == 0)
++    {
++        return false;
++    }
++    std::string model(modelSize, '\0');
++    if (sysctlbyname("hw.model", model.data(), &modelSize, nullptr, 0) != 0 || modelSize == 0)
++    {
++        return false;
++    }
++    model.resize(modelSize - 1);
++    *outMachineModel = model;
++    return true;
++#else
+     io_service_t platformExpert = IOServiceGetMatchingService(
+         kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
+
+@@ -144,6 +164,7 @@
+     CFRelease(modelData);
+
+     return true;
++#endif
+ }
+
+ bool ParseMacMachineModel(const std::string &identifier,

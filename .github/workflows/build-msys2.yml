@@ -71,6 +71,7 @@ jobs:
           msystem: ${{ matrix.flavor }}
           install: >-
             base-devel
+            pacman-contrib
             unzip
             dos2unix
             git
