@@ -51,7 +51,7 @@ trap 'rm -f "$manifest"' EXIT
     while IFS= read -r path; do
         printf '%s %s\n' "$path" "$(git hash-object "$path")"
     done < <(git ls-files -- apothecary/apothecary apothecary/configure apothecary/toolchains \
-        scripts/apo.sh scripts/build-modular-optional.sh scripts/modular-cache-key.sh scripts/cache-toolchain.sh \
+         .github/workflows/build-modular-optional.yml scripts/apo.sh scripts/build-modular-optional.sh scripts/modular-cache-key.sh scripts/cache-toolchain.sh \
         scripts/calculate_formulas.sh scripts/apple-install-tools.sh scripts/load.sh scripts/save.sh scripts/secure.sh \
         scripts/package-individual.sh scripts/export_config.sh ":(icase)scripts/$TARGET/install.sh" apo "${formula_paths[@]}" | LC_ALL=C sort -u)
     if [[ -n ${PLATFORM_ARTIFACT_CONTEXT:-} ]]; then

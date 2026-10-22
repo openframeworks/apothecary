@@ -13,11 +13,11 @@
 FORMULA_TYPES=("vs")
 FORMULA_DEPENDS=()
 
-VER=26.0.4
-SHA256=6d91541e086f29bb003602d2c81070f2be4c0693a90b181ca91e46fa3953fe78
+VER=26.2.4
+SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=6
+BUILD_ID=13
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
@@ -81,10 +81,10 @@ function build() {
     export VSINSTALLDIR="${VS_INSTALL_PATH:-${VS_BASE_PATH}}"
 
     # Core maps arm64ec → Host*/arm64. Prefer the real ARM64EC toolset
-    # (lib/arm64ec + cl that defaults to /arm64EC) so DLLs link with OF ARM64EC.
+    # when installed; otherwise /arm64EC selects the ABI on the ARM64 compiler.
     if [ "$ARCH" = "arm64ec" ]; then
         local ec_bin
-        ec_bin="$(cd "${VS_BIN_PATH}/../arm64ec" 2>/dev/null && pwd)"
+        ec_bin="$(cd "${VS_BIN_PATH}/../arm64ec" 2>/dev/null && pwd)" || ec_bin=""
         if [ -n "$ec_bin" ] && [ -f "${ec_bin}/cl.exe" ]; then
             VS_BIN_PATH="$ec_bin"
             echo "glon12: ARM64EC toolset ${VS_BIN_PATH}"
@@ -99,18 +99,20 @@ function build() {
 
     local lib_arch msvc_root kits kitver
     lib_arch="$(basename "${VS_BIN_PATH}")"
-    if [ "$ARCH" = "arm64ec" ] && [ "$lib_arch" != "arm64ec" ]; then
-        lib_arch="arm64ec"
+    # MSVC and Windows SDK ship the hybrid ARM64/ARM64EC runtime and import
+    # libraries under arm64, even when the compiler lives in bin/*/arm64ec.
+    if [ "$ARCH" = "arm64ec" ]; then
+        lib_arch="arm64"
     fi
     msvc_root="$(cd "${VS_BIN_PATH}/../../.." && pwd)"
-    kits="/c/Program Files (x86)/Windows Kits/10"
+    kits="${GLON12_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
     kitver="$(ls -1 "${kits}/Lib" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1)"
 
     local inc_w lib_w
     inc_w="$(cygpath -w "${msvc_root}/include")"
     lib_w="$(cygpath -w "${msvc_root}/lib/${lib_arch}")"
     if [ -n "${kitver}" ]; then
-        inc_w="${inc_w};$(cygpath -w "${kits}/Include/${kitver}/ucrt");$(cygpath -w "${kits}/Include/${kitver}/um");$(cygpath -w "${kits}/Include/${kitver}/shared")"
+        inc_w="${inc_w};$(cygpath -w "${kits}/Include/${kitver}/ucrt");$(cygpath -w "${kits}/Include/${kitver}/um");$(cygpath -w "${kits}/Include/${kitver}/shared");$(cygpath -w "${kits}/Include/${kitver}/winrt")"
         lib_w="${lib_w};$(cygpath -w "${kits}/Lib/${kitver}/ucrt/${lib_arch}");$(cygpath -w "${kits}/Lib/${kitver}/um/${lib_arch}")"
     fi
     export INCLUDE="${inc_w}${INCLUDE:+;${INCLUDE}}"
@@ -124,6 +126,9 @@ function build() {
     export LD="${VS_BIN_PATH}/link.exe"
     # Mesa adds /we4189. NDEBUG makes assert-only locals unused (C4189).
     # _CL_ is appended after the compiler command, so it beats /we4189.
+    # MSYS otherwise converts slash-prefixed environment flags into paths
+    # before launching native Meson/Python (e.g. /wd4189 becomes wd4189.obj).
+    export MSYS2_ENV_CONV_EXCL="${MSYS2_ENV_CONV_EXCL:+${MSYS2_ENV_CONV_EXCL};}CL;_CL_"
     export _CL_="${_CL_:+${_CL_} }/wd4189"
     if [ "$ARCH" = "arm64ec" ]; then
         export _CL_="${_CL_} /arm64EC"
@@ -141,7 +146,8 @@ function build() {
     local cpu_family cpu
     case "${ARCH}" in
         32|x86) cpu_family="x86"; cpu="i686" ;;
-        arm64|arm64ec) cpu_family="aarch64"; cpu="aarch64" ;;
+        arm64) cpu_family="aarch64"; cpu="aarch64" ;;
+        arm64ec) cpu_family="aarch64"; cpu="arm64ec" ;;
         *) cpu_family="x86_64"; cpu="x86_64" ;;
     esac
     local host_m host_family
@@ -167,12 +173,23 @@ function build() {
         echo "cpu_family = '${cpu_family}'"
         echo "cpu = '${cpu}'"
         echo "endian = 'little'"
+        if [ "$ARCH" = "arm64ec" ]; then
+            echo
+            echo "[built-in options]"
+            echo "c_link_args = ['/machine:arm64ec']"
+            echo "cpp_link_args = ['/machine:arm64ec']"
+        fi
     } > "${machine_ini}"
     echo "glon12: meson cpu_family=${cpu_family} (ARCH=${ARCH}) host=${host_family} file=${machine_ini}"
 
+    # Ninja derives lib.exe /MACHINE from cl's banner, which still says ARM64
+    # with /arm64EC. The VS backend honors host_machine.cpu=arm64ec for both
+    # DLLs and the static libraries in Mesa subprojects.
+    local backend=ninja
+    [ "$ARCH" != arm64ec ] || backend=vs
     local meson_args=(
         setup "${bdir}"
-        --backend=ninja
+        --backend="$backend"
         --buildtype=release
         --prefix="$(pwd)/${bdir}/Release"
         -Dgallium-drivers=d3d12
@@ -186,6 +203,22 @@ function build() {
         meson_args+=(--native-file "${machine_ini}")
     else
         meson_args+=(--cross-file "${machine_ini}")
+    fi
+    if [ "$backend" = vs ]; then
+        # Meson launches msbuild by name. setup_vs_vars discovers VS but does
+        # not add MSBuild's directory to PATH for the native Python process.
+        local vs_root msbuild_dir
+        vs_root="$(cygpath -u "$VS_INSTALL_PATH")"
+        for msbuild_dir in "$vs_root/MSBuild/Current/Bin" "$vs_root/MSBuild/${VS_VER:-17}.0/Bin"; do
+            if [ -f "$msbuild_dir/MSBuild.exe" ]; then
+                export PATH="$msbuild_dir:$PATH"
+                break
+            fi
+        done
+        if ! command -v MSBuild.exe >/dev/null 2>&1; then
+            echoError "glon12: MSBuild.exe not found under $vs_root/MSBuild"
+            return 1
+        fi
     fi
     # --vsenv is nice on a working VS; CI MSYS meson + our INCLUDE/LIB is enough.
     if ! meson "${meson_args[@]}" --vsenv; then
