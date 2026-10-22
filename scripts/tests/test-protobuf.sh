@@ -21,6 +21,11 @@ export TYPE ARCH PLATFORM
 export APOTHECARY_DIR="$ROOT/apothecary" DOWNLOADER_SCRIPT="$ROOT/scripts/downloader.sh"
 export SECURE_SCRIPT="$ROOT/scripts/secure.sh" CPP_STANDARD=17 C_STANDARD=17
 export MIN_SDK_VER=12.0 GCC_VERSION="${GCC_VERSION:-10}" PARALLEL_MAKE="${PARALLEL_MAKE:-4}"
+if [ "$TYPE" = linux ]; then
+    # Use the selected compiler for the consumer and metadata as well as for
+    # the formula's Linux toolchain; do not fall back to the runner default.
+    export CC="gcc-$GCC_VERSION" CXX="g++-$GCC_VERSION"
+fi
 if [ -n "${PROTOBUF_SOURCE_DIR:-}" ]; then
     cd "$PROTOBUF_SOURCE_DIR"
 else
