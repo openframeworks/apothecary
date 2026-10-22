@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=13
+BUILD_ID=14
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -324,6 +324,11 @@ function _angle_patch_platform_sources() {
         patch -p1 --forward --reject-file=- < "$formula_dir/visionos-sdk-info.patch" || return 1
     fi
     if [ "$TYPE" = xros ]; then
+        # Chromium's compiler runtime selector predates visionOS. Device and
+        # simulator must use their own builtins archives, just like iOS/tvOS.
+        if ! grep -q 'target_platform == "xros"' build/config/clang/BUILD.gn; then
+            patch -p1 --forward --reject-file=- < "$formula_dir/visionos-clang-runtime.patch" || return 1
+        fi
         # Keep the Rust allowlist consistent with apple-gn.patch's ABI names.
         # GN validates these even when ANGLE has no Rust compilation targets.
         local triple

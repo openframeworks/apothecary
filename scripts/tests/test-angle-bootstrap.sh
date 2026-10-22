@@ -133,16 +133,51 @@ intel_simulator_args=$(TYPE=ios ARCH=x86_64 PLATFORM=SIMULATOR64 _angle_gn_args)
 echo 'Real ARM64 and Intel simulator labels select distinct GN CPUs'
 
 # visionOS ABI names introduced by the GN patch must pass Rust's allowlist.
-mkdir -p build/config/apple build/rust
+mkdir -p build/config/apple build/config/clang build/rust
 printf "'xrsimulator',\n" > build/config/apple/sdk_info.py
 printf 'aarch64-apple-ios\n' > build/rust/known-target-triples.txt
+cat > build/config/clang/BUILD.gn <<'EOF'
+clang_lib("compiler_builtins") {
+  if (is_mac) {
+    libname = "osx"
+  } else if (is_ios) {
+    if (target_platform == "iphoneos") {
+      if (target_environment == "simulator") {
+        libname = "iossim"
+      } else if (target_environment == "device") {
+        libname = "ios"
+      } else if (target_environment == "catalyst") {
+        libname = "osx"
+      } else {
+        assert(false, "unsupported target_environment=$target_environment")
+      }
+    } else if (target_platform == "tvos") {
+      if (target_environment == "simulator") {
+        libname = "tvossim"
+      } else if (target_environment == "device") {
+        libname = "tvos"
+      } else {
+        assert(false, "unsupported target_environment=$target_environment")
+      }
+    } else {
+      assert(false, "unsupported target_platform=$target_platform")
+    }
+  } else if (current_cpu != "ppc64" && current_cpu != "s390x") {
+    libname = "builtins"
+  }
+}
+
+EOF
 TYPE=xros _angle_patch_platform_sources
 TYPE=xros _angle_patch_platform_sources
 for triple in aarch64-apple-visionos aarch64-apple-visionos-sim x86_64-apple-visionos; do
     grep -Fx "$triple" build/rust/known-target-triples.txt
 done
 [ "$(wc -l < build/rust/known-target-triples.txt | tr -d ' ')" = 4 ]
-echo 'visionOS Rust target registration is complete and repeatable'
+grep -F 'libname = "xros"' build/config/clang/BUILD.gn
+grep -F 'libname = "xrossim"' build/config/clang/BUILD.gn
+[ "$(grep -c 'target_platform == "xros"' build/config/clang/BUILD.gn)" -eq 1 ]
+echo 'visionOS Rust and Clang runtime registration is complete and repeatable'
 
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
