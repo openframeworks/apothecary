@@ -1,0 +1,38 @@
+name: Test optional Protobuf formula
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apothecary/formulas/protobuf/**'
+      - 'scripts/tests/test-protobuf.sh'
+      - 'scripts/tests/protobuf/**'
+      - '.github/workflows/test-protobuf.yml'
+  push:
+    branches: [bleeding]
+    paths:
+      - 'apothecary/formulas/protobuf/**'
+      - 'scripts/tests/test-protobuf.sh'
+      - 'scripts/tests/protobuf/**'
+      - '.github/workflows/test-protobuf.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-22.04, macos-14]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Linux build tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y gcc-10 g++-10 cmake ninja-build pkg-config unzip
+      - name: Build, relocate and consume full and lite runtimes
+        env:
+          GCC_VERSION: '10'
+          PARALLEL_MAKE: '4'
+        run: bash scripts/tests/test-protobuf.sh
