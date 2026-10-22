@@ -279,6 +279,10 @@ jobs:
           if-no-files-found: error
       - name: Upload to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
-        env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-        run: gh release upload latest-modular "out/oF_glon12_vs_${ARCH}.zip" --clobber --repo "$GITHUB_REPOSITORY"
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: out/oF_glon12_vs_${{ matrix.arch }}.zip
