@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=12
+BUILD_ID=13
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -257,7 +257,7 @@ function _angle_use_github_dependency_mirrors() {
 function _angle_cpu() {
     case "${ARCH}" in
         32|x86) echo "x86" ;;
-        arm64|arm64ec) echo "arm64" ;;
+        arm64|arm64ec|SIM_arm64) echo "arm64" ;;
         *) echo "x64" ;;
     esac
 }

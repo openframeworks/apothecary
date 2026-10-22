@@ -115,6 +115,23 @@ for xros_platform in XROS SIMULATOR_XROS; do
 done
 echo 'iOS 15, macOS 12, MSVC libc++ and visionOS SDK discovery args passed'
 
+# Match the actual labels passed by the Apple workflow and engine, rather than
+# treating every simulator as ARCH=arm64. SIM_arm64 must not fall back to x64.
+for target in ios tvos xros; do
+    case "$target" in
+        ios) simulator_platform=SIMULATORARM64 ;;
+        tvos) simulator_platform=SIMULATORARM64_TVOS ;;
+        xros) simulator_platform=SIMULATOR_VISIONOS ;;
+    esac
+    simulator_args=$(TYPE="$target" ARCH=SIM_arm64 PLATFORM="$simulator_platform" _angle_gn_args)
+    [[ "$simulator_args" == *'target_cpu="arm64"'* ]]
+    [[ "$simulator_args" == *'target_environment="simulator"'* ]]
+    [[ "$simulator_args" != *'target_cpu="x64"'* ]]
+done
+intel_simulator_args=$(TYPE=ios ARCH=x86_64 PLATFORM=SIMULATOR64 _angle_gn_args)
+[[ "$intel_simulator_args" == *'target_cpu="x64"'* ]]
+echo 'Real ARM64 and Intel simulator labels select distinct GN CPUs'
+
 # visionOS ABI names introduced by the GN patch must pass Rust's allowlist.
 mkdir -p build/config/apple build/rust
 printf "'xrsimulator',\n" > build/config/apple/sdk_info.py
