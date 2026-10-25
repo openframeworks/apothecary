@@ -14,6 +14,8 @@
 # and hardens GIF, IFF and Sun Raster decoding against malformed input.
 # 3.19.26 fixes TIFF/JPEG sampling mismatches and oversized ICO decoding;
 # adds selectable MSVC runtime support (the default preserves existing flags).
+# 3.19.27 fixes HEIF thumbnail handling and portable JXR builds; existing codec
+# selection stays unchanged (HEIF/JXL opt-in, JXR Windows-only).
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -22,11 +24,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.26
-SHA256="9524ff52e20704038b0205706858d02760f4f2caa2c2f59123d93a7ebf68c871"
+VER=3.19.27
+SHA256="bd27cacea016abf0293ae2c6f7eceb59fbf594c052909738deff81bbdd16cdeb"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=27
+BUILD_ID=28
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
