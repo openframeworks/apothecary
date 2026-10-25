@@ -10,6 +10,16 @@ on:
     paths-ignore:
       - "**/README.md"
   workflow_dispatch:
+    inputs:
+      arch:
+        description: Raspberry Pi architecture to rebuild
+        type: choice
+        default: all
+        options: [all, armv6l, armv7l, aarch64]
+      pi_zero_test:
+        description: Run ARM1176 CPU/runtime diagnostics (select armv6l)
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
@@ -37,7 +47,7 @@ jobs:
     outputs:
       workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
       build_needed: ${{ steps.plan.outputs.build_needed }}
-      matrix: ${{ steps.plan.outputs.matrix }}
+      matrix: ${{ steps.select.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -48,6 +58,26 @@ jobs:
         with:
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-linux-rpi.yml', job: 'build-linux-rpi'});
+      - name: Select manually requested architecture
+        id: select
+        env:
+          BUILD_MATRIX: ${{ steps.plan.outputs.matrix }}
+          RPI_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'all' }}
+          PI_ZERO_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.pi_zero_test || false }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          matrix = json.loads(os.environ['BUILD_MATRIX'])
+          arch = os.environ['RPI_ARCH']
+          if os.environ['PI_ZERO_TEST'] == 'true' and arch != 'armv6l':
+              raise SystemExit('Pi Zero diagnostics require arch=armv6l')
+          if arch != 'all':
+              matrix['include'] = [row for row in matrix['include'] if row['arch'] == arch]
+          if not matrix['include']:
+              raise SystemExit('Requested architecture is absent from the build plan')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('matrix=' + json.dumps(matrix) + '\n')
+          PY
       - uses: actions/upload-artifact@v7.0.0
         with:
           name: build-plan-${{ github.workflow }}
@@ -99,6 +129,12 @@ jobs:
       - name: Install target packages into sysroot
         run: sudo --preserve-env=SYSROOT,RPI_QEMU_ARCH ./scripts/linux/raspios/${{ matrix.arch }}/install.sh
 
+      - name: Test Pi Zero CPU and system runtime
+        if: github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l'
+        id: pi-zero-system
+        continue-on-error: true
+        run: bash scripts/tests/test-rpi-armv6-runtime.sh system
+
       - name: Build
         run: ./scripts/linux/raspios/${{ matrix.arch }}/build.sh
 
@@ -107,6 +143,29 @@ jobs:
 
       - name: Package canonical archive
         run: scripts/package.sh
+
+      - name: Test extracted Pi Zero package
+        if: github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l'
+        id: pi-zero-package
+        continue-on-error: true
+        run: bash scripts/tests/test-rpi-armv6-runtime.sh package
+
+      - name: Preserve Pi Zero diagnostics and build logs
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l'
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: pi-zero-armv6-diagnostics
+          path: |
+            ${{ runner.temp }}/pi-zero-armv6/
+            **/formula_armv6l.log
+            out/openFrameworksLibs*.tar.bz2*
+          if-no-files-found: warn
+
+      - name: Require Pi Zero runtime compatibility
+        if: always() && github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l' && (steps.pi-zero-system.outcome == 'failure' || steps.pi-zero-package.outcome == 'failure')
+        run: |
+          echo 'Pi Zero runtime diagnostics failed; see the per-CPU logs and summary.' >&2
+          exit 1
 
       - name: List output
         run: |
