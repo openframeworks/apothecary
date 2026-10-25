@@ -108,6 +108,12 @@
     "pattern": "v?(\\d+(?:\\.\\d+)+)"
   },
   {
+    "name": "RGFW",
+    "formula": "apothecary/formulas/rgfw/rgfw.sh",
+    "repo": "ColleagueRiley/RGFW",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
     "name": "RtAudio",
     "formula": "apothecary/formulas/rtAudio/rtAudio.sh",
     "repo": "thestk/rtaudio",
