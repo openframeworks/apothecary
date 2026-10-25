@@ -38,6 +38,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+      - name: Verify Brotli native tool selection
+        run: bash scripts/tests/test-brotli-msys2-tools.sh
       - name: Plan selected formula and toolchain builds
         id: plan
         uses: actions/github-script@v9.0.0

@@ -11,7 +11,7 @@ FORMULA_DEPENDS=()
 # define the version
 VER=1.2.1
 SHA256="98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f"
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 # tools for git use
@@ -52,6 +52,33 @@ function _brotli_msys2_cpu() {
         clangarm64) echo aarch64 ;;
         *) echoError "brotli: unsupported MSYS2 architecture ${ARCH}" >&2; return 1 ;;
     esac
+}
+
+# MSYS CMake emits POSIX paths which native Ninja cannot resolve. Keep CMake,
+# Ninja and pkg-config in the selected MinGW environment, regardless of PATH.
+function _brotli_msys2_tool() {
+    local tool
+    if [ -n "${MINGW_PREFIX:-}" ]; then
+        tool="$MINGW_PREFIX/bin/$1.exe"
+        if [ ! -x "$tool" ]; then
+            echo "brotli: missing native MSYS2 tool $tool" >&2
+            return 1
+        fi
+        printf '%s\n' "$tool"
+    else
+        command -v "$1"
+    fi
+}
+
+function _brotli_msys2_compiler() {
+    if [ -n "${CC:-}" ]; then
+        printf '%s\n' "$CC"
+    else
+        case "$ARCH" in
+            clang64|clangarm64) _brotli_msys2_tool clang ;;
+            *) _brotli_msys2_tool gcc ;;
+        esac
+    fi
 }
 
 # executed inside the lib src dir
@@ -112,14 +139,14 @@ function build() {
         cd ..
         rm -f CMakeCache.txt
     elif [ "$TYPE" == "msys2" ]; then
-        local bdir="build_${TYPE}_${ARCH}" compiler
+        local bdir="build_${TYPE}_${ARCH}" compiler cmake_bin ninja_bin
         _brotli_msys2_cpu >/dev/null || return 1
-        case "$ARCH" in
-            clang64|clangarm64) compiler="${CC:-clang}" ;;
-            *) compiler="${CC:-gcc}" ;;
-        esac
+        cmake_bin=$(_brotli_msys2_tool cmake) || return 1
+        ninja_bin=$(_brotli_msys2_tool ninja) || return 1
+        compiler=$(_brotli_msys2_compiler) || return 1
         DEFINES="-DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_DISABLE_TESTS=ON -DBROTLI_BUNDLED_MODE=OFF"
-        cmake -S . -B "$bdir" -G Ninja ${DEFINES} \
+        "$cmake_bin" -S . -B "$bdir" -G Ninja ${DEFINES} \
+            -DCMAKE_MAKE_PROGRAM="$ninja_bin" \
             -DCMAKE_C_COMPILER="$compiler" \
             -DCMAKE_C_STANDARD="${C_STANDARD}" \
             -DCMAKE_BUILD_TYPE=Release \
@@ -127,8 +154,8 @@ function build() {
             -DCMAKE_INSTALL_PREFIX="$PWD/$bdir/Release" \
             -DCMAKE_INSTALL_INCLUDEDIR=include \
             -DCMAKE_INSTALL_LIBDIR=lib || return 1
-        cmake --build "$bdir" --config Release --parallel "${PARALLEL_MAKE}" || return 1
-        cmake --install "$bdir" --config Release || return 1
+        "$cmake_bin" --build "$bdir" --config Release --parallel "${PARALLEL_MAKE}" || return 1
+        "$cmake_bin" --install "$bdir" --config Release || return 1
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
