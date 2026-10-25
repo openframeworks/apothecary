@@ -101,9 +101,23 @@ publish() {
     fi
 }
 
+validate_registry() {
+    local registry=$1 formulas=$2 problems
+    problems=$(jq -cn --argjson entries "$registry" --argjson formulas "$formulas" '
+      ($entries | map(.formula)) as $configured |
+      {missing: ($formulas - $configured), stale: ($configured - $formulas),
+       duplicate: ($configured | group_by(.) | map(select(length > 1) | .[0]))} |
+      to_entries | [.[] | .key as $kind | .value[] | "\($kind): \(.)"]') || return 1
+    if [[ $(jq length <<< "$problems") -gt 0 ]]; then
+        echo 'Registry must cover each formula exactly once' >&2
+        jq -r '.[]' <<< "$problems" >&2
+        return 1
+    fi
+}
+
 main() {
     local file_issue=0 repository=${GITHUB_REPOSITORY:-} only='[]' entry name pin choices best
-    local results='[]' errors='[]' skipped='[]' registry formulas configured tmp body updates failures
+    local results='[]' errors='[]' skipped='[]' registry formulas tmp body updates failures
     while [[ $# -gt 0 ]]; do
         case $1 in
             --file-issue) file_issue=1; shift ;;
@@ -123,10 +137,7 @@ main() {
     formulas=$(while IFS= read -r path; do
         if grep -q '^FORMULA_TYPES=' "$ROOT/$path"; then printf '%s\n' "$path"; fi
     done < <(git -C "$ROOT" ls-files 'apothecary/formulas/*.sh') | jq -Rsc 'split("\n") | map(select(length > 0)) | sort')
-    configured=$(jq -c '[.[].formula] | sort' <<< "$registry")
-    [[ $formulas == "$configured" ]] && jq -e 'map(.formula) | length == (unique | length)' <<< "$registry" >/dev/null || {
-        echo 'Registry must cover each formula exactly once' >&2; return 1;
-    }
+    validate_registry "$registry" "$formulas" || return 1
     if [[ $only != '[]' ]]; then
         jq -en --argjson entries "$registry" --argjson names "$only" '$names - [$entries[].name] | length == 0' >/dev/null || { echo 'Unknown library in --only' >&2; return 1; }
         registry=$(jq -c --argjson names "$only" '[.[] | select(.name as $n | $names | index($n))]' <<< "$registry")
