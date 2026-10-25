@@ -132,6 +132,29 @@ jobs:
       run: scripts/build.sh
       env:
         BUNDLE: ${{ matrix.bundle }}
+    - name: Package Poco modular library
+      if: matrix.bundle == 2
+      env:
+        PACKAGE_LIBS: poco
+        ALWAYS_BUILD: 1
+      run: |
+        bash scripts/package-individual.sh
+        python3 scripts/tests/check-poco-windows-package.py "out/oF_poco_vs_${ARCH}.zip" out/poco
+    - name: Upload Poco review package
+      if: matrix.bundle == 2
+      uses: actions/upload-artifact@v7.0.0
+      with:
+        name: poco-vs-${{ env.ARCH }}
+        path: out/oF_poco_vs_${{ env.ARCH }}.zip
+        if-no-files-found: error
+    - name: Publish Poco modular library
+      if: matrix.bundle == 2 && github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+      uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+      with:
+        token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+        tag_name: latest-modular
+        fail_on_unmatched_files: true
+        files: out/oF_poco_vs_${{ env.ARCH }}.zip
     - name: Publish platform artifact baseline
       env:
         BUNDLE: ${{ matrix.bundle }}
