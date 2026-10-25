@@ -1817,6 +1817,21 @@ function reindexMsys2GnuArchives() {
       echoWarning "  could not reindex [$archive]"
     fi
   done < <(find "$root/lib/msys2" -type f -name '*.a' ! -name '*.dll.a' -print 2>/dev/null)
+  # copy() records metadata before CPU promotion and archive normalization.
+  # Preserve its provenance, but hash the final archive bytes we will package.
+  local sidecar binary digest algorithm
+  while IFS= read -r sidecar; do
+    binary=$(awk -F '"' '/^binary = / {print $2; exit}' "$sidecar")
+    case "$binary" in *.a) ;; *) continue ;; esac
+    binary="$(dirname "$sidecar")/$binary"
+    [ -f "$binary" ] || continue
+    digest=$(calculate_hash "$binary") || return 1
+    algorithm=$(hash_type "$binary") || return 1
+    sed -i.bak \
+      -e "s|^binarySha = .*|binarySha = \"$digest\"|" \
+      -e "s|^shaType = .*|shaType = \"$algorithm\"|" "$sidecar" || return 1
+    rm -f "$sidecar.bak"
+  done < <(find "$root/lib/msys2" -type f -name '*.pkl' 2>/dev/null)
 }
 
 function promoteMsys2ArchPath() {

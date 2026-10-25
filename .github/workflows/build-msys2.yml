@@ -83,6 +83,7 @@ jobs:
             gcc:p
             cmake:p
             ninja:p
+            pkgconf:p
             gperf:p
             libxml2:p
             python3:p
@@ -133,6 +134,8 @@ jobs:
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: scripts/build.sh
+      - name: Verify packaged Brotli
+        run: bash scripts/tests/test-brotli-msys2.sh out
       - name: Publish platform artifact baseline
         continue-on-error: true
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
