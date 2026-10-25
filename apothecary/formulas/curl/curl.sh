@@ -11,13 +11,13 @@ FORMULA_DEPENDS=("openssl" "zlib" "brotli" "nghttp2" "nghttp3" "ngtcp2" "libssh2
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
-VER=8.22.0
-VER_D=8_22_0
-SHA1="284e444b67f676a281906cfc86e9672780555cd4"
-SHA256="d54dd598bf05927a726deb38df31c6a255ba83ff1de57c5d1464dac3ed8f44a1"
+VER=8.23.0
+VER_D=8_23_0
+SHA1="dde79cd20f6b0d6dc7f4dcc3dd71c472fc2ebcee"
+SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=11
+BUILD_ID=12
 DEFINES=""
 USE_OPENSSL=ON
 

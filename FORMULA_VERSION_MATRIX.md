@@ -51,7 +51,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **boost** | `1.92.0` | `boost-1.92.0` | updated | `FORMULA_TYPES=()` — unused. filesystem with header-only System; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.1` | `v1.2.1` | current | Security update for CVE-2026-111497; checked 2026-10-25. | https://github.com/google/brotli |
 | **cairo** | `1.18.4` | `1.18.4` | current | Latest stable. | https://gitlab.freedesktop.org/cairo/cairo |
-| **curl** | `8.22.0` | `curl-8_22_0` / `8.22.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
+| **curl** | `8.23.0` | `curl-8_22_0` / `8.23.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
 | **dawn** | `2026.07.31` (`cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7`) | Dawn `v20260911.162847` (rolling) | pinned-dev | ofLibs-era SHA. `DAWN_BUILD_MONOLITHIC_LIBRARY=STATIC`. Linux off until GCC 11. watchOS: no Metal. | https://dawn.googlesource.com/dawn |
 | **fmt** | `12.2.0` | `12.2.0` | current | Latest stable. | https://github.com/fmtlib/fmt |
 | **FreeImage** | `3.19.27` | `3.19.27` | current | OF fork (`danoli3/FreeImage`), checked 2026-10-25. HEIF thumbnail and portable JXR fixes; existing codec and MSVC runtime settings preserved. | https://github.com/danoli3/FreeImage |
@@ -215,7 +215,7 @@ formulas:
   boost:      { current: "1.92.0",   latest: "1.92.0",   status: updated, pin: "FORMULA_TYPES empty; unused" }
   brotli:     { current: "1.2.1",    latest: "1.2.1",    status: current }
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current }
-  curl:       { current: "8.22.0",   latest: "8.22.0",   status: current, pin: "none" }
+  curl:       { current: "8.23.0",   latest: "8.23.0",   status: current, pin: "none" }
   dawn:       { current: "2026.07.31", latest: "v20260911.162847", status: pinned-dev, pin: "SHA; Linux needs GCC 11" }
   fmt:        { current: "12.2.0",   latest: "12.2.0",   status: current }
   FreeImage:  { current: "3.19.27",  latest: "3.19.27",  status: current, pin: "OF fork; JXR Windows-only; LibRaw default since 3.19.18" }
