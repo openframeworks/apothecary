@@ -20,6 +20,8 @@ permissions:
   actions: read
 
 env:
+  # Bump for compiler/SDK setup or build-command changes not declared below.
+  BUILD_PROFILE_ID: "1"
   TARGET: linux
   TYPE: linux
   GCC: gcc10

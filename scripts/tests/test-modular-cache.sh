@@ -40,6 +40,9 @@ export PATH="$TEST_ROOT/bin:$PATH" OUTPUT_FOLDER="$TEST_ROOT/out"
 mkdir -p "$TEST_ROOT/scripts/tvOS"
 printf 'installer-v1\n' > "$TEST_ROOT/scripts/tvOS/install.sh"
 printf 'helper-v1\n' > "$TEST_ROOT/scripts/apple-install-tools.sh"
+mkdir -p "$TEST_ROOT/.github/workflows"
+printf 'optional-workflow-v1\n' > "$TEST_ROOT/.github/workflows/build-modular-optional.yml"
+printf 'core-workflow-v1\n' > "$TEST_ROOT/.github/workflows/build-osx.yml"
 git -C "$TEST_ROOT" init -q
 git -C "$TEST_ROOT" add .
 key() { bash "$TEST_ROOT/scripts/modular-cache-key.sh" example; }
@@ -50,6 +53,10 @@ printf changed >> "$TEST_ROOT/scripts/tvOS/install.sh"
 sed -i.bak '$d' "$TEST_ROOT/scripts/tvOS/install.sh"
 [[ $(TARGET=tvos key) == "$tvos_base" ]]
 base=$(key)
+[[ $(BUILD_PROFILE_ID=1 key) == "$base" ]]
+[[ $(BUILD_PROFILE_ID=2 key) != "$base" ]]
+printf '# upload-only change\n' >> "$TEST_ROOT/.github/workflows/build-modular-optional.yml"
+[[ $(key) == "$base" ]]
 printf changed >> "$TEST_ROOT/scripts/apple-install-tools.sh"
 [[ $(key) != "$base" ]]
 sed -i.bak '$d' "$TEST_ROOT/scripts/apple-install-tools.sh"
@@ -71,6 +78,9 @@ sed -i.bak '$d' "$TEST_ROOT/apothecary/formulas/example/example.sh"
 [[ $(WindowsSDKVersion=10.0.26100.0 key) != "$base" ]]
 printf 'NDK=29\nANDROID_API=25\n' > "$TEST_ROOT/platform-context"
 platform_base=$(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key)
+printf '# upload-only change\n' >> "$TEST_ROOT/.github/workflows/build-osx.yml"
+[[ $(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key) == "$platform_base" ]]
+[[ $(BUILD_PROFILE_ID=2 PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key) != "$platform_base" ]]
 printf 'ANDROID_API=26\n' >> "$TEST_ROOT/platform-context"
 [[ $(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key) != "$platform_base" ]]
 mkdir -p "$TEST_ROOT/apothecary/formulas/_depends"

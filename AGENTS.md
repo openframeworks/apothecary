@@ -121,3 +121,10 @@ Release records do not expire with age. Rebuild on changed inputs or missing/inv
 verified outputs, or by explicit manual/version-tag publication. Keep SDK and
 compiler versions declared in configuration; silent runner updates are not
 discovered when a native job is skipped.
+
+Workflow build profiles use `BUILD_PROFILE_ID` (default `1`). Bump it when a
+compiler/SDK installation step or build command changes in a way not already
+represented by the runner, container, shell, matrix row or declared environment.
+Workflow comments, scheduling, upload and publication steps do not invalidate
+compilation. Formula source, version, `BUILD_ID`, patches and build/toolchain
+scripts still invalidate selected formulas and their reverse dependencies.

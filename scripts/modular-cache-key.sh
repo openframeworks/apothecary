@@ -33,13 +33,11 @@ collect_formula() {
     for dependency in $depends; do collect_formula "$dependency"; done
 }
 collect_formula "$LIBRARY"
-workflow_file="${GITHUB_WORKFLOW_REF:-}"
-workflow_file="${workflow_file%%@*}"
-workflow_file="${workflow_file##*/}"
 manifest=$(mktemp)
 trap 'rm -f "$manifest"' EXIT
 {
     printf 'modular-cache-v1\n%s\n%s\n%s\n' "$LIBRARY" "$TARGET" "$OPTIONAL_ARCHS"
+    printf 'build-profile=%s\n' "${BUILD_PROFILE_ID:-1}"
     printf '%s\n' "${RUNNER_OS:-$(uname -s)}" "${RUNNER_ARCH:-$(uname -m)}" "${ImageVersion:-}"
     if [[ -n ${PLATFORM_ARTIFACT_CONTEXT:-} ]]; then
         cat "$PLATFORM_ARTIFACT_CONTEXT"
@@ -51,7 +49,7 @@ trap 'rm -f "$manifest"' EXIT
     while IFS= read -r path; do
         printf '%s %s\n' "$path" "$(git hash-object "$path")"
     done < <(git ls-files -- apothecary/apothecary apothecary/configure apothecary/toolchains \
-         .github/workflows/build-modular-optional.yml scripts/apo.sh scripts/build-modular-optional.sh scripts/modular-cache-key.sh scripts/cache-toolchain.sh \
+         scripts/apo.sh scripts/build-modular-optional.sh scripts/modular-cache-key.sh scripts/cache-toolchain.sh \
         scripts/calculate_formulas.sh scripts/apple-install-tools.sh scripts/load.sh scripts/save.sh scripts/secure.sh \
         scripts/package-individual.sh scripts/export_config.sh ":(icase)scripts/$TARGET/install.sh" apo "${formula_paths[@]}" | LC_ALL=C sort -u)
     if [[ -n ${PLATFORM_ARTIFACT_CONTEXT:-} ]]; then
@@ -59,7 +57,7 @@ trap 'rm -f "$manifest"' EXIT
             printf '%s %s\n' "$path" "$(git hash-object "$path")"
         done < <(git ls-files -- scripts/build.sh scripts/package.sh scripts/artifact \
             scripts/platform-artifact-manifest.sh scripts/platform-artifacts.cjs \
-            .github/actions/platform-artifacts ".github/workflows/build-$TARGET.yml" ".github/workflows/$workflow_file" \
+            .github/actions/platform-artifacts \
             ":(icase)scripts/$TARGET" | LC_ALL=C sort -u)
     fi
 } > "$manifest"

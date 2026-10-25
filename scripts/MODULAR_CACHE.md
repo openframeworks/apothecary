@@ -116,3 +116,22 @@ These jobs use native Windows Python/Meson/Ninja with MSYS only as the shell.
 The cache context records their versions, the installed MSVC toolset and Windows
 SDK directories; architecture, formula and build infrastructure hashes are also
 part of the key. A cache hit still repackages and verifies the ZIP.
+
+## Release planner build profiles
+
+Core build planning uses `BUILD_PROFILE_ID` in each workflow environment. Increment
+it for significant compiler/SDK setup or build-command changes that are not
+already represented by the declared runner, container, shell, matrix row or
+build environment. A job-level value can restrict the rebuild to that job.
+Formula `BUILD_ID` remains the marker for changes to an individual library.
+
+Workflow text, triggers and publishing/upload steps are excluded from compilation
+fingerprints. Adding a matrix row builds that new variant without invalidating
+unchanged rows. Formula sources, patches, dependencies and shared build/toolchain
+scripts remain inputs. Manual dispatch and version-tag publication still rebuild.
+
+Legacy records are checked against their exact recorded source commit before
+translating their fingerprints. Their published asset identities and SHA-256
+values must still match. Missing history, an invalid record or an unavailable
+commit falls back to rebuilding; the profile migration does not trust version
+strings alone.

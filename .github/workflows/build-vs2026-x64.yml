@@ -20,6 +20,8 @@ permissions:
   contents: write
 
 env:
+  # Bump for compiler/SDK setup or build-command changes not declared below.
+  BUILD_PROFILE_ID: "1"
   TARGET: "vs"
   VS_STUDIO: "2026"
   VS_VER: 18
