@@ -12,6 +12,7 @@ on:
       - 'scripts/tests/test-angle-bootstrap.sh'
       - 'scripts/tests/test-secure-compiler.sh'
       - 'scripts/tests/test-glon12-toolchain.sh'
+      - 'scripts/tests/test-glon12-runtime.sh'
       - 'scripts/secure.sh'
       - 'scripts/modular-cache-key.sh'
       - 'scripts/cache-toolchain.sh'
@@ -41,6 +42,7 @@ jobs:
       - run: bash scripts/tests/test-angle-bootstrap.sh
       - run: bash scripts/tests/test-secure-compiler.sh
       - run: bash scripts/tests/test-glon12-toolchain.sh
+      - run: bash scripts/tests/test-glon12-runtime.sh
       - run: bash scripts/tests/test-modular-cache.sh
       - run: bash scripts/tests/test-apple-install-tools.sh
 
@@ -228,6 +230,8 @@ jobs:
           python_dir=$(dirname "$(cygpath -u "$WINDOWS_PYTHON")")
           printf '%s\n' "$(cygpath -w "$python_dir")" "$(cygpath -w "$python_dir/Scripts")" >> "$GITHUB_PATH"
           export PATH="$python_dir:$python_dir/Scripts:$PATH"
+          sdk_root="${GLON12_WINDOWS_SDK_ROOT:-${WindowsSdkDir:-${WINDOWSSDKDIR:-/c/Program Files (x86)/Windows Kits/10}}}"
+          sdk_root=$(cygpath -u "$sdk_root")
           context="$(cygpath -u "$RUNNER_TEMP")/glon12-toolchain.txt"
           {
             python --version
@@ -235,7 +239,12 @@ jobs:
             ninja --version
             '/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe' -latest -property installationVersion
             ls -1 '/c/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC'
-            ls -1 '/c/Program Files (x86)/Windows Kits/10/Include'
+            ls -1 "$sdk_root/Include"
+            # Cached packages include the SDK validator, whose bytes can
+            # change independently of the installed SDK directory names.
+            while IFS= read -r validator; do
+              sha256sum "$validator"
+            done < <(find "$sdk_root/bin" -type f -iname dxil.dll | LC_ALL=C sort)
           } > "$context"
           echo "PLATFORM_ARTIFACT_CONTEXT=$context" >> "$GITHUB_ENV"
       - name: Compute exact modular cache key
@@ -265,6 +274,7 @@ jobs:
           unzip -Z1 "$package" > "$listing"
           grep -iE '/opengl32[.]dll$' "$listing"
           grep -iE '/libgallium_wgl[.]dll$' "$listing"
+          grep -iE '/dxil[.]dll$' "$listing"
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5

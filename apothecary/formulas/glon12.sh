@@ -4,7 +4,7 @@
 # https://docs.mesa3d.org/drivers/d3d12.html
 #
 # Brought forward from origin/openGLonDX12 @ 44174899.
-# VS-only. Ships opengl32.dll + libgallium_wgl.dll next to the OF .exe so
+# VS-only. Ships opengl32.dll + libgallium_wgl.dll + dxil.dll next to the OF .exe so
 # GLFW/GLEW keep working; the system OpenGL ICD is not used.
 #
 # Host needs: meson, ninja (or Meson VS backend + MSBuild), WinFlexBison
@@ -17,10 +17,42 @@ VER=26.2.4
 SHA256=bce5f7fbebb934373b86c999a064d52fb5065878dc57f287f95346648ec832e9
 WINFLEX_VER=2.5.25
 WINFLEX_SHA256=8d324b62be33604b2c45ad1dd34ab93d722534448f55a16ca7292de32b6ac135
-BUILD_ID=13
+BUILD_ID=14
 DEFINES="-Dgallium-drivers=d3d12 -Dllvm=disabled -Dplatforms=windows"
 
 GIT_URL=https://gitlab.freedesktop.org/mesa/mesa
+
+function _glon12_sdk_root() {
+    local root="${GLON12_WINDOWS_SDK_ROOT:-${WindowsSdkDir:-${WINDOWSSDKDIR:-/c/Program Files (x86)/Windows Kits/10}}}"
+    if command -v cygpath >/dev/null 2>&1; then
+        root=$(cygpath -u "$root") || return 1
+    fi
+    printf '%s\n' "${root%/}"
+}
+
+function _glon12_sdk_version() {
+    local root="$1" version
+    version="${GLON12_WINDOWS_SDK_VERSION:-${WindowsSDKVersion:-${WINDOWSSDKVERSION:-}}}"
+    version="${version%\\}"
+    version="${version%/}"
+    if [ -z "$version" ]; then
+        version=$(ls -1 "$root/Lib" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1) || return 1
+    fi
+    if [ -z "$version" ] || [ ! -d "$root/Lib/$version" ]; then
+        echo "glon12: Windows SDK version not installed: $root/Lib/$version" >&2
+        return 1
+    fi
+    printf '%s\n' "$version"
+}
+
+function _glon12_dxil_arch() {
+    case "$ARCH" in
+        32|x86) echo x86 ;;
+        64|x64|x86_64|arm64ec) echo x64 ;;
+        arm64) echo arm64 ;;
+        *) echo "glon12: unsupported DXIL runtime architecture $ARCH" >&2; return 1 ;;
+    esac
+}
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -105,8 +137,8 @@ function build() {
         lib_arch="arm64"
     fi
     msvc_root="$(cd "${VS_BIN_PATH}/../../.." && pwd)"
-    kits="${GLON12_WINDOWS_SDK_ROOT:-/c/Program Files (x86)/Windows Kits/10}"
-    kitver="$(ls -1 "${kits}/Lib" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -1)"
+    kits=$(_glon12_sdk_root) || return 1
+    kitver=$(_glon12_sdk_version "$kits") || return 1
 
     local inc_w lib_w
     inc_w="$(cygpath -w "${msvc_root}/include")"
@@ -233,14 +265,26 @@ function build() {
 
 function copy() {
     echo "copy glon12 -> $1"
-    mkdir -p "$1/include" "$1/bin/$TYPE/$PLATFORM" "$1/lib/$TYPE/$PLATFORM"
+    local kits kitver runtime_arch validator destination
+    kits=$(_glon12_sdk_root) || return 1
+    kitver=$(_glon12_sdk_version "$kits") || return 1
+    runtime_arch=$(_glon12_dxil_arch) || return 1
+    # ARM64EC can load the SDK's x64 validator; a pure ARM64 DLL uses a
+    # different ABI. The SDK does not ship a separate arm64ec bin directory.
+    validator="$kits/bin/$kitver/$runtime_arch/dxil.dll"
+    if [ ! -s "$validator" ]; then
+        echo "glon12: required DXIL shader validator missing: $validator" >&2
+        return 1
+    fi
+    destination="$1/bin/$TYPE/$PLATFORM"
+    mkdir -p "$1/include" "$destination" "$1/lib/$TYPE/$PLATFORM" || return 1
     . "$SECURE_SCRIPT"
 
     local bdir="build_${TYPE}_${PLATFORM}"
     local copied=0
     local f
     while IFS= read -r f; do
-        cp -v "$f" "$1/bin/$TYPE/$PLATFORM/"
+        cp -v "$f" "$destination/" || return 1
         copied=1
     done < <(find "${bdir}" -type f \( -iname 'opengl32.dll' -o -iname 'libgallium_wgl.dll' -o -iname 'libglapi.dll' \) 2>/dev/null)
 
@@ -250,9 +294,21 @@ function copy() {
         exit 1
     fi
 
-    if [ -f "$1/bin/$TYPE/$PLATFORM/opengl32.dll" ]; then
-        secure "$1/bin/$TYPE/$PLATFORM/opengl32.dll" "glon12.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-    fi
+    for f in opengl32.dll libgallium_wgl.dll; do
+        if [ ! -s "$destination/$f" ]; then
+            echo "glon12: required Mesa runtime missing: $destination/$f" >&2
+            return 1
+        fi
+    done
+    cp -v "$validator" "$destination/dxil.dll" || return 1
+    secure "$destination/opengl32.dll" "glon12.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256" || return 1
+    {
+        pkl_property windowsSdkVersion "$kitver"
+        pkl_property dxilSdkArchitecture "$runtime_arch"
+        pkl_property dxilBinary "dxil.dll"
+        pkl_property dxilBinarySha "$(calculate_hash "$destination/dxil.dll")"
+        pkl_property dxilShaType "$(hash_type "$destination/dxil.dll")"
+    } >> "$destination/glon12.pkl" || return 1
 
     if [ -d "$1/license" ]; then
         rm -rf "$1/license"
@@ -273,7 +329,9 @@ function load() {
     . "$LOAD_SCRIPT"
     LOAD_RESULT=$(loadsave ${TYPE} "glon12" ${ARCH} ${VER} "$LIBS_DIR_REAL/glon12/bin/$TYPE/$PLATFORM" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
-    if [ "$PREBUILT" -eq 1 ]; then
+    local runtime_dir="$LIBS_DIR_REAL/glon12/bin/$TYPE/$PLATFORM"
+    if [ "$PREBUILT" -eq 1 ] && [ -s "$runtime_dir/opengl32.dll" ] &&
+       [ -s "$runtime_dir/libgallium_wgl.dll" ] && [ -s "$runtime_dir/dxil.dll" ]; then
         echo 1
     else
         TARGET_DIR="$LIBS_DIR_REAL/$1/bin/$TYPE/$PLATFORM"
