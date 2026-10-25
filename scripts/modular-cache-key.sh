@@ -45,7 +45,7 @@ trap 'rm -f "$manifest"' EXIT
         cat "$PLATFORM_ARTIFACT_CONTEXT"
     fi
     # Include all caller build settings, excluding credentials and job metadata.
-    env | LC_ALL=C sort | sed -En '/^(OPENCV_.*|ANGLE_.*|CPP_STANDARD|C_STANDARD|CFLAGS|CXXFLAGS|CPPFLAGS|LDFLAGS|FLAGS_.*|FLAG_.*|VS_VER|MULTITHREADED_TYPE|PTHREADS_ENABLED|DEVELOPER_DIR|SDKROOT|.*DEPLOYMENT_TARGET)=/p'
+    env | LC_ALL=C sort | sed -En '/^(OPENCV_.*|ANGLE_.*|GLON12_.*|WindowsSdkDir|WINDOWSSDKDIR|WindowsSDKVersion|WINDOWSSDKVERSION|CPP_STANDARD|C_STANDARD|CFLAGS|CXXFLAGS|CPPFLAGS|LDFLAGS|FLAGS_.*|FLAG_.*|VS_VER|MULTITHREADED_TYPE|PTHREADS_ENABLED|DEVELOPER_DIR|SDKROOT|.*DEPLOYMENT_TARGET)=/p'
     if [[ -z ${PLATFORM_ARTIFACT_CONTEXT:-} ]]; then bash scripts/cache-toolchain.sh; fi
     # Shared build/packaging infrastructure and the selected formula trees.
     while IFS= read -r path; do

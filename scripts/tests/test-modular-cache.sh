@@ -66,6 +66,9 @@ sed -i.bak '$d' "$TEST_ROOT/apothecary/formulas/example/example.sh"
 [[ $(OPTIONAL_ARCHS=arm64 key) != "$base" ]]
 [[ $(TARGET=ios key) != "$base" ]]
 [[ $(CFLAGS=-O3 key) != "$base" ]]
+[[ $(GLON12_WINDOWS_SDK_VERSION=10.0.26100.0 key) != "$base" ]]
+[[ $(GLON12_WINDOWS_SDK_ROOT=/selected/sdk key) != "$base" ]]
+[[ $(WindowsSDKVersion=10.0.26100.0 key) != "$base" ]]
 printf 'NDK=29\nANDROID_API=25\n' > "$TEST_ROOT/platform-context"
 platform_base=$(PLATFORM_ARTIFACT_CONTEXT="$TEST_ROOT/platform-context" key)
 printf 'ANDROID_API=26\n' >> "$TEST_ROOT/platform-context"
