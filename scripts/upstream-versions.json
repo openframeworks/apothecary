@@ -84,6 +84,12 @@
     "pattern": "v?(\\d+(?:\\.\\d+)+)"
   },
   {
+    "name": "OpenAL",
+    "formula": "apothecary/formulas/openal/openal.sh",
+    "repo": "kcat/openal-soft",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
     "name": "OpenCV",
     "formula": "apothecary/formulas/opencv/opencv.sh",
     "repo": "opencv/opencv",

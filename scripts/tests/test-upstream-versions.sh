@@ -8,6 +8,21 @@ assert() {
     if "$@"; then passed=$((passed + 1)); else echo "FAIL: $*" >&2; exit 1; fi
 }
 entry='{"repo":"owner/project","pattern":"v?(\\d+(?:\\.\\d+)+)"}'
+# Registry errors must name omitted, stale and repeated formulas before any API work.
+registry='[{"formula":"formulas/one.sh"},{"formula":"formulas/two.sh"}]'
+formulas='["formulas/one.sh","formulas/two.sh"]'
+assert validate_registry "$registry" "$formulas"
+for problem in missing stale duplicate; do
+    case $problem in
+        missing) invalid='[{"formula":"formulas/one.sh"}]'; expected='missing: formulas/two.sh' ;;
+        stale) invalid='[{"formula":"formulas/one.sh"},{"formula":"formulas/two.sh"},{"formula":"formulas/old.sh"}]'; expected='stale: formulas/old.sh' ;;
+        duplicate) invalid='[{"formula":"formulas/one.sh"},{"formula":"formulas/two.sh"},{"formula":"formulas/two.sh"}]'; expected='duplicate: formulas/two.sh' ;;
+    esac
+    if validate_registry "$invalid" "$formulas" 2>"$TEST_TMP/registry-error"; then
+        echo "FAIL: $problem registry accepted" >&2; exit 1
+    fi
+    assert grep -Fxq "$expected" "$TEST_TMP/registry-error"
+done
 assert json -en 'include "upstream-versions"; ("1.10" | version("(\\d+(?:\\.\\d+)+)")) > ("1.9.9" | version("(\\d+(?:\\.\\d+)+)"))' >/dev/null
 assert json -en 'include "upstream-versions"; ("1.2" | version("(\\d+(?:\\.\\d+)+)")) == ("1.2.0" | version("(\\d+(?:\\.\\d+)+)"))' >/dev/null
 for tag in v1.2.3-rc1 v1.2.3-beta master deadbeef v1.2.3-dev; do
