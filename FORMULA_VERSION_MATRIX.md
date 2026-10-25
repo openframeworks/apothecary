@@ -57,7 +57,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **FreeImage** | `3.19.27` | `3.19.27` | current | OF fork (`danoli3/FreeImage`), checked 2026-10-25. HEIF thumbnail and portable JXR fixes; existing codec and MSVC runtime settings preserved. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.14.3` | `VER-2-14-3` | current | Latest 2.14. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
-| **glon12** | Mesa `26.2.4` | Mesa `26.2.4` | pinned-dev | VS-only GL→D3D12. SHA256 `bce5f7fb…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
+| **glon12** | Mesa `26.2.5` | Mesa `26.2.5` | pinned-dev | VS-only GL→D3D12. SHA256 `794b3d17…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
 | **glfw** | `3.5.1` | `3.5.1` | current | Latest stable. | https://github.com/glfw/glfw |
 | **glm** | `1.0.3` | `1.0.3` | current | Latest stable. | https://github.com/g-truc/glm |
 | **gstreamer** | `1.28.8` (`1b2a95a1…`) | `1.28.8` stable; `1.29.2` newer | updated | linux/osx only. Stable 1.x update. Updated source pin; build validation required. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
@@ -134,7 +134,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Item | Pinned → candidate | Why it is a project |
 |------|--------------------|---------------------|
-| **glon12** | Mesa 26.2.4 | Updated; native VS GL→D3D12 validation pending. |
+| **glon12** | Mesa 26.2.5 | Updated; native VS GL→D3D12 validation pending. |
 | **shaderc** | SHA `ff84893` → `v2026.4` | Formula unused (`FORMULA_TYPES=()`). |
 | **dawn / angle** | current SHAs → newer Chromium | Rolling; needs `AGENTS.md` pin table + CI. |
 | **tess2 / rtAudio `GIT_TAG=master`** | tag vs `VER` | Align git tag with `VER` so checkouts are reproducible. |
@@ -221,7 +221,7 @@ formulas:
   FreeImage:  { current: "3.19.27",  latest: "3.19.27",  status: current, pin: "OF fork; JXR Windows-only; LibRaw default since 3.19.18" }
   freetype:   { current: "2.14.3",   latest: "2.14.3",   status: current }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current }
-  glon12:     { current: "26.2.4",   latest: "26.2.4",   status: pinned-dev, pin: "Mesa SHA; VS-only" }
+  glon12:     { current: "26.2.5",   latest: "26.2.5",   status: pinned-dev, pin: "Mesa SHA; VS-only" }
   glfw:       { current: "3.5.1",    latest: "3.5.1",    status: current }
   glm:        { current: "1.0.3",    latest: "1.0.3",    status: current }
   gstreamer:  { current: "1.28.8",   latest: "1.28.8",   status: updated, pin: "none documented — not bumped" }
