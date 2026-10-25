@@ -12,6 +12,8 @@
 # 3.19.21 vendors OpenEXR 3.5.2 and libpng 1.6.59; adds CR3/X3F RAW support.
 # 3.19.25 adds channel-count queries, HEIF/AVIF/JXL codecs (disabled by default),
 # and hardens GIF, IFF and Sun Raster decoding against malformed input.
+# 3.19.26 fixes TIFF/JPEG sampling mismatches and oversized ICO decoding;
+# adds selectable MSVC runtime support (the default preserves existing flags).
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -20,11 +22,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.25
-SHA256="1736f4d91b80675d7c9a707484e0b84d366acb6ab8d92f5fcf1623d2f2af82b1"
+VER=3.19.26
+SHA256="9524ff52e20704038b0205706858d02760f4f2caa2c2f59123d93a7ebf68c871"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=26
+BUILD_ID=27
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
