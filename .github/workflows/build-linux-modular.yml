@@ -16,6 +16,10 @@ permissions:
   contents: write
   actions: read
 
+env:
+  # Bump for compiler/SDK setup or build-command changes not declared below.
+  BUILD_PROFILE_ID: "1"
+
 jobs:
   pre-check:
     runs-on: ubuntu-latest

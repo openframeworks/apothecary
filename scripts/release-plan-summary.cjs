@@ -2,7 +2,7 @@
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const literal = value => String(value ?? '').trim().replace(/^(['"])(.*?)\1(?:\s+#.*)?$/, '$2') || 'Not declared';
 const variant = row => Object.entries(row).map(([key,value]) => `${key}=${typeof value === 'object' ? JSON.stringify(value) : value}`).join(', ') || 'default';
-const fields = ['TARGET','ARCH','BUNDLE','SDK','NDK','ANDROID_API','EMSDK_VERSION','PTHREADS_ENABLED','DEVELOPER_DIR','GCC','GCC_VERSION','CC','CXX','VS_VER','VS_STUDIO','WINDOWS_SDK_VERSION','MSYSTEM','C_STANDARD','CPP_STANDARD'];
+const fields = ['BUILD_PROFILE_ID','TARGET','ARCH','BUNDLE','SDK','NDK','ANDROID_API','EMSDK_VERSION','PTHREADS_ENABLED','DEVELOPER_DIR','GCC','GCC_VERSION','CC','CXX','VS_VER','VS_STUDIO','WINDOWS_SDK_VERSION','MSYSTEM','C_STANDARD','CPP_STANDARD'];
 function environment(config, jobId, row) {
     const job = config.jobs[jobId];
     const resolve = value => String(value).replace(/\$\{\{\s*matrix\.([\w.]+)\s*\}\}/g, (expression, key) => {
@@ -41,7 +41,7 @@ async function write({core, file, job, config, plans, disabled, isPR}) {
     const table = rows => core.summary.addTable(rows.map(row => row.map(escape)));
     core.summary.addHeading(`Platform build plan — ${escape(config.name || file)}`);
     core.summary.addHeading('Build environment and keys', 3);
-    core.summary.addRaw('Declared native build configuration follows; this Linux pre-check does not probe native SDKs or compilers. The profile key covers the workflow, matrix and selected environment; each library also has its own recipe/dependency key.\n\n');
+    core.summary.addRaw('Declared native build configuration follows; this Linux pre-check does not probe native SDKs or compilers. The profile key covers BUILD_PROFILE_ID, the selected matrix row, environment, runner, container and shell. Publishing steps and workflow text are excluded; each library also has its own recipe/dependency key.\n\n');
     table([['Variant','Toolchain / SDK configuration','Profile key'],...plans.map(plan => [variant(plan.row),environment(config,job,plan.row).map(([key,value])=>`${key}=${value}`).join('; ') || 'Native runner defaults',plan.wanted?.profile || 'Unavailable'])]);
     core.summary.addHeading('Variant decisions',3);
     table([['Variant','Decision'],...plans.map(plan=>[variant(plan.row),disabled ? 'Workflow disabled' : plan.reason || (isPR ? 'Unchanged against PR base; runner skipped' : 'Verified published output unchanged; runner skipped')])]);

@@ -19,6 +19,8 @@ permissions:
   actions: read
 
 env:
+  # Bump for compiler/SDK setup or build-command changes not declared below.
+  BUILD_PROFILE_ID: "1"
   TARGET: "emscripten"
   EMSDK_VERSION: "6.0.11"
   USE_ARTIFACT: true

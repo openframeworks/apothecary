@@ -18,11 +18,37 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  write('scripts/build-matrices.json',JSON.stringify({[file]:{[job]:{bundle:[1,2]}}}));
  write('scripts/calculate_formulas.sh','FORMULAS=(FreeImage)\n');
  write('apothecary/formulas/FreeImage/FreeImage.sh','VER=1\nBUILD_ID=1\nFORMULA_DEPENDS=(zlib)\n');
+ write('apothecary/formulas/FreeImage/large-vendor-source.c','x'.repeat(2*1024*1024));
  write('apothecary/formulas/zlib/zlib.sh','VER=1\nBUILD_ID=1\nFORMULA_DEPENDS=()\n');
  write('apothecary/formulas/fontconfig/fontconfig.sh','VER=1\nBUILD_ID=1\nFORMULA_DEPENDS=()\n');
  git('init','-q');git('add','.');git('-c','commit.gpgsign=false','commit','-qm','fixture');
  const baseline=p.inputs(file,job,row), ref=git('rev-parse','HEAD');
  assert.deepEqual(p.inputs(file,job,row,ref),baseline,'working tree and Git baseline hashes agree');
+ const originalWorkflow=fs.readFileSync(file,'utf8');
+ fs.appendFileSync(file,'# Publication-only comment\n');
+ assert.deepEqual(p.inputs(file,job,row),baseline,'workflow comments do not rebuild');
+ write(file,originalWorkflow+'    steps:\n      - name: Upload Poco\n        uses: actions/upload-artifact@v7\n');
+ assert.deepEqual(p.inputs(file,job,row),baseline,'publishing-only steps do not rebuild');
+ write(file,originalWorkflow.replace('TARGET: osx','TARGET: osx\n  BUILD_PROFILE_ID: 1'));
+ assert.deepEqual(p.inputs(file,job,row),baseline,'declaring the default profile ID does not rebuild');
+ write(file,originalWorkflow.replace('TARGET: osx','TARGET: osx\n  BUILD_PROFILE_ID: 2'));
+ assert.notEqual(p.inputs(file,job,row).profile,baseline.profile,'explicit build profile bump rebuilds');
+ assert.deepEqual(p.inputs(file,job,row,ref),baseline,'historical configuration is read from the historical workflow');
+ write(file,originalWorkflow.replace('TARGET: osx','TARGET: osx\n  CFLAGS: -mchanged'));
+ assert.notEqual(p.inputs(file,job,row).profile,baseline.profile,'compiler flags rebuild');
+ for (const setup of ['    runs-on: ubuntu-24.04\n','    container: ubuntu:24.04\n','    defaults:\n      run:\n        shell: bash\n']) {
+  write(file,originalWorkflow+setup);
+  assert.notEqual(p.inputs(file,job,row).profile,baseline.profile,'runner/container/shell changes rebuild');
+ }
+ write(file,originalWorkflow);
+ const assetForMigration={id:101,name:'legacy.zip',size:4,digest:'sha256:'+'a'.repeat(64)};
+ const legacy={...p.inputs(file,job,row,ref,true),commit:ref,publishedAt:'2026-01-01T00:00:00Z',assets:[assetForMigration]};
+ const migrated=p.normalizePublished(file,job,row,legacy);
+ assert(p.matches(baseline,migrated,[assetForMigration]),'verified legacy source keys migrate without rebuilding');
+ assert(!p.matches(baseline,migrated,[]),'legacy migration never accepts missing published assets');
+ const forged=JSON.parse(JSON.stringify(legacy));forged.formulas.FreeImage.key='forged';
+ assert.throws(()=>p.normalizePublished(file,job,row,forged),/recorded source/,'legacy record must match the recorded commit');
+ assert.equal(p.normalizePublished(file,job,row,{...legacy,commit:'missing'}).profile,legacy.profile,'missing commit does not migrate');
  fs.appendFileSync('apothecary/formulas/fontconfig/fontconfig.sh','# Linux-only change\n');
  assert.deepEqual(p.inputs(file,job,row),baseline,'fontconfig does not rebuild FreeImage on macOS');
  fs.appendFileSync('apothecary/formulas/zlib/zlib.sh','# changed dependency patch\n');
@@ -32,7 +58,8 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert.notEqual(p.inputs(file,job,row).formulas.FreeImage.key,baseline.formulas.FreeImage.key,'BUILD_ID changes invalidate outputs');
  git('checkout','--','apothecary/formulas/FreeImage/FreeImage.sh');
  write('scripts/build-matrices.json',JSON.stringify({[file]:{[job]:{bundle:[1,2],SDK:['new-sdk']}}}));
- assert.notEqual(p.inputs(file,job,row).profile,baseline.profile,'SDK matrix changes invalidate the build');
+ assert.equal(p.inputs(file,job,row).profile,baseline.profile,'unrelated matrix definition changes do not invalidate an unchanged row');
+ assert.notEqual(p.inputs(file,job,{...row,SDK:'new-sdk'}).profile,baseline.profile,'selected SDK matrix changes invalidate the build');
  git('checkout','--','scripts/build-matrices.json');
  assert.equal(p.stateName('.github/workflows/build-macos.yml','build-macos-platforms',{bundle:2}),'macos-bundle-2.pkl');
  assert.equal(p.stateName('.github/workflows/build-linux-modular.yml','build',{library:'poco',arch:'arm64',runner:'ubuntu-24.04-arm'}),'poco-linux-arch-arm64.pkl');

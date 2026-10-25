@@ -19,6 +19,8 @@ permissions:
   actions: read
 
 env:
+  # Bump for compiler/SDK setup or build-command changes not declared below.
+  BUILD_PROFILE_ID: "1"
   TARGET: "osx"
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}

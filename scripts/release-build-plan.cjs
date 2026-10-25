@@ -5,11 +5,12 @@ const crypto = require('node:crypto');
 const {execFileSync} = require('node:child_process');
 const stable = value => JSON.stringify(value, (_, item) => item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a],[b]) => a.localeCompare(b))) : item);
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
-const git = (...args) => execFileSync('git', args, {encoding:'utf8'}).trim();
-const read = (file, ref) => ref ? execFileSync('git',['show',`${ref}:${file}`],{encoding:'utf8'}) : fs.readFileSync(file, 'utf8');
+const gitOptions = {encoding:'utf8',maxBuffer:64*1024*1024};
+const git = (...args) => execFileSync('git', args, gitOptions).trim();
+const read = (file, ref) => ref ? execFileSync('git',['show',`${ref}:${file}`],gitOptions) : fs.readFileSync(file, 'utf8');
 const tracked = ref => (ref ? git('ls-tree','-r','--name-only',ref) : git('ls-files')).split('\n');
-function yaml(file) {
-    return JSON.parse(execFileSync('ruby',['-ryaml','-rjson','-e','puts JSON.generate(YAML.load_file(ARGV[0]))',file],{encoding:'utf8'}));
+function yaml(file, ref) {
+    return JSON.parse(execFileSync('ruby',['-ryaml','-rjson','-e','puts JSON.generate(YAML.load(STDIN.read))'],{encoding:'utf8',input:read(file,ref)}));
 }
 function matrixRows(matrix) {
     if (!Object.keys(matrix).some(k => !['include','exclude'].includes(k))) return (matrix.include || []).map(row => ({...row}));
@@ -33,8 +34,14 @@ function resolve(value, row) {
         return String(result);
     });
 }
-function inputs(file, jobId, row, ref) {
-    const workflow = yaml(file), job = workflow.jobs[jobId];
+function resolveTree(value, row) {
+    if (typeof value === 'string') return resolve(value,row);
+    if (Array.isArray(value)) return value.map(item=>resolveTree(item,row));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,resolveTree(item,row)]));
+    return value;
+}
+function inputs(file, jobId, row, ref, legacy = false) {
+    const workflow = yaml(file,ref), job = workflow.jobs[jobId];
     const env = Object.fromEntries(Object.entries({...workflow.env,...job.env}).filter(([key]) => !/SECRET|TOKEN|PASSWORD/i.test(key)).map(([key,value]) => [key,resolve(value,row)]));
     env.ARCH = String(row.ARCH ?? row.arch ?? row.flavor ?? row.cfg?.arch ?? env.ARCH ?? '64');
     env.BUNDLE = String(row.bundle ?? env.BUNDLE ?? 0);
@@ -44,8 +51,20 @@ function inputs(file, jobId, row, ref) {
     const selectionScript = read('scripts/calculate_formulas.sh',ref);
     const libraries = execFileSync('bash',['-c',`${selectionScript}\nprintf '\\nPLANNER_FORMULAS=%s\\n' "\${FORMULAS[*]}"`], {env:{...process.env,...env},encoding:'utf8'}).split('\n').find(line => line.startsWith('PLANNER_FORMULAS=')).slice(17).trim().split(/\s+/).filter(Boolean);
     const files = tracked(ref);
-    const profile = hash(stable({schema:1,workflow:read(file,ref),matrix:JSON.parse(read('scripts/build-matrices.json',ref))[file][jobId],row,env}));
-    const shared = files.filter(p => p === 'apothecary/apothecary' || p === 'apothecary/configure' || p.startsWith('apothecary/toolchains/') || /^scripts\/(build\.sh|calculate_formulas\.sh|package.*|export_config\.sh|secure\.sh|load\.sh|save\.sh|release-build-plan\.cjs|release-toolchain\.sh|cache-toolchain\.sh)$/.test(p) || p.toLowerCase().startsWith(`scripts/${env.TARGET}/`) || p.startsWith('scripts/artifact/'));
+    let profile;
+    if (legacy) {
+        profile = hash(stable({schema:1,workflow:read(file,ref),matrix:JSON.parse(read('scripts/build-matrices.json',ref))[file][jobId],row,env}));
+    } else {
+        env.BUILD_PROFILE_ID = env.BUILD_PROFILE_ID || '1';
+        if (!/^[1-9][0-9]*$/.test(env.BUILD_PROFILE_ID)) throw Error('BUILD_PROFILE_ID must be a positive integer');
+        // Build commands/tool installation changes require an explicit profile
+        // bump. Publishing steps, triggers and unrelated matrix rows are not
+        // compiler inputs. Preserve runner/container/shell and declared flags.
+        profile = hash(stable({schema:2,row,env,runner:resolveTree(job['runs-on'] ?? null,row),
+            container:resolveTree(job.container ?? null,row),
+            defaults:resolveTree({...workflow.defaults?.run,...job.defaults?.run},row)}));
+    }
+    const shared = files.filter(p => p === 'apothecary/apothecary' || p === 'apothecary/configure' || p.startsWith('apothecary/toolchains/') || /^scripts\/(build\.sh|calculate_formulas\.sh|package.*|export_config\.sh|secure\.sh|load\.sh|save\.sh|release-toolchain\.sh|cache-toolchain\.sh)$/.test(p) || (legacy && p === 'scripts/release-build-plan.cjs') || p.toLowerCase().startsWith(`scripts/${env.TARGET}/`) || p.startsWith('scripts/artifact/'));
     function formula(lib, seen = new Set()) {
         if (seen.has(lib)) return [];
         seen.add(lib);
@@ -65,7 +84,22 @@ function inputs(file, jobId, row, ref) {
         const src = files.find(p => p === `apothecary/formulas/${lib}.sh` || p === `apothecary/formulas/${lib}/${lib}.sh` || p === `apothecary/formulas/_depends/${lib}.sh`);
         for (const field of ['VER','BUILD_ID','SHA256','SOURCE_COMMIT']) formulas[lib][field] = read(src,ref).match(new RegExp(`^${field}=(.*)$`,'m'))?.[1] || '';
     }
-    return {schema:1,workflow:file,job:jobId,matrix:row,target:env.TARGET,profile,formulas};
+    return {schema:1,...(legacy ? {} : {profileVersion:2}),workflow:file,job:jobId,matrix:row,target:env.TARGET,profile,formulas};
+}
+function sameRecipes(wanted, previous) {
+    const names = Object.keys(wanted.formulas).sort();
+    return previous?.profile === wanted.profile && JSON.stringify(names) === JSON.stringify(Object.keys(previous.formulas || {}).sort()) && names.every(name=>wanted.formulas[name].key === previous.formulas[name].key);
+}
+function normalizePublished(file, job, row, previous) {
+    if (!previous || previous.profileVersion === 2) return previous;
+    if (previous.profileVersion !== undefined || !/^[a-f0-9]{40}$/.test(previous.commit || '')) return previous;
+    // Audit the legacy record against its exact recorded commit before deriving
+    // equivalent new keys. Archive IDs/sizes/digests are still checked by matches.
+    const old = inputs(file,job,row,previous.commit,true);
+    if (previous.schema !== old.schema || !sameRecipes(old,previous)) throw Error('Legacy build record does not match its recorded source commit');
+    const normalized = inputs(file,job,row,previous.commit);
+    for (const [name,recipe] of Object.entries(normalized.formulas)) normalized.formulas[name] = {...previous.formulas[name],...recipe};
+    return {...previous,...normalized};
 }
 // Emit and read a data-only Pkl subset. Never evaluate downloaded Pkl code.
 function pklString(value) {
@@ -132,10 +166,10 @@ function stateName(file, job, row, legacy = false) {
     return parts.join('-')+'.pkl';
 }
 function matches(wanted, previous, assets, now = Date.now()) {
+    if ((wanted.profileVersion || 1) !== (previous?.profileVersion || 1)) return false;
     if (previous?.schema !== 1 || previous.profile !== wanted.profile || !Number.isFinite(Date.parse(previous.publishedAt)) || Date.parse(previous.publishedAt)>now) return false;
     if (!Array.isArray(previous.assets) || !previous.assets.length || !previous.assets.every(a => assets.some(b => b.id === a.id && b.name === a.name && b.size === a.size && b.digest === a.digest && /^sha256:[0-9a-f]{64}$/.test(b.digest || '')))) return false;
-    const names = Object.keys(wanted.formulas).sort();
-    return JSON.stringify(names) === JSON.stringify(Object.keys(previous.formulas || {}).sort()) && names.every(name => wanted.formulas[name].key === previous.formulas[name].key);
+    return sameRecipes(wanted,previous);
 }
 function groupLibraries(rows) {
     const groups=new Map();
@@ -203,7 +237,7 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
                 else reason = 'PR changes selected recipes, dependencies or toolchain';
             } else if (context.ref.startsWith('refs/tags/')) reason = 'tag publication';
             else if (context.eventName === 'workflow_dispatch') reason = 'manual rebuild';
-            else if (matches(wanted,published,assets)) reason = '';
+            else if (matches(wanted,normalizePublished(file,jobId,row,published),assets)) reason = '';
         } catch (error) {reason = `conservative rebuild: ${error.message}`;}
         if (reason) chosen.push(row);
         plans.push({row,wanted,published,reason});
@@ -301,3 +335,4 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;
 
 exports.groupLibraries=groupLibraries;
+exports.normalizePublished=normalizePublished;

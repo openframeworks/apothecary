@@ -12,6 +12,7 @@ context_file=$(mktemp)
 trap 'rm -f "$context_file"' EXIT
 {
     printf 'platform-artifacts-v1\n'
+    printf 'build-profile=%s\n' "${BUILD_PROFILE_ID:-1}"
     bash scripts/cache-toolchain.sh
     env | LC_ALL=C sort | sed -En '/^(BUNDLE|SDK|NDK|ANDROID_API|MSYSTEM|MINGW_PREFIX|.*DEPLOYMENT_TARGET|CPP_STANDARD|C_STANDARD|CFLAGS|CXXFLAGS|CPPFLAGS|LDFLAGS|FLAGS_.*|FLAG_.*|PTHREADS_ENABLED|MULTITHREADED_TYPE|VS_VER|OPENCV_.*)=/p'
     if [[ $TARGET == android ]]; then
