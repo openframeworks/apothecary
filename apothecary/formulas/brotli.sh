@@ -9,8 +9,8 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux" "android
 FORMULA_DEPENDS=()
 
 # define the version
-VER=1.2.0
-SHA256="816c96e8e8f193b40151dad7e8ff37b1221d019dbcb9c35cd3fadbfe6477dfec"
+VER=1.2.1
+SHA256="98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f"
 BUILD_ID=2
 DEFINES=""
 
