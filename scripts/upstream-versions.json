@@ -102,6 +102,12 @@
     "pattern": "v?(\\d+(?:\\.\\d+)+)"
   },
   {
+    "name": "Protobuf",
+    "formula": "apothecary/formulas/protobuf/protobuf.sh",
+    "repo": "protocolbuffers/protobuf",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
     "name": "pugixml",
     "formula": "apothecary/formulas/pugixml.sh",
     "repo": "zeux/pugixml",
