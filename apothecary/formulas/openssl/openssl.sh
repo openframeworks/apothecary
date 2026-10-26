@@ -6,16 +6,16 @@
 FORMULA_TYPES=("vs" "osx" "ios" "tvos" "xros" "catos" "watchos" "linux" "android" )
 FORMULA_DEPENDS=("zlib")
 
-# OpenSSL 4.0.3 + danoli3/openssl-cmake branch 4.0 (test pin for PR #562)
+# OpenSSL 4.1.0 + pinned danoli3/openssl-cmake branch 4.1.
 # Note: openssl-cmake 3.5 + 3.5.7 failed CI (ML-DSA DTLS capability macros).
-VER=4.0.3
-VERDIR=4.0.0
-VER_TAG="4.0"
-OPENSSL_CMAKE_COMMIT=2058261bb74c7443c753981bcecc1b2c7d9bc73d
-SHA1=7035f60f356f8c80b76eebfdeb81a499f19028fa
-SHA256=325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9
+VER=4.1.0
+VERDIR=4.1.0
+VER_TAG="4.1"
+OPENSSL_CMAKE_COMMIT=176816e9dfab3af33c1ae32fcb9981f4ce5d40ea
+SHA1=44d07584cca891b042c38478255228ac4bd379a6
+SHA256=50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd
 
-BUILD_ID=14
+BUILD_ID=15
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
