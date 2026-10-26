@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" "brotli")
 # define the version
 VER=2.15.0
 SHA256="87c7f1f8699b91e89f773f7dcfa505b044e1dae67f62a55d4e29c3afdcac4fb8"
-BUILD_ID=3
+BUILD_ID=4
 DEFINES=""
 
 GIT_VER="VER-${VER//./-}"
@@ -479,7 +479,8 @@ function build() {
 
         LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
         LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng.a"
+        # libpng's Emscripten copy keeps the upstream versioned archive name.
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
 
         LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
