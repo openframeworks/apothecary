@@ -10,6 +10,7 @@ on:
       - 'apothecary/formulas/glon12.sh'
       - 'apothecary/formulas/dawn/**'
       - 'scripts/tests/test-angle-bootstrap.sh'
+      - 'scripts/tests/test-angle-xros-runtime.sh'
       - 'scripts/tests/test-secure-compiler.sh'
       - 'scripts/tests/test-glon12-toolchain.sh'
       - 'scripts/tests/test-glon12-runtime.sh'
@@ -81,6 +82,9 @@ jobs:
       - name: Verify ANGLE dynamic XCFramework staging
         if: matrix.library == 'angle'
         run: bash scripts/tests/test-angle-apple-stage.sh
+      - name: Verify ANGLE visionOS compiler runtimes
+        if: matrix.library == 'angle' && matrix.target == 'xros'
+        run: bash scripts/tests/test-angle-xros-runtime.sh
       - name: Install
         run: ./scripts/${{ matrix.install }}/install.sh
       - name: Ensure Ninja is available for the cache fingerprint

@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=14
+BUILD_ID=15
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -181,7 +181,7 @@ function prepare() {
         # ANGLE patches Chromium's pinned build dependency after sync. Later
         # platform builds reuse this checkout, so reset dependency changes
         # before syncing it again.
-        _angle_win_run "gclient sync --force --no-history --shallow"
+        _angle_win_run "gclient sync --force --no-history --shallow" || return 1
     else
         bash "${vendor}/depot_tools/ensure_bootstrap"
         python3 scripts/bootstrap.py
@@ -189,7 +189,10 @@ function prepare() {
         # ANGLE patches Chromium's pinned build dependency after sync. Later
         # platform builds reuse this checkout, so reset dependency changes
         # before syncing it again.
-        gclient sync --force --no-history --shallow
+        gclient sync --force --no-history --shallow || return 1
+    fi
+    if [ "$TYPE" = xros ]; then
+        _angle_patch_xros_runtime || return 1
     fi
 }
 
@@ -326,7 +329,7 @@ function _angle_patch_platform_sources() {
     if [ "$TYPE" = xros ]; then
         # Chromium's compiler runtime selector predates visionOS. Device and
         # simulator must use their own builtins archives, just like iOS/tvOS.
-        if ! grep -q 'target_platform == "xros"' build/config/clang/BUILD.gn; then
+        if ! grep -q 'libname = "xrossim"' build/config/clang/BUILD.gn; then
             patch -p1 --forward --reject-file=- < "$formula_dir/visionos-clang-runtime.patch" || return 1
         fi
         # Keep the Rust allowlist consistent with apple-gn.patch's ABI names.
@@ -341,8 +344,33 @@ function _angle_patch_platform_sources() {
     fi
 }
 
+function _angle_patch_xros_runtime() {
+    local formula_dir
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # Bundled builtins require visionOS 26.5. Select the active Xcode's
+    # builtins instead so both slices keep the visionOS 2.0 minimum.
+    if ! grep -q 'angle_xros_clang_runtime_dir' build/config/clang/BUILD.gn; then
+        patch -p1 --forward --reject-file=- < "$formula_dir/visionos-xcode-runtime.patch" || return 1
+    fi
+}
+
+function _angle_xros_runtime_dir() {
+    local sdk libname runtime_dir
+    case "$(_angle_environment)" in
+        simulator) sdk=xrsimulator; libname=xrossim ;;
+        device) sdk=xros; libname=xros ;;
+        *) echoError "angle: unsupported visionOS runtime environment" >&2; return 1 ;;
+    esac
+    runtime_dir=$(xcrun --sdk "$sdk" clang --print-runtime-dir) || return 1
+    if [ ! -f "$runtime_dir/libclang_rt.$libname.a" ]; then
+        echoError "angle: missing Xcode runtime $runtime_dir/libclang_rt.$libname.a" >&2
+        return 1
+    fi
+    printf '%s\n' "$runtime_dir"
+}
+
 function _angle_gn_args() {
-    local cpu os env apple
+    local cpu os env apple runtime_dir
     cpu="$(_angle_cpu)"
     os="$(_angle_os)"
     env="$(_angle_environment)"
@@ -373,8 +401,8 @@ function _angle_gn_args() {
             echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"tvos\" use_blink=true ios_deployment_target=\"16.0\""
             ;;
         xros)
-            # Same discovery path as tvOS. visionOS 2 is the first stable release.
-            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"xros\" ios_deployment_target=\"2.0\""
+            runtime_dir="$(_angle_xros_runtime_dir)" || return 1
+            echo "${common} ${apple} ios_enable_code_signing=false target_environment=\"${env}\" target_platform=\"xros\" ios_deployment_target=\"2.0\" angle_xros_clang_runtime_dir=\"${runtime_dir}\""
             ;;
         *)
             echoError "angle: GN args not defined for TYPE=${TYPE}"
@@ -402,7 +430,7 @@ function build() {
         exit 1
     fi
 
-    gn_args="$(_angle_gn_args)"
+    gn_args="$(_angle_gn_args)" || return 1
     DEFINES="${gn_args}"
     echo "angle: gn=$(command -v gn 2>/dev/null || echo MISSING) --args=${gn_args}"
     if ! command -v gn >/dev/null 2>&1; then
