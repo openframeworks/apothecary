@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" "brotli")
 # define the version
 VER=2.15.0
 SHA256="87c7f1f8699b91e89f773f7dcfa505b044e1dae67f62a55d4e29c3afdcac4fb8"
-BUILD_ID=2
+BUILD_ID=3
 DEFINES=""
 
 GIT_VER="VER-${VER//./-}"
@@ -105,7 +105,7 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
@@ -394,7 +394,7 @@ function build() {
 
         LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
         LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng.a"
 
         LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
@@ -463,7 +463,7 @@ function build() {
             -DBROTLIDEC_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
-            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY}:${LIBBROTLI_ENC_LIB}:${LIBBROTLI_DEC_LIB}" \
+            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_DEC_LIB};${LIBBROTLI_LIBRARY}" \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
