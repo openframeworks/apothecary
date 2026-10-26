@@ -216,6 +216,44 @@ grep -F 'libname = "xrossim"' build/config/clang/BUILD.gn
 grep -F '_clang_lib_dir = get_path_info(angle_xros_clang_runtime_dir, "dir")' build/config/clang/BUILD.gn
 echo 'visionOS Rust and Clang runtime registration is complete and repeatable'
 
+# The pinned bundle helper must accept both visionOS SDK names, even when
+# code signing is disabled. Its mobile bundle layout is flat for these SDKs.
+cat > build/config/apple/codesign.py <<'EOF'
+class Bundle:
+  @staticmethod
+  def Kind(platform, extension):
+    if platform in ('iphoneos', 'iphonesimulator'):
+      return 'ios'
+    if platform == 'macosx':
+      if extension == '.framework':
+        return 'mac_framework'
+      return 'mac'
+    if platform in ('watchos', 'watchsimulator'):
+      return 'watchos'
+    if platform in ('appletvos', 'appletvsimulator'):
+      return 'tvos'
+    raise ValueError('unknown bundle type %s for %s' % (extension, platform))
+EOF
+TYPE=xros _angle_patch_xros_bundle
+TYPE=xros _angle_patch_xros_bundle
+command python3 - <<'PY'
+import runpy
+bundle = runpy.run_path('build/config/apple/codesign.py')['Bundle']
+for platform in ('xros', 'xrsimulator'):
+    assert bundle.Kind(platform, '.framework') == 'xros'
+for platform, kind in [('iphoneos', 'ios'), ('iphonesimulator', 'ios'),
+                       ('watchos', 'watchos'), ('appletvos', 'tvos'),
+                       ('macosx', 'mac_framework')]:
+    assert bundle.Kind(platform, '.framework') == kind
+try:
+    bundle.Kind('unsupported', '.framework')
+except ValueError:
+    pass
+else:
+    raise AssertionError('Unknown platforms must still fail')
+PY
+echo 'visionOS bundle registration is repeatable and preserves existing platforms'
+
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
 mkdir -p build/toolchain/win build/config/win "$fixture/sdk/Include/10.0.26100.0/um" "$fixture/sdk/Include/10.0.26100.0/ucrt" "$fixture/sdk/Lib/10.0.26100.0/um/x64" "$fixture/sdk/Lib/10.0.26100.0/ucrt/x64" "$fixture/sdk/Include/10.0.28000.0/um"

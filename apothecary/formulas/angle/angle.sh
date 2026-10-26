@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=15
+BUILD_ID=16
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -193,6 +193,7 @@ function prepare() {
     fi
     if [ "$TYPE" = xros ]; then
         _angle_patch_xros_runtime || return 1
+        _angle_patch_xros_bundle || return 1
     fi
 }
 
@@ -351,6 +352,16 @@ function _angle_patch_xros_runtime() {
     # builtins instead so both slices keep the visionOS 2.0 minimum.
     if ! grep -q 'angle_xros_clang_runtime_dir' build/config/clang/BUILD.gn; then
         patch -p1 --forward --reject-file=- < "$formula_dir/visionos-xcode-runtime.patch" || return 1
+    fi
+}
+
+function _angle_patch_xros_bundle() {
+    local formula_dir
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    # visionOS frameworks use the flat mobile bundle layout. Chromium's
+    # pinned helper must recognise both SDK names even with signing disabled.
+    if ! grep -q "platform in ('xros', 'xrsimulator')" build/config/apple/codesign.py; then
+        patch -p1 --forward --reject-file=- < "$formula_dir/visionos-bundle.patch" || return 1
     fi
 }
 
