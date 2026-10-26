@@ -10,15 +10,15 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "vs" "android" "
 FORMULA_DEPENDS=("zlib" "libpng" "brotli")
 
 # define the version
-VER=2.14.3
-SHA256="dc49de6b01a266eef4876a4dd34d9842c475d3e28ff2eff63bd2fb760ab56261"
-BUILD_ID=1
+VER=2.15.0
+SHA256="87c7f1f8699b91e89f773f7dcfa505b044e1dae67f62a55d4e29c3afdcac4fb8"
+BUILD_ID=4
 DEFINES=""
 
 GIT_VER="VER-${VER//./-}"
 
 # tools for git use
-GIT_TAG="VER-${VER%.*}"
+GIT_TAG="$GIT_VER"
 GIT_HUB=https://github.com/freetype/freetype/tags
 URL="https://github.com/freetype/freetype/archive/refs/tags/${GIT_VER}.tar.gz"
 GIT_URL="https://github.com/freetype/freetype"
@@ -40,8 +40,8 @@ function download() {
 function prepare() {
     mkdir -p lib/$TYPE
 
-    rm -f ./CMakeLists.txt
-    cp -v $FORMULA_DIR/CMakeLists.txt ./CMakeLists.txt
+    # Keep the pinned release's CMake build: 2.15 adds the HVF driver and
+    # matching module/configuration handling missing from the old 2.13 copy.
 
     apothecaryDepend download zlib
     apothecaryDepend prepare zlib
@@ -88,7 +88,9 @@ function build() {
     fi
 
 
-    DEFINES="	
+    # Keep the archive independent of Apple's optional HVF SDK/runtime.
+    # Standard TrueType/OpenType rendering and the existing codecs stay enabled.
+    DEFINES="-DFT_DISABLE_HVF=ON \
 		    -DCMAKE_C_STANDARD=${C_STANDARD} \
 		    -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
 		    -DCMAKE_CXX_STANDARD_REQUIRED=ON \
@@ -103,7 +105,7 @@ function build() {
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
         ZLIB_INCLUDE_DIR="$LIBS_ROOT/zlib/include"
-        ZLIB_LIBRARY="$LIBS_ROOT/zlib/$TYPE/$PLATFORM/zlib.a"
+        ZLIB_LIBRARY="$LIBS_ROOT/zlib/lib/$TYPE/$PLATFORM/zlib.a"
 
         LIBPNG_ROOT="$LIBS_ROOT/libpng/"
         LIBPNG_INCLUDE_DIR="$LIBS_ROOT/libpng/include"
@@ -392,7 +394,7 @@ function build() {
 
         LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
         LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng.a"
 
         LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
@@ -461,7 +463,7 @@ function build() {
             -DBROTLIDEC_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIR=${LIBBROTLI_INCLUDE_DIR} \
             -DBROTLI_INCLUDE_DIRS=${LIBBROTLI_INCLUDE_DIR} \
-            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_LIBRARY}:${LIBBROTLI_ENC_LIB}:${LIBBROTLI_DEC_LIB}" \
+            -DBROTLIDEC_LIBRARIES="${LIBBROTLI_DEC_LIB};${LIBBROTLI_LIBRARY}" \
             -DENABLE_VISIBILITY=OFF \
             -DCMAKE_VERBOSE_MAKEFILE=${VERBOSE_MAKEFILE} \
             -DCMAKE_CXX_EXTENSIONS=OFF \
@@ -477,7 +479,8 @@ function build() {
 
         LIBPNG_ROOT="${LIBS_ROOT}/libpng/"
         LIBPNG_INCLUDE_DIR="${LIBS_ROOT}/libpng/include"
-        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng.a"
+        # libpng's Emscripten copy keeps the upstream versioned archive name.
+        LIBPNG_LIBRARY="$LIBS_ROOT/libpng/lib/${TYPE}/${PLATFORM}/libpng16.a"
 
         LIBBROTLI_ROOT="$LIBS_ROOT/brotli/"
         LIBBROTLI_INCLUDE_DIR="$LIBS_ROOT/brotli/include"
