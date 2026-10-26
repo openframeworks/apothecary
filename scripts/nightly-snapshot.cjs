@@ -26,7 +26,43 @@ async function optionalRelease(github,repo,tag) {
     try{return (await github.rest.repos.getReleaseByTag({...repo,tag})).data;}
     catch(e){if(e.status===404)return null;throw e;}
 }
-exports.refresh=async ({github,context,core,dryRun=false,now=new Date(),download})=>{
+const integrationPlatforms=Object.freeze(['linux','macos','ios','tvos','android','emscripten','windows']);
+async function latestSha(github,repo) {
+    const ref=(await github.rest.git.getRef({...repo,ref:'tags/latest'})).data.object;
+    return ref.type==='tag' ? (await github.rest.git.getTag({...repo,tag_sha:ref.sha})).data.object.sha : ref.sha;
+}
+async function masterSha(github) {
+    const sha=(await github.rest.repos.getCommit({owner:'openframeworks',repo:'openFrameworks',ref:'master'})).data.sha;
+    if(!/^[a-f0-9]{40}$/.test(sha||''))throw Error('Cannot resolve openFrameworks master');
+    return sha;
+}
+exports.plan=async({github,context})=>{
+    const source=await optionalRelease(github,context.repo,'latest');
+    if(!source||source.draft)throw Error('latest is missing or unpublished');
+    const assets=libraryAssets(await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:source.id,per_page:100}));
+    if(!assets.length)throw Error('latest has no library assets');
+    for(const asset of assets)if(!/^[A-Za-z0-9_.+-]+$/.test(asset.name)||!/^sha256:[a-f0-9]{64}$/.test(asset.digest||''))throw Error(`Missing source digest or unsafe name: ${asset.name}`);
+    return {schema:1,repository:`${context.repo.owner}/${context.repo.repo}`,releaseId:source.id,sourceSha:await latestSha(github,context.repo),
+        openframeworksSha:await masterSha(github),platforms:[...integrationPlatforms],assets:assets.map(({id,name,size,digest})=>({id,name,size,digest}))};
+};
+exports.refresh=async(args)=>{
+    if(args.dryRun)return copySnapshot(args);
+    const {plan,buildResult,overrideBuildGate=false,github,context}=args;
+    if(typeof overrideBuildGate!=='boolean')throw Error('Build-gate override must be a boolean');
+    if(!plan||plan.schema!==1||plan.repository!==`${context.repo.owner}/${context.repo.repo}`||
+       JSON.stringify(plan.platforms)!==JSON.stringify(integrationPlatforms)||!Array.isArray(plan.assets))throw Error('A complete frozen nightly validation plan is required');
+    if(overrideBuildGate&&context.eventName!=='workflow_dispatch')throw Error('Build-gate override is only allowed on manual dispatch');
+    if(!overrideBuildGate&&buildResult!=='success')throw Error(`openFrameworks master build gate did not pass (${buildResult||'missing'}); preserving nightly`);
+    const runUrl=`https://github.com/${plan.repository}/actions/runs/${context.runId}`;
+    const validationText=overrideBuildGate ? `Manual build-gate override by ${context.actor||'unknown'}: ${runUrl}.\nopenFrameworks master at planning: ${plan.openframeworksSha}. Compatibility checks were bypassed.` :
+        `Validated against openFrameworks master ${plan.openframeworksSha} on ${plan.platforms.join(', ')}.\nValidation run: ${runUrl}.`;
+    return copySnapshot({...args,validationText,validate:async({source,assets,sha})=>{
+        if(source.id!==plan.releaseId||sha!==plan.sourceSha||fingerprint(assets)!==fingerprint(plan.assets))throw Error('latest changed since the validated plan; preserving nightly');
+        if(await latestSha(github,context.repo)!==plan.sourceSha)throw Error('latest tag changed since validation; preserving nightly');
+        if(!overrideBuildGate&&await masterSha(github)!==plan.openframeworksSha)throw Error('openFrameworks master changed since validation; preserving nightly');
+    }});
+};
+async function copySnapshot({github,context,core,dryRun=false,now=new Date(),download,validate,validationText=''}) {
     const repo=context.repo;
     const list=release_id=>github.paginate(github.rest.repos.listReleaseAssets,{...repo,release_id,per_page:100});
     const source=await optionalRelease(github,repo,'latest');
@@ -47,15 +83,14 @@ exports.refresh=async ({github,context,core,dryRun=false,now=new Date(),download
         return false;
     }
     if(await masterIsBusy()){core.notice('Master platform builds are active; preserving nightly. Retry after publication.');return;}
-    const ref=(await github.rest.git.getRef({...repo,ref:'tags/latest'})).data.object;
-    let sha=ref.sha;
-    if(ref.type==='tag')sha=(await github.rest.git.getTag({...repo,tag_sha:sha})).data.object.sha;
+    const sha=await latestSha(github,repo);
+    await validate({source,assets,sha});
     const date=now.toISOString().slice(0,10), stageTag=`nightly-staging-${context.runId}-${context.runAttempt||1}`;
     const temp=fs.mkdtempSync(path.join(os.tmpdir(),'nightly-snapshot-'));
     let staged,previous,previousMoved=false,published=false;
     try {
         const newest=assets.map(a=>a.updated_at||a.created_at).filter(Boolean).sort().at(-1)||'unknown';
-        const body=`Daily snapshot copied from [latest](${source.html_url}) on ${date} (UTC).\n\nNo compilation was performed. Library versions and original build metadata are unchanged.\nSource tag commit: ${sha}. Most recent source asset update: ${newest}.\nTag-dependent filenames and checksum/manifest references are renamed from latest to nightly.\n`;
+        const body=`Daily snapshot copied from [latest](${source.html_url}) on ${date} (UTC).\n\nNo library compilation was performed. Library versions and original build metadata are unchanged.\n${validationText}\nSource tag commit: ${sha}. Most recent source asset update: ${newest}.\nTag-dependent filenames and checksum/manifest references are renamed from latest to nightly.\n`;
         staged=(await github.rest.repos.createRelease({...repo,tag_name:stageTag,target_commitish:sha,name:`Nightly ${date}`,body,draft:true,prerelease:true,make_latest:'false'})).data;
         for(const asset of assets) {
             const file=path.join(temp,'asset');
@@ -83,6 +118,7 @@ exports.refresh=async ({github,context,core,dryRun=false,now=new Date(),download
         }
         if(fingerprint(libraryAssets(await list(source.id)))!==fingerprint(assets))throw Error('latest changed while copying; nightly was not replaced');
         if(await masterIsBusy())throw Error('Master started publishing while copying; nightly was not replaced');
+        await validate({source,assets,sha});
         previous=await optionalRelease(github,repo,'nightly');
         // Preserve the old release/assets until the fully staged snapshot is published.
         if(previous){
@@ -109,5 +145,6 @@ exports.refresh=async ({github,context,core,dryRun=false,now=new Date(),download
             catch(e){if(e.status!==404&&e.status!==422)core.warning(`Temporary tag cleanup failed: ${tag}: ${e.message}`);}
         }
     }
-};
+}
 exports.nightlyName=nightlyName;exports.renameMetadata=renameMetadata;
+exports.integrationPlatforms=integrationPlatforms;
