@@ -30,7 +30,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Track | What we ship | Why |
 |-------|----------------|-----|
-| **OpenSSL** | **4.0.2** via `danoli3/openssl-cmake` branch `4.0` | OF moved off 3.x onto 4.0 (#562/#590). `openssl-cmake` 3.5 + OpenSSL 3.5.7 failed CI (ML-DSA DTLS macros). LTS **3.5.8** is the rollback track, not the default. **4.1.0-alpha1** is not for OF. |
+| **OpenSSL** | **4.1.0** via pinned `danoli3/openssl-cmake` branch `4.1` | Stable 4.1.0, not the earlier alpha. Wrapper `176816e9dfab3af33c1ae32fcb9981f4ce5d40ea` supports the generated 4.1 sources. Native macOS ARM64 package, direct TLS/crypto and curl consumers pass; cross-platform CI remains required. |
 | **OpenCV** | **4.14.0** (latest 4.x) | OF still uses the 4.x API. **5.0.0** is a major. |
 | **libpng** | **1.6.59** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
 | **libxml2** | **2.15.4** (latest 2.13.x) | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
@@ -72,7 +72,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **nghttp3** | `1.18.0` | `v1.18.0` | current | cURL HTTP/3. | https://github.com/ngtcp2/nghttp3 |
 | **ngtcp2** | `1.25.0` | `v1.25.0` | current | cURL HTTP/3/QUIC. | https://github.com/ngtcp2/ngtcp2 |
 | **opencv** | `4.14.0` | `5.0.0` latest · **`4.14.0` latest 4.x** | current (4.x track) | OF 4.x API. Do not take 5.0 without an OF renderer/module pass. | https://github.com/opencv/opencv |
-| **openssl** | `4.0.2` + cmake `VER_TAG=4.0` | `openssl-4.0.2` · LTS `3.5.8` · `4.1.0-alpha1` | current (4.0 track) | 4.0 via `danoli3/openssl-cmake`. Not 3.5 (CI fail). Not 4.1 alpha. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
+| **openssl** | `4.1.0` + cmake `VER_TAG=4.1` | `openssl-4.1.0` | native validated; CI pending | Exact 4.1 wrapper commit and release archive hashes are pinned. Preserve platform assembly fallbacks and OS random seeding. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
 | **pixman** | `0.46.4` | `pixman-0.46.4` | current | Latest stable. | https://gitlab.freedesktop.org/pixman/pixman |
 | **poco** | `1.15.4` | `poco-1.15.4-release` | current | Latest stable. | https://github.com/pocoproject/poco |
 | **portaudio** | `19.7.0` | `v19.7.0` | updated | Linux formula; updated to the 2021 v19.7.0 stable source archive. | http://www.portaudio.com |
@@ -147,7 +147,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **opencv** | 4.14.0 | 5.0 is a major |
 | **libxml2** | 2.13.9 | 2.15.4 track change |
 | **libpng** | 1.6.59 | 1.7 beta |
-| **openssl** | 4.0.2 | not 4.1-alpha; not 3.5 unless rolling back |
+| **openssl** | 4.1.0 | stable release with pinned 4.1 CMake wrapper; cross-platform CI pending |
 | **boost / portaudio / shaderc** | as-is | unused formulas |
 | **metalangle SHA** | `ec92514` | overlay + SPIRV-Cross pin |
 | **FreeImage JXR** | Windows-only | jxrlib SAL/GUID |
@@ -155,7 +155,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 ### Already on latest (intended track)
 
-`brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.0) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `zlib`
+`brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.1) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `zlib`
 
 ---
 
@@ -236,7 +236,7 @@ formulas:
   nghttp3:    { current: "1.18.0",   latest: "1.18.0",   status: current }
   ngtcp2:     { current: "1.25.0",   latest: "1.25.0",   status: current }
   opencv:     { current: "4.14.0",   latest: "5.0.0",    status: current, track: "4.x", pin: "OF 4.x API" }
-  openssl:    { current: "4.0.2",    latest: "4.0.2",    status: current, track: "4.0", pin: "openssl-cmake 4.0; not 3.5; not 4.1-alpha" }
+  openssl:    { current: "4.1.0",    latest: "4.1.0",    status: ci-pending, track: "4.1", pin: "openssl-cmake 176816e9dfab3af33c1ae32fcb9981f4ce5d40ea; stable 4.1.0" }
   pixman:     { current: "0.46.4",   latest: "0.46.4",   status: current }
   poco:       { current: "1.15.4",   latest: "1.15.4",   status: current }
   portaudio:  { current: "19.7.0", latest: "v19.7.0", status: updated, pin: "Linux formula" }
