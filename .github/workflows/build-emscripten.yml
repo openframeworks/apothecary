@@ -41,6 +41,8 @@ jobs:
           fetch-depth: 0
       - name: Test installed SDK selection
         run: bash scripts/tests/test-emscripten-setup.sh
+      - name: Test Cairo SDK environment selection
+        run: bash scripts/tests/test-emscripten-cairo-env.sh
       - name: Plan selected formula and toolchain builds
         id: plan
         uses: actions/github-script@v9.0.0
@@ -58,6 +60,7 @@ jobs:
     needs: pre-check
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -67,6 +70,7 @@ jobs:
           cd $HOME/emsdk
           ./emsdk install ${{ env.EMSDK_VERSION }}
           ./emsdk activate ${{ env.EMSDK_VERSION }}
+          echo "EMSDK=$HOME/emsdk" >> $GITHUB_ENV
           echo "EMSDK_PATH=$HOME/emsdk" >> $GITHUB_ENV
           echo "EMSCRIPTEN=$HOME/emsdk/upstream/emscripten" >> $GITHUB_ENV
           echo 'export PATH="$HOME/emsdk:$HOME/emsdk/upstream/emscripten:$PATH"' >> $HOME/.bashrc
