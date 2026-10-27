@@ -77,7 +77,7 @@ candidates() {
 }
 
 publish() {
-    local repository=$1 body=$2 updates=$3 errors=$4 batch existing='[]' page=1 number old payload
+    local repository=$1 body=$2 updates=$3 errors=$4 keep_open=${5:-0} batch existing='[]' page=1 number old payload
     [[ $repository =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo 'Invalid owner/repository' >&2; return 1; }
     while :; do
         batch=$(api "repos/$repository/issues?state=open&per_page=100&page=$page") || return 1
@@ -87,7 +87,7 @@ publish() {
     done
     [[ $(jq length <<< "$existing") -le 1 ]] || { echo 'Multiple tracking issues found' >&2; return 1; }
     number=$(jq -r '.[0].number // empty' <<< "$existing")
-    if [[ $updates -gt 0 || $errors -gt 0 ]]; then
+    if [[ $updates -gt 0 || $errors -gt 0 || $keep_open -eq 1 ]]; then
         payload=$(jq -cn --arg body "$body" --arg title "$TITLE" '{body: $body, title: $title}')
         if [[ -n $number ]]; then
             old=$(jq -r '.[0].body' <<< "$existing")
