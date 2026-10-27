@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Emscripten",
+    "file": ".github/workflows/build-emscripten.yml",
+    "format": "yaml_env",
+    "variable": "EMSDK_VERSION",
+    "repo": "emscripten-core/emscripten",
+    "pattern": "(\\d+\\.\\d+\\.\\d+)"
+  }
+]
