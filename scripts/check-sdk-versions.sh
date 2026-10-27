@@ -6,6 +6,10 @@ source "$SDK_ROOT/scripts/check-upstream-versions.sh"
 MARKER='<!-- apothecary-sdk-versions -->'
 TITLE='Apothecary SDK version check'
 
+sdk_toolchains() {
+    python3 "$ROOT/scripts/check-sdk-toolchains.py" --root "$ROOT"
+}
+
 sdk_current() {
     local entry=$1 file variable raw pattern
     file=$(jq -r .file <<< "$entry")
@@ -29,7 +33,7 @@ sdk_current() {
 
 sdk_main() {
     local file_issue=0 repository=${GITHUB_REPOSITORY:-} registry entry name pin choices best
-    local results='[]' errors='[]' tmp body updates failures
+    local results='[]' errors='[]' tmp body updates failures toolchains successes
     while [[ $# -gt 0 ]]; do
         case $1 in
             --file-issue) file_issue=1; shift ;;
@@ -61,6 +65,13 @@ sdk_main() {
     done < <(jq -c '.[]' <<< "$registry")
     updates=$(jq '[.[] | select(.newer)] | length' <<< "$results")
     failures=$(jq length <<< "$errors")
+    if ! toolchains=$(sdk_toolchains); then
+        toolchains='{"markdown":"### Toolchain/action checks that failed\n\n- Collector failed; see action logs.\n","checks":0,"errors":1,"updates":0}'
+    fi
+    jq -e '.markdown | type == "string"' <<< "$toolchains" >/dev/null
+    updates=$((updates + $(jq .updates <<< "$toolchains")))
+    failures=$((failures + $(jq .errors <<< "$toolchains")))
+    successes=$(($(jq length <<< "$results") + $(jq .checks <<< "$toolchains")))
     {
         printf '%s\n\n' "$MARKER"
         printf '%s\n\n' 'SDK/toolchain pins are compared with stable upstream releases. This report does not change SDK versions or establish compatibility.'
@@ -72,8 +83,10 @@ sdk_main() {
             printf '\n### Checks that failed\n\n'
             jq -r '.[] | "- \(.name): \(.error)"' <<< "$errors"
         fi
-        printf '\n%s successful checks; %s failed; %s updates available.\n' "$(jq length <<< "$results")" "$failures" "$updates"
-        printf '\nCoverage: Emscripten only. Android SDK/NDK, Apple SDKs and other toolchains are not checked yet.\n'
+        printf '\n'
+        jq -r .markdown <<< "$toolchains"
+        printf '\n%s successful checks; %s failed; %s updates available.\n' "$successes" "$failures" "$updates"
+        printf '\nCoverage: Emscripten, Apple Xcode/bundled SDKs, Android SDK Build Tools/NDK, Microsoft Windows SDK/Visual Studio channels and external GitHub Action references.\n'
         printf '\nWorkflow: `.github/workflows/sdk-versions.yml`.\n'
     } > "$tmp/report"
     cat "$tmp/report"
