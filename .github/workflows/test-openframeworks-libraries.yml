@@ -49,12 +49,12 @@ jobs:
       APOTHECARY_REPOSITORY: ${{ github.repository }}
     steps:
       - name: Check out Apothecary test scripts
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
         with:
           path: apothecary-tests
 
       - name: Check out openFrameworks
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v7.0.1
         with:
           repository: openframeworks/openFrameworks
           ref: ${{ inputs.openframeworks_ref }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Set up MSYS2 download tools
         if: inputs.platform == 'windows'
-        uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@v2.33.0
         with:
           update: true
           install: git unzip
@@ -120,7 +120,7 @@ jobs:
 
       - name: Set up Java
         if: inputs.platform == 'android'
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6.1.0
         with:
           distribution: temurin
           java-version: '17'

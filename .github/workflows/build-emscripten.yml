@@ -45,7 +45,7 @@ jobs:
         with:
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-emscripten.yml', job: 'build-emscripten-platforms'});
-      - uses: actions/upload-artifact@v7.0.0
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: .build-plans/*.pkl
@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload Artifact
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding') && env.USE_ARTIFACT == 'true' && steps.platform-artifacts.outcome == 'success'
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: libs-${{ env.RELEASE }}-emscripten-${{ env.ARCH }}
           path: out/${{ env.FILENAME }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: ${{ runner.temp }}/build-plans

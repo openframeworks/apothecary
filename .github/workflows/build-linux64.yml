@@ -40,7 +40,7 @@ jobs:
         with:
           script: |
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-linux64.yml', job: 'build'});
-      - uses: actions/upload-artifact@v7.0.0
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: .build-plans/*.pkl
@@ -69,7 +69,7 @@ jobs:
       CXXFLAGS: -O2 -fPIC -D_GLIBCXX_USE_CXX11_ABI=1 ${{ matrix.arch_flags }}
     steps:
       - name: Restore APT package cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6.1.0
         with:
           path: /github/home/.cache/apt/archives
           key: apt-focal-${{ matrix.arch }}-gcc10-v1
@@ -152,7 +152,7 @@ jobs:
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: ${{ runner.temp }}/build-plans

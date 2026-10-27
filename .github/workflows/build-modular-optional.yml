@@ -94,7 +94,7 @@ jobs:
         run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
       - name: Restore compiled modular outputs
         id: cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: |
@@ -112,7 +112,7 @@ jobs:
         run: bash scripts/build-modular-optional.sh
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: |
@@ -147,7 +147,7 @@ jobs:
       ALWAYS_BUILD: 1
       NO_FORCE: 1
     steps:
-      - uses: msys2/setup-msys2@v2.32.0
+      - uses: msys2/setup-msys2@v2.33.0
         with:
           update: true
           install: >-
@@ -165,7 +165,7 @@ jobs:
         run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
       - name: Restore compiled modular outputs
         id: cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: out/${{ matrix.library }}
@@ -181,7 +181,7 @@ jobs:
         run: bash scripts/build-modular-optional.sh
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: out/${{ matrix.library }}
@@ -217,11 +217,11 @@ jobs:
       NO_FORCE: 1
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7.1.0
         id: python
         with:
           python-version: '3.12'
-      - uses: msys2/setup-msys2@v2.32.0
+      - uses: msys2/setup-msys2@v2.33.0
         with:
           msystem: MSYS
           path-type: inherit
@@ -260,7 +260,7 @@ jobs:
         run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
       - name: Restore compiled modular outputs
         id: cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: out/glon12
@@ -285,12 +285,12 @@ jobs:
           grep -iE '/dxil[.]dll$' "$listing"
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
           path: out/glon12
       - name: Upload validation package
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: glon12-vs-${{ matrix.arch }}
           path: out/oF_glon12_vs_${{ matrix.arch }}.zip
