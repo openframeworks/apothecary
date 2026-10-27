@@ -97,7 +97,8 @@ publish() {
             api "repos/$repository/issues" github POST "$payload" >/dev/null
         fi
     elif [[ -n $number ]]; then
-        api "repos/$repository/issues/$number" github PATCH '{"state":"closed"}' >/dev/null
+        payload=$(jq -cn --arg body "$body" '{body: $body, state: "closed"}')
+        api "repos/$repository/issues/$number" github PATCH "$payload" >/dev/null
     fi
 }
 
@@ -162,10 +163,17 @@ main() {
     {
         printf '%s\n\n' "$MARKER"
         printf '%s\n' 'A scheduled check compared formula pins with upstream stable releases.' 'A newer release may require a different supported branch, patches, checksums or platform changes.' 'This report does not change formulas.'
-        printf '\n'
+        printf '\n### Libraries with newer releases\n\n'
         printf '%s\n' '| Library | Pinned | Latest stable upstream |' '| --- | --- | --- |'
-        jq -r '.[] | select(.newer) | "| \(.name) | \(.pin) | [\(.tag)](\(.url)) |"' <<< "$results"
+        jq -r 'sort_by(.name | ascii_downcase)[] | select(.newer) | "| \(.name) | \(.pin) | [\(.tag)](\(.url)) |"' <<< "$results"
         if [[ $updates -eq 0 ]]; then echo '| — | — | No newer releases detected among successful checks |'; fi
+        printf '\n### Up-to-date libraries\n\n'
+        printf '%s\n\n' 'No newer stable release was found for these successfully checked pins.'
+        printf '%s\n' '| Library | Pinned | Latest stable upstream |' '| --- | --- | --- |'
+        jq -r 'sort_by(.name | ascii_downcase)[] | select(.newer | not) | "| \(.name) | \(.pin) | [\(.tag)](\(.url)) |"' <<< "$results"
+        if [[ $(jq '[.[] | select(.newer | not)] | length' <<< "$results") -eq 0 ]]; then
+            echo '| — | — | No up-to-date libraries verified |'
+        fi
         if [[ $failures -gt 0 ]]; then
             printf '\n### Checks that failed\n\n'
             jq -r '.[] | "- \(.name): \(.error)"' <<< "$errors"
