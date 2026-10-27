@@ -194,7 +194,7 @@ elif [ "$TARGET" == "msys2" ]; then
     echo "C:\Program Files\7-Zip\7z.exe a $TARBALL $LIBS"
 elif [ "$TARGET" == "vs" ]; then
     if [ ! -z "${VS_VER+x}" ]; then
-        if [ "${VS_VER}" == "16" ]; then
+        if [ "${VS_VER}" == "16" ] || [ "${VS_TOOLSET:-}" == "v142" ]; then
             echo "VS2019 Version"
             TARGET="${TARGET}_2019"
         elif [ "${VS_VER}" == "18" ]; then
