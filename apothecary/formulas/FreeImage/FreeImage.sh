@@ -16,6 +16,8 @@
 # adds selectable MSVC runtime support (the default preserves existing flags).
 # 3.19.27 fixes HEIF thumbnail handling and portable JXR builds; existing codec
 # selection stays unchanged (HEIF/JXL opt-in, JXR Windows-only).
+# 3.19.28 hardens TARGA/BMP and memory-stream decoding, fixes MinGW JXL decoding,
+# and updates bundled LibRaw to 0.22.3, libheif to 1.23.7 and Brotli to 1.2.1.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -24,8 +26,8 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.27
-SHA256="bd27cacea016abf0293ae2c6f7eceb59fbf594c052909738deff81bbdd16cdeb"
+VER=3.19.28
+SHA256="3c40cbbe767c693cc07de1b75804850966d0d48f8b6d4c6f899c773d2b54e73e"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
 BUILD_ID=28
