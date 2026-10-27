@@ -8,6 +8,10 @@
 
 FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=("openssl" "zlib" "brotli" "nghttp2" "nghttp3" "ngtcp2" "libssh2")
+if [ "${TYPE:-}" == vs ] && [ "${VS_TOOLSET:-}" == v142 ]; then
+    # nghttp3/ngtcp2 require _Generic fixes absent from VS2019's C compiler.
+    FORMULA_DEPENDS=("openssl" "zlib" "brotli" "nghttp2" "libssh2")
+fi
 
 # Android to implementation 'com.android.ndk.thirdparty:curl:7.79.1-beta-1'
 
@@ -17,7 +21,7 @@ SHA1="dde79cd20f6b0d6dc7f4dcc3dd71c472fc2ebcee"
 SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=12
+BUILD_ID=13
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -67,7 +71,15 @@ function prepare() {
 function verify_required_features() {
     local CONFIG_HEADER="$1"
     local FEATURE
-    for FEATURE in USE_NGHTTP2 USE_NGTCP2 USE_NGHTTP3 USE_LIBSSH2; do
+    local FEATURES=(USE_NGHTTP2 USE_NGTCP2 USE_NGHTTP3 USE_LIBSSH2)
+    if [ "$TYPE" == vs ] && [ "${VS_TOOLSET:-}" == v142 ]; then
+        FEATURES=(USE_NGHTTP2 USE_LIBSSH2)
+        if grep -Eq '^#define (USE_NGTCP2|USE_NGHTTP3) 1$' "$CONFIG_HEADER"; then
+            echo 'VS2019 curl must use the HTTP/1.1 + HTTP/2 profile'
+            exit 1
+        fi
+    fi
+    for FEATURE in "${FEATURES[@]}"; do
         if ! grep -q "^#define ${FEATURE} 1$" "$CONFIG_HEADER"; then
             echo "curl configured without required feature ${FEATURE}"
             exit 1
@@ -150,7 +162,12 @@ function build() {
     NGHTTP3_ROOT="$LIBS_ROOT/nghttp3"
     NGTCP2_ROOT="$LIBS_ROOT/ngtcp2"
     LIBSSH2_ROOT="$LIBS_ROOT/libssh2"
-    if [ ! -f "$NGTCP2_ROOT/include/ngtcp2/version.h" ]; then
+    local CURL_HTTP3=ON
+    if [ "$TYPE" == vs ] && [ "${VS_TOOLSET:-}" == v142 ]; then
+        CURL_HTTP3=OFF
+        echo 'VS2019: HTTP/3 disabled; HTTP/1.1, HTTP/2, TLS and SSH remain enabled'
+    fi
+    if [ "$CURL_HTTP3" == ON ] && [ ! -f "$NGTCP2_ROOT/include/ngtcp2/version.h" ]; then
         echo " ngtcp2 version.h missing at $NGTCP2_ROOT/include/ngtcp2/version.h"
         echo " curl 8.21 treats an unknown ngtcp2 version as < 1.12.0 (OpenSSL QUIC)."
         echo " Rebuild ngtcp2, then retry curl."
@@ -256,7 +273,7 @@ function build() {
             -DNGHTTP2_USE_STATIC_LIBS=ON \
             -DNGHTTP2_INCLUDE_DIR="$NGHTTP2_ROOT/include" \
             -DNGHTTP2_LIBRARY="$NGHTTP2_LIBRARY" \
-            -DUSE_NGTCP2=ON \
+            -DUSE_NGTCP2=${CURL_HTTP3} \
             -DNGTCP2_USE_STATIC_LIBS=ON \
             -DNGTCP2_INCLUDE_DIR="$NGTCP2_ROOT/include" \
             -DNGTCP2_LIBRARY="$NGTCP2_LIBRARY" \
@@ -304,14 +321,19 @@ function build() {
             echo "Unable to find the Visual Studio librarian"
             exit 1
         fi
+        local HTTP_DEPENDENCIES=("$NGHTTP2_LIBRARY")
+        if [ "$CURL_HTTP3" == ON ]; then
+            HTTP_DEPENDENCIES+=("$NGHTTP3_LIBRARY" "$NGTCP2_LIBRARY" "$NGTCP2_CRYPTO_LIBRARY")
+        fi
+        HTTP_DEPENDENCIES+=("$LIBSSH2_LIBRARY")
+        local WINDOWS_DEPENDENCIES=() DEPENDENCY
+        for DEPENDENCY in "${HTTP_DEPENDENCIES[@]}"; do
+            WINDOWS_DEPENDENCIES+=("$(cygpath -w "$DEPENDENCY")")
+        done
         MSYS2_ARG_CONV_EXCL='*' "$librarian" /NOLOGO \
             "/OUT:$(cygpath -w "$PWD/Release/lib/libcurl-merged.lib")" \
             "$(cygpath -w "$PWD/Release/lib/libcurl.lib")" \
-            "$(cygpath -w "$NGHTTP2_LIBRARY")" \
-            "$(cygpath -w "$NGHTTP3_LIBRARY")" \
-            "$(cygpath -w "$NGTCP2_LIBRARY")" \
-            "$(cygpath -w "$NGTCP2_CRYPTO_LIBRARY")" \
-            "$(cygpath -w "$LIBSSH2_LIBRARY")"
+            "${WINDOWS_DEPENDENCIES[@]}"
         mv Release/lib/libcurl-merged.lib Release/lib/libcurl.lib
         cd ..
 
