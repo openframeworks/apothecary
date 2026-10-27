@@ -20,6 +20,8 @@ apothecary_vs_configure_toolset() {
     [ -n "${VS_TOOLSET:-}" ] || return 0
     case "$VS_TOOLSET" in
         v142)
+            # Recipes use VC_VERSION in output names; VS_VER describes the host.
+            export VC_VERSION=142
             [ "${VS_COMPILER:-MSVC}" = MSVC ] || return 1
             case "${ARCH:-}" in
                 32|64) ;;

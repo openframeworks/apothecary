@@ -13,6 +13,7 @@ apothecary_vs_configure_toolset
 [[ $VS_VER_DIR == 14.29.30133 && $VS_BIN_PATH == *14.29.30133/bin/Hostx64/x64 ]]
 [[ $PATH == "$VS_BIN_PATH:"* && $CPP_STANDARD == 23 && $CPP_STANDARD_MODE == latest ]]
 [[ $CC == cl && $CXX == cl ]]
+[[ $VC_VERSION == 142 ]]
 [[ $CMAKE_GENERATOR == 'Visual Studio 17 2022' && $CMAKE_GENERATOR_TOOLSET == 'v142,version=14.29.30133,host=x64' ]]
 [[ $CMAKE_WIN_SDK == *'-T v142,version=14.29.30133,host=x64' ]]
 ( VS_WINDOWS_SDK_VERSION=10.0.19041.0; apothecary_vs_configure_toolset; [[ $CMAKE_WIN_SDK == '-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.19041.0 -DCMAKE_SYSTEM_VERSION=10.0.19041.0 -T v142,version=14.29.30133,host=x64' ]] )
@@ -45,7 +46,7 @@ PY
     WIN10_INSTALLED_SDK_2022_HEX=0x0A004F5C
     TARGET_WIN_11=0 VS_HOST=amd64
     source "$fixture/vs-init.sh"
-    [[ $VS_VER == 17 && $VS_VER_GEN == '17 2022' && $VS_VER_DIR == 14.29.30133 ]]
+    [[ $VS_VER == 17 && $VS_VER_GEN == '17 2022' && $VS_VER_DIR == 14.29.30133 && $VC_VERSION == 142 ]]
     [[ $CPP_STANDARD == 23 && $CPP_STANDARD_MODE == latest && $PATH == "$VS_BIN_PATH:"* ]]
 )
 echo 'VS toolset selection tests passed'

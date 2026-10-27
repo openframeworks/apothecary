@@ -7,6 +7,7 @@ if(NOT CMAKE_VS_PLATFORM_TOOLSET STREQUAL "v142")
     message(FATAL_ERROR "Expected v142, got ${CMAKE_VS_PLATFORM_TOOLSET}")
 endif()
 add_executable(vs2019_maximum main.cpp)
+target_compile_options(vs2019_maximum PRIVATE /utf-8)
 # On MSVC 19.29, this selects /std:c++latest, rather than /std:c++20.
 set_target_properties(vs2019_maximum PROPERTIES CXX_STANDARD 23 CXX_STANDARD_REQUIRED YES)
 if(SDK_ROOT)

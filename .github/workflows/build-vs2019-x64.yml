@@ -45,6 +45,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - run: bash scripts/tests/test-vs-toolset.sh
       - run: bash scripts/tests/test-vs2019-curl-profile.sh
+      - run: bash scripts/tests/test-vs2019-assimp-copy.sh
 
   build-vs2019-64:
     needs: test-selector
