@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../check-sdk-versions.sh"
+# Provider/real-YAML fixtures are separate; publication tests stay offline.
+sdk_toolchains() { echo '{"markdown":"","checks":0,"errors":0,"updates":0}'; }
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT
 original_root=$ROOT
@@ -66,4 +68,11 @@ if (
 grep -Fq 'HTTP 503 from SDK upstream' "$fixture/failed"
 grep -Fq 'No successful checks' "$fixture/failed"
 grep -Fq '0 successful checks; 1 failed' "$fixture/failed"
+if (
+    candidates() { echo '[{"tag":"6.0.13","url":"https://example.test/sdk"}]'; }
+    sdk_toolchains() { echo '{"markdown":"Toolchain fixture failed visibly","checks":2,"errors":1,"updates":1}'; }
+    sdk_main
+) > "$fixture/toolchain-failed"; then echo 'Failed toolchain lookup returned success' >&2; exit 1; fi
+grep -Fq 'Toolchain fixture failed visibly' "$fixture/toolchain-failed"
+grep -Fq '3 successful checks; 1 failed; 1 updates available' "$fixture/toolchain-failed"
 echo 'SDK reports: literal pins, stable releases, status tables, issue isolation and failure reporting passed'
