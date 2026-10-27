@@ -63,6 +63,16 @@ jobs:
       ANDROID_API: ${{ matrix.API }}
     steps:
       - uses: actions/checkout@v7.0.1
+      - name: Install and verify the selected Android NDK
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:?Android SDK root is missing}}"
+          sdkmanager --sdk_root="$sdk_root" --install "ndk;$NDK"
+          ndk_root="$sdk_root/ndk/$NDK"
+          installed=$(sed -n 's/^Pkg.Revision[[:space:]]*=[[:space:]]*//p' "$ndk_root/source.properties" | tr -d '\r')
+          test "$installed" = "$NDK" || { echo "Requested NDK $NDK, installed $installed" >&2; exit 1; }
+          echo "ANDROID_NDK_ROOT=$ndk_root" >> "$GITHUB_ENV"
+          echo "NDK_ROOT=$ndk_root" >> "$GITHUB_ENV"
       - name: Determine Release
         id: vars
         shell: bash
