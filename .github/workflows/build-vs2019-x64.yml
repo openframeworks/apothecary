@@ -20,8 +20,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: vs2019-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 env:
   # VS2022 hosts the VS2019 compiler. VS_VER denotes the generator host.
