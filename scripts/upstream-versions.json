@@ -178,8 +178,7 @@
     "name": "PortAudio",
     "formula": "apothecary/formulas/portaudio.sh",
     "repo": "PortAudio/portaudio",
-    "pattern": "v?(\\d+(?:\\.\\d+)+)",
-    "current_pattern": "stable_v(\\d+)_20110326"
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
   },
   {
     "name": "Cairo",

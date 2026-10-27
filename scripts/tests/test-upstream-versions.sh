@@ -91,6 +91,7 @@ for scenario in failure clean unchanged create multiple; do
 done
 assert grep -q '"body":"failure report"' "$TEST_TMP/failure"
 assert grep -q '"state":"closed"' "$TEST_TMP/clean"
+assert grep -q '"body":"clean report"' "$TEST_TMP/clean"
 assert test ! -e "$TEST_TMP/unchanged"
 assert grep -q '^POST ' "$TEST_TMP/create"
 assert test ! -e "$TEST_TMP/multiple"
@@ -104,6 +105,36 @@ fi
 assert grep -q 'HTTP 503 from mocked upstream' "$TEST_TMP/report"
 assert grep -q '0 successful checks; 1 failed' "$TEST_TMP/report"
 assert cmp -s "$TEST_TMP/report" "$TEST_TMP/summary"
+assert grep -q 'No up-to-date libraries verified' "$TEST_TMP/report"
+# Exercise the actual registry and literal pins, including PortAudio's move
+# from stable_v19_20110326 to a normal dotted version. Only upstream is mocked.
+(
+    candidates() {
+        case $(jq -r .name <<< "$1") in
+            PortAudio) echo '[{"tag":"v19.7.0","url":"https://example.test/portaudio/v19.7.0"}]' ;;
+            OpenSSL)
+                next_major=$(current "$1" | jq '.version[0] + 1')
+                printf '[{"tag":"openssl-%s.0.0","url":"https://example.test/openssl/newer"}]\n' "$next_major"
+                ;;
+            FreeType)
+                tag=$(current "$1" | jq -r '.pin | "VER-" + gsub("\\."; "-")')
+                jq -cn --arg tag "$tag" '[{tag:$tag,url:"https://example.test/freetype/current"}]'
+                ;;
+            *) return 1 ;;
+        esac
+    }
+    main --only PortAudio OpenSSL FreeType
+) > "$TEST_TMP/tables"
+assert grep -Fxq '### Libraries with newer releases' "$TEST_TMP/tables"
+assert grep -Fxq '### Up-to-date libraries' "$TEST_TMP/tables"
+assert grep -Fxq '| PortAudio | 19.7.0 | [v19.7.0](https://example.test/portaudio/v19.7.0) |' "$TEST_TMP/tables"
+assert grep -q '3 successful checks; 0 failed' "$TEST_TMP/tables"
+awk '/^### Up-to-date libraries/{current=1} current' "$TEST_TMP/tables" > "$TEST_TMP/current-table"
+assert grep -q '^| FreeType |' "$TEST_TMP/current-table"
+assert grep -q '^| PortAudio |' "$TEST_TMP/current-table"
+if grep -q '^| OpenSSL |' "$TEST_TMP/current-table"; then
+    echo 'FAIL: outdated library included in up-to-date table' >&2; exit 1
+fi
 if (main --only OpenSSL --file-issue) >/dev/null 2>&1; then
     echo 'FAIL: partial report allowed issue writes' >&2; exit 1
 fi
