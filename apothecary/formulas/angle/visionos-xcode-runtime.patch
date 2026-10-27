@@ -1,0 +1,29 @@
+--- a/build/config/clang/BUILD.gn
++++ b/build/config/clang/BUILD.gn
+@@ -11,6 +11,12 @@
+   import("//build/config/apple/mobile_config.gni")
+ }
+-
++
++declare_args() {
++  # Xcode's visionOS builtins support our deployment minimum; Chromium's
++  # bundled visionOS builtins were built for a newer OS.
++  angle_xros_clang_runtime_dir = ""
++}
++
+ # Helper function for adding cflags to use a clang plugin.
+ # - `plugin` is the name of the plugin.
+ # - `plugin_arguments` is a list of arguments to pass to the plugin.
+@@ -236,6 +242,12 @@
+       _clang_lib_dir = "$clang_base_path/lib/clang/$clang_version/lib"
++      if (is_ios && target_platform == "xros" &&
++          target_name == "compiler_builtins") {
++        assert(angle_xros_clang_runtime_dir != "",
++               "visionOS requires the selected Xcode's Clang runtime directory")
++        _clang_lib_dir = get_path_info(angle_xros_clang_runtime_dir, "dir")
++      }
+       _lib_file = "${_prefix}clang_rt.${_libname}${_suffix}.${_ext}"
+       libs = [ "$_clang_lib_dir/$_dir/$_lib_file" ]
+     }
+   }
+ }

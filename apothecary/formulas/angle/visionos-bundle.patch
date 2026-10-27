@@ -1,0 +1,9 @@
+--- a/build/config/apple/codesign.py
++++ b/build/config/apple/codesign.py
+@@ -141,4 +141,6 @@
+       return 'watchos'
+     if platform in ('appletvos', 'appletvsimulator'):
+       return 'tvos'
++    if platform in ('xros', 'xrsimulator'):
++      return 'xros'
+     raise ValueError('unknown bundle type %s for %s' % (extension, platform))

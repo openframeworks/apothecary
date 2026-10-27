@@ -102,10 +102,18 @@ vs_args=$(TYPE=vs ARCH=64 PLATFORM=x64 _angle_gn_args)
 [[ "$vs_args" == *'use_custom_libcxx=false'* ]]
 [[ "$vs_args" == *'use_custom_libcxx_for_host=false'* ]]
 [[ "$vs_args" == *'use_siso=false'* ]]
+mkdir -p "$fixture/Xcode Toolchain/lib/darwin"
+touch "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xros.a" "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xrossim.a"
+xcrun() {
+    [ "$#" -eq 4 ] && [ "$1" = --sdk ] && [ "$3" = clang ] && [ "$4" = --print-runtime-dir ] || return 1
+    case "$2" in xros|xrsimulator) ;; *) return 1 ;; esac
+    printf '%s\n' "$fixture/Xcode Toolchain/lib/darwin"
+}
 for xros_platform in XROS SIMULATOR_XROS; do
     xros_args=$(TYPE=xros ARCH=arm64 PLATFORM="$xros_platform" _angle_gn_args)
     [[ "$xros_args" == *'target_platform="xros"'* ]]
     [[ "$xros_args" == *'ios_deployment_target="2.0"'* ]]
+    [[ "$xros_args" == *"angle_xros_clang_runtime_dir=\"$fixture/Xcode Toolchain/lib/darwin\""* ]]
     [[ "$xros_args" != *ios_sdk_path* ]]
     if [ "$xros_platform" = XROS ]; then
         [[ "$xros_args" == *'target_environment="device"'* ]]
@@ -131,12 +139,37 @@ done
 intel_simulator_args=$(TYPE=ios ARCH=x86_64 PLATFORM=SIMULATOR64 _angle_gn_args)
 [[ "$intel_simulator_args" == *'target_cpu="x64"'* ]]
 echo 'Real ARM64 and Intel simulator labels select distinct GN CPUs'
+mv "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xrossim.a" "$fixture/Xcode Toolchain/lib/darwin/saved.a"
+if TYPE=xros ARCH=SIM_arm64 PLATFORM=SIMULATOR_VISIONOS _angle_gn_args; then
+    echo 'Missing visionOS simulator runtime was incorrectly accepted' >&2
+    exit 1
+fi
+mv "$fixture/Xcode Toolchain/lib/darwin/saved.a" "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xrossim.a"
+unset -f xcrun
 
 # visionOS ABI names introduced by the GN patch must pass Rust's allowlist.
 mkdir -p build/config/apple build/config/clang build/rust
 printf "'xrsimulator',\n" > build/config/apple/sdk_info.py
 printf 'aarch64-apple-ios\n' > build/rust/known-target-triples.txt
 cat > build/config/clang/BUILD.gn <<'EOF'
+if (is_ios) {
+  # For `target_environment` and `target_platform`.
+  import("//build/config/apple/mobile_config.gni")
+}
+
+# Helper function for adding cflags to use a clang plugin.
+# - `plugin` is the name of the plugin.
+# - `plugin_arguments` is a list of arguments to pass to the plugin.
+template("clang_lib") {
+  if (true) {
+    config(target_name) {
+      _clang_lib_dir = "$clang_base_path/lib/clang/$clang_version/lib"
+      _lib_file = "${_prefix}clang_rt.${_libname}${_suffix}.${_ext}"
+      libs = [ "$_clang_lib_dir/$_dir/$_lib_file" ]
+    }
+  }
+}
+
 clang_lib("compiler_builtins") {
   if (is_mac) {
     libname = "osx"
@@ -168,6 +201,8 @@ clang_lib("compiler_builtins") {
 }
 
 EOF
+TYPE=xros _angle_patch_xros_runtime
+TYPE=xros _angle_patch_xros_runtime
 TYPE=xros _angle_patch_platform_sources
 TYPE=xros _angle_patch_platform_sources
 for triple in aarch64-apple-visionos aarch64-apple-visionos-sim x86_64-apple-visionos; do
@@ -176,8 +211,48 @@ done
 [ "$(wc -l < build/rust/known-target-triples.txt | tr -d ' ')" = 4 ]
 grep -F 'libname = "xros"' build/config/clang/BUILD.gn
 grep -F 'libname = "xrossim"' build/config/clang/BUILD.gn
-[ "$(grep -c 'target_platform == "xros"' build/config/clang/BUILD.gn)" -eq 1 ]
+[ "$(grep -c 'target_platform == "xros"' build/config/clang/BUILD.gn)" -eq 2 ]
+[ "$(grep -c 'angle_xros_clang_runtime_dir = ""' build/config/clang/BUILD.gn)" -eq 1 ]
+grep -F '_clang_lib_dir = get_path_info(angle_xros_clang_runtime_dir, "dir")' build/config/clang/BUILD.gn
 echo 'visionOS Rust and Clang runtime registration is complete and repeatable'
+
+# The pinned bundle helper must accept both visionOS SDK names, even when
+# code signing is disabled. Its mobile bundle layout is flat for these SDKs.
+cat > build/config/apple/codesign.py <<'EOF'
+class Bundle:
+  @staticmethod
+  def Kind(platform, extension):
+    if platform in ('iphoneos', 'iphonesimulator'):
+      return 'ios'
+    if platform == 'macosx':
+      if extension == '.framework':
+        return 'mac_framework'
+      return 'mac'
+    if platform in ('watchos', 'watchsimulator'):
+      return 'watchos'
+    if platform in ('appletvos', 'appletvsimulator'):
+      return 'tvos'
+    raise ValueError('unknown bundle type %s for %s' % (extension, platform))
+EOF
+TYPE=xros _angle_patch_xros_bundle
+TYPE=xros _angle_patch_xros_bundle
+command python3 - <<'PY'
+import runpy
+bundle = runpy.run_path('build/config/apple/codesign.py')['Bundle']
+for platform in ('xros', 'xrsimulator'):
+    assert bundle.Kind(platform, '.framework') == 'xros'
+for platform, kind in [('iphoneos', 'ios'), ('iphonesimulator', 'ios'),
+                       ('watchos', 'watchos'), ('appletvos', 'tvos'),
+                       ('macosx', 'mac_framework')]:
+    assert bundle.Kind(platform, '.framework') == kind
+try:
+    bundle.Kind('unsupported', '.framework')
+except ValueError:
+    pass
+else:
+    raise AssertionError('Unknown platforms must still fail')
+PY
+echo 'visionOS bundle registration is repeatable and preserves existing platforms'
 
 # Keep both Chromium SDK constants aligned with complete installed headers/libs.
 source "$ROOT/apothecary/formulas/angle/angle.sh"
