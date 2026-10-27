@@ -15,6 +15,8 @@ apothecary_vs_configure_toolset
 [[ $CC == cl && $CXX == cl ]]
 [[ $CMAKE_GENERATOR == 'Visual Studio 17 2022' && $CMAKE_GENERATOR_TOOLSET == 'v142,version=14.29.30133,host=x64' ]]
 [[ $CMAKE_WIN_SDK == *'-T v142,version=14.29.30133,host=x64' ]]
+( VS_WINDOWS_SDK_VERSION=10.0.19041.0; apothecary_vs_configure_toolset; [[ $CMAKE_WIN_SDK == '-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=10.0.19041.0 -DCMAKE_SYSTEM_VERSION=10.0.19041.0 -T v142,version=14.29.30133,host=x64' ]] )
+if ( VS_WINDOWS_SDK_VERSION=latest; apothecary_vs_configure_toolset ); then exit 1; fi
 # Explicit older standards remain usable. No fallback to the newest compiler.
 ( CPP_STANDARD=20; apothecary_vs_configure_toolset; [[ $CPP_STANDARD == 20 && -z ${CPP_STANDARD_MODE:-} ]] )
 if ( VS_TOOLS_VERSION=14.28; apothecary_vs_configure_toolset ); then exit 1; fi

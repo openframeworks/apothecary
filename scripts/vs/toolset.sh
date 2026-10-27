@@ -40,6 +40,13 @@ apothecary_vs_configure_toolset() {
     export PATH="$VS_BIN_PATH:$PATH"
     export CC=cl CXX=cl
     export CMAKE_GENERATOR="Visual Studio ${VS_VER_GEN}"
+    if [ -n "${VS_WINDOWS_SDK_VERSION:-}" ]; then
+        if [[ ! $VS_WINDOWS_SDK_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo 'VS_WINDOWS_SDK_VERSION must be a literal four-part SDK version' >&2
+            return 1
+        fi
+        export CMAKE_WIN_SDK="-DCMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=$VS_WINDOWS_SDK_VERSION -DCMAKE_SYSTEM_VERSION=$VS_WINDOWS_SDK_VERSION"
+    fi
     case "$VS_HOSTPLATFORM" in
         Hostx64) export CMAKE_GENERATOR_TOOLSET="$VS_TOOLSET,version=$VS_VER_DIR,host=x64" ;;
         Hostx86) export CMAKE_GENERATOR_TOOLSET="$VS_TOOLSET,version=$VS_VER_DIR,host=x86" ;;

@@ -30,6 +30,7 @@ env:
   VS_VER: "17"
   VS_TOOLSET: v142
   VS_TOOLS_VERSION: "14.29"
+  VS_WINDOWS_SDK_VERSION: "10.0.19041.0"
   CPP_STANDARD: max
   MULTITHREADED_TYPE: MD
   NO_FORCE: "1"
@@ -74,14 +75,14 @@ jobs:
           vsversion: "2022"
           toolset: "14.29"
           arch: amd64
-          sdk: "10.0.20348.0"
+          sdk: ${{ env.VS_WINDOWS_SDK_VERSION }}
       - name: Verify v142 and maximum C++ mode
         run: |
           set -euo pipefail
           case "$VCToolsVersion" in 14.29.*) ;; *) echo "Wrong compiler: $VCToolsVersion"; exit 1 ;; esac
           cmake -S scripts/tests/vs2019 -B build/vs2019-probe \
             -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
-            -DCMAKE_SYSTEM_VERSION=10.0.20348.0
+            -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION"
           cmake --build build/vs2019-probe --config Release --verbose
           ./build/vs2019-probe/Release/vs2019_maximum.exe
       - name: Build core bundle with v142
@@ -100,7 +101,7 @@ jobs:
           7z x "out/openFrameworksLibs_vs2019-test_vs_2019_64_${BUNDLE}.zip" -obuild/vs2019-extracted
           cmake -S scripts/tests/vs2019 -B build/vs2019-consumer \
             -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
-            -DCMAKE_SYSTEM_VERSION=10.0.20348.0 \
+            -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION" \
             -DSDK_ROOT="$(cygpath -m "$PWD/build/vs2019-extracted")" -DBUNDLE="$BUNDLE"
           cmake --build build/vs2019-consumer --config Release --verbose
           ./build/vs2019-consumer/Release/vs2019_maximum.exe
