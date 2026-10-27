@@ -22,7 +22,7 @@ env:
   # Bump for compiler/SDK setup or build-command changes not declared below.
   BUILD_PROFILE_ID: "1"
   TARGET: "emscripten"
-  EMSDK_VERSION: "6.0.11"
+  EMSDK_VERSION: "6.0.13"
   USE_ARTIFACT: true
   PTHREADS_ENABLED: 1
   NO_FORCE: 1
@@ -39,6 +39,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
+      - name: Test installed SDK selection
+        run: bash scripts/tests/test-emscripten-setup.sh
       - name: Plan selected formula and toolchain builds
         id: plan
         uses: actions/github-script@v9.0.0

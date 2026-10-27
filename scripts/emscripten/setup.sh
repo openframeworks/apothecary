@@ -2,14 +2,15 @@
 
 # Default EMSDK path and version
 EMSDK=${EMSDK:-$HOME/emsdk}
-EMSDK_VERSION=${EMSDK_VERSION:-6.0.11}
+EMSDK_VERSION=${EMSDK_VERSION:-6.0.13}
 SETUP_STATUS_FILE="$HOME/.emsdk_setup_status"
 
 check_emsdk() {
-    if [ -d "$1/upstream/emscripten" ] && command -v emcc >/dev/null 2>&1; then
-        local installed_version=$(emcc --version | head -n1 | cut -d' ' -f3)
+    if [ -x "$1/upstream/emscripten/emcc" ]; then
+        local installed_version
+        installed_version=$("$1/upstream/emscripten/emcc" --version | awk 'NR == 1 { for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) { print $i; exit } }')
         echo "Emscripten version: $installed_version"
-        return 0
+        [ "$installed_version" = "$EMSDK_VERSION" ]
     else
         return 1
     fi
@@ -18,15 +19,11 @@ check_emsdk() {
 # Preserve EMSDK_VERSION before sourcing emsdk_env.sh
 export ORIGINAL_EMSDK_VERSION="$EMSDK_VERSION"
 
-if [ -f "$SETUP_STATUS_FILE" ]; then
-    SAVED_VERSION=$(cat "$SETUP_STATUS_FILE")
-    if [ "$SAVED_VERSION" = "$EMSDK_VERSION" ] && check_emsdk "$EMSDK"; then
-        echo "=== EMSDK is already set up (Version: $SAVED_VERSION). Skipping installation. ==="
-        source "$EMSDK/emsdk_env.sh"
-        return 0
-    else
-        echo "=== EMSDK version mismatch or not properly installed. Reinstalling... ==="
-    fi
+if check_emsdk "$EMSDK"; then
+    echo "=== EMSDK is already set up (Version: $EMSDK_VERSION). Skipping installation. ==="
+    source "$EMSDK/emsdk_env.sh"
+    export EMSDK_VERSION="$ORIGINAL_EMSDK_VERSION"
+    return 0
 fi
 
 # Install or update Emscripten if needed
