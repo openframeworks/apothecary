@@ -122,7 +122,7 @@ SRC
             "$libs/brotli/lib/linux/armv6l/libbrotlienc.a" \
             "$libs/brotli/lib/linux/armv6l/libbrotlidec.a" \
             "$libs/brotli/lib/linux/armv6l/libbrotlicommon.a" \
-            "$libs/zlib/lib/linux/armv6l/libz.a" -lm -o "$report/package-roundtrip"
+            "$libs/zlib/lib/linux/armv6l/zlib.a" -lm -o "$report/package-roundtrip"
         probe package-roundtrip "$report/package-roundtrip"
         ;;
     *) echo "Usage: $0 system|package" >&2; exit 1 ;;

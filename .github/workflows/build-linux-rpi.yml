@@ -20,6 +20,10 @@ on:
         description: Run ARM1176 CPU/runtime diagnostics (select armv6l)
         type: boolean
         default: false
+      publish_armv6l:
+        description: Publish ARMv6 libraries to release (select armv6l; bleeding/master/tag)
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
@@ -48,6 +52,8 @@ jobs:
       workflow_disabled: ${{ steps.plan.outputs.workflow_disabled }}
       build_needed: ${{ steps.plan.outputs.build_needed }}
       matrix: ${{ steps.select.outputs.matrix }}
+      manual_publish: ${{ steps.select.outputs.manual_publish }}
+      publish_release: ${{ steps.select.outputs.publish_release }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -64,20 +70,10 @@ jobs:
           BUILD_MATRIX: ${{ steps.plan.outputs.matrix }}
           RPI_ARCH: ${{ github.event_name == 'workflow_dispatch' && inputs.arch || 'all' }}
           PI_ZERO_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.pi_zero_test || false }}
-        run: |
-          python3 - <<'PY'
-          import json, os
-          matrix = json.loads(os.environ['BUILD_MATRIX'])
-          arch = os.environ['RPI_ARCH']
-          if os.environ['PI_ZERO_TEST'] == 'true' and arch != 'armv6l':
-              raise SystemExit('Pi Zero diagnostics require arch=armv6l')
-          if arch != 'all':
-              matrix['include'] = [row for row in matrix['include'] if row['arch'] == arch]
-          if not matrix['include']:
-              raise SystemExit('Requested architecture is absent from the build plan')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('matrix=' + json.dumps(matrix) + '\n')
-          PY
+          PUBLISH_ARMV6L: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_armv6l || false }}
+        run: python3 scripts/select-rpi-release.py
+      - name: Test ARMv6 publication selection
+        run: python3 scripts/tests/test-rpi-release-selection.py
       - uses: actions/upload-artifact@v7.0.0
         with:
           name: build-plan-${{ github.workflow }}
@@ -144,6 +140,31 @@ jobs:
       - name: Package canonical archive
         run: scripts/package.sh
 
+      - name: Verify ARMv6 release candidate checksum and identity
+        if: matrix.arch == 'armv6l'
+        working-directory: out
+        run: |
+          set -euo pipefail
+          archive="openFrameworksLibs_${RELEASE}_linux_armv6l_${GCC}.tar.bz2"
+          sha256sum --check "${archive}.sha256"
+          python3 - "$archive" <<'PY'
+          import json, sys
+          name = sys.argv[1]
+          with open(name + '.manifest.json') as stream:
+              manifest = json.load(stream)
+          assert manifest['artifact'] == name, manifest
+          assert manifest['target'] == 'linux_raspberrypi_armv6', manifest
+          assert manifest['architecture'] == 'armv6l' and manifest['compiler'] == 'gcc10', manifest
+          PY
+
+      - name: Upload ARMv6 release candidate
+        if: matrix.arch == 'armv6l'
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: armv6l-gcc10-release-candidate
+          path: out/openFrameworksLibs_${{ env.RELEASE }}_linux_armv6l_gcc10.tar.bz2*
+          if-no-files-found: error
+
       - name: Test extracted Pi Zero package
         if: github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l'
         id: pi-zero-package
@@ -173,12 +194,13 @@ jobs:
           find out/ -type f \( -name "*.tar.bz2" -o -name "*.sha256" -o -name "*.json" \) -print || true
 
       - name: Update Release
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: needs.pre-check.outputs.publish_release == 'true'
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: ${{ env.RELEASE }}
           draft: false
+          fail_on_unmatched_files: true
           files: |
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.sha256
@@ -201,17 +223,18 @@ jobs:
             await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-linux-rpi.yml', job: 'build-linux-rpi', matrix: JSON.parse(process.env.BUILD_PLAN_MATRIX)});
 
       - name: Clean canonical archive before modular packaging
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push'
+        if: needs.pre-check.outputs.publish_release == 'true'
         run: rm -f out/openFrameworksLibs*.tar.bz2
 
       - name: Package modular libraries
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: needs.pre-check.outputs.publish_release == 'true'
         run: scripts/package-individual.sh
 
       - name: Upload modular libraries
-        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        if: needs.pre-check.outputs.publish_release == 'true'
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
+          fail_on_unmatched_files: true
           files: out/oF_*_linux_${{ env.ARCH }}_gcc10.tar.bz2
