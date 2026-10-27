@@ -24,6 +24,8 @@ env:
   BUILD_PROFILE_ID: "1"
   TARGET: "vs"
   VS_STUDIO: "2026"
+  VS_WINDOWS_SDK_VERSION: "10.0.28000.0"
+  WINDOWS_SDK_RELEASE: "10.0.28000.2957"
   VS_VER: 18
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -96,6 +98,9 @@ jobs:
           path: apothecary/build
           key: apothecary-vs${{ env.VS_VER }}-${{ matrix.arch }}-bundle-${{ matrix.bundle }}-${{ hashFiles('apothecary/formulas/**', 'apothecary/apothecary', 'scripts/build.sh', 'scripts/calculate_formulas.sh', 'scripts/vs/**') }}
 
+      - name: Install Windows SDK 10.0.28000.2957
+        shell: pwsh
+        run: ./scripts/vs/install-windows-sdk.ps1
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
 
