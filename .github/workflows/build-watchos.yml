@@ -92,7 +92,7 @@ jobs:
           GA_CI_SECRET: ${{ secrets.CI_SECRET }}
       - name: Upload binaries as Artifact
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: libs-watchos-${{ env.TARGET }}-${{ matrix.bundle }}
           path: out/openFrameworksLibs_${{ env.release }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2

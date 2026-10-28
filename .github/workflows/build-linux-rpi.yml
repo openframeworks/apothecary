@@ -74,7 +74,7 @@ jobs:
         run: python3 scripts/select-rpi-release.py
       - name: Test ARMv6 publication selection
         run: python3 scripts/tests/test-rpi-release-selection.py
-      - uses: actions/upload-artifact@v7.0.0
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: .build-plans/*.pkl
@@ -159,7 +159,7 @@ jobs:
 
       - name: Upload ARMv6 release candidate
         if: matrix.arch == 'armv6l'
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: armv6l-gcc10-release-candidate
           path: out/openFrameworksLibs_${{ env.RELEASE }}_linux_armv6l_gcc10.tar.bz2*
@@ -173,7 +173,7 @@ jobs:
 
       - name: Preserve Pi Zero diagnostics and build logs
         if: always() && github.event_name == 'workflow_dispatch' && inputs.pi_zero_test && matrix.arch == 'armv6l'
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: pi-zero-armv6-diagnostics
           path: |
@@ -208,7 +208,7 @@ jobs:
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.2
         with:
           name: build-plan-${{ github.workflow }}
           path: ${{ runner.temp }}/build-plans

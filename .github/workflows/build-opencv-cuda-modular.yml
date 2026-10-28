@@ -22,14 +22,14 @@ jobs:
   linux-cuda:
     runs-on: [self-hosted, linux, x64, cuda]
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.1
       - name: Build modular CUDA variant
         shell: bash
         env:
           TYPE: linux
           ARCH: x86_64
         run: NO_COLOR=1 UI_ANIM=0 ./apo variant "${{ inputs.profile }}" all
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ inputs.profile }}-linux-x86_64
           path: xout/oF_${{ inputs.profile }}_linux_x86_64.tar.bz2
@@ -42,14 +42,14 @@ jobs:
   windows-cuda:
     runs-on: [self-hosted, windows, x64, cuda]
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v7.0.1
       - name: Build modular CUDA variant
         shell: bash
         env:
           TYPE: vs
           ARCH: 64
         run: NO_COLOR=1 UI_ANIM=0 ./apo variant "${{ inputs.profile }}" all
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ inputs.profile }}-windows-x64
           path: xout/oF_${{ inputs.profile }}_vs_64.zip

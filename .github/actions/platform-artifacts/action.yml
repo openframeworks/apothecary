@@ -40,7 +40,7 @@ runs:
           await require(`${process.env.GITHUB_WORKSPACE}/scripts/platform-artifacts.cjs`).select({github, context, core});
     - name: Download platform baseline
       if: inputs.phase == 'restore' && steps.baseline.outputs.run-id != ''
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v8.0.2
       with:
         github-token: ${{ github.token }}
         run-id: ${{ steps.baseline.outputs.run-id }}
@@ -74,7 +74,7 @@ runs:
         tar -czf "$artifact_temp/platform-binaries.tar.gz" -C out .
     - name: Upload trusted platform baseline
       if: inputs.phase == 'save'
-      uses: actions/upload-artifact@v7.0.0
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: platform-v1-${{ env.TARGET }}-${{ inputs.variant }}
         path: ${{ runner.temp }}/platform-binaries.tar.gz
