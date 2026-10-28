@@ -21,6 +21,7 @@ permissions:
 env:
   # Bump for compiler/SDK setup or build-command changes not declared below.
   BUILD_PROFILE_ID: "1"
+  XCODE_VERSION: "27.1"
   TARGET: "osx"
   NO_FORCE: 1
   GA_CI_SECRET: ${{ secrets.CI_SECRET }}
@@ -52,13 +53,13 @@ jobs:
           if-no-files-found: ignore
   build-macos-platforms:
     if: needs.pre-check.outputs.build_needed == 'true'
-    runs-on: macos-14
+    runs-on: xcode-27
     needs: pre-check
     strategy:
       matrix: ${{ fromJSON(needs.pre-check.outputs.matrix) }}
     env:
       BUNDLE: ${{ matrix.bundle }}
-      DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_27.1.app/Contents/Developer"
     steps:
       - name: Determine Release
         id: vars
@@ -74,6 +75,8 @@ jobs:
             echo "RELEASE=latest" >> $GITHUB_ENV
           fi
       - uses: actions/checkout@v7.0.1
+      - name: Verify selected Xcode and platform SDKs
+        run: bash scripts/check-apple-sdk.sh "${TARGET}"
       - name: Scripts Calc Formula - ${{ env.TARGET }} Bundle ${{ matrix.bundle }}
         run: ./scripts/calculate_formulas.sh
       - name: Scripts Install
@@ -244,9 +247,9 @@ jobs:
     # Temporarily disabled while openFrameworks is updated for OpenSSL 4.
     if: ${{ false }}
     needs: build-macos-platforms
-    runs-on: macos-14
+    runs-on: xcode-27
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.2.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
       OF_ROOT: ${{ github.workspace }}/openFrameworks
     steps:
       - name: Check out Apothecary test scripts
