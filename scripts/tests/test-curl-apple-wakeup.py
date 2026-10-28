@@ -52,6 +52,8 @@ with tempfile.TemporaryDirectory(prefix='curl-apple-wakeup-') as directory:
     for apple in (False, True):
         for have_pipe2 in (False, True):
             prefix = '''
+/* Match curl's CMake feature macros: strict C99 hides O_CLOEXEC on glibc. */
+#define _GNU_SOURCE 1
 #include <stdbool.h>
 #include <fcntl.h>
 #include <unistd.h>
