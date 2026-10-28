@@ -46,6 +46,7 @@ jobs:
       - run: bash scripts/tests/test-vs-toolset.sh
       - run: bash scripts/tests/test-vs2019-curl-profile.sh
       - run: bash scripts/tests/test-vs2019-assimp-copy.sh
+      - run: bash scripts/tests/test-vs2019-opencv-copy.sh
 
   build-vs2019-64:
     needs: test-selector

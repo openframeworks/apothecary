@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=8
+BUILD_ID=9
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -1065,13 +1065,25 @@ function copy() {
 
 #        if [ "${OPENCV_STATIC:-0}" = "1" ]; then
                                 
-            if [ -d "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/" ]; then
-                cp -v "build_${TYPE}_${PLATFORM}/Release/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
-            else
-                cp -v "build_${TYPE}_${PLATFORM}/Release/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Release
-                cp -v "build_${TYPE}_${PLATFORM}/Debug/staticlib/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
-            fi
+            # OpenCV names this directory after the compiler (vc16 for v142),
+            # which can differ from the VS generator host (VS_VER=17).
+            local configuration install_root static_dir candidate
+            for configuration in Release Debug; do
+                install_root="build_${TYPE}_${PLATFORM}/${configuration}"
+                static_dir=""
+                for candidate in "$install_root/${OUTPUT_FOLDER}/vc${VS_VER}/staticlib" \
+                    "$install_root/staticlib" "$install_root/${OUTPUT_FOLDER}"/vc*/staticlib; do
+                    if [ -d "$candidate" ] && compgen -G "$candidate/*.lib" >/dev/null; then
+                        static_dir="$candidate"
+                        break
+                    fi
+                done
+                if [ -z "$static_dir" ]; then
+                    echo "OpenCV ${configuration} static libraries missing under $install_root" >&2
+                    return 1
+                fi
+                cp -v "$static_dir/"*.lib "$1/lib/$TYPE/$PLATFORM/$configuration/" || return 1
+            done
 
 #        else
 #
@@ -1101,8 +1113,8 @@ function copy() {
 		cp -v "build_${TYPE}_${PLATFORM}/3rdparty/lib/Debug/"*.lib $1/lib/$TYPE/$PLATFORM/Debug
 		cp -Rv "build_${TYPE}_${PLATFORM}/Release/etc/"* $1/etc
 
-		secure "$1/lib/$TYPE/$PLATFORM/Debug/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
-		secure "$1/lib/$TYPE/$PLATFORM/Release/opencv_core${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+		secure "$1/lib/$TYPE/$PLATFORM/Debug/opencv_world${FILE_VERSION}d.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" || return 1
+		secure "$1/lib/$TYPE/$PLATFORM/Release/opencv_world${FILE_VERSION}.lib" "opencv.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" || return 1
 
 
     elif [ "$TYPE" == "android" ]; then
