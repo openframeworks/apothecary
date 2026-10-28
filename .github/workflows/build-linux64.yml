@@ -3,7 +3,7 @@ name: build-linux
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - "**/README.md"
   pull_request:
@@ -147,8 +147,17 @@ jobs:
           draft: false
           files: |
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2
-            out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.sha256
             out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.manifest.json
+
+      # The separate publisher covers latest/latest-modular. Retain existing
+      # sidecar publication for nightly and immutable versioned releases.
+      - name: Publish checksum for other release channels
+        if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && env.RELEASE != 'latest' && env.RELEASE != 'latest-modular' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE }}
+          files: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ env.ARCH }}_${{ env.GCC }}.tar.bz2.sha256
 
       - name: Download verified Linux build plan
         if: github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master')

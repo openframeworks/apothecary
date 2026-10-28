@@ -20,6 +20,7 @@
 !/.github/workflows/validate-formula-sources.yml
 !/.github/workflows/validate-platform-artifacts.yml
 !/.github/workflows/upstream-versions.yml
+!/.github/workflows/publish-checksums.yml
 !/.github/workflows/build-modular-optional.yml
 !/apothecary/**/*
 !/scripts/**/*

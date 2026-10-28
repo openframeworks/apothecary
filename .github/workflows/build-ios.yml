@@ -3,7 +3,7 @@ name: build-ios
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!nightly-staging-*', '!nightly-previous-*']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - '**/README.md'
   pull_request:
