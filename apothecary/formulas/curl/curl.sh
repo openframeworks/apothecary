@@ -21,7 +21,7 @@ SHA1="dde79cd20f6b0d6dc7f4dcc3dd71c472fc2ebcee"
 SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=13
+BUILD_ID=15
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -60,6 +60,14 @@ function prepare() {
             echo "Failed to apply apple-patch.diff"
             exit 1
         fi
+        if grep -Fq 'dlsym(RTLD_DEFAULT, "pipe2")' lib/socketpair.c; then
+            echo "apple-pipe-runtime.patch already applied"
+        elif patch --batch --forward -p1 <"$FORMULA_DIR/apple-pipe-runtime.patch"; then
+            echo "apple-pipe-runtime.patch applied successfully"
+        else
+            echo "Failed to apply apple-pipe-runtime.patch"
+            return 1
+        fi
     fi
     echo "prepared"
 
@@ -85,6 +93,22 @@ function verify_required_features() {
             exit 1
         fi
     done
+}
+
+# A weak pipe2 import still requires the consuming SDK to provide its symbol.
+# Apple packages support older SDKs as well as older deployment targets.
+function verify_apple_wakeup_symbols() {
+    local SYMBOLS DEPLOYMENT_MAJOR="${MIN_SDK_VER:-0}"
+    DEPLOYMENT_MAJOR="${DEPLOYMENT_MAJOR%%.*}"
+    # Explicit deployment targets of 27+ intentionally use pipe2 directly.
+    if [[ "$DEPLOYMENT_MAJOR" =~ ^[0-9]+$ ]] && [ "$DEPLOYMENT_MAJOR" -ge 27 ]; then
+        return 0
+    fi
+    SYMBOLS=$(nm -u "$1") || return 1
+    if printf '%s\n' "$SYMBOLS" | grep -E '(^|[[:space:]])_pipe2$' >/dev/null; then
+        echo "curl Apple archive imports pipe2 and cannot link with older SDKs: $1" >&2
+        return 1
+    fi
 }
 
 function merge_unix_curl_dependencies() {
@@ -784,6 +808,7 @@ function copy() {
         secure "$1/lib/$TYPE/$PLATFORM/libcurl.lib" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "${FORMULA_DEPENDS[*]}"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         CURL_APPLE_LIBRARY="build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a"
+        verify_apple_wakeup_symbols "$CURL_APPLE_LIBRARY" || return 1
         if ! nm -g "$CURL_APPLE_LIBRARY" | grep '_Curl_ssl_openssl' >/dev/null; then
             echo "curl built without the required OpenSSL TLS backend"
             exit 1
