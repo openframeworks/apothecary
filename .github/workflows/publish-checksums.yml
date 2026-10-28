@@ -1,0 +1,84 @@
+name: Publish release checksums
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Preview checksum coverage without changing releases
+        type: boolean
+        default: false
+  push:
+    branches: [bleeding, master]
+    paths:
+      - '.github/workflows/publish-checksums.yml'
+      - 'scripts/release-checksums.cjs'
+  pull_request:
+    paths:
+      - '.github/workflows/publish-checksums.yml'
+      - 'scripts/release-checksums.cjs'
+      - 'scripts/tests/test-release-checksums.cjs'
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_run:
+    workflows:
+      - build-android
+      - build-catos
+      - build-emscripten
+      - build-ios
+      - build-linux
+      - build-linux-cross
+      - build-linux-rpi
+      - build-linux-modular
+      - build-linux-openal-modular
+      - build-macos
+      - build-msys2
+      - build-modular-optional
+      - Build modular OpenCV CUDA
+      - build-tvos
+      - build-vs2022-64
+      - build-vs2022-arm64
+      - build-vs2022-arm64ec
+      - build-vs2026
+      - build-xros
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-checksums-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'publish' }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # workflow_run never executes the triggering run's checkout or artifacts.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.repository.default_branch || github.sha }}
+      - run: node scripts/tests/test-release-checksums.cjs
+      - run: ruby scripts/tests/test-workflow-scheduling.rb
+  publish:
+    needs: test
+    if: >-
+      github.repository == 'openframeworks/apothecary' &&
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.event != 'pull_request' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Publish checksums and retire public checksum sidecars
+        uses: actions/github-script@v9.0.0
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-checksums.cjs`).sync({github, context, core, dryRun: process.env.DRY_RUN === 'true'});
