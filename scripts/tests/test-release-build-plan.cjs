@@ -5,6 +5,14 @@ const p=require('../release-build-plan.cjs');
 const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'release-plan-test-'));
 const write=(name,data)=>{fs.mkdirSync(path.dirname(name),{recursive:true});fs.writeFileSync(name,data);};
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.env,GIT_AUTHOR_NAME:'Fixture',GIT_AUTHOR_EMAIL:'fixture@example.invalid',GIT_COMMITTER_NAME:'Fixture',GIT_COMMITTER_EMAIL:'fixture@example.invalid'}}).trim();
+// Exercise the actual optional workflow configuration before fixture setup.
+const rgfwWorkflow='.github/workflows/build-rgfw-modular.yml';
+const rgfwMatrix=JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'))[rgfwWorkflow]?.build;
+assert.ok(rgfwMatrix,'RGFW pre-check has a registered build matrix');
+const rgfwRows=p.matrixRows(rgfwMatrix);
+assert.equal(rgfwRows.length,10,'macOS, wasm32/64, MSVC and MSYS2 variants are planned');
+assert.equal(new Set(rgfwRows.map(row=>p.stateName(rgfwWorkflow,'build',row))).size,rgfwRows.length,'RGFW variants have distinct metadata assets');
+for (const row of rgfwRows) assert.deepEqual(Object.keys(p.inputs(rgfwWorkflow,'build',row).formulas),['rgfw'],'each native RGFW row resolves its environment and selects only RGFW');
 // The workflow must actually upload the extension emitted by the planner.
 for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8')))) {
  const text=fs.readFileSync(file,'utf8');
@@ -181,5 +189,17 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  androidAPI.rest.repos.uploadReleaseAsset=async()=>{throw Error('upload failed');};
  await assert.rejects(p.record({github:androidAPI,context,core:recorderCore,workflow:androidFile,job:androidJob,matrix:androidRow}),/upload failed/);
  assert.equal(migrationEvents.length,0,'failed publication preserves the legacy record');
+ // A second modular workflow must use latest-modular and per-library records.
+ const modularFile='.github/workflows/build-rgfw-modular.yml';
+ write(modularFile,fs.readFileSync(file,'utf8'));
+ const catalogs=JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'));
+ catalogs[modularFile]={[job]:{include:[entry]}};write('scripts/build-matrices.json',JSON.stringify(catalogs));
+ const modularWanted=p.inputs(modularFile,job,entry);
+ write(path.join(process.env.RUNNER_TEMP,'build-plans',p.stateName(modularFile,job,entry)),p.renderPkl(modularWanted));
+ const releaseTags=[];
+ github.rest.repos.getReleaseByTag=async args=>{releaseTags.push(args.tag);return {data:{id:args.tag==='build-state'?20:10}};};
+ await p.record({github,context,core:recorderCore,workflow:modularFile,job,matrix:entry});
+ assert.equal(releaseTags[0],'latest-modular');assert.equal(uploaded.channel,'modular');
+ assert.equal(uploaded.assets.length,1,'other modular workflows isolate library assets too');
  console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, age-independent reuse, tags and API fallback passed');
 }finally{process.chdir(root);fs.rmSync(tmp,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});
