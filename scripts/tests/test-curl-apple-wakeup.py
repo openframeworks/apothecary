@@ -49,64 +49,91 @@ with tempfile.TemporaryDirectory(prefix='curl-apple-wakeup-') as directory:
     source = patched.decode()
     start = source.index('static int wakeup_pipe(')
     function = source[start:source.index('\n#elif defined(HAVE_SOCKETPAIR)', start)]
-    for apple in (False, True):
-        for have_pipe2 in (False, True):
-            prefix = '''
-/* Match curl's CMake feature macros: strict C99 hides O_CLOEXEC on glibc. */
-#define _GNU_SOURCE 1
-#include <stdbool.h>
-#include <fcntl.h>
-#include <unistd.h>
-typedef int curl_socket_t;
-#define CURL_SOCKET_BAD (-1)
-#define TRUE 1
-#define sclose close
-static int calls;
-static int curlx_nonblock(int fd, int enabled) {
-  int flags = fcntl(fd, F_GETFL);
-  return fcntl(fd, F_SETFL, enabled ? flags | O_NONBLOCK : flags & ~O_NONBLOCK);
-}
-#undef __APPLE__
-#define HAVE_FCNTL 1
-#define HAVE_BUILTIN_AVAILABLE 1
-#undef __MAC_OS_X_VERSION_MAX_ALLOWED
-#define __MAC_OS_X_VERSION_MAX_ALLOWED 270000
-#define pipe2 selected_pipe2
-'''
-            if apple:
-                prefix += '#define __APPLE__ 1\n'
-                prefix += 'int selected_pipe2(int fds[2], int flags) __attribute__((error("Apple archive must not import pipe2")));\n'
-            else:
-                prefix += '''
-static int selected_pipe2(int fds[2], int flags) {
-  ++calls;
-  if(pipe(fds)) return -1;
-  for(int i = 0; i < 2; ++i) {
-    if(fcntl(fds[i], F_SETFD, FD_CLOEXEC)) return -1;
-    if(flags & O_NONBLOCK) if(curlx_nonblock(fds[i], 1)) return -1;
-  }
-  return 0;
-}
-'''
-            if have_pipe2:
-                prefix += '#define HAVE_PIPE2 1\n'
-            main = '''
-int main(void) {
-  for(int nonblocking = 0; nonblocking < 2; ++nonblocking) {
-    int fds[2];
-    if(wakeup_pipe(fds, nonblocking)) return 1;
-    for(int i = 0; i < 2; ++i) {
-      if(!(fcntl(fds[i], F_GETFD) & FD_CLOEXEC)) return 2;
-      if(!!(fcntl(fds[i], F_GETFL) & O_NONBLOCK) != nonblocking) return 3;
-      close(fds[i]);
+    # Control availability so OS 27 lookup paths also run on older hosts/Linux.
+    function = re.sub(r'__builtin_available\([^)]*\)', 'available', function)
+    cases = [
+        ('Apple older runtime', True, False, 270000, 0, 0, 0, 0, 0),
+        ('Apple new runtime, symbol missing', True, False, 270000, 1, 0, 0, 2, 0),
+        ('Apple new runtime, symbol found', True, False, 270000, 1, 1, 0, 2, 2),
+        ('Apple new runtime, pipe2 fails', True, False, 270000, 1, 1, 1, 2, 2),
+        ('Apple old SDK', True, False, 260000, 1, 1, 0, 0, 0),
+        ('Apple minimum 27 direct path', True, True, 270000, 1, 1, 0, 0, 2),
+        ('GNU pipe2', False, True, 270000, 1, 1, 0, 0, 2),
+        ('GNU fallback', False, False, 270000, 1, 1, 0, 0, 0),
+    ]
+    prefix = r'''
+    #define _GNU_SOURCE 1
+    #include <stdbool.h>
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <string.h>
+    #include <errno.h>
+    #include <dlfcn.h>
+    typedef int curl_socket_t;
+    #define CURL_SOCKET_BAD (-1)
+    #define TRUE 1
+    #define sclose close
+    #define HAVE_FCNTL 1
+    #define HAVE_BUILTIN_AVAILABLE 1
+    #undef __APPLE__
+    #undef __MAC_OS_X_VERSION_MAX_ALLOWED
+    /* PROFILE */
+    static int calls, lookups;
+    static int curlx_nonblock(int fd, int enabled) {
+      int flags = fcntl(fd, F_GETFL);
+      return fcntl(fd, F_SETFL, enabled ? flags | O_NONBLOCK : flags & ~O_NONBLOCK);
     }
-  }
-  return calls == EXPECTED_CALLS ? 0 : 4;
-}
-'''.replace('EXPECTED_CALLS', str(2 if have_pipe2 and not apple else 0))
-            probe = fixture / 'probe.c'
-            executable = fixture / 'probe'
-            probe.write_text(prefix + function + main)
-            run([compiler, '-std=c99', '-Werror=implicit-function-declaration', str(probe), '-o', str(executable)])
-            run([str(executable)])
-            print(f'{"Apple" if apple else "GNU"}, HAVE_PIPE2={int(have_pipe2)}: wakeup path, close-on-exec and nonblocking flags passed')
+    static int selected_pipe2(int fds[2], int flags) {
+      ++calls;
+      if(FAIL_PIPE2) { errno = EMFILE; return -1; }
+      if(pipe(fds)) return -1;
+      for(int i = 0; i < 2; ++i) {
+        if(fcntl(fds[i], F_SETFD, FD_CLOEXEC)) return -1;
+        if(flags & O_NONBLOCK) if(curlx_nonblock(fds[i], 1)) return -1;
+      }
+      return 0;
+    }
+    static void *selected_dlsym(void *handle, const char *name) {
+      ++lookups;
+      if(handle != RTLD_DEFAULT || strcmp(name, "pipe2")) return NULL;
+      return FOUND ? (void *)selected_pipe2 : NULL;
+    }
+    #define pipe2 selected_pipe2
+    #define dlsym selected_dlsym
+    '''
+    main = r'''
+    int main(void) {
+      for(int nonblocking = 0; nonblocking < 2; ++nonblocking) {
+        int fds[2] = {-1, -1};
+        int result = wakeup_pipe(fds, nonblocking);
+        if(FAIL_PIPE2) {
+          if(result != -1 || errno != EMFILE || fds[0] != -1 || fds[1] != -1) return 1;
+          continue;
+        }
+        if(result) return 2;
+        for(int i = 0; i < 2; ++i) {
+          if(!(fcntl(fds[i], F_GETFD) & FD_CLOEXEC)) return 3;
+          if(!!(fcntl(fds[i], F_GETFL) & O_NONBLOCK) != nonblocking) return 4;
+        }
+        if(write(fds[1], "x", 1) != 1) return 5;
+        char c;
+        if(read(fds[0], &c, 1) != 1 || c != 'x') return 6;
+        close(fds[0]); close(fds[1]);
+      }
+      return calls == CALLS && lookups == LOOKUPS ? 0 : 7;
+    }
+    '''
+    for name, apple, direct, sdk, available, found, fail, lookups, calls in cases:
+        defines = f'\n#define __MAC_OS_X_VERSION_MAX_ALLOWED {sdk}\n'
+        for key, value in [('available', available), ('FOUND', found), ('FAIL_PIPE2', fail), ('LOOKUPS', lookups), ('CALLS', calls)]:
+            defines += f'#define {key} {value}\n'
+        if apple:
+            defines += '#define __APPLE__ 1\n'
+        if direct:
+            defines += '#define HAVE_PIPE2 1\n'
+        probe = fixture / 'probe.c'
+        executable = fixture / 'probe'
+        probe.write_text(prefix.replace('/* PROFILE */', defines) + function + main)
+        run([compiler, '-std=c99', '-Werror=implicit-function-declaration', str(probe), '-o', str(executable)])
+        run([str(executable)])
+        print(name + ': lookup selection, descriptor flags and pipe I/O passed')
