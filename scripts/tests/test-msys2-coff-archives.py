@@ -108,8 +108,8 @@ copyFormula brotli
             run([lld, '-flavor', 'link', '/machine:' + machine, '/subsystem:console', '/nodefaultlib',
                  '/entry:entry', '/out:' + str(root / 'consumer.exe'), str(consumer_obj), str(archive)])
             if cpu == 'aarch64':
-                unavailable = driver.replace('findLlvmAr() { printf', 'unusedLlvmAr() { printf')
-                unavailable = 'findLlvmAr() { return 1; }\n' + unavailable
+                unavailable = driver.replace('reindexMsys2GnuArchives "$1"',
+                                             'findLlvmAr() { return 1; }\nreindexMsys2GnuArchives "$1"')
                 missing = subprocess.run(['bash', '-e', '-c', unavailable, 'archive-regression', str(root)], env=env,
                                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                 assert missing.returncode != 0, 'ARM64 must not fall back to host GNU ar'
