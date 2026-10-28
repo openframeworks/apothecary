@@ -40,6 +40,12 @@ jobs:
           fetch-depth: 0
       - name: Verify Brotli native tool selection
         run: bash scripts/tests/test-brotli-msys2-tools.sh
+      - name: Install COFF archive regression tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm lld binutils-mingw-w64-x86-64
+      - name: Verify MSYS2 archive indexes and duplicate members
+        run: python3 scripts/tests/test-msys2-coff-archives.py
       - name: Plan selected formula and toolchain builds
         id: plan
         uses: actions/github-script@v9.0.0
