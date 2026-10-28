@@ -1,0 +1,130 @@
+name: build-vs2019-64
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/build-vs2019-x64.yml'
+      - 'apothecary/apothecary'
+      - 'apothecary/formulas/**'
+      - 'scripts/vs/**'
+      - 'scripts/build.sh'
+      - 'scripts/calculate_formulas.sh'
+      - 'scripts/package*.sh'
+      - 'scripts/secure.sh'
+      - 'scripts/tests/test-vs-toolset.sh'
+      - 'scripts/tests/test-vs2019-*.sh'
+      - 'scripts/tests/vs2019/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+env:
+  # VS2022 hosts the VS2019 compiler. VS_VER denotes the generator host.
+  BUILD_PROFILE_ID: "1"
+  TARGET: vs
+  ARCH: "64"
+  VS_VER: "17"
+  VS_TOOLSET: v142
+  VS_TOOLS_VERSION: "14.29"
+  VS_WINDOWS_SDK_VERSION: "10.0.19041.0"
+  CPP_STANDARD: max
+  MULTITHREADED_TYPE: MD
+  NO_FORCE: "1"
+  NO_COLOR: "1"
+  UI_ANIM: "0"
+
+jobs:
+  test-selector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash scripts/tests/test-vs-toolset.sh
+      - run: bash scripts/tests/test-vs2019-curl-profile.sh
+      - run: bash scripts/tests/test-vs2019-assimp-copy.sh
+      - run: bash scripts/tests/test-vs2019-opencv-copy.sh
+
+  build-vs2019-64:
+    needs: test-selector
+    runs-on: windows-2022
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        bundle: [1, 2]
+    env:
+      BUNDLE: ${{ matrix.bundle }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: msys2/setup-msys2@v2.32.0
+        with:
+          update: true
+          path-type: inherit
+          install: >-
+            base-devel unzip dos2unix gperf git
+            mingw-w64-x86_64-python mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-make mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
+      - name: Install host tools
+        run: bash scripts/vs/install.sh
+      - name: Activate VS2019 compiler in VS2022
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: "2022"
+          toolset: "14.29"
+          arch: amd64
+          sdk: ${{ env.VS_WINDOWS_SDK_VERSION }}
+      - name: Verify v142 and maximum C++ mode
+        run: |
+          set -euo pipefail
+          case "$VCToolsVersion" in 14.29.*) ;; *) echo "Wrong compiler: $VCToolsVersion"; exit 1 ;; esac
+          cmake -S scripts/tests/vs2019 -B build/vs2019-probe \
+            -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
+            -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION"
+          cmake --build build/vs2019-probe --config Release --verbose
+          ./build/vs2019-probe/Release/vs2019_maximum.exe
+      - name: Build core bundle with v142
+        run: bash scripts/build.sh
+      - name: Package VS2019 review archive
+        env:
+          RELEASE: vs2019-test
+        run: |
+          set -euo pipefail
+          bash scripts/package.sh
+          test -s "out/openFrameworksLibs_vs2019-test_vs_2019_64_${BUNDLE}.zip"
+      - name: Build and run consumer from extracted archive
+        run: |
+          set -euo pipefail
+          mkdir -p build/vs2019-extracted
+          7z x "out/openFrameworksLibs_vs2019-test_vs_2019_64_${BUNDLE}.zip" -obuild/vs2019-extracted
+          cmake -S scripts/tests/vs2019 -B build/vs2019-consumer \
+            -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
+            -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION" \
+            -DSDK_ROOT="$(cygpath -m "$PWD/build/vs2019-extracted")" -DBUNDLE="$BUNDLE"
+          cmake --build build/vs2019-consumer --config Release --verbose
+          ./build/vs2019-consumer/Release/vs2019_maximum.exe
+      - name: Upload VS2019 archive
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: vs2019-v142-x64-bundle-${{ matrix.bundle }}
+          path: out/openFrameworksLibs_vs2019-test_vs_2019_64_${{ matrix.bundle }}.zip
+          if-no-files-found: error
+      - name: Upload compiler and formula diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: vs2019-v142-diagnostics-${{ matrix.bundle }}
+          path: |
+            formula_64.log
+            build/vs2019-probe/**/*.vcxproj
+            build/vs2019-probe/CMakeCache.txt
+            build/vs2019-consumer/**/*.vcxproj
+            build/vs2019-consumer/CMakeCache.txt
+            build/**/CMakeConfigureLog.yaml
+          if-no-files-found: ignore

@@ -285,6 +285,16 @@ for formula in "${FORMULAS[@]}"; do
 done
 FORMULAS_MODULAR_ONLY+=("opencv5")
 
+if [ "$TARGET" == vs ] && [ "${VS_TOOLSET:-}" == v142 ]; then
+    # Current QUIC dependencies need newer MSVC C _Generic semantics.
+    VS2019_FORMULAS=()
+    for formula in "${FORMULAS[@]}"; do
+        case "$formula" in nghttp3|ngtcp2) continue ;; esac
+        VS2019_FORMULAS+=("$formula")
+    done
+    FORMULAS=("${VS2019_FORMULAS[@]}")
+fi
+
 array_contains() {
     local array="$1[@]"
     local seeking=$2

@@ -13,7 +13,7 @@ FORMULA_DEPENDS=("zlib")
 VER=6.0.5
 SHA256="edf3749559c2b7d1f758ffb66fc5bec62186221e623b7f2e8969f17ee46ecb6f"
 SHA256_ZIP="89e477e89df739ecc7dd21874897ac2e70c8944eb1074fbdbbdbf4dd2de6a403"
-BUILD_ID=7
+BUILD_ID=8
 DEFINES=""
 
 # tools for git use
@@ -464,13 +464,15 @@ function copy() {
         if [ "${ASSIMP_STATIC:-${DEFAULT_VS_STATIC}}" = "1" ]; then
             cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
             cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
-            secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+            secure "$1/lib/$TYPE/$PLATFORM/Release/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+            secure "$1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         else
             cp -v "build_${TYPE}_${PLATFORM}_release/bin/Release/assimp-vc${VC_VERSION}-mt.dll" $1/lib/$TYPE/$PLATFORM/Release/assimp-vc${VC_VERSION}-mt.dll
             cp -v "build_${TYPE}_${PLATFORM}_debug/bin/Debug/assimp-vc${VC_VERSION}-mtd.dll" $1/lib/$TYPE/$PLATFORM/Debug/assimp-vc${VC_VERSION}-mtd.dll
             cp -v "build_${TYPE}_${PLATFORM}_debug/lib/Debug/assimp-vc${VC_VERSION}-mtd.lib" $1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib
             cp -v "build_${TYPE}_${PLATFORM}_release/lib/Release/assimp-vc${VC_VERSION}-mt.lib" $1/lib/$TYPE/$PLATFORM/Release/libassimp.lib
-            secure "$1/lib/$TYPE/$PLATFORM/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+            secure "$1/lib/$TYPE/$PLATFORM/Release/libassimp.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+            secure "$1/lib/$TYPE/$PLATFORM/Debug/libassimpD.lib" "assimp.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         fi
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
