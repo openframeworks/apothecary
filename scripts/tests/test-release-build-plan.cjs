@@ -154,8 +154,21 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert.equal(uploaded.assets[0].id,51);
 
  write(androidFile,'env:\n  TARGET: android\njobs:\n  build-android-platforms:\n    env:\n      SDK: ${{ matrix.SDK }}\n      NDK: ${{ matrix.NDK }}\n      ANDROID_API: ${{ matrix.API }}\n');
- write('scripts/build-matrices.json',JSON.stringify({[androidFile]:{[androidJob]:{include:[androidRow]}}}));
+ const androidRows=[androidRow,{...androidRow,ARCH:'x86_64'}];
+ write('scripts/build-matrices.json',JSON.stringify({[androidFile]:{[androidJob]:{include:androidRows}}}));
  git('add',androidFile,'scripts/build-matrices.json');
+ git('-c','commit.gpgsign=false','commit','-qm','Android matrix baseline');
+ const androidRef=git('rev-parse','HEAD');
+ const androidPR={...prContext,payload:{pull_request:{base:{sha:androidRef,ref:'bleeding'}}}};
+ await p.plan({github:{},context:androidPR,core,workflow:androidFile,job:androidJob});
+ assert.equal(outputs.build_needed,'false','unchanged Android PR does not allocate native runners');
+ for(const key of ['NDK','SDK','API']) {
+  write('scripts/build-matrices.json',JSON.stringify({[androidFile]:{[androidJob]:{include:[{...androidRow,[key]:'new-version'},androidRows[1]]}}}));
+  await p.plan({github:{},context:androidPR,core,workflow:androidFile,job:androidJob});
+  assert.equal(outputs.build_needed,'true',`${key}-only matrix PR allocates a native runner`);
+  assert.deepEqual(JSON.parse(outputs.matrix).include,[{...androidRow,[key]:'new-version'}],`${key} changes schedule only affected rows`);
+ }
+ write('scripts/build-matrices.json',JSON.stringify({[androidFile]:{[androidJob]:{include:[androidRow]}}}));
  const androidState=p.inputs(androidFile,androidJob,androidRow);
  const changedAndroid=p.inputs(androidFile,androidJob,{...androidRow,NDK:'30'});
  assert.notEqual(androidState.profile,changedAndroid.profile,'NDK still invalidates the build profile');
