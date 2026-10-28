@@ -31,7 +31,8 @@ env:
   VS_VER: "17"
   VS_TOOLSET: v142
   VS_TOOLS_VERSION: "14.29"
-  VS_WINDOWS_SDK_VERSION: "10.0.19041.0"
+  VS_WINDOWS_SDK_VERSION: "10.0.28000.0"
+  WINDOWS_SDK_RELEASE: "10.0.28000.2957"
   CPP_STANDARD: max
   MULTITHREADED_TYPE: MD
   NO_FORCE: "1"
@@ -73,6 +74,9 @@ jobs:
             mingw-w64-x86_64-make mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
       - name: Install host tools
         run: bash scripts/vs/install.sh
+      - name: Install Windows SDK 10.0.28000.2957
+        shell: pwsh
+        run: ./scripts/vs/install-windows-sdk.ps1
       - name: Activate VS2019 compiler in VS2022
         uses: ilammy/msvc-dev-cmd@v1
         with:
