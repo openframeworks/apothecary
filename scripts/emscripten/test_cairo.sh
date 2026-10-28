@@ -2,6 +2,12 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+# Each Actions step starts a fresh shell; the SDK setup from the build step
+# does not carry over. Accept the workflow's existing EMSDK_PATH as well.
+EMSDK=${EMSDK:-${EMSDK_PATH:-}}
+: "${EMSDK:?Set EMSDK or EMSDK_PATH to the installed Emscripten SDK}"
+source "$EMSDK/emsdk_env.sh"
+: "${EMSDK_NODE:?The selected SDK did not configure its Node runtime}"
 LIBS_ROOT=${OUTPUT_FOLDER:-"$ROOT/out"}
 if [ "${ARCH:-32}" == "64" ]; then
     platform=WASM64
@@ -24,4 +30,4 @@ trap 'rm -rf "$test_dir"' EXIT
     "$LIBS_ROOT/brotli/lib/emscripten/$platform/libbrotlicommon.a" \
     -pthread -matomics -mbulk-memory -sENVIRONMENT=node \
     -o "$test_dir/cairo-smoke.js"
-node "$test_dir/cairo-smoke.js"
+"$EMSDK_NODE" "$test_dir/cairo-smoke.js"
