@@ -232,9 +232,17 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
             fs.mkdirSync('.build-plans',{recursive:true});
             fs.writeFileSync(path.join('.build-plans',stateName(file,jobId,row)),renderPkl(wanted));
             if (context.payload.pull_request) {
-                const previous = inputs(file,jobId,row,context.payload.pull_request.base.sha);
-                if (JSON.stringify(wanted.formulas) === JSON.stringify(previous.formulas) && wanted.profile === previous.profile) reason = '';
-                else reason = 'PR changes selected recipes, dependencies or toolchain';
+                const base = context.payload.pull_request.base.sha;
+                const previousRows = matrixRows(JSON.parse(read('scripts/build-matrices.json',base))[file][jobId]);
+                // A new SDK/NDK matrix value must not also be injected into the
+                // historical inputs: that would compare the new version with itself.
+                if (!previousRows.some(previous => stable(previous) === stable(row))) {
+                    reason = 'PR changes selected matrix configuration';
+                } else {
+                    const previous = inputs(file,jobId,row,base);
+                    if (JSON.stringify(wanted.formulas) === JSON.stringify(previous.formulas) && wanted.profile === previous.profile) reason = '';
+                    else reason = 'PR changes selected recipes, dependencies or toolchain';
+                }
             } else if (context.ref.startsWith('refs/tags/')) reason = 'tag publication';
             else if (context.eventName === 'workflow_dispatch') reason = 'manual rebuild';
             else if (matches(wanted,normalizePublished(file,jobId,row,published),assets)) reason = '';
