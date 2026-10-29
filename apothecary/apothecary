@@ -1633,7 +1633,7 @@ function copyFormula() {
   copy $LIBS_DIR_REAL/$1
   if [ "$TYPE" == "msys2" ]; then
     promoteMsys2ArchPath "$LIBS_DIR_REAL/$1"
-    reindexMsys2GnuArchives "$LIBS_DIR_REAL/$1"
+    reindexMsys2GnuArchives "$LIBS_DIR_REAL/$1" || return $?
   fi
   # Relocate cmake/pkg-config install files to formula-relative paths (issue #405).
   if [ -f "$APOTHECARY_DIR/../scripts/export_config.sh" ]; then
@@ -1685,7 +1685,9 @@ function cleanFormula() {
 }
 
 # clang64 llvm-ar writes a mixed GNU/MSVC symbol index that MinGW ld and lld
-# reject. Prefer binutils/gcc-ar. CPU folder is x86_64 (mingw64/ucrt64/clang64)
+# reject. Prefer binutils/gcc-ar for x86_64; use LLVM's GNU format for ARM64
+# COFF, which the x86/MSYS binutils can silently re-index without any symbols.
+# CPU folder is x86_64 (mingw64/ucrt64/clang64)
 # or aarch64 (clangarm64) so OF can prefer lib/msys2/x86_64.
 function msys2CpuArch() {
   case "${ARCH:-}-${MSYSTEM:-}" in
@@ -1770,7 +1772,11 @@ function gnuReindexArchive() {
   # overwrite each other and the repacked archive silently loses code.
   # Only rebuild the symbol index in place for those archives.
   if [ -n "$("$ar_bin" t "$archive_abs" 2>/dev/null | sort | uniq -d)" ]; then
-    "$ar_bin" s "$archive_abs" || return 1
+    if [ "$ar_kind" = llvm ]; then
+      "$ar_bin" --format=gnu s "$archive_abs" || return 1
+    else
+      "$ar_bin" s "$archive_abs" || return 1
+    fi
     if [ "$ar_kind" != llvm ] && [ -n "$ranlib_bin" ]; then
       "$ranlib_bin" "$archive_abs" >/dev/null 2>&1 || true
     fi
@@ -1810,7 +1816,13 @@ function reindexMsys2GnuArchives() {
   local ar_bin ranlib_bin archive ar_kind
   ar_kind=gnu
   ranlib_bin=""
-  if ar_bin=$(findGnuAr); then
+  if [ "$(msys2CpuArch)" = aarch64 ]; then
+    ar_kind=llvm
+    if ! ar_bin=$(findLlvmAr); then
+      echoWarning ' ARM64 COFF archives require llvm-ar; refusing to use host binutils'
+      return 1
+    fi
+  elif ar_bin=$(findGnuAr); then
     ranlib_bin=$(findGnuRanlib || true)
   elif ar_bin=$(findLlvmAr); then
     ar_kind=llvm
@@ -1826,8 +1838,24 @@ function reindexMsys2GnuArchives() {
       echoVerbose "  reindexed [$archive]"
     else
       echoWarning "  could not reindex [$archive]"
+      return 1
     fi
   done < <(find "$root/lib/msys2" -type f -name '*.a' ! -name '*.dll.a' -print 2>/dev/null)
+  # copy() records metadata before CPU promotion and archive normalization.
+  # Preserve its provenance, but hash the final archive bytes we will package.
+  local sidecar binary digest algorithm
+  while IFS= read -r sidecar; do
+    binary=$(awk -F '"' '/^binary = / {print $2; exit}' "$sidecar")
+    case "$binary" in *.a) ;; *) continue ;; esac
+    binary="$(dirname "$sidecar")/$binary"
+    [ -f "$binary" ] || continue
+    digest=$(calculate_hash "$binary") || return 1
+    algorithm=$(hash_type "$binary") || return 1
+    sed -i.bak \
+      -e "s|^binarySha = .*|binarySha = \"$digest\"|" \
+      -e "s|^shaType = .*|shaType = \"$algorithm\"|" "$sidecar" || return 1
+    rm -f "$sidecar.bak"
+  done < <(find "$root/lib/msys2" -type f -name '*.pkl' 2>/dev/null)
 }
 
 function promoteMsys2ArchPath() {

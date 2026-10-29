@@ -5,13 +5,13 @@
 # It is similar in speed with deflate but offers more dense compression.
 # https://github.com/google/brotli
 
-FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" "emscripten")
+FORMULA_TYPES=("osx" "vs" "msys2" "ios" "watchos" "catos" "xros" "tvos" "linux" "android" "emscripten")
 FORMULA_DEPENDS=()
 
 # define the version
 VER=1.2.1
 SHA256="98d35d11a78dc453aebb7d10c3748f3f73ff78c8267c0dc697b8631f67bf7e8f"
-BUILD_ID=2
+BUILD_ID=5
 DEFINES=""
 
 # tools for git use
@@ -46,9 +46,44 @@ function prepare() {
     : #noop
 }
 
+function _brotli_msys2_cpu() {
+    case "${ARCH}" in
+        mingw64|ucrt64|clang64) echo x86_64 ;;
+        clangarm64) echo aarch64 ;;
+        *) echoError "brotli: unsupported MSYS2 architecture ${ARCH}" >&2; return 1 ;;
+    esac
+}
+
+# MSYS CMake emits POSIX paths which native Ninja cannot resolve. Keep CMake,
+# Ninja and pkg-config in the selected MinGW environment, regardless of PATH.
+function _brotli_msys2_tool() {
+    local tool
+    if [ -n "${MINGW_PREFIX:-}" ]; then
+        tool="$MINGW_PREFIX/bin/$1.exe"
+        if [ ! -x "$tool" ]; then
+            echo "brotli: missing native MSYS2 tool $tool" >&2
+            return 1
+        fi
+        printf '%s\n' "$tool"
+    else
+        command -v "$1"
+    fi
+}
+
+function _brotli_msys2_compiler() {
+    if [ -n "${CC:-}" ]; then
+        printf '%s\n' "$CC"
+    else
+        case "$ARCH" in
+            clang64|clangarm64) _brotli_msys2_tool clang ;;
+            *) _brotli_msys2_tool gcc ;;
+        esac
+    fi
+}
+
 # executed inside the lib src dir
 function build() {
-    LIBS_ROOT=$(realpath $LIBS_DIR)
+    LIBS_ROOT=$(realpath "$LIBS_DIR")
 
     if [[ $FORCE_DOWNLOAD -eq 0 ]] && [[ $USE_SAVE == 1 ]]; then
         result=$(load "brotli" | tail -n 1)
@@ -103,6 +138,24 @@ function build() {
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
         rm -f CMakeCache.txt
+    elif [ "$TYPE" == "msys2" ]; then
+        local bdir="build_${TYPE}_${ARCH}" compiler cmake_bin ninja_bin
+        _brotli_msys2_cpu >/dev/null || return 1
+        cmake_bin=$(_brotli_msys2_tool cmake) || return 1
+        ninja_bin=$(_brotli_msys2_tool ninja) || return 1
+        compiler=$(_brotli_msys2_compiler) || return 1
+        DEFINES="-DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_DISABLE_TESTS=ON -DBROTLI_BUNDLED_MODE=OFF"
+        "$cmake_bin" -S . -B "$bdir" -G Ninja ${DEFINES} \
+            -DCMAKE_MAKE_PROGRAM="$ninja_bin" \
+            -DCMAKE_C_COMPILER="$compiler" \
+            -DCMAKE_C_STANDARD="${C_STANDARD}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS_RELEASE="${FLAG_RELEASE:--O3} -DNDEBUG" \
+            -DCMAKE_INSTALL_PREFIX="$PWD/$bdir/Release" \
+            -DCMAKE_INSTALL_INCLUDEDIR=include \
+            -DCMAKE_INSTALL_LIBDIR=lib || return 1
+        "$cmake_bin" --build "$bdir" --config Release --parallel "${PARALLEL_MAKE}" || return 1
+        "$cmake_bin" --install "$bdir" --config Release || return 1
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p "build_${TYPE}_${PLATFORM}"
         cd "build_${TYPE}_${PLATFORM}"
@@ -269,8 +322,8 @@ function build() {
 
 # executed inside the lib src dir, first arg $1 is the dest libs dir root
 function copy() {
-    mkdir -p $1/lib/$TYPE
-    mkdir -p $1/include
+    mkdir -p "$1/lib/$TYPE"
+    mkdir -p "$1/include"
     . "$SECURE_SCRIPT"
     if [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -302,6 +355,40 @@ function copy() {
         sed -i.bak "s|^libdir=.*|libdir=${1}/lib/${TYPE}/${PLATFORM}/|" "$PKG_FILE"
         sed -i.bak "s|^includedir=.*|includedir=${1}/include|" "$PKG_FILE"
         rm -v "$PKG_FILE.bak"
+    elif [ "$TYPE" == "msys2" ]; then
+        local cpu prefix libdir component pc
+        cpu=$(_brotli_msys2_cpu) || return 1
+        prefix="build_${TYPE}_${ARCH}/Release"
+        libdir="$1/lib/$TYPE/$cpu"
+        mkdir -p "$libdir" || return 1
+        cp -R "$prefix/include/." "$1/include/" || return 1
+        for component in brotlicommon brotlidec brotlienc; do
+            cp "$prefix/lib/lib$component.a" "$libdir/" || return 1
+            pc="$libdir/lib$component.pc"
+            cp "$prefix/lib/pkgconfig/lib$component.pc" "$pc" || return 1
+            sed -i.bak \
+                -e 's|^prefix=.*|prefix=${pcfiledir}/../../..|' \
+                -e 's|^exec_prefix=.*|exec_prefix=${prefix}|' \
+                -e 's|^libdir=.*|libdir=${pcfiledir}|' \
+                -e 's|^includedir=.*|includedir=${prefix}/include|' "$pc" || return 1
+            rm -f "$pc.bak"
+        done
+        # oF honours libsorder.make; encoder/decoder require common last.
+        printf '%s\n' libbrotlienc.a libbrotlidec.a libbrotlicommon.a > "$libdir/libsorder.make"
+        # Avoid the generic exporter synthesizing an unusable -lbrotli alias.
+        cat > "$libdir/brotli.pc" <<EOF
+prefix=\${pcfiledir}/../../..
+libdir=\${pcfiledir}
+includedir=\${prefix}/include
+
+Name: brotli
+Description: Brotli encoder and decoder
+Version: $VER
+Requires: libbrotlienc = $VER, libbrotlidec = $VER, libbrotlicommon = $VER
+Libs:
+Cflags: -I\${includedir}
+EOF
+        secure "$libdir/libbrotlidec.a" "brotli.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS" "$SHA256" || return 1
     elif [ "$TYPE" == "vs" ]; then
         cp -v -r c/include/* $1/include
         mkdir -p $1/lib/$TYPE/$PLATFORM/
@@ -428,15 +515,19 @@ function copy() {
     fi
 
     if [ -d "$1/license" ]; then
-        rm -rf $1/license
+        rm -rf "$1/license"
     fi
-    mkdir -p $1/license
-    cp -v LICENSE $1/license/
+    mkdir -p "$1/license"
+    cp -v LICENSE "$1/license/"
 }
 
 # executed inside the lib src dir
 function clean() {
-    if [ "$TYPE" == "vs" ]; then
+    if [ "$TYPE" == "msys2" ]; then
+        if [ -d "build_${TYPE}_${ARCH}" ]; then
+            rm -r "build_${TYPE}_${ARCH}"
+        fi
+    elif [ "$TYPE" == "vs" ]; then
         if [ -d "build_${TYPE}_${PLATFORM}" ]; then
             rm -r build_${TYPE}_${PLATFORM}
         fi
@@ -452,7 +543,11 @@ function clean() {
 
 function load() {
     . "$LOAD_SCRIPT"
-    LOAD_RESULT=$(loadsave ${TYPE} "brotli" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$PLATFORM" ${BUILD_ID})
+    local library_platform="$PLATFORM"
+    if [ "$TYPE" == msys2 ]; then
+        library_platform=$(_brotli_msys2_cpu) || return 1
+    fi
+    LOAD_RESULT=$(loadsave ${TYPE} "brotli" ${ARCH} ${VER} "$LIBS_DIR_REAL/$1/lib/$TYPE/$library_platform" ${BUILD_ID})
     PREBUILT=$(echo "$LOAD_RESULT" | tail -n 1)
     if [ "$PREBUILT" -eq 1 ]; then
         echo 1
