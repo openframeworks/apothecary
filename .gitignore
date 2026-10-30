@@ -41,3 +41,4 @@ scripts/status.txt
 *.xcuserstate
 
 !.github/workflows/build-linux-openal-modular.yml
+!/.github/workflows/refresh-nightly.yml

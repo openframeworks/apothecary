@@ -1,6 +1,20 @@
 name: Test libraries in openFrameworks
 
 on:
+  workflow_call:
+    inputs:
+      library_ref:
+        type: string
+        required: true
+      openframeworks_ref:
+        type: string
+        required: true
+      platform:
+        type: string
+        required: true
+      snapshot_manifest_artifact:
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       library_ref:
@@ -34,6 +48,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: of-library-integration-${{ inputs.library_ref }}-${{ inputs.openframeworks_ref }}-${{ inputs.platform }}
@@ -68,10 +83,6 @@ jobs:
           update: true
           install: git unzip
 
-      - name: Install selected libraries
-        shell: bash
-        run: bash apothecary-tests/scripts/test-openframeworks-libraries.sh "$OF_ROOT" "${{ inputs.library_ref }}" "${{ inputs.platform }}"
-
       - name: Install Linux dependencies
         if: inputs.platform == 'linux'
         run: sudo openFrameworks/scripts/linux/ubuntu/install_dependencies.sh -y
@@ -82,19 +93,42 @@ jobs:
         working-directory: openFrameworks
         run: scripts/ci/vs/install.sh
 
+      - name: Set up Node for frozen candidate verification
+        if: inputs.snapshot_manifest_artifact != ''
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Download frozen candidate plan
+        if: inputs.snapshot_manifest_artifact != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.snapshot_manifest_artifact }}
+          path: ${{ runner.temp }}/nightly-plan
+
+      # CI setup may download its normal libraries. Install the frozen bytes
+      # after setup so those downloads cannot substitute for the candidate.
+      - name: Install selected libraries
+        shell: bash
+        env:
+          LIBRARY_REF: ${{ inputs.library_ref }}
+          INTEGRATION_PLATFORM: ${{ inputs.platform }}
+          SNAPSHOT_MANIFEST: ${{ inputs.snapshot_manifest_artifact != '' && format('{0}/nightly-plan/plan.json', runner.temp) || '' }}
+        run: bash apothecary-tests/scripts/test-openframeworks-libraries.sh "$OF_ROOT" "$LIBRARY_REF" "$INTEGRATION_PLATFORM" "$SNAPSHOT_MANIFEST"
+
       - name: Build Linux core, emptyExample, and allAddonsExample
         if: inputs.platform == 'linux'
         working-directory: openFrameworks
         env:
           TRAVIS_BUILD_DIR: ${{ github.workspace }}/openFrameworks
-        run: scripts/ci/linux64/build.sh
+        run: scripts/ci/linux/64/build.sh
 
       - name: Run Linux smoke tests
         if: inputs.platform == 'linux'
         working-directory: openFrameworks
         env:
           TRAVIS_BUILD_DIR: ${{ github.workspace }}/openFrameworks
-        run: scripts/ci/linux64/run_tests.sh
+        run: scripts/ci/linux/64/run_tests.sh
 
       - name: Build macOS core and examples
         if: inputs.platform == 'macos'
@@ -109,14 +143,14 @@ jobs:
         working-directory: openFrameworks
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
-        run: scripts/ci/ios/build.sh
+        run: env GITHUB_WORKSPACE="$OF_ROOT" scripts/ci/ios/build.sh
 
       - name: Build tvOS
         if: inputs.platform == 'tvos'
         working-directory: openFrameworks
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
-        run: scripts/ci/tvos/build.sh
+        run: env GITHUB_WORKSPACE="$OF_ROOT" scripts/ci/tvos/build.sh
 
       - name: Set up Java
         if: inputs.platform == 'android'
@@ -129,13 +163,18 @@ jobs:
         if: inputs.platform == 'android'
         working-directory: openFrameworks/libs/openFrameworksCompiled/project/android
         env:
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
-          ANDROID_NDK_ROOT: ${{ env.ANDROID_NDK_LATEST_HOME }}
+          NDK: '29.0.14206865'
+          ANDROID_API: '25'
+          ARCH: arm64-v8a
+          NUM_CORES: '2'
         run: |
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          export ANDROID_NDK_ROOT="$ANDROID_HOME/ndk/$NDK"
+          sdkmanager "ndk;$NDK" 'cmake;3.22.1' 'platforms;android-34' 'build-tools;37.0.0'
           gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug
-          ./cmake.sh arm64-v8a
+          ./cmake.sh
 
       - name: Build Emscripten core and examples
         if: inputs.platform == 'emscripten'
@@ -154,6 +193,15 @@ jobs:
         run: |
           msbuild examples/templates/emptyExample/emptyExample.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v143
           msbuild examples/templates/allAddonsExample/allAddonsExample.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v143
+
+      - name: Preserve candidate provenance
+        if: always() && inputs.snapshot_manifest_artifact != ''
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: nightly-candidate-${{ inputs.platform }}
+          path: openFrameworks/.nightly-candidate-*.json
+          include-hidden-files: true
+          if-no-files-found: warn
 
       - name: Integration summary
         if: always()

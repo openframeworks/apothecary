@@ -1,0 +1,114 @@
+name: Refresh daily nightly snapshot
+on:
+  schedule:
+    # Start before openFrameworks nightly; promotion waits for integration.
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: List the snapshot without builds or release changes
+        type: boolean
+        default: true
+      override_build_gate:
+        description: Publish without openFrameworks master build validation
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - 'scripts/nightly-snapshot.cjs'
+      - 'scripts/install-nightly-candidate.cjs'
+      - 'scripts/test-openframeworks-libraries.sh'
+      - 'scripts/tests/test-nightly-snapshot.cjs'
+      - 'scripts/tests/test-nightly-candidate.cjs'
+      - '.github/workflows/test-openframeworks-libraries.yml'
+      - '.github/workflows/refresh-nightly.yml'
+concurrency:
+  group: nightly-release-refresh
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: node scripts/tests/test-nightly-snapshot.cjs
+      - run: node scripts/tests/test-nightly-candidate.cjs
+      - run: bash -n scripts/test-openframeworks-libraries.sh
+  plan:
+    needs: test
+    if: github.repository == 'openframeworks/apothecary' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+      platforms: ${{ steps.plan.outputs.platforms }}
+      openframeworks_sha: ${{ steps.plan.outputs.openframeworks_sha }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Freeze source assets and openFrameworks master
+        id: plan
+        uses: actions/github-script@v9.0.0
+        env:
+          SNAPSHOT_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const helper = require(`${process.env.GITHUB_WORKSPACE}/scripts/nightly-snapshot.cjs`);
+            const plan = await helper.plan({github, context});
+            fs.mkdirSync('.nightly-plan', {recursive: true});
+            fs.writeFileSync('.nightly-plan/plan.json', JSON.stringify(plan, null, 2));
+            core.setOutput('publish', String(process.env.SNAPSHOT_DRY_RUN !== 'true'));
+            core.setOutput('platforms', JSON.stringify(plan.platforms));
+            core.setOutput('openframeworks_sha', plan.openframeworksSha);
+            core.info(`Frozen ${plan.assets.length} assets against openFrameworks master ${plan.openframeworksSha}`);
+            if (process.env.SNAPSHOT_DRY_RUN === 'true') await helper.refresh({github, context, core, dryRun: true});
+      - uses: actions/upload-artifact@v7.0.0
+        with:
+          name: nightly-validation-plan
+          path: .nightly-plan/plan.json
+          include-hidden-files: true
+          if-no-files-found: error
+  integration:
+    needs: plan
+    if: needs.plan.outputs.publish == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.override_build_gate)
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.plan.outputs.platforms) }}
+    uses: ./.github/workflows/test-openframeworks-libraries.yml
+    with:
+      library_ref: latest
+      openframeworks_ref: ${{ needs.plan.outputs.openframeworks_sha }}
+      platform: ${{ matrix.platform }}
+      snapshot_manifest_artifact: nightly-validation-plan
+  refresh:
+    needs: [plan, integration]
+    if: always() && !cancelled() && needs.plan.result == 'success' && needs.plan.outputs.publish == 'true'
+    permissions:
+      contents: write
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8
+        with:
+          name: nightly-validation-plan
+          path: ${{ runner.temp }}/nightly-plan
+      - name: Promote only the tested snapshot
+        uses: actions/github-script@v9.0.0
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          MASTER_BUILD_RESULT: ${{ needs.integration.result }}
+          OVERRIDE_BUILD_GATE: ${{ github.event_name == 'workflow_dispatch' && inputs.override_build_gate || false }}
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('node:fs');
+            const plan = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/nightly-plan/plan.json`, 'utf8'));
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/nightly-snapshot.cjs`).refresh({
+              github, context, core, plan,
+              buildResult: process.env.MASTER_BUILD_RESULT,
+              overrideBuildGate: process.env.OVERRIDE_BUILD_GATE === 'true'
+            });

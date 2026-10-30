@@ -5,6 +5,12 @@ OF_ROOT="${1:?usage: $0 OPENFRAMEWORKS_ROOT LIBRARY_REF PLATFORM}"
 LIBRARY_REF="${2:?usage: $0 OPENFRAMEWORKS_ROOT LIBRARY_REF PLATFORM}"
 PLATFORM="${3:?usage: $0 OPENFRAMEWORKS_ROOT LIBRARY_REF PLATFORM}"
 REPOSITORY="${APOTHECARY_REPOSITORY:-openframeworks/apothecary}"
+SNAPSHOT_MANIFEST="${4:-}"
+if [[ -n "$SNAPSHOT_MANIFEST" ]]; then
+    SCRIPT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    node "$SCRIPT_ROOT/install-nightly-candidate.cjs" "$SNAPSHOT_MANIFEST" "$OF_ROOT" "$PLATFORM"
+    exit
+fi
 
 case "$PLATFORM" in
     linux) OF_PLATFORM="linux"; MODULAR_SUFFIX="linux_64_gcc14" ;;
