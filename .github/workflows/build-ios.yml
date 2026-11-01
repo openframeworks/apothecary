@@ -3,7 +3,7 @@ name: build-ios
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!artifacts', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -154,12 +154,12 @@ jobs:
           TARGET: ${{ env.TARGET }}
           BUNDLE: ${{ matrix.bundle }}
         run: cp "out/openFrameworksLibs_${RELEASE}_${TARGET}_${BUNDLE}.tar.bz2" "out/apple-inputs-${RELEASE}-${TARGET}-${BUNDLE}.tar.bz2"
-      - name: Store raw Apple bundle in build-state release
+      - name: Store raw Apple bundle in artifacts release
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
-          tag_name: build-state
+          tag_name: artifacts
           overwrite_files: true
           make_latest: false
           files: out/apple-inputs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}.tar.bz2
@@ -347,13 +347,13 @@ jobs:
                 downloadedArtifacts.add(artifact.name);
               }
             }
-            // Actions artifacts expire. Restore missing raw platform bundles from the durable build-state release.
+            // Actions artifacts expire. Restore missing raw platform bundles from the durable artifacts release.
             let stateAssets = [];
             try {
-              const stateRelease = await github.rest.repos.getReleaseByTag({...context.repo, tag: 'build-state'});
+              const stateRelease = await github.rest.repos.getReleaseByTag({...context.repo, tag: 'artifacts'});
               stateAssets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id: stateRelease.data.id, per_page: 100});
             } catch (error) {
-              core.warning(`Could not read durable Apple inputs from build-state: ${error.message}`);
+              core.warning(`Could not read durable Apple inputs from artifacts: ${error.message}`);
             }
             for (const name of artifactNamesToDownload) {
               if (downloadedArtifacts.has(name)) continue;
@@ -361,7 +361,7 @@ jobs:
               if (!asset) continue;
               const response = await github.rest.repos.getReleaseAsset({...context.repo, asset_id: asset.id, headers: {accept: 'application/octet-stream'}});
               fs.writeFileSync(path.join(outputDir, `${name}.tar.bz2`), Buffer.from(response.data));
-              console.log(`Restored ${name} from build-state release`);
+              console.log(`Restored ${name} from artifacts release`);
               downloadedArtifacts.add(name);
             }
             const missing = [...artifactNamesToDownload].filter(name => !downloadedArtifacts.has(name));
