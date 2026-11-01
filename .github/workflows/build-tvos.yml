@@ -144,6 +144,22 @@ jobs:
           name: libs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}
           path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 31
+      - name: Preserve raw Apple bundle for XCFramework assembly
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        env:
+          RELEASE: ${{ env.RELEASE }}
+          TARGET: ${{ env.TARGET }}
+          BUNDLE: ${{ matrix.bundle }}
+        run: cp "out/openFrameworksLibs_${RELEASE}_${TARGET}_${BUNDLE}.tar.bz2" "out/apple-inputs-${RELEASE}-${TARGET}-${BUNDLE}.tar.bz2"
+      - name: Store raw Apple bundle in build-state release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: build-state
+          overwrite_files: true
+          make_latest: false
+          files: out/apple-inputs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}.tar.bz2
       - name: Remove .tar.bz2 files
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding' || contains(github.ref, 'refs/tags/'))
         run: |
