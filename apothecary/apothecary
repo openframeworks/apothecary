@@ -2102,6 +2102,20 @@ function frameworkFormula() {
               echo "No PKL file found at $1 - $CURRENT_TYPE. Ensure .pkl files are present and correctly named."
             fi
 
+            # archives built only for the paired arch (eg KleidiCV, arm64 only) aren't in this arch's
+            # folder, so they're never lipo'd; libtool merges them into that arch's slice of the merged archive
+            if [[ "$X_ARCH" != "$PAIR" && -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$PAIR/" ]]; then
+              while IFS= read -r -d $'\0' PAIR_ONLY_FILE; do
+                if [[ ! -f "$DIR_PATH/$(basename "$PAIR_ONLY_FILE")" ]]; then
+                  mkdir -p "$MERGED_DIR"
+                  cp -v "$PAIR_ONLY_FILE" "$MERGED_DIR/"
+                  echo "Only built for $PAIR: $PAIR_ONLY_FILE into [$MERGED_DIR]"
+                  if [[ ! " ${merged_dirs[*]} " =~ " $MERGED_DIR/ " ]]; then
+                    merged_dirs+=("$MERGED_DIR/")
+                  fi
+                fi
+              done < <(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$PAIR/" -maxdepth 1 -name "*.a" -print0)
+            fi
             num_archive_paths=${#archive_paths[@]}
             for ARCH_FILE in "${archive_paths[@]}"; do
               echo "ARCH_FILE: $ARCH_FILE $1 - $CURRENT_TYPE"
@@ -2446,6 +2460,20 @@ function xframeworkFormula() {
             else
               echo "No PKL file found at $1 - $CURRENT_TYPE. Ensure .pkl files are present and correctly named."
               # Handle error or provide defaults for VERSION and DEFINES
+            fi
+            # archives built only for the paired arch (eg KleidiCV, arm64 only) aren't in this arch's
+            # folder, so they're never lipo'd; libtool merges them into that arch's slice of the merged archive
+            if [[ "$X_ARCH" != "$PAIR" && -d "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$PAIR/" ]]; then
+              while IFS= read -r -d $'\0' PAIR_ONLY_FILE; do
+                if [[ ! -f "$DIR_PATH/$(basename "$PAIR_ONLY_FILE")" ]]; then
+                  mkdir -p "$MERGED_DIR"
+                  cp -v "$PAIR_ONLY_FILE" "$MERGED_DIR/"
+                  echo "Only built for $PAIR: $PAIR_ONLY_FILE into [$MERGED_DIR]"
+                  if [[ ! " ${merged_dirs[*]} " =~ " $MERGED_DIR/ " ]]; then
+                    merged_dirs+=("$MERGED_DIR/")
+                  fi
+                fi
+              done < <(find "$LIBS_DIR_REAL/$1/lib/$CURRENT_TYPE/$PAIR/" -maxdepth 1 -name "*.a" -print0)
             fi
             num_archive_paths=${#archive_paths[@]}
             for ARCH_FILE in "${archive_paths[@]}"; do
