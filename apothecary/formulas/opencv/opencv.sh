@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=9
+BUILD_ID=10
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -121,10 +121,14 @@ function build() {
         -DPNG_PNG_INCLUDE_DIR=${LIBPNG_INCLUDE_DIR} \
         -DPNG_LIBRARY=${LIBPNG_LIBRARY}"
 
-        # The Apple combined archive does not bundle KleidiCV's HAL libraries.
-        # Keep OpenCV self-contained until those acceleration archives are packaged.
+        if [ "$ARCH" == "arm64" ]; then
+            KLEIDICV_DEFINE="-DWITH_KLEIDICV=ON"
+        else
+            KLEIDICV_DEFINE="-DWITH_KLEIDICV=OFF"
+        fi
+
         DEFINES="
-        -DWITH_KLEIDICV=OFF \
+        $KLEIDICV_DEFINE \
         -DBUILD_DOCS=OFF \
         -DENABLE_BUILD_HARDENING=ON \
         -DBUILD_ANDROID_EXAMPLES=OFF \
@@ -1045,6 +1049,22 @@ function copy() {
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/opencv4/3rdparty/"*.a $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/Release/lib/"*.a $1/lib/$TYPE/$PLATFORM
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/"*.dylib $1/lib/$TYPE/$PLATFORM 2>/dev/null || true
+
+        # OpenCV's static install does not place KleidiCV's HAL dependency
+        # archives in Release/lib/opencv4/3rdparty. Copy them from the build
+        # tree so they are included in the Apothecary package and Apple
+        # XCFramework merge.
+        if grep -q '^WITH_KLEIDICV:BOOL=ON$' "build_${TYPE}_${PLATFORM}/CMakeCache.txt"; then
+            KLEIDICV_BUILD_DIR="build_${TYPE}_${PLATFORM}"
+            for KLEIDICV_LIB in libkleidicv.a libkleidicv_thread.a libkleidicv_hal.a; do
+                KLEIDICV_LIB_PATH=$(find "$KLEIDICV_BUILD_DIR" -type f -name "$KLEIDICV_LIB" -print -quit)
+                if [ -z "$KLEIDICV_LIB_PATH" ]; then
+                    echo "KleidiCV is enabled but $KLEIDICV_LIB was not built"
+                    return 1
+                fi
+                cp -v "$KLEIDICV_LIB_PATH" "$1/lib/$TYPE/$PLATFORM/"
+            done
+        fi
 
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" $1/include/
 
