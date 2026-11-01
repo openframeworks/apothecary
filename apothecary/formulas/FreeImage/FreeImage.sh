@@ -18,6 +18,8 @@
 # selection stays unchanged (HEIF/JXL opt-in, JXR Windows-only).
 # 3.19.28 hardens TARGA/BMP and memory-stream decoding, fixes MinGW JXL decoding,
 # and updates bundled LibRaw to 0.22.3, libheif to 1.23.7 and Brotli to 1.2.1.
+# 3.19.29 adds 64-bit TIFF/BigTIFF reads, hardens memory and JP2/J2K streams,
+# and updates bundled libaom to 3.15.2.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -26,11 +28,11 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.28
-SHA256="3c40cbbe767c693cc07de1b75804850966d0d48f8b6d4c6f899c773d2b54e73e"
+VER=3.19.29
+SHA256="25ae2e924dab4775feca28b6a9454070e6d8dcd6981eeb45863194928e3f3d7e"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
-BUILD_ID=28
+BUILD_ID=29
 DEFINES=""
 
 # download the source code and unpack it into LIB_NAME
