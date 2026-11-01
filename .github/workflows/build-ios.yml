@@ -3,7 +3,7 @@ name: build-ios
 on:
   push:
     branches: [bleeding, master]
-    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!artifacts', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
       - '**/README.md'
   pull_request:
@@ -147,6 +147,22 @@ jobs:
           name: libs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}
           path: out/openFrameworksLibs_${{ env.RELEASE }}_${{ env.TARGET }}_${{ matrix.bundle }}.tar.bz2
           retention-days: 31
+      - name: Preserve raw Apple bundle for XCFramework assembly
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        env:
+          RELEASE: ${{ env.RELEASE }}
+          TARGET: ${{ env.TARGET }}
+          BUNDLE: ${{ matrix.bundle }}
+        run: cp "out/openFrameworksLibs_${RELEASE}_${TARGET}_${BUNDLE}.tar.bz2" "out/apple-inputs-${RELEASE}-${TARGET}-${BUNDLE}.tar.bz2"
+      - name: Store raw Apple bundle in artifacts release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: artifacts
+          overwrite_files: true
+          make_latest: false
+          files: out/apple-inputs-${{ env.RELEASE }}-${{ env.TARGET }}-${{ matrix.bundle }}.tar.bz2
       - name: Remove .tar.bz2 files
         if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding')
         run: |
@@ -292,12 +308,12 @@ jobs:
             }
 
             // List all artifacts for the repository
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {
               owner: context.repo.owner,
               repo: 'apothecary',
               sort: 'created_at',
               direction: 'desc',
-              per_page: 150
+              per_page: 100
             });
 
             const release = '${{ github.ref }}'.startsWith('refs/tags/') ? 'latest' : process.env.RELEASE;
@@ -305,18 +321,17 @@ jobs:
             const platformTargets = { ios: "ios", macos: "osx", tvos: "tvos" };
             const artifactNamesToDownload = new Set();
 
-            const max = 9; // The maximum suffix number for artifacts
+            const max = 3; // Apple libraries are split into three bundles.
 
-            // Generate artifact names dynamically based on platforms, target mappings, and max count
+            // Generate artifact names for each Apple platform and bundle.
             for (const platform of platforms) {
               for (let i = 1; i <= max; i++) {
                 artifactNamesToDownload.add(`libs-${release}-${platformTargets[platform]}-${i}`);
               }
             }
-            let count = 0;
             const downloadedArtifacts = new Set();
 
-            for (const artifact of artifacts.data.artifacts) {
+            for (const artifact of artifacts) {
               if (artifactNamesToDownload.has(artifact.name) && !artifact.expired && !downloadedArtifacts.has(artifact.name)) {
                 // Download the artifact
                 const download = await github.rest.actions.downloadArtifact({
@@ -329,13 +344,28 @@ jobs:
                 const artifactPath = path.join(outputDir, `${artifact.name}.zip`);
                 fs.writeFileSync(artifactPath, Buffer.from(download.data));
                 console.log(`Downloaded ${artifact.name} to ${artifactPath}`);
-                count++;
                 downloadedArtifacts.add(artifact.name);
-                if (count >= max) {
-                  break;
-                }
               }
             }
+            // Actions artifacts expire. Restore missing raw platform bundles from the durable artifacts release.
+            let stateAssets = [];
+            try {
+              const stateRelease = await github.rest.repos.getReleaseByTag({...context.repo, tag: 'artifacts'});
+              stateAssets = await github.paginate(github.rest.repos.listReleaseAssets, {...context.repo, release_id: stateRelease.data.id, per_page: 100});
+            } catch (error) {
+              core.warning(`Could not read durable Apple inputs from artifacts: ${error.message}`);
+            }
+            for (const name of artifactNamesToDownload) {
+              if (downloadedArtifacts.has(name)) continue;
+              const asset = stateAssets.find(item => item.name === `apple-inputs-${release}-${name.replace(/^libs-${release}-/, '')}.tar.bz2`);
+              if (!asset) continue;
+              const response = await github.rest.repos.getReleaseAsset({...context.repo, asset_id: asset.id, headers: {accept: 'application/octet-stream'}});
+              fs.writeFileSync(path.join(outputDir, `${name}.tar.bz2`), Buffer.from(response.data));
+              console.log(`Restored ${name} from artifacts release`);
+              downloadedArtifacts.add(name);
+            }
+            const missing = [...artifactNamesToDownload].filter(name => !downloadedArtifacts.has(name));
+            if (missing.length) throw new Error(`Missing Apple build inputs: ${missing.join(', ')}. Rebuild those platform bundles before XCFramework assembly.`);
       - name: Extract Artifacts to /out
         run: |
             mkdir -p out
