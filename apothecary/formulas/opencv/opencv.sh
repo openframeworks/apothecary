@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=10
+BUILD_ID=11
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -1056,6 +1056,7 @@ function copy() {
         # XCFramework merge.
         if grep -q '^WITH_KLEIDICV:BOOL=ON$' "build_${TYPE}_${PLATFORM}/CMakeCache.txt"; then
             KLEIDICV_BUILD_DIR="build_${TYPE}_${PLATFORM}"
+            KLEIDICV_ARCHIVES=()
             for KLEIDICV_LIB in libkleidicv.a libkleidicv_thread.a libkleidicv_hal.a; do
                 KLEIDICV_LIB_PATH=$(find "$KLEIDICV_BUILD_DIR" -type f -name "$KLEIDICV_LIB" -print -quit)
                 if [ -z "$KLEIDICV_LIB_PATH" ]; then
@@ -1063,7 +1064,19 @@ function copy() {
                     return 1
                 fi
                 cp -v "$KLEIDICV_LIB_PATH" "$1/lib/$TYPE/$PLATFORM/"
+                KLEIDICV_ARCHIVES+=("$1/lib/$TYPE/$PLATFORM/$KLEIDICV_LIB")
             done
+
+            # These arm64-only archives must be embedded into an archive that
+            # also has an x86_64 counterpart. The Apple XCFramework merger
+            # lipo-merges matching archive names; unmatched archives remain
+            # arm64-only and would otherwise become a second, overlapping
+            # opencv.a. Embed KleidiCV into opencv_core before that merge.
+            OPENCV_CORE="$1/lib/$TYPE/$PLATFORM/libopencv_core.a"
+            OPENCV_CORE_MERGED="${OPENCV_CORE}.kleidicv.tmp"
+            libtool -static -o "$OPENCV_CORE_MERGED" "$OPENCV_CORE" "${KLEIDICV_ARCHIVES[@]}"
+            mv -f "$OPENCV_CORE_MERGED" "$OPENCV_CORE"
+            rm -f "${KLEIDICV_ARCHIVES[@]}"
         fi
 
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/include/opencv4/" $1/include/
