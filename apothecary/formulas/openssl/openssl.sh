@@ -11,7 +11,9 @@ FORMULA_DEPENDS=("zlib")
 VER=4.1.0
 VERDIR=4.1.0
 VER_TAG="4.1"
-OPENSSL_CMAKE_COMMIT=176816e9dfab3af33c1ae32fcb9981f4ce5d40ea
+# Upstream rewrote the 4.1 branch commit; this commit has the same tree and parent
+# as the previous pin and is reachable from the branch cloned below.
+OPENSSL_CMAKE_COMMIT=e3096cf2764301c380e0924e516f64240661c738
 SHA1=44d07584cca891b042c38478255228ac4bd379a6
 SHA256=50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd
 
