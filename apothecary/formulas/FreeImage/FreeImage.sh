@@ -22,6 +22,8 @@
 # and updates bundled libaom to 3.15.2.
 # 3.19.30 adds metadata stripping and updates OpenEXR, Little CMS and libaom
 # with malformed-file, crash and integer-overflow fixes.
+# 3.19.31 fixes BMP RLE8 integer overflow and updates bundled OpenJPH to 0.33.0
+# for an HTJ2K allocation fix and additional marker bounds checks.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -30,8 +32,8 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.30
-SHA256="ce02ce40bec672a002ba3b9d1e48eca8f3fe1da3d2db6106d4a70f815a359b6b"
+VER=3.19.31
+SHA256="1a21c87d4ad819dfa97869e3ae62c702cab123e2e5624acb495e9fcfc02b6f02"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
 BUILD_ID=29
