@@ -57,7 +57,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **FreeImage** | `3.19.29` | `3.19.29` | current | OF fork (`danoli3/FreeImage`), checked 2026-10-31. Adds 64-bit TIFF/BigTIFF reads, memory and JP2/J2K stream hardening, and bundled libaom 3.15.2; existing codec settings preserved. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.15.0` | `VER-2-14-3` | current | Latest 2.15. Uses upstream CMake; optional HVF disabled for portable linking. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
-| **glon12** | Mesa `26.2.5` | Mesa `26.2.5` | pinned-dev | VS-only GL→D3D12. SHA256 `794b3d17…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
+| **glon12** | Mesa `26.2.6` | Mesa `26.2.6` | updated | VS-only GL→D3D12; Mesa bug-fix release. Native Windows validation required. | https://archive.mesa3d.org |
 | **glfw** | `3.5.1` | `3.5.1` | current | Latest stable. | https://github.com/glfw/glfw |
 | **glm** | `1.0.3` | `1.0.3` | current | Latest stable. | https://github.com/g-truc/glm |
 | **gstreamer** | `1.28.8` (`1b2a95a1…`) | `1.28.8` stable; `1.29.2` newer | updated | linux/osx only. Stable 1.x update. Updated source pin; build validation required. | https://gitlab.freedesktop.org/gstreamer/gstreamer |
@@ -221,7 +221,7 @@ formulas:
   FreeImage:  { current: "3.19.29",  latest: "3.19.29",  status: current, pin: "OF fork; JXR Windows-only; 64-bit TIFF reads since 3.19.29" }
   freetype:   { current: "2.15.0",   latest: "2.15.0",   status: current }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current }
-  glon12:     { current: "26.2.5",   latest: "26.2.5",   status: pinned-dev, pin: "Mesa SHA; VS-only" }
+  glon12:     { current: "26.2.6",   latest: "26.2.6",   status: updated, pin: "Mesa SHA; VS-only" }
   glfw:       { current: "3.5.1",    latest: "3.5.1",    status: current }
   glm:        { current: "1.0.3",    latest: "1.0.3",    status: current }
   gstreamer:  { current: "1.28.8",   latest: "1.28.8",   status: updated, pin: "none documented — not bumped" }
