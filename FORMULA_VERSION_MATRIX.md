@@ -81,7 +81,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **shaderc** | `ff84893dd52d28f0b1737d2635733d952013bd9c` | tag `v2026.4` | pinned-dev | `FORMULA_TYPES=()` — unused. SHA is shaderc “known-good”. Only bump with SPIRV/Glslang stack. | https://github.com/google/shaderc |
 | **svgtiny** | `0.1.8` | netsurf package line | n/a | NetSurf libsvgtiny; not a GitHub release train. | `git://git.netsurf-browser.org/libsvgtiny.git` |
 | **tess2** | `1.0.2` | `v1.0.2` | current | Latest stable (`GIT_TAG=master` in formula — verify checkout). | https://github.com/memononen/libtess2 |
-| **uriparser** | `1.0.2` | `uriparser-1.0.2` | current | Latest stable. | https://github.com/uriparser/uriparser |
+| **uriparser** | `1.0.3` | `uriparser-1.0.3` | updated | Security update; build validation required. | https://github.com/uriparser/uriparser |
 | **utf8** (utfcpp) | `4.2.1` | `v4.2.1` | current | Header-only; includes the 4.2.1 next16 error-type fix. | https://github.com/nemtrif/utfcpp |
 | **videoInput** | `master` (`261bfeee…`) | branch only | pinned-dev | ofTheo fork SHA. Windows capture. | https://github.com/ofTheo/videoInput |
 | **zlib** | `1.3.2` | `v1.3.2` | current | Latest stable. | https://github.com/madler/zlib |
@@ -244,7 +244,7 @@ formulas:
   rtAudio:    { current: "6.0.1",    latest: "6.0.1",    status: current }
   shaderc:    { current: "ff84893",  latest: "v2026.4",  status: pinned-dev, pin: "Linux formula; known-good SHA" }
   tess2:      { current: "1.0.2",    latest: "1.0.2",    status: current }
-  uriparser:  { current: "1.0.2",    latest: "1.0.2",    status: current }
+  uriparser:  { current: "1.0.3",    latest: "1.0.3",    status: updated }
   utf8:       { current: "4.2.1", latest: "4.2.1", status: current, pin: "header-only" }
   videoInput: { current: "261bfeee", latest: "master",   status: pinned-dev, pin: "ofTheo SHA" }
   zlib:       { current: "1.3.2",    latest: "1.3.2",    status: current }
