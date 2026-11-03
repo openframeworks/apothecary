@@ -69,7 +69,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **libxml2** | `2.15.4` | `v2.15.4` | current | 2.15 track; rebuild consumers formerly linked to 2.13. HTML/HTTP/legacy features remain disabled. | https://github.com/GNOME/libxml2 |
 | **metalangle** | `1.0` (`ec925142edeb1da3158fd8710ecc6dc2fb1f1f97`) | kakashidinho frozen 2023-02-11 | pinned-dev | 2022 Metal overlay + SPIRV-Cross `f38cbeb8`. **Never** put a 2025+ Chromium SHA here — that belongs on `angle`. | https://github.com/kakashidinho/metalangle |
 | **nghttp2** | `1.70.0` | `v1.70.0` | current | cURL HTTP/2. | https://github.com/nghttp2/nghttp2 |
-| **nghttp3** | `1.18.0` | `v1.18.0` | current | cURL HTTP/3. | https://github.com/ngtcp2/nghttp3 |
+| **nghttp3** | `1.19.0` | `v1.19.0` | updated | cURL HTTP/3; build validation required. | https://github.com/ngtcp2/nghttp3 |
 | **ngtcp2** | `1.25.0` | `v1.25.0` | current | cURL HTTP/3/QUIC. | https://github.com/ngtcp2/ngtcp2 |
 | **opencv** | `4.14.0` | `5.0.0` latest · **`4.14.0` latest 4.x** | current (4.x track) | OF 4.x API. Do not take 5.0 without an OF renderer/module pass. | https://github.com/opencv/opencv |
 | **openssl** | `4.1.0` + cmake `VER_TAG=4.1` | `openssl-4.1.0` | native validated; CI pending | Exact 4.1 wrapper commit and release archive hashes are pinned. Preserve platform assembly fallbacks and OS random seeding. | https://github.com/openssl/openssl · cmake https://github.com/danoli3/openssl-cmake |
@@ -233,7 +233,7 @@ formulas:
   libxml2:    { current: "2.15.4",   latest: "2.15.4",   status: current, pin: "2.15 track; consumers must rebuild" }
   metalangle: { current: "ec92514",  latest: "frozen-2023", status: pinned-dev, pin: "2022 overlay + SPIRV-Cross" }
   nghttp2:    { current: "1.70.0",   latest: "1.70.0",   status: current }
-  nghttp3:    { current: "1.18.0",   latest: "1.18.0",   status: current }
+  nghttp3:    { current: "1.19.0",   latest: "1.19.0",   status: updated }
   ngtcp2:     { current: "1.25.0",   latest: "1.25.0",   status: current }
   opencv:     { current: "4.14.0",   latest: "5.0.0",    status: current, track: "4.x", pin: "OF 4.x API" }
   openssl:    { current: "4.1.0",    latest: "4.1.0",    status: ci-pending, track: "4.1", pin: "openssl-cmake 176816e9dfab3af33c1ae32fcb9981f4ce5d40ea; stable 4.1.0" }
