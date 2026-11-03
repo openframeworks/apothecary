@@ -35,7 +35,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **libpng** | **1.6.59** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
 | **libxml2** | **2.15.4** (latest 2.13.x) | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
 | **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
-| **FreeImage** | **3.19.29** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON; JXR Windows-only. 3.19.29 adds 64-bit TIFF/BigTIFF reads, hardens memory and JP2/J2K streams, and updates bundled libaom to 3.15.2; existing codec selection is preserved. |
+| **FreeImage** | **3.19.31** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON; JXR Windows-only. Fixes BMP RLE8 integer overflow; updates OpenJPH to 0.33.0 for CVE-2026-111151 and marker bounds checks. |
 | **ANGLE / Dawn / MetalANGLE / GLon12** | SHA pins | Opt-in backends. Not default OF GL. See `AGENTS.md`. |
 | **Linux CI compiler** | **GCC 10** | Focal-era CI. Dawn stays **off** Linux core until GCC 11 (`std::bit_cast` / `atomic::wait`). |
 | **Android NDK** | YAML `28.2.13676358` | See [Toolchains](#toolchains). Configure currently redirects that string to `ANDROID_NDK_LATEST_HOME` (**r29** on ubuntu-24.04). |
@@ -54,7 +54,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **curl** | `8.23.0` | `curl-8_22_0` / `8.23.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
 | **dawn** | `2026.07.31` (`cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7`) | Dawn `v20260911.162847` (rolling) | pinned-dev | ofLibs-era SHA. `DAWN_BUILD_MONOLITHIC_LIBRARY=STATIC`. Linux off until GCC 11. watchOS: no Metal. | https://dawn.googlesource.com/dawn |
 | **fmt** | `12.2.0` | `12.2.0` | current | Latest stable. | https://github.com/fmtlib/fmt |
-| **FreeImage** | `3.19.29` | `3.19.29` | current | OF fork (`danoli3/FreeImage`), checked 2026-10-31. Adds 64-bit TIFF/BigTIFF reads, memory and JP2/J2K stream hardening, and bundled libaom 3.15.2; existing codec settings preserved. | https://github.com/danoli3/FreeImage |
+| **FreeImage** | `3.19.31` | `3.19.31` | current | OF fork (`danoli3/FreeImage`), checked 2026-11-03. Fixes BMP RLE8 signed overflow and updates OpenJPH to 0.33.0, including CVE-2026-111151 fix. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.15.0` | `VER-2-14-3` | current | Latest 2.15. Uses upstream CMake; optional HVF disabled for portable linking. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
 | **glon12** | Mesa `26.2.5` | Mesa `26.2.5` | pinned-dev | VS-only GL→D3D12. SHA256 `794b3d17…`. Newer Mesa is a backend bump, not a silent formula bump. | https://archive.mesa3d.org |
@@ -169,7 +169,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | cairo | cairographics / freedesktop git |
 | curl | `github.com/curl/curl` `curl-$VER_D` |
 | fmt | `github.com/fmtlib/fmt` tag `$VER` |
-| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.29` |
+| FreeImage | `github.com/danoli3/FreeImage` tag `3.19.31` |
 | freetype | `github.com/freetype/freetype` `VER-2-14-3` |
 | glew | nigels-com/glew release tarball |
 | glfw | `github.com/glfw/glfw` tag `$VER` |
@@ -218,7 +218,7 @@ formulas:
   curl:       { current: "8.23.0",   latest: "8.23.0",   status: current, pin: "none" }
   dawn:       { current: "2026.07.31", latest: "v20260911.162847", status: pinned-dev, pin: "SHA; Linux needs GCC 11" }
   fmt:        { current: "12.2.0",   latest: "12.2.0",   status: current }
-  FreeImage:  { current: "3.19.29",  latest: "3.19.29",  status: current, pin: "OF fork; JXR Windows-only; 64-bit TIFF reads since 3.19.29" }
+  FreeImage:  { current: "3.19.31",  latest: "3.19.31",  status: current, pin: "OF fork; JXR Windows-only; BMP RLE8 overflow fix; OpenJPH 0.33.0 / CVE-2026-111151" }
   freetype:   { current: "2.15.0",   latest: "2.15.0",   status: current }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current }
   glon12:     { current: "26.2.5",   latest: "26.2.5",   status: pinned-dev, pin: "Mesa SHA; VS-only" }
