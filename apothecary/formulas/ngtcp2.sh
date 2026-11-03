@@ -6,8 +6,8 @@
 FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=("openssl")
 
-VER=1.25.0
-SHA256="1c0843076528a87b65e9a9d455100941f4cb65d44f96c5da6ae56df146043955"
+VER=1.26.0
+SHA256="85174d674e7f8fd911a827c6e483fd417b21b1f54d7853dac464cee446c8d35f"
 BUILD_ID=2
 DEFINES="-DNGTCP2_STATICLIB"
 
