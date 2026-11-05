@@ -5,10 +5,10 @@ on:
     branches: [bleeding, master]
     tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!artifacts', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
   pull_request:
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
