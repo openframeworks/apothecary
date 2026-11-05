@@ -7,8 +7,8 @@
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
 FORMULA_DEPENDS=()
 
-VER=1.0.2
-SOURCE_COMMIT=9b2bed92f5deecf740819f9bf27724bee2fe9c12
+VER=1.0.3
+SOURCE_COMMIT=fe754ef0d62c882747222c4455cb028b03dca33b
 BUILD_ID=1
 DEFINES=""
 
