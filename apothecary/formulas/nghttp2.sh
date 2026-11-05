@@ -6,8 +6,8 @@
 FORMULA_TYPES=("vs" "osx" "ios" "xros" "tvos" "catos" "watchos" "android" "linux")
 FORMULA_DEPENDS=()
 
-VER=1.70.0
-SHA256="aa317e2cf9dca6afa0aed68f8fad6ff303ec6982e25a78c75c0b65e2b9b3ded5"
+VER=1.71.0
+SHA256="0cdd35ecec77919b4b7b245f87fe8d2216e3d62da854eb0838c594ff058042fc"
 BUILD_ID=1
 DEFINES="-DNGHTTP2_STATICLIB"
 

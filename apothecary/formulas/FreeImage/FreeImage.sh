@@ -20,6 +20,10 @@
 # and updates bundled LibRaw to 0.22.3, libheif to 1.23.7 and Brotli to 1.2.1.
 # 3.19.29 adds 64-bit TIFF/BigTIFF reads, hardens memory and JP2/J2K streams,
 # and updates bundled libaom to 3.15.2.
+# 3.19.30 adds metadata stripping and updates OpenEXR, Little CMS and libaom
+# with malformed-file, crash and integer-overflow fixes.
+# 3.19.31 fixes BMP RLE8 integer overflow and updates bundled OpenJPH to 0.33.0
+# for an HTJ2K allocation fix and additional marker bounds checks.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -28,8 +32,8 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.29
-SHA256="25ae2e924dab4775feca28b6a9454070e6d8dcd6981eeb45863194928e3f3d7e"
+VER=3.19.31
+SHA256="1a21c87d4ad819dfa97869e3ae62c702cab123e2e5624acb495e9fcfc02b6f02"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
 BUILD_ID=29
