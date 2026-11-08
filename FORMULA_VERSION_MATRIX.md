@@ -53,7 +53,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **cairo** | `1.18.4` | `1.18.4` | current | Latest stable. | https://gitlab.freedesktop.org/cairo/cairo |
 | **curl** | `8.23.0` | `curl-8_22_0` / `8.23.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
 | **dawn** | `2026.07.31` (`cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7`) | Dawn `v20260911.162847` (rolling) | pinned-dev | ofLibs-era SHA. `DAWN_BUILD_MONOLITHIC_LIBRARY=STATIC`. Linux off until GCC 11. watchOS: no Metal. | https://dawn.googlesource.com/dawn |
-| **fmt** | `12.2.0` | `12.2.0` | current | Latest stable. | https://github.com/fmtlib/fmt |
+| **fmt** | `12.2.1` | `12.2.1` | current | Latest stable. | https://github.com/fmtlib/fmt |
 | **FreeImage** | `3.19.31` | `3.19.31` | current | OF fork (`danoli3/FreeImage`), checked 2026-11-03. Fixes BMP RLE8 signed overflow and updates OpenJPH to 0.33.0, including CVE-2026-111151 fix. | https://github.com/danoli3/FreeImage |
 | **freetype** | `2.15.0` | `VER-2-14-3` | current | Latest 2.15. Uses upstream CMake; optional HVF disabled for portable linking. | https://github.com/freetype/freetype |
 | **glew** | `2.3.1` | `glew-2.3.1` | current | Latest stable. | https://github.com/nigels-com/glew |
@@ -217,7 +217,7 @@ formulas:
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current }
   curl:       { current: "8.23.0",   latest: "8.23.0",   status: current, pin: "none" }
   dawn:       { current: "2026.07.31", latest: "v20260911.162847", status: pinned-dev, pin: "SHA; Linux needs GCC 11" }
-  fmt:        { current: "12.2.0",   latest: "12.2.0",   status: current }
+  fmt:        { current: "12.2.1",   latest: "12.2.1",   status: current }
   FreeImage:  { current: "3.19.31",  latest: "3.19.31",  status: current, pin: "OF fork; JXR Windows-only; BMP RLE8 overflow fix; OpenJPH 0.33.0 / CVE-2026-111151" }
   freetype:   { current: "2.15.0",   latest: "2.15.0",   status: current }
   glew:       { current: "2.3.1",    latest: "2.3.1",    status: current }
