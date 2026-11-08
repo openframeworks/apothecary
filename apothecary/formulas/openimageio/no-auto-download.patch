@@ -1,0 +1,10 @@
+--- a/src/cmake/dependency_utils.cmake
++++ b/src/cmake/dependency_utils.cmake
+@@ -842,6 +842,7 @@
+ # be stored in the ${pkgname}_ROOT variable.
+ #
+ macro (build_dependency_with_cmake pkgname)
++    message (FATAL_ERROR "Apothecary requires staged dependencies: ${pkgname}; automatic downloads are disabled")
+     cmake_parse_arguments(_pkg   # prefix
+         # noValueKeywords:
+         "NOINSTALL"
