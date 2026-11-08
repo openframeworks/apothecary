@@ -1,58 +1,58 @@
 --- a/modules/dnn/src/layers/quantlizelinear_layer.cpp
 +++ b/modules/dnn/src/layers/quantlizelinear_layer.cpp
-@@ -7,7 +7,7 @@
- #include "layers_common.hpp"
+@@ -8,7 +8,7 @@
  #include "../net_impl.hpp"
+ #include "../onnx/onnx_dtype_convert.hpp"
  
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
  #include <immintrin.h>
  #endif
  
-@@ -17,7 +17,7 @@
+@@ -18,7 +18,7 @@
  {
  
- // Fast path for per-tensor quantization: float → uint8 with AVX2
+ // Fast path for per-tensor quantization: float -> uint8 or int8 with AVX2
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
+ template <typename _OutTp>
  #if defined(__GNUC__) || defined(__clang__)
  __attribute__((target("avx2")))
- #endif
-@@ -228,7 +228,7 @@
+@@ -306,7 +306,7 @@
      }
  
-     // Fast path: per-tensor quantization float→uint8 with AVX2 + proper parallelism
+     // Fast path: per-tensor quantization float to uint8 or int8 with AVX2 + parallelism
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
-     if (block_size == 0 && sz_a == 1 && inptype == CV_32F && outtype == CV_8U && sctype == CV_32F
-         && checkHardwareSupport(CV_CPU_AVX2)) {
-         float inv_scale = 1.f / reinterpret_cast<const float*>(scale.data)[0];
+     if (block_size == 0 && sz_a == 1 && inptype == CV_32F && sctype == CV_32F
+         && (outtype == CV_8U || outtype == CV_8S) && checkHardwareSupport(CV_CPU_AVX2)) {
+         float scale_f32 = reinterpret_cast<const float*>(scale.data)[0];
 --- a/modules/dnn/src/layers/dequantizelinear_layer.cpp
 +++ b/modules/dnn/src/layers/dequantizelinear_layer.cpp
-@@ -8,7 +8,7 @@
- #include "layers_common.hpp"
+@@ -9,7 +9,7 @@
  #include "../net_impl.hpp"
+ #include "../onnx/onnx_dtype_convert.hpp"
  
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
  #include <immintrin.h>
  #endif
  
-@@ -24,7 +24,7 @@
+@@ -25,7 +25,7 @@
      Opset's 10 to 25 are covered.
  */
  
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
+ template <typename _InpTp>
  #if defined(__GNUC__) || defined(__clang__)
  __attribute__((target("avx2")))
- #endif
-@@ -232,7 +232,7 @@
+@@ -291,7 +291,7 @@
      }
  
      // Fast path: per-tensor dequantization uint8→float with AVX2 + proper parallelism
 -#if defined(__x86_64__) || defined(_M_X64)
 +#if (defined(__x86_64__) || defined(_M_X64)) && !defined(_M_ARM64EC)
-     if (block_size == 0 && sz_a == 1 && inptype == CV_8U && outtype == CV_32F && sctype == CV_32F
-         && checkHardwareSupport(CV_CPU_AVX2)) {
+     if (block_size == 0 && sz_a == 1 && outtype == CV_32F && sctype == CV_32F
+         && (inptype == CV_8U || inptype == CV_8S) && checkHardwareSupport(CV_CPU_AVX2)) {
          float sc = reinterpret_cast<const float*>(scale.data)[0];

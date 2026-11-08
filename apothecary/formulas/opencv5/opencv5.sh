@@ -10,12 +10,12 @@ FORMULA_TYPES=("osx" "ios" "catos" "xros" "tvos" "vs" "msys2" "android" "emscrip
 FORMULA_DEPENDS=("zlib" "libpng" )
 
 # define the version
-VER=5.0.0
-SHA256="b0528f5a1d379d59d4701cb28c36e22214cc51cf64594e5b56f2d3e6c0233095"
-BUILD_ID=6
+VER=5.1.0
+SHA256="638c1dae7e37e45afea21aa217dc667ad7cf57acc66cdf652c074f1e0e5ad6d2"
+BUILD_ID=1
 DEFINES=""
 FRAMEWORKS=""
-FILE_VERSION=500
+FILE_VERSION=510
 
 # tools for git use
 GIT_URL=https://github.com/opencv/opencv
@@ -23,7 +23,7 @@ GIT_TAG=$VER
 
 GIT_CONTRIB_URL=https://github.com/opencv/opencv_contrib
 VER_CONTRIB=$VER
-SHA256_CONTRIB="c58f6344170c39abf187c56f3843b59cab1fd3e89cf19ba2ce25dc061659b27f"
+SHA256_CONTRIB="6aee68285f0e7b7bf77d3656bc6568820c6f15704860fc0922def357d40ebeff"
 
 # download the source code and unpack it into LIB_NAME
 function download() {
@@ -50,11 +50,11 @@ function prepare() {
         patch -p1 < "$FORMULA_DIR/stereo-iterator.patch" || return 1
     fi
 
-    # OpenCV 5.0.0 includes <exception>; the OpenCV 4 patch is unnecessary.
+    # OpenCV 5.1.0 includes <exception>; the OpenCV 4 patch is unnecessary.
 
     if [[ "$TYPE" =~ ^(vs|msys2)$ ]]; then
-        # Vendored MLAS depends on assembly/POSIX APIs unsupported on Windows.
-        # Keep DNN enabled using its built-in SGEMM fallback.
+        # Preserve the Windows fallback until upstream's new MSVC ARM64 MLAS
+        # kernels pass native validation; DNN retains its built-in SGEMM.
         if ! grep -q 'vendored MLAS kernels unsupported on Windows' 3rdparty/mlas/CMakeLists.txt; then
             patch -p1 < "$FORMULA_DIR/windows-mlas-fallback.patch"
         fi

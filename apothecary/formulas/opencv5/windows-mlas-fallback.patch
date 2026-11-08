@@ -1,11 +1,11 @@
 --- a/3rdparty/mlas/CMakeLists.txt
 +++ b/3rdparty/mlas/CMakeLists.txt
-@@ -76,6 +76,12 @@
- set(OPENCV_DNN_MLAS_ENABLED     0  CACHE INTERNAL "" FORCE)
- set(OPENCV_DNN_MLAS_SKIP_REASON "" CACHE INTERNAL "" FORCE)
+@@ -106,6 +106,12 @@
+   return()
+ endif()
  
-+# Apothecary applies this patch only to Windows builds. Do not depend on
-+# OpenCV's platform variables remaining unchanged in this subdirectory.
++# Apothecary keeps the existing Windows SGEMM fallback until the new upstream
++# MSVC ARM64 kernels have passed the native platform matrix.
 +set(OPENCV_DNN_MLAS_SKIP_REASON "vendored MLAS kernels unsupported on Windows"
 +    CACHE INTERNAL "" FORCE)
 +message(STATUS "MLAS disabled on Windows; DNN will use its built-in SGEMM")
