@@ -7,8 +7,8 @@ FORMULA_TYPES=("vs" "osx" "emscripten" "ios" "watchos" "catos" "xros" "tvos" "li
 FORMULA_DEPENDS=()
 
 # define the version
-VER=1.3.2
-SHA256="bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16"
+VER=1.4
+SHA256="02dd159783677a749c04adbdd02b55b8a2bcc7e054f51b76b549199a916ad584"
 BUILD_ID=1
 DEFINES=""
 FRAMEWORKS=""
