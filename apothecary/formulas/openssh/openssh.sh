@@ -5,7 +5,7 @@ FORMULA_DEPENDS=("openssl" "liboqs" "zlib")
 VER=10.4p1-oqs-2026-08
 SOURCE_COMMIT=eed58298755950fb201039d00bcb37b7af1447a9
 SHA256="7e4cf39caeef681574596f8849683ed2cfb048950797407754fad38ab6657ae7"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 GIT_URL=https://github.com/open-quantum-safe/openssh
 
@@ -39,7 +39,7 @@ function prepare() {
 function build() {
     local source_dir="$PWD" build_dir="$PWD/build_${TYPE}_${PLATFORM}"
     local libdir="lib/$TYPE/$PLATFORM" architecture="$ARCH"
-    local platform_flags="" host_arch
+    local platform_flags="" platform_libs="" host_arch
     case "$TYPE" in
         osx)
             case "$PLATFORM" in MAC_ARM64) architecture=arm64 ;; MAC) architecture=x86_64 ;; *) return 1 ;; esac
@@ -49,6 +49,10 @@ function build() {
             host_arch=$(uname -m)
             case "$ARCH:$host_arch" in 64:x86_64|x86_64:x86_64|arm64:aarch64|aarch64:aarch64) : ;;
                 *) echoError "OpenSSH currently supports native desktop builds only"; return 1 ;; esac
+            # OpenSSL is static in Apothecary. libcrypto's Linux objects may
+            # need the dynamic-loader and pthread libraries during OpenSSH's
+            # configure link probe and final link.
+            platform_libs="-ldl -pthread"
             ;;
         *) echoError "Unsupported OpenSSH target: $TYPE"; return 1 ;;
     esac
@@ -61,7 +65,7 @@ function build() {
     cp -R "$LIBS_DIR_REAL/zlib/include/." "$build_dir/zlib/include/" || return $?
     (
         cd "$build_dir" || exit 1
-        CC="${CC:-cc}" CFLAGS="-O2 $platform_flags" \
+        CC="${CC:-cc}" CFLAGS="-O2 $platform_flags" LIBS="$platform_libs" \
         CPPFLAGS="-I$LIBS_DIR_REAL/openssl/include -I$LIBS_DIR_REAL/liboqs/include" \
         LDFLAGS="$platform_flags" \
         "$source_dir/configure" --prefix=/ --sysconfdir=/etc/ssh \
