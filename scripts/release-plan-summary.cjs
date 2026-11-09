@@ -2,7 +2,7 @@
 const escape = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const literal = value => String(value ?? '').trim().replace(/^(['"])(.*?)\1(?:\s+#.*)?$/, '$2') || 'Not declared';
 const variant = row => Object.entries(row).map(([key,value]) => `${key}=${typeof value === 'object' ? JSON.stringify(value) : value}`).join(', ') || 'default';
-const fields = ['BUILD_PROFILE_ID','TARGET','ARCH','BUNDLE','SDK','NDK','ANDROID_API','EMSDK_VERSION','PTHREADS_ENABLED','DEVELOPER_DIR','GCC','GCC_VERSION','CC','CXX','VS_VER','VS_STUDIO','WINDOWS_SDK_VERSION','MSYSTEM','C_STANDARD','CPP_STANDARD'];
+const fields = ['BUILD_PROFILE_ID','TARGET','ARCH','BUNDLE','SDK','NDK','ANDROID_API','EMSDK_VERSION','PTHREADS_ENABLED','DEVELOPER_DIR','GCC','GCC_VERSION','CC','CXX','VS_VER','VS_STUDIO','VS_TOOLSET','VS_TOOLS_VERSION','VS_WINDOWS_SDK_VERSION','WINDOWS_SDK_VERSION','MSYSTEM','C_STANDARD','CPP_STANDARD'];
 function environment(config, jobId, row) {
     const job = config.jobs[jobId];
     const resolve = value => String(value).replace(/\$\{\{\s*matrix\.([\w.]+)\s*\}\}/g, (expression, key) => {

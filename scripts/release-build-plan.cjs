@@ -268,10 +268,10 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
     }
 }
 exports.plan=plan;
-exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}) => {
+exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row,toolchain}) => {
     if (context.eventName !== 'push' || !['refs/heads/bleeding','refs/heads/master'].includes(context.ref)) return;
     if (Array.isArray(row.entries)) {
-        for (const entry of row.entries) await exports.record({github,context,core,workflow:file,job:jobId,matrix:entry});
+        for (const entry of row.entries) await exports.record({github,context,core,workflow:file,job:jobId,matrix:entry,toolchain});
         return;
     }
     const tag = file.endsWith('build-linux-modular.yml') ? 'latest-modular' : context.ref === 'refs/heads/master' ? 'nightly' : 'latest';
@@ -322,7 +322,9 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row}
         if (metadata.length) recipe.installed = metadata;
     }
     state.publishedAt = new Date().toISOString(); state.commit = context.sha; state.runId = context.runId; state.assets = published;
-    state.toolchain = execFileSync('bash',['scripts/release-toolchain.sh'],{encoding:'utf8'});
+    // Aggregate publication can run on Linux after native consumer gates. Keep
+    // the evidence produced on the build runner instead of describing Linux.
+    state.toolchain = toolchain ?? execFileSync('bash',['scripts/release-toolchain.sh'],{encoding:'utf8'});
     state.channel = channel(file,context); state.release = tag; state.releaseId = release.id;
     const metadata = await stateRelease(github,context,true);
     const states = await github.paginate(github.rest.repos.listReleaseAssets,{...context.repo,release_id:metadata.id,per_page:100});

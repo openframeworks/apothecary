@@ -586,7 +586,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/include/" $1/
         cp -v "build_${TYPE}_${ARCH}/lib/"*.lib $1/lib/$TYPE/$PLATFORM/
         . "$SECURE_SCRIPT"
-        secure "$1/lib/$TYPE/$PLATFORM/libfreetype.lib" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/freetype.lib" "freetype.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
         # cp -v "build_${TYPE}_${ARCH}/lib/"*.pdb $1/lib/$TYPE/$PLATFORM/
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/

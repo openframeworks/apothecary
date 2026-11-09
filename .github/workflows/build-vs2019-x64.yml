@@ -2,22 +2,35 @@ name: build-vs2019-64
 
 on:
   workflow_dispatch:
+  push:
+    branches: [bleeding, master]
+    tags: ['**', '!latest', '!latest-modular', '!nightly', '!build-state', '!artifacts', '!sha256', '!nightly-staging-*', '!nightly-previous-*']
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     paths:
       - '.github/workflows/build-vs2019-x64.yml'
       - 'apothecary/apothecary'
+      - 'apothecary/toolchains/**'
       - 'apothecary/formulas/**'
       - 'scripts/vs/**'
       - 'scripts/build.sh'
       - 'scripts/calculate_formulas.sh'
       - 'scripts/package*.sh'
       - 'scripts/secure.sh'
+      - 'scripts/export_config.sh'
+      - 'scripts/cache-toolchain.sh'
+      - 'scripts/release-toolchain.sh'
       - 'scripts/tests/test-vs-toolset.sh'
       - 'scripts/tests/test-vs2019-*.sh'
       - 'scripts/tests/vs2019/**'
+      - 'scripts/tests/test-vs2019-package.py'
+      - 'scripts/build-matrices.json'
+      - 'scripts/release-*.cjs'
 
 permissions:
-  contents: read
+  actions: read
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
@@ -25,20 +38,41 @@ concurrency:
 
 env:
   # VS2022 hosts the VS2019 compiler. VS_VER denotes the generator host.
-  BUILD_PROFILE_ID: "1"
+  BUILD_PROFILE_ID: "2"
   TARGET: vs
   ARCH: "64"
   VS_VER: "17"
   VS_TOOLSET: v142
   VS_TOOLS_VERSION: "14.29"
   VS_WINDOWS_SDK_VERSION: "10.0.19041.0"
-  CPP_STANDARD: max
+  CPP_STANDARD: "17"
+  C_STANDARD: "17"
   MULTITHREADED_TYPE: MD
   NO_FORCE: "1"
   NO_COLOR: "1"
   UI_ANIM: "0"
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      build_needed: ${{ steps.plan.outputs.build_needed }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Plan VS2019 builds
+        id: plan
+        uses: actions/github-script@v9.0.0
+        with:
+          script: |
+            await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).plan({github, context, core, workflow: '.github/workflows/build-vs2019-x64.yml', job: 'build-vs2019-64'});
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: .build-plans/*.pkl
+          include-hidden-files: true
+          if-no-files-found: error
   test-selector:
     runs-on: ubuntu-latest
     steps:
@@ -47,13 +81,16 @@ jobs:
       - run: bash scripts/tests/test-vs2019-curl-profile.sh
       - run: bash scripts/tests/test-vs2019-assimp-copy.sh
       - run: bash scripts/tests/test-vs2019-opencv-copy.sh
+      - run: python3 scripts/tests/test-vs2019-package.py
 
   build-vs2019-64:
-    needs: test-selector
+    needs: [pre-check, test-selector]
+    if: needs.pre-check.outputs.build_needed == 'true'
     runs-on: windows-2022
     timeout-minutes: 180
     strategy:
       fail-fast: false
+      # Test and publish the pair together whenever either bundle changes.
       matrix:
         bundle: [1, 2]
     env:
@@ -65,6 +102,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: msys2/setup-msys2@v2.32.0
         with:
+          release: false
           update: true
           path-type: inherit
           install: >-
@@ -80,7 +118,18 @@ jobs:
           toolset: "14.29"
           arch: amd64
           sdk: ${{ env.VS_WINDOWS_SDK_VERSION }}
-      - name: Verify v142 and maximum C++ mode
+      - name: Select archive channel
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF" in
+            refs/heads/bleeding) release=latest ;;
+            refs/heads/master) release=nightly ;;
+            refs/tags/*) release="${GITHUB_REF#refs/tags/}" ;;
+            *) release=vs2019-test ;;
+          esac
+          echo "RELEASE=$release" >> "$GITHUB_ENV"
+      - name: Verify v142 and C++17
         run: |
           set -euo pipefail
           case "$VCToolsVersion" in 14.29.*) ;; *) echo "Wrong compiler: $VCToolsVersion"; exit 1 ;; esac
@@ -88,32 +137,41 @@ jobs:
             -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
             -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION"
           cmake --build build/vs2019-probe --config Release --verbose
-          ./build/vs2019-probe/Release/vs2019_maximum.exe
+          ./build/vs2019-probe/Release/VS2019_CXX17.exe
       - name: Build core bundle with v142
         run: bash scripts/build.sh
-      - name: Package VS2019 review archive
-        env:
-          RELEASE: vs2019-test
+      - name: Package VS2019 archive
         run: |
           set -euo pipefail
           bash scripts/package.sh
-          test -s "out/openFrameworksLibs_vs2019-test_vs_2019_64_${BUNDLE}.zip"
+          test -s "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip"
       - name: Build and run consumer from extracted archive
         run: |
           set -euo pipefail
           mkdir -p build/vs2019-extracted
-          7z x "out/openFrameworksLibs_vs2019-test_vs_2019_64_${BUNDLE}.zip" -obuild/vs2019-extracted
+          7z x "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" -obuild/vs2019-extracted
           cmake -S scripts/tests/vs2019 -B build/vs2019-consumer \
             -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
             -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION" \
             -DSDK_ROOT="$(cygpath -m "$PWD/build/vs2019-extracted")" -DBUNDLE="$BUNDLE"
           cmake --build build/vs2019-consumer --config Release --verbose
-          ./build/vs2019-consumer/Release/vs2019_maximum.exe
+          ./build/vs2019-consumer/Release/VS2019_CXX17.exe
+          python3 scripts/vs/verify-v142-package.py \
+            "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" \
+            --bundle "$BUNDLE" --commit "$GITHUB_SHA" \
+            --manifest "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.manifest.json"
+          sha256sum "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" > "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip.sha256"
+          bash scripts/release-toolchain.sh > "out/vs2019-v142-toolchain-${BUNDLE}.txt"
+          { printf 'VS_TOOLSET=%s\nVCToolsVersion=%s\nCPP_STANDARD=%s\n' "$VS_TOOLSET" "$VCToolsVersion" "$CPP_STANDARD"; cl 2>&1 || true; } >> "out/vs2019-v142-toolchain-${BUNDLE}.txt"
       - name: Upload VS2019 archive
         uses: actions/upload-artifact@v7.0.0
         with:
           name: vs2019-v142-x64-bundle-${{ matrix.bundle }}
-          path: out/openFrameworksLibs_vs2019-test_vs_2019_64_${{ matrix.bundle }}.zip
+          path: |
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_${{ matrix.bundle }}.zip
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_${{ matrix.bundle }}.zip.sha256
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_${{ matrix.bundle }}.manifest.json
+            out/vs2019-v142-toolchain-${{ matrix.bundle }}.txt
           if-no-files-found: error
       - name: Upload compiler and formula diagnostics
         if: always()
@@ -128,3 +186,170 @@ jobs:
             build/vs2019-consumer/CMakeCache.txt
             build/**/CMakeConfigureLog.yaml
           if-no-files-found: ignore
+
+  verify-openframeworks:
+    needs: build-vs2019-64
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Check out current OF core
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: openframeworks/openFrameworks
+          ref: master
+          path: consumer/openFrameworks
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: vs2019-v142-x64-bundle-*
+          merge-multiple: true
+          path: out
+      - uses: msys2/setup-msys2@v2.32.0
+        with:
+          release: false
+          update: true
+          path-type: inherit
+          install: base-devel git unzip curl mingw-w64-x86_64-python
+      - name: Install v142 host tools
+        shell: msys2 {0}
+        run: bash scripts/vs/install.sh
+      - name: Activate VS2019 compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: "2022"
+          toolset: "14.29"
+          arch: amd64
+          sdk: ${{ env.VS_WINDOWS_SDK_VERSION }}
+      - uses: microsoft/setup-msbuild@v3
+      - name: Deploy both tested bundles and generate emptyExample
+        shell: msys2 {0}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for bundle in 1 2; do
+            archive=$(find out -maxdepth 1 -name "openFrameworksLibs_*_vs_2019_64_${bundle}.zip")
+            test -n "$archive"
+            sha256sum --check "$archive.sha256"
+            python3 scripts/vs/verify-v142-package.py "$archive" --bundle "$bundle" --commit "$GITHUB_SHA"
+            7z x "$archive" -oconsumer/openFrameworks/libs -y
+          done
+          mkdir -p build/projectGenerator
+          gh release download nightly --repo openframeworks/projectGenerator --pattern projectGenerator-vs.zip --dir build/projectGenerator
+          digest=$(gh api repos/openframeworks/projectGenerator/releases/tags/nightly --jq '.assets[] | select(.name == "projectGenerator-vs.zip") | .digest')
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          printf '%s  %s\n' "${digest#sha256:}" build/projectGenerator/projectGenerator-vs.zip | sha256sum --check
+          unzip -q build/projectGenerator/projectGenerator-vs.zip -d build/projectGenerator
+          ./build/projectGenerator/projectGenerator.exe -o"$PWD/consumer/openFrameworks" -v -pvs2019 "$PWD/consumer/openFrameworks/examples/templates/emptyExample"
+      - name: Add IP Helper dependency for packaged curl
+        shell: pwsh
+        run: |
+          $project = 'consumer/openFrameworks/examples/templates/emptyExample/emptyExample.vcxproj'
+          $content = [System.IO.File]::ReadAllText((Join-Path $env:GITHUB_WORKSPACE $project))
+          if ($content -notmatch 'Iphlpapi\.lib') {
+            $content = $content.Replace('<AdditionalDependencies>', '<AdditionalDependencies>Iphlpapi.lib;')
+            [System.IO.File]::WriteAllText((Join-Path $env:GITHUB_WORKSPACE $project), $content)
+          }
+      - name: Compile and link current core and emptyExample with C++17
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $header = Join-Path $env:GITHUB_WORKSPACE 'scripts/tests/vs2019/assert-cxx17.h'
+          # _CL_ is appended to each compiler invocation. The forced header
+          # checks the actual compiler and mode for every OF/example C++ TU.
+          $env:_CL_ = "/std:c++17 /FI`"$header`""
+          $tools = $env:VCToolsVersion.TrimEnd('\')
+          foreach ($configuration in @('Debug', 'Release')) {
+            msbuild consumer/openFrameworks/examples/templates/emptyExample/emptyExample.vcxproj `
+              /m /p:Configuration=$configuration /p:Platform=x64 /p:PlatformToolset=v142 `
+              /p:VCToolsVersion=$tools /p:WindowsTargetPlatformVersion=$env:VS_WINDOWS_SDK_VERSION `
+              /p:LanguageStandard=stdcpp17 /bl:out/vs2019-core-$configuration.binlog
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          foreach ($file in @(
+            'consumer/openFrameworks/examples/templates/emptyExample/bin/emptyExample_debug.exe',
+            'consumer/openFrameworks/examples/templates/emptyExample/bin/emptyExample.exe',
+            'consumer/openFrameworks/libs/openFrameworksCompiled/lib/vs/x64/openframeworksLib_debug.lib',
+            'consumer/openFrameworks/libs/openFrameworksCompiled/lib/vs/x64/openframeworksLib.lib')) {
+            if (-not (Test-Path $file) -or (Get-Item $file).Length -eq 0) { throw "Missing build output: $file" }
+          }
+          $ofCommit = git -C consumer/openFrameworks rev-parse HEAD
+          @{apothecaryCommit=$env:GITHUB_SHA; openframeworksCommit=$ofCommit; toolset='v142'; cppStandard='17'; configurations=@('Debug','Release')} |
+            ConvertTo-Json | Set-Content out/vs2019-core-build.json
+      - name: Upload current-core evidence
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: vs2019-core-build
+          path: out/vs2019-core-build.json
+          if-no-files-found: error
+      - name: Upload core build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: vs2019-core-diagnostics
+          path: |
+            out/vs2019-core-*.binlog
+            consumer/openFrameworks/examples/templates/emptyExample/*.vcxproj
+          if-no-files-found: ignore
+
+  publish:
+    needs: [pre-check, build-vs2019-64, verify-openframeworks]
+    if: github.repository == 'openframeworks/apothecary' && github.event_name == 'push' && (github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: vs2019-v142-x64-bundle-*
+          merge-multiple: true
+          path: out
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: vs2019-core-build
+          path: out
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: build-plan-${{ github.workflow }}
+          path: ${{ runner.temp }}/build-plans
+      - name: Verify release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$GITHUB_REF" in
+            refs/heads/bleeding) release=latest ;;
+            refs/heads/master) release=nightly ;;
+            refs/tags/*) release="${GITHUB_REF#refs/tags/}" ;;
+            *) exit 1 ;;
+          esac
+          echo "RELEASE=$release" >> "$GITHUB_ENV"
+          test -s out/vs2019-core-build.json
+          for bundle in 1 2; do
+            archive="out/openFrameworksLibs_${release}_vs_2019_64_${bundle}.zip"
+            sha256sum --check "$archive.sha256"
+            python3 scripts/vs/verify-v142-package.py "$archive" --bundle "$bundle" --commit "$GITHUB_SHA"
+            test -s "out/vs2019-v142-toolchain-${bundle}.txt"
+            unzip -qo "$archive" -d out
+          done
+      - name: Publish verified VS2019 release pair
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE }}
+          fail_on_unmatched_files: true
+          files: |
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_*.zip
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_*.zip.sha256
+            out/openFrameworksLibs_${{ env.RELEASE }}_vs_2019_64_*.manifest.json
+            out/vs2019-v142-toolchain-*.txt
+            out/vs2019-core-build.json
+      - name: Record verified release outputs
+        if: github.ref == 'refs/heads/bleeding' || github.ref == 'refs/heads/master'
+        uses: actions/github-script@v9.0.0
+        with:
+          github-token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('node:fs');
+            for (const bundle of [1, 2]) {
+              const toolchain = fs.readFileSync(`out/vs2019-v142-toolchain-${bundle}.txt`, 'utf8');
+              await require(`${process.env.GITHUB_WORKSPACE}/scripts/release-build-plan.cjs`).record({github, context, core, workflow: '.github/workflows/build-vs2019-x64.yml', job: 'build-vs2019-64', matrix: {bundle}, toolchain});
+            }

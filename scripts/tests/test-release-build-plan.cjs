@@ -118,6 +118,9 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert.equal(uploaded.formulas.FreeImage.installed[0].version,'1.0');
  assert.equal(uploaded.formulas.FreeImage.installed[0].buildTime,'2026-01-02 T03:04:05Z');
  assert.equal(uploaded.assets[0].digest,published.digest);assert.equal(uploaded.formulas.FreeImage.key,state.formulas.FreeImage.key);
+ const nativeEvidence='MSVC 19.29.30158\nVS_TOOLSET=v142\nCPP_STANDARD=17\n';
+ await p.record({github,context,core:recorderCore,workflow:file,job,matrix:row,toolchain:nativeEvidence});
+ assert.equal(uploaded.toolchain,nativeEvidence,'aggregate publication retains the native compiler evidence');
  const unusual={path:'C:\\bin\\foo',flags:'quotes " and tabs\t newline\n',nested:[{version:'1.0'}],enabled:true};
  assert.deepEqual(JSON.parse(JSON.stringify(p.parsePkl(p.renderPkl(unusual)))),unusual,'Pkl metadata safely round-trips paths, quotes, whitespace and collections');
  assert.throws(()=>p.parsePkl('state = import "https://example.com/code.pkl"'),'downloaded state cannot execute imports');

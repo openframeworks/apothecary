@@ -8,6 +8,8 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
+import urllib.error
 import urllib.request
 
 root = Path(__file__).resolve().parents[2]
@@ -26,13 +28,26 @@ def run(args, **kwargs):
         raise RuntimeError(result.stdout)
     return result.stdout
 
+def download(url, destination):
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response:
+                destination.write_bytes(response.read())
+            return
+        except urllib.error.HTTPError as error:
+            if not 500 <= error.code < 600 or attempt == 3:
+                raise
+        except urllib.error.URLError:
+            if attempt == 3:
+                raise
+        time.sleep(2 ** attempt)
+
 with tempfile.TemporaryDirectory(prefix='curl-apple-wakeup-') as directory:
     fixture = Path(directory)
     archive = Path(sys.argv[1]) if len(sys.argv) > 1 else fixture / 'curl.tar.gz'
     if len(sys.argv) <= 1:
         url = f'https://github.com/curl/curl/releases/download/curl-{tag}/curl-{version}.tar.gz'
-        with urllib.request.urlopen(url, timeout=60) as response:
-            archive.write_bytes(response.read())
+        download(url, archive)
     if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
         raise RuntimeError('curl source SHA-256 mismatch; refusing to extract')
     with tarfile.open(archive) as source:

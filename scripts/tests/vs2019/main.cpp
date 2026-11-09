@@ -1,7 +1,8 @@
-#include <concepts>
+#include <array>
+#include <type_traits>
 #include <iostream>
-#include <span>
 #include <cstring>
+#include "assert-cxx17.h"
 #ifdef TEST_PACKAGED_ZLIB
 #include <zlib.h>
 #endif
@@ -9,21 +10,15 @@
 #include <fmt/format.h>
 #endif
 
-#if !defined(_MSC_VER) || _MSC_VER < 1920 || _MSC_VER >= 1930
-#error Expected the VS2019 compiler
-#endif
-#if !defined(_MSVC_LANG) || _MSVC_LANG <= 202002L
-#error Expected /std:c++latest, not /std:c++20 or an older mode
-#endif
-
-template <std::integral T> constexpr T total(std::span<const T> values) {
+template <typename T, std::size_t N> constexpr T total(const std::array<T, N>& values) {
+    static_assert(std::is_integral_v<T>, "Expected integral values");
     T sum{};
     for (auto value : values) sum += value;
     return sum;
 }
 
 int main() {
-    const int values[]{1, 2, 3};
+    const std::array<int, 3> values{1, 2, 3};
     std::cout << "VS2019: _MSC_VER=" << _MSC_VER << " _MSVC_LANG=" << _MSVC_LANG << '\n';
 #ifdef TEST_PACKAGED_ZLIB
     const unsigned char input[] = "VS2019 packaged zlib roundtrip";

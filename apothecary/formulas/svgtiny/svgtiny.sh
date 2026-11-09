@@ -11,7 +11,7 @@ FORMULA_DEPENDS=("zlib" "libxml2")
 
 # define the version by sha
 VER=0.1.8
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 
 # tools for git use
@@ -415,7 +415,7 @@ function copy() {
         cp -Rv "build_${TYPE}_${ARCH}/include/" $1/
         cp -v "build_${TYPE}_${ARCH}/Release/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtiny.lib
         cp -v "build_${TYPE}_${ARCH}/Debug/svgtiny.lib" $1/lib/$TYPE/$PLATFORM/svgtinyD.lib
-        secure "$1/lib/$TYPE/$PLATFORM/libsvgtiny.lib" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
+        secure "$1/lib/$TYPE/$PLATFORM/svgtiny.lib" "svgtiny.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "$FORMULA_DEPENDS"
     elif [[ "$TYPE" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
         mkdir -p $1/lib/$TYPE/$PLATFORM/
         cp -v "build_${TYPE}_${PLATFORM}/libsvgtiny.a" $1/lib/$TYPE/$PLATFORM/libsvgtiny.a
