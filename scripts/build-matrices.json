@@ -118,6 +118,11 @@
       ]
     }
   },
+  ".github/workflows/build-vs2019-x64.yml": {
+    "build-vs2019-64": {
+      "bundle": [1, 2]
+    }
+  },
   ".github/workflows/build-vs2022-arm64.yml": {
     "build-vs2022-arm64": {
       "bundle": [

@@ -55,13 +55,9 @@ apothecary_vs_configure_toolset() {
         *) echo "Unsupported v142 compiler host: $VS_HOSTPLATFORM" >&2; return 1 ;;
     esac
     export CMAKE_WIN_SDK="$CMAKE_WIN_SDK -T $CMAKE_GENERATOR_TOOLSET"
-    if [ "${CPP_STANDARD:-}" = max ]; then
-        # CMake maps CXX_STANDARD=23 to /std:c++latest on MSVC 19.29.
-        # This does not mean the VS2019 compiler implements all of C++23.
-        export CPP_STANDARD=23
-        export CPP_STANDARD_MODE=latest
-    elif [ "${CPP_STANDARD:-}" != 23 ]; then
-        unset CPP_STANDARD_MODE
-    fi
+    # OF's VS2019 profile is C++17. Do not inherit C++23 or /std:c++latest
+    # from the VS2022 generator host, including in the packaged Pkl metadata.
+    export CPP_STANDARD=17
+    unset CPP_STANDARD_MODE
     echo "MSVC toolset $VS_TOOLSET ($VS_VER_DIR), CMake C++ $CPP_STANDARD (${CPP_STANDARD_MODE:-standard})"
 }
