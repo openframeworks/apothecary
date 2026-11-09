@@ -163,6 +163,23 @@
     "pattern": "openssl-(\\d+(?:\\.\\d+)+)"
   },
   {
+    "name": "liboqs",
+    "formula": "apothecary/formulas/liboqs/liboqs.sh",
+    "repo": "open-quantum-safe/liboqs",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "oqsprovider",
+    "formula": "apothecary/formulas/oqsprovider/oqsprovider.sh",
+    "repo": "open-quantum-safe/oqs-provider",
+    "pattern": "v?(\\d+(?:\\.\\d+)+)"
+  },
+  {
+    "name": "OQS OpenSSH",
+    "formula": "apothecary/formulas/openssh/openssh.sh",
+    "skip": "Pinned fork commit and snapshot version label; not a stable upstream release tag"
+  },
+  {
     "name": "POCO",
     "formula": "apothecary/formulas/poco/poco.sh",
     "repo": "pocoproject/poco",
