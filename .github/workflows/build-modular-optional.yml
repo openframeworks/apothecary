@@ -149,6 +149,7 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@v2.33.0
         with:
+          release: false
           update: true
           install: >-
             base-devel unzip dos2unix gperf git python3
@@ -223,6 +224,7 @@ jobs:
           python-version: '3.12'
       - uses: msys2/setup-msys2@v2.33.0
         with:
+          release: false
           msystem: MSYS
           path-type: inherit
           update: true

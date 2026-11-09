@@ -80,6 +80,7 @@ jobs:
         if: inputs.platform == 'windows'
         uses: msys2/setup-msys2@v2.33.0
         with:
+          release: false
           update: true
           install: git unzip
 

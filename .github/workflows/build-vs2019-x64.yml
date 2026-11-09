@@ -102,6 +102,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: msys2/setup-msys2@v2.32.0
         with:
+          release: false
           update: true
           path-type: inherit
           install: >-
@@ -205,6 +206,7 @@ jobs:
           path: out
       - uses: msys2/setup-msys2@v2.32.0
         with:
+          release: false
           update: true
           path-type: inherit
           install: base-devel git unzip curl mingw-w64-x86_64-python
@@ -239,6 +241,15 @@ jobs:
           printf '%s  %s\n' "${digest#sha256:}" build/projectGenerator/projectGenerator-vs.zip | sha256sum --check
           unzip -q build/projectGenerator/projectGenerator-vs.zip -d build/projectGenerator
           ./build/projectGenerator/projectGenerator.exe -o"$PWD/consumer/openFrameworks" -v -pvs2019 "$PWD/consumer/openFrameworks/examples/templates/emptyExample"
+      - name: Add IP Helper dependency for packaged curl
+        shell: pwsh
+        run: |
+          $project = 'consumer/openFrameworks/examples/templates/emptyExample/emptyExample.vcxproj'
+          $content = [System.IO.File]::ReadAllText((Join-Path $env:GITHUB_WORKSPACE $project))
+          if ($content -notmatch 'Iphlpapi\.lib') {
+            $content = $content.Replace('<AdditionalDependencies>', '<AdditionalDependencies>Iphlpapi.lib;')
+            [System.IO.File]::WriteAllText((Join-Path $env:GITHUB_WORKSPACE $project), $content)
+          }
       - name: Compile and link current core and emptyExample with C++17
         shell: pwsh
         run: |
