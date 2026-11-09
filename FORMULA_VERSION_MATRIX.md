@@ -84,7 +84,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **uriparser** | `1.0.3` | `uriparser-1.0.3` | updated | Security update; build validation required. | https://github.com/uriparser/uriparser |
 | **utf8** (utfcpp) | `4.2.1` | `v4.2.1` | current | Header-only; includes the 4.2.1 next16 error-type fix. | https://github.com/nemtrif/utfcpp |
 | **videoInput** | `master` (`261bfeee…`) | branch only | pinned-dev | ofTheo fork SHA. Windows capture. | https://github.com/ofTheo/videoInput |
-| **zlib** | `1.3.2` | `v1.3.2` | current | Latest stable. | https://github.com/madler/zlib |
+| **zlib** | `1.4` | `v1.4` | current | Latest stable. | https://github.com/madler/zlib |
 
 ---
 
@@ -247,7 +247,7 @@ formulas:
   uriparser:  { current: "1.0.3",    latest: "1.0.3",    status: updated }
   utf8:       { current: "4.2.1", latest: "4.2.1", status: current, pin: "header-only" }
   videoInput: { current: "261bfeee", latest: "master",   status: pinned-dev, pin: "ofTheo SHA" }
-  zlib:       { current: "1.3.2",    latest: "1.3.2",    status: current }
+  zlib:       { current: "1.4",    latest: "1.4",    status: current }
   fmod:       { current: "44459",    latest: "vendor",   status: vendor }
   fmodex:     { current: "44459",    latest: "vendor",   status: vendor }
   automake:   { current: "1.16.4",   latest: "1.18.1",   status: behind, pin: "host tool" }

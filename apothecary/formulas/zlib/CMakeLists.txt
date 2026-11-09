@@ -5,9 +5,9 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib C)
+project(zlib VERSION 1.4 LANGUAGES C)
 
-set(VERSION "1.3.2")
+set(VERSION "${PROJECT_VERSION}")
 
 set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
@@ -71,6 +71,9 @@ if(NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
   endif()
 endif()
 
+# zlib 1.4's CMake template uses the project version and these install paths.
+set(pc_libdir "${INSTALL_LIB_DIR}")
+set(pc_includedir "${INSTALL_INC_DIR}")
 set(ZLIB_PC ${CMAKE_CURRENT_BINARY_DIR}/zlib.pc)
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zlib.pc.cmakein ${ZLIB_PC} @ONLY)
