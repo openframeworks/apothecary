@@ -50,6 +50,37 @@ class PackageVerification(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid binary"):
             self.check_package({"binary": "../example.lib"})
 
+    def test_freetype_metadata_uses_packaged_windows_filename(self):
+        commit = "a" * 40
+        zlib_bytes = b"zlib archive fixture"
+        freetype_bytes = b"freetype archive fixture"
+        common = {
+            "cppStandard": "17",
+            "compilerVersion": "Microsoft (R) C/C++ Optimizing Compiler Version 19.29.30158 for x64",
+            "buildCommit": commit,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "package.zip"
+            with zipfile.ZipFile(archive, "w") as output:
+                output.writestr("zlib/lib/vs/x64/zlib.lib", zlib_bytes)
+                output.writestr("zlib/lib/vs/x64/zlib.pkl", "".join(
+                    f"{key} = {json.dumps(value)}\n" for key, value in {
+                        **common,
+                        "binary": "zlib.lib",
+                        "binarySha": hashlib.sha256(zlib_bytes).hexdigest(),
+                    }.items()))
+                output.writestr("freetype/lib/vs/x64/freetype.lib", freetype_bytes)
+                output.writestr("freetype/lib/vs/x64/freetype.pkl", "".join(
+                    f"{key} = {json.dumps(value)}\n" for key, value in {
+                        **common,
+                        "binary": "freetype.lib",
+                        "binarySha": hashlib.sha256(freetype_bytes).hexdigest(),
+                    }.items()))
+            result = package.verify(archive, "1", commit)
+        record = next(item for item in result["binaries"] if item["metadata"].startswith("freetype/"))
+        self.assertEqual(record["binary"], "freetype.lib")
+        self.assertEqual(record["binarySha"], hashlib.sha256(freetype_bytes).hexdigest())
+
 
 if __name__ == "__main__":
     unittest.main()
