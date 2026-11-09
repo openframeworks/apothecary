@@ -77,7 +77,7 @@ LINUX_MODULAR_FORMULAS=(
     pixman pkg-config zlib utf8 boost libpng brotli pugixml freetype libxml2 svgtiny
     FreeImage assimp glew glfw glm json libusb kiss portaudio rtAudio tess2
     uriparser cairo fmt openssl nghttp2 nghttp3 ngtcp2 libssh2 curl
-    poco dawn opencv5
+    poco dawn opencv5 liboqs oqsprovider openssh
 )
 
 if [[ "$TARGET" =~ ^(linux)$ ]]; then
@@ -271,6 +271,10 @@ if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros)$ ]]; then
 fi
 if [[ "$TARGET" =~ ^(vs|osx|macos|ios|tvos|catos|xros|linux)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("dawn")
+fi
+if [[ "$TARGET" =~ ^(osx|macos)$ ]]; then
+    # Desktop Open Quantum Safe packages; Linux builds use the Linux modular matrix.
+    FORMULAS_MODULAR_OPTIONAL+=("liboqs" "oqsprovider" "openssh")
 fi
 if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("metalangle")

@@ -12,6 +12,10 @@ Apothecary's core packages:
 The OpenSSH source is a full-commit archive pin rather than the older named
 snapshot. Every archive is verified by SHA-256 before extraction.
 
+The three formulas are included in modular packages for desktop macOS and Linux.
+Linux modular builds cover x86_64 and ARM64; the macOS modular job builds both
+x86_64 and ARM64. They are not built for mobile Apple targets or Windows.
+
 ```sh
 NO_COLOR=1 UI_ANIM=0 TYPE=osx ARCH=arm64 ./apo update oqsprovider openssh
 ```
