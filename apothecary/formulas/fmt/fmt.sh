@@ -7,14 +7,14 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 FORMULA_DEPENDS=()
 
 # define the version
-VER=12.2.0
+VER=12.2.1
 
 # tools for git use
 GIT_URL=https://github.com/fmtlib/fmt
 URL=${GIT_URL}/archive/refs/tags/${VER}
-GIT_TAG=12.2.0
-SHA256="8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0"
-SHA256_ZIP="8bc0dfbeccc1ba96dc9c0f9bf0bbc95f3c7a35308122618638c5755f389e5e72"
+GIT_TAG=$VER
+SHA256="449374d74f31b67796dece454d59b93e6f1538efcce0e9ac78000c98142c139e"
+SHA256_ZIP="d00e6eb3bb9588becf8021b496f3e39f4a3ad368486819ec05f2ee4c5777b366"
 BUILD_ID=1
 DEFINES=""
 
