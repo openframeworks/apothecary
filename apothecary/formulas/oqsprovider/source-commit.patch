@@ -1,0 +1,11 @@
+--- a/oqsprov/CMakeLists.txt
++++ b/oqsprov/CMakeLists.txt
+@@ -2,6 +2,2 @@
+-execute_process(
+-  COMMAND git log -1 --format=%h
+-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+-  OUTPUT_VARIABLE GIT_COMMIT_HASH
+-  OUTPUT_STRIP_TRAILING_WHITESPACE
+-)
++# Archive builds must not pick up the enclosing Apothecary repository commit.
++set(GIT_COMMIT_HASH "${APOTHECARY_SOURCE_COMMIT}")
