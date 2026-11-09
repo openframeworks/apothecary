@@ -7,12 +7,12 @@ FORMULA_TYPES=("linux" "osx" )
 
 FORMULA_DEPENDS=( "freetype" "libpng" "zlib" )
 
-VER=1.28.8
-SOURCE_COMMIT=1b2a95a1b72787cda146b46df9605b168e5b683b
+VER=1.28.9
+SOURCE_COMMIT=3ced45da096032bdac8e0922faa492a079c3180e
 GIT_URL=https://github.com/GStreamer/gstreamer.git
 
 DEFINES=""
-BUILD_ID=2
+BUILD_ID=1
 
 function download() {
     . "$DOWNLOADER_SCRIPT"
