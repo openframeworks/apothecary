@@ -5,7 +5,7 @@ FORMULA_TYPES=("osx" "linux")
 FORMULA_DEPENDS=()
 VER=0.16.0
 SHA256="162d5b510518ee5f285f82fa1f16402a885176e818bf1b1a4c3c91c9a2f01eae"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES=""
 URL="https://github.com/open-quantum-safe/liboqs/archive/refs/tags/${VER}.tar.gz"
 
@@ -23,6 +23,9 @@ function download() {
 function prepare() {
     if ! grep -q OQS_SNTRUP761_crypto_int16_optblocker src/kem/ntruprime/CMakeLists.txt; then
         patch -p1 < "$FORMULA_DIR/sntrup-symbol-namespace.patch" || return $?
+    fi
+    if ! grep -q OQS_keccak_1600_init_state src/common/CMakeLists.txt; then
+        patch -p1 < "$FORMULA_DIR/openssl-sha3-symbol-namespace.patch" || return $?
     fi
 }
 

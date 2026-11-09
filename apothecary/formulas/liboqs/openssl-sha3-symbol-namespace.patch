@@ -1,0 +1,32 @@
+--- a/src/common/CMakeLists.txt
++++ b/src/common/CMakeLists.txt
+@@ -105,5 +105,28 @@
+                             ${OSSL_HELPERS}
+                             common.c
+                             rand/rand_nist.c)
++
++# OpenSSL also exports these private AVX512 Keccak symbols from libcrypto.
++# Keep liboqs's copy local to its implementation when static archives are
++# linked into the same executable.
++if(TARGET sha3_avx512vl_low)
++    set(_OQS_SHA3_SYMBOL_RENAMES
++        keccak_1600_init_state=OQS_keccak_1600_init_state
++        keccak_1600_load_state_x4=OQS_keccak_1600_load_state_x4
++        keccak_1600_save_state_x4=OQS_keccak_1600_save_state_x4
++        keccak_1600_partial_add_x4=OQS_keccak_1600_partial_add_x4
++        keccak_1600_extract_bytes_x4=OQS_keccak_1600_extract_bytes_x4
++        SHA3_shake128_x4_avx512vl=OQS_SHA3_shake128_x4_avx512vl
++        SHA3_shake128_x4_inc_absorb_avx512vl=OQS_SHA3_shake128_x4_inc_absorb_avx512vl
++        SHA3_shake128_x4_inc_finalize_avx512vl=OQS_SHA3_shake128_x4_inc_finalize_avx512vl
++        SHA3_shake128_x4_inc_squeeze_avx512vl=OQS_SHA3_shake128_x4_inc_squeeze_avx512vl
++        SHA3_shake256_x4_avx512vl=OQS_SHA3_shake256_x4_avx512vl
++        SHA3_shake256_x4_inc_absorb_avx512vl=OQS_SHA3_shake256_x4_inc_absorb_avx512vl
++        SHA3_shake256_x4_inc_finalize_avx512vl=OQS_SHA3_shake256_x4_inc_finalize_avx512vl
++        SHA3_shake256_x4_inc_squeeze_avx512vl=OQS_SHA3_shake256_x4_inc_squeeze_avx512vl)
++    target_compile_definitions(sha3_avx512vl_low PRIVATE ${_OQS_SHA3_SYMBOL_RENAMES})
++    target_compile_definitions(common PRIVATE ${_OQS_SHA3_SYMBOL_RENAMES})
++    target_compile_definitions(internal PRIVATE ${_OQS_SHA3_SYMBOL_RENAMES})
++endif()
+ set_property(TARGET internal PROPERTY C_VISIBILITY_PRESET default)
+ 
+ if(${OQS_USE_OPENSSL})
