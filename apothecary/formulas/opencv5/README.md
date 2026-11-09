@@ -1,6 +1,6 @@
 # OpenCV 5 modular package
 
-`opencv5` is a separate OpenCV 5.0.0 formula cloned from `opencv`. The existing
+`opencv5` is a separate OpenCV 5.1.0 formula cloned from `opencv`. The existing
 OpenCV 4 compatibility formula remains unchanged. Sources and matching contrib
 are pinned by SHA-256; the build/cache/output name is `opencv5`.
 
