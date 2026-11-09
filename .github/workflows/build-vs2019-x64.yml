@@ -136,7 +136,7 @@ jobs:
             -G 'Visual Studio 17 2022' -A x64 -T "v142,version=${VCToolsVersion%\\},host=x64" \
             -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION"
           cmake --build build/vs2019-probe --config Release --verbose
-          ./build/vs2019-probe/Release/vs2019_cxx17.exe
+          ./build/vs2019-probe/Release/VS2019_CXX17.exe
       - name: Build core bundle with v142
         run: bash scripts/build.sh
       - name: Package VS2019 archive
@@ -154,7 +154,7 @@ jobs:
             -DCMAKE_SYSTEM_VERSION="$VS_WINDOWS_SDK_VERSION" \
             -DSDK_ROOT="$(cygpath -m "$PWD/build/vs2019-extracted")" -DBUNDLE="$BUNDLE"
           cmake --build build/vs2019-consumer --config Release --verbose
-          ./build/vs2019-consumer/Release/vs2019_cxx17.exe
+          ./build/vs2019-consumer/Release/VS2019_CXX17.exe
           python3 scripts/vs/verify-v142-package.py \
             "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" \
             --bundle "$BUNDLE" --commit "$GITHUB_SHA" \
