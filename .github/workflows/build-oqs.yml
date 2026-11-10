@@ -122,23 +122,6 @@ jobs:
             test "${#packages[@]}" -gt 0
             ls -lah "${packages[@]}"
           done
-      - name: Run OpenSSH OQS smoke tests
-        run: |
-          host=$(uname -m)
-          case "$host" in
-            arm64|aarch64) native=MAC_ARM64 ;;
-            x86_64) native=MAC ;;
-            *) echo "Unsupported host architecture: $host" >&2; exit 1 ;;
-          esac
-          bash scripts/tests/oqs/test-openssh.sh out osx "$native"
-          for platform in MAC MAC_ARM64; do
-            bin=out/openssh/bin/osx/$platform/ssh
-            test -x "$bin"
-            file "$bin"
-          done
-          if [ "$native" = MAC_ARM64 ] && arch -x86_64 /usr/bin/true >/dev/null 2>&1; then
-            arch -x86_64 bash scripts/tests/oqs/test-openssh.sh out osx MAC
-          fi
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6.1.0
@@ -148,6 +131,23 @@ jobs:
             out/liboqs
             out/oqsprovider
             out/openssh
+      - name: Run OpenSSH OQS smoke tests
+        run: |
+          host=$(uname -m)
+          case "$host" in
+            arm64|aarch64) native=MAC_ARM64; foreign=MAC; foreign_macho='x86_64' ;;
+            x86_64) native=MAC; foreign=MAC_ARM64; foreign_macho='arm64' ;;
+            *) echo "Unsupported host architecture: $host" >&2; exit 1 ;;
+          esac
+          bash scripts/tests/oqs/test-openssh.sh out osx "$native"
+          native_bin=out/openssh/bin/osx/$native/ssh
+          foreign_bin=out/openssh/bin/osx/$foreign/ssh
+          test -x "$native_bin"
+          test -x "$foreign_bin"
+          file "$native_bin"
+          file "$foreign_bin"
+          file "$foreign_bin" | grep -F "$foreign_macho"
+
       - name: Upload validation package
         uses: actions/upload-artifact@v7.0.2
         with:
