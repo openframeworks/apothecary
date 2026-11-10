@@ -43,6 +43,8 @@ jobs:
         run: bash scripts/tests/test-emscripten-setup.sh
       - name: Test Cairo SDK environment selection
         run: bash scripts/tests/test-emscripten-cairo-env.sh
+      - name: Test OpenCV libc++ 23 iterator patch
+        run: bash scripts/tests/test-opencv-stereo-iterator.sh
       - name: Plan selected formula and toolchain builds
         id: plan
         uses: actions/github-script@v9.0.0

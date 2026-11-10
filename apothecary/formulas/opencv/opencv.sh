@@ -12,7 +12,7 @@ FORMULA_DEPENDS=("zlib" "libpng" )
 # define the version
 VER=4.14.0
 SHA256="ee8fb9b30eb60850431b4656447080e3737b56e45719c92b67f245950609f86e"
-BUILD_ID=11
+BUILD_ID=12
 DEFINES=""
 FRAMEWORKS=""
 FILE_VERSION=4140
@@ -53,6 +53,11 @@ function prepare() {
     else
         echo "Failed to apply system-exception.patch"
         exit 1
+    fi
+
+    # libc++ 23 (Emscripten 7) no longer transitively provides std::back_inserter.
+    if ! grep -q '^#include <iterator>' modules/calib3d/src/stereo_geom.cpp; then
+        patch -p1 < "$FORMULA_DIR/stereo-iterator.patch" || return 1
     fi
 
     #no idea why we are building iOS stuff on Windows - but this might fix it
