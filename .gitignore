@@ -22,6 +22,7 @@
 !/.github/workflows/upstream-versions.yml
 !/.github/workflows/publish-checksums.yml
 !/.github/workflows/build-modular-optional.yml
+!/.github/workflows/build-oqs.yml
 !/apothecary/**/*
 !/scripts/**/*
 /apothecary/build

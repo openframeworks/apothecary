@@ -1,0 +1,143 @@
+name: build-oqs
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/build-oqs.yml'
+      - 'apothecary/formulas/liboqs/**'
+      - 'apothecary/formulas/oqsprovider/**'
+      - 'apothecary/formulas/openssh/**'
+      - 'scripts/tests/oqs/**'
+      - 'scripts/tests/test-package-platforms.sh'
+      - 'scripts/build-modular-optional.sh'
+      - 'scripts/package-individual.sh'
+      - 'scripts/package-platform.sh'
+      - 'scripts/calculate_formulas.sh'
+      - 'scripts/modular-cache-key.sh'
+      - 'scripts/cache-toolchain.sh'
+      - 'scripts/secure.sh'
+      - 'scripts/osx/install.sh'
+      - 'scripts/apple-install-tools.sh'
+      - 'scripts/check-apple-sdk.sh'
+  push:
+    branches: [bleeding, master]
+    paths:
+      - '.github/workflows/build-oqs.yml'
+      - 'apothecary/formulas/liboqs/**'
+      - 'apothecary/formulas/oqsprovider/**'
+      - 'apothecary/formulas/openssh/**'
+      - 'scripts/tests/oqs/**'
+      - 'scripts/tests/test-package-platforms.sh'
+      - 'scripts/build-modular-optional.sh'
+      - 'scripts/package-individual.sh'
+      - 'scripts/package-platform.sh'
+      - 'scripts/calculate_formulas.sh'
+      - 'scripts/modular-cache-key.sh'
+      - 'scripts/cache-toolchain.sh'
+      - 'scripts/secure.sh'
+      - 'scripts/osx/install.sh'
+      - 'scripts/apple-install-tools.sh'
+      - 'scripts/check-apple-sdk.sh'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+permissions:
+  contents: write
+
+env:
+  BUILD_PROFILE_ID: "1"
+  XCODE_VERSION: "27.1"
+
+jobs:
+  test:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: bash -n apothecary/formulas/liboqs/liboqs.sh
+      - run: bash -n apothecary/formulas/oqsprovider/oqsprovider.sh
+      - run: bash -n apothecary/formulas/openssh/openssh.sh
+      - run: bash -n scripts/package-individual.sh
+      - run: bash -n scripts/build-modular-optional.sh
+      - run: bash scripts/tests/test-package-platforms.sh
+
+  osx:
+    needs: test
+    name: optional ${{ matrix.library }}-osx
+    runs-on: xcode-27
+    strategy:
+      fail-fast: false
+      matrix:
+        library: [liboqs, oqsprovider, openssh]
+    env:
+      TARGET: osx
+      TYPE: osx
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
+      OPTIONAL_ARCHS: x86_64 arm64
+      PACKAGE_LIBS: ${{ matrix.library }}
+      ALWAYS_BUILD: 1
+      NO_FORCE: 1
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Verify selected Xcode and platform SDKs
+        run: bash scripts/check-apple-sdk.sh osx
+      - name: Install
+        run: |
+          ./scripts/osx/install.sh
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+      - name: Ensure Ninja is available for the cache fingerprint
+        run: command -v ninja >/dev/null || brew install ninja
+      - name: Compute exact modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
+      - name: Restore compiled modular outputs
+        id: cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/${{ matrix.library }}
+      - name: Report modular cache result
+        env:
+          CACHE_KEY: ${{ steps.key.outputs.key }}
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: |
+          printf '### Modular cache: %s / %s\n\nKey: `%s`\n\nExact hit: `%s`\n' "$TARGET" "$PACKAGE_LIBS" "$CACHE_KEY" "${CACHE_HIT:-false}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Build or reuse and package modular library
+        env:
+          MODULAR_CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: bash scripts/build-modular-optional.sh
+      - name: Verify packaged archives
+        run: |
+          shopt -s nullglob
+          packages=(out/oF_${{ matrix.library }}_osx_*.tar.bz2)
+          test "${#packages[@]}" -gt 0
+          ls -lah "${packages[@]}"
+      - name: Run OpenSSH OQS smoke tests
+        if: matrix.library == 'openssh'
+        run: |
+          bash scripts/tests/oqs/test-openssh.sh out osx MAC_ARM64
+          bash scripts/tests/oqs/test-openssh.sh out osx MAC
+      - name: Save compiled modular outputs
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6.1.0
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/${{ matrix.library }}
+      - name: Upload validation package
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: oqs-${{ matrix.library }}-osx
+          path: out/oF_${{ matrix.library }}_osx_*.tar.bz2
+          if-no-files-found: error
+      - name: Upload Open Quantum Safe package to latest-modular
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: true
+          files: out/oF_${{ matrix.library }}_osx_*.tar.bz2
