@@ -64,6 +64,7 @@ jobs:
       - run: bash -n scripts/package-individual.sh
       - run: bash -n scripts/build-modular-optional.sh
       - run: bash scripts/tests/test-package-platforms.sh
+      - run: ruby scripts/tests/test-workflow-scheduling.rb
 
   osx:
     needs: test
