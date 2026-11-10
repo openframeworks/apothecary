@@ -11,25 +11,25 @@ cp "$ROOT/scripts/sdk-versions.json" "$fixture/scripts/sdk-versions.json"
 ROOT=$fixture
 entry=$(jq -c '.[0]' "$ROOT/scripts/sdk-versions.json")
 pin_file="$ROOT/.github/workflows/build-emscripten.yml"
-printf 'env:\n  EMSDK_VERSION: "6.0.13"\n' > "$pin_file"
+printf 'env:\n  EMSDK_VERSION: "7.0.0"\n' > "$pin_file"
 pin=$(sdk_current "$entry")
-jq -en --argjson pin "$pin" '$pin == {pin:"6.0.13",version:[6,0,13,0]}' >/dev/null
-for value in '"6.0.13-rc1"' 'latest' '\$(touch should-not-execute)' ''; do
+jq -en --argjson pin "$pin" '$pin == {pin:"7.0.0",version:[7,0,0,0]}' >/dev/null
+for value in '"7.0.0-rc1"' 'latest' '\$(touch should-not-execute)' ''; do
     printf 'env:\n  EMSDK_VERSION: %s\n' "$value" > "$pin_file"
     if sdk_current "$entry" >/dev/null 2>&1; then echo "Invalid SDK pin accepted: $value" >&2; exit 1; fi
 done
 test ! -e should-not-execute
-printf 'env:\n  EMSDK_VERSION: "6.0.13"\n  EMSDK_VERSION: "6.0.12"\n' > "$pin_file"
+printf 'env:\n  EMSDK_VERSION: "7.0.0"\n  EMSDK_VERSION: "6.0.13"\n' > "$pin_file"
 if sdk_current "$entry" >/dev/null 2>&1; then echo 'Ambiguous SDK pin accepted' >&2; exit 1; fi
-printf 'env:\n  EMSDK_VERSION: "6.0.11"\n' > "$pin_file"
+printf 'env:\n  EMSDK_VERSION: "6.0.13"\n' > "$pin_file"
 (
-    api() { echo '[{"tag_name":"6.0.13","html_url":"https://example.test/6.0.13"},{"tag_name":"6.0.14-rc1","prerelease":true}]'; }
+    api() { echo '[{"tag_name":"7.0.0","html_url":"https://example.test/7.0.0"},{"tag_name":"7.0.1-rc1","prerelease":true}]'; }
     GITHUB_STEP_SUMMARY="$fixture/summary" sdk_main
 ) > "$fixture/report"
-grep -Fq '| Emscripten | 6.0.11 | [6.0.13](https://example.test/6.0.13) | Update available |' "$fixture/report"
+grep -Fq '| Emscripten | 6.0.13 | [7.0.0](https://example.test/7.0.0) | Update available |' "$fixture/report"
 grep -Fq '1 successful checks; 0 failed; 1 updates available.' "$fixture/report"
 cmp "$fixture/report" "$fixture/summary"
-printf 'env:\n  EMSDK_VERSION: "6.0.13"\n' > "$pin_file"
+printf 'env:\n  EMSDK_VERSION: "7.0.0"\n' > "$pin_file"
 # A healthy SDK check still creates its own report; the vendor-library issue
 # returned by the API must never be selected for editing.
 (
@@ -39,7 +39,7 @@ printf 'env:\n  EMSDK_VERSION: "6.0.13"\n' > "$pin_file"
             echo '{}'; return
         fi
         case $1 in
-            repos/emscripten-core/emscripten/releases*) echo '[{"tag_name":"6.0.13","html_url":"https://example.test/6.0.13"}]' ;;
+            repos/emscripten-core/emscripten/releases*) echo '[{"tag_name":"7.0.0","html_url":"https://example.test/7.0.0"}]' ;;
             repos/owner/project/issues*) echo '[{"number":612,"body":"<!-- apothecary-upstream-versions -->"}]' ;;
             *) echo "Unexpected mock API path: $1" >&2; return 1 ;;
         esac
@@ -69,7 +69,7 @@ grep -Fq 'HTTP 503 from SDK upstream' "$fixture/failed"
 grep -Fq 'No successful checks' "$fixture/failed"
 grep -Fq '0 successful checks; 1 failed' "$fixture/failed"
 if (
-    candidates() { echo '[{"tag":"6.0.13","url":"https://example.test/sdk"}]'; }
+    candidates() { echo '[{"tag":"7.0.0","url":"https://example.test/sdk"}]'; }
     sdk_toolchains() { echo '{"markdown":"Toolchain fixture failed visibly","checks":2,"errors":1,"updates":1}'; }
     sdk_main
 ) > "$fixture/toolchain-failed"; then echo 'Failed toolchain lookup returned success' >&2; exit 1; fi
