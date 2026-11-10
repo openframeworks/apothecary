@@ -48,8 +48,7 @@ permissions:
   contents: write
 
 env:
-  BUILD_PROFILE_ID: "1"
-  XCODE_VERSION: "27.1"
+  BUILD_PROFILE_ID: "2"
 
 jobs:
   test:
@@ -68,24 +67,17 @@ jobs:
 
   osx:
     needs: test
-    name: optional ${{ matrix.library }}-osx
-    runs-on: xcode-27
-    strategy:
-      fail-fast: false
-      matrix:
-        library: [liboqs, oqsprovider, openssh]
+    name: optional oqs-osx
+    runs-on: macos-15
     env:
       TARGET: osx
       TYPE: osx
-      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
       OPTIONAL_ARCHS: x86_64 arm64
-      PACKAGE_LIBS: ${{ matrix.library }}
+      PACKAGE_LIBS: liboqs oqsprovider openssh
       ALWAYS_BUILD: 1
       NO_FORCE: 1
     steps:
       - uses: actions/checkout@v7.0.1
-      - name: Verify selected Xcode and platform SDKs
-        run: bash scripts/check-apple-sdk.sh osx
       - name: Install
         run: |
           ./scripts/osx/install.sh
@@ -94,45 +86,76 @@ jobs:
         run: command -v ninja >/dev/null || brew install ninja
       - name: Compute exact modular cache key
         id: key
-        run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
+        run: |
+          digest=$(
+            {
+              bash scripts/modular-cache-key.sh liboqs
+              bash scripts/modular-cache-key.sh oqsprovider
+              bash scripts/modular-cache-key.sh openssh
+            } | shasum -a 256 | awk '{print $1}'
+          )
+          printf 'key=modular-v1-osx-oqs-%s\n' "$digest" >> "$GITHUB_OUTPUT"
       - name: Restore compiled modular outputs
         id: cache
         uses: actions/cache/restore@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
-          path: out/${{ matrix.library }}
+          path: |
+            out/liboqs
+            out/oqsprovider
+            out/openssh
       - name: Report modular cache result
         env:
           CACHE_KEY: ${{ steps.key.outputs.key }}
           CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
         run: |
           printf '### Modular cache: %s / %s\n\nKey: `%s`\n\nExact hit: `%s`\n' "$TARGET" "$PACKAGE_LIBS" "$CACHE_KEY" "${CACHE_HIT:-false}" >> "$GITHUB_STEP_SUMMARY"
-      - name: Build or reuse and package modular library
+      - name: Build or reuse and package modular libraries
         env:
           MODULAR_CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
         run: bash scripts/build-modular-optional.sh
       - name: Verify packaged archives
         run: |
           shopt -s nullglob
-          packages=(out/oF_${{ matrix.library }}_osx_*.tar.bz2)
-          test "${#packages[@]}" -gt 0
-          ls -lah "${packages[@]}"
+          for library in liboqs oqsprovider openssh; do
+            packages=(out/oF_${library}_osx_*.tar.bz2)
+            test "${#packages[@]}" -gt 0
+            ls -lah "${packages[@]}"
+          done
       - name: Run OpenSSH OQS smoke tests
-        if: matrix.library == 'openssh'
         run: |
-          bash scripts/tests/oqs/test-openssh.sh out osx MAC_ARM64
-          bash scripts/tests/oqs/test-openssh.sh out osx MAC
+          host=$(uname -m)
+          case "$host" in
+            arm64|aarch64) native=MAC_ARM64 ;;
+            x86_64) native=MAC ;;
+            *) echo "Unsupported host architecture: $host" >&2; exit 1 ;;
+          esac
+          bash scripts/tests/oqs/test-openssh.sh out osx "$native"
+          for platform in MAC MAC_ARM64; do
+            bin=out/openssh/bin/osx/$platform/ssh
+            test -x "$bin"
+            file "$bin"
+          done
+          if [ "$native" = MAC_ARM64 ] && arch -x86_64 /usr/bin/true >/dev/null 2>&1; then
+            arch -x86_64 bash scripts/tests/oqs/test-openssh.sh out osx MAC
+          fi
       - name: Save compiled modular outputs
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6.1.0
         with:
           key: ${{ steps.key.outputs.key }}
-          path: out/${{ matrix.library }}
+          path: |
+            out/liboqs
+            out/oqsprovider
+            out/openssh
       - name: Upload validation package
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: oqs-${{ matrix.library }}-osx
-          path: out/oF_${{ matrix.library }}_osx_*.tar.bz2
+          name: oqs-osx
+          path: |
+            out/oF_liboqs_osx_*.tar.bz2
+            out/oF_oqsprovider_osx_*.tar.bz2
+            out/oF_openssh_osx_*.tar.bz2
           if-no-files-found: error
       - name: Upload Open Quantum Safe package to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
@@ -141,4 +164,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
           fail_on_unmatched_files: true
-          files: out/oF_${{ matrix.library }}_osx_*.tar.bz2
+          files: |
+            out/oF_liboqs_osx_*.tar.bz2
+            out/oF_oqsprovider_osx_*.tar.bz2
+            out/oF_openssh_osx_*.tar.bz2
