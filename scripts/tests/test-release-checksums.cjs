@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
-const {sync, hashAsset} = require('../release-checksums.cjs');
+const {sync, hashAsset, sidecarDigest} = require('../release-checksums.cjs');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const context = {repo:{owner:'openframeworks',repo:'apothecary'},sha:'a'.repeat(40),runId:123};
 const core = {info(){},warning(){}};
@@ -60,6 +60,18 @@ const text=(f,name)=>f.blobs.get(f.releases.get('sha256').assets.find(a=>a.name=
     mismatch.sidecar.size=mismatch.blobs.get(mismatch.sidecar.id).length;mismatch.sidecar.digest='sha256:'+hash(mismatch.blobs.get(mismatch.sidecar.id));
     await assert.rejects(run(mismatch),/Existing checksum differs/);
     assert.deepEqual(mismatch.events,[],'inconsistent sidecars cannot be silently discarded');
+
+    assert.equal(sidecarDigest(`${hash('current')} *out/${f.current.name}\n`, f.current.name), hash('current'));
+    assert.equal(sidecarDigest(`${hash('legacy')} *out/openFrameworksLibs_latest_vs_2019_64_1.zip\r\n`, f.legacy.name), hash('legacy'));
+    assert.equal(sidecarDigest(`SHA256 (${f.current.name}) = ${hash('current')}`, f.current.name), hash('current'));
+    assert.equal(sidecarDigest(hash('current'), f.current.name), hash('current'));
+    assert.throws(() => sidecarDigest(`${hash('current')}  other.zip\n`, f.current.name), /Existing checksum names/);
+    assert.throws(() => sidecarDigest('not-a-checksum\n', f.current.name), /Invalid checksum sidecar/);
+
+    const gnuPath=fixture();
+    const vsSidecar=gnuPath.add(gnuPath.latest, gnuPath.legacy.name+'.sha256', `${hash('legacy')} *out/${gnuPath.legacy.name}\n`);
+    await run(gnuPath);
+    assert(!gnuPath.latest.assets.some(a=>a.id===vsSidecar.id),'GNU binary sidecars with packaging paths relocate when the hash matches');
 
     const failed=fixture();
     failed.github.rest.repos.uploadReleaseAsset=async()=>{throw Error('upload failed');};

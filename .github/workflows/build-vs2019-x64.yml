@@ -160,7 +160,8 @@ jobs:
             "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" \
             --bundle "$BUNDLE" --commit "$GITHUB_SHA" \
             --manifest "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.manifest.json"
-          sha256sum "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" > "out/openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip.sha256"
+          # Hash from out/ so the sidecar names the archive, not out/archive.
+          ( cd out && sha256sum "openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip" > "openFrameworksLibs_${RELEASE}_vs_2019_64_${BUNDLE}.zip.sha256" )
           bash scripts/release-toolchain.sh > "out/vs2019-v142-toolchain-${BUNDLE}.txt"
           { printf 'VS_TOOLSET=%s\nVCToolsVersion=%s\nCPP_STANDARD=%s\n' "$VS_TOOLSET" "$VCToolsVersion" "$CPP_STANDARD"; cl 2>&1 || true; } >> "out/vs2019-v142-toolchain-${BUNDLE}.txt"
       - name: Upload VS2019 archive
@@ -230,7 +231,7 @@ jobs:
           for bundle in 1 2; do
             archive=$(find out -maxdepth 1 -name "openFrameworksLibs_*_vs_2019_64_${bundle}.zip")
             test -n "$archive"
-            sha256sum --check "$archive.sha256"
+            ( cd "$(dirname "$archive")" && sha256sum --check "$(basename "$archive").sha256" )
             python3 scripts/vs/verify-v142-package.py "$archive" --bundle "$bundle" --commit "$GITHUB_SHA"
             7z x "$archive" -oconsumer/openFrameworks/libs -y
           done
@@ -325,7 +326,7 @@ jobs:
           test -s out/vs2019-core-build.json
           for bundle in 1 2; do
             archive="out/openFrameworksLibs_${release}_vs_2019_64_${bundle}.zip"
-            sha256sum --check "$archive.sha256"
+            ( cd out && sha256sum --check "$(basename "$archive").sha256" )
             python3 scripts/vs/verify-v142-package.py "$archive" --bundle "$bundle" --commit "$GITHUB_SHA"
             test -s "out/vs2019-v142-toolchain-${bundle}.txt"
             unzip -qo "$archive" -d out
