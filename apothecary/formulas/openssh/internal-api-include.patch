@@ -1,0 +1,6 @@
+--- a/ssh-oqs.c
++++ b/ssh-oqs.c
+@@ -30,0 +31 @@
++#define SSHKEY_INTERNAL
+@@ -34 +34,0 @@
+-#define SSHKEY_INTERNAL

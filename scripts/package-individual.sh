@@ -33,6 +33,7 @@ OPT="${OPT:+_$OPT}"
 if [ -z "${OUTPUT_FOLDER+x}" ]; then
     export OUTPUT_FOLDER="$ROOT/out"
 fi
+REQUESTED_OUTPUT_FOLDER="$OUTPUT_FOLDER"
 if [[ "$TARGET" =~ ^(osx|ios|tvos|xros|catos|watchos)$ ]]; then
     export OUTPUT_FOLDER="$ROOT/xout"
 fi
@@ -88,9 +89,26 @@ else
     fi
 fi
 
-cd $OUTPUT_FOLDER
+# Apple XCFramework packages live in xout/. Ordinary archives such as OQS stay
+# in the requested out/ folder when they were never staged as XCFrameworks.
+package_source_dir() {
+    local library="$1"
+    if [ -d "$OUTPUT_FOLDER/$library" ]; then
+        printf '%s\n' "$OUTPUT_FOLDER"
+        return 0
+    fi
+    if [ -d "$REQUESTED_OUTPUT_FOLDER/$library" ]; then
+        printf '%s\n' "$REQUESTED_OUTPUT_FOLDER"
+        return 0
+    fi
+    if [ -d "$ROOT/out/$library" ]; then
+        printf '%s\n' "$ROOT/out"
+        return 0
+    fi
+    return 1
+}
 
-echo "Compressing individual libraries from [$OUTPUT_FOLDER]... FORMULAS:[$FORMULAS]"
+echo "Compressing individual libraries from [$OUTPUT_FOLDER] (fallback [$REQUESTED_OUTPUT_FOLDER])... FORMULAS:[$FORMULAS]"
 
 package_failed=0
 for LIB in "${FORMULAS[@]}"; do
@@ -108,21 +126,24 @@ for LIB in "${FORMULAS[@]}"; do
         echo "Skipping internal formula '$LIB' (merged into curl)"
         continue
     fi
-    if [ -d "$LIB" ]; then
+    src=$(package_source_dir "$LIB") || src=""
+    if [ -n "$src" ] && [ -d "$src/$LIB" ]; then
         if [[ "$TARGET" == "msys2" || "$TARGET" == "vs" ]]; then
             # ZIP format for Windows (msys2 / vs)
             TARBALL="oF_${LIB}_${TARGET}_${ARCH}${OPT}.zip"
-            echo "Packaging $LIB -> $TARBALL"
-            if [[ "$TARGET" == "msys2" ]]; then
+            echo "Packaging $LIB -> $src/$TARBALL"
+            (
+                cd "$src" || exit 1
                 "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$LIB"
-            else
-                "C:\Program Files\7-Zip\7z.exe" a "$TARBALL" "$LIB"
-            fi
+            )
         else
             # TAR format for Linux/macOS/Emscripten
             TARBALL="oF_${LIB}_${TARGET}_${ARCH}${GCC}${OPT}.tar.bz2"
-            echo "Packaging $LIB -> $TARBALL"
-            tar cjvf "$TARBALL" "$LIB"
+            echo "Packaging $LIB -> $src/$TARBALL"
+            (
+                cd "$src" || exit 1
+                tar cjvf "$TARBALL" "$LIB"
+            )
         fi
 
         if [ $? -eq 0 ]; then
@@ -132,15 +153,18 @@ for LIB in "${FORMULAS[@]}"; do
             package_failed=1
         fi
     else
-        echo "Error: Cannot package $LIB as it does not exist in $OUTPUT_FOLDER"
+        echo "Error: Cannot package $LIB as it does not exist in $OUTPUT_FOLDER or $REQUESTED_OUTPUT_FOLDER"
         package_failed=1
     fi
 done
 
 echo "All libraries have been packaged."
 echo "Listing all created packages:"
-find . -type f -name "*.tar.bz2"
-
-cd ../
+{
+    for dir in "$OUTPUT_FOLDER" "$REQUESTED_OUTPUT_FOLDER" "$ROOT/out"; do
+        [ -d "$dir" ] || continue
+        find "$dir" -type f \( -name "*.tar.bz2" -o -name "*.zip" \)
+    done
+} | sort -u || true
 
 exit "$package_failed"

@@ -1,0 +1,13 @@
+include(CMakeFindDependencyMacro)
+# A static provider must use the OpenSSL version it was compiled against.
+find_dependency(OpenSSL @OPENSSL_VERSION@ EXACT)
+find_dependency(liboqs CONFIG)
+if(NOT TARGET apothecary::oqsprovider)
+    get_filename_component(_oqs_prefix "${CMAKE_CURRENT_LIST_DIR}/../../../.." ABSOLUTE)
+    add_library(apothecary::oqsprovider STATIC IMPORTED)
+    set_target_properties(apothecary::oqsprovider PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/../liboqsprovider.a"
+        INTERFACE_INCLUDE_DIRECTORIES "${_oqs_prefix}/include"
+        INTERFACE_LINK_LIBRARIES "OQS::oqs;OpenSSL::Crypto")
+    unset(_oqs_prefix)
+endif()

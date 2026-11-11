@@ -47,7 +47,7 @@ echo "Archs: [${ARCHS[*]}]"
 if [[ "${MODULAR_CACHE_HIT:-false}" == true ]]; then
     for lib in "${OPTIONAL[@]}"; do
         [[ -d "$OUTPUT_FOLDER/$lib" ]] || { echo "Cached output missing: $lib" >&2; exit 1; }
-        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
+        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]] && [[ ! "$lib" =~ ^(liboqs|oqsprovider|openssh)$ ]]; then
             [[ -d "$ROOT/xout/$lib" ]] || { echo "Cached XCFramework staging missing: $lib" >&2; exit 1; }
         fi
     done
@@ -59,7 +59,7 @@ else
             TYPE="$TYPE" ARCH="$arch" OUTPUT_FOLDER="$OUTPUT_FOLDER" \
                 "$ROOT/apo" update "$lib"
         done
-        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]]; then
+        if [[ "$TYPE" =~ ^(osx|macos|ios|tvos|xros|catos|watchos)$ ]] && [[ ! "$lib" =~ ^(liboqs|oqsprovider|openssh)$ ]]; then
             echo "==== apo modular $lib ===="
             if [ "$lib" = angle ]; then
                 TYPE="$TYPE" OUTPUT_FOLDER="$OUTPUT_FOLDER" \

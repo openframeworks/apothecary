@@ -1,0 +1,8 @@
+--- a/src/kem/ntruprime/CMakeLists.txt
++++ b/src/kem/ntruprime/CMakeLists.txt
+@@ -10,0 +11,5 @@
++    # Keep the bundled implementation's optimization blockers private to liboqs.
++    target_compile_definitions(ntruprime_sntrup761_openssh PRIVATE
++        crypto_int16_optblocker=OQS_SNTRUP761_crypto_int16_optblocker
++        crypto_int32_optblocker=OQS_SNTRUP761_crypto_int32_optblocker
++        crypto_int64_optblocker=OQS_SNTRUP761_crypto_int64_optblocker)

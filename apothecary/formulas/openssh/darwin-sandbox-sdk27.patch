@@ -1,0 +1,15 @@
+# Backport of openssh/openssh-portable d4b4c304a202f5099f2f60be9af9ba266212bb74
+--- a/configure.ac
++++ b/configure.ac
+@@ -861,0 +862 @@
++	AC_CHECK_DECLS(kSBXProfilePureComputation, [], [], [#include <sandbox.h>])
+@@ -3968 +3969,2 @@
+-       test "x$ac_cv_header_sandbox_h" = "xyes") ; then
++       test "x$ac_cv_header_sandbox_h" = "xyes" && \
++       test "x$ac_cv_have_decl_kSBXProfilePureComputation" = "xyes") ; then
+@@ -3970,2 +3972,3 @@
+-	     "x$ac_cv_header_sandbox_h" != "xyes" && \
+-		AC_MSG_ERROR([Darwin seatbelt sandbox requires sandbox.h and sandbox_init function])
++	     "x$ac_cv_header_sandbox_h" != "xyes" -o \
++	     "x$ac_cv_have_decl_kSBXProfilePureComputation" != "xyes" && \
++		AC_MSG_ERROR([Darwin seatbelt sandbox requires sandbox.h, sandbox_init() and kSBXProfilePureComputation])

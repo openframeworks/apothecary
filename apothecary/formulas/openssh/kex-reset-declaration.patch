@@ -1,0 +1,4 @@
+--- a/kex.h
++++ b/kex.h
+@@ -300,0 +301 @@
++void	 kex_reset_keys(struct kex *);

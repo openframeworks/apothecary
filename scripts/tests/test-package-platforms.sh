@@ -12,6 +12,11 @@ for library in zlib assimp FreeImage json glm utf8 cairo opencv; do
 done
 formula_has_package_for_target videoInput vs "$ROOT/apothecary"
 formula_has_package_for_target glfw osx "$ROOT/apothecary"
+formula_has_package_for_target liboqs osx "$ROOT/apothecary"
+formula_has_package_for_target liboqs linux "$ROOT/apothecary"
+if formula_has_package_for_target liboqs vs "$ROOT/apothecary"; then
+    echo "Unexpected VS package: liboqs" >&2; exit 1
+fi
 TEMP=$(mktemp -d)
 trap 'rm -rf "$TEMP"' EXIT
 mkdir -p "$TEMP/out/zlib" "$TEMP/out/json/include" "$TEMP/bin"
@@ -25,6 +30,14 @@ test -s "$TEMP/out/oF_json_emscripten_32.tar.bz2"
 FORMULAS_OVERRIDE='pkg-config glew zlib' bash "$ROOT/scripts/package-individual.sh" > "$TEMP/implicit.log"
 if PACKAGE_LIBS=missing-library bash "$ROOT/scripts/package-individual.sh" > "$TEMP/missing.log" 2>&1; then
     echo 'Missing real library must still fail' >&2; exit 1
+fi
+mkdir -p "$TEMP/out/oqs-fixture"
+printf fixture > "$TEMP/out/oqs-fixture/lib.a"
+TARGET=osx ARCH=64 ALWAYS_BUILD=1 OUTPUT_FOLDER="$TEMP/out" \
+    PACKAGE_LIBS=oqs-fixture bash "$ROOT/scripts/package-individual.sh" > "$TEMP/osx-out.log"
+test -s "$TEMP/out/oF_oqs-fixture_osx_64.tar.bz2"
+if [ -d "$ROOT/xout/oqs-fixture" ]; then
+    echo 'OQS-style osx packages must stay in out/, not xout/' >&2; exit 1
 fi
 # Model the Windows archiver on a case-sensitive filesystem. Publication and
 # metadata recording must see exactly the same lowercase filename.
