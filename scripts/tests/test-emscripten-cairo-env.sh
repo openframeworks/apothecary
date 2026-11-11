@@ -12,14 +12,21 @@ cat > "$fixture/sdk/upstream/emscripten/emcc" <<'EOF'
 set -eu
 output=
 found_platform=0
+found_memory64=0
 while [ "$#" -gt 0 ]; do
     case "$1" in
         -o) output=$2; shift ;;
+        -m64) found_memory64=1 ;;
         *.a) case "$1" in */"$EXPECTED_PLATFORM"/*) found_platform=1 ;; *) exit 1 ;; esac ;;
     esac
     shift
 done
 test "$found_platform" = 1
+if [ "$EXPECTED_PLATFORM" = WASM64 ]; then
+    test "$found_memory64" = 1
+else
+    test "$found_memory64" = 0
+fi
 printf 'SDK compiler selected\n' > "$output"
 EOF
 cat > "$fixture/sdk/sdk-node" <<'EOF'

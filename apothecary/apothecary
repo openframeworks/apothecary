@@ -914,7 +914,8 @@ if [ "$TYPE" = "emscripten" ]; then
   export PLATFORM_FLAG=""
   if [ $ARCH == 64 ] ; then
     export PLATFORM="WASM64"
-    export PLATFORM_FLAG="-DMEMORY64 -matomics -mbulk-memory"
+    # A preprocessor define does not select the wasm64 target.
+    export PLATFORM_FLAG="-m64 -matomics -mbulk-memory"
     echo "Emscripten: ARCH:${ARCH}"
   else
     export PLATFORM="WASM"
