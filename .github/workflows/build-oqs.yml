@@ -20,6 +20,7 @@ on:
       - 'scripts/osx/install.sh'
       - 'scripts/apple-install-tools.sh'
       - 'scripts/check-apple-sdk.sh'
+      - 'scripts/test-openframeworks-libraries.sh'
   push:
     branches: [bleeding, master]
     paths:
@@ -39,6 +40,7 @@ on:
       - 'scripts/osx/install.sh'
       - 'scripts/apple-install-tools.sh'
       - 'scripts/check-apple-sdk.sh'
+      - 'scripts/test-openframeworks-libraries.sh'
 
 concurrency:
   group: ${{ github.workflow }}-${{ startsWith(github.ref, 'refs/tags/') && github.run_id || github.event.pull_request.number || github.ref }}
@@ -64,6 +66,9 @@ jobs:
       - run: bash -n scripts/build-modular-optional.sh
       - run: bash scripts/tests/test-package-platforms.sh
       - run: ruby scripts/tests/test-workflow-scheduling.rb
+      - run: bash -n scripts/tests/oqs/generate-ofx-addon.sh
+      - run: bash -n scripts/tests/oqs/test-ofx-addon.sh
+      - run: bash -n scripts/tests/oqs/install-ofx-addon.sh
 
   osx:
     needs: test
@@ -148,6 +153,11 @@ jobs:
           file "$foreign_bin"
           file "$foreign_bin" | grep -F "$foreign_macho"
 
+      - name: Generate private ofxOQS addon from packages
+        run: bash scripts/tests/oqs/generate-ofx-addon.sh out out/ofxOQS osx
+      - name: Test ofxOQS addon layout and native smoke tests
+        run: bash scripts/tests/oqs/test-ofx-addon.sh out/ofxOQS
+
       - name: Upload validation package
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -156,6 +166,12 @@ jobs:
             out/oF_liboqs_osx_*.tar.bz2
             out/oF_oqsprovider_osx_*.tar.bz2
             out/oF_openssh_osx_*.tar.bz2
+          if-no-files-found: error
+      - name: Upload private ofxOQS addon
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: ofxOQS-osx
+          path: out/ofxOQS
           if-no-files-found: error
       - name: Upload Open Quantum Safe package to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
@@ -168,3 +184,29 @@ jobs:
             out/oF_liboqs_osx_*.tar.bz2
             out/oF_oqsprovider_osx_*.tar.bz2
             out/oF_openssh_osx_*.tar.bz2
+
+  of-addon:
+    needs: osx
+    name: ofxOQS openFrameworks example
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          path: apothecary
+      - uses: actions/checkout@v7.0.1
+        with:
+          repository: openframeworks/openFrameworks
+          ref: master
+          submodules: recursive
+          path: openFrameworks
+      - name: Download private ofxOQS addon
+        uses: actions/download-artifact@v8
+        with:
+          name: ofxOQS-osx
+          path: openFrameworks/addons/ofxOQS
+      - name: Install openFrameworks osx libraries
+        working-directory: openFrameworks
+        run: scripts/osx/download_libs.sh -b
+      - name: Build ofxOQS example
+        working-directory: openFrameworks/addons/ofxOQS/example
+        run: make -j4

@@ -53,6 +53,7 @@ install_modular() {
             libusb|libfreenect) destination="$OF_ROOT/addons/ofxKinect/libs" ;;
             libxml2|svgtiny) destination="$OF_ROOT/addons/ofxSvg/libs" ;;
             oscpack) destination="$OF_ROOT/addons/ofxOsc/libs" ;;
+            liboqs|oqsprovider|openssh) destination="$OF_ROOT/addons/ofxOQS/libs" ;;
             *) destination="$OF_ROOT/libs" ;;
         esac
         mkdir -p "$destination"
