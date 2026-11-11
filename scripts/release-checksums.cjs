@@ -4,6 +4,31 @@ const channels = ['latest', 'latest-modular'];
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const validHash = value => /^[a-f0-9]{64}$/.test(value || '');
 const archiveName = name => /^(?:openFrameworksLibs_|oF_)[A-Za-z0-9_.+-]*\.(?:zip|tar\.bz2|tar\.gz|tar\.xz|tgz|7z)$/.test(name);
+const basename = value => String(value || '').replace(/\\/g, '/').split('/').pop();
+
+// Accept GNU text (`HASH  name`), GNU binary (`HASH *path/name`), a bare
+// hash, and BSD `SHA256 (name) = HASH`. Packaging often records the path
+// used on the builder, including `out/` from MSYS2 sha256sum.
+function sidecarDigest(text, name) {
+    const line = String(text).replace(/^\uFEFF/, '').trim().split(/\r?\n/).find(Boolean);
+    if (!line) throw Error(`Invalid checksum sidecar: ${name}.sha256`);
+    const gnu = line.match(/^([a-fA-F0-9]{64}) (?:\*| )(.+)$/);
+    const bsd = !gnu && line.match(/^SHA256 \((.+)\) = ([a-fA-F0-9]{64})$/);
+    let digest, listed = name;
+    if (gnu) {
+        digest = gnu[1].toLowerCase();
+        listed = basename(gnu[2]);
+    } else if (bsd) {
+        digest = bsd[2].toLowerCase();
+        listed = basename(bsd[1]);
+    } else if (/^[a-fA-F0-9]{64}$/.test(line)) {
+        digest = line.toLowerCase();
+    } else {
+        throw Error(`Invalid checksum sidecar: ${name}.sha256`);
+    }
+    if (!listed || listed !== name) throw Error(`Existing checksum names ${listed}: ${name}.sha256`);
+    return digest;
+}
 
 async function release(github, repo, tag) {
     try { return (await github.rest.repos.getReleaseByTag({...repo, tag})).data; }
@@ -111,13 +136,14 @@ async function sync({github, context, core, dryRun = false, digestAsset = hashAs
         const sums = Buffer.from(records.map(item => `${item.sha256}  ${item.source.name}\n`).join(''));
         const index = Buffer.from(JSON.stringify({schema:1, channel:tag, releaseId:source.id, assets:records}, null, 2) + '\n');
         const sidecars = sourceAssets.filter(asset => asset.name.endsWith('.sha256') && archiveName(asset.name.slice(0,-7)));
-        // Check the old sidecars before removing them; a disagreement is a
-        // publication error, never a reason to discard integrity metadata.
+        // Check the old sidecars before removing them; a hash disagreement is
+        // a publication error, never a reason to discard integrity metadata.
+        // Compare the digest, not the GNU line layout.
         for (const asset of sidecars) {
             const name = asset.name.slice(0,-7), record = records.find(item => item.source.name === name);
             if (!record) throw Error(`Orphan checksum: ${asset.name}`);
             const text = (await readAsset(github, repo, asset)).toString('utf8');
-            if (text.trim() !== `${record.sha256}  ${name}`) throw Error(`Existing checksum differs: ${asset.name}`);
+            if (sidecarDigest(text, name) !== record.sha256) throw Error(`Existing checksum differs: ${asset.name}`);
         }
         if (snapshot(await assets(github, repo, source)) !== snapshot(sourceAssets)) throw Error(`${tag} moved while checksums were calculated; retry`);
         core.info(`${dryRun ? 'Preview' : 'Publish'} ${sumsName}: ${records.length} archives; relocate ${sidecars.length} sidecars`);
@@ -133,4 +159,4 @@ async function sync({github, context, core, dryRun = false, digestAsset = hashAs
     }
     return results;
 }
-module.exports = {sync, archiveName, snapshot, hashAsset};
+module.exports = {sync, archiveName, snapshot, hashAsset, sidecarDigest};
