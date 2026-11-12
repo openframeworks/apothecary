@@ -9,8 +9,10 @@ EMSDK=${EMSDK:-${EMSDK_PATH:-}}
 source "$EMSDK/emsdk_env.sh"
 : "${EMSDK_NODE:?The selected SDK did not configure its Node runtime}"
 LIBS_ROOT=${OUTPUT_FOLDER:-"$ROOT/out"}
+TARGET_FLAGS=()
 if [ "${ARCH:-32}" == "64" ]; then
     platform=WASM64
+    TARGET_FLAGS=(-m64)
 else
     platform=WASM
 fi
@@ -28,6 +30,6 @@ trap 'rm -rf "$test_dir"' EXIT
     "$LIBS_ROOT/zlib/lib/emscripten/$platform/zlib.a" \
     "$LIBS_ROOT/brotli/lib/emscripten/$platform/libbrotlidec.a" \
     "$LIBS_ROOT/brotli/lib/emscripten/$platform/libbrotlicommon.a" \
-    -pthread -matomics -mbulk-memory -sENVIRONMENT=node \
+    "${TARGET_FLAGS[@]}" -pthread -matomics -mbulk-memory -sENVIRONMENT=node \
     -o "$test_dir/cairo-smoke.js"
 "$EMSDK_NODE" "$test_dir/cairo-smoke.js"

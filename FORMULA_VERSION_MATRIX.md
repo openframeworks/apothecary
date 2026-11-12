@@ -111,7 +111,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Tool | What CI declares | What actually runs | Why / watch |
 |------|------------------|--------------------|-------------|
-| **Emscripten** | `6.0.8` (`build-emscripten.yml`) | 6.0.8 | Current pin (#591). |
+| **Emscripten** | `7.0.0` (`build-emscripten.yml`) | 7.0.0 | Current pin. |
 | **Linux GCC** | gcc-10 | gcc-10 on Linux/RPi jobs | Keep until Dawn/C++20 libstdc++ is accepted. |
 | **VS** | VS2022 (17) + VS2026 (18) | both | Dual matrix. |
 | **Android SDK** | matrix `36.0.0` | Runner has 34–37; **Studio is not installed** | cmdline-tools 12.0 on ubuntu-24.04. |
@@ -254,7 +254,7 @@ formulas:
   automake:   { current: "1.16.4",   latest: "1.18.1",   status: behind, pin: "host tool" }
   pkg-config: { current: "0.29.2",   latest: "0.29.2",   status: current, pin: "classic pkg-config not pkgconf" }
 toolchains:
-  emscripten: { current: "6.0.8", status: current }
+  emscripten: { current: "7.0.0", status: current }
   linux_gcc:  { current: "10", pin: "Focal CI; Dawn off until GCC 11" }
   android_ndk_yaml: { current: "28.2.13676358", actual_ci: "ANDROID_NDK_LATEST_HOME r29 29.0.14206865", pin: "configure redirects 28.2 string to latest" }
   android_api: { current: "24" }

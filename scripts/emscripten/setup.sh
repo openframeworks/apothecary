@@ -2,13 +2,13 @@
 
 # Default EMSDK path and version
 EMSDK=${EMSDK:-$HOME/emsdk}
-EMSDK_VERSION=${EMSDK_VERSION:-6.0.13}
+EMSDK_VERSION=${EMSDK_VERSION:-7.0.0}
 SETUP_STATUS_FILE="$HOME/.emsdk_setup_status"
 
 check_emsdk() {
     if [ -x "$1/upstream/emscripten/emcc" ]; then
         local installed_version
-        installed_version=$("$1/upstream/emscripten/emcc" --version | awk 'NR == 1 { for (i = 1; i <= NF; i++) if ($i ~ /^[0-9]+\.[0-9]+\.[0-9]+$/) { print $i; exit } }')
+        installed_version=$("$1/upstream/emscripten/emcc" --version | awk 'NR == 1 { for (i = 1; i <= NF; i++) if (match($i, /^[0-9]+\.[0-9]+\.[0-9]+/)) { print substr($i, RSTART, RLENGTH); exit } }')
         echo "Emscripten version: $installed_version"
         [ "$installed_version" = "$EMSDK_VERSION" ]
     else
