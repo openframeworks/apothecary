@@ -72,3 +72,4 @@ jobs:
       - run: node scripts/tests/test-release-plan-summary.cjs
       - run: bash -n scripts/build.sh scripts/build-timings.sh scripts/tests/test-build-timings.sh
       - run: bash scripts/tests/test-build-timings.sh
+      - run: bash scripts/tests/test-msys2-install.sh
