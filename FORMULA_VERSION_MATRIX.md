@@ -87,6 +87,19 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **videoInput** | `master` (`261bfeee…`) | branch only | pinned-dev | ofTheo fork SHA. Windows capture. | https://github.com/ofTheo/videoInput |
 | **zlib** | `1.4` | `v1.4` | current | Latest stable. | https://github.com/madler/zlib |
 
+New opt-in image dependencies checked 2026-11-08 (outside core build lists):
+
+| Formula | Pin | Status | Notes |
+|---------|-----|--------|-------|
+| imath | 3.2.3 | macOS ARM64 validated | Static library and upstream CMake exports. |
+| openexr | 3.5.3 | macOS ARM64 validated | Staged Imath; vendored deflate/zstd/OpenJPH. |
+| libjpeg-turbo | 3.2.1 | macOS ARM64 validated | Static JPEG/TurboJPEG; Apothecary zlib. |
+| libtiff | 4.7.2 | macOS ARM64 validated | Static TIFF; Apothecary zlib/JPEG; other external codecs disabled. |
+| openimageio | 3.2.2.0 | starter, not built | OpenColorIO and robin-map formulas pending; explicit external prefix required. |
+
+See [the image dependency notes](apothecary/formulas/openimageio/README.md) for
+consumer validation and platform limits.
+
 ---
 
 ## Vendor / prebuilt

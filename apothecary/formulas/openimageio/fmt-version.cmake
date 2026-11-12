@@ -1,0 +1,7 @@
+include("${CMAKE_CURRENT_LIST_DIR}/root.cmake")
+file(STRINGS "${APOTHECARY_FMT_ROOT}/include/fmt/base.h" _fmt_macro REGEX "^#define FMT_VERSION [0-9]+")
+string(REGEX REPLACE "^#define FMT_VERSION ([0-9]+).*" "\\1" _fmt_number "${_fmt_macro}")
+math(EXPR _fmt_major "${_fmt_number} / 10000")
+math(EXPR _fmt_minor "(${_fmt_number} / 100) % 100")
+math(EXPR _fmt_patch "${_fmt_number} % 100")
+set(PACKAGE_VERSION "${_fmt_major}.${_fmt_minor}.${_fmt_patch}")
