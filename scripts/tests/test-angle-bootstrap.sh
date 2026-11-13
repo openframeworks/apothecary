@@ -96,12 +96,15 @@ echo 'tvOS device and simulator use complete upstream SDK discovery'
 ios_args=$(TYPE=ios ARCH=arm64 PLATFORM=OS64 _angle_gn_args)
 [[ "$ios_args" == *'ios_deployment_target="15.0"'* ]]
 [[ "$ios_args" != *'ios_deployment_target="13.0"'* ]]
+[[ "$ios_args" == *'use_lld=false'* ]]
 osx_args=$(TYPE=osx ARCH=arm64 PLATFORM=MAC_ARM64 _angle_gn_args)
 [[ "$osx_args" == *'mac_deployment_target="12.0"'* ]]
+[[ "$osx_args" == *'use_lld=false'* ]]
 vs_args=$(TYPE=vs ARCH=64 PLATFORM=x64 _angle_gn_args)
 [[ "$vs_args" == *'use_custom_libcxx=false'* ]]
 [[ "$vs_args" == *'use_custom_libcxx_for_host=false'* ]]
 [[ "$vs_args" == *'use_siso=false'* ]]
+[[ "$vs_args" != *'use_lld=false'* ]]
 mkdir -p "$fixture/Xcode Toolchain/lib/darwin"
 touch "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xros.a" "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xrossim.a"
 xcrun() {

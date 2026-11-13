@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=16
+BUILD_ID=17
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -387,7 +387,9 @@ function _angle_gn_args() {
     env="$(_angle_environment)"
     local common
     common="is_debug=false is_component_build=false symbol_level=0 angle_assert_always_on=false angle_build_tests=false angle_enable_d3d9=false angle_enable_d3d12=false angle_enable_gl=false angle_enable_null=false angle_enable_vulkan=false angle_enable_essl=true angle_enable_glsl=true target_os=\"${os}\" target_cpu=\"${cpu}\""
-    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true"
+    # Host tools (cppgen_plugin) always link against the MacOSX SDK. Chromium's
+    # bundled ld64.lld cannot parse Xcode 27 TBD files that list arm64e.x1-macos.
+    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false use_lld=false angle_enable_d3d11=false angle_enable_metal=true"
     case "${TYPE}" in
         vs)
             # MSVC does not define __BYTE_ORDER__, which Chromium's libc++ requires.
