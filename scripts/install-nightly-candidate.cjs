@@ -15,7 +15,7 @@ function selectAssets(plan,platform) {
         macos:[1,2,3].map(i=>`openFrameworksLibs_latest_osx_${i}.tar.bz2`),
         ios:[1,2,3].map(i=>`openFrameworksLibs_latest_macos_${i}.tar.bz2`),
         tvos:[1,2,3].map(i=>`openFrameworksLibs_latest_macos_${i}.tar.bz2`),
-        android:['armv7','arm64','x86_64'].map(arch=>`openFrameworksLibs_latest_android_${arch}.tar.bz2`),
+        android:['armv7','arm64','x86','x86_64'].map(arch=>`openFrameworksLibs_latest_android_${arch}.tar.bz2`),
         emscripten:[32,64].map(arch=>`openFrameworksLibs_latest_emscripten_${arch}.tar.bz2`),
         windows:[1,2].map(i=>`openFrameworksLibs_latest_vs_64_${i}.zip`)
     }[platform];

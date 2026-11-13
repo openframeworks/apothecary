@@ -81,7 +81,7 @@ After `copy`, `scripts/export_config.sh` writes relocatable `.pc` and `cmake/*Co
 **Arch examples:**  
 - `osx` / `macos`: `arm64`, `x86_64`  
 - Apple mobile: `arm64`, `SIM_arm64`, `x86_64`  
-- `android`: e.g. `arm64`, `x86_64` (as supported by scripts)
+- `android`: `arm64`, `armv7`, `x86`, `x86_64`
 
 ---
 

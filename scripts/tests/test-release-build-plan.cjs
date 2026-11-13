@@ -6,7 +6,9 @@ const root=process.cwd(), tmp=fs.mkdtempSync(path.join(os.tmpdir(),'release-plan
 const write=(name,data)=>{fs.mkdirSync(path.dirname(name),{recursive:true});fs.writeFileSync(name,data);};
 const git=(...args)=>execFileSync('git',args,{encoding:'utf8',env:{...process.env,GIT_AUTHOR_NAME:'Fixture',GIT_AUTHOR_EMAIL:'fixture@example.invalid',GIT_COMMITTER_NAME:'Fixture',GIT_COMMITTER_EMAIL:'fixture@example.invalid'}}).trim();
 // The workflow must actually upload the extension emitted by the planner.
-for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8')))) {
+const matrices=JSON.parse(fs.readFileSync('scripts/build-matrices.json','utf8'));
+assert.deepEqual(matrices['.github/workflows/build-android.yml']['build-android-platforms'].ARCH,['armv7','arm64','x86','x86_64']);
+for (const file of Object.keys(matrices)) {
  const text=fs.readFileSync(file,'utf8');
  assert.ok(text.includes('path: .build-plans/*.pkl'), `${file} uploads Pkl build plans`);
  assert.ok(!text.includes('.build-plans/*.json'), `${file} has no obsolete JSON glob`);
@@ -70,7 +72,7 @@ for (const file of Object.keys(JSON.parse(fs.readFileSync('scripts/build-matrice
  assert.equal(p.stateName(androidFile,androidJob,androidRow),'android-arch-arm64.pkl');
  assert.equal(p.stateName(androidFile,androidJob,{...androidRow,SDK:'38.0.0',NDK:'30',API:'26'}),'android-arch-arm64.pkl','Android toolchain changes retain the friendly asset name');
  assert.equal(p.stateName(androidFile,androidJob,androidRow,true),'android-api-25-arch-arm64-ndk-29.0.14206865-sdk-37.0.0.pkl','legacy name remains readable for migration');
- assert.equal(new Set(['arm64','armv7','x86_64'].map(ARCH=>p.stateName(androidFile,androidJob,{...androidRow,ARCH}))).size,3);
+ assert.equal(new Set(['arm64','armv7','x86','x86_64'].map(ARCH=>p.stateName(androidFile,androidJob,{...androidRow,ARCH}))).size,4);
 
  assert.equal(p.matrixRows({include:[{arch:'64'},{arch:'arm64'},{arch:'armv6l'}]}).length,3);
  assert.equal(p.matrixRows({arch:['64','arm64'],bundle:[1,2]}).length,4);
