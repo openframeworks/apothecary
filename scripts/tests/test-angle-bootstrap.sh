@@ -105,6 +105,57 @@ vs_args=$(TYPE=vs ARCH=64 PLATFORM=x64 _angle_gn_args)
 [[ "$vs_args" == *'use_custom_libcxx_for_host=false'* ]]
 [[ "$vs_args" == *'use_siso=false'* ]]
 [[ "$vs_args" != *'use_lld=false'* ]]
+
+# iOS host toolchain forces use_lld=true; the patch must flip that so
+# cppgen_plugin links with Apple ld against the MacOSX SDK.
+mkdir -p build/toolchain/mac
+cat > build/toolchain/mac/BUILD.gn <<'EOF'
+# Copyright 2021 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/config/mac/mac_sdk.gni")
+import("//build/config/v8_target_cpu.gni")
+import("//build/toolchain/apple/toolchain.gni")
+import("//build_overrides/build.gni")
+
+# Specialisation of the apple_toolchain template to declare the toolchain
+# and its tools to build target for macOS platform.
+template("mac_toolchain") {
+  assert(defined(invoker.toolchain_args),
+         "Toolchains must declare toolchain_args")
+
+  apple_toolchain(target_name) {
+    forward_variables_from(invoker, "*", [ "toolchain_args" ])
+
+    bin_path = mac_bin_path
+
+    toolchain_args = {
+      forward_variables_from(invoker.toolchain_args, "*")
+      current_os = "mac"
+      if (target_os == "ios") {
+        # Use LLD for the host part of a chrome/ios build.
+        use_lld = true
+
+        # Override `is_component_build` for the host toolchain.
+        # See https://crbug.com/gn/286 for details why this is
+        # required.
+        is_component_build = is_debug
+      }
+    }
+  }
+}
+EOF
+_angle_patch_host_ld
+_angle_patch_host_ld
+grep -F 'use_lld = false' build/toolchain/mac/BUILD.gn
+grep -F 'arm64e.x1-macos' build/toolchain/mac/BUILD.gn
+if grep -q 'use_lld = true' build/toolchain/mac/BUILD.gn; then
+    echo 'iOS host toolchain still forces use_lld=true' >&2
+    exit 1
+fi
+echo 'iOS host toolchain uses Apple ld'
+
 mkdir -p "$fixture/Xcode Toolchain/lib/darwin"
 touch "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xros.a" "$fixture/Xcode Toolchain/lib/darwin/libclang_rt.xrossim.a"
 xcrun() {

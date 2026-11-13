@@ -1,0 +1,16 @@
+diff -ruN a/build/toolchain/mac/BUILD.gn b/build/toolchain/mac/BUILD.gn
+--- a/build/toolchain/mac/BUILD.gn
++++ b/build/toolchain/mac/BUILD.gn
+@@ -22,8 +22,10 @@
+       forward_variables_from(invoker.toolchain_args, "*")
+       current_os = "mac"
+       if (target_os == "ios") {
+-        # Use LLD for the host part of a chrome/ios build.
+-        use_lld = true
++        # Chromium forces LLD here, which ignores top-level use_lld=false.
++        # Xcode 27 MacOSX SDK TBD files list arm64e.x1-macos, which the
++        # bundled ld64.lld cannot parse when linking host tools.
++        use_lld = false
+ 
+         # Override `is_component_build` for the host toolchain.
+         # See https://crbug.com/gn/286 for details why this is
