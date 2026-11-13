@@ -10,7 +10,7 @@ const digest=bytes=>'sha256:'+crypto.createHash('sha256').update(bytes).digest('
 const assetNames=[
     'openFrameworksLibs_latest_linux_64_gcc10.tar.bz2',
     ...['osx','macos'].flatMap(target=>[1,2,3].map(i=>`openFrameworksLibs_latest_${target}_${i}.tar.bz2`)),
-    ...['armv7','arm64','x86_64'].map(arch=>`openFrameworksLibs_latest_android_${arch}.tar.bz2`),
+    ...['armv7','arm64','x86','x86_64'].map(arch=>`openFrameworksLibs_latest_android_${arch}.tar.bz2`),
     ...[32,64].map(arch=>`openFrameworksLibs_latest_emscripten_${arch}.tar.bz2`),
     ...[1,2].map(i=>`openFrameworksLibs_latest_vs_64_${i}.zip`)
 ];
@@ -19,7 +19,8 @@ const plan={schema:1,repository:'owner/repo',sourceSha:'a'.repeat(40),openframew
 (async()=>{try {
     assert.equal(selectAssets(plan,'linux').length,1);
     assert.equal(selectAssets(plan,'windows').length,2);
-    for(const platform of ['macos','ios','tvos','android'])assert.equal(selectAssets(plan,platform).length,3);
+    for(const platform of ['macos','ios','tvos'])assert.equal(selectAssets(plan,platform).length,3);
+    assert.equal(selectAssets(plan,'android').length,4);
     assert.equal(selectAssets(plan,'emscripten').length,2);
     assert.throws(()=>selectAssets({...plan,assets:[]},'windows'),/missing/);
     const staging=path.join(temp,'staging');fs.mkdirSync(staging);
