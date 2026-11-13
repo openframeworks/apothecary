@@ -32,14 +32,14 @@ jobs:
         fi
   build-watchos-platforms:
     if: needs.pre-check.outputs.workflow_disabled != 'true'
-    runs-on: macos-14
+    runs-on: xcode-27
     needs: pre-check
     strategy:
       matrix:
         bundle: [1, 2, 3]
     env:
       BUNDLE: ${{ matrix.bundle }}
-      DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
+      DEVELOPER_DIR: "/Applications/Xcode_27.1.app/Contents/Developer"
     steps:
       - name: Determine Release
         id: vars

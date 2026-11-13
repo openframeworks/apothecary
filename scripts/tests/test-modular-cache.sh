@@ -37,6 +37,8 @@ TOOL
 chmod +x "$TEST_ROOT/bin/xcrun"
 export TEST_ROOT TARGET=osx TYPE=osx OPTIONAL_ARCHS='x86_64 arm64'
 export PATH="$TEST_ROOT/bin:$PATH" OUTPUT_FOLDER="$TEST_ROOT/out"
+# Workflow env can export BUILD_PROFILE_ID; the baseline is the script default.
+unset BUILD_PROFILE_ID
 mkdir -p "$TEST_ROOT/scripts/tvOS"
 printf 'installer-v1\n' > "$TEST_ROOT/scripts/tvOS/install.sh"
 printf 'helper-v1\n' > "$TEST_ROOT/scripts/apple-install-tools.sh"

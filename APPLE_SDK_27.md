@@ -1,9 +1,11 @@
 # Xcode 27.1 SDK test
 
-The iOS, macOS and tvOS workflows use GitHub's `xcode-27` ARM64 preview runner,
-which includes `/Applications/Xcode_27.1.app`. The SDK preflight rejects a
-different Xcode or SDK version and reports the SDK's minimum deployment target
-and supported architectures for device and simulator builds.
+The iOS, macOS, tvOS and watchOS workflows, and the osx/ios/tvos modular-optional
+jobs, use GitHub's `xcode-27` ARM64 preview runner, which includes
+`/Applications/Xcode_27.1.app`. GitHub retired `macos-14` on 2 November 2026, so
+those jobs cannot request that label. The SDK preflight rejects a different
+Xcode or SDK version and reports the SDK's minimum deployment target and
+supported architectures for device and simulator builds.
 
 | Platform | Xcode 27.1 SDK | Apple-supported deployment floor | Apothecary target retained |
 | --- | --- | --- | --- |

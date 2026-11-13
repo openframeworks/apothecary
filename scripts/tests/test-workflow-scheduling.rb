@@ -32,4 +32,14 @@ end
   raise "Metadata tag starts builds: #{tag}" if match_tag.call(tag)
 end
 YAML.load_file("#{root}/.github/actions/platform-artifacts/action.yml")
+retired = /\Amacos-14(?:-large|-xlarge)?\z/
+walk = lambda do |value, file|
+  case value
+  when Hash then value.each_value { |item| walk.call(item, file) }
+  when Array then value.each { |item| walk.call(item, file) }
+  when String
+    raise "Retired runner #{value}: #{file}" if value.match?(retired)
+  end
+end
+Dir["#{root}/.github/workflows/*.yml"].each { |file| walk.call(YAML.load_file(file), file) }
 puts 'Workflow scheduling and composite YAML checks passed'

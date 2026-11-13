@@ -17,7 +17,7 @@ FORMULA_DEPENDS=()
 
 VER=2026.08.13
 SOURCE_COMMIT=7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80
-BUILD_ID=16
+BUILD_ID=18
 DEFINES="angle_enable_metal=true angle_enable_d3d11=true"
 
 GIT_URL=https://github.com/google/angle.git
@@ -309,6 +309,36 @@ function _angle_patch_apple() {
     fi
 }
 
+# iOS/tvOS/Catalyst/visionOS host tools (cppgen_plugin) still use the MacOSX
+# SDK. Chromium's mac host toolchain forces use_lld=true, so top-level
+# use_lld=false never reaches that link.
+function _angle_patch_host_ld() {
+    local formula_dir patch_file toolchain_gn
+    formula_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    patch_file="${formula_dir}/host-apple-ld.patch"
+    toolchain_gn="build/toolchain/mac/BUILD.gn"
+    if [ ! -f "$patch_file" ]; then
+        echoError "angle: missing ${patch_file}"
+        return 1
+    fi
+    if [ ! -f "$toolchain_gn" ]; then
+        echoError "angle: missing ${toolchain_gn}"
+        return 1
+    fi
+    if grep -q 'arm64e.x1-macos' "$toolchain_gn"; then
+        echo "angle: host Apple ld patch already applied"
+        return 0
+    fi
+    if ! grep -q 'Use LLD for the host part of a chrome/ios build' "$toolchain_gn"; then
+        echoError "angle: unexpected ${toolchain_gn} (missing iOS host lld override)"
+        return 1
+    fi
+    if ! patch -p1 --forward --reject-file=- < "$patch_file"; then
+        echoError "angle: failed to apply host-apple-ld.patch"
+        return 1
+    fi
+}
+
 # Complete the source/SDK guards missing from this pinned Chromium revision.
 function _angle_patch_platform_sources() {
     local formula_dir
@@ -387,7 +417,9 @@ function _angle_gn_args() {
     env="$(_angle_environment)"
     local common
     common="is_debug=false is_component_build=false symbol_level=0 angle_assert_always_on=false angle_build_tests=false angle_enable_d3d9=false angle_enable_d3d12=false angle_enable_gl=false angle_enable_null=false angle_enable_vulkan=false angle_enable_essl=true angle_enable_glsl=true target_os=\"${os}\" target_cpu=\"${cpu}\""
-    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false angle_enable_d3d11=false angle_enable_metal=true"
+    # Host tools (cppgen_plugin) always link against the MacOSX SDK. Chromium's
+    # bundled ld64.lld cannot parse Xcode 27 TBD files that list arm64e.x1-macos.
+    apple="is_clang=true use_custom_libcxx=false clang_use_chrome_plugins=false use_lld=false angle_enable_d3d11=false angle_enable_metal=true"
     case "${TYPE}" in
         vs)
             # MSVC does not define __BYTE_ORDER__, which Chromium's libc++ requires.
@@ -435,6 +467,7 @@ function build() {
     elif [[ "$TYPE" =~ ^(osx|macos|ios|tvos|catos|xros)$ ]]; then
         _angle_depot_env "$(pwd)/.vendor"
         _angle_patch_apple
+        _angle_patch_host_ld || return 1
         _angle_patch_platform_sources || return 1
     else
         echoError "angle: unsupported TYPE=${TYPE}"
