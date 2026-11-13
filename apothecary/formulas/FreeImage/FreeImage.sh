@@ -25,6 +25,7 @@
 # 3.19.31 fixes BMP RLE8 integer overflow and updates bundled OpenJPH to 0.33.0
 # for an HTJ2K allocation fix and additional marker bounds checks.
 # 3.19.32 updates bundled zlib to 1.4 and adds MSVC v142 packaging support.
+# 3.19.33 hardens JPEG XR, HDR, IFF, PICT and WBMP loading and adds WEBP_SHARPYUV.
 # OpenEXR needs C++17; apothecary is C++17+ (C++23 default, C++17 on GCC 10).
 
 FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscripten" "linux")
@@ -33,8 +34,8 @@ FORMULA_TYPES=("osx" "vs" "ios" "watchos" "catos" "xros" "tvos" "android" "emscr
 
 FORMULA_DEPENDS=("zlib" "libpng")
 
-VER=3.19.32
-SHA256="b5e10f7c9bcc20dc9f7f0651fb9c7d7fea9885513c9b17b41a2fbc1952a09807"
+VER=3.19.33
+SHA256="79637fbee678b7c75aefccf0ebe4c0567f4100a4e951e690a4aa1648bbe48f8b"
 GIT_URL=https://github.com/danoli3/FreeImage
 GIT_TAG=$VER
 BUILD_ID=29
