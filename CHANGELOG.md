@@ -16,7 +16,7 @@ Curated from the git history of [openframeworks/apothecary](https://github.com/o
 
 ## 2026 (Jan – Sep)
 
-- **CEF** 156.0.15 (Chromium 156.0.8078.80) modular-optional formula: Spotify desktop binary distributions, compile `libcef_dll_wrapper`, package runtime/resources/locales. osx, linux and vs (x86_64 + arm64).
+- **CEF** 156.0.15 (Chromium 156.0.8078.80) modular-optional formula: Spotify desktop binary distributions, compile `libcef_dll_wrapper`, package runtime/resources/locales. osx, linux and vs (x64, arm64, ARM64EC).
 - **Android** NDK `28.2.13676358` → **r29 `29.0.14206865`**, SDK build-tools `36.0.0` → **`37.0.0`** (latest on ubuntu-24.04 Actions). Min compile API **24 → 25**.
 - **MetalANGLE** ships as `MetalANGLE.xcframework` (same pattern as Dawn). copy() seals `MetalANGLE.a`; iOS simulator lipo covers COMBINED + thin slices. Docs: `libs/metalangle`, not OF’s stale `libs/metal`.
 - **CMake/pkg-config install** (#405): after each formula copy, emit relocatable `.pc` and `cmake/*Config.cmake` next to the binary; rewrite cmake `--install` absolute prefixes.

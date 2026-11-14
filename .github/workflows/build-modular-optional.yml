@@ -165,6 +165,7 @@ jobs:
         arch: ['64']
         include:
           - {library: cef, arch: arm64}
+          - {library: cef, arch: arm64ec}
     defaults:
       run:
         shell: msys2 {0}
