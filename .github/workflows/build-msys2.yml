@@ -94,7 +94,7 @@ jobs:
             pkgconf:p
             gperf:p
             libxml2:p
-            python3:p
+            python:p
             libpng:p
             zlib:p
 
