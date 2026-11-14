@@ -51,7 +51,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **boost** | `1.92.0` | `boost-1.92.0` | updated | `FORMULA_TYPES=()` — unused. filesystem with header-only System; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.1` | `v1.2.1` | current | Security update for CVE-2026-111497; checked 2026-10-25. | https://github.com/google/brotli |
 | **cairo** | `1.18.4` | `1.18.4` | current | Latest stable. | https://gitlab.freedesktop.org/cairo/cairo |
-| **cef** | `156.0.15` (`156.0.15+gcf671c0+chromium-156.0.8078.80`) | Spotify Current Stable 156 | current | Desktop binary SDK from cef-builds.spotifycdn.com. Compile `libcef_dll_wrapper` only (`USE_SANDBOX=OFF`, VS `/MD`). osx/linux/vs x86_64+arm64. No iOS/Android/emscripten/msys2. | https://cef-builds.spotifycdn.com |
+| **cef** | `156.0.15` (`156.0.15+gcf671c0+chromium-156.0.8078.80`) | Spotify Current Stable 156 | current | Desktop binary SDK from cef-builds.spotifycdn.com. Compile `libcef_dll_wrapper` only (`USE_SANDBOX=OFF`, VS `/MD`). osx/linux/vs x86_64+arm64; VS ARM64EC uses the windows64 runtime. No iOS/Android/emscripten/msys2. | https://cef-builds.spotifycdn.com |
 | **curl** | `8.23.0` | `curl-8_22_0` / `8.23.0` | current | HTTP/2, HTTP/3 and SSH dependency integration retained. TLS-SRP is removed upstream. | https://github.com/curl/curl |
 | **dawn** | `2026.07.31` (`cd2d5a667d1140af6e89f4c4c24f6545e1d5d2d7`) | Dawn `v20260911.162847` (rolling) | pinned-dev | ofLibs-era SHA. `DAWN_BUILD_MONOLITHIC_LIBRARY=STATIC`. Linux off until GCC 11. watchOS: no Metal. | https://dawn.googlesource.com/dawn |
 | **fmt** | `12.2.1` | `12.2.1` | current | Latest stable. | https://github.com/fmtlib/fmt |

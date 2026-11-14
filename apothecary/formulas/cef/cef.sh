@@ -9,7 +9,8 @@
 # https://cef-builds.spotifycdn.com/index.html
 #
 # Official binaries exist for osx, linux and vs (x86_64 and arm64). There is
-# no iOS, Android, Emscripten, MSYS2 or ARM64EC distribution.
+# no iOS, Android, Emscripten or MSYS2 distribution. VS ARM64EC uses the
+# windows64 runtime (ARM64EC loads x64 DLLs) and compiles the wrapper as ARM64EC.
 
 FORMULA_TYPES=("osx" "linux" "vs")
 FORMULA_DEPENDS=()
@@ -18,7 +19,7 @@ FORMULA_DEPENDS=()
 VER=156.0.15
 CEF_BUILD="156.0.15+gcf671c0+chromium-156.0.8078.80"
 CEF_CDN="https://cef-builds.spotifycdn.com"
-BUILD_ID=2
+BUILD_ID=3
 DEFINES="-DUSE_SANDBOX=OFF -DCEF_RUNTIME_LIBRARY_FLAG=/MD"
 
 SHA256_LINUX64="1d0a26b3ce480d8db220e9af0f7c8699afa889e088eb5f7f7d822bbac1c9920f"
@@ -56,6 +57,12 @@ function _cef_platform() {
             case "$ARCH" in
                 64) printf '%s\n' windows64 ;;
                 arm64) printf '%s\n' windowsarm64 ;;
+                arm64ec)
+                    # Spotify publishes x64 and ARM64, not ARM64EC. ARM64EC
+                    # processes load x64 libcef.dll; the wrapper is still
+                    # compiled with -A ARM64EC.
+                    printf '%s\n' windows64
+                    ;;
                 *)
                     echoError "CEF has no binary distribution for TYPE=vs ARCH=$ARCH"
                     return 1

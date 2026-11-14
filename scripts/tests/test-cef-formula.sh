@@ -24,11 +24,7 @@ expect_platform linux arm64 linuxarm64
 expect_platform linux aarch64 linuxarm64
 expect_platform vs 64 windows64
 expect_platform vs arm64 windowsarm64
-
-if TYPE=vs ARCH=arm64ec _cef_platform 2>/dev/null; then
-    echo 'vs/arm64ec should be rejected' >&2
-    exit 1
-fi
+expect_platform vs arm64ec windows64
 if TYPE=ios ARCH=arm64 _cef_platform 2>/dev/null; then
     echo 'ios should be rejected' >&2
     exit 1
@@ -61,6 +57,11 @@ url="$(_cef_url macosarm64)"
 [ "$(_cef_project_arch macosarm64)" = arm64 ]
 [ "$(_cef_project_arch linux64)" = x86_64 ]
 [ "$(_cef_project_arch windowsarm64)" = arm64 ]
+[ "$(_cef_project_arch windows64)" = x86_64 ]
+if TYPE=vs ARCH=32 _cef_platform 2>/dev/null; then
+    echo 'vs/32 should be rejected' >&2
+    exit 1
+fi
 
 _cef_is_sample cefclient
 _cef_is_sample cefclient.exe
