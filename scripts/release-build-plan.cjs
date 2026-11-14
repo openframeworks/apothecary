@@ -151,7 +151,7 @@ function stateName(file, job, row, legacy = false) {
     const platform=path.basename(file,'.yml').replace(/^build-/, '').replace(/-modular$/, '');
     const part=value=>encodeURIComponent(String(value)).replace(/-/g,'%2D');
     const parts=row.library ? [part(row.library),platform] : [platform];
-    const standardJobs=['build',`build-${platform}`,`build-${platform}-platforms`, 'build-vs2022-64', 'build-vs2026'];
+    const standardJobs=['build',`build-${platform}`,`build-${platform}-platforms`, 'build-vs2019-64', 'build-vs2022-64', 'build-vs2026'];
     if(!standardJobs.includes(job))parts.push('job',part(job));
     // These describe runner setup, not independent output variants. Their values
     // still participate in profile/recipe fingerprints inside the record.
@@ -186,6 +186,16 @@ function channel(file, context) {
         (context.payload.pull_request?.base.ref || context.ref.replace('refs/heads/','')) === 'master' ? 'nightly' : 'latest';
 }
 function publishedStateName(file, job, row, context, legacy = false) {return `${channel(file,context)}-${stateName(file,job,row,legacy)}`;}
+// GitHub release asset names cannot contain '%'. Uploads of %2D names land as .2D,
+// so replace never finds the previous record and the next upload 422s.
+function githubSafeAssetName(name) {return String(name).replace(/%/g,'.');}
+function publishedAssetNames(file, job, row, context) {
+    const names=[publishedStateName(file,job,row,context), publishedStateName(file,job,row,context,true)];
+    if (job === 'build-vs2019-64' && row && row.bundle != null) {
+        names.push(`${channel(file,context)}-vs2019-x64-job-build%2Dvs2019%2D64-bundle-${row.bundle}.pkl`);
+    }
+    return [...new Set(names.flatMap(name => [name, githubSafeAssetName(name)]))];
+}
 async function stateRelease(github, context, create = false) {
     try {return (await github.rest.repos.getReleaseByTag({...context.repo,tag:'build-state'})).data;}
     catch (error) {
@@ -221,8 +231,8 @@ async function plan({github,context,core,workflow: file,job:jobId}) {
         let reason = 'missing or changed published output', wanted, published;
         try {
             wanted = inputs(file,jobId,row);
-            const asset = states.find(a => a.name === publishedStateName(file,jobId,row,context)) ||
-                states.find(a => a.name === publishedStateName(file,jobId,row,context,true));
+            const aliases = publishedAssetNames(file,jobId,row,context);
+            const asset = aliases.map(name => states.find(a => a.name === name)).find(Boolean);
             if (asset && asset.size < 4*1024*1024) {
                 try {
                     const response = await github.rest.repos.getReleaseAsset({...context.repo,asset_id:asset.id,headers:{accept:'application/octet-stream'}});
@@ -333,16 +343,18 @@ exports.record = async ({github,context,core,workflow:file,job:jobId,matrix:row,
     const old = states.find(a => a.name === name);
     if (old) await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:old.id});
     await github.rest.repos.uploadReleaseAsset({...context.repo,release_id:metadata.id,name,data,headers:{'content-type':'application/vnd.apple.pkl','content-length':data.length}});
-    // Retire the old verbose Android name only after the new record is durable.
-    const legacyName = publishedStateName(file,jobId,row,context,true);
-    const legacy = legacyName !== name && states.find(a => a.name === legacyName);
-    if (legacy) {
+    // Retire previous names only after the new record is durable.
+    const retired = publishedAssetNames(file,jobId,row,context).filter(alias => alias !== name);
+    for (const legacyName of retired) {
+        const legacy = states.find(a => a.name === legacyName);
+        if (!legacy) continue;
         try {await github.rest.repos.deleteReleaseAsset({...context.repo,asset_id:legacy.id});}
         catch (error) {core.warning(`Published ${name}, but could not remove ${legacyName}: ${error.message}`);}
     }
     core.info(`Recorded ${name}: ${Object.keys(state.formulas).length} formulas, ${published.length} verified outputs`);
 };
 exports.inputs=inputs;exports.matrixRows=matrixRows;exports.matches=matches;exports.stateName=stateName;
+exports.githubSafeAssetName=githubSafeAssetName;exports.publishedAssetNames=publishedAssetNames;
 
 exports.groupLibraries=groupLibraries;
 exports.normalizePublished=normalizePublished;

@@ -73,6 +73,14 @@ for (const file of Object.keys(matrices)) {
  assert.equal(p.stateName(androidFile,androidJob,{...androidRow,SDK:'38.0.0',NDK:'30',API:'26'}),'android-arch-arm64.pkl','Android toolchain changes retain the friendly asset name');
  assert.equal(p.stateName(androidFile,androidJob,androidRow,true),'android-api-25-arch-arm64-ndk-29.0.14206865-sdk-37.0.0.pkl','legacy name remains readable for migration');
  assert.equal(new Set(['arm64','armv7','x86','x86_64'].map(ARCH=>p.stateName(androidFile,androidJob,{...androidRow,ARCH}))).size,4);
+ const vsFile='.github/workflows/build-vs2019-x64.yml', vsJob='build-vs2019-64', vsRow={bundle:1};
+ assert.equal(p.stateName(vsFile,vsJob,vsRow),'vs2019-x64-bundle-1.pkl');
+ assert.equal(p.stateName(vsFile,vsJob,{bundle:2}),'vs2019-x64-bundle-2.pkl');
+ assert.equal(p.githubSafeAssetName('latest-vs2019-x64-job-build%2Dvs2019%2D64-bundle-1.pkl'),'latest-vs2019-x64-job-build.2Dvs2019.2D64-bundle-1.pkl');
+ const vsAliases=p.publishedAssetNames(vsFile,vsJob,vsRow,{ref:'refs/heads/bleeding',payload:{}});
+ assert.ok(vsAliases.includes('latest-vs2019-x64-bundle-1.pkl'));
+ assert.ok(vsAliases.includes('latest-vs2019-x64-job-build.2Dvs2019.2D64-bundle-1.pkl'));
+ assert.ok(vsAliases.includes('latest-vs2019-x64-job-build%2Dvs2019%2D64-bundle-1.pkl'));
 
  assert.equal(p.matrixRows({include:[{arch:'64'},{arch:'arm64'},{arch:'armv6l'}]}).length,3);
  assert.equal(p.matrixRows({arch:['64','arm64'],bundle:[1,2]}).length,4);
@@ -199,5 +207,14 @@ for (const file of Object.keys(matrices)) {
  androidAPI.rest.repos.uploadReleaseAsset=async()=>{throw Error('upload failed');};
  await assert.rejects(p.record({github:androidAPI,context,core:recorderCore,workflow:androidFile,job:androidJob,matrix:androidRow}),/upload failed/);
  assert.equal(migrationEvents.length,0,'failed publication preserves the legacy record');
+ write(path.join(process.env.RUNNER_TEMP,'build-plans',p.stateName(vsFile,vsJob,vsRow)),p.renderPkl(androidState));
+ write('out/openFrameworksLibs_latest_vs_2019_64_1.zip','vs2019 archive');
+ const vsBytes=fs.readFileSync('out/openFrameworksLibs_latest_vs_2019_64_1.zip');
+ const vsPublished={id:77,name:'openFrameworksLibs_latest_vs_2019_64_1.zip',size:vsBytes.length,digest:'sha256:'+require('node:crypto').createHash('sha256').update(vsBytes).digest('hex')};
+ const vsStale={id:88,name:'latest-vs2019-x64-job-build.2Dvs2019.2D64-bundle-1.pkl',size:12};
+ const vsEvents=[];
+ const vsAPI={rest:{repos:{getReleaseByTag:async args=>({data:{id:args.tag==='build-state'?20:10}}),listReleaseAssets:'assets',uploadReleaseAsset:async args=>{vsEvents.push(['upload',args.name]);return {data:{}};},deleteReleaseAsset:async args=>vsEvents.push(['delete',args.asset_id])}},paginate:async(_,args)=>args.release_id===20?[vsStale]:[vsPublished]};
+ await p.record({github:vsAPI,context:{...context,eventName:'push',ref:'refs/heads/bleeding',payload:{},sha:'abc',runId:1},core:recorderCore,workflow:vsFile,job:vsJob,matrix:vsRow});
+ assert.deepEqual(vsEvents,[['upload','latest-vs2019-x64-bundle-1.pkl'],['delete',88]],'VS2019 records replace GitHub-sanitized %2D asset names');
  console.log('Release planning: dependency invalidation, platform isolation, SDK matrices, archive identity, age-independent reuse, tags and API fallback passed');
 }finally{process.chdir(root);fs.rmSync(tmp,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});
