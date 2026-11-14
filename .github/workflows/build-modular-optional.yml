@@ -9,6 +9,8 @@ on:
       - 'apothecary/formulas/metalangle/**'
       - 'apothecary/formulas/glon12.sh'
       - 'apothecary/formulas/dawn/**'
+      - 'apothecary/formulas/cef/**'
+      - 'scripts/tests/test-cef-formula.sh'
       - 'scripts/tests/test-angle-bootstrap.sh'
       - 'scripts/tests/test-angle-xros-runtime.sh'
       - 'scripts/tests/test-secure-compiler.sh'
@@ -51,6 +53,7 @@ jobs:
       - run: bash scripts/tests/test-glon12-runtime.sh
       - run: bash scripts/tests/test-modular-cache.sh
       - run: bash scripts/tests/test-apple-install-tools.sh
+      - run: bash scripts/tests/test-cef-formula.sh
       - run: ruby scripts/tests/test-workflow-scheduling.rb
 
   apple:
@@ -61,10 +64,14 @@ jobs:
       fail-fast: false
       matrix:
         target: [osx, ios, tvos, catos, xros]
-        library: [angle, metalangle, dawn]
+        library: [angle, metalangle, dawn, cef]
         exclude:
           - {target: catos, library: metalangle}
           - {target: xros, library: metalangle}
+          - {target: ios, library: cef}
+          - {target: tvos, library: cef}
+          - {target: catos, library: cef}
+          - {target: xros, library: cef}
         include:
           - {target: osx, runner: xcode-27, xcode: Xcode_27.1.app, archs: 'x86_64 arm64', install: osx}
           - {target: ios, runner: xcode-27, xcode: Xcode_27.1.app, archs: 'arm64 x86_64 SIM_arm64', install: ios}
@@ -123,30 +130,48 @@ jobs:
           path: |
             out/${{ matrix.library }}
             xout/${{ matrix.library }}
+      - name: Upload CEF package artifact
+        if: matrix.library == 'cef'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: cef-${{ matrix.target }}
+          path: out/oF_cef_*.tar.bz2
+          if-no-files-found: error
       - name: Upload to latest-modular
-        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary' && matrix.library != 'cef'
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
         with:
           token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           tag_name: latest-modular
           fail_on_unmatched_files: true
           files: xout/oF_${{ matrix.library }}_*.tar.bz2
+      - name: Upload CEF to latest-modular
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary' && matrix.library == 'cef'
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: true
+          files: out/oF_cef_*.tar.bz2
 
   vs:
     needs: test
-    name: optional ${{ matrix.library }}-vs-64
+    name: optional ${{ matrix.library }}-vs-${{ matrix.arch }}
     runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
-        library: [angle, dawn]
+        library: [angle, dawn, cef]
+        arch: ['64']
+        include:
+          - {library: cef, arch: arm64}
     defaults:
       run:
         shell: msys2 {0}
     env:
       TARGET: vs
       TYPE: vs
-      ARCH: 64
+      ARCH: ${{ matrix.arch }}
       VS_VER: 17
       PACKAGE_LIBS: ${{ matrix.library }}
       ALWAYS_BUILD: 1
@@ -191,6 +216,13 @@ jobs:
         with:
           key: ${{ steps.key.outputs.key }}
           path: out/${{ matrix.library }}
+      - name: Upload CEF package artifact
+        if: matrix.library == 'cef'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: cef-vs-${{ matrix.arch }}
+          path: out/oF_cef_*.zip
+          if-no-files-found: error
       - name: Upload to latest-modular
         if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
         uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
@@ -199,6 +231,71 @@ jobs:
           tag_name: latest-modular
           fail_on_unmatched_files: true
           files: out/oF_${{ matrix.library }}_*.zip
+
+  linux:
+    needs: test
+    name: optional cef-linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {arch: '64', runner: ubuntu-24.04}
+          - {arch: arm64, runner: ubuntu-24.04-arm}
+    env:
+      TARGET: linux
+      TYPE: linux
+      ARCH: ${{ matrix.arch }}
+      PACKAGE_LIBS: cef
+      ALWAYS_BUILD: 1
+      NO_FORCE: 1
+      NO_COLOR: '1'
+      UI_ANIM: '0'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ bzip2 pkg-config
+      - name: Compute exact modular cache key
+        id: key
+        run: bash scripts/modular-cache-key.sh "$PACKAGE_LIBS" >> "$GITHUB_OUTPUT"
+      - name: Restore compiled modular outputs
+        id: cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/cef
+      - name: Report modular cache result
+        env:
+          CACHE_KEY: ${{ steps.key.outputs.key }}
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: |
+          printf '### Modular cache: %s / %s\n\nKey: `%s`\n\nExact hit: `%s`\n' "$TARGET" "$PACKAGE_LIBS" "$CACHE_KEY" "${CACHE_HIT:-false}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Build or reuse and package CEF
+        env:
+          MODULAR_CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: bash scripts/build-modular-optional.sh
+      - name: Save compiled modular outputs
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6.1.0
+        with:
+          key: ${{ steps.key.outputs.key }}
+          path: out/cef
+      - name: Upload CEF package artifact
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: cef-linux-${{ matrix.arch }}
+          path: out/oF_cef_*.tar.bz2
+          if-no-files-found: error
+      - name: Upload to latest-modular
+        if: github.event_name == 'push' && github.repository == 'openframeworks/apothecary'
+        uses: danoli3/action-gh-release@ec40b04e78c39008f73c4ca3fdf9b51df604c4ed # temporary patch: softprops/action-gh-release#852
+        with:
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          tag_name: latest-modular
+          fail_on_unmatched_files: true
+          files: out/oF_cef_*.tar.bz2
 
   glon12:
     needs: test

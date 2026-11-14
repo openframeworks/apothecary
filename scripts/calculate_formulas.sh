@@ -279,6 +279,9 @@ fi
 if [[ "$TARGET" =~ ^(osx|macos|ios|tvos)$ ]]; then
     FORMULAS_MODULAR_OPTIONAL+=("metalangle")
 fi
+if [[ "$TARGET" =~ ^(vs|osx|macos|linux)$ ]]; then
+    FORMULAS_MODULAR_OPTIONAL+=("cef")
+fi
 # OpenCV 5 follows each OpenCV build slot, but is published separately.
 # Do this before overrides so explicitly selected formula lists stay exact.
 for formula in "${FORMULAS[@]}"; do
