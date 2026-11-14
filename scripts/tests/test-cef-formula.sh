@@ -96,4 +96,8 @@ for extra in ios android emscripten msys2; do
     esac
 done
 
+# VS configure must keep /MD away from MSYS path conversion (C1083 C:/msys64/MD).
+grep -q 'MSYS2_ARG_CONV_EXCL="-DCEF_RUNTIME_LIBRARY_FLAG"' "$ROOT/apothecary/formulas/cef/cef.sh"
+grep -q -- '-DCEF_RUNTIME_LIBRARY_FLAG=/MD' "$ROOT/apothecary/formulas/cef/cef.sh"
+
 echo 'CEF platform, hash and URL mapping tests passed'

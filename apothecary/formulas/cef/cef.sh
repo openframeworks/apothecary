@@ -18,7 +18,7 @@ FORMULA_DEPENDS=()
 VER=156.0.15
 CEF_BUILD="156.0.15+gcf671c0+chromium-156.0.8078.80"
 CEF_CDN="https://cef-builds.spotifycdn.com"
-BUILD_ID=1
+BUILD_ID=2
 DEFINES="-DUSE_SANDBOX=OFF -DCEF_RUNTIME_LIBRARY_FLAG=/MD"
 
 SHA256_LINUX64="1d0a26b3ce480d8db220e9af0f7c8699afa889e088eb5f7f7d822bbac1c9920f"
@@ -168,7 +168,9 @@ function build() {
 
     if [ "$TYPE" = "vs" ]; then
         generator="Visual Studio ${VS_VER_GEN}"
-        cmake -S . -B "$build_dir" \
+        # MSYS2 converts a leading-slash MSVC flag such as /MD into C:/msys64/MD
+        # and MSVC then tries to compile that path as a source file.
+        MSYS2_ARG_CONV_EXCL="-DCEF_RUNTIME_LIBRARY_FLAG" cmake -S . -B "$build_dir" \
             -G "$generator" \
             -A "${PLATFORM}" \
             -DPROJECT_ARCH="$project_arch" \
