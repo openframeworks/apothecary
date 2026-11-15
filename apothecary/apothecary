@@ -1308,6 +1308,24 @@ function checkFormula() {
   eval $3=$parentDir
 }
 
+# Names of real formulas in FORMULAS_DIR: top-level *.sh scripts and
+# directories that contain <name>/<name>.sh. Skip patches, docs, and _depends.
+function listAllFormulas() {
+  local entry base
+  for entry in "$FORMULAS_DIR"/* ; do
+    [ -e "$entry" ] || continue
+    base=$(basename "$entry")
+    [ "$base" = "$DEPENDS_SUBDIR" ] && continue
+    if [ -d "$entry" ]; then
+      if [ -f "$entry/${base}.sh" ]; then
+        printf '%s\n' "$base"
+      fi
+    elif [ "${base##*.}" = "sh" ]; then
+      printf '%s\n' "${base%.*}"
+    fi
+  done
+}
+
 # execute a given command on a formula and/or formulas,
 # checks and sources formula scripts before running based on first arg:
 # $1 = bool, should source this formula
@@ -1336,9 +1354,10 @@ function doCommand() {
         echoInfo " ----- Apothecary All Build Sucessfully completed for $TYPE -----"
     elif [ "$1" == "all" ] ; then
         local formula
-        for formula in $( ls -1 $FORMULAS_DIR | grep -v $DEPENDS_SUBDIR) ; do
-            doCommand $shouldSource $cmd "${formula%.*}"
-        done
+        while IFS= read -r formula ; do
+            [ -n "$formula" ] || continue
+            doCommand $shouldSource $cmd "$formula"
+        done < <(listAllFormulas)
         echoInfo " ----- Apothecary All Build Sucessfully completed for $TYPE -----"
     # process all addons in the addons dir
     elif [ "$1" == "addons" ] ; then
@@ -1415,7 +1434,16 @@ function doCommand() {
           # does this formula support the current build type?
           local bFormulaType=0 # bool
           isFormulaType $TYPE bFormulaType
+          local skipUnsupportedType=0
           if [ $bFormulaType == 0 ] && [ $TYPE != "macos" ] ; then
+            case "$cmd" in
+              cleanFormula|remove|remove-lib|remove-all)
+                skipUnsupportedType=0 ;;
+              *)
+                skipUnsupportedType=1 ;;
+            esac
+          fi
+          if [ $skipUnsupportedType == 1 ] ; then
             echoInfo " Skipping [\"$currentLib\":] $cmd not needed for type \"$TYPE\""
           else
             # do command
@@ -1654,9 +1682,9 @@ function cleanFormula() {
   echo
 
   if [ ! -e $BUILD_DIR/$1 ] ; then
-    echoError " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
-    echoError " Did you download the formula? Clean build folder however"
-    exit 0
+    echoInfo " Lib src dir missing for \"$1\": $BUILD_DIR/$1"
+    echoInfo " Nothing to clean"
+    return 0
   fi
 
   cd $BUILD_DIR/$1
