@@ -70,6 +70,9 @@ const plan={schema:1,repository:'owner/repo',sourceSha:'a'.repeat(40),openframew
     assert(workflow.includes('override_build_gate:'));
     const integration=fs.readFileSync('.github/workflows/test-openframeworks-libraries.yml','utf8');
     assert(integration.includes('workflow_call:'));
+    assert(integration.includes('default: auto'));
+    assert(integration.includes('- all'));
+    assert(integration.includes('needs.plan.outputs.platforms'));
     assert(integration.indexOf('- name: Install selected libraries')>integration.indexOf('- name: Install Windows build dependencies'));
     assert(integration.includes('scripts/ci/linux/64/build.sh'));
     assert(integration.includes('env GITHUB_WORKSPACE="$OF_ROOT" scripts/ci/ios/build.sh'));

@@ -18,22 +18,17 @@ on:
   workflow_dispatch:
     inputs:
       library_ref:
-        description: Library line or release to test
+        description: auto uses this workflow's tag (v12.2.0) or bleeding. Or type latest, latest-modular, master, or a release tag.
         required: true
-        default: bleeding
-        type: choice
-        options:
-          - bleeding
-          - master
-          - latest
-          - latest-modular
+        default: auto
+        type: string
       openframeworks_ref:
         description: openFrameworks branch, tag, or SHA
         required: true
         default: master
         type: string
       platform:
-        description: Integration target
+        description: One integration target, or all
         required: true
         default: linux
         type: choice
@@ -45,6 +40,7 @@ on:
           - android
           - emscripten
           - windows
+          - all
 
 permissions:
   contents: read
@@ -55,9 +51,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  plan:
+    name: Resolve targets
+    runs-on: ubuntu-24.04
+    outputs:
+      library_ref: ${{ steps.resolve.outputs.library_ref }}
+      platforms: ${{ steps.resolve.outputs.platforms }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - id: resolve
+        env:
+          LIBRARY_REF: ${{ inputs.library_ref }}
+          WORKFLOW_REF_TYPE: ${{ github.ref_type }}
+          WORKFLOW_REF_NAME: ${{ github.ref_name }}
+          PLATFORM: ${{ inputs.platform }}
+        run: bash scripts/resolve-of-library-integration.sh
+
   integration:
-    name: ${{ inputs.platform }} / ${{ inputs.library_ref }} / oF ${{ inputs.openframeworks_ref }}
-    runs-on: ${{ (inputs.platform == 'macos' || inputs.platform == 'ios' || inputs.platform == 'tvos') && 'macos-15' || inputs.platform == 'windows' && 'windows-2022' || 'ubuntu-24.04' }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.plan.outputs.platforms) }}
+    name: ${{ matrix.platform }} / ${{ needs.plan.outputs.library_ref }} / oF ${{ inputs.openframeworks_ref }}
+    runs-on: ${{ (matrix.platform == 'macos' || matrix.platform == 'ios' || matrix.platform == 'tvos') && 'macos-15' || matrix.platform == 'windows' && 'windows-2022' || 'ubuntu-24.04' }}
+    timeout-minutes: 180
     env:
       OF_ROOT: ${{ github.workspace }}/openFrameworks
       GH_TOKEN: ${{ github.token }}
@@ -77,7 +95,7 @@ jobs:
           path: openFrameworks
 
       - name: Set up MSYS2 download tools
-        if: inputs.platform == 'windows'
+        if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2.33.0
         with:
           release: false
@@ -85,11 +103,11 @@ jobs:
           install: git unzip
 
       - name: Install Linux dependencies
-        if: inputs.platform == 'linux'
+        if: matrix.platform == 'linux'
         run: sudo openFrameworks/scripts/linux/ubuntu/install_dependencies.sh -y
 
       - name: Install Windows build dependencies
-        if: inputs.platform == 'windows'
+        if: matrix.platform == 'windows'
         shell: msys2 {0}
         working-directory: openFrameworks
         run: scripts/ci/vs/install.sh
@@ -112,27 +130,27 @@ jobs:
       - name: Install selected libraries
         shell: bash
         env:
-          LIBRARY_REF: ${{ inputs.library_ref }}
-          INTEGRATION_PLATFORM: ${{ inputs.platform }}
+          LIBRARY_REF: ${{ needs.plan.outputs.library_ref }}
+          INTEGRATION_PLATFORM: ${{ matrix.platform }}
           SNAPSHOT_MANIFEST: ${{ inputs.snapshot_manifest_artifact != '' && format('{0}/nightly-plan/plan.json', runner.temp) || '' }}
         run: bash apothecary-tests/scripts/test-openframeworks-libraries.sh "$OF_ROOT" "$LIBRARY_REF" "$INTEGRATION_PLATFORM" "$SNAPSHOT_MANIFEST"
 
       - name: Build Linux core, emptyExample, and allAddonsExample
-        if: inputs.platform == 'linux'
+        if: matrix.platform == 'linux'
         working-directory: openFrameworks
         env:
           TRAVIS_BUILD_DIR: ${{ github.workspace }}/openFrameworks
         run: scripts/ci/linux/64/build.sh
 
       - name: Run Linux smoke tests
-        if: inputs.platform == 'linux'
+        if: matrix.platform == 'linux'
         working-directory: openFrameworks
         env:
           TRAVIS_BUILD_DIR: ${{ github.workspace }}/openFrameworks
         run: scripts/ci/linux/64/run_tests.sh
 
       - name: Build macOS core and examples
-        if: inputs.platform == 'macos'
+        if: matrix.platform == 'macos'
         working-directory: openFrameworks
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
@@ -140,28 +158,28 @@ jobs:
         run: scripts/ci/osx/build.sh xcode
 
       - name: Build iOS
-        if: inputs.platform == 'ios'
+        if: matrix.platform == 'ios'
         working-directory: openFrameworks
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
         run: env GITHUB_WORKSPACE="$OF_ROOT" scripts/ci/ios/build.sh
 
       - name: Build tvOS
-        if: inputs.platform == 'tvos'
+        if: matrix.platform == 'tvos'
         working-directory: openFrameworks
         env:
           DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
         run: env GITHUB_WORKSPACE="$OF_ROOT" scripts/ci/tvos/build.sh
 
       - name: Set up Java
-        if: inputs.platform == 'android'
+        if: matrix.platform == 'android'
         uses: actions/setup-java@v6.1.0
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Build Android core
-        if: inputs.platform == 'android'
+        if: matrix.platform == 'android'
         working-directory: openFrameworks/libs/openFrameworksCompiled/project/android
         env:
           NDK: '29.0.14206865'
@@ -178,17 +196,17 @@ jobs:
           ./cmake.sh
 
       - name: Build Emscripten core and examples
-        if: inputs.platform == 'emscripten'
+        if: matrix.platform == 'emscripten'
         working-directory: openFrameworks
         run: |
           docker run --rm -v "$PWD:/src" -w /src emscripten/emsdk:7.0.0 scripts/ci/emscripten/build.sh
 
       - name: Set up MSBuild
-        if: inputs.platform == 'windows'
+        if: matrix.platform == 'windows'
         uses: microsoft/setup-msbuild@v3
 
       - name: Build Windows emptyExample and allAddonsExample
-        if: inputs.platform == 'windows'
+        if: matrix.platform == 'windows'
         working-directory: openFrameworks
         shell: pwsh
         run: |
@@ -199,7 +217,7 @@ jobs:
         if: always() && inputs.snapshot_manifest_artifact != ''
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: nightly-candidate-${{ inputs.platform }}
+          name: nightly-candidate-${{ matrix.platform }}
           path: openFrameworks/.nightly-candidate-*.json
           include-hidden-files: true
           if-no-files-found: warn
@@ -211,8 +229,8 @@ jobs:
           {
             echo "## openFrameworks library integration"
             echo
-            echo "- Libraries: \`${{ inputs.library_ref }}\`"
+            echo "- Libraries: \`${{ needs.plan.outputs.library_ref }}\`"
             echo "- openFrameworks: \`${{ inputs.openframeworks_ref }}\`"
-            echo "- Platform: \`${{ inputs.platform }}\`"
+            echo "- Platform: \`${{ matrix.platform }}\`"
             echo "- Result: \`${{ job.status }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
