@@ -14,8 +14,14 @@ formula_has_package_for_target videoInput vs "$ROOT/apothecary"
 formula_has_package_for_target glfw osx "$ROOT/apothecary"
 formula_has_package_for_target liboqs osx "$ROOT/apothecary"
 formula_has_package_for_target liboqs linux "$ROOT/apothecary"
+formula_has_package_for_target cef osx "$ROOT/apothecary"
+formula_has_package_for_target cef linux "$ROOT/apothecary"
+formula_has_package_for_target cef vs "$ROOT/apothecary"
 if formula_has_package_for_target liboqs vs "$ROOT/apothecary"; then
     echo "Unexpected VS package: liboqs" >&2; exit 1
+fi
+if formula_has_package_for_target cef emscripten "$ROOT/apothecary"; then
+    echo "Unexpected Emscripten package: cef" >&2; exit 1
 fi
 TEMP=$(mktemp -d)
 trap 'rm -rf "$TEMP"' EXIT

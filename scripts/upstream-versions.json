@@ -252,6 +252,11 @@
     "skip": "Pinned commit/date rather than a stable release"
   },
   {
+    "name": "CEF",
+    "formula": "apothecary/formulas/cef/cef.sh",
+    "skip": "Spotify binary SDK pin; Chromium Embedded Framework build IDs are not GitHub release tags"
+  },
+  {
     "name": "MetalANGLE",
     "formula": "apothecary/formulas/metalangle/metalangle.sh",
     "skip": "Pinned fork commit; version label does not identify its source revision"
