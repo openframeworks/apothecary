@@ -18,8 +18,10 @@ on:
       - 'scripts/nightly-snapshot.cjs'
       - 'scripts/install-nightly-candidate.cjs'
       - 'scripts/test-openframeworks-libraries.sh'
+      - 'scripts/resolve-of-library-integration.sh'
       - 'scripts/tests/test-nightly-snapshot.cjs'
       - 'scripts/tests/test-nightly-candidate.cjs'
+      - 'scripts/tests/test-resolve-of-library-integration.sh'
       - '.github/workflows/test-openframeworks-libraries.yml'
       - '.github/workflows/refresh-nightly.yml'
 concurrency:
@@ -35,7 +37,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - run: node scripts/tests/test-nightly-snapshot.cjs
       - run: node scripts/tests/test-nightly-candidate.cjs
-      - run: bash -n scripts/test-openframeworks-libraries.sh
+      - run: bash -n scripts/test-openframeworks-libraries.sh scripts/resolve-of-library-integration.sh scripts/tests/test-resolve-of-library-integration.sh
+      - run: bash scripts/tests/test-resolve-of-library-integration.sh
   plan:
     needs: test
     if: github.repository == 'openframeworks/apothecary' && github.event_name != 'pull_request'
