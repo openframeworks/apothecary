@@ -24,6 +24,9 @@ on:
       - 'scripts/tests/test-*cache*'
       - 'scripts/tests/test-platform-artifacts.cjs'
       - 'scripts/tests/test-workflow-scheduling.rb'
+      - 'scripts/tests/test-curl-ca-defaults.sh'
+      - 'apothecary/formulas/curl/**'
+      - 'apothecary/formulas/openssl/**'
       - '.github/workflows/validate-platform-artifacts.yml'
   push:
     branches: [bleeding, master]
@@ -50,6 +53,9 @@ on:
       - 'scripts/tests/test-*cache*'
       - 'scripts/tests/test-platform-artifacts.cjs'
       - 'scripts/tests/test-workflow-scheduling.rb'
+      - 'scripts/tests/test-curl-ca-defaults.sh'
+      - 'apothecary/formulas/curl/**'
+      - 'apothecary/formulas/openssl/**'
       - '.github/workflows/validate-platform-artifacts.yml'
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -72,3 +78,5 @@ jobs:
       - run: node scripts/tests/test-release-plan-summary.cjs
       - run: bash -n scripts/build.sh scripts/build-timings.sh scripts/tests/test-build-timings.sh
       - run: bash scripts/tests/test-build-timings.sh
+      - run: bash -n apothecary/formulas/curl/curl.sh apothecary/formulas/openssl/openssl.sh scripts/tests/test-curl-ca-defaults.sh
+      - run: bash scripts/tests/test-curl-ca-defaults.sh
