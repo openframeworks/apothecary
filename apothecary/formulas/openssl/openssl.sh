@@ -17,7 +17,7 @@ OPENSSL_CMAKE_COMMIT=e3096cf2764301c380e0924e516f64240661c738
 SHA1=44d07584cca891b042c38478255228ac4bd379a6
 SHA256=50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd
 
-BUILD_ID=15
+BUILD_ID=16
 
 CSTANDARD=c17 # c89 | c99 | c11 | gnu11
 SITE=https://www.openssl.org
@@ -452,7 +452,8 @@ function build() {
             -DCMAKE_PREFIX_PATH="${LIBS_ROOT}" \
             -DZLIB_ROOT=${ZLIB_ROOT} \
             -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIR} \
-            -DZLIB_LIBRARY=${ZLIB_LIBRARY}
+            -DZLIB_LIBRARY=${ZLIB_LIBRARY} \
+            -DOPENSSL_OPENSSLDIR=/etc/ssl
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd ..
 

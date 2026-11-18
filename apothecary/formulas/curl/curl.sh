@@ -21,7 +21,7 @@ SHA1="dde79cd20f6b0d6dc7f4dcc3dd71c472fc2ebcee"
 SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49"
 CACERT_DATE=2026-07-16
 CACERT_SHA256="3ff344e30b9b1ed2971044eabb438a08f2e2245ddb5f8ab1a3ad8b63ab4eaf91"
-BUILD_ID=15
+BUILD_ID=16
 DEFINES=""
 USE_OPENSSL=ON
 
@@ -93,6 +93,68 @@ function verify_required_features() {
             exit 1
         fi
     done
+}
+
+# Runtime CA defaults for libcurl. Never bake a build-tree cacert.pem into
+# CURL_CA_BUNDLE: that path is absent on user machines and produces
+# CURLE_SSL_CACERT_BADFILE ("Problem with the SSL CA cert (path? access rights?)").
+# Apple uses SecTrust. Windows uses the native ROOT/CA stores (curl 8.19+).
+# Linux uses distro CA locations. Android uses the system hashed CA directory.
+function curl_ca_cmake_args() {
+    case "$TYPE" in
+        vs)
+            echo "-DCURL_CA_NATIVE=ON -DCURL_CA_BUNDLE=none -DCURL_CA_PATH=none"
+            ;;
+        osx|ios|tvos|xros|catos|watchos)
+            echo "-DCURL_CA_BUNDLE=none -DCURL_CA_PATH=none -DCURL_CA_FALLBACK=ON"
+            ;;
+        linux)
+            if [ "${CROSSCOMPILING:-0}" -eq 1 ]; then
+                echo "-DCURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt -DCURL_CA_PATH=/etc/ssl/certs -DCURL_CA_FALLBACK=ON"
+            else
+                echo "-DCURL_CA_BUNDLE=auto -DCURL_CA_PATH=auto -DCURL_CA_FALLBACK=ON"
+            fi
+            ;;
+        android)
+            echo "-DCURL_CA_BUNDLE=none -DCURL_CA_PATH=/system/etc/security/cacerts -DCURL_CA_FALLBACK=ON"
+            ;;
+        *)
+            echo "-DCURL_CA_BUNDLE=none -DCURL_CA_FALLBACK=ON"
+            ;;
+    esac
+}
+
+function verify_ca_defaults() {
+    local CACHE_FILE="$1"
+    if [ ! -f "$CACHE_FILE" ]; then
+        echo "curl CMake cache missing: $CACHE_FILE"
+        exit 1
+    fi
+    if grep -E 'CURL_CA_BUNDLE:[^=]+=.+/cacert\.pem' "$CACHE_FILE" >/dev/null; then
+        echo "curl CA bundle still points at a build-time cacert.pem"
+        grep CURL_CA "$CACHE_FILE" || true
+        exit 1
+    fi
+    case "$TYPE" in
+        vs)
+            if ! grep -q '^CURL_CA_NATIVE:BOOL=ON$' "$CACHE_FILE"; then
+                echo "curl configured without Windows native CA store"
+                exit 1
+            fi
+            ;;
+        osx|ios|tvos|xros|catos|watchos)
+            if ! grep -q '^USE_APPLE_SECTRUST:BOOL=ON$' "$CACHE_FILE"; then
+                echo "curl configured without Apple SecTrust"
+                exit 1
+            fi
+            ;;
+        android)
+            if ! grep -q '/system/etc/security/cacerts' "$CACHE_FILE"; then
+                echo "curl Android CA path is not the system cacerts directory"
+                exit 1
+            fi
+            ;;
+    esac
 }
 
 # A weak pipe2 import still requires the consuming SDK to provide its symbol.
@@ -202,10 +264,7 @@ function build() {
     local OF_LIBS_OPENSSL_ABS_PATH=$(realpath $OF_LIBS_OPENSSL)
     export OPENSSL_PATH=$OF_LIBS_OPENSSL_ABS_PATH
 
-    local CACERT_PATH="./cacert.pem"
-
     if [ "$TYPE" == "vs" ]; then
-         local CACERT_PATH=$(realpath "./cacert.pem")
         export OPENSSL_LIBRARIES=$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM
         export OPENSSL_WINDOWS_PATH=$(cygpath -w ${OF_LIBS_OPENSSL_ABS_PATH} | sed "s/\\\/\\\\\\\\/g")
 
@@ -217,7 +276,6 @@ function build() {
         GENERATOR_NAME="Visual Studio ${VS_VER_GEN}"
         mkdir -p "build_${TYPE}_${ARCH}"
         cd "build_${TYPE}_${ARCH}"
-        cp ../cacert.pem ./cacert.pem
         rm -f CMakeCache.txt *.a *.o *.lib
 
 
@@ -244,17 +302,7 @@ function build() {
         NGTCP2_CRYPTO_LIBRARY="$NGTCP2_ROOT/lib/$TYPE/$PLATFORM/ngtcp2_crypto_ossl.lib"
         LIBSSH2_LIBRARY="$LIBSSH2_ROOT/lib/$TYPE/$PLATFORM/libssh2.lib"
 
-        if [ "$USE_OPENSSL" == "ON" ]; then
-            OPENSSL_DEFS="-DCURL_USE_OPENSSL=ON \
-                -DUSE_OPENSSL=ON \
-                -DCURL_CA_FALLBACK=ON \
-                -DCURL_CA_BUNDLE=${CACERT_PATH} \
-                -DCURL_CA_EMBED=${CACERT_PATH}"
-            CACERT_PATH="${CACERT_PATH}"
-            OPENSSL_DEFS="${OPENSSL_DEFS} -DCURL_CA_BUNDLE=${CACERT_PATH} -DCURL_CA_EMBED=${CACERT_PATH}"
-        else
-            OPENSSL_DEFS="-DCURL_USE_OPENSSL=OFF -DUSE_OPENSSL=OFF -DCURL_USE_SCHANNEL=ON"
-        fi
+        OPENSSL_DEFS="-DCURL_USE_OPENSSL=ON -DUSE_OPENSSL=ON $(curl_ca_cmake_args)"
 
         # The Visual Studio build runs from an MSYS2 shell in CI. Do not let
         # pkg-config inject MinGW's native headers (for example vadefs.h) into
@@ -337,6 +385,7 @@ function build() {
             -DOPENSSL_LIBRARIES="$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libcrypto.lib;$OF_LIBS_OPENSSL_ABS_PATH/lib/$TYPE/$PLATFORM/libssl.lib;" \
             -A "${PLATFORM}" \
             -G "${GENERATOR_NAME}"
+        verify_ca_defaults CMakeCache.txt
         verify_required_features lib/curl_config.h
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
 
@@ -379,7 +428,7 @@ function build() {
             -DOPENSSL_INCLUDE_DIR=${OF_LIBS_OPENSSL_ABS_PATH}/include \
             -DOPENSSL_CRYPTO_LIBRARY=${OPENSSL_LIBRARY_CRYPT} \
             -DOPENSSL_SSL_LIBRARY=${OPENSSL_LIBRARY} \
-            -DCURL_CA_BUNDLE=$CACERT_PATH \
+            $(curl_ca_cmake_args) \
             -DOPENSSL_LIBRARIES=${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libssl.a;${OF_LIBS_OPENSSL_ABS_PATH}/lib/${TYPE}/${PLATFORM}/libcrypto.a"
 
         ZLIB_ROOT="$LIBS_ROOT/zlib/"
@@ -427,7 +476,6 @@ function build() {
             -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON \
             -DCURL_STATICLIB=ON \
             -DBUILD_STATIC_LIBS=ON \
-            -DCURL_CA_FALLBACK=ON \
             -DENABLE_UNICODE=ON \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=Release \
@@ -485,6 +533,7 @@ function build() {
             -DENABLE_THREADED_RESOLVER=ON \
             -DENABLE_IPV6=ON
 
+        verify_ca_defaults CMakeCache.txt
         verify_required_features lib/curl_config.h
 
         echo "--------- CMakeCache.txt Content ---------"
@@ -517,7 +566,6 @@ function build() {
         cd ..
 
     elif [ "$TYPE" == "linux" ]; then
-        CACERT_PATH=$(realpath "$CACERT_PATH")
         OPENSSL_ROOT="$LIBS_ROOT/openssl"
         OPENSSL_LIBRARY="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libssl.a"
         OPENSSL_LIBRARY_CRYPT="$OPENSSL_ROOT/lib/$TYPE/$PLATFORM/libcrypto.a"
@@ -558,9 +606,7 @@ function build() {
             -DOPENSSL_SSL_LIBRARY="$OPENSSL_LIBRARY" \
             -DOPENSSL_CRYPTO_LIBRARY="$OPENSSL_LIBRARY_CRYPT" \
             -DOPENSSL_USE_STATIC_LIBS=ON \
-            -DCURL_CA_FALLBACK=ON \
-            -DCURL_CA_BUNDLE="$CACERT_PATH" \
-            -DCURL_CA_EMBED="$CACERT_PATH" \
+            $(curl_ca_cmake_args) \
             -DZLIB_ROOT="$ZLIB_ROOT" \
             -DZLIB_INCLUDE_DIR="$ZLIB_ROOT/include" \
             -DZLIB_LIBRARY="$ZLIB_LIBRARY" \
@@ -593,6 +639,7 @@ function build() {
             -DENABLE_IPV6=ON \
             -DENABLE_WEBSOCKETS=ON
 
+        verify_ca_defaults "$BUILD_DIR/CMakeCache.txt"
         verify_required_features "$BUILD_DIR/lib/curl_config.h"
         cmake --build "$BUILD_DIR" --config Release -j"${PARALLEL_MAKE}" --target install
         merge_unix_curl_dependencies "$BUILD_DIR/Release/lib/libcurl.a" \
@@ -643,7 +690,7 @@ function build() {
             -DCMAKE_C_STANDARD=${C_STANDARD} \
             -DCMAKE_CXX_STANDARD=${CPP_STANDARD} \
             -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCURL_CA_BUNDLE=none \
+            $(curl_ca_cmake_args) \
             -DCMAKE_CXX_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DCMAKE_C_FLAGS="-DUSE_PTHREADS=1 ${FLAG_RELEASE} -Wno-error=implicit-function-declaration" \
             -DENABLE_STRICT_TRY_COMPILE=ON \
@@ -704,9 +751,7 @@ function build() {
             -DCURL_USE_LIBSSH2=ON \
             -DLIBSSH2_INCLUDE_DIR=${LIBSSH2_ROOT}/include \
             -DLIBSSH2_LIBRARY=${LIBSSH2_LIBRARY} \
-            -DCURL_CA_FALLBACK=ON \
             -DCURL_DISABLE_POP3=ON \
-            -DCURL_CA_FALLBACK=ON \
             -DCURL_DISABLE_IMAP=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DENABLE_UNIX_SOCKETS=ON \
@@ -728,6 +773,7 @@ function build() {
             echo "curl configured without the required OpenSSL and Apple SecTrust backends"
             exit 1
         fi
+        verify_ca_defaults CMakeCache.txt
         verify_required_features lib/curl_config.h
         cmake --build . --config Release -j${PARALLEL_MAKE} --target install
         cd "Release/lib/"
@@ -826,6 +872,11 @@ function copy() {
         cp -Rv "build_${TYPE}_${PLATFORM}/Release/lib/libcurl.a" $1/lib/$TYPE/$PLATFORM/libcurl.a
         secure "$1/lib/$TYPE/$PLATFORM/libcurl.a" "curl.pkl" "$VERSION" "$DEFINES" "$BUILD_ID" "${FORMULA_DEPENDS[*]}"
     fi
+    if [ ! -f cacert.pem ]; then
+        echo "cacert.pem missing; cannot install CA bundle"
+        exit 1
+    fi
+    cp -v cacert.pem "$1/cacert.pem"
     # copy license file
     if [ -d "$1/license" ]; then
         rm -rf $1/license
