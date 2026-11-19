@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       overwrite_existing:
-        description: "Move an existing version tag to latest and rebuild its release"
+        description: "Move an existing version tag to latest and replace its archives with current latest zips. Keeps the GitHub Release; same filenames are overwritten in place."
         required: true
         default: false
         type: boolean
@@ -29,9 +29,9 @@ jobs:
         with:
           fetch-depth: 0
           ref: latest
-          # A PAT is required: pushes made with GITHUB_TOKEN do not start the
-          # existing build-* workflows that upload the platform release assets.
-          token: ${{ secrets.PAT_TOKEN }}
+          # Prefer PAT so a tag push can start build-* workflows. GITHUB_TOKEN
+          # is enough to move the tag and replace release archives.
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Validate and resolve version
         id: release
@@ -85,7 +85,7 @@ jobs:
 
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
           RELEASE_VERSION: ${{ steps.release.outputs.version }}
           SOURCE_SHA: ${{ steps.release.outputs.sha }}
@@ -102,14 +102,49 @@ jobs:
               --notes "$notes"
           fi
 
+      - name: Replace archives from latest
+        if: ${{ inputs.overwrite_existing }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p latest-assets renamed
+          gh release download latest --dir latest-assets --pattern 'openFrameworksLibs_latest_*'
+          gh release download latest --dir latest-assets --pattern 'vs2019-*' || true
+          shopt -s nullglob
+          count=0
+          for src in latest-assets/*; do
+            base="$(basename "$src")"
+            dest="${base//openFrameworksLibs_latest_/openFrameworksLibs_${RELEASE_TAG}_}"
+            if [[ "$dest" == *.manifest.json ]]; then
+              sed "s/openFrameworksLibs_latest_/openFrameworksLibs_${RELEASE_TAG}_/g" "$src" > "renamed/$dest"
+            else
+              mv "$src" "renamed/$dest"
+            fi
+            count=$((count + 1))
+          done
+          if [[ "$count" -eq 0 ]]; then
+            echo "No latest archives found to copy onto ${RELEASE_TAG}." >&2
+            exit 1
+          fi
+          gh release upload "$RELEASE_TAG" renamed/* --clobber
+          echo "Uploaded ${count} archives from latest onto ${RELEASE_TAG}."
+
       - name: Summary
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
           SOURCE_SHA: ${{ steps.release.outputs.sha }}
+          OVERWRITE_EXISTING: ${{ inputs.overwrite_existing }}
         run: |
           {
             echo "## Release started"
             echo
             echo "Created \`${RELEASE_TAG}\` from \`latest\` at \`${SOURCE_SHA}\`."
-            echo "The tag push started the enabled platform build workflows; each successful build uploads its archive to this release."
+            if [[ "${OVERWRITE_EXISTING}" == "true" ]]; then
+              echo "Existing GitHub Release was kept. Archives were replaced with current \`latest\` assets of the same name."
+              echo "A PAT_TOKEN tag push may also start platform rebuilds; GITHUB_TOKEN alone does not."
+            else
+              echo "The tag push starts platform build workflows when PAT_TOKEN is configured; each successful build uploads its archive to this release."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
