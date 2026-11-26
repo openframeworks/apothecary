@@ -358,7 +358,8 @@ function build() {
             -DBUILD_SHARED_LIBS=OFF
             -DASSIMP_BUILD_TESTS=0
             -DASSIMP_BUILD_SAMPLES=0
-            -DASSIMP_BUILD_3MF_IMPORTER=0"
+            -DASSIMP_BUILD_3MF_IMPORTER=0
+            -DASSIMP_WARNINGS_AS_ERRORS=OFF"
 
         if [ "${ASSIMP_DOUBLE:-0}" == "1" ]; then
             DEFINES="$DEFINES -DASSIMP_DOUBLE_PRECISION=ON"
