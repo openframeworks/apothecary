@@ -84,7 +84,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **svgtiny** | `0.1.8` | netsurf package line | n/a | NetSurf libsvgtiny; not a GitHub release train. | `git://git.netsurf-browser.org/libsvgtiny.git` |
 | **tess2** | `1.0.2` | `v1.0.2` | current | Latest stable (`GIT_TAG=master` in formula — verify checkout). | https://github.com/memononen/libtess2 |
 | **uriparser** | `1.0.3` | `uriparser-1.0.3` | updated | Security update; build validation required. | https://github.com/uriparser/uriparser |
-| **utf8** (utfcpp) | `4.2.1` | `v4.2.1` | current | Header-only; includes the 4.2.1 next16 error-type fix. | https://github.com/nemtrif/utfcpp |
+| **utf8** (utfcpp) | `5.0.0` | `v5.0.0` | current | Header-only. Major UTF-16 API expansion; existing UTF-8 APIs retained. | https://github.com/nemtrif/utfcpp |
 | **videoInput** | `master` (`261bfeee…`) | branch only | pinned-dev | ofTheo fork SHA. Windows capture. | https://github.com/ofTheo/videoInput |
 | **zlib** | `1.4` | `v1.4` | current | Latest stable. | https://github.com/madler/zlib |
 
@@ -157,7 +157,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 ### Already on latest (intended track)
 
-`brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.1) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `zlib`
+`brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.1) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `utf8` · `zlib`
 
 ---
 
@@ -247,7 +247,7 @@ formulas:
   shaderc:    { current: "ff84893",  latest: "v2026.4",  status: pinned-dev, pin: "Linux formula; known-good SHA" }
   tess2:      { current: "1.0.2",    latest: "1.0.2",    status: current }
   uriparser:  { current: "1.0.3",    latest: "1.0.3",    status: updated }
-  utf8:       { current: "4.2.1", latest: "4.2.1", status: current, pin: "header-only" }
+  utf8:       { current: "5.0.0", latest: "5.0.0", status: current, pin: "header-only; UTF-16 APIs" }
   videoInput: { current: "261bfeee", latest: "master",   status: pinned-dev, pin: "ofTheo SHA" }
   zlib:       { current: "1.4",    latest: "1.4",    status: current }
   fmod:       { current: "44459",    latest: "vendor",   status: vendor }
