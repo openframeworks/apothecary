@@ -34,7 +34,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | **OpenCV** | **4.14.0** (latest 4.x) | OF still uses the 4.x API. **5.0.0** is a major. |
 | **libpng** | **1.6.59** (latest 1.6) | **1.7 is still beta** (`v1.7.0beta89`). |
 | **libxml2** | **2.15.4** (latest 2.13.x) | Dedicated track update for #612. ABI compatibility starts at 2.14; consumers must rebuild and downstream validation is required. |
-| **Assimp** | **5.4.3** | Last known-good. **6.0.5** caused CI regressions; do not jump without a dedicated rebuild. |
+| **Assimp** | **6.0.6** | Latest 6.0 bugfix (`v6.0.6`, 2026-11-09). Formula already on 6.0.5 after #655; this is the dedicated 6.0.6 rebuild. |
 | **FreeImage** | **3.19.33** (`danoli3/FreeImage`) | OF fork, not SourceForge. OpenEXR/WebP/LibRaw ON; JXR Windows-only. Hardens JPEG XR, HDR, IFF, PICT and WBMP loading; adds `WEBP_SHARPYUV`. |
 | **ANGLE / Dawn / MetalANGLE / GLon12** | SHA pins | Opt-in backends. Not default OF GL. See `AGENTS.md`. |
 | **Linux CI compiler** | **GCC 10** | Focal-era CI. Dawn stays **off** Linux core until GCC 11 (`std::bit_cast` / `atomic::wait`). |
@@ -47,7 +47,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 | Formula | Pinned | Latest upstream | Status | Why pinned | Source |
 |---------|--------|-----------------|--------|------------|--------|
 | **angle** | `2026.08.13` (`7e8009eb2c42996fe6e7337bf8d12e1cfe4a1b80`) | google/angle main (rolling) | pinned-dev | Chromium SHA. GLES→D3D11 on VS and GLES→Metal on osx/ios/tvos/catos/xros. Opt-in `latest-modular` with artifact caching; **off core**. Not metalangle. | https://github.com/google/angle |
-| **assimp** | `5.4.3` | `v6.0.5` | compatibility pin | 6.x failed CI. Last known-good 5.4.3. | https://github.com/assimp/assimp |
+| **assimp** | `6.0.6` | `v6.0.6` | current | Latest 6.0 bugfix; importer hardening and OBJ integer overflow fix. Poly2Tri `<ostream>` include still applied in `prepare()`. | https://github.com/assimp/assimp |
 | **boost** | `1.92.0` | `boost-1.92.0` | updated | `FORMULA_TYPES=()` — unused. filesystem with header-only System; OF is C++17+. Do not treat as a live dep. | boostorg tarball |
 | **brotli** | `1.2.1` | `v1.2.1` | current | Security update for CVE-2026-111497; checked 2026-10-25. | https://github.com/google/brotli |
 | **cairo** | `1.18.4` | `1.18.4` | current | Latest stable. | https://gitlab.freedesktop.org/cairo/cairo |
@@ -145,7 +145,6 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 | Item | Stays | Blocker |
 |------|-------|---------|
-| **assimp** | 5.4.3 | 6.0.5 CI regressions |
 | **opencv** | 4.14.0 | 5.0 is a major |
 | **libxml2** | 2.13.9 | 2.15.4 track change |
 | **libpng** | 1.6.59 | 1.7 beta |
@@ -157,7 +156,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 
 ### Already on latest (intended track)
 
-`brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.1) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `zlib`
+`assimp` · `brotli` · `cairo` · `fmt` · `FreeImage` · `freetype` · `glew` · `glfw` · `glm` · `json` · `kiss` · `libpng` (1.6) · `libssh2` · `libusb` · `nghttp2` · `nghttp3` · `ngtcp2` · `opencv` (4.x) · `openssl` (4.1) · `pixman` · `poco` · `pugixml` · `rtAudio` · `tess2` · `uriparser` · `zlib`
 
 ---
 
@@ -213,7 +212,7 @@ A **pin** is not “we forgot to bump”. If status is compatibility / major-beh
 generated: 2026-09-14
 formulas:
   angle:      { current: "2026.08.13", latest: "rolling", status: pinned-dev, pin: "chromium SHA; Apple gn gen off core" }
-  assimp:     { current: "5.4.3",    latest: "6.0.5",    status: compatibility_pin, pin: "6.x CI regressions" }
+  assimp:     { current: "6.0.6",    latest: "6.0.6",    status: current, pin: "6.0 bugfix; poly2tri ostream patch" }
   boost:      { current: "1.92.0",   latest: "1.92.0",   status: updated, pin: "FORMULA_TYPES empty; unused" }
   brotli:     { current: "1.2.1",    latest: "1.2.1",    status: current }
   cairo:      { current: "1.18.4",   latest: "1.18.4",   status: current }
