@@ -6,7 +6,7 @@ trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/sdk/upstream/emscripten" "$fixture/wrong-path"
 cat > "$fixture/sdk/upstream/emscripten/emcc" <<'EOF'
 #!/usr/bin/env bash
-echo 'emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 7.0.0-git (fixture)'
+echo 'emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 7.0.1-git (fixture)'
 EOF
 cat > "$fixture/wrong-path/emcc" <<'EOF'
 #!/usr/bin/env bash
@@ -18,10 +18,10 @@ printf 'export EMSDK_TEST_ACTIVATED=1\n' > "$fixture/sdk/emsdk_env.sh"
 git() { echo 'Unexpected git access for the already installed SDK' >&2; return 1; }
 PATH="$fixture/wrong-path:$PATH"
 EMSDK="$fixture/sdk"
-EMSDK_VERSION=7.0.0
+EMSDK_VERSION=7.0.1
 source "$ROOT/scripts/emscripten/setup.sh"
 test "$EMSDK_TEST_ACTIVATED" = 1
-test "$EMSDK_VERSION" = 7.0.0
+test "$EMSDK_VERSION" = 7.0.1
 check_emsdk "$EMSDK"
 EMSDK_VERSION=6.0.13
 if check_emsdk "$EMSDK"; then
