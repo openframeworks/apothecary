@@ -1,0 +1,6 @@
+syntax = "proto3";
+package apothecary;
+message FullMessage {
+  string text = 1;
+  int64 value = 2;
+}
